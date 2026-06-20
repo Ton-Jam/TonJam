@@ -243,7 +243,7 @@ const UserProfile: React.FC = () => {
       </div>
 
       {/* 3. TABS NAVIGATION (Refined) */}
-      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/90 backdrop-blur-xl border-b border-white/5 py-4 mb-4 sm:mb-8 overflow-hidden group">
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-transparent py-4 mb-4 sm:mb-8 overflow-hidden group">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-row">
             {['overview', 'inventory', 'activity', 'network'].map(tab => (

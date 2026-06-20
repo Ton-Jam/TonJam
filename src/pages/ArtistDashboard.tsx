@@ -42,6 +42,8 @@ import { getPlaceholderImage } from "@/lib/utils";
 import TrackMonetizationModal from "@/components/TrackMonetizationModal";
 import EditMetadataModal from "@/components/EditMetadataModal";
 import SponsorshipSubmissionModal from "@/components/SponsorshipSubmissionModal";
+import { BadgeSystem } from "@/components/BadgeSystem";
+import CollectorTier from "@/components/CollectorTier";
 
 import SongRequestsTab from "@/components/SongRequestsTab";
 import AlbumCard from "@/components/AlbumCard";
@@ -68,7 +70,7 @@ export default function ArtistDashboard() {
   const { user, isArtist, loading } = useAuth();
   
   // Tabs state
-  const [activeTab, setActiveTab] = useState<"overview" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty">("overview");
 
   // Bulk Selection States
   const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>([]);
@@ -594,6 +596,16 @@ export default function ArtistDashboard() {
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5" /> Fan Connect
+          </button>
+          <button
+            onClick={() => setActiveTab("loyalty")}
+            className={`flex-1 min-w-[120px] transition-all duration-300 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 ${
+              activeTab === "loyalty" 
+                ? "bg-white/[0.06] text-white shadow-lg shadow-black/30" 
+                : "text-zinc-500 hover:text-white hover:bg-white/[0.02]"
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-yellow-500 animate-pulse" /> Loyalty
           </button>
         </div>
 
@@ -1233,6 +1245,51 @@ export default function ArtistDashboard() {
                     </div>
                   </div>
 
+                </div>
+
+              </div>
+            )}
+
+            {activeTab === "loyalty" && (
+              <div className="space-y-6">
+                
+                {/* Embedded dynamic metrics overview */}
+                <div className="p-6 rounded-3xl bg-white/[0.02] backdrop-blur-md space-y-4">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-yellow-500 animate-pulse" /> Platform Loyalty Ecosystem
+                    </h3>
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                      Your decentralized credentials, active nodes & unlocked curation badges
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-2">
+                    <div className="bg-black/40 p-4 rounded-2xl">
+                      <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">User Engagement</p>
+                      <span className="text-xs font-black text-white uppercase">High Connectivity</span>
+                    </div>
+                    <div className="bg-black/40 p-4 rounded-2xl">
+                      <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Streaming Activity</p>
+                      <span className="text-xs font-black text-cyan-400 uppercase">Interactive Node</span>
+                    </div>
+                    <div className="bg-black/40 p-4 rounded-2xl">
+                      <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">NFT Holdings</p>
+                      <span className="text-xs font-black text-purple-400 uppercase">{nfts.length} scarce assets</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Collector Tier Indicator */}
+                  <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-3xl">
+                    <CollectorTier user={userProfile} isOwnProfile={true} />
+                  </div>
+
+                  {/* Badge System */}
+                  <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-3xl">
+                    <BadgeSystem user={userProfile} isOwnProfile={true} />
+                  </div>
                 </div>
 
               </div>

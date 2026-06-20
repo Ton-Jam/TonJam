@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 // Import custom reusable subcomponents
 import { AnalyticsCard } from "@/components/marketplace/AnalyticsCard";
@@ -330,7 +331,7 @@ const Marketplace: React.FC = () => {
         </motion.section>
 
         {/* --- SECTION 3: MARKETPLACE FILTER PILLS --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8 sticky top-0 z-30 py-2.5 bg-[#050A24]/90 backdrop-blur-md">
+        <motion.section variants={itemVariants} className="w-full px-4 md:px-8 sticky top-0 z-30 py-2.5 bg-transparent">
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
             <LayoutGroup id="marketFilters">
               {FILTER_PILLS.map((pill) => {
@@ -339,10 +340,12 @@ const Marketplace: React.FC = () => {
                   <button
                     key={pill}
                     onClick={() => setActiveTab(pill)}
-                    className="relative flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-colors duration-200 focus:outline-none"
-                    style={{
-                      color: isActive ? "#FFFFFF" : "#9AA0AE",
-                    }}
+                    className={cn(
+                      "relative flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 focus:outline-none border",
+                      isActive 
+                        ? "border-transparent text-white bg-transparent" 
+                        : "border-white/10 bg-[#0a113a] text-[#9AA0AE] hover:border-[#5B6BFF] hover:bg-[#5B6BFF]/15 hover:text-white"
+                    )}
                   >
                     {isActive && (
                       <motion.div

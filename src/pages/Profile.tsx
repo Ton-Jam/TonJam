@@ -559,7 +559,7 @@ const Profile: React.FC = () => {
 
 
   {/* Tab Navigation */}
-  <div className="w-full sticky top-[0px] z-40 bg-background/95 backdrop-blur-md border-b border-border/10 mb-2">
+  <div className="w-full sticky top-[0px] z-40 bg-transparent mb-2">
     <div className="max-w-7xl mx-auto px-4">
       <div className="flex items-center justify-between py-2 overflow-hidden">
         <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">

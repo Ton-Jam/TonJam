@@ -911,8 +911,8 @@ body {
 /* Hover/Focus State for Desktop */
 @media (hover: hover) {
   .pill:hover:not(.active) {
-    border-color: rgba(192, 192, 192, 0.6) !important;
-    background: #101a3b !important;
+    border-color: #5B6BFF !important;
+    background: rgba(91, 107, 255, 0.15) !important;
     color: #ffffff !important;
   }
 }

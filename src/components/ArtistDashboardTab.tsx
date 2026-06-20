@@ -26,6 +26,8 @@ import { motion } from "motion/react";
 import { exportAuditLogToPDF } from "@/lib/pdfExport";
 import TrackUploadModal from "@/components/TrackUploadModal";
 import { cn } from "@/lib/utils";
+import { BadgeSystem } from "@/components/BadgeSystem";
+import CollectorTier from "@/components/CollectorTier";
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
@@ -43,7 +45,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
   const [expandedMonth, setExpandedMonth] = React.useState<string | null>(null);
   const [activityTimeFrame, setActivityTimeFrame] = React.useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
   const [performanceTimeFrame, setPerformanceTimeFrame] = React.useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
-  const [activeSubTab, setActiveSubTab] = React.useState<'overview' | 'audit' | 'withdrawals'>('overview');
+  const [activeSubTab, setActiveSubTab] = React.useState<'overview' | 'audit' | 'withdrawals' | 'loyalty'>('overview');
 
   const [prevTotalEarnings, setPrevTotalEarnings] = React.useState(totalEarnings);
   const [isEarningsPulsing, setIsEarningsPulsing] = React.useState(false);
@@ -370,7 +372,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
   const [auditFindings, setAuditFindings] = React.useState<string[]>([]);
   const [auditLoading, setAuditLoading] = React.useState(false);
 
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const { preferences, addNotification } = useNotification();
   const hasAlerted = React.useRef(false);
 
@@ -732,6 +734,13 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
             className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeSubTab === 'withdrawals' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white/5 text-muted-foreground hover:text-foreground'}`}
           >
             Withdrawals
+          </button>
+          <button
+            id="artist-loyalty-tab"
+            onClick={() => setActiveSubTab('loyalty')}
+            className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeSubTab === 'loyalty' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white/5 text-muted-foreground hover:text-foreground'}`}
+          >
+            Loyalty Hub
           </button>
         </div>
       </div>
@@ -1603,7 +1612,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
               </div>
           </div>
         </>
-      ) : (
+      ) : activeSubTab === 'withdrawals' ? (
         <>
           {/* Withdrawals Payout and Royalty Split Settlement Tab Content */}
           <div className="space-y-6">
@@ -1782,6 +1791,47 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
             </div>
           </div>
         </>
+      ) : (
+        <div className="space-y-6">
+          {/* Embedded dynamic metrics overview */}
+          <div className="p-6 rounded-3xl bg-white/[0.02] backdrop-blur-md space-y-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" /> Platform Loyalty Ecosystem
+              </h3>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                Your decentralized credentials, active nodes & unlocked curation badges
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-2">
+              <div className="bg-black/45 p-4 rounded-2xl">
+                <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">User Engagement</p>
+                <span className="text-xs font-black text-white uppercase">High Connectivity</span>
+              </div>
+              <div className="bg-black/45 p-4 rounded-2xl">
+                <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Streaming Activity</p>
+                <span className="text-xs font-black text-cyan-400 uppercase">Interactive Node</span>
+              </div>
+              <div className="bg-black/45 p-4 rounded-2xl">
+                <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">NFT Holdings</p>
+                <span className="text-xs font-black text-purple-400 uppercase">scarcity node status</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            {/* Collector Tier Indicator */}
+            <div className="bg-card p-6 rounded-3xl">
+              <CollectorTier user={userProfile} isOwnProfile={true} />
+            </div>
+
+            {/* Badge System */}
+            <div className="bg-card p-6 rounded-3xl">
+              <BadgeSystem user={userProfile} isOwnProfile={true} />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

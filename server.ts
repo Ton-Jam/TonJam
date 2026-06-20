@@ -383,25 +383,47 @@ async function startServer() {
 
     app.post('/api/gemini/generate-image', async (req, res) => {
         try {
-            const { title, trackInfo } = req.body;
-            const promptContext = `
-                Create a highly descriptive and artistic prompt for an image generation model to create a playlist cover for a playlist titled "${title}". 
-                The playlist contains tracks like: ${trackInfo}. 
-                The style should be modern, vibrant, and reflect the mood of the music. 
-                Return ONLY the prompt text.
-            `;
+            const { title, trackInfo, prompt: userPrompt } = req.body;
+            let finalPrompt = userPrompt;
+            
+            if (userPrompt) {
+                // Let's use Gemini to craft a beautiful, high-quality descriptive artistic prompt based on user's simple prompt
+                try {
+                    const enhanceContext = `
+                        Enrich this simple visual prompt into a highly descriptive, cinematic, and artistic prompt for an image generation model: "${userPrompt}".
+                        Make it modern, vibrant, and professionally polished. Return ONLY the enhanced prompt text, without any introductory or concluding remarks. Max 100 words.
+                    `;
+                    const enhanceResponse = await ai.models.generateContent({
+                        model: "gemini-3.5-flash",
+                        contents: [{ parts: [{ text: enhanceContext }] }]
+                    });
+                    const enhancedText = enhanceResponse.text?.trim();
+                    if (enhancedText) {
+                        finalPrompt = enhancedText;
+                    }
+                } catch (err) {
+                    console.warn("Could not enhance user's prompt with Gemini, using prompt as-is:", err);
+                }
+            } else {
+                const promptContext = `
+                    Create a highly descriptive and artistic prompt for an image generation model to create a playlist cover for a playlist titled "${title}". 
+                    The playlist contains tracks like: ${trackInfo}. 
+                    The style should be modern, vibrant, and reflect the mood of the music. 
+                    Return ONLY the prompt text.
+                `;
 
-            // Use text model to generate the vision prompt
-            const visionPromptResponse = await ai.models.generateContent({
-                model: "gemini-3.5-flash",
-                contents: [{ parts: [{ text: promptContext }] }]
-            });
-            const imagePrompt = visionPromptResponse.text?.trim() || `Artistic playlist cover for ${title}, modern music theme, vibrant colors`;
+                // Use text model to generate the vision prompt
+                const visionPromptResponse = await ai.models.generateContent({
+                    model: "gemini-3.5-flash",
+                    contents: [{ parts: [{ text: promptContext }] }]
+                });
+                finalPrompt = visionPromptResponse.text?.trim() || `Artistic playlist cover for ${title}, modern music theme, vibrant colors`;
+            }
 
             // Use pollinations for the actual image to keep it reliable in this environment
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1000&height=1000&nologo=true&seed=${Date.now()}`;
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1000&height=1000&nologo=true&seed=${Date.now()}`;
             
-            res.json({ imageUrl });
+            res.json({ imageUrl, prompt: finalPrompt });
         } catch (error: any) {
             console.error("AI Image generation error:", error);
             res.status(500).json({ error: error.message || "Failed to generate AI image" });

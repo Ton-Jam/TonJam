@@ -346,7 +346,7 @@ const JamSpace: React.FC = () => {
             </motion.div>
 
             {/* Feed Filters - Sticky & Atmospheric matching Marketplace */}
-            <div className="sticky top-14 z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-4 border-b border-white/[0.05] px-4">
+            <div className="sticky top-14 z-[37] bg-transparent py-4 w-full mb-4 px-4">
               <FilterPills
                 selectedGenre={filterType}
                 onSelect={(v) => setFilterType(v || 'All')}

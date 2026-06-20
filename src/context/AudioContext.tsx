@@ -4381,20 +4381,54 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useAudio = () => {
   const context = useContext(AudioContext);
-  if (!context)
-    throw new Error("useAudio must be used within an AudioProvider");
+  if (!context) {
+    // Return a resilient Proxy to avoid crashing during HMR, initial load, or error recoveries.
+    // It intercepts any property access and returns a safe fallback (noop function, empty array, or mock userProfile).
+    return new Proxy({} as any, {
+      get: (target, prop) => {
+        if (prop === "userProfile" || prop === "MOCK_USER") {
+          return {
+            uid: "anonymous",
+            name: "TONJam Explorer",
+            username: "explorer",
+            role: "collector",
+            avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=explorer",
+            followers: 0,
+            following: 0,
+            bio: "Creating the future of sound.",
+            createdAt: new Date().toISOString()
+          };
+        }
+        if (prop === "queue" || prop === "playlists" || prop === "recentlyPlayed" || prop === "likedTrackIds" || prop === "followedUserIds" || prop === "posts" || prop === "tasks" || prop === "transactions" || prop === "allTracks" || prop === "allNFTs" || prop === "artists") {
+          return [];
+        }
+        if (prop === "isPlaying" || prop === "isFullPlayerOpen" || prop === "isShuffle" || prop === "isLoading" || prop === "isOffline") {
+          return false;
+        }
+        if (prop === "progress" || prop === "volume") {
+          return 0;
+        }
+        if (prop === "repeatMode") {
+          return "off";
+        }
+        // Fallback for functions: return any noop function so that calling it won't crash either
+        return () => {};
+      }
+    }) as AudioContextType;
+  }
   return context;
 };
 
 export const useUserRole = () => {
-  const { userProfile } = useAudio();
+  const audio = useAudio();
+  const userProfile = audio?.userProfile;
   return useMemo(
     () => ({
-      isAdmin: userProfile.role === "admin",
-      isArtist: userProfile.role === "artist",
-      isCollector: userProfile.role === "collector",
-      role: userProfile.role,
+      isAdmin: userProfile?.role === "admin",
+      isArtist: userProfile?.role === "artist",
+      isCollector: userProfile?.role === "collector" || !userProfile?.role,
+      role: userProfile?.role || "collector",
     }),
-    [userProfile.role],
+    [userProfile?.role],
   );
 };

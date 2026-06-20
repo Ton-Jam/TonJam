@@ -539,7 +539,7 @@ const Discover: React.FC = () => {
 
 
         {/* Search & Filter Header - Sticky & Atmospheric */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-lg py-2 w-full border-b border-blue-500/10 transition-colors duration-300 flex flex-col gap-1">
+        <div className="sticky top-0 z-40 bg-transparent py-2 w-full transition-colors duration-300 flex flex-col gap-1">
           <div className="w-full flex items-center gap-3 px-4 md:px-8 lg:px-12">
             <form 
               onSubmit={handleSearchSubmit} 

@@ -240,7 +240,7 @@ const Library: React.FC = () => {
       <div className="px-4 py-3 sm:px-6 max-w-7xl mx-auto space-y-6">
         
         {/* Global Filter Pills & Grid Toggle controls block */}
-        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-6 border-b border-border/30 flex flex-col md:flex-row md:items-center justify-between gap-4 px-4">
+        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-transparent py-4 w-full mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 px-4">
           <FilterPills
             selectedGenre={filter === 'all' ? 'All' : filter.charAt(0).toUpperCase() + filter.slice(1)}
             onSelect={(v) => setFilter(v ? (v === 'All Symbols' ? 'all' : v.toLowerCase()) as any : 'all')}

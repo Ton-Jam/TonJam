@@ -55,6 +55,9 @@ const ArtistMinting: React.FC = () => {
 
   const [royaltySplits, setRoyaltySplits] = useState<RoyaltySplitExtended[]>([{ address: userProfile.walletAddress || '', percentage: 100, label: 'Creator' }]);
 
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [isGeneratingAiCover, setIsGeneratingAiCover] = useState(false);
+
   useEffect(() => {
     if (selectedTrack) {
       setTrackData({
@@ -114,7 +117,7 @@ const ArtistMinting: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!trackData.title || !trackData.genre || (!selectedTrack && (!trackData.audioFile || !trackData.coverFile))) {
+    if (!trackData.title || !trackData.genre || (!selectedTrack && (!trackData.audioFile || (!trackData.coverFile && !trackData.coverPreview)))) {
       addNotification("Please fill in all required fields and upload files", "error");
       return;
     }
@@ -154,6 +157,8 @@ const ArtistMinting: React.FC = () => {
         setLoadingMessage('Transmitting visual data...');
         const { downloadUrl } = await uploadCover(trackData.coverFile);
         coverUrl = downloadUrl;
+      } else if (trackData.coverPreview) {
+        coverUrl = trackData.coverPreview;
       }
       
       updateStep('upload', 'completed', 35);
@@ -383,12 +388,22 @@ const ArtistMinting: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-8">
                   <div 
-                    onClick={() => fileInputRef.current?.click()} 
+                    onClick={() => !isGeneratingAiCover && fileInputRef.current?.click()} 
                     className="w-full aspect-square bg-white/5 border-2 border-dashed border-white/10 rounded-[4px] flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500/50 transition-all overflow-hidden relative group" 
                   >
                     <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e, 'cover')} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
-                    {trackData.coverPreview ? (
-                      <img src={trackData.coverPreview} alt="Cover" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                    {isGeneratingAiCover ? (
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center gap-3">
+                        <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+                        <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest animate-pulse">Forging Art Core...</span>
+                      </div>
+                    ) : trackData.coverPreview ? (
+                      <>
+                        <img src={trackData.coverPreview} alt="Cover" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Upload className="w-8 h-8 text-white/80" />
+                        </div>
+                      </>
                     ) : (
                       <>
                         <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -397,6 +412,115 @@ const ArtistMinting: React.FC = () => {
                         <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Upload Vision</span>
                       </>
                     )}
+                  </div>
+
+                  {/* AI Vision Generator */}
+                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl space-y-4">
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-tight flex items-center gap-2 text-cyan-400">
+                        <Sparkles className="w-4 h-4 animate-pulse" /> Generative AI Vision Lab
+                      </h3>
+                      <p className="text-[9px] font-bold text-white/45 uppercase tracking-widest mt-1">Co-create unique track cover art with Gemini</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[9px] font-black text-white/40 uppercase tracking-widest mb-1.5">Aesthetic Directives</label>
+                        <textarea 
+                          value={aiPrompt} 
+                          onChange={e => setAiPrompt(e.target.value)}
+                          className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-cyan-500 h-20 resize-none placeholder:text-white/20"
+                          placeholder="Describe the desired visual aesthetic (e.g. infinite glowing neural matrix, retro wave futuristic skyline, high contrast cyan and magenta, synthwave 3D render)..." 
+                        />
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!trackData.title) {
+                              addNotification("Give your track a title first to auto-generate a custom directive!", "info");
+                              return;
+                            }
+                            const suggested = `Cinematic, hyper-detailed cyberpunk illustration for a track labeled "${trackData.title}" in the genre "${trackData.genre || 'Electronic'}". ${trackData.description ? 'Visual themes: ' + trackData.description : 'Features digital grid, neon glow, cosmic energy, synthwave style, octane 3D render'}`;
+                            setAiPrompt(suggested);
+                            addNotification("Custom directive generated based on lore!", "success");
+                          }}
+                          className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors"
+                        >
+                          Auto Suggest
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const promptToUse = aiPrompt.trim() || (trackData.title ? `Artistic cover for track ${trackData.title} in genre ${trackData.genre || 'ambient'}, digital illustration, vibrant elements, cyberpunk design` : 'Dynamic retro music artwork, synthesizer dashboard, lasers, neon pink and cyan');
+                            setIsGeneratingAiCover(true);
+                            try {
+                              addNotification("Initializing AI image generator...", "info");
+                              const response = await fetch('/api/gemini/generate-image', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  title: trackData.title || "Unknown Track",
+                                  trackInfo: trackData.genre || "Electronic",
+                                  prompt: promptToUse
+                                })
+                              });
+                              if (!response.ok) throw new Error("API call failed");
+                              const data = await response.json();
+                              if (data.imageUrl) {
+                                setTrackData(prev => ({
+                                  ...prev,
+                                  coverPreview: data.imageUrl,
+                                  coverFile: null // Zero out manual file to prioritize AI url
+                                }));
+                                addNotification("AI Art synthesized successfully!", "success");
+                              } else {
+                                throw new Error("No image URL returned");
+                              }
+                            } catch (error) {
+                              console.error("AI Generation failed:", error);
+                              addNotification("Failed to generate AI art. Using fallback aesthetic.", "error");
+                            } finally {
+                              setIsGeneratingAiCover(false);
+                            }
+                          }}
+                          disabled={isGeneratingAiCover}
+                          className="flex-1 py-2 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                        >
+                          {isGeneratingAiCover ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Synthesizing...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-3 h-3" /> Synthesize Art
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Preset chips to helper inspire prompts */}
+                      <div className="flex flex-wrap gap-1.5 pt-1.5">
+                        {[
+                          { label: 'Cyberpunk', prompt: 'Vibrant neon cyberpunk alleyway in Tokyo, rainy night, holographic displays, reflection on wet asphalt, retro-futuristic, high contrast' },
+                          { label: 'Synthwave', prompt: 'Classic synthwave wireframe horizon with a massive glowing neon sun, palm trees, starfield, 1980s retro grid, retro-futuristic' },
+                          { label: 'Cosmic Ambient', prompt: 'Ethereal cosmic nebula, glowing dust particles, infinite slow swirling galaxy, calm and serene deep space, spiritual mood' },
+                          { label: 'Hyper Phonk', prompt: 'Aggressive drift phonk retro car drifting, heavy smoke, flashing strobe lights, dark street aesthetic, retro VHS camera overlay, gritty' }
+                        ].map(preset => (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => {
+                              setAiPrompt(preset.prompt);
+                            }}
+                            className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 bg-white/5 border border-white/5 rounded-full hover:border-cyan-500/30 text-white/50 hover:text-white transition-colors"
+                          >
+                            + {preset.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   {!selectedTrack && (
