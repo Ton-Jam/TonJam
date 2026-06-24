@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button as MTButton } from "@material-tailwind/react";
 import { 
@@ -33,7 +33,9 @@ import {
   History,
   Disc,
   Play,
-  ArrowUpRight
+  ArrowUpRight,
+  RefreshCw,
+  Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
@@ -96,6 +98,31 @@ const JamSpace: React.FC = () => {
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiResult, setAiResult] = useState<GenerateAIPlaylistResult | null>(null);
   const [isAiComposeOpen, setIsAiComposeOpen] = useState(false);
+
+  // Web3 Music Trends states
+  const [trends, setTrends] = useState<any[]>([]);
+  const [isLoadingTrends, setIsLoadingTrends] = useState(false);
+
+  const fetchTrends = async () => {
+    setIsLoadingTrends(true);
+    try {
+      const response = await fetch('/api/web3-music-trends');
+      if (response.ok) {
+        const data = await response.json();
+        if (data && Array.isArray(data.trends)) {
+          setTrends(data.trends);
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching Web3 Music Trends:", e);
+    } finally {
+      setIsLoadingTrends(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTrends();
+  }, []);
 
   const trendingNFTCoverflowItems = useMemo<CoverflowItem[]>(() => {
     return allNFTs.slice(0, 7).map(nft => ({
@@ -426,6 +453,69 @@ const JamSpace: React.FC = () => {
                           {isGeneratingAI ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Sparkles className="h-3.5 w-3.5 mr-2" />}
                           Synthesize Now
                         </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Web3 Music Trends Card */}
+                <Card className="bg-[#0e1735]/65 border-none rounded-2xl overflow-hidden shadow-xl shadow-black/40">
+                  <CardHeader className="p-5 pb-2 flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-100 flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-blue-400 animate-pulse" />
+                        Web3 Music Trends
+                      </CardTitle>
+                      <span className="text-[9px] font-black text-slate-400/70 uppercase tracking-[0.2em] mt-1 block">Live Gemini Synthesis</span>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      onClick={fetchTrends} 
+                      disabled={isLoadingTrends}
+                      className="h-8 w-8 rounded-full p-0 text-slate-400 hover:text-white hover:bg-white/5 transition-colors shrink-0"
+                    >
+                      <RefreshCw className={cn("h-3.5 w-3.5", isLoadingTrends && "animate-spin")} />
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-1 space-y-3">
+                    {isLoadingTrends ? (
+                      <div className="flex flex-col items-center justify-center py-8 gap-2">
+                        <RefreshCw className="h-6 w-6 text-blue-500 animate-spin" />
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Curating feeds...</span>
+                      </div>
+                    ) : trends.length === 0 ? (
+                      <p className="text-center text-[10px] text-slate-500 py-6 uppercase tracking-wider font-bold">Static waves... reload to query</p>
+                    ) : (
+                      <div className="flex flex-col gap-2.5">
+                        {trends.map((item) => (
+                          <div 
+                            key={item.id} 
+                            className="p-3 bg-zinc-900/20 hover:bg-[#16224f]/40 rounded-xl transition-all cursor-pointer group flex flex-col gap-1"
+                          >
+                            <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-wider">
+                              <span className="text-blue-400 font-bold">{item.source}</span>
+                              <span className="text-slate-500">{item.timestamp}</span>
+                            </div>
+                            <h4 className="text-xs font-bold text-white tracking-tight group-hover:text-blue-300 transition-colors leading-snug">
+                              {item.title}
+                            </h4>
+                            <p className="text-[10px] text-slate-400 font-medium leading-relaxed font-sans line-clamp-2 mt-0.5">
+                              {item.summary}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-300 font-black uppercase">
+                                {item.category}
+                              </span>
+                              <span className={cn(
+                                "text-[8px] px-1.5 py-0.5 rounded font-black uppercase",
+                                item.impact === 'High' ? 'bg-red-500/10 text-red-300' : 
+                                item.impact === 'Medium' ? 'bg-orange-500/10 text-orange-300' : 'bg-green-500/10 text-green-300'
+                              )}>
+                                Impact: {item.impact}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </CardContent>

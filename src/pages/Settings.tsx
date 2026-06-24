@@ -123,12 +123,12 @@ const Settings: React.FC = () => {
           ))}
         </TabsList>
 
-        <TabsContent value="general" className="space-y-4">
-          <Card className="bg-muted/5 border-white/5 rounded-2xl overflow-hidden">
-            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-[9px] font-black text-blue-500 uppercase tracking-[0.3em]">Identity Core</CardTitle>
+        <TabsContent value="general" className="space-y-6">
+          <Card className="bg-background border border-white/10 rounded-3xl overflow-hidden shadow-sm">
+            <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">Identity Core</CardTitle>
             </CardHeader>
-            <CardContent className="p-2 space-y-0.5">
+            <CardContent className="p-4 pt-2 space-y-0.5">
                 <SettingRow 
                     icon={UserCircle} 
                     title="Profile Sync" 
@@ -153,11 +153,11 @@ const Settings: React.FC = () => {
           </Card>
 
 
-          <Card className="bg-muted/10 border-white/5 rounded-[4px] overflow-hidden">
-            <CardHeader className="pb-4">
+          <Card className="bg-background border border-white/10 rounded-3xl overflow-hidden shadow-sm mt-4">
+            <CardHeader className="p-6 pb-4">
               <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Security Matrix</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1">
+            <CardContent className="p-4 space-y-1">
               <SettingRow 
                 icon={Key} 
                 title="Secondary Auth" 

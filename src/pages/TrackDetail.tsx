@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, increment, setDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { 
   Play, 
@@ -27,7 +27,11 @@ import {
   Image as ImageIcon,
   DownloadCloud,
   FileText,
-  Loader2
+  Loader2,
+  Gift,
+  Check,
+  Copy,
+  Send
 } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, TJ_COIN_ICON } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -40,6 +44,7 @@ import TokenGate from '@/components/TokenGate';
 import { useTokenGating } from '@/hooks/useTokenGating';
 import CommentsSection from '@/components/CommentsSection';
 import ReactionsSection from '@/components/ReactionsSection';
+import AudioVisualizer from '@/components/AudioVisualizer';
 
 const TrackDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -47,7 +52,7 @@ const TrackDetail: React.FC = () => {
   const { 
     playTrack, currentTrack, isPlaying, jamTrack, purchaseTrack, mintNFT, 
     allTracks, allNFTs, likedTrackIds, toggleLikeTrack, addNotification, 
-    setTrackToAddToPlaylist, setOptionsTrack, setFullPlayerOpen, userProfile,
+    setTrackToAddToPlaylist, setOptionsTrack, setFullPlayerOpen, userProfile, setUserProfile,
     isTrackCached, downloadTrackForOffline, deleteCachedTrack,
     toggleFollowUser, followedUserIds
   } = useAudio();
@@ -154,6 +159,105 @@ const TrackDetail: React.FC = () => {
     }
   };
   
+  const [sharedPlatforms, setSharedPlatforms] = useState<string[]>([]);
+  const [isSharing, setIsSharing] = useState(false);
+  const [sharingPlatform, setSharingPlatform] = useState<string | null>(null);
+
+  const handleShareEarn = async (platform: string) => {
+    if (!userProfile) {
+      addNotification("Please initialize neural profile to earn rewards.", "warning");
+      return;
+    }
+    if (sharedPlatforms.includes(platform)) {
+      addNotification(`Rewards already claimed for sharing on ${platform.toUpperCase()}`, "info");
+      return;
+    }
+
+    setSharingPlatform(platform);
+    setIsSharing(true);
+
+    const shareText = `Check out this music NFT "${track.title}" by ${track.artist} on TonJam!`;
+    const shareUrl = window.location.href;
+    const telegramLink = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+    const twitterLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+
+    if (platform === 'telegram') {
+      window.open(telegramLink, '_blank', 'width=600,height=400,noopener,noreferrer');
+    } else if (platform === 'twitter') {
+      window.open(twitterLink, '_blank', 'width=600,height=400,noopener,noreferrer');
+    } else if (platform === 'facebook') {
+      window.open(facebookLink, '_blank', 'width=600,height=400,noopener,noreferrer');
+    } else if (platform === 'copylink') {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        addNotification("Exclusive NFT resource link copied to buffer!", "success");
+      } catch (err) {
+        console.error("Clipboard copy failed:", err);
+      }
+    }
+
+    // Interactive countdown latency simulation for a neat transition feel
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    const rewardAmount = platform === 'copylink' ? 2 : 5;
+
+    try {
+      if (userProfile.uid) {
+        const userRef = doc(db, "users", userProfile.uid);
+        await updateDoc(userRef, {
+          jamBalance: increment(rewardAmount),
+          tjBalance: increment(rewardAmount),
+        });
+      }
+
+      const txId = `tx-share-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+      const newTx = {
+        id: txId,
+        type: "claim_rewards" as const,
+        amount: rewardAmount,
+        platformFee: 0,
+        artistShare: 0,
+        recipientAddress: userProfile.walletAddress || "USER_WALLET",
+        userId: userProfile.uid,
+        trackId: track.id,
+        trackTitle: `Share to Earn: shared "${track.title}" to ${platform.toUpperCase()}`,
+        timestamp: new Date().toISOString(),
+        status: "completed" as const,
+        txHash: `0x${Math.random().toString(16).substr(2, 40)}`,
+        participants: [userProfile.uid].filter(Boolean),
+      };
+
+      await setDoc(doc(db, "transactions", txId), newTx);
+
+      setUserProfile((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          jamBalance: (prev.jamBalance || 0) + rewardAmount,
+          tjBalance: (prev.tjBalance || 0) + rewardAmount,
+        };
+      });
+
+      setSharedPlatforms((prev) => [...prev, platform]);
+
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.8 },
+        colors: ['#00b4d8', '#3b82f6', '#8b5cf6', '#e0f2fe']
+      });
+
+      addNotification(`Success! Mindset rewarded with +${rewardAmount} JAM Tokens!`, "success");
+    } catch (error) {
+      console.error(error);
+      addNotification("A network delay interrupted the reward transaction.", "error");
+    } finally {
+      setIsSharing(false);
+      setSharingPlatform(null);
+    }
+  };
+
   const isActive = currentTrack?.id === track?.id;
   const isLiked = track ? likedTrackIds.includes(track.id) : false;
 
@@ -434,6 +538,9 @@ const TrackDetail: React.FC = () => {
               </div>
             </div>
 
+            {/* Real-time Audio Visualizer Component */}
+            <AudioVisualizer className="w-full h-[220px]" />
+
             {/* Purchase / Mint Card */}
             {track.isNFT ? (
               <div className="p-4 rounded-2xl bg-muted/50 backdrop-blur-xl space-y-4">
@@ -472,6 +579,101 @@ const TrackDetail: React.FC = () => {
             ) : (
               <></>
             )}
+
+            {/* Share to Earn Section */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-900/10 via-blue-900/10 to-background/50 backdrop-blur-xl space-y-4 relative overflow-hidden">
+              {/* Pulsing glow behind reward */}
+              <div className="absolute -top-12 -right-12 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+              
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="flex h-2 w-2 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-[9px] font-black tracking-[0.2em] text-emerald-400 uppercase">Share Protocol Active</span>
+                  </div>
+                  <h3 className="text-base font-black uppercase tracking-tight text-foreground">Share to Earn</h3>
+                  <p className="text-[10px] text-muted-foreground/80 uppercase tracking-widest font-bold leading-normal mt-1">
+                    Help amplify {track.isNFT ? 'this Music NFT' : 'this Frequency'} on social networks & claim JAM instant streams!
+                  </p>
+                </div>
+
+                {/* Pulsing Reward Indicator */}
+                <div className="flex flex-col items-center bg-amber-500/10 px-3.5 py-2.5 rounded-xl shadow-lg relative shrink-0">
+                  <div className="absolute inset-0 bg-amber-500/5 rounded-xl animate-pulse" />
+                  <div className="flex items-center gap-1 text-amber-400 mb-0.5">
+                    <img src={TJ_COIN_ICON} className="w-4 h-4" alt="JAM" />
+                    <span className="text-sm font-black tracking-tight">+5 JAM</span>
+                  </div>
+                  <span className="text-[7px] text-amber-500/80 font-extrabold uppercase tracking-widest">per share</span>
+                </div>
+              </div>
+
+              {/* Social Platforms Action Area */}
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  { id: 'telegram', name: 'Telegram', color: 'bg-[#229ED9]/10 hover:bg-[#229ED9]/20 text-[#229ED9]', icon: Send, reward: 5 },
+                  { id: 'twitter', name: 'X / Twitter', color: 'bg-black/40 hover:bg-black/60 text-foreground', icon: Share2, reward: 5 },
+                  { id: 'facebook', name: 'Facebook', color: 'bg-blue-600/10 hover:bg-blue-600/20 text-blue-400', icon: Share2, reward: 5 },
+                  { id: 'copylink', name: 'Copy Link', color: 'bg-muted/45 hover:bg-muted/70 text-muted-foreground', icon: Copy, reward: 2 }
+                ].map((plat) => {
+                  const Icon = plat.icon;
+                  const isClaimed = sharedPlatforms.includes(plat.id);
+                  const isCurrent = sharingPlatform === plat.id;
+
+                  return (
+                    <button
+                      key={plat.id}
+                      onClick={() => handleShareEarn(plat.id)}
+                      disabled={isSharing || isClaimed}
+                      className={`flex flex-col p-3 rounded-xl transition-all relative overflow-hidden group text-left ${plat.color} ${isClaimed ? 'opacity-40 cursor-not-allowed' : 'active:scale-95'}`}
+                    >
+                      {/* Hover subtle glow effect */}
+                      <span className="absolute inset-0 bg-white/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      
+                      <div className="flex items-center justify-between w-full mb-1 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <Icon className="w-3.5 h-3.5" />
+                          <span className="text-[10px] font-black uppercase tracking-wider">{plat.name}</span>
+                        </div>
+                        {isClaimed && <Check className="w-3.5 h-3.5 text-emerald-500" />}
+                      </div>
+
+                      <div className="flex items-center justify-between w-full mt-1.5 relative z-10">
+                        <span className="text-[8px] uppercase tracking-widest opacity-60">Reward Pool</span>
+                        {isCurrent ? (
+                          <span className="text-[8px] font-black uppercase text-amber-400 animate-pulse">Claiming...</span>
+                        ) : isClaimed ? (
+                          <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest">Received</span>
+                        ) : (
+                          <span className="text-[9px] font-black text-amber-400">+{plat.reward} JAM</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Progress/Summary Board */}
+              <div className="p-3 rounded-xl bg-muted/20 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Gift className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider">
+                    Distributed Today for this Track
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] font-black text-foreground uppercase tracking-wider">
+                    {sharedPlatforms.reduce((sum, current) => sum + (current === 'copylink' ? 2 : 5), 0)} JAM
+                  </span>
+                  <span className="text-[8px] text-muted-foreground/60 block uppercase tracking-widest leading-none mt-0.5">
+                    Limit resets in 24h
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Right Column: Metadata & Content */}
@@ -602,6 +804,12 @@ const TrackDetail: React.FC = () => {
                             <DetailItem label="Release Date" value={track.releaseDate || '2023-10-15'} />
                             <DetailItem label="CID" value={track.cid || 'Not Available'} isMono />
                             <DetailItem label="Genre" value={track.genre} />
+                            {track.isDrmProtected && (
+                              <>
+                                <DetailItem label="Content Protection" value="Active (Acoustic Watermark Secured)" />
+                                <DetailItem label="Acoustic Signature" value={track.watermarkText || 'TON Signature'} />
+                              </>
+                            )}
                           </AccordionContent>
                         </AccordionItem>
                       </Accordion>

@@ -387,13 +387,13 @@ const Profile: React.FC = () => {
  return (
  <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
  {/* Banner Section */}
- <div className="relative h-[16vh] sm:h-[30vh] md:h-[40vh] w-full overflow-hidden bg-blue-950">
+ <div className="relative w-full h-[240px] md:h-[320px] overflow-hidden bg-blue-950">
  <BackButton className="absolute top-4 left-4 z-50 bg-black/50 text-white hover:bg-black/70" />
  <img src={localUser.bannerUrl || getPlaceholderImage(`banner-${localUser.uid}`, 1200, 400)} className="w-full h-full object-cover opacity-80" alt="" />
  <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
  
  {/* Subtle blue gradient boundary line */}
- <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500/10 via-blue-500/60 to-blue-500/10 z-10" />
+ <div className="absolute bottom-0 left-0 right-0 h-[2px] hidden" />
  
  {isEditing && (
  <button 
@@ -408,7 +408,7 @@ const Profile: React.FC = () => {
  </div>
 
   {/* IDENTITY SECTION */}
-  <div className="w-full max-w-7xl mx-auto px-4 relative z-30 flex flex-col items-start text-neutral-900 dark:text-white font-sans">
+  <div className="w-full px-6 md:px-12 lg:px-16 relative z-30 flex flex-col items-start text-neutral-900 dark:text-white font-sans">
     <div className="flex justify-between items-end w-full mb-4">
       {/* Profile Picture */}
       <div className="relative group -mt-10 sm:-mt-16 md:-mt-24">
@@ -456,7 +456,7 @@ const Profile: React.FC = () => {
           </>
         ) : (
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {localUser.isVerifiedArtist ? (
+            {(localUser.isVerifiedArtist || localUser.role === 'admin') ? (
               <button 
                 onClick={() => navigate('/artist-dashboard')}
                 className="px-3.5 py-1.5 sm:px-6 sm:py-2 bg-background text-foreground rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm cursor-pointer"
@@ -477,12 +477,6 @@ const Profile: React.FC = () => {
               title="Settings"
             >
               <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </button>
-            <button 
-              onClick={() => navigate('/edit-profile')}
-              className="px-3.5 py-1.5 sm:px-6 sm:py-2 bg-background text-foreground rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm cursor-pointer"
-            >
-              Edit Profile
             </button>
           </div>
         )}
@@ -560,18 +554,18 @@ const Profile: React.FC = () => {
 
   {/* Tab Navigation */}
   <div className="w-full sticky top-[0px] z-40 bg-transparent mb-2">
-    <div className="max-w-7xl mx-auto px-4">
-      <div className="flex items-center justify-between py-2 overflow-hidden">
+    <div className="w-full px-6 md:px-12 lg:px-16">
+      <div className="flex items-center justify-between py-2 pb-8 overflow-hidden">
         <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
           <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start -mx-4 px-4 scroll-row">
           {[
             { id: 'feed', label: 'Activity' },
             { id: 'overview', label: 'Overview' },
             { id: 'inventory', label: 'Inventory' },
-            { id: 'releases', label: 'Releases', hidden: !userProfile.isVerifiedArtist },
+            { id: 'releases', label: 'Releases', hidden: !(userProfile?.isVerifiedArtist || userProfile?.role === 'admin') },
             { id: 'sequences', label: 'Playlists' },
             { id: 'staking', label: 'Staking' },
-            { id: 'artist-dashboard', label: 'Artist Dashboard', hidden: !userProfile.isVerifiedArtist }
+            { id: 'artist-dashboard', label: 'Artist Dashboard', hidden: !(userProfile?.isVerifiedArtist || userProfile?.role === 'admin') }
           ].filter(t => !t.hidden).map(tab => (
             <TabsTrigger
               key={tab.id}
@@ -604,16 +598,18 @@ const Profile: React.FC = () => {
         </button>
       </div>
 
-      <FilterSection 
-        isOpen={showFilters}
-        onOpenChange={setShowFilters}
-        activeFilter={activeTab}
-        setActiveFilter={setActiveTab as any}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        sortOption={sortOption}
-        setSortOption={setSortOption}
-      />
+      <div className="mt-6">
+        <FilterSection 
+          isOpen={showFilters}
+          onOpenChange={setShowFilters}
+          activeFilter={activeTab}
+          setActiveFilter={setActiveTab as any}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+        />
+      </div>
       
       {searchQuery && (
         <div className="flex items-center gap-3 py-4 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -630,7 +626,7 @@ const Profile: React.FC = () => {
   </div>
 
   {/* Main Dashboard Layout */}
-  <div className="w-full px-4 sm:px-6 md:px-8 py-6">
+  <div className="w-full px-6 md:px-12 lg:px-16 py-6">
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       {/* Main Column (Feed/Content) */}
       <div className="lg:col-span-8 space-y-8">
@@ -693,11 +689,11 @@ const Profile: React.FC = () => {
 
         {/* ... remaining tabs content ... */}
         {activeTab === 'overview' && (
-          <div className="space-y-0 animate-in fade-in slide-in-from-bottom-4 duration-500 last:border-b-0">
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 last:border-b-0">
             {/* Anthem Highlight */}
             {anthemNft && (
-              <div className="p-6 border-b border-white/5 relative group animate-subtle-glow rounded-3xl overflow-hidden my-4 mx-4">
-                <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+              <div className="p-6 border-b border-white/5 relative group animate-subtle-glow overflow-hidden my-4">
+                <div className="flex flex-col md:flex-row items-center gap-8 relative z-10 w-full">
                   <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-2xl flex-shrink-0 border border-white/10">
                     <img src={anthemNft.imageUrl || getPlaceholderImage(`nft-${anthemNft.id}`)} className="w-full h-full object-cover" alt={anthemNft.title} />
                   </div>
@@ -729,7 +725,7 @@ const Profile: React.FC = () => {
               </div>
             )}
 
-            <div className="p-4 space-y-8">
+            <div className="space-y-8 w-full">
               <JamPointsTracker />
 
               <SectionHeader title="Followed Artists" onAction={() => setActiveTab('staking')} />
@@ -883,10 +879,12 @@ const Profile: React.FC = () => {
 
           <div className="mt-10 pt-10 border-t border-white/5">
             <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-6">Identity Protocols</h4>
-            {localUser.isVerifiedArtist ? (
+            {(localUser.isVerifiedArtist || localUser.role === 'admin') ? (
               <div className="flex items-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
                 <Verified className="w-5 h-5 text-emerald-500" />
-                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Verified Architect</span>
+                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                  {localUser.role === 'admin' ? 'Verified Admin Architect' : 'Verified Architect'}
+                </span>
               </div>
             ) : localUser.verificationStatus && localUser.verificationStatus !== 'unverified' ? (
               <div className="space-y-4">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, Music, Image as ImageIcon, CheckCircle2, Loader2, FileAudio } from 'lucide-react';
+import { X, Upload, Music, Image as ImageIcon, CheckCircle2, Loader2, FileAudio, Shield } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { Track } from '@/types';
@@ -41,6 +41,8 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     editions: '1',
     rarity: 'Common',
     royaltySplits: [{ address: userProfile?.walletAddress || '', percentage: 100 }] as { address: string; percentage: number }[],
+    isDrmProtected: false,
+    watermarkText: 'TonJam Cryptographic Proof',
   });
 
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -106,7 +108,9 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
         likes: 0,
         releaseDate: new Date().toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
-        artistVerified: true
+        artistVerified: true,
+        isDrmProtected: formData.isDrmProtected,
+        watermarkText: formData.isDrmProtected ? formData.watermarkText : undefined,
       };
 
       addUserTrack(newTrack);
@@ -167,6 +171,8 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
       editions: '1',
       rarity: 'Common',
       royaltySplits: [{ address: userProfile?.walletAddress || '', percentage: 100 }],
+      isDrmProtected: false,
+      watermarkText: 'TonJam Cryptographic Proof',
     });
     setAudioFile(null);
     setCoverFile(null);
@@ -335,6 +341,43 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                         NFT Asset
                       </button>
                     </div>
+                  </div>
+
+                  {/* Content Protection & DRM (Sleek layout with zero border lines) */}
+                  <div className="p-3 bg-blue-500/5 rounded-lg space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-black text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                          <Shield className="w-3.5 h-3.5 text-blue-500" /> Content Protection (DRM)
+                        </span>
+                        <span className="text-[7px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                          Restrict stream downloads & lock media source
+                        </span>
+                      </div>
+                      <input 
+                        type="checkbox"
+                        id="drm-toggle"
+                        checked={formData.isDrmProtected}
+                        onChange={(e) => setFormData({...formData, isDrmProtected: e.target.checked})}
+                        className="w-4 h-4 rounded cursor-pointer accent-blue-500"
+                      />
+                    </div>
+
+                    {formData.isDrmProtected && (
+                      <div className="space-y-2 animate-in fade-in duration-200">
+                        <label className="text-[8px] font-bold text-blue-400 uppercase tracking-widest">Acoustic / Digital Watermark Stamp</label>
+                        <input 
+                          type="text"
+                          value={formData.watermarkText}
+                          onChange={(e) => setFormData({...formData, watermarkText: e.target.value})}
+                          placeholder="e.g. Cryptographic TON Signature"
+                          className="w-full bg-foreground/[0.03] border-none rounded-[4px] p-2 text-[10px] text-foreground outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+                        />
+                        <p className="text-[7px] text-muted-foreground uppercase tracking-widest leading-normal">
+                          Injects a persistent, non-destructive acoustic signature and metadata stamp into public playback channels.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {formData.isNFT && (
@@ -529,6 +572,18 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                     <p className="text-xs font-bold text-foreground uppercase">~0.02 TON</p>
                   </div>
                 </div>
+
+                {formData.isDrmProtected && (
+                  <div className="p-2.5 bg-blue-500/5 rounded-[4px] flex items-center justify-between">
+                    <div>
+                      <p className="text-[8px] font-bold text-blue-400 uppercase tracking-widest">DRM Protection Status</p>
+                      <p className="text-[9px] font-black text-foreground uppercase tracking-wider">Acoustic Watermark Active</p>
+                    </div>
+                    <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-[7px] font-black uppercase tracking-wider max-w-[150px] truncate">
+                      {formData.watermarkText || 'TON Signed'}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2">

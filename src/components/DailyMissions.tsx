@@ -33,37 +33,33 @@ export const DailyMissions = () => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Daily Missions</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="w-full">
+      <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 px-1">Daily Missions</h3>
+      <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
         {missions.map(mission => {
           const completed = progress.find(p => p.missionId === mission.id)?.completed;
           return (
-            <div key={mission.id} className="flex items-center justify-between p-4 border rounded-lg mb-2">
+            <div key={mission.id} className="min-w-[240px] p-3 bg-slate-950 border border-slate-800 rounded-xl flex flex-col justify-between">
               <div>
-                <h4 className="font-semibold">{mission.title}</h4>
-                <p className="text-sm text-gray-500">{mission.description}</p>
-                <div className="relative group">
-                  <span className="text-xs font-bold text-blue-600 cursor-help underline decoration-dotted underline-offset-2">+{mission.xpReward} XP</span>
-                  <div className="absolute left-0 bottom-full mb-2 w-max px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                    Earn {mission.xpReward} XP for this mission!
-                  </div>
-                </div>
+                <h4 className="text-xs font-bold text-slate-200 leading-tight mb-1">{mission.title}</h4>
+                <p className="text-[10px] text-slate-500 leading-tight mb-3">{mission.description}</p>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                disabled={completed}
-                onClick={() => handleComplete(mission.id)}
-              >
-                {completed ? <CheckCircle2 className="text-green-500" /> : <Circle />}
-              </Button>
+              <div className="flex items-center justify-between pt-2 border-t border-slate-800">
+                <span className="text-[10px] font-bold text-blue-400">+{mission.xpReward} XP</span>
+                <Button 
+                  size="sm"
+                  variant={completed ? "secondary" : "default"}
+                  className="h-7 text-[9px] font-bold uppercase px-3"
+                  disabled={completed}
+                  onClick={() => handleComplete(mission.id)}
+                >
+                  {completed ? 'Done' : 'Claim'}
+                </Button>
+              </div>
             </div>
           );
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

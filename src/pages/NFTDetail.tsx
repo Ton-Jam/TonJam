@@ -98,6 +98,7 @@ import { PriceSparkline } from "@/components/PriceSparkline";
 import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
 import { QuickBid } from "@/components/QuickBid";
 import { CollectionStats } from "@/components/CollectionStats";
+import { Interactive3DViewer } from "@/components/Interactive3DViewer";
 
 const NFTDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -782,64 +783,24 @@ const NFTDetail: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-4 items-start">
           {/* Left Column: Artwork & Technical Specs */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="relative group max-w-[280px] mx-auto sm:max-w-none" onClick={handlePlayClick}>
-              <div className="relative aspect-square max-h-[280px] sm:max-h-none mx-auto w-full rounded-[4px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] bg-black/40 border border-white/10">
-                <img
-                  src={
-                    localNft.imageUrl ||
-                    getPlaceholderImage(`nft-${localNft.id}`)
-                  }
-                  className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110"
-                  alt={localNft.title}
+            <Interactive3DViewer
+              imageUrl={localNft.imageUrl || getPlaceholderImage(`nft-${localNft.id}`)}
+              title={localNft.title}
+              isActive={isActive}
+              isPlaying={isPlaying}
+              handlePlayClick={handlePlayClick}
+              edition={localNft.edition}
+              minted={localNft.minted}
+              supply={localNft.supply}
+              isAuction={isAuction}
+              auctionTimerComponent={
+                <AuctionCountdownTimer 
+                  nft={localNft} 
+                  variant="default" 
+                  className="bg-background/80 backdrop-blur-2xl border border-transparent shadow-2xl" 
                 />
-
-                {/* Play Overlay */}
-                <div
-                  className={`absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[4px] transition-opacity duration-500 ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="w-24 h-24 rounded-full bg-blue-600/90 backdrop-blur-md flex items-center justify-center shadow-[0_0_40px_rgba(37,99,235,0.6)] border border-white/20"
-                  >
-                    {isActive && isPlaying ? (
-                      <Pause className="h-10 w-10 text-white fill-current" />
-                    ) : (
-                      <Play className="h-10 w-10 text-white fill-current ml-4" />
-                    )}
-                  </motion.div>
-                </div>
-
-                {/* Edition Badge */}
-                <div className="absolute top-4 left-4 flex flex-col gap-1.5 sm:top-6 sm:left-6">
-                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[4px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                    {localNft.edition}{" "}
-                    <span className="text-muted-foreground ml-2 sm:ml-4">
-                      Edition
-                    </span>
-                  </div>
-                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[4px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                    {localNft.minted || 0}{" "}
-                    <span className="text-muted-foreground ml-1.5 sm:ml-2">
-                      Minted / {localNft.supply || 0} Total
-                    </span>
-                  </div>
-                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[4px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                    {(localNft.supply || 0) - (localNft.minted || 0)}{" "}
-                    <span className="text-muted-foreground ml-1.5 sm:ml-2">
-                      Remaining
-                    </span>
-                  </div>
-                </div>
-
-                {/* Live Auction Badge */}
-                {isAuction && (
-                  <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
-                    <AuctionCountdownTimer nft={localNft} variant="default" className="bg-background/80 backdrop-blur-2xl border border-transparent shadow-2xl" />
-                  </div>
-                )}
-              </div>
-            </div>
+              }
+            />
 
             {/* Hardware-style Stats Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -1211,11 +1172,13 @@ const NFTDetail: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <button
+                    <motion.button
                       onClick={handleAction}
                       disabled={isPlacingBid || (isAuction && isAuctionEnded)}
+                      whileHover={!(isAuction && isAuctionEnded) && !isPlacingBid ? { scale: 1.03, y: -1, boxShadow: "0 10px 20px rgba(59, 130, 246, 0.4)" } : undefined}
+                      whileTap={!(isAuction && isAuctionEnded) && !isPlacingBid ? { scale: 0.97 } : undefined}
                       className={cn(
-                        "flex-[2] py-2.5 cursor-pointer transition-all bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-lg border border-[#C0C0C0]/50 hover:brightness-110 shadow-lg hover:shadow-blue-500/20 font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 flex items-center justify-center gap-2",
+                        "flex-[2] py-2.5 cursor-pointer transition-all bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-lg border border-[#C0C0C0]/50 hover:brightness-110 shadow-lg hover:shadow-blue-500/20 font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-2",
                         (isAuction && isAuctionEnded) && "opacity-50 grayscale cursor-not-allowed"
                       )}
                     >
@@ -1230,13 +1193,15 @@ const NFTDetail: React.FC = () => {
                       ) : (
                         "Acquire Asset"
                       )}
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
                       onClick={() => setShowOfferModal(true)}
-                      className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-foreground rounded-lg font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10 flex items-center justify-center gap-1.5"
+                      whileHover={{ scale: 1.03, y: -1, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                      whileTap={{ scale: 0.97 }}
+                      className="flex-1 py-2.5 bg-white/5 text-foreground rounded-lg font-bold text-[10px] uppercase tracking-[0.3em] transition-all border border-white/10 flex items-center justify-center gap-1.5"
                     >
                       <Handshake className="h-3.5 w-3.5" /> Make Offer
-                    </button>
+                    </motion.button>
                     {userOffer && (
                       <button
                         onClick={handleCancelBid}

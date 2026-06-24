@@ -317,7 +317,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050a24] text-white flex flex-col items-center justify-center p-4 relative overflow-y-auto">
+    <div className="min-h-screen bg-[#0A113A] text-white flex flex-col items-center justify-center p-4 relative overflow-y-auto">
       {/* Background Glow */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-[10%] left-[20%] w-[40%] h-[40%] bg-blue-500/[0.02] rounded-full blur-[150px]" />

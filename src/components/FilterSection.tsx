@@ -150,7 +150,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       whileHover={{ scale: 1.01, backgroundColor: 'rgba(255,255,255,0.06)' }}
                       whileTap={{ scale: 0.99 }}
                       onClick={() => applyPreset(pr)}
-                      className="p-3 bg-white/[0.03] hover:bg-white/[0.05] rounded-xl text-left transition-all cursor-pointer flex items-center justify-between group border-none"
+                      className="p-3 bg-white/[0.03] hover:bg-white/[0.05] rounded-xl text-left transition-all cursor-pointer flex items-center justify-between group border border-gray-400/30"
                     >
                       <div>
                         <span className="text-[10px] font-black text-white uppercase tracking-wider block">{pr.name}</span>
@@ -200,14 +200,21 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setActiveFilter(cat.id)}
                     className={cn(
-                      "py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer whitespace-nowrap border-none",
-                      activeFilter === cat.id 
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" 
-                        : "bg-white/5 text-zinc-400 hover:bg-white/10"
+                      "relative py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer whitespace-nowrap border border-gray-400/30 overflow-hidden",
+                      activeFilter === cat.id ? "text-white" : "bg-white/5 text-zinc-400 hover:bg-white/10"
                     )}
                   >
-                    <cat.icon className="h-3.5 w-3.5" />
-                    {cat.label}
+                    {activeFilter === cat.id && (
+                      <motion.div
+                        layoutId="active-pill-background"
+                        className="absolute inset-0 bg-blue-600 rounded-xl z-0 shadow-lg shadow-blue-600/20"
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                        <cat.icon className="h-3.5 w-3.5" />
+                        {cat.label}
+                    </span>
                   </motion.button>
                 ))}
               </div>
@@ -232,14 +239,23 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSortOption(opt.id)}
                     className={cn(
-                      "py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer border-none",
+                      "relative py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer border border-gray-400/30 overflow-hidden",
                       sortOption === opt.id 
-                        ? "bg-white/10 text-white shadow-md shadow-white/5 font-black" 
+                        ? "text-white" 
                         : "bg-white/5 text-zinc-400 hover:bg-white/8 hover:text-white"
                     )}
                   >
-                    <opt.icon className="h-3 w-3" />
-                    {opt.label}
+                    {sortOption === opt.id && (
+                      <motion.div
+                        layoutId="active-sort-pill-background"
+                        className="absolute inset-0 bg-blue-600 rounded-xl z-0 shadow-md shadow-blue-600/20"
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                        <opt.icon className="h-3 w-3" />
+                        {opt.label}
+                    </span>
                   </motion.button>
                 ))}
               </div>
@@ -305,7 +321,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       whileTap={{ scale: 0.98 }}
                       onClick={() => filters.setRarity!(rarity)}
                       className={cn(
-                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none",
+                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border border-gray-400/30",
                         filters.rarity === rarity 
                           ? "bg-amber-500/10 text-amber-400 shadow-lg shadow-amber-500/15" 
                           : "bg-white/5 text-zinc-400 hover:bg-white/8 hover:text-white"
@@ -332,7 +348,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       whileTap={{ scale: 0.98 }}
                       onClick={() => filters.setStatus!(status)}
                       className={cn(
-                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none",
+                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border border-gray-400/30",
                         filters.status === status 
                           ? "bg-purple-500/10 text-purple-400 shadow-lg shadow-purple-500/15" 
                           : "bg-white/5 text-zinc-400 hover:bg-white/8 hover:text-white"

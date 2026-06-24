@@ -25,9 +25,10 @@ interface PlaylistCardProps {
   playlist: Playlist;
   variant?: 'default' | 'row';
   onClick?: () => void;
+  className?: string;
 }
 
-const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'default', onClick }) => {
+const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'default', onClick, className = '' }) => {
   const { allTracks, playlistFolders, movePlaylistToFolder, deletePlaylist } = useAudio();
   const navigate = useNavigate();
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
@@ -108,7 +109,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
         whileHover={{ x: 4 }}
         whileTap={{ scale: 0.98 }}
         onClick={onClick} 
-        className="group flex items-center gap-2 p-2 rounded-[4px] hover:bg-muted/50 transition-all cursor-pointer w-full"
+        className={`group flex items-center gap-2 p-2 rounded-[4px] hover:bg-muted/50 transition-all cursor-pointer w-full ${className}`}
       >
         <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0">
           {renderCover()}
@@ -134,7 +135,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       whileHover={{ y: -4, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick} 
-      className="group relative cursor-pointer p-2 rounded-[4px] w-full"
+      className={`group relative cursor-pointer p-2 rounded-[4px] w-full ${className}`}
     >
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[4px] overflow-hidden bg-neutral-900 shadow-lg mb-2">

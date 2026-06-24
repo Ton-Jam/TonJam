@@ -40,11 +40,23 @@ interface NFTCardProps {
   className?: string;
   isSelectedForCompare?: boolean;
   onToggleCompare?: (nft: NFTItem) => void;
+  currencyMode?: 'TON' | 'USD';
 }
 
-const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false, className = '', isSelectedForCompare = false, onToggleCompare }) => {
+const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false, className = '', isSelectedForCompare = false, onToggleCompare, currencyMode = 'TON' }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying, setOptionsTrack, userProfile, setAnthem, addNotification, collections } = useAudio();
+
+  const formattedPrice = React.useMemo(() => {
+    if (!nft?.price) return '0';
+    const num = parseFloat(nft.price.replace(' TON', '').trim());
+    if (isNaN(num)) return nft.price;
+    if (currencyMode === 'USD') {
+      const usd = num * 5.30;
+      return usd >= 1000 ? Math.round(usd).toLocaleString() : usd.toFixed(2);
+    }
+    return nft.price.replace(' TON', '').trim();
+  }, [nft?.price, currencyMode]);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -351,15 +363,19 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                <div className="hidden md:flex flex-col items-end opacity-40 group-hover:opacity-100 transition-opacity">
                   <span className="text-[6px] font-bold text-muted-foreground uppercase tracking-widest">Eval</span>
                   <div className="flex items-center gap-1">
-                    <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
+                    {currencyMode === 'USD' ? (
+                      <span className="text-[12px] font-extrabold text-[#2BE08C]">$</span>
+                    ) : (
+                      <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
+                    )}
                     <motion.span 
-                      key={nft.price}
+                      key={`${nft.price}-${currencyMode}`}
                       initial={{ opacity: 0, y: -2 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
                       className="text-[12px] font-bold text-foreground tracking-tighter inline-block"
                     >
-                      {nft.price.replace(' TON', '')}
+                      {formattedPrice}
                     </motion.span>
                   </div>
                </div>
@@ -485,15 +501,19 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   <div className="space-y-0.5">
                      <p className="text-[8px] font-medium text-muted-foreground/30 uppercase tracking-[0.1em]">Val_Artifact</p>
                      <div className="flex items-center gap-1 bg-muted/40 py-0.5 px-2 rounded-[4px] border border-border/10">
-                        <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
+                        {currencyMode === 'USD' ? (
+                          <span className="text-sm font-black text-[#2BE08C]">$</span>
+                        ) : (
+                          <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
+                        )}
                         <motion.span 
-                          key={nft.price}
+                          key={`${nft.price}-${currencyMode}`}
                           initial={{ opacity: 0, y: -2 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, ease: "easeOut" }}
                           className="text-sm font-black text-foreground tracking-tighter inline-block"
                         >
-                          {nft.price.replace(' TON', '')}
+                          {formattedPrice}
                         </motion.span>
                      </div>
                   </div>

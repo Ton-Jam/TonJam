@@ -183,6 +183,12 @@ service cloud.firestore {
         && data.weight is number;
     }
 
+    function isValidRoyalty(data) {
+      return data.artistId is string && data.artistId.size() <= 128
+        && (!data.keys().contains('totalEarned') || data.totalEarned is number)
+        && (!data.keys().contains('pendingWithdrawal') || data.pendingWithdrawal is number);
+    }
+
     // 🏷 MARKETPLACE LISTINGS
     match /listings/{listingId} {
       allow read: if true;
@@ -394,6 +400,28 @@ service cloud.firestore {
       allow create: if isSignedIn() && isOwner(incoming().creator) && isValidId(folderId) && isValidPlaylistFolder(incoming());
       allow update: if isSignedIn() && (isAdmin() || (isOwner(existing().creator) && isValidPlaylistFolder(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'playlistIds', 'updatedAt'])));
       allow delete: if isSignedIn() && (isAdmin() || isOwner(existing().creator));
+    }
+
+    // 💰 ROYALTIES
+    match /royalties/{royaltyId} {
+      allow read: if isSignedIn() && (isOwner(royaltyId) || isOwner(resource.data.artistId) || isAdmin() || (resource.data.artistId == request.auth.uid));
+      allow create: if isSignedIn() && isValidId(royaltyId) && isValidRoyalty(incoming());
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        // 1. Payout/Claim by the owner (resets pendingWithdrawal to 0)
+        (
+          (isOwner(royaltyId) || isOwner(existing().artistId)) &&
+          incoming().pendingWithdrawal == 0 &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['pendingWithdrawal', 'updatedAt'])
+        ) ||
+        // 2. Royalty accumulation / distribution (increments values)
+        (
+          incoming().diff(existing()).affectedKeys().hasAll(['totalEarned', 'pendingWithdrawal', 'updatedAt']) &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['totalEarned', 'pendingWithdrawal', 'updatedAt', 'artistId']) &&
+          isValidRoyalty(incoming())
+        )
+      );
+      allow delete: if isAdmin();
     }
 
     // 💸 TRANSACTIONS (Pillar 7: Atomicity / Persistence)

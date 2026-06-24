@@ -175,7 +175,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
       className={cn(
-        "fixed left-0 right-0 z-[48] bg-black/40 backdrop-blur-3xl px-6 py-3 flex flex-col items-stretch shadow-[0_-12px_45px_rgba(0,0,0,0.4)] h-[76px] md:h-24 lg:left-64 transition-all duration-300",
+        "fixed left-0 right-0 z-[48] bg-black/40 backdrop-blur-3xl px-6 py-3 flex flex-col items-stretch h-[76px] md:h-24 lg:left-64 transition-all duration-300 mini-player-opaque",
         isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0",
       )}
     >
@@ -192,7 +192,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
 
       {/* Top Progress Bar (Compact, slim visual indicator & interactive scrub running perfectly along the top edge of mini player) */}
       <div
-        className="absolute top-0 left-0 right-0 px-0 z-30 cursor-pointer h-1.5 flex items-center bg-transparent group/topseek select-none"
+        className="absolute top-0 left-0 right-0 px-0 z-30 cursor-pointer h-[2px] hover:h-1 group/topseek select-none transition-all duration-200"
         onClick={handleProgressScrub}
         onTouchStart={handleProgressScrub}
         onTouchMove={(e) => {
@@ -201,7 +201,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           }
         }}
       >
-        <div className="w-full h-[2px] bg-white/10 relative transition-all group-hover/topseek:h-[3.5px]">
+        <div className="w-full h-full bg-white/15 relative">
           <div
             className="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-100"
             style={{ width: `${progress}%` }}

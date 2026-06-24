@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -31,6 +31,7 @@ import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FanTokenHub } from '@/components/FanTokenHub';
 import { FanPowerTracker } from '@/components/FanPowerTracker';
+import { useAudioStore } from '@/store/audioStore';
 
 type TabType = 'discography' | 'nfts' | 'tokens' | 'portfolio' | 'collection' | 'posts' | 'fan_club' | 'events' | 'about' | 'fan_power';
 
@@ -38,7 +39,20 @@ const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { addNotification, userProfile, posts: allPosts, setTrackToAddToPlaylist, playTrack, playAll, followedUserIds, toggleFollowUser, setHeaderTitle } = useAudio();
+  const { 
+    addNotification, 
+    userProfile, 
+    posts: allPosts, 
+    setTrackToAddToPlaylist, 
+    playTrack, 
+    playAll, 
+    followedUserIds, 
+    toggleFollowUser, 
+    setHeaderTitle,
+    currentTrack,
+    repeatMode
+  } = useAudio();
+  const setRepeatMode = useAudioStore(state => state.setRepeatMode);
   const [activeTab, setActiveTab] = useState<TabType>('discography');
   const [artist, setArtist] = useState<Artist | null>(null);
 
@@ -196,6 +210,25 @@ const ArtistProfile: React.FC = () => {
       .slice(0, 3);
   }, [artistTracks]);
 
+  const isAutoLoopOn = useMemo(() => {
+    return repeatMode === 'one' && topThreeTracks.length > 0 && currentTrack?.id === topThreeTracks[0]?.id;
+  }, [repeatMode, currentTrack, topThreeTracks]);
+
+  const handleToggleAutoLoop = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const topHit = topThreeTracks[0];
+    if (!topHit) return;
+
+    if (isAutoLoopOn) {
+      setRepeatMode('off');
+      toast.success("Auto-loop turned off");
+    } else {
+      await playTrack(topHit);
+      setRepeatMode('one');
+      toast.success(`Looping Artist's Top Hit: ${topHit.title}`);
+    }
+  }, [isAutoLoopOn, topThreeTracks, playTrack, setRepeatMode]);
+
   const handleFollow = () => {
     if (artist?.uid) {
       toggleFollowUser(artist.uid);
@@ -231,7 +264,7 @@ const ArtistProfile: React.FC = () => {
   return (
     <div className="w-full bg-background min-h-screen text-foreground pb-24">
       {/* Cover Image */}
-      <div className="relative h-[200px] md:h-[240px] w-full bg-muted">
+      <div className="relative w-[851px] h-[315px] bg-muted mx-auto overflow-hidden">
         <button 
           onClick={() => navigate(-1)} 
           className="absolute top-4 left-4 z-30 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white/90 hover:text-white transition-all cursor-pointer"
@@ -485,7 +518,30 @@ const ArtistProfile: React.FC = () => {
               {/* Popular Tracks */}
               {topThreeTracks.length > 0 && (
                 <section>
-                  <h3 className="text-2xl font-bold tracking-tight mb-6">Popular</h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-2xl font-bold tracking-tight">Popular</h3>
+                    
+                    {/* Auto-Loop Toggle */}
+                    <div 
+                      onClick={handleToggleAutoLoop}
+                      className="flex items-center gap-2 bg-[#18181b]/60 hover:bg-[#18181b]/80 py-1.5 px-3 rounded-full cursor-pointer select-none transition-all duration-200 active:scale-95"
+                    >
+                      <span className="text-[9px] font-black uppercase tracking-wider text-neutral-400">
+                        Auto-Loop Top Hit
+                      </span>
+                      <div className={cn(
+                        "w-7 h-4 rounded-full p-0.5 transition-colors duration-200 ease-in-out flex items-center",
+                        isAutoLoopOn ? "bg-emerald-500" : "bg-neutral-800"
+                      )}>
+                        <motion.div 
+                          layout 
+                          className="w-3 h-3 bg-white rounded-full shadow-sm"
+                          animate={{ x: isAutoLoopOn ? 12 : 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                      </div>
+                    </div>
+                  </div>
                   <div className="flex flex-col gap-1">
                     {topThreeTracks.map((track, idx) => {
                       const associatedNft = MOCK_NFTS.find(n => n.trackId === track.id);

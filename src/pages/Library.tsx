@@ -111,9 +111,9 @@ const Library: React.FC = () => {
 
     if (filter === 'all' || filter === 'nfts') {
       const myNFTs = allNFTs.filter(nft => 
-        (nft.owner === userProfile.walletAddress) || 
-        (nft.owner === userProfile.name) ||
-        userNFTs.some(un => un.id === nft.id)
+        (nft.owner === userProfile?.walletAddress) || 
+        (nft.owner === userProfile?.name) ||
+        userNFTs?.some(un => un.id === nft.id)
       );
       items = [...items, ...myNFTs.map(n => ({ ...n, type: 'nft' }))];
     }

@@ -33,6 +33,41 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from 'motion/react';
 
+const CountdownTimer: React.FC<{ targetDate: string }> = ({ targetDate }) => {
+  const calculateTimeLeft = React.useCallback(() => {
+    const total = Date.parse(targetDate) - Date.now();
+    if (total <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+    const seconds = Math.floor((total / 1000) % 60);
+    const minutes = Math.floor((total / 1000 / 60) % 60);
+    const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+    const days = Math.floor(total / (1000 * 60 * 60 * 24));
+    return { days, hours, minutes, seconds };
+  }, [targetDate]);
+
+  const [timeLeft, setTimeLeft] = React.useState(calculateTimeLeft());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [calculateTimeLeft]);
+
+  return (
+    <div className="flex items-center gap-1 font-mono text-[8px] sm:text-[9px] uppercase tracking-wider text-amber-500 bg-amber-500/10 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-[4px] select-none">
+      <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500 animate-[pulse_1.5s_infinite]" />
+      <span>
+        {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}
+        {String(timeLeft.hours).padStart(2, '0')}h{' '}
+        {String(timeLeft.minutes).padStart(2, '0')}m{' '}
+        {String(timeLeft.seconds).padStart(2, '0')}s
+      </span>
+    </div>
+  );
+};
+
 interface TrackCardProps {
   track: Track;
   variant?: 'default' | 'row' | 'compact';
@@ -60,6 +95,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
     downloadTrackForOffline, isTrackCached, deleteCachedTrack 
   } = useAudio();
   const [isCached, setIsCached] = React.useState(false);
+  const [isHyped, setIsHyped] = React.useState(false);
 
   React.useEffect(() => {
     const checkCache = async () => {
@@ -82,6 +118,27 @@ const TrackCard: React.FC<TrackCardProps> = ({
   };
   const [tonConnectUI] = useTonConnectUI();
   const { hasAccess } = useTokenGating(track.tokenGating);
+
+  const isComingSoon = React.useMemo(() => {
+    if (!track.releaseDate) return false;
+    return new Date(track.releaseDate).getTime() > Date.now();
+  }, [track.releaseDate]);
+
+  const handleHypeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsHyped(prev => !prev);
+    if (!isHyped) {
+      addNotification(`Frequency aligned! Pre-saved '${track.title}'. Launch alert synchronized.`, 'success');
+      confetti({
+        particleCount: 80,
+        spread: 80,
+        origin: { y: 0.8 },
+        colors: ['#FFB703', '#F1C40F', '#E67E22']
+      });
+    } else {
+      addNotification(`Pre-save telemetry reset for '${track.title}'.`, 'info');
+    }
+  };
   
   if (isLoading) {
     return <SkeletonCard variant={variant} className={className} />;
@@ -112,6 +169,15 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const handlePlay = (e?: React.MouseEvent) => {
     e?.stopPropagation();
+    if (isComingSoon) {
+      addNotification(`'${track.title}' is unreleased! Pre-save and align frequency telemetry to build hype.`, 'info');
+      confetti({
+        particleCount: 50,
+        spread: 65,
+        origin: { y: 0.8 }
+      });
+      return;
+    }
     if (track.tokenGating?.enabled && !hasAccess) {
       addNotification(`This track is exclusive to ${track.tokenGating.tokenSymbol} holders.`, 'warning');
       return;
@@ -303,7 +369,14 @@ const TrackCard: React.FC<TrackCardProps> = ({
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className={`text-[9px] font-bold uppercase tracking-tighter line-clamp-2 whitespace-normal break-words ${isActive ? 'text-primary' : 'text-foreground'}`}>{track.title}</h4>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h4 className={`text-[9px] font-bold uppercase tracking-tighter line-clamp-2 whitespace-normal break-words ${isActive ? 'text-primary' : 'text-foreground'}`}>{track.title}</h4>
+                {isComingSoon && (
+                  <span className="text-[6.5px] font-black tracking-widest text-[#050A24] bg-amber-500 px-1 py-0.2 rounded-[2px] uppercase animate-pulse">
+                    SOON
+                  </span>
+                )}
+              </div>
               <HoverCard>
                 <HoverCardTrigger asChild>
                   <p 
@@ -395,9 +468,16 @@ const TrackCard: React.FC<TrackCardProps> = ({
               </div>
 
               <div className="flex-1 min-w-0">
-                <h4 className={`text-xs font-bold uppercase tracking-tight line-clamp-2 whitespace-normal break-words ${isActive ? 'text-primary' : 'text-foreground'}`}>
-                  {track.title}
-                </h4>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className={`text-xs font-bold uppercase tracking-tight line-clamp-2 whitespace-normal break-words ${isActive ? 'text-primary' : 'text-foreground'}`}>
+                    {track.title}
+                  </h4>
+                  {isComingSoon && (
+                    <span className="text-[7px] font-black tracking-widest text-[#050A24] bg-amber-500 px-1.5 py-0.5 rounded-[4px] uppercase animate-pulse">
+                      COMING SOON
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <HoverCard>
                     <HoverCardTrigger asChild>
@@ -428,22 +508,58 @@ const TrackCard: React.FC<TrackCardProps> = ({
                     </HoverCardContent>
                   </HoverCard>
                 </div>
+                {isComingSoon && (
+                  <div className="md:hidden mt-2 flex items-center gap-2">
+                    <CountdownTimer targetDate={track.releaseDate!} />
+                    <button
+                      onClick={handleHypeClick}
+                      className={`cursor-pointer transition-all rounded-[4px] h-5 px-2.5 text-[8px] font-black uppercase tracking-widest flex items-center gap-1 leading-none ${isHyped ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-[#050A24]'}`}
+                    >
+                      {isHyped ? 'SYNCED' : 'HYPE'}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-4 sm:gap-6 pr-1">
                 <div className="hidden md:flex items-center gap-8">
-                    <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
-                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Popularity</span>
-                      <span className="text-[9px] font-medium text-foreground uppercase group-hover/row:text-red-500">{(track.likes || 0).toLocaleString()}</span>
+                  {isComingSoon ? (
+                    <div className="flex items-center gap-3">
+                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">DRIPPING IN</span>
+                      <CountdownTimer targetDate={track.releaseDate!} />
+                      <button
+                        onClick={handleHypeClick}
+                        className={`cursor-pointer transition-all rounded-[4px] h-6 px-3 text-[8px] font-black uppercase tracking-widest flex items-center gap-1 leading-none ${isHyped ? 'bg-emerald-600 text-white' : 'bg-amber-500 hover:bg-amber-400 text-[#050A24]'}`}
+                      >
+                        {isHyped ? (
+                          <>
+                            <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                            HYPED & SYNCED
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-2.5 h-2.5 text-[#050A24] fill-current" />
+                            HYPE TRACK
+                          </>
+                        )}
+                      </button>
                     </div>
-                    <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
-                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Frequency</span>
-                      <span className="text-[9px] font-medium text-foreground uppercase group-hover/row:text-blue-400">{formatNumber(track.playCount || 0)}</span>
-                    </div>
-                    <div className="flex flex-col items-end min-w-[60px] opacity-40 group-hover/row:opacity-100 transition-opacity">
-                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Length</span>
-                      <span className="text-[9px] font-medium text-foreground">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
-                    </div>
+                  ) : (
+                    <>
+                      <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Popularity</span>
+                        <span className="text-[9px] font-medium text-foreground uppercase group-hover/row:text-red-500">{(track.likes || 0).toLocaleString()}</span>
+                      </div>
+                      <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Frequency</span>
+                        <span className="text-[9px] font-medium text-foreground uppercase group-hover/row:text-blue-400">{formatNumber(track.playCount || 0)}</span>
+                      </div>
+                      <div className="flex flex-col items-end min-w-[60px] opacity-40 group-hover/row:opacity-100 transition-opacity">
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Length</span>
+                        <span className="text-[9px] font-medium text-foreground">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-1">
@@ -507,6 +623,11 @@ const TrackCard: React.FC<TrackCardProps> = ({
             
             {/* Status indicators */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
+              {isComingSoon && (
+                <div className="bg-amber-500 text-[8px] font-black text-[#050A24] px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest animate-pulse shadow-md shadow-amber-500/20">
+                  COMING SOON
+                </div>
+              )}
               {track.isNFT && (
                 <div className="bg-purple-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest border border-purple-400/30">
                   NFT_ASSET
@@ -548,22 +669,52 @@ const TrackCard: React.FC<TrackCardProps> = ({
               {track.artist}
             </p>
 
-            <div className="flex items-center justify-between w-full mt-2">
-              <div className="flex items-center gap-1 text-[9px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
-                  <Headphones className="w-3 h-3" />
-                  {formatNumber(track.playCount || 0)}
+            {isComingSoon ? (
+              <div className="w-full mt-2 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[7.5px] font-bold text-muted-foreground uppercase tracking-widest leading-none">DROP TIME</span>
+                  <CountdownTimer targetDate={track.releaseDate!} />
+                </div>
+                <button
+                  onClick={handleHypeClick}
+                  className={cn(
+                      "w-full cursor-pointer transition-all rounded-[4px] h-7 text-[8px] font-black uppercase tracking-widest flex items-center justify-center gap-1 text-white shadow-md leading-none",
+                      isHyped 
+                        ? 'bg-emerald-600 shadow-emerald-500/10' 
+                        : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-amber-500/10'
+                  )}
+                >
+                  {isHyped ? (
+                    <>
+                      <CheckCircle2 className="w-3 h-3 text-white" />
+                      SYNCED
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-3 h-3 text-white fill-current animate-pulse" />
+                      PRE-SAVE / HYPE
+                    </>
+                  )}
+                </button>
               </div>
+            ) : (
+              <div className="flex items-center justify-between w-full mt-2">
+                <div className="flex items-center gap-1 text-[9px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
+                    <Headphones className="w-3 h-3" />
+                    {formatNumber(track.playCount || 0)}
+                </div>
 
-              <button
-                onClick={handlePlay}
-                className={cn(
-                    "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 h-6 px-3 text-[9px] font-black uppercase tracking-[0.1em] text-white",
-                    'bg-gradient-to-r from-blue-600 to-blue-400 shadow-md shadow-blue-500/20'
-                )}
-              >
-                Play
-              </button>
-            </div>
+                <button
+                  onClick={handlePlay}
+                  className={cn(
+                      "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 h-6 px-3 text-[9px] font-black uppercase tracking-[0.1em] text-white",
+                      'bg-gradient-to-r from-blue-600 to-blue-400 shadow-md shadow-blue-500/20'
+                  )}
+                >
+                  Play
+                </button>
+              </div>
+            )}
           </div>
         </motion.div>
       </ContextMenuTrigger>

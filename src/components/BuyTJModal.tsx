@@ -11,6 +11,7 @@ import {
   Info
 } from 'lucide-react';
 import { TON_LOGO, TJ_COIN_ICON, JAM_PRICE_USD } from '@/constants';
+import { triggerHaptic } from '@/lib/haptics';
 
 interface BuyTJModalProps {
   onClose: () => void;
@@ -26,6 +27,7 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
   const jamAmount = tonAmount ? parseFloat(tonAmount) * tonToJamRate : 0;
 
   const handleBuy = async () => {
+    triggerHaptic('medium');
     if (!tonAmount || parseFloat(tonAmount) <= 0) return;
     
     setIsProcessing(true);

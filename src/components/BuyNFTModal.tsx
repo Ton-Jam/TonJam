@@ -8,6 +8,7 @@ import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { processNFTSaleRoyalty } from '@/services/royaltyService';
 import { createActivityPost } from '@/services/socialService';
 import { getPlaceholderImage, cn } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/haptics';
 import { buyNFT, getActiveListingForNFT } from '@/services/marketplaceService';
 import { GasFeeDisplay } from '@/components/GasFeeDisplay';
 import { toast } from 'sonner';
@@ -68,6 +69,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   };
 
   const executePurchase = async () => {
+    triggerHaptic('medium');
     setIsConfirmOpen(false);
     setIsProcessing(true);
     addNotification("Requesting wallet signature...", "info");

@@ -36,6 +36,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,7 @@ import { AnalyticsCard } from "@/components/marketplace/AnalyticsCard";
 import NFTCard from "@/components/NFTCard";
 import { CollectionCard } from "@/components/marketplace/CollectionCard";
 import { RankingCard } from "@/components/marketplace/RankingCard";
+import CommunityFeedCard from "@/components/CommunityFeedCard";
 
 // Import App Audio/State Integrations
 import { useAudio } from "@/context/AudioContext";
@@ -130,6 +132,71 @@ const Marketplace: React.FC = () => {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [tickerOffset, setTickerOffset] = useState(0);
   const [rankingTab, setRankingTab] = useState("collections");
+
+  // Simulated dynamic updates for Marketplace Live Activity Feed
+  const [marketplaceTick, setMarketplaceTick] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setMarketplaceTick((t) => t + 1);
+    }, 10000); // refresh relative strings
+    return () => clearInterval(timer);
+  }, []);
+
+  const [marketplaceActivities, setMarketplaceActivities] = useState([
+    { id: "mact-1", username: "ton_wizard", action: "purchased", target: "Genesis Beats Vol. 1 #42", time: "now", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=wizard", accentColor: "#2BE08C", createdAt: Date.now() - 2000 },
+    { id: "mact-2", username: "lofi_duck", action: "minted", target: "Neon Nights #10", time: "2m ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=duck", accentColor: "#5B6BFF", createdAt: Date.now() - 2 * 60 * 1000 },
+    { id: "mact-3", username: "synth_cat", action: "placed a bid on", target: "Dreamweaver Velvet #01", time: "5m ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=cat", accentColor: "#FF3A5C", createdAt: Date.now() - 5 * 60 * 1000 },
+    { id: "mact-4", username: "0x_vibe", action: "collected", target: "Decentralized Amapiano #03", time: "12m ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=vibe", accentColor: "#00B4D8", createdAt: Date.now() - 12 * 60 * 1000 },
+    { id: "mact-5", username: "giga_collector", action: "swept 5 editions of", target: "Golden Horizon Lofi", time: "25m ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=giga", accentColor: "#F5D547", createdAt: Date.now() - 25 * 60 * 1000 },
+  ]);
+
+  useEffect(() => {
+    const userPool = ["cyber_bard", "sol_rebel", "vibe_collector", "retro_dj", "tonjam_minter", "pixel_grooves"];
+    const actionPool = [
+      { action: "purchased", accentColor: "#2BE08C" },
+      { action: "minted NFT", accentColor: "#5B6BFF" },
+      { action: "offered bid on", accentColor: "#FF3A5C" },
+      { action: "collected", accentColor: "#00B4D8" },
+      { action: "liked the audio of", accentColor: "#F5D547" }
+    ];
+    const targetPool = ["Solar Pulse Core", "Decentralized Lofi", "Retro Sunset Drifter", "Deep Abyssal Audio", "Interstellar Anthem #03"];
+
+    const interval = setInterval(() => {
+      const randUser = userPool[Math.floor(Math.random() * userPool.length)];
+      const randAct = actionPool[Math.floor(Math.random() * actionPool.length)];
+      const randTarget = targetPool[Math.floor(Math.random() * targetPool.length)];
+      
+      const newAct = {
+        id: `mact-${Date.now()}`,
+        username: randUser,
+        action: randAct.action,
+        target: randTarget,
+        time: "now",
+        avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${randUser}`,
+        accentColor: randAct.accentColor,
+        createdAt: Date.now()
+      };
+
+      setMarketplaceActivities(prev => [newAct, ...prev].slice(0, 10));
+    }, 12000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getMarketRelativeTimeStr = (act: typeof marketplaceActivities[0]) => {
+    if (!act.createdAt) return act.time;
+    const diffMs = Date.now() - act.createdAt;
+    const diffSecs = Math.max(0, Math.floor(diffMs / 1000));
+    if (diffSecs < 10) return "now";
+    if (diffSecs < 60) return `${diffSecs}s ago`;
+    const diffMins = Math.floor(diffSecs / 60);
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}d ago`;
+  };
 
   // Fallback state populated when firebase/MOCK list is loading
   const safeNFTs = useMemo(() => {
@@ -256,28 +323,13 @@ const Marketplace: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[#050A24] text-white font-sans pb-28 select-none overflow-x-hidden">
+    <div className="relative min-h-screen w-full bg-[#0A113A] text-white font-sans pb-28 select-none overflow-x-hidden">
       
       {/* Background visual halo glow */}
       <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-[#5B6BFF]/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute top-1/3 right-1/4 w-[350px] h-[350px] bg-[#00B4D8]/5 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* --- SECTION 1: MARKETPLACE HERO --- */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full px-4 md:px-8 pt-8 pb-4 text-center sm:text-left"
-      >
-        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#00B4D8] mb-1.5 inline-block">
-          TonJam Portal
-        </span>
-        <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tighter text-white">
-          NFT Marketplace
-        </h1>
-        <p className="text-xs sm:text-sm font-medium text-[#9AA0AE] tracking-wide mt-1">
-          Discover, stream and own music NFTs
-        </p>
-      </motion.div>
+      {/* --- SECTION 1: MARKETPLACE HERO REMOVED (displayed in global app) --- */}
 
       {/* --- SECTION 9: LIVE SALES FEED (Ticker placed on top for high context) --- */}
       <div className="w-full bg-[#0A113A]/60 py-2.5 border-y border-white/[0.04] mb-6 overflow-hidden relative">
@@ -481,16 +533,20 @@ const Marketplace: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
               <Zap className="w-5 h-5 text-[#F5D547]" />
-              New Drops Grid
+              New Drops
             </h2>
             <Badge className="bg-[#2BE08C]/15 text-[#2BE08C] uppercase tracking-widest text-[8px] font-black">
               Just Added
             </Badge>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {filteredNewDrops.slice(0, 8).map((nft) => (
-              <NFTCard key={`drop-${nft.id}`} nft={{ ...nft, owner: 'marketplace' } as any} />
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
+            {filteredNewDrops.slice(0, 10).map((nft) => (
+              <NFTCard 
+                key={`drop-${nft.id}`} 
+                nft={{ ...nft, owner: 'marketplace' } as any} 
+                className="w-52 flex-shrink-0 snap-start"
+              />
             ))}
           </div>
         </motion.section>
@@ -513,45 +569,82 @@ const Marketplace: React.FC = () => {
               </Badge>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {top10Collections.map((col, idx) => (
-                <div
-                  key={col.id}
-                  onClick={() => navigate(`/artist/dj-krupy`)}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.01] hover:bg-white/[0.03] duration-200 text-xs text-white/90 cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="w-4 font-black font-mono text-[#9AA0AE] text-center">
-                      {idx + 1}
-                    </span>
-                    <img
-                      src={col.imageUrl}
-                      alt={col.name}
-                      referrerPolicy="no-referrer"
-                      className="w-10 h-10 rounded-lg object-cover bg-black/30"
-                    />
-                    <div className="min-w-0">
-                      <p className="font-extrabold text-[#FFFFFF] tracking-tight truncate max-w-[130px] uppercase">
-                        {col.name}
-                      </p>
-                      <p className="text-[9px] text-[#9AA0AE] font-semibold tracking-wider uppercase truncate">
-                        Floor: <span className="text-[#00B4D8] font-bold">{col.floorPrice} TON</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <p className="font-black text-white">{col.volume} TON</p>
-                    <span
-                      className={`text-[8.5px] font-mono font-black ${
-                        col.change.startsWith("+") ? "text-[#2BE08C]" : "text-[#FF3A5C]"
-                      }`}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Leaderboard Left Side (col-span-2) */}
+              <div className="lg:col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {top10Collections.map((col, idx) => (
+                    <div
+                      key={col.id}
+                      onClick={() => navigate(`/artist/dj-krupy`)}
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.01] hover:bg-white/[0.03] duration-200 text-xs text-white/90 cursor-pointer"
                     >
-                      {col.change}
-                    </span>
-                  </div>
+                      <div className="flex items-center gap-3">
+                        <span className="w-4 font-black font-mono text-[#9AA0AE] text-center">
+                          {idx + 1}
+                        </span>
+                        <img
+                          src={col.imageUrl}
+                          alt={col.name}
+                          referrerPolicy="no-referrer"
+                          className="w-10 h-10 rounded-lg object-cover bg-black/30"
+                        />
+                        <div className="min-w-0">
+                          <p className="font-extrabold text-[#FFFFFF] tracking-tight truncate max-w-[130px] uppercase">
+                            {col.name}
+                          </p>
+                          <p className="text-[9px] text-[#9AA0AE] font-semibold tracking-wider uppercase truncate">
+                            Floor: <span className="text-[#00B4D8] font-bold">{col.floorPrice} TON</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="font-black text-white">{col.volume} TON</p>
+                        <span
+                          className={`text-[8.5px] font-mono font-black ${
+                            col.change.startsWith("+") ? "text-[#2BE08C]" : "text-[#FF3A5C]"
+                          }`}
+                        >
+                          {col.change}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* Community Collection Activity Feed Right Side */}
+              <div className="bg-white/[0.01] p-4 rounded-xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8]">
+                    Recent Collection Actions
+                  </span>
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                  </span>
+                </div>
+                <ScrollArea className="h-[310px] w-full pr-3">
+                  <div className="space-y-3.5 text-left">
+                    {marketplaceActivities.slice(0, 5).map((act, index) => (
+                      <React.Fragment key={`col-act-${act.id}`}>
+                        <CommunityFeedCard
+                          username={act.username}
+                          action={act.action}
+                          target={act.target}
+                          time={getMarketRelativeTimeStr(act)}
+                          avatar={act.avatar}
+                          accentColor={act.accentColor}
+                        />
+                        {index < 4 && (
+                          <Separator className="my-3 opacity-30" />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
             </div>
           </div>
         </motion.section>
@@ -581,6 +674,12 @@ const Marketplace: React.FC = () => {
                   className="rounded-lg text-[9px] font-black uppercase tracking-wider text-[#9AA0AE] data-[state=active]:bg-[#5B6BFF] data-[state=active]:text-white data-[state=active]:shadow-none px-4 py-2"
                 >
                   Tracks
+                </TabsTrigger>
+                <TabsTrigger
+                  value="activity"
+                  className="rounded-lg text-[9px] font-black uppercase tracking-wider text-[#9AA0AE] data-[state=active]:bg-[#5B6BFF] data-[state=active]:text-white data-[state=active]:shadow-none px-4 py-2"
+                >
+                  Activity Feed
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -640,6 +739,41 @@ const Marketplace: React.FC = () => {
                   }}
                 />
               ))}
+            </TabsContent>
+
+            <TabsContent value="activity" className="mt-0 space-y-3.5 bg-white/[0.01] p-4 rounded-xl text-left">
+              <div className="flex items-center justify-between pb-2 border-b border-white/[0.02]">
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-wider text-white">
+                    Live Broadcast Feed
+                  </h3>
+                  <p className="text-[9px] text-[#9AA0AE] font-semibold mt-0.5">
+                    Real-time transaction & activity stream over TON blockchain
+                  </p>
+                </div>
+                <Badge className="bg-[#2BE08C]/15 text-[#2BE08C] uppercase tracking-widest text-[8px] font-black border-none animate-pulse">
+                  Live Stream
+                </Badge>
+              </div>
+              <ScrollArea className="h-96 w-full pr-3 mt-2">
+                <div className="space-y-3">
+                  {marketplaceActivities.map((act, index) => (
+                    <React.Fragment key={`rank-act-${act.id}`}>
+                      <CommunityFeedCard
+                        username={act.username}
+                        action={act.action}
+                        target={act.target}
+                        time={getMarketRelativeTimeStr(act)}
+                        avatar={act.avatar}
+                        accentColor={act.accentColor}
+                      />
+                      {index < marketplaceActivities.length - 1 && (
+                        <Separator className="my-3 opacity-30" />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </ScrollArea>
             </TabsContent>
           </Tabs>
         </motion.section>

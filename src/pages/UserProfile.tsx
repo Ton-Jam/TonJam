@@ -138,7 +138,7 @@ const UserProfile: React.FC = () => {
   return (
     <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
       {/* 1. CINEMATIC BANNER (Audiomack Style) */}
-      <div className="relative h-[120px] sm:h-[160px] md:h-[200px] overflow-hidden group bg-blue-950 border-b-[2px] border-blue-500/50">
+      <div className="relative h-[240px] md:h-[320px] overflow-hidden group bg-blue-950">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105 opacity-80"
           style={{ backgroundImage: `url(${user.bannerUrl || getPlaceholderImage(`user-banner-${user.uid}`, 1200, 400)})` }}
@@ -161,7 +161,7 @@ const UserProfile: React.FC = () => {
       </div>
 
       {/* 2. IDENTITY & ACTIONS (Refined) */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-30">
+      <div className="w-full px-6 md:px-12 lg:px-16 relative z-30">
         {/* Extreme Left Actions Below Cover */}
         <div className="flex items-center gap-2 mb-4 pt-4">
           <button 
@@ -244,7 +244,7 @@ const UserProfile: React.FC = () => {
 
       {/* 3. TABS NAVIGATION (Refined) */}
       <div className="sticky top-[var(--header-height,64px)] z-30 bg-transparent py-4 mb-4 sm:mb-8 overflow-hidden group">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="w-full px-6 md:px-12 lg:px-16">
           <div className="flex items-center gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-row">
             {['overview', 'inventory', 'activity', 'network'].map(tab => (
               <MTButton 
@@ -264,7 +264,7 @@ const UserProfile: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="w-full px-6 md:px-12 lg:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Main Content */}
           <div className="lg:col-span-8">

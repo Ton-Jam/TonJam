@@ -215,7 +215,7 @@ Everything is clear in the neon light`
     price: '4.5', 
     playCount: 32000, 
     likes: 4950, 
-    releaseDate: '2024-02-10',
+    releaseDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     createdAt: '2024-02-10T00:00:00Z'
   },
   { 
@@ -252,7 +252,7 @@ Everything is clear in the neon light`
     price: '10.0', 
     playCount: 13400, 
     likes: 1150, 
-    releaseDate: '2024-03-01',
+    releaseDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     createdAt: '2024-03-01T00:00:00Z'
   },
   { 

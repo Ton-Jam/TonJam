@@ -8,9 +8,10 @@ import AlbumOptionsModal from '@/components/AlbumOptionsModal';
 interface AlbumCardProps {
   album: Album;
   index: number;
+  className?: string;
 }
 
-const AlbumCard: React.FC<AlbumCardProps> = ({ album, index }) => {
+const AlbumCard: React.FC<AlbumCardProps> = ({ album, index, className = '' }) => {
   const navigate = useNavigate();
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
   
@@ -23,7 +24,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index }) => {
       whileTap={{ scale: 0.98 }}
       transition={{ delay: index * 0.1 }}
       onClick={() => navigate(`/album/${album.id}`)}
-      className="group relative w-full cursor-pointer"
+      className={`group relative w-full cursor-pointer ${className}`}
     >
       <div className="relative aspect-square rounded-[4px] overflow-hidden mb-4 bg-white/[0.05] border border-white/5 group-hover:border-blue-500/30 transition-all shadow-2xl">
         {album.coverUrl ? (

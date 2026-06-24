@@ -86,6 +86,8 @@ export class Track {
   isCollaboration?: boolean;
   createdAt!: string | number;
   tokenGating?: TokenGating;
+  isDrmProtected?: boolean;
+  watermarkText?: string;
 }
 
 export interface NFTTrait {
@@ -265,6 +267,7 @@ export interface Artist {
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   playCount?: number;
   location?: string;
+  isLive?: boolean;
   verificationStatus?: 'unverified' | 'pending' | 'verified' | 'rejected';
 }
 

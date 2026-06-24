@@ -37,7 +37,10 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import FilterPills from "@/components/FilterPills";
+import ContinueListeningCard from "@/components/ContinueListeningCard";
 
 // Import custom card components and types
 import ArtistCard from "@/components/ArtistCard";
@@ -45,6 +48,7 @@ import UserCard from "@/components/UserCard";
 import NFTCard from "@/components/NFTCard";
 import TrackCard from "@/components/TrackCard";
 import GenreCard from "@/components/GenreCard";
+import CommunityFeedCard from "@/components/CommunityFeedCard";
 import { Artist, Track, NFTItem } from "@/types";
 
 // ==========================================
@@ -94,6 +98,7 @@ interface CommunityActivity {
   time: string;
   avatar: string;
   accentColor: string;
+  createdAt?: number;
 }
 
 const Home: React.FC = () => {
@@ -322,22 +327,45 @@ const Home: React.FC = () => {
   // ------------------------------------------
   // COMMUNITY ACTIVITY SOCIAL STREAM (MOCK DATA)
   // ------------------------------------------
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 10000); // refresh every 10 seconds for real-time fidelity
+    return () => clearInterval(timer);
+  }, []);
+
   const [communityActivities, setCommunityActivities] = useState<CommunityActivity[]>([
-    { id: "act-1", username: "Davido", action: "minted a new NFT", target: "OBO Genesis Edition #01", time: "Just now", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=davido", accentColor: "#2BE08C" },
-    { id: "act-2", username: "Ayra Starr", action: "released a track", target: "Bloody Samaritan (Vibe Edition)", time: "3 mins ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=ayra", accentColor: "#5B6BFF" },
-    { id: "act-3", username: "DJ Nova", action: "started a Space", target: "TON Creators Hub Live 🎙️", time: "12 mins ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=nova", accentColor: "#FF3A5C" },
-    { id: "act-4", username: "ProducerX", action: "reached milestones", target: "1,000,000 dynamic streams", time: "32 mins ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=prodx", accentColor: "#00B4D8" },
-    { id: "act-5", username: "krupyfan_ton", action: "purchased NFT", target: "Solar Pulse Keyframe #44", time: "1 hour ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=krupyfan", accentColor: "#F5D547" },
-    { id: "act-6", username: "vibe_collector", action: "followed artist", target: "Luna Ray Release Stream", time: "2 hours ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=vibe", accentColor: "#5B6BFF" }
+    { id: "act-1", username: "Davido", action: "minted a new NFT", target: "OBO Genesis Edition #01", time: "now", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=davido", accentColor: "#2BE08C", createdAt: Date.now() - 4000 },
+    { id: "act-2", username: "Ayra Starr", action: "released a track", target: "Bloody Samaritan (Vibe Edition)", time: "3m ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=ayra", accentColor: "#5B6BFF", createdAt: Date.now() - 3 * 60 * 1000 },
+    { id: "act-3", username: "DJ Nova", action: "started a Space", target: "TON Creators Hub Live 🎙️", time: "12m ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=nova", accentColor: "#FF3A5C", createdAt: Date.now() - 12 * 60 * 1000 },
+    { id: "act-4", username: "ProducerX", action: "reached milestones", target: "1,000,000 dynamic streams", time: "32m ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=prodx", accentColor: "#00B4D8", createdAt: Date.now() - 32 * 60 * 1000 },
+    { id: "act-5", username: "krupyfan_ton", action: "purchased NFT", target: "Solar Pulse Keyframe #44", time: "1h ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=krupyfan", accentColor: "#F5D547", createdAt: Date.now() - 60 * 60 * 1000 },
+    { id: "act-6", username: "vibe_collector", action: "followed artist", target: "Luna Ray Release Stream", time: "2h ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=vibe", accentColor: "#5B6BFF", createdAt: Date.now() - 120 * 60 * 1000 }
   ]);
 
   // Infinite Scroll simulation for social feed
   const loadMoreActivities = () => {
     const extra: CommunityActivity[] = [
-      { id: `act-ex-${Date.now()}-1`, username: "Whiz_Collector", action: "minted music NFT", target: "Cyber Drift Platinum #09", time: "3 hours ago", avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.random()}`, accentColor: "#00B4D8" },
-      { id: `act-ex-${Date.now()}-2`, username: "Santi_Beats", action: "joined voice space", target: "Afrobeats Lounge", time: "4 hours ago", avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.random()}`, accentColor: "#F5D547" }
+      { id: `act-ex-${Date.now()}-1`, username: "Whiz_Collector", action: "minted music NFT", target: "Cyber Drift Platinum #09", time: "3h ago", avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.random()}`, accentColor: "#00B4D8", createdAt: Date.now() - 180 * 60 * 1000 },
+      { id: `act-ex-${Date.now()}-2`, username: "Santi_Beats", action: "joined voice space", target: "Afrobeats Lounge", time: "4h ago", avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.random()}`, accentColor: "#F5D547", createdAt: Date.now() - 240 * 60 * 1000 }
     ];
     setCommunityActivities(curr => [...curr, ...extra]);
+  };
+
+  const getRelativeTimeStr = (act: CommunityActivity) => {
+    if (!act.createdAt) return act.time;
+    const diffMs = Date.now() - act.createdAt;
+    const diffSecs = Math.max(0, Math.floor(diffMs / 1000));
+    if (diffSecs < 10) return "now";
+    if (diffSecs < 60) return `${diffSecs}s ago`;
+    const diffMins = Math.floor(diffSecs / 60);
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}d ago`;
   };
 
   // ------------------------------------------
@@ -352,8 +380,25 @@ const Home: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const listeningRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = listeningRef.current;
+    if (!container) return;
+
+    const scrollInterval = setInterval(() => {
+      if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
+        container.scrollLeft = 0;
+      } else {
+        container.scrollLeft += 1;
+      }
+    }, 50);
+
+    return () => clearInterval(scrollInterval);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#050A24] text-white pb-32 overflow-x-hidden selection:bg-[#5B6BFF]/30">
+    <div className="min-h-screen bg-[#0A113A] text-white pb-32 overflow-x-hidden selection:bg-[#5B6BFF]/30">
       
       {/* GLOWING ORBIT BACKGROUND BLURS - Boundary-Free, No outlines */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#5B6BFF]/10 rounded-full blur-[160px] pointer-events-none -z-10" />
@@ -386,42 +431,20 @@ const Home: React.FC = () => {
         </motion.div>
 
         <div className="space-y-3 text-left">
-          <h2 className="text-xs font-black tracking-widest text-[#9AA0AE] uppercase px-0.5">
+          <h2 className="text-xs font-black tracking-widest text-[#9AA0AE] uppercase px-4">
             Continue Listening
           </h2>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-0.5">
-            <div className="bg-[#0A113A]/60 backdrop-blur-xl rounded-xl p-2.5 relative overflow-hidden flex items-center justify-between gap-2 shadow-md border-none flex-shrink-0 w-64">
-              {/* Holographic fluid overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#5B6BFF]/10 to-[#00B4D8]/10 pointer-events-none" />
-              
-              <div className="flex items-center gap-2 min-w-0 z-10">
-                <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0">
-                  <img 
-                    src="https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true" 
-                    alt="Solar Pulse" 
-                    className="w-full h-full object-cover" 
-                  />
-                </div>
-                <div className="min-w-0 text-left">
-                  <h4 className="text-[11px] font-extrabold text-white truncate leading-none">
-                    Solar Pulse
-                  </h4>
-                  <p className="text-[9px] text-[#9AA0AE] truncate mt-0.5">
-                    DJ Krupy
-                  </p>
-                </div>
+          <div ref={listeningRef} className="flex gap-4 overflow-x-auto no-scrollbar pb-3 pl-4" style={{ scrollBehavior: 'smooth' }}>
+            {(allTracks && allTracks.length > 0 ? allTracks.slice(0, 6) : MOCK_TRACKS.slice(0, 6)).map((track) => (
+              <div key={track.id} className="w-[300px] shrink-0">
+                <ContinueListeningCard
+                  title={track.title}
+                  artist={track.artist}
+                  coverUrl={track.coverUrl || (track as any).imageUrl || ""}
+                  onPlay={() => playTrack(track)}
+                />
               </div>
-
-              <button 
-                onClick={() => {
-                  const solarPulse = MOCK_TRACKS.find(t => t.id === "1") || MOCK_TRACKS[0];
-                  playTrack(solarPulse);
-                }}
-                className="w-8 h-8 rounded-full bg-[#5B6BFF] hover:bg-[#4856ea] text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-md shrink-0 cursor-pointer border-none z-10"
-              >
-                <Play className="w-3.5 h-3.5 fill-white text-white ml-0.5" />
-              </button>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -877,34 +900,32 @@ const Home: React.FC = () => {
             <Activity className="w-4.5 h-4.5 text-[#2BE08C] animate-pulse" />
           </div>
 
-          <div className="rounded-2xl bg-[#0A113A]/50 p-4 space-y-3.5 border-none shadow-md text-left">
-            <div className="space-y-3.5">
-              {communityActivities.map((act) => (
-                <div
-                  key={act.id}
-                  className="flex items-start justify-between gap-3 text-xs pb-3 border-b border-white/[0.02] last:border-b-0 last:pb-0"
-                >
-                  <div className="flex items-start gap-2.5 min-w-0">
-                    <Avatar className="w-7 h-7 bg-[#050A24] rounded-lg shrink-0 overflow-hidden flex items-center justify-center">
-                      <img src={act.avatar} alt="" className="w-6 h-6 object-contain" />
-                    </Avatar>
-                    <div className="min-w-0">
-                      <p className="text-[11.5px] leading-tight text-[#9AA0AE]">
-                        <span className="font-extrabold text-white">{act.username}</span> {act.action}{" "}
-                        <span className="font-semibold text-white tracking-tight" style={{ color: act.accentColor }}>{act.target}</span>
-                      </p>
-                      <span className="text-[9px] text-[#9AA0AE]/60 block mt-0.5 font-medium">{act.time}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="rounded-2xl bg-[#0A113A]/50 p-4 border-none shadow-md text-left">
+            <ScrollArea className="h-72 w-full pr-3">
+              <div className="space-y-3.5">
+                {communityActivities.map((act, index) => (
+                  <React.Fragment key={act.id}>
+                    <CommunityFeedCard
+                      username={act.username}
+                      action={act.action}
+                      target={act.target}
+                      time={getRelativeTimeStr(act)}
+                      avatar={act.avatar}
+                      accentColor={act.accentColor}
+                    />
+                    {index < communityActivities.length - 1 && (
+                      <Separator className="my-3 opacity-30" />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            </ScrollArea>
 
             <Button
               size="sm"
               variant="outline"
               onClick={loadMoreActivities}
-              className="w-full h-8 text-[9px] font-black uppercase tracking-widest bg-white/[0.02] text-[#9AA0AE]/80 hover:bg-white/5 border-none rounded-xl mt-2 cursor-pointer flex items-center gap-1 justify-center leading-none"
+              className="w-full h-8 text-[9px] font-black uppercase tracking-widest bg-white/[0.02] text-[#9AA0AE]/80 hover:bg-white/5 border-none rounded-xl mt-4 cursor-pointer flex items-center gap-1 justify-center leading-none"
             >
               Load Older Stream Activities <ArrowUpRight className="w-3.5 h-3.5" />
             </Button>

@@ -468,7 +468,7 @@ const Tasks: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050A24] text-white pb-32 overflow-x-hidden selection:bg-[#5B6BFF]/30">
+    <div className="min-h-screen bg-[#0A113A] text-white pb-32 overflow-x-hidden selection:bg-[#5B6BFF]/30">
       
       {/* BACKGROUND DECORATIVE GLOWS (Framed inside clean dark theme, no border lines) */}
       <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-[#5B6BFF]/10 to-transparent blur-[160px] pointer-events-none -z-10" />
@@ -609,76 +609,82 @@ const Tasks: React.FC = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
           onClick={() => handleMissionClick(featuredMission)}
-          className={`relative rounded-2xl p-5 overflow-hidden transition-all duration-300 border-none cursor-pointer group flex flex-col justify-between ${
+          className={`relative rounded-xl p-4 overflow-hidden transition-all duration-300 border-none cursor-pointer group ${
             featuredMission.state === "completed" 
               ? "bg-[#0A113A]/40 opacity-70" 
-              : "bg-gradient-to-br from-[#101A3B] to-[#0A113A]"
+              : "bg-gradient-to-br from-[#121B3A] via-[#0E1535] to-[#0A0F2E]"
           }`}
         >
           {/* Holographic Glowing Orbs */}
-          <div className="absolute top-0 right-0 w-44 h-44 bg-gradient-to-br from-[#5B6BFF]/20 to-[#00B4D8]/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
+          <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#5B6BFF]/15 to-[#00B4D8]/15 rounded-full blur-2xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
           
-          <div className="relative z-10 flex items-start justify-between gap-4">
-            <div className="space-y-2">
-              <span className="text-[9px] font-black uppercase tracking-widest bg-gradient-to-r from-[#5B6BFF] to-[#00B4D8] text-white px-3 py-1 rounded-full">
-                🔥 Featured Mission
-              </span>
-              <h2 className="text-lg font-bold text-white tracking-tight pt-1">
-                💎 {featuredMission.title}
-              </h2>
-              <p className="text-xs text-[#9AA0AE] leading-relaxed max-w-[240px]">
-                {featuredMission.description}
-              </p>
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              {/* Left Side: Compact Icon badge with pulse glow */}
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5B6BFF]/20 to-[#00B4D8]/20 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-950/50">
+                <Zap className="w-5 h-5 text-[#00B4D8] animate-pulse" />
+              </div>
+
+              {/* Title & Desc Column */}
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[8px] font-black uppercase tracking-wider text-[#00B4D8] bg-[#00B4D8]/10 px-2 py-0.5 rounded-md">
+                    Featured Mission
+                  </span>
+                  <span className="text-[8px] font-black uppercase tracking-wider text-[#9AA0AE]">
+                    {featuredMission.progress}/{featuredMission.total} Complete
+                  </span>
+                </div>
+                <h2 className="text-sm font-bold text-white tracking-tight flex items-center gap-1.5">
+                  {featuredMission.title}
+                </h2>
+                <p className="text-[11px] text-[#9AA0AE] leading-normal max-w-sm">
+                  {featuredMission.description}
+                </p>
+              </div>
             </div>
 
-            <div className="text-right flex flex-col items-end">
-              <div className="flex items-center gap-1.5 bg-[#5B6BFF]/10 text-white font-bold text-xs px-3 py-1.5 rounded-full">
-                <img src={TJ_COIN_ICON} alt="TJ" className="w-4 h-4 object-contain" />
+            {/* Right Side: Reward & Action CTA aligned perfectly */}
+            <div className="flex items-center sm:flex-col sm:items-end justify-between sm:justify-center gap-3 shrink-0">
+              {/* Reward Tag */}
+              <div className="flex items-center gap-1 bg-[#5B6BFF]/10 text-white font-black text-[10px] px-2.5 py-1 rounded-lg">
+                <img src={TJ_COIN_ICON} alt="TJ" className="w-3.5 h-3.5 object-contain" />
                 <span>+500 TJ</span>
+              </div>
+
+              {/* CTA Button */}
+              <div>
+                {featuredMission.state === "completed" ? (
+                  <div className="text-[10px] font-black uppercase tracking-wider text-[#2BE08C] bg-[#2BE08C]/10 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" /> Paid
+                  </div>
+                ) : featuredMission.state === "claimable" ? (
+                  <Button
+                    size="sm"
+                    onClick={(e) => handleClaimReward(featuredMission, e)}
+                    className="h-8 bg-[#2BE08C] hover:bg-[#20c87b] text-[#050A24] font-black text-[9px] uppercase tracking-widest px-4 rounded-lg shadow-lg cursor-pointer transition-all duration-200 active:scale-95 border-none"
+                  >
+                    Claim TJ
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 border border-[#5B6BFF]/30 text-white hover:bg-[#5B6BFF]/10 font-black text-[9px] uppercase tracking-widest px-4 rounded-lg cursor-pointer flex items-center gap-1 transition-all duration-200 active:scale-95"
+                  >
+                    Mint <ArrowUpRight className="w-3 h-3 text-[#00B4D8]" />
+                  </Button>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Status Display Bar */}
-          <div className="relative z-10 mt-5 pt-3 border-t border-white/[0.04] flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#9AA0AE] mb-1.5">
-                <span>Progress Block</span>
-                <span className="text-[#00B4D8]">
-                  {featuredMission.progress} / {featuredMission.total} Complete
-                </span>
-              </div>
-              <div className="w-full h-1.5 bg-[#050A24] rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-[#5B6BFF] to-[#00B4D8] rounded-full transition-all duration-300"
-                  style={{ width: `${(featuredMission.progress / featuredMission.total) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="shrink-0 self-end">
-              {featuredMission.state === "completed" ? (
-                <div className="text-xs font-bold text-[#2BE08C] bg-[#2BE08C]/15 px-3 py-1.5 rounded-full flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Paid
-                </div>
-              ) : featuredMission.state === "claimable" ? (
-                <Button
-                  size="sm"
-                  onClick={(e) => handleClaimReward(featuredMission, e)}
-                  className="h-8 bg-[#2BE08C] hover:bg-[#20c87b] text-[#050A24] font-black text-[10px] uppercase tracking-widest px-4 rounded-full shadow-lg cursor-pointer"
-                >
-                  Claim TJ
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 border border-[#5B6BFF]/30 text-white hover:bg-[#5B6BFF]/10 font-bold text-[10px] uppercase tracking-widest px-4 rounded-full cursor-pointer flex items-center gap-1"
-                >
-                  Mint <ArrowUpRight className="w-3 h-3 text-[#00B4D8]" />
-                </Button>
-              )}
-            </div>
+          {/* Thin Progress bar at the bottom edge */}
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/45">
+            <div 
+              className="h-full bg-gradient-to-r from-[#5B6BFF] to-[#00B4D8]"
+              style={{ width: `${(featuredMission.progress / featuredMission.total) * 100}%` }}
+            />
           </div>
         </motion.div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button as MTButton } from "@material-tailwind/react";
-import { Gem, Heart, Zap, Gavel, UserPlus, ChevronRight, Satellite, BellRing, Sparkles, X as XMarkIcon } from 'lucide-react';
+import { Gem, Heart, Zap, Gavel, UserPlus, ChevronRight, Satellite, BellRing, Sparkles, X as XMarkIcon, Music } from 'lucide-react';
 import { APP_LOGO, TJ_COIN_ICON } from '@/constants';
 import NotificationDetailModal from '@/components/NotificationDetailModal';
 import { useAudio } from '@/context/AudioContext';
@@ -172,6 +172,46 @@ const Notifications: React.FC = () => {
     addToast("Simulated outbid signal broadcasted to relay!", "success");
   };
 
+  const handleSimulateEndingAuction = async () => {
+    // Ensure permission is granted
+    const approved = await requestPushPermission();
+
+    if (!preferences.bidAlerts) {
+      addToast("Enable Outbid/Bid alerts in Settings to receive browser banners!", "warning");
+    }
+
+    dbAddNotification({
+      userId: userProfile?.uid || "",
+      type: 'bid_update',
+      title: 'AUCTION ENDING SOON!',
+      message: 'The cyber auction for "Deep Horizon #042" which you participated in ends in less than 30 minutes! Validate your placement now.'
+    });
+
+    addToast("Simulated ending auction alert broadcasted to relay!", "success");
+  };
+
+  const handleSimulateNewRelease = async () => {
+    // Ensure permission is granted
+    const approved = await requestPushPermission();
+
+    if (!preferences.dropsAndReleases) {
+      addToast("Enable Drops/Releases in Settings to receive browser banners!", "warning");
+    }
+
+    const followedArtistsList = artists.filter(a => followedUserIds.includes(a.uid));
+    const artistName = followedArtistsList.length > 0 ? followedArtistsList[0].name : "Luna Ray";
+
+    dbAddNotification({
+      userId: userProfile?.uid || "",
+      type: 'track_upload',
+      title: 'NEW RELEASE SIGNAL!',
+      message: `Tracked artist "${artistName}" dropped a new frequency: "Digital Horizon (VIP)"! Sync up and stream.`,
+      link: '/discover'
+    });
+
+    addToast(`Simulated track release from followed artist "${artistName}" broadcasted!`, "success");
+  };
+
   const renderIcon = (item: NotifyItem) => {
     if (item.img) return <img src={item.img} className="w-6 h-6 object-contain" alt="" />;
     
@@ -206,6 +246,22 @@ const Notifications: React.FC = () => {
                 className="h-7 rounded-lg text-[8px] font-black uppercase tracking-widest bg-amber-500/10 hover:bg-amber-500/15 text-amber-500 border-none px-3 flex items-center gap-1 cursor-pointer"
             >
                 <BellRing className="h-3 w-3" /> Simulate Outbid
+            </Button>
+            <Button 
+                onClick={handleSimulateEndingAuction}
+                variant="ghost" 
+                size="sm" 
+                className="h-7 rounded-lg text-[8px] font-black uppercase tracking-widest bg-emerald-500/15 hover:bg-emerald-500/20 text-emerald-400 border-none px-3 flex items-center gap-1 cursor-pointer"
+            >
+                <Gavel className="h-3 w-3" /> Simulate Ending Auction
+            </Button>
+            <Button 
+                onClick={handleSimulateNewRelease}
+                variant="ghost" 
+                size="sm" 
+                className="h-7 rounded-lg text-[8px] font-black uppercase tracking-widest bg-indigo-500/15 hover:bg-indigo-500/20 text-indigo-400 border-none px-3 flex items-center gap-1 cursor-pointer"
+            >
+                <Music className="h-3 w-3" /> Simulate Release Track
             </Button>
             <Button 
                 variant="ghost" 

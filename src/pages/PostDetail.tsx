@@ -29,6 +29,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType, auth } from '@/lib/firebase';
 import { cn, getPlaceholderImage, shareContent } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/haptics';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -128,6 +129,7 @@ const PostDetail: React.FC = () => {
   const artist = MOCK_ARTISTS.find(a => a.name === post.userName || a.uid === post.userId);
 
   const handleLike = async () => {
+    triggerHaptic('light');
     if (id) {
       await toggleLikePost(id);
     }

@@ -63,6 +63,11 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
       className="flex items-center justify-between gap-4 cursor-default w-full font-sans pb-2"
     >
         <div className="flex flex-col gap-1 items-start">
+            {artist.isLive && (
+                <Badge variant="secondary" className="bg-red-500 text-white font-bold text-[8px] tracking-widest px-2 py-0 rounded-full uppercase transition-colors animate-pulse mb-1">
+                    Live
+                </Badge>
+            )}
             {artist.username && (
                 <Badge variant="secondary" className="bg-muted/40 backdrop-blur-md text-foreground/70 border-border/50 font-bold text-[8px] tracking-widest px-3 py-0.5 rounded-full uppercase hover:bg-muted/60 transition-colors w-fit mb-1">
                     {artist.username.replace('@', '')}

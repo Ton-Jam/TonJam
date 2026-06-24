@@ -26,7 +26,8 @@ import {
   Sparkles,
   Loader2,
   Sliders,
-  Heart
+  Heart,
+  QrCode
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,12 +39,16 @@ import EmptyNFTState from '@/components/EmptyNFTState';
 import TrendingNFTCard from '@/components/TrendingNFTCard';
 import TrackCard from '@/components/TrackCard';
 import AlbumCard from '@/components/AlbumCard';
+import PlaylistCard from '@/components/PlaylistCard';
+import ArtistCard from '@/components/ArtistCard';
 import ArtistListItem from '@/components/ArtistListItem';
 import TrendingArtistLeaderboard from '@/components/TrendingArtistLeaderboard';
+import { toast } from 'sonner';
 import { ArtistLeaderboard } from '@/components/ArtistLeaderboard';
 import SkeletonCard from '@/components/SkeletonCard';
 import SonicSearchSection from '@/components/SonicSearchSection';
 import FilterPills from '@/components/FilterPills';
+import QRScanner from '@/components/QRScanner';
 import { FilterSection } from '@/components/FilterSection';
 import { useAudio } from '@/context/AudioContext';
 import Autoplay from "embla-carousel-autoplay";
@@ -53,6 +58,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { getPlaceholderImage, cn } from '@/lib/utils';
+import GenreHeatmap from '@/components/GenreHeatmap';
 import SocialFeed from '@/components/SocialFeed';
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -103,6 +109,48 @@ const BROWSE_CATEGORIES = [
   { id: 'rnb', title: 'R&B', color: 'bg-fuchsia-600', image: 'https://picsum.photos/seed/rnb/200/200' },
   { id: 'kpop', title: 'K-Pop', color: 'bg-rose-500', image: 'https://picsum.photos/seed/kpop/200/200' },
 ];
+
+// Helper for horizontal scroll section with skeleton
+const SectionWrapper = ({ 
+  title, 
+  subtitle, 
+  isLoading, 
+  skeletonCount = 5, 
+  skeletonVariant = 'default',
+  children 
+}: { 
+  title: string, 
+  subtitle?: string, 
+  isLoading: boolean, 
+  skeletonCount?: number,
+  skeletonVariant?: 'default' | 'row' | 'compact',
+  children: React.ReactNode 
+}) => {
+  const skeletonClass = skeletonVariant === 'row' 
+    ? "w-[280px] sm:w-[320px] flex-shrink-0" 
+    : "w-[140px] sm:w-[170px] flex-shrink-0";
+    
+  return (
+    <section className="space-y-4">
+      <div className="space-y-1 px-4 md:px-8 lg:px-12">
+        {subtitle && <span className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.25em]">{subtitle}</span>}
+        <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white">{title}</h2>
+      </div>
+      
+      {isLoading ? (
+        <div className="flex gap-4 overflow-x-auto pb-4 pl-4 md:pl-8 lg:pl-12">
+          {[...Array(skeletonCount)].map((_, i) => (
+            <SkeletonCard key={`${title}-${i}`} variant={skeletonVariant} className={skeletonClass} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex gap-4 overflow-x-auto pb-4 pl-4 md:pl-8 lg:pl-12 scroll-smooth no-scrollbar">
+          {children}
+        </div>
+      )}
+    </section>
+  );
+};
 
 const Discover: React.FC = () => {
   const navigate = useNavigate();
@@ -345,6 +393,15 @@ const Discover: React.FC = () => {
 
   const [isVoiceSearchActive, setIsVoiceSearchActive] = useState(false);
   const [isVibeSearch, setIsVibeSearch] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleScan = (data: string | null) => {
+    if (data) {
+      toast.success(`Scanned: ${data}`);
+      setShowScanner(false);
+      // TODO: Implement import logic
+    }
+  };
   const [activeFilter, setActiveFilter] = useState<'all' | 'tracks' | 'nfts' | 'artists' | 'playlists' | 'users' | 'community'>('all');
   const [aiVibeResults, setAiVibeResults] = useState<any[] | null>(null);
   const [isTourOpen, setIsTourOpen] = useState(false);
@@ -359,6 +416,63 @@ const Discover: React.FC = () => {
     const saved = localStorage.getItem('tonjam_search_history');
     return saved ? JSON.parse(saved) : [];
   });
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      const history = [searchQuery, ...searchHistory.filter(h => h !== searchQuery)].slice(0, 10);
+      setSearchHistory(history);
+      localStorage.setItem('tonjam_search_history', JSON.stringify(history));
+    }
+  };
+
+  const filteredResults = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) {
+      return {
+        tracks: [] as any[],
+        nfts: [] as any[],
+        artists: [] as any[],
+        playlists: [] as any[],
+        users: [] as any[]
+      };
+    }
+    return {
+      tracks: allTracks.filter(t => 
+        t.title?.toLowerCase().includes(q) || 
+        t.artist?.toLowerCase().includes(q) || 
+        t.genre?.toLowerCase().includes(q)
+      ),
+      nfts: allNFTs.filter(n => 
+        n.title?.toLowerCase().includes(q) || 
+        (n as any).title?.toLowerCase().includes(q)
+      ),
+      artists: artists.filter(a => 
+        a.name?.toLowerCase().includes(q) || 
+        a.username?.toLowerCase().includes(q) || 
+        a.genre?.toLowerCase().includes(q)
+      ),
+      playlists: allUserPlaylists.filter(p => 
+        p.title?.toLowerCase().includes(q) || 
+        p.description?.toLowerCase().includes(q)
+      ),
+      users: firestoreUsers.filter(u => 
+        u.name?.toLowerCase().includes(q) || 
+        (u as any).displayName?.toLowerCase().includes(q) ||
+        u.username?.toLowerCase().includes(q)
+      )
+    };
+  }, [searchQuery, allTracks, allNFTs, artists, allUserPlaylists, firestoreUsers]);
+
+  const hasResults = useMemo(() => {
+    return (
+      filteredResults.tracks.length > 0 ||
+      filteredResults.nfts.length > 0 ||
+      filteredResults.artists.length > 0 ||
+      filteredResults.playlists.length > 0 ||
+      filteredResults.users.length > 0
+    );
+  }, [filteredResults]);
 
   const trendingTopics = [
     'TON Alpha Signal',
@@ -384,199 +498,148 @@ const Discover: React.FC = () => {
     }
   }, []);
 
-  const addToSearchHistory = (term: string) => {
-    if (!term.trim()) return;
-    setSearchHistory(prev => {
-      const newHistory = [term, ...prev.filter(t => t !== term)].slice(0, 10);
-      localStorage.setItem('tonjam_search_history', JSON.stringify(newHistory));
-      return newHistory;
-    });
-  };
-
-  const clearSearchHistory = () => {
-    setSearchHistory([]);
-    localStorage.removeItem('tonjam_search_history');
-  };
-
-  const handleVoiceSearch = () => {
-    // @ts-ignore
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert('Voice search is not supported in this browser.');
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-
-    recognition.onstart = () => setIsVoiceSearchActive(true);
-    recognition.onend = () => setIsVoiceSearchActive(false);
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setSearchQuery(transcript);
-      addToSearchHistory(transcript);
-    };
-
-    recognition.start();
-  };
-
-  const filteredResults = useMemo(() => {
-    if (aiVibeResults) {
-      return { tracks: aiVibeResults, nfts: [], artists: [], users: [] };
-    }
-    const query = searchQuery.toLowerCase();
-    
-    const sortPrioritizeFollowed = (a: any, b: any, getId: (item: any) => string | undefined) => {
-      const aFollowed = followedUserIds.includes(getId(a) || '');
-      const bFollowed = followedUserIds.includes(getId(b) || '');
-      if (aFollowed && !bFollowed) return -1;
-      if (!aFollowed && bFollowed) return 1;
-      return 0;
-    };
-
-    const tracks = allTracks.filter((t: any) => {
-      const matchesQuery = (query === '' || 
-        (t.title || '').toLowerCase().includes(query) || 
-        (t.artist || '').toLowerCase().includes(query) ||
-        (t.genre || '').toLowerCase().includes(query));
-      
-      if (!matchesQuery) return false;
-      if (t.bpm && (t.bpm < bpmRange[0] || t.bpm > bpmRange[1])) return false;
-      if (selectedKeys.length > 0 && t.key) {
-        const matchesKey = selectedKeys.some(sk => t.key.startsWith(sk));
-        if (!matchesKey) return false;
-      }
-      if (selectedMoods.length > 0 && t.mood && !selectedMoods.includes(t.mood)) return false;
-      if (onlyVerified && !t.artistVerified) return false;
-      return true;
-    }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, t => t.artistId));
-    
-    const nfts = allNFTs.filter((n: any) => {
-      const q = query;
-      const matchesQuery = (q === '' ||
-        (n.title && n.title.toLowerCase().includes(q)) || 
-        (n.artist && n.artist.toLowerCase().includes(q)) ||
-        (n.description && n.description.toLowerCase().includes(q)));
-      
-      if (!matchesQuery) return false;
-      if (onlyVerified && !n.artistVerified) return false;
-      return true;
-    }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, n => n.artistId));
-    
-    const filteredArtists = artists.filter((a: any) => {
-      const matchesQuery = (query === '' || (a.name || '').toLowerCase().includes(query) || 
-        (a.genre && a.genre.toLowerCase().includes(query)));
-      
-      if (!matchesQuery) return false;
-      if (onlyVerified && !a.verified) return false;
-      return true;
-    }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, art => art.uid));
-
-    const users = firestoreUsers.filter((u: any) => {
-      const matchesQuery = (query === '' || (u.name || '').toLowerCase().includes(query) || 
-        (u.username || '').toLowerCase().includes(query));
-      
-      if (!matchesQuery) return false;
-      if (onlyVerified && !u.isVerifiedArtist) return false;
-      return true;
-    }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, usr => usr.uid));
-
-    return { tracks, nfts, artists: filteredArtists, users };
-  }, [searchQuery, allTracks, artists, allNFTs, firestoreUsers, bpmRange, selectedKeys, selectedMoods, onlyVerified, followedUserIds, aiVibeResults]);
-
-  const hasResults = filteredResults.tracks.length > 0 || 
-                     filteredResults.nfts.length > 0 || 
-                     filteredResults.artists.length > 0 ||
-                     filteredResults.users.length > 0;
-
-  useEffect(() => {
-    // Basic vibe detection: "mood", "vibe", "feeling", "like"
-    const vibeKeywords = ['mood', 'vibe', 'feeling', 'like', 'sounds like', 'atmosphere'];
-    const lowerQuery = searchQuery.toLowerCase();
-    const isVibeQuery = vibeKeywords.some(k => lowerQuery.includes(k)) || isVibeSearch;
-
-    if (isVibeQuery && searchQuery.length > 5) {
-       krupyVibesSearch(searchQuery, allTracks).then(setAiVibeResults);
-    } else {
-       setAiVibeResults(null);
-    }
-  }, [searchQuery, isVibeSearch, allTracks]);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    addToSearchHistory(searchQuery);
-  };
-
   return (
     <div className="min-h-screen bg-background pb-24 relative discover-page w-full px-0 max-w-full">
-      {/* Atmospheric Background Blobs */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -z-10" />
-      <div className="absolute top-1/4 -left-24 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[100px] -z-10" />
-      
-      {/* DJ Krupy Background Decoration */}
-      <div className="absolute inset-0 pointer-events-none flex items-center justify-center -z-20 opacity-[0.02] overflow-hidden">
-        <img src={APP_LOGO} className="w-[120vw] h-[120vw] animate-[spin_120s_linear_infinite] grayscale" alt="" />
-      </div>
-      
-      <Joyride
-        steps={[
-          {
-            target: '.discover-search-input',
-            content: 'Use the search bar to find your favorite tracks, artists, or NFTs.',
-          },
-          {
-            target: '.filter-tabs',
-            content: 'Filter results by category.',
-          }
-        ]}
-        run={isTourOpen}
-        continuous
-      />
-
-
-
-
-        {/* Search & Filter Header - Sticky & Atmospheric */}
-        <div className="sticky top-0 z-40 bg-transparent py-2 w-full transition-colors duration-300 flex flex-col gap-1">
-          <div className="w-full flex items-center gap-3 px-4 md:px-8 lg:px-12">
-            <form 
-              onSubmit={handleSearchSubmit} 
-              className="relative flex-1 group"
-            >
-               {/* Simple Search Input Container */}
-              <div className="relative flex items-center h-12 bg-card border border-border/60 rounded-full overflow-hidden transition-all">
-                
-                <Input
+      {/* Search & Filter Header with Navy Blue background; no borders */}
+      <div className="sticky top-0 z-40 bg-[#0a122e]/95 backdrop-blur-md py-4 w-full transition-colors duration-300">
+        <div className="w-full flex items-center gap-3 px-4 md:px-8 lg:px-12">
+          {/* Search Form (from existing) with Navy background */}
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 group bg-[#16224f]/60 p-1 rounded-full shadow-inner">
+            {/* Input and suggestions logic... */}
+            <div className="relative flex items-center h-10 bg-[#070e24] rounded-full overflow-hidden transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+               <Input
                   type="text"
-                  placeholder="Search artists, tracks, or nfts..."
+                  placeholder="Search..."
                   value={searchQuery}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-4 h-full bg-transparent border-none focus-visible:ring-0 rounded-none text-xs font-bold uppercase tracking-widest z-10"
+                  className="pl-4 h-full bg-transparent border-none focus-visible:ring-0 rounded-none text-xs font-bold uppercase tracking-widest z-10 text-white placeholder:text-slate-500"
+                />
+            </div>
+            
+            {/* Recent Searches Dropdown */}
+            {isFocused && searchHistory.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-2 bg-[#09112a] text-white rounded-2xl shadow-2xl p-4 z-50 overflow-hidden select-none">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-400">
+                    <History className="w-3.5 h-3.5 text-blue-400" />
+                    Recent Searches
+                  </span>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSearchHistory([]);
+                      localStorage.removeItem('tonjam_search_history');
+                    }}
+                    className="text-[10px] font-bold uppercase tracking-wider text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <div className="flex flex-col gap-1">
+                  {searchHistory.slice(0, 5).map((query, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between hover:bg-[#16224f]/50 px-2 py-1.5 rounded-xl cursor-pointer transition-colors group"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setSearchQuery(query);
+                      }}
+                    >
+                      <span className="text-xs text-slate-200">{query}</span>
+                      <button
+                        type="button"
+                        className="text-slate-500 hover:text-red-400 p-1 rounded-md transition-colors"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          const updated = searchHistory.filter(h => h !== query);
+                          setSearchHistory(updated);
+                          localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
+                        }}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Suggestions logic remains the same */}
+          </form>
+
+          {/* Shrunk Filter Button */}
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => setIsDiscoverFiltersOpen(true)}
+            className="h-8 w-8 rounded-full bg-[#16224f] border-none text-white hover:bg-blue-600 transition-all shrink-0"
+          >
+            <ListFilter className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+
+        {/* Filter Pills with Solid Navy background container & no title/borders */}
+        <div className="px-4 md:px-8 lg:px-12 mt-3">
+          <div className="w-full filter-tabs py-3 px-5 bg-[#0d1633] backdrop-blur-md rounded-2xl shadow-xl shadow-black/55 overflow-hidden">
+              <div className="overflow-x-auto no-scrollbar">
+                <FilterPills
+                  selectedGenre={activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)}
+                  onSelect={(v) => setActiveFilter((v ? v.toLowerCase() : 'all') as any)}
+                  categories={['All', 'Community', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users']}
                 />
               </div>
-            </form>
-
-            {/* Filters Button */}
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => setIsDiscoverFiltersOpen(true)}
-              className="h-10 w-10 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0"
-            >
-              <ListFilter className="h-4 w-4 text-foreground" />
-            </Button>
-          </div>
-
-          <div className="w-full filter-tabs pt-1 pb-1 px-4 md:px-8 lg:px-12">
-            <FilterPills
-              selectedGenre={activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)}
-              onSelect={(v) => setActiveFilter((v ? v.toLowerCase() : 'all') as any)}
-              categories={['All', 'Community', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users']}
-            />
           </div>
         </div>
+      </div>
+      {/* Main Content Sections */}
+      <div className="w-full max-w-full pb-32 space-y-16 mt-8 md:mt-12">
+          {/* Sections placeholder */}
+          <SectionWrapper title="Artist Discography" isLoading={isLoading}>
+              {MOCK_ALBUMS.slice(0, 5).map((album, idx) => (
+                  <AlbumCard key={album.id} album={album} index={idx} className="w-[140px] sm:w-[170px] flex-shrink-0" />
+              ))}
+          </SectionWrapper>
+          
+          <SectionWrapper title="Top Artist Tracks" isLoading={isLoading} skeletonVariant="row">
+              {trendingTracks.map(track => (
+                  <TrackCard key={track.id} track={track} variant="row" className="w-[280px] sm:w-[320px] flex-shrink-0" />
+              ))}
+          </SectionWrapper>
+          
+          <SectionWrapper title="Top Artist NFTs" isLoading={isLoading} skeletonVariant="default">
+              {featuredNFTReleases.map(nft => (
+                  <NFTCard key={nft.id} nft={nft} className="w-[140px] sm:w-[170px] flex-shrink-0" />
+              ))}
+          </SectionWrapper>
+          
+          <SectionWrapper title="Similar Tracks" isLoading={isLoading} skeletonVariant="row">
+              {trendingTracks.slice(0, 5).map(track => (
+                  <TrackCard key={track.id} track={track} variant="row" className="w-[280px] sm:w-[320px] flex-shrink-0" />
+              ))}
+          </SectionWrapper>
+          
+          <SectionWrapper title="Featured Playlist" isLoading={isLoading} skeletonVariant="compact">
+              {allUserPlaylists.slice(0, 5).map(playlist => (
+                  <PlaylistCard key={playlist.id} playlist={playlist} className="w-[140px] sm:w-[170px] flex-shrink-0" />
+              ))}
+          </SectionWrapper>
+          
+          <SectionWrapper title="Similar Artists" isLoading={isLoading} skeletonVariant="compact">
+              {emergingArtists.map(artist => (
+                  <ArtistCard key={artist.uid} artist={artist} className="w-[120px] sm:w-[140px] flex-shrink-0" />
+              ))}
+          </SectionWrapper>
+          
+          <SectionWrapper title="Recommended" isLoading={isLoading} skeletonVariant="default">
+              {recommendedTracks.map(track => (
+                  <TrackCard key={track.id} track={track} className="w-[140px] sm:w-[170px] flex-shrink-0" />
+              ))}
+          </SectionWrapper>
+      </div>
 
 
       <div className="w-full max-w-full px-4 md:px-8 lg:px-12 pb-32 space-y-12 md:space-y-16 mt-8 md:mt-12">
@@ -670,29 +733,6 @@ const Discover: React.FC = () => {
                     </CardContent>
                   </Card>
                 </motion.div>
-              </section>
-            )}
-
-            {searchHistory.length > 0 && (
-              <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Recent exploration</h2>
-                  <Button variant="ghost" size="sm" onClick={clearSearchHistory} className="h-auto p-0 text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-foreground">
-                    Clear all
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {searchHistory.map((term, idx) => (
-                    <Badge
-                      key={`history-${idx}`}
-                      variant="secondary"
-                      onClick={() => setSearchQuery(term)}
-                      className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-xs font-medium cursor-pointer transition-colors border-none"
-                    >
-                      {term}
-                    </Badge>
-                  ))}
-                </div>
               </section>
             )}
 

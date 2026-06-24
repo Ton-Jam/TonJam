@@ -376,6 +376,83 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
   const { preferences, addNotification } = useNotification();
   const hasAlerted = React.useRef(false);
 
+  // Secondary NFT Royalties states
+  const [secondaryFilter, setSecondaryFilter] = React.useState<string>('all');
+  const [isScanningRoyalties, setIsScanningRoyalties] = React.useState<boolean>(false);
+  const [secondaryTransactions, setSecondaryTransactions] = React.useState([
+    { id: 'tx-sec-1', nftName: 'Neon Waves #03', salePrice: 45, royalty: 2.25, seller: 'EQD8a...28bN', buyer: 'EQA5k...49gT', date: 'May 20, 2026', txHash: 'e6a8...3b9c' },
+    { id: 'tx-sec-2', nftName: 'Cyberpunk Genesis #01', salePrice: 120, royalty: 6.00, seller: 'EQC1o...99xY', buyer: 'EQK2r...22zL', date: 'May 18, 2026', txHash: 'f49b...281a' },
+    { id: 'tx-sec-3', nftName: 'Sunset Vibe #14', salePrice: 30, royalty: 1.50, seller: 'EQB2w...88vC', buyer: 'EQF7d...11kP', date: 'May 12, 2026', txHash: 'd712...918b' },
+    { id: 'tx-sec-4', nftName: 'Electric Dreams #07', salePrice: 80, royalty: 4.00, seller: 'EQM4p...55sQ', buyer: 'EQN9c...33vA', date: 'May 05, 2026', txHash: 'c90a...471d' },
+    { id: 'tx-sec-5', nftName: 'Neon Waves #09', salePrice: 50, royalty: 2.50, seller: 'EQA2h...12eR', buyer: 'EQT5y...88uI', date: 'Apr 28, 2026', txHash: 'a55d...102f' },
+  ]);
+
+  const handleScanOnChainRoyalties = async () => {
+    if (isScanningRoyalties) return;
+    setIsScanningRoyalties(true);
+    addNotification({
+      userId: user?.uid || 'all',
+      type: 'general',
+      title: 'Mainnet Scan Initiated',
+      message: 'Connecting to TON mainnet nodes to scan secondary sales contract...',
+    });
+    
+    // Simulate delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Check if we've already scanned once to avoid infinite insertions
+    const hasAlreadyScanned = secondaryTransactions.some(tx => tx.id === 'tx-sec-scanned');
+    if (hasAlreadyScanned) {
+      setIsScanningRoyalties(false);
+      addNotification({
+        userId: user?.uid || 'all',
+        type: 'general',
+        title: 'Scan Completed',
+        message: 'No new secondary transactions found. All royalties fully settled.',
+      });
+      return;
+    }
+    
+    // Add a new high-value transaction
+    const newTx = {
+      id: 'tx-sec-scanned',
+      nftName: 'Cyberpunk Genesis #02',
+      salePrice: 150,
+      royalty: 7.50,
+      seller: 'EQG2k...44fD',
+      buyer: 'EQW7s...81pQ',
+      date: 'May 24, 2026',
+      txHash: 'c12b...9a8f'
+    };
+    
+    setSecondaryTransactions(prev => [newTx, ...prev]);
+    setIsScanningRoyalties(false);
+    addNotification({
+      userId: user?.uid || 'all',
+      type: 'general',
+      title: 'Secondary Royalties Settled',
+      message: 'Successfully retrieved and settled 1 new secondary royalty payout: +7.50 TON!',
+    });
+  };
+
+  const filteredSecTransactions = React.useMemo(() => {
+    if (secondaryFilter === 'all') return secondaryTransactions;
+    return secondaryTransactions.filter(tx => tx.nftName.toLowerCase().includes(secondaryFilter.toLowerCase()));
+  }, [secondaryTransactions, secondaryFilter]);
+
+  const totalSecVolume = React.useMemo(() => {
+    return filteredSecTransactions.reduce((acc, tx) => acc + tx.salePrice, 0);
+  }, [filteredSecTransactions]);
+
+  const totalSecRoyalties = React.useMemo(() => {
+    return filteredSecTransactions.reduce((acc, tx) => acc + tx.royalty, 0);
+  }, [filteredSecTransactions]);
+
+  const avgSecRoyalty = React.useMemo(() => {
+    if (filteredSecTransactions.length === 0) return 0;
+    return totalSecRoyalties / filteredSecTransactions.length;
+  }, [filteredSecTransactions, totalSecRoyalties]);
+
   // States for Withdrawals & Payout calculations
   const [pendingBalance, setPendingBalance] = React.useState<number>(totalEarnings > 0 ? totalEarnings : 12.4);
   const [isProcessingPayouts, setIsProcessingPayouts] = React.useState(false);
@@ -752,6 +829,143 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
               <MetricCard title="Total Earnings" value={`$${totalEarnings.toLocaleString()}`} sub="+12.5% from last month" isPulsing={isEarningsPulsing} />
               <MetricCard title="Top Performing Track" value="Neon Waves" sub="14k streams last week" />
               <MetricCard title="Monthly Growth" value="18.2%" sub="Total platform presence" />
+          </div>
+
+          {/* Secondary Market Royalties Tracker Widget */}
+          <div className="bg-card/40 backdrop-blur-xl p-8 rounded-3xl space-y-6 shadow-2xl relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] block">Immutable On-Chain Ledger</span>
+                <h3 className="text-xl font-black text-foreground uppercase tracking-tight flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-blue-500" />
+                  Secondary Market NFT Royalties
+                </h3>
+                <p className="text-xs text-muted-foreground/80 max-w-2xl leading-relaxed">
+                  Track and verify perpetual royalties generated from peer-to-peer resales of your music NFTs across decentralized secondary marketplaces.
+                </p>
+              </div>
+
+              <div>
+                <button
+                  onClick={handleScanOnChainRoyalties}
+                  disabled={isScanningRoyalties}
+                  className="w-full md:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
+                >
+                  {isScanningRoyalties ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Scanning Mainnet Nodes...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      Scan Blockchain Nodes
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Metrics Row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white/[0.02] hover:bg-white/[0.04] p-5 rounded-2xl transition-all duration-300">
+                <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Secondary Royalties Collected</p>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-2xl font-black text-white font-mono">{totalSecRoyalties.toFixed(2)}</span>
+                  <span className="text-xs font-bold text-blue-400 uppercase">TON</span>
+                </div>
+                <p className="text-[9px] text-zinc-500/80 font-bold mt-1">~${(totalSecRoyalties * 7.5).toFixed(2)} USD</p>
+              </div>
+
+              <div className="bg-white/[0.02] hover:bg-white/[0.04] p-5 rounded-2xl transition-all duration-300">
+                <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Total Secondary Volume</p>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-2xl font-black text-white font-mono">{totalSecVolume.toFixed(2)}</span>
+                  <span className="text-xs font-bold text-blue-400 uppercase">TON</span>
+                </div>
+                <p className="text-[9px] text-zinc-500/80 font-bold mt-1">Across {filteredSecTransactions.length} unique resales</p>
+              </div>
+
+              <div className="bg-white/[0.02] hover:bg-white/[0.04] p-5 rounded-2xl transition-all duration-300">
+                <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Secondary Royalty Rate</p>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-2xl font-black text-blue-400 font-mono">5.0%</span>
+                  <span className="text-xs font-bold text-zinc-500 uppercase">SPLIT</span>
+                </div>
+                <p className="text-[9px] text-zinc-500/80 font-bold mt-1">Average Payout: {avgSecRoyalty.toFixed(2)} TON</p>
+              </div>
+            </div>
+
+            {/* Filter and Content section */}
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <p className="text-[10px] font-black uppercase tracking-wider text-zinc-500">
+                  Filter Resales ledger
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {['all', 'neon waves', 'cyberpunk', 'sunset vibe', 'electric dreams'].map(filterId => (
+                    <button
+                      key={filterId}
+                      onClick={() => setSecondaryFilter(filterId)}
+                      className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider transition-all ${
+                        secondaryFilter === filterId 
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/10' 
+                          : 'bg-white/5 text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {filterId === 'all' ? 'All Editions' : filterId}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Transactions Ledger List */}
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 no-scrollbar">
+                {filteredSecTransactions.length === 0 ? (
+                  <div className="p-8 text-center bg-white/[0.01] rounded-2xl">
+                    <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">No matching secondary transactions detected</p>
+                  </div>
+                ) : (
+                  filteredSecTransactions.map(tx => (
+                    <div key={tx.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/[0.01] hover:bg-white/[0.025] rounded-2xl transition-all duration-200 gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-blue-600/10 flex items-center justify-center font-bold text-xs text-blue-400">
+                          NFT
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-black uppercase tracking-wide text-white">{tx.nftName}</h4>
+                          <p className="text-[9px] text-zinc-500 font-bold flex items-center gap-1.5 mt-0.5">
+                            <Clock className="w-3 h-3 text-zinc-600" />
+                            {tx.date} • Sale Price: <span className="text-white font-mono">{tx.salePrice} TON</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:items-end justify-center gap-1">
+                        <div className="flex items-center gap-3">
+                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">
+                            {tx.seller} → {tx.buyer}
+                          </span>
+                          <a 
+                            href={`https://tonviewer.com/transaction/${tx.txHash}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-zinc-600 hover:text-blue-400 transition-colors"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md">
+                            +{tx.royalty.toFixed(2)} TON Earned
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Social Verification Section */}

@@ -71,6 +71,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { getPlaceholderImage } from "@/lib/utils";
 import { useAudioStore } from "@/store/audioStore";
 import { useUserStore } from "@/store/userStore";
+import { triggerHaptic } from "@/lib/haptics";
 
 // Helper for Firestore errors (already imported from firebase.ts)
 
@@ -3274,6 +3275,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const toggleLikeTrack = async (trackId: string) => {
+    triggerHaptic('light');
     if (!trackId) {
       console.warn("Attempted to like undefined track");
       return;

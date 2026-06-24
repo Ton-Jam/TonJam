@@ -164,7 +164,7 @@ export default function ProfileSettings() {
             {[
               { id: 'profile', label: 'Primary Profile', icon: UserCircleIcon },
               { id: 'verification', label: 'Verification', icon: ShieldCheck },
-              { id: 'royalties', label: 'Royalties', icon: SparklesIcon, hidden: !(userProfile?.role === 'artist' || userProfile?.isVerifiedArtist) }
+              { id: 'royalties', label: 'Royalties', icon: SparklesIcon, hidden: !(userProfile?.role === 'artist' || userProfile?.isVerifiedArtist || userProfile?.role === 'admin') }
             ].filter(t => !t.hidden).map(tab => (
               <button
                 key={tab.id}
@@ -480,7 +480,7 @@ export default function ProfileSettings() {
               </p>
             </div>
 
-            {userProfile?.isVerifiedArtist ? (
+            {(userProfile?.isVerifiedArtist || userProfile?.role === 'admin') ? (
               <div className="p-12 bg-emerald-500/5 border border-emerald-500/20 rounded-[4px] text-center space-y-6">
                 <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20">
                   <CheckCircle className="w-10 h-10 text-emerald-500" />

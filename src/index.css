@@ -261,6 +261,7 @@
     }
   }
 
+
   @keyframes marquee {
     0% {
       transform: translateX(0%);
@@ -273,6 +274,16 @@
   --font-heading: var(--font-sans);
 
   --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 @layer base {
@@ -304,9 +315,13 @@
     background-color: #0A113A !important;
   }
   .dark body,
-  .dark .bg-background {
-    background-color: #0A113A !important;
-  }
+  .dark .bg-background,
+  .dark [class*="bg-[#050A24]"],
+  .dark [class*="bg-[#050a24]"],
+  .dark [class*="bg-[#0B0F2A]"],
+  .dark [class*="bg-[#0B0F14]"],
+  .dark [class*="bg-[#050505]"],
+  .dark [class*="bg-[#0a0a0a]"],
   .dark .bg-zinc-950,
   .dark .bg-zinc-900,
   .dark .bg-black,
@@ -326,6 +341,61 @@
   .dark .bg-zinc-900\/40,
   .dark .bg-zinc-900\/60 {
     background-color: #0a113a !important;
+  }
+
+  /* Make sections, panels, and container backdrops lay completely clean and flat on Navy Blue */
+  .dark [class*="bg-[#0A113A]/50"],
+  .dark [class*="bg-[#0A113A]/60"],
+  .dark [class*="bg-[#0A113A]/40"],
+  .dark [class*="bg-[#0A113A]/30"],
+  .dark [class*="bg-[#0A113A]/25"],
+  .dark [class*="bg-[#0A113A]/20"],
+  .dark [class*="bg-[#0a113a]/50"],
+  .dark [class*="bg-[#0a113a]/60"],
+  .dark [class*="bg-[#0a113a]/40"],
+  .dark [class*="bg-white/0.01"],
+  .dark [class*="bg-white/0.02"],
+  .dark [class*="bg-white/0.03"],
+  .dark [class*="bg-white/0.04"],
+  .dark [class*="bg-white/0.05"],
+  .dark [class*="bg-white/[0.01]"],
+  .dark [class*="bg-white/[0.02]"],
+  .dark [class*="bg-white/[0.03]"],
+  .dark [class*="bg-white/[0.04]"],
+  .dark [class*="bg-white/[0.05]"],
+  .dark [class*="bg-white/[0.06]"],
+  .dark [class*="bg-white/[0.08]"],
+  .dark [class*="bg-white/5"],
+  .dark [class*="bg-zinc-900/40"],
+  .dark [class*="bg-zinc-900/60"],
+  .dark [class*="bg-zinc-950/60"],
+  .dark [class*="bg-zinc-950/80"],
+  .dark [class*="backdrop-blur-"]:not(.mini-player-opaque):not(.mobile-nav-opaque),
+  .dark .backdrop-blur-md:not(.mini-player-opaque):not(.mobile-nav-opaque),
+  .dark .backdrop-blur-lg:not(.mini-player-opaque):not(.mobile-nav-opaque),
+  .dark .backdrop-blur-xl:not(.mini-player-opaque):not(.mobile-nav-opaque) {
+    background-color: transparent !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Ensure the mobile navigation bar and mini player have rich, luxurious, non-transparent dark obsidian with real frosted glass blur */
+  .dark .mini-player-opaque {
+    background-color: rgba(5, 10, 36, 0.96) !important;
+    background: rgba(5, 10, 36, 0.96) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    box-shadow: none !important;
+  }
+
+  .dark .mobile-nav-opaque {
+    background-color: rgba(5, 10, 36, 0.96) !important;
+    background: rgba(5, 10, 36, 0.96) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.65) !important;
   }
 
   /* Force premium subtle silver outlines for target task card components */
@@ -604,7 +674,7 @@
   }
 
   .scroll-row {
-    @apply flex overflow-x-auto gap-4 pb-4 -mx-4 px-4 md:-mx-8 md:px-8 lg:-mx-12 lg:px-12;
+    @apply flex overflow-x-auto gap-4 pb-4;
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
@@ -847,28 +917,12 @@ body {
   display: flex;
   gap: 0.75rem;
   overflow-x: auto;
-  padding: 0 1rem;
+  padding: 0 0.5rem;
 
   /* Smooth scrolling experience on mobile */
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
-
-  /* Left and right fade-out mask for overflow scroll */
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent,
-    #000 16px,
-    #000 calc(100% - 16px),
-    transparent
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    #000 16px,
-    #000 calc(100% - 16px),
-    transparent
-  );
+  scroll-snap-type: x proximity;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -885,34 +939,36 @@ body {
 /* Pill Component Design */
 .pill {
   flex: 0 0 auto; /* Prevents pills from shrinking */
-  background: #0a113a !important;
-  color: var(--on-surface-muted, #9aa0ae) !important;
-  border: 1px solid rgba(192, 192, 192, 0.3) !important;
-  padding: 0.25rem 0.75rem !important;
+  background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 0.32rem 0.75rem !important;
   border-radius: 50px !important;
-  font-size: 0.75rem !important;
-  font-weight: 500 !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.3s ease !important;
   white-space: nowrap !important;
   position: relative !important;
   overflow: hidden !important;
   scroll-snap-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
 }
 
 /* Active State */
 .pill.active {
-  background: transparent !important;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  font-weight: 600 !important;
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(59, 130, 246, 0.1) !important;
 }
 
 /* Hover/Focus State for Desktop */
 @media (hover: hover) {
   .pill:hover:not(.active) {
-    border-color: #5B6BFF !important;
-    background: rgba(91, 107, 255, 0.15) !important;
+    border-color: #3b82f6 !important;
+    background: linear-gradient(135deg, #1e293b, #1e3a8a) !important;
     color: #ffffff !important;
+    transform: translateY(-2px);
   }
 }

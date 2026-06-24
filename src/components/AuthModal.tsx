@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
+import { triggerHaptic } from '@/lib/haptics';
 import { APP_LOGO } from '../constants';
 
 const authSchema = z.object({
@@ -58,6 +59,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     try {
       const { error } = await signInWithWallet(address, appName);
       if (error) throw error;
+      triggerHaptic('success');
       toast.success('Wallet Connected', {
         description: 'Neural link established via Web3.',
       });
