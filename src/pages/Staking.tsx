@@ -115,7 +115,7 @@ const Staking: React.FC = () => {
   };
 
   return (
-    <div className="px-4 pb-4 lg:px-4 lg:pb-4 space-y-4 animate-in fade-in duration-700 mb-4 max-w-7xl mx-auto">
+    <div className="px-4 pb-4 lg:px-4 lg:pb-4 space-y-4 animate-in fade-in duration-700 mb-4 w-full max-w-full">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-4 mb-4">

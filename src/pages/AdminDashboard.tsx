@@ -294,7 +294,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-4 pt-4 px-4 animate-in fade-in duration-700">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full max-w-full">
         <header className="mb-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-[4px]">

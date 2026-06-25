@@ -304,7 +304,7 @@ const ArtistProfile: React.FC = () => {
         </div>
       </div>
       
-      <div className="max-w-6xl mx-auto px-4 md:px-12 mt-20 md:mt-24">
+      <div className="w-full max-w-full px-4 md:px-12 mt-20 md:mt-24">
         {/* Action Buttons Below Cover */}
         {!isOwnProfile && (
             <div className="flex items-center gap-2 mb-6">

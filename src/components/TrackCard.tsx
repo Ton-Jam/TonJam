@@ -422,10 +422,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
         <ContextMenuTrigger>
           <motion.div 
           whileHover={{ opacity: 1, backgroundColor: "rgba(255, 255, 255, 0.05)" }}
-          className={`flex flex-col w-full group/row border-b border-zinc-700 last:border-0 transition-colors rounded-[4px] mx-2 ${className}`}
+          className={`flex flex-col w-full group/row border-b border-zinc-700 last:border-0 transition-colors rounded-[4px] ${className}`}
         >
             <div 
-              className="flex items-center gap-4 p-2 sm:p-3 cursor-pointer w-full outline-none focus-visible:bg-white/5"
+              className="flex items-center gap-4 px-4 sm:px-8 py-2 sm:py-3 cursor-pointer w-full outline-none focus-visible:bg-white/5"
               onClick={handleCardClickInner}
               onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
               role="button"

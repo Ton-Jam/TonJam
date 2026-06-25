@@ -28,7 +28,7 @@ export const AdvancedStats: React.FC = () => {
       ref={timelineRef}
       className="flex flex-col gap-8 py-4 bg-white min-h-screen justify-center md:px-0 px-5 font-dmSans"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="w-full max-w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Chart Section */}
           <TimelineAnimation

@@ -67,7 +67,7 @@ import {
 export default function ArtistDashboard() {
   const navigate = useNavigate();
   const { getEarnings, addNotification, deleteTrack, updateTrack, addUserNFT, userProfile } = useAudio();
-  const { user, isArtist, loading } = useAuth();
+  const { user, isArtist, isAdmin, loading } = useAuth();
   
   // Tabs state
   const [activeTab, setActiveTab] = useState<"overview" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty">("overview");
@@ -187,7 +187,7 @@ export default function ArtistDashboard() {
 
   // Synced state tracking values
   useEffect(() => {
-    if (!loading && (!user || !isArtist)) {
+    if (!loading && (!user || (!isArtist && !isAdmin))) {
       navigate('/');
       return;
     }
@@ -258,7 +258,7 @@ export default function ArtistDashboard() {
     return () => {
       unsubscribeTracks();
     };
-  }, [user, isArtist, loading, navigate]);
+  }, [user, isArtist, isAdmin, loading, navigate]);
 
   const fetchStaticData = async () => {
     try {
@@ -536,7 +536,7 @@ export default function ArtistDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <button
-               onClick={() => setActiveTab("sonic")}
+               onClick={() => navigate("/upload")}
                className="h-9 px-4 bg-cyan-500 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-cyan-400 transition-colors flex items-center gap-2"
             >
                 <Upload className="w-3.5 h-3.5" /> Upload Track

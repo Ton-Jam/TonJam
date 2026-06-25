@@ -69,7 +69,7 @@ const LimitedNFTs: React.FC = () => {
         </div>
       </div>
 
-      <main className="w-full max-w-7xl mx-auto px-6 mt-12 space-y-12">
+      <main className="w-full w-full max-w-full px-6 mt-12 space-y-12">
         {/* Controls */}
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between glass p-4 rounded-2xl border border-white/5">
           <div className="relative flex-1 w-full">

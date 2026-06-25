@@ -909,13 +909,13 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       
       <div className="pt-4 pb-4">
         <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Account</p>
-        {(userProfile.role === 'artist' || userProfile.role === 'admin' || userProfile.isVerifiedArtist) && (
-          <NavItem to={`/artist/${userProfile.uid}`} icon={UserIcon} label="Artist Profile" onClick={onNavigate} />
+        {(isArtist || isAdmin || userProfile?.isVerifiedArtist) && (
+          <NavItem to={`/artist/${userProfile?.uid}`} icon={UserIcon} label="Artist Profile" onClick={onNavigate} />
         )}
-        {(userProfile.role === 'artist' || userProfile.role === 'admin' || userProfile.isVerifiedArtist) && (
+        {(isArtist || isAdmin || userProfile?.isVerifiedArtist) && (
           <NavItem to="/artist-dashboard" icon={Squares2X2Icon} label="Artist Dashboard" onClick={onNavigate} />
         )}
-        {userProfile.role === 'admin' && (
+        {isAdmin && (
           <NavItem to="/admin" icon={ShieldCheckIcon} label="Admin Console" onClick={onNavigate} />
         )}
         <NavItem to="/profile" icon={UserIcon} label="User Profile" onClick={onNavigate} />

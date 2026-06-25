@@ -365,7 +365,7 @@ const TrackDetail: React.FC = () => {
         <div className="absolute inset-0 bg-background/40" />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-4 pt-4">
+      <div className="relative z-10 w-full max-w-full px-4 md:px-4 pt-4">
         {/* Header Navigation */}
         <div className="flex items-center justify-between mb-4">
           <div 

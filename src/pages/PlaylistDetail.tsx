@@ -342,7 +342,7 @@ const PlaylistDetail: React.FC = () => {
         </div>
 
         {/* Tracks List (Edge-to-Edge) */}
-        <div className="w-full">
+        <div className="w-[calc(100%+2rem)] md:w-[calc(100%+4rem)] -mx-4 md:-mx-8">
           <div className="flex flex-col gap-0.5">
             {playlistTracks.map((track, index) => (
               <div 

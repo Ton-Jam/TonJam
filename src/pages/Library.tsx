@@ -237,7 +237,7 @@ const Library: React.FC = () => {
 
   return (
     <div className="page-container w-full min-h-screen bg-background text-foreground pb-4">
-      <div className="px-4 py-3 sm:px-6 max-w-7xl mx-auto space-y-6">
+      <div className="px-4 py-3 sm:px-6 w-full max-w-full space-y-6">
         
         {/* Global Filter Pills & Grid Toggle controls block */}
         <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-transparent py-4 w-full mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 px-4">

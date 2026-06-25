@@ -39,7 +39,7 @@ const MyNFTs: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
-      <main className="px-5 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+      <main className="px-5 py-6 sm:px-8 w-full max-w-full space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <Tabs 
             value={activeTab} 

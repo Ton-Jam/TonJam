@@ -404,7 +404,7 @@ service cloud.firestore {
 
     // 💰 ROYALTIES
     match /royalties/{royaltyId} {
-      allow read: if isSignedIn() && (isOwner(royaltyId) || isOwner(resource.data.artistId) || isAdmin() || (resource.data.artistId == request.auth.uid));
+      allow read: if isSignedIn() && (isOwner(royaltyId) || isAdmin() || (resource != null && resource.data.artistId == request.auth.uid));
       allow create: if isSignedIn() && isValidId(royaltyId) && isValidRoyalty(incoming());
       allow update: if isSignedIn() && (
         isAdmin() || 

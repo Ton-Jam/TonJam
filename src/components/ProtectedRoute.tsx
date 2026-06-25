@@ -21,7 +21,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && userProfile && !allowedRoles.includes(userProfile.role as any)) {
+  const isAdminEmail = user?.email === 'krusherkrupy@gmail.com';
+  const userRole = isAdminEmail ? 'admin' : (userProfile?.role || 'collector');
+
+  if (allowedRoles && !allowedRoles.includes(userRole as any)) {
     // Redirect to home if role not allowed
     return <Navigate to="/" replace />;
   }

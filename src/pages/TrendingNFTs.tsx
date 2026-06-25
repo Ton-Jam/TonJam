@@ -75,7 +75,7 @@ const TrendingNFTs: React.FC = () => {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full" />
       </div>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-32">
+      <main className="relative z-10 w-full max-w-full px-4 sm:px-6 pt-10 pb-32">
         {/* Header Section */}
         <header className="mb-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">

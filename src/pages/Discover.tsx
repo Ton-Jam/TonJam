@@ -500,13 +500,13 @@ const Discover: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24 relative discover-page w-full px-0 max-w-full">
-      {/* Search & Filter Header with Navy Blue background; no borders */}
-      <div className="sticky top-0 z-40 bg-[#0a122e]/95 backdrop-blur-md py-4 w-full transition-colors duration-300">
+      {/* Search & Filter Header with solid Navy Blue background; no borders */}
+      <div className="sticky top-0 z-40 bg-[#0a1638] py-4 w-full transition-colors duration-300 shadow-xl shadow-black/40">
         <div className="w-full flex items-center gap-3 px-4 md:px-8 lg:px-12">
-          {/* Search Form (from existing) with Navy background */}
-          <form onSubmit={handleSearchSubmit} className="relative flex-1 group bg-[#16224f]/60 p-1 rounded-full shadow-inner">
+          {/* Search Form (from existing) with solid Navy background */}
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 group bg-[#132354] p-1 rounded-full shadow-inner">
             {/* Input and suggestions logic... */}
-            <div className="relative flex items-center h-10 bg-[#070e24] rounded-full overflow-hidden transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+            <div className="relative flex items-center h-10 bg-[#07102e] rounded-full overflow-hidden transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
                <Input
                   type="text"
                   placeholder="Search..."
@@ -583,15 +583,13 @@ const Discover: React.FC = () => {
         </div>
 
         {/* Filter Pills with Solid Navy background container & no title/borders */}
-        <div className="px-4 md:px-8 lg:px-12 mt-3">
-          <div className="w-full filter-tabs py-3 px-5 bg-[#0d1633] backdrop-blur-md rounded-2xl shadow-xl shadow-black/55 overflow-hidden">
-              <div className="overflow-x-auto no-scrollbar">
-                <FilterPills
-                  selectedGenre={activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)}
-                  onSelect={(v) => setActiveFilter((v ? v.toLowerCase() : 'all') as any)}
-                  categories={['All', 'Community', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users']}
-                />
-              </div>
+        <div className="w-full filter-tabs py-3 px-4 md:px-8 lg:px-12 bg-[#0a1638] shadow-xl shadow-black/55 mt-3 overflow-hidden">
+          <div className="overflow-x-auto no-scrollbar">
+            <FilterPills
+              selectedGenre={activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)}
+              onSelect={(v) => setActiveFilter((v ? v.toLowerCase() : 'all') as any)}
+              categories={['All', 'Community', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users']}
+            />
           </div>
         </div>
       </div>

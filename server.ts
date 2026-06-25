@@ -120,7 +120,7 @@ async function startServer() {
         const prompt = `Based on this performance data: ${JSON.stringify(trackPerformance)}, suggest optimal royalty split adjustments to maximize engagement and retention. Provide 3 specific, actionable suggestions. Return JSON format { recommendations: string[] }. KEEP IT CONCISE.`;
         try {
             const response = await ai.models.generateContent({
-                model: "gemini-1.5-flash",
+                model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }],
                 config: { responseMimeType: "application/json" }
             });
@@ -143,7 +143,7 @@ async function startServer() {
         const prompt = `Analyze this royalty audit log data for any anomalous patterns, irregularities, or suspected missing payout events: ${JSON.stringify(auditData)}. Provide a concise summary of your findings as a list of points. If all looks normal, say "No anomalies detected". Return JSON format { findings: string[] }.`;
         try {
             const response = await ai.models.generateContent({
-                model: "gemini-1.5-flash",
+                model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }],
                 config: { responseMimeType: "application/json" }
             });
@@ -332,7 +332,7 @@ async function startServer() {
             `;
 
             const response = await ai.models.generateContent({
-                model: "gemini-3.5-flash",
+                model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
                     responseMimeType: "application/json",
@@ -433,7 +433,7 @@ async function startServer() {
             `;
 
             const response = await ai.models.generateContent({
-                model: "gemini-3.5-flash",
+                model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
                     responseMimeType: "application/json",
@@ -554,7 +554,7 @@ async function startServer() {
             `;
 
             const response = await ai.models.generateContent({
-                model: "gemini-3.5-flash",
+                model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }]
             });
             const generatedBio = response.text?.trim() || '';
@@ -579,7 +579,7 @@ async function startServer() {
                         Make it modern, vibrant, and professionally polished. Return ONLY the enhanced prompt text, without any introductory or concluding remarks. Max 100 words.
                     `;
                     const enhanceResponse = await ai.models.generateContent({
-                        model: "gemini-3.5-flash",
+                        model: "gemini-2.5-flash",
                         contents: [{ parts: [{ text: enhanceContext }] }]
                     });
                     const enhancedText = enhanceResponse.text?.trim();
@@ -599,7 +599,7 @@ async function startServer() {
 
                 // Use text model to generate the vision prompt
                 const visionPromptResponse = await ai.models.generateContent({
-                    model: "gemini-3.5-flash",
+                    model: "gemini-2.5-flash",
                     contents: [{ parts: [{ text: promptContext }] }]
                 });
                 finalPrompt = visionPromptResponse.text?.trim() || `Artistic playlist cover for ${title}, modern music theme, vibrant colors`;
@@ -683,7 +683,7 @@ async function startServer() {
             const audioData = fs.readFileSync(filePath);
             
             const response = await ai.models.generateContent({
-                model: "gemini-3.5-flash",
+                model: "gemini-2.5-flash",
                 contents: [{
                     parts: [
                         {
@@ -756,7 +756,7 @@ async function startServer() {
     app.post('/api/gemini/sonic-dna', async (req, res) => {
         try {
             const { artist, tracks } = req.body;
-            const model = "gemini-3.5-flash";
+            const model = "gemini-2.5-flash";
             const prompt = `Analyze the sonic profile of artist "${artist.name}" based on these tracks: ${tracks.map((t: any) => t.title).join(", ")}. 
             The artist's bio is: "${artist.bio}".
             Return a JSON object with:
@@ -796,7 +796,7 @@ async function startServer() {
     app.post('/api/gemini/semantic-search', async (req, res) => {
         try {
             const { query, allTracks } = req.body;
-            const model = "gemini-3.5-flash";
+            const model = "gemini-2.5-flash";
             const prompt = `The user is searching for music with the query: "${query}".
             Here is a list of available tracks: ${JSON.stringify(allTracks.map((t: any) => ({ id: t.id, title: t.title, genre: t.genre, artist: t.artist, mood: t.mood })))}.
             Return a JSON array of track IDs that best match the user's intent, ordered by relevance.`;
@@ -836,7 +836,7 @@ async function startServer() {
     app.post('/api/gemini/global-search', async (req, res) => {
         try {
             const { query, context } = req.body;
-            const model = "gemini-3.5-flash";
+            const model = "gemini-2.5-flash";
             const prompt = `The user is using natural language to search for artists, tracks, or NFTs on a music platform.
             Query: "${query}"
             
@@ -921,7 +921,7 @@ async function startServer() {
     app.post('/api/gemini/nft-lore', async (req, res) => {
         try {
             const { title, genre, baseDescription } = req.body;
-            const model = "gemini-3.5-flash";
+            const model = "gemini-2.5-flash";
             const prompt = `Generate a short, compelling lore or backstory for a music NFT titled "${title}". 
             The genre is ${genre}. 
             Base description: ${baseDescription}
@@ -944,7 +944,7 @@ async function startServer() {
     app.post('/api/gemini/related-artists', async (req, res) => {
         try {
             const { artistName, allArtists } = req.body;
-            const model = "gemini-3.5-flash";
+            const model = "gemini-2.5-flash";
             const prompt = `Given the artist "${artistName}", find 3 similar artists from this list: ${allArtists.map((a: any) => a.name).join(", ")}.
             Return a JSON array of artist names.`;
 
@@ -974,7 +974,7 @@ async function startServer() {
     app.post('/api/gemini/krupy-recommendations', async (req, res) => {
         try {
             const { currentTrack, allTracks, allArtists } = req.body;
-            const model = "gemini-3.5-flash";
+            const model = "gemini-2.5-flash";
             const prompt = `Based on the current track "${currentTrack.title}" by ${currentTrack.artist} (Genre: ${currentTrack.genre}), 
             suggest 3 similar tracks and 2 similar artists from this available library:
             - Tracks: ${allTracks.map((t: any) => t.title).join(", ")}
@@ -1022,7 +1022,7 @@ async function startServer() {
     app.post('/api/gemini/similar-tracks', async (req, res) => {
         try {
             const { recentlyPlayed = [], likedTracks = [], availableTracks = [] } = req.body;
-            const model = "gemini-3.5-flash";
+            const model = "gemini-2.5-flash";
             
             if (!availableTracks || availableTracks.length === 0) {
                 return res.json({ recommendedTrackIds: [], explanation: "No references available in catalog." });
@@ -1124,7 +1124,7 @@ async function startServer() {
     app.post('/api/gemini/chat', async (req, res) => {
         try {
             const { message, history, currentTrack } = req.body;
-            const model = "gemini-3.5-flash";
+            const model = "gemini-2.5-flash";
             
             let contextPrompt = "";
             if (currentTrack) {

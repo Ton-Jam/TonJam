@@ -1613,9 +1613,9 @@ const FullPlayer: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 220 }}
-              className="fixed inset-y-0 right-0 z-[70] bg-[#0A113A] w-full sm:max-w-md flex flex-col pt-8 select-none shadow-[0_0_50px_rgba(0,0,0,0.85)] border-none"
+              className="fixed inset-0 z-[70] bg-[#0A113A] w-full flex flex-col pt-8 select-none border-none"
             >
-              <div className="flex items-center justify-between px-6 pb-4">
+              <div className="flex items-center justify-between px-4 sm:px-8 pb-4">
                 <div>
                   <h3 className="text-xl font-extrabold text-white tracking-tight">
                     Up Next
@@ -1634,9 +1634,9 @@ const FullPlayer: React.FC = () => {
                 </Button>
               </div>
 
-              <ScrollArea className="flex-1 px-6 pb-20 no-scrollbar">
-                <div className="space-y-6">
-                  <div className="p-4 rounded-xl bg-zinc-900/60 flex items-center gap-4">
+              <ScrollArea className="flex-1 w-full">
+                <div className="space-y-6 w-full pb-32">
+                  <div className="p-4 mx-4 sm:mx-8 rounded-xl bg-zinc-900/60 flex items-center gap-4">
                     <Avatar className="w-12 h-12 rounded-lg">
                       <AvatarImage
                         src={
@@ -1659,7 +1659,7 @@ const FullPlayer: React.FC = () => {
                   </div>
 
                   <div className="space-y-2 pb-10">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 mb-3 px-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 mb-3 px-4 sm:px-8">
                       Queued Tracks
                     </p>
                     {queue.length > 0 ? (

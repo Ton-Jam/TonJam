@@ -28,10 +28,12 @@ import TrackUploadModal from "@/components/TrackUploadModal";
 import { cn } from "@/lib/utils";
 import { BadgeSystem } from "@/components/BadgeSystem";
 import CollectorTier from "@/components/CollectorTier";
+import { useNavigate } from "react-router-dom";
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
 export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalEarnings }) => {
+  const navigate = useNavigate();
   const genreData = [
     { name: 'Electronic', value: 400 },
     { name: 'Lo-fi', value: 300 },
@@ -787,7 +789,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
         <div className="flex gap-2 items-center">
           <Button
             variant="outline"
-            onClick={() => setIsUploadModalOpen(true)}
+            onClick={() => navigate("/upload")}
             className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest bg-cyan-500/10 text-cyan-500 border-cyan-500/20 hover:bg-cyan-500/20"
           >
             Upload Track

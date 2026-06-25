@@ -26,13 +26,14 @@ const chartConfig = {
 
 interface Props {
   data: { date: string; price: number }[];
+  title?: string;
 }
 
-export function FloorPriceChart({ data }: Props) {
+export function FloorPriceChart({ data, title = "Floor Price Analytics" }: Props) {
   return (
     <Card className="border-border bg-card/50">
       <CardHeader className="py-3">
-        <CardTitle className="text-sm font-black uppercase text-foreground">Floor Price Analytics</CardTitle>
+        <CardTitle className="text-sm font-black uppercase text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent className="px-2 pb-2">
         <ChartContainer

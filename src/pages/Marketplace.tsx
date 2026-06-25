@@ -367,8 +367,8 @@ const Marketplace: React.FC = () => {
         className="space-y-10"
       >
         {/* --- SECTION 2: MARKETPLACE ANALYTICS --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8">
-          <div className="-mx-4 flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory px-4">
+        <motion.section variants={itemVariants} className="w-full">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory px-4 md:px-8">
             {ANALYTICS_DATA.map((card, idx) => (
               <AnalyticsCard
                 key={`analytics-${idx}`}
@@ -382,41 +382,9 @@ const Marketplace: React.FC = () => {
           </div>
         </motion.section>
 
-        {/* --- SECTION 3: MARKETPLACE FILTER PILLS --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8 sticky top-0 z-30 py-2.5 bg-transparent">
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
-            <LayoutGroup id="marketFilters">
-              {FILTER_PILLS.map((pill) => {
-                const isActive = activeTab === pill;
-                return (
-                  <button
-                    key={pill}
-                    onClick={() => setActiveTab(pill)}
-                    className={cn(
-                      "relative flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 focus:outline-none border",
-                      isActive 
-                        ? "border-transparent text-white bg-transparent" 
-                        : "border-white/10 bg-[#0a113a] text-[#9AA0AE] hover:border-[#5B6BFF] hover:bg-[#5B6BFF]/15 hover:text-white"
-                    )}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeFilter"
-                        className="absolute inset-0 bg-[#5B6BFF] rounded-full z-0"
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                    <span className="relative z-10">{pill}</span>
-                  </button>
-                );
-              })}
-            </LayoutGroup>
-          </div>
-        </motion.section>
-
         {/* --- SECTION 4: FEATURED COLLECTION CAROUSEL --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8">
-          <div className="relative rounded-2xl bg-[#0A113A] border border-white/[0.04] overflow-hidden min-h-[220px] sm:min-h-[280px] flex flex-col justify-end p-6 md:p-8">
+        <motion.section variants={itemVariants} className="w-full">
+          <div className="relative rounded-2xl bg-[#0A113A] border border-white/[0.04] overflow-hidden min-h-[220px] sm:min-h-[280px] flex flex-col justify-end p-6 md:p-8 mx-4 md:mx-8">
             <AnimatePresence mode="wait">
               {FEATURED_COLLECTIONS.map((col, idx) => {
                 if (idx !== carouselIndex) return null;
@@ -505,9 +473,41 @@ const Marketplace: React.FC = () => {
           </div>
         </motion.section>
 
+        {/* --- SECTION 3: MARKETPLACE FILTER PILLS --- */}
+        <motion.section variants={itemVariants} className="w-full sticky top-0 z-30 py-2.5 bg-[#000000]">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 px-4 md:px-8">
+            <LayoutGroup id="marketFilters">
+              {FILTER_PILLS.map((pill) => {
+                const isActive = activeTab === pill;
+                return (
+                  <button
+                    key={pill}
+                    onClick={() => setActiveTab(pill)}
+                    className={cn(
+                      "relative flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 focus:outline-none border",
+                      isActive 
+                        ? "border-transparent text-white bg-transparent" 
+                        : "border-white/10 bg-[#0a113a] text-[#9AA0AE] hover:border-[#5B6BFF] hover:bg-[#5B6BFF]/15 hover:text-white"
+                    )}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeFilter"
+                        className="absolute inset-0 bg-[#5B6BFF] rounded-full z-0"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10">{pill}</span>
+                  </button>
+                );
+              })}
+            </LayoutGroup>
+          </div>
+        </motion.section>
+
         {/* --- SECTION 5: TRENDING NFTS --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8">
-          <div className="flex items-center justify-between mb-4">
+        <motion.section variants={itemVariants} className="w-full">
+          <div className="flex items-center justify-between mb-4 px-4 md:px-8">
             <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
               <Flame className="w-5 h-5 text-[#FF3A5C]" />
               Trending Audio Assets
@@ -517,7 +517,7 @@ const Marketplace: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory px-4 md:px-8">
             {safeNFTs.slice(0, 8).map((nft) => (
               <NFTCard
                 key={`trending-${nft.id}`}
@@ -529,8 +529,8 @@ const Marketplace: React.FC = () => {
         </motion.section>
 
         {/* --- SECTION 6: NEW DROPS --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8">
-          <div className="flex items-center justify-between mb-4">
+        <motion.section variants={itemVariants} className="w-full">
+          <div className="flex items-center justify-between mb-4 px-4 md:px-8">
             <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
               <Zap className="w-5 h-5 text-[#F5D547]" />
               New Drops
@@ -540,7 +540,7 @@ const Marketplace: React.FC = () => {
             </Badge>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory px-4 md:px-8">
             {filteredNewDrops.slice(0, 10).map((nft) => (
               <NFTCard 
                 key={`drop-${nft.id}`} 
@@ -552,8 +552,8 @@ const Marketplace: React.FC = () => {
         </motion.section>
 
         {/* --- SECTION 7: TOP COLLECTIONS (Leaderboard) --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8">
-          <div className="bg-[#0A113A] rounded-2xl border border-white/[0.04] p-5">
+        <motion.section variants={itemVariants} className="w-full">
+          <div className="bg-[#0A113A] rounded-2xl border border-white/[0.04] p-5 mx-4 md:mx-8">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-white flex items-center gap-1.5">
@@ -650,9 +650,9 @@ const Marketplace: React.FC = () => {
         </motion.section>
 
         {/* --- SECTION 8: MARKETPLACE RANKINGS --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8">
+        <motion.section variants={itemVariants} className="w-full">
           <Tabs value={rankingTab} onValueChange={setRankingTab} className="w-full">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 px-4 md:px-8">
               <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white">
                 Marketplace Rankings
               </h2>
@@ -756,7 +756,7 @@ const Marketplace: React.FC = () => {
                 </Badge>
               </div>
               <ScrollArea className="h-96 w-full pr-3 mt-2">
-                <div className="space-y-3">
+                <div className="space-y-3 px-4 md:px-8">
                   {marketplaceActivities.map((act, index) => (
                     <React.Fragment key={`rank-act-${act.id}`}>
                       <CommunityFeedCard
@@ -779,8 +779,8 @@ const Marketplace: React.FC = () => {
         </motion.section>
 
         {/* --- SECTION 10: RECOMMENDED FOR YOU --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8">
-          <div className="flex items-center justify-between mb-4">
+        <motion.section variants={itemVariants} className="w-full">
+          <div className="flex items-center justify-between mb-4 px-4 md:px-8">
             <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[#2BE08C]" />
               Recommended For You
@@ -790,7 +790,7 @@ const Marketplace: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory px-4 md:px-8">
             {safeNFTs.slice(3, 9).map((nft) => (
               <NFTCard
                 key={`rec-${nft.id}`}
@@ -802,8 +802,8 @@ const Marketplace: React.FC = () => {
         </motion.section>
 
         {/* --- SECTION 11: RECENTLY VIEWED --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8">
-          <div className="flex items-center justify-between mb-4">
+        <motion.section variants={itemVariants} className="w-full">
+          <div className="flex items-center justify-between mb-4 px-4 md:px-8">
             <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
               <Clock className="w-5 h-5 text-[#9AA0AE]" />
               Recently Viewed History
@@ -813,7 +813,7 @@ const Marketplace: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory px-4 md:px-8">
             {safeNFTs.slice(6, 12).reverse().map((nft) => (
               <NFTCard
                 key={`recent-${nft.id}`}
@@ -825,12 +825,12 @@ const Marketplace: React.FC = () => {
         </motion.section>
 
         {/* --- SECTION 12: CATEGORIES (Responsive Grid) --- */}
-        <motion.section variants={itemVariants} className="w-full px-4 md:px-8">
-          <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white mb-4">
+        <motion.section variants={itemVariants} className="w-full">
+          <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white mb-4 px-4 md:px-8">
             Marketplace Categories
           </h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 px-4 md:px-8">
             {CATEGORY_ITEMS.map((cat, idx) => (
               <motion.div
                 key={idx}

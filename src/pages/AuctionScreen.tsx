@@ -364,7 +364,7 @@ const AuctionScreen: React.FC = () => {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.4)_100%)]"></div>
         </div>
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+        <div className="relative z-10 w-full w-full max-w-full px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <motion.div 
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -527,7 +527,7 @@ const AuctionScreen: React.FC = () => {
         </div>
       </div>
 
-      <main className="w-full max-w-7xl mx-auto px-6 mt-12 space-y-16">
+      <main className="w-full w-full max-w-full px-6 mt-12 space-y-16">
         {/* Statistics Bar */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[

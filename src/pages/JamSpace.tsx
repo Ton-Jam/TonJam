@@ -259,7 +259,7 @@ const JamSpace: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/[0.03] blur-[150px] rounded-full translate-y-1/3 -translate-x-1/4"></div>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 relative z-10">
+      <div className="w-full w-full max-w-full px-0 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-8">
           
           {/* Left Column: Navigation Sidebar */}
