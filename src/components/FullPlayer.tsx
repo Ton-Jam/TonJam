@@ -135,6 +135,8 @@ const FullPlayer: React.FC = () => {
     isTrackCached,
     downloadTrackForOffline,
     deleteCachedTrack,
+    isSeeking,
+    setIsSeeking,
   } = useAudio();
 
   const [isCached, setIsCached] = useState(false);
@@ -876,7 +878,13 @@ const FullPlayer: React.FC = () => {
                 <div className="relative pt-6 pb-2 px-1 group/slider-deck">
                   <div
                     className="relative w-full h-6 flex items-center cursor-pointer group/seek-deck select-none rounded bg-transparent z-10"
-                    onClick={handleProgressScrub}
+                    onMouseDown={(e) => { setIsSeeking(true); handleProgressScrub(e); }}
+                    onMouseMove={(e) => { if (isSeeking) handleProgressScrub(e); }}
+                    onMouseUp={(e) => { setIsSeeking(false); handleProgressScrub(e); }}
+                    onMouseLeave={(e) => { if (isSeeking) setIsSeeking(false); }}
+                    onTouchStart={(e) => { setIsSeeking(true); handleProgressScrub(e); }}
+                    onTouchMove={(e) => { if (isSeeking) handleProgressScrub(e); }}
+                    onTouchEnd={(e) => { setIsSeeking(false); handleProgressScrub(e); }}
                   >
                     <div className="w-full h-1 bg-white/10 rounded-full relative transition-all group-hover/seek-deck:h-1.5 overflow-hidden">
                       <div

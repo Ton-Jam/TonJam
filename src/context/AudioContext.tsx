@@ -113,6 +113,8 @@ interface AudioContextType {
   isLoading: boolean;
   isHighFidelity: boolean;
   exclusiveContent: ExclusiveContent[] | null;
+  isSeeking: boolean;
+  setIsSeeking: (isSeeking: boolean) => void;
   communityPosts: Post[];
   addCommunityPost: (post: Partial<Post>) => Promise<void>;
   resetProtocol: () => void;
@@ -417,6 +419,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   } | null>(null);
 
   const [artworkStyle, setArtworkStyle] = useState<'spotify' | 'vinyl' | 'visualizer'>('spotify');
+  const [isSeeking, setIsSeeking] = useState(false);
   
   const [isOffline, setIsOffline] = useState(false);
   const toggleOfflineMode = useCallback(() => {
@@ -2074,6 +2077,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     const audio = audioRef.current;
 
     const handleTimeUpdate = () => {
+      if (isSeeking) return;
       if (audio.duration)
         setProgress((audio.currentTime / audio.duration) * 100);
     };
@@ -2112,7 +2116,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [queue, currentTrack, repeatMode, isShuffle]);
+  }, [queue, currentTrack, repeatMode, isShuffle, isSeeking]);
 
   const addNotification = (
     message: string,
@@ -4346,6 +4350,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         jamspaceFilters,
         setJamspaceFilters,
         isLoading,
+        isSeeking,
+        setIsSeeking,
         deleteTrack,
         isHighFidelity,
         exclusiveContent,
