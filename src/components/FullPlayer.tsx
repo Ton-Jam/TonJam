@@ -872,34 +872,26 @@ const FullPlayer: React.FC = () => {
                   </div>
                 )}
 
-                {/* Spotify-standard Progress Slider Deck */}
+                {/* Sleek Spotify-like Progress Slider */}
                 <div className="relative pt-6 pb-2 px-1 group/slider-deck">
                   <div
-                    className="relative w-full h-4 flex items-center cursor-pointer group/seek-deck select-none rounded bg-transparent z-10"
+                    className="relative w-full h-6 flex items-center cursor-pointer group/seek-deck select-none rounded bg-transparent z-10"
                     onClick={handleProgressScrub}
-                    onTouchStart={handleProgressScrub}
-                    onTouchMove={(e) => {
-                      if (e.touches.length > 0) {
-                        handleProgressScrub(e);
-                      }
-                    }}
                   >
-                    <div className="w-full h-[2px] bg-neutral-700/60 rounded-full relative transition-all group-hover/seek-deck:h-[4px] overflow-hidden">
+                    <div className="w-full h-1 bg-white/10 rounded-full relative transition-all group-hover/seek-deck:h-1.5 overflow-hidden">
                       <div
-                        className="absolute top-0 left-0 h-full bg-blue-500 rounded-full group-hover/seek-deck:bg-emerald-400 transition-all duration-75"
+                        className="absolute top-0 left-0 h-full bg-white rounded-full group-hover/seek-deck:bg-[#00B4D8] transition-all duration-75"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
                     <div
-                      className="absolute top-1/2 -translate-y-1/2 size-3 bg-white rounded-full opacity-0 group-hover/seek-deck:opacity-100 shadow-md pointer-events-none transition-opacity -ml-1.5"
+                      className="absolute top-1/2 -translate-y-1/2 size-3.5 bg-white rounded-full opacity-0 group-hover/seek-deck:opacity-100 shadow-xl pointer-events-none transition-all duration-200 -ml-1.5 ring-2 ring-white/20"
                       style={{ left: `${progress}%` }}
                     />
                   </div>
-                  <div className="flex justify-between text-[10px] font-bold text-neutral-400 tracking-wider font-mono mt-2 z-10 relative">
+                  <div className="flex justify-between text-[10px] font-bold text-[#9AA0AE] tracking-wider font-mono mt-2 z-10 relative">
                     <span>{formatTime(currentTime)}</span>
-                    <span style={{ color: `${visualizerColor}cc` }}>
-                      {formatTime(duration)}
-                    </span>
+                    <span>{formatTime(duration)}</span>
                   </div>
                 </div>
 
@@ -928,43 +920,34 @@ const FullPlayer: React.FC = () => {
                     </svg>
                   </button>
 
-                  {/* Center Play Button - Clean UI without backdrop */}
+                  {/* Center Play Button */}
                   <button
                     onClick={togglePlay}
-                    className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center p-0 hover:scale-[1.05] active:scale-[0.95] transition-all bg-transparent text-white shrink-0 overflow-hidden border-0 outline-none focus:outline-none"
+                    className="w-16 h-16 rounded-full flex items-center justify-center p-0 hover:scale-105 active:scale-95 transition-all bg-white text-[#050A24] shrink-0 border-0 outline-none focus:outline-none shadow-lg"
                   >
-                    <motion.div
-                      className="absolute inset-0 bg-white/5"
-                      initial={{ scale: 0, opacity: 0 }}
-                      whileTap={{ scale: 2, opacity: 0.4 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ pointerEvents: "none" }}
-                    />
                     <AnimatePresence mode="wait" initial={false}>
                       {isPlaying ? (
                         <motion.div
                           key="pause"
-                          initial={{ scale: 0.5, opacity: 0, rotate: -45 }}
-                          animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                          exit={{ scale: 0.5, opacity: 0, rotate: 45 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                          className="w-full h-full flex items-center justify-center text-white"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="text-[#050A24]"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#00B4D8]">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+                            <path fillRule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clipRule="evenodd" />
                           </svg>
                         </motion.div>
                       ) : (
                         <motion.div
                           key="play"
-                          initial={{ scale: 0.5, opacity: 0, rotate: 45 }}
-                          animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                          exit={{ scale: 0.5, opacity: 0, rotate: -45 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                          className="w-full h-full flex items-center justify-center text-white"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="text-[#050A24] pl-1"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white translate-x-[2px]">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 0 1 0 1.971l-11.54 6.347a1.125 1.125 0 0 1-1.667-.985V5.653z" />
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+                            <path fillRule="evenodd" d="M4.5 5.653c0-1.077 1.177-1.74 2.113-1.189l12.43 7.347c.928.549.928 1.829 0 2.378L6.613 21.536c-.936.551-2.113-.112-2.113-1.189V5.653Z" clipRule="evenodd" />
                           </svg>
                         </motion.div>
                       )}
@@ -997,34 +980,6 @@ const FullPlayer: React.FC = () => {
                       <span className="absolute top-[2px] right-[2px] text-[8px] font-black text-[#050A24] rounded-full w-4 h-4 flex items-center justify-center bg-[#00B4D8] shadow-sm shadow-[#00B4D8]/50">
                         1
                       </span>
-                    )}
-                  </button>
-
-                  {/* Lyrics Toggle Button */}
-                  <button
-                    onClick={() => setActiveView(activeView === "lyrics" ? "player" : "lyrics")}
-                    className={cn(
-                      "relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full bg-transparent hover:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 border-0 outline-none focus:outline-none",
-                      activeView === "lyrics" ? "text-[#00B4D8]" : "text-[#9AA0AE]"
-                    )}
-                  >
-                    <Mic2 className="w-[20px] h-[20px] sm:w-[28px] sm:h-[28px] md:w-[32px] md:h-[32px]" />
-                    {activeView === "lyrics" && (
-                      <span className="absolute bottom-[2px] sm:bottom-[4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#00B4D8] rounded-full" />
-                    )}
-                  </button>
-
-                  {/* Equalizer Toggle Button */}
-                  <button
-                    onClick={() => setActiveView(activeView === "equalizer" ? "player" : "equalizer")}
-                    className={cn(
-                      "relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full bg-transparent hover:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 border-0 outline-none focus:outline-none",
-                      activeView === "equalizer" ? "text-[#00B4D8]" : "text-[#9AA0AE]"
-                    )}
-                  >
-                    <Sliders className="w-[20px] h-[20px] sm:w-[28px] sm:h-[28px] md:w-[32px] md:h-[32px]" />
-                    {activeView === "equalizer" && (
-                      <span className="absolute bottom-[2px] sm:bottom-[4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#00B4D8] rounded-full" />
                     )}
                   </button>
                 </div>
