@@ -128,7 +128,7 @@ const SectionWrapper = ({
 }) => {
   const skeletonClass = skeletonVariant === 'row' 
     ? "w-[280px] sm:w-[320px] flex-shrink-0" 
-    : "w-[140px] sm:w-[170px] flex-shrink-0";
+    : "w-[170px] sm:w-[200px] flex-shrink-0";
     
   return (
     <section className="space-y-4">
@@ -596,12 +596,6 @@ const Discover: React.FC = () => {
       {/* Main Content Sections */}
       <div className="w-full max-w-full pb-32 space-y-16 mt-8 md:mt-12">
           {/* Sections placeholder */}
-          <SectionWrapper title="Artist Discography" isLoading={isLoading}>
-              {MOCK_ALBUMS.slice(0, 5).map((album, idx) => (
-                  <AlbumCard key={album.id} album={album} index={idx} className="w-[140px] sm:w-[170px] flex-shrink-0" />
-              ))}
-          </SectionWrapper>
-          
           <SectionWrapper title="Top Artist Tracks" isLoading={isLoading} skeletonVariant="row">
               {trendingTracks.map(track => (
                   <TrackCard key={track.id} track={track} variant="row" className="w-[280px] sm:w-[320px] flex-shrink-0" />
@@ -610,7 +604,7 @@ const Discover: React.FC = () => {
           
           <SectionWrapper title="Top Artist NFTs" isLoading={isLoading} skeletonVariant="default">
               {featuredNFTReleases.map(nft => (
-                  <NFTCard key={nft.id} nft={nft} className="w-[140px] sm:w-[170px] flex-shrink-0" />
+                  <NFTCard key={nft.id} nft={nft} className="w-[170px] sm:w-[200px] flex-shrink-0" />
               ))}
           </SectionWrapper>
           
@@ -622,19 +616,19 @@ const Discover: React.FC = () => {
           
           <SectionWrapper title="Featured Playlist" isLoading={isLoading} skeletonVariant="compact">
               {allUserPlaylists.slice(0, 5).map(playlist => (
-                  <PlaylistCard key={playlist.id} playlist={playlist} className="w-[140px] sm:w-[170px] flex-shrink-0" />
+                  <PlaylistCard key={playlist.id} playlist={playlist} className="w-[170px] sm:w-[200px] flex-shrink-0" />
               ))}
           </SectionWrapper>
           
           <SectionWrapper title="Similar Artists" isLoading={isLoading} skeletonVariant="compact">
               {emergingArtists.map(artist => (
-                  <ArtistCard key={artist.uid} artist={artist} className="w-[120px] sm:w-[140px] flex-shrink-0" />
+                  <ArtistCard key={artist.uid} artist={artist} className="w-[170px] sm:w-[200px] flex-shrink-0" />
               ))}
           </SectionWrapper>
           
           <SectionWrapper title="Recommended" isLoading={isLoading} skeletonVariant="default">
               {recommendedTracks.map(track => (
-                  <TrackCard key={track.id} track={track} className="w-[140px] sm:w-[170px] flex-shrink-0" />
+                  <TrackCard key={track.id} track={track} className="w-[170px] sm:w-[200px] flex-shrink-0" />
               ))}
           </SectionWrapper>
       </div>

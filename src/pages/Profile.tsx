@@ -72,6 +72,7 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
+import { updateEngagementScore } from "@/services/engagementService";
 import { BadgeSystem } from '@/components/BadgeSystem';
 import { JamPointsTracker } from '@/components/JamPointsTracker';
 
@@ -241,6 +242,10 @@ const Profile: React.FC = () => {
  content: newPostContent || `Listening to ${currentTrack?.title}`,
  trackId: currentTrack?.id,
  });
+
+ if (user) {
+   updateEngagementScore(user.uid, 5);
+ }
 
  setNewPostContent('');
  addNotification('Signal broadcasted successfully', 'success');
@@ -873,6 +878,12 @@ const Profile: React.FC = () => {
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">JAM Balance</span>
               <span className="text-lg font-black text-white group-hover:text-amber-500 transition-colors metric">
                 {(userProfile?.jamBalance || 0).toLocaleString()} <span className="text-[10px] text-amber-500 font-sans">JAM</span>
+              </span>
+            </div>
+            <div className="flex justify-between items-center group">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Engagement Score</span>
+              <span className="text-lg font-black text-white transition-colors metric">
+                {(localUser.fanEngagementScore || 0).toLocaleString()}
               </span>
             </div>
           </div>

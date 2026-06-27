@@ -5,6 +5,7 @@ import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp,
 import { Trash2, MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { getPlaceholderImage } from '@/lib/utils';
+import { updateEngagementScore } from '@/services/engagementService';
 
 interface Comment {
   id: string;
@@ -66,6 +67,7 @@ export default function CommentsSection({ targetId, targetType }: CommentsSectio
         text: newComment.trim(),
         createdAt: serverTimestamp()
       });
+      updateEngagementScore(auth.currentUser.uid, 2); // 2 points for commenting
       setNewComment('');
       addNotification("Comment posted", "success");
     } catch (error) {

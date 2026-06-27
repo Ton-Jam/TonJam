@@ -17,6 +17,7 @@
         "xp": { "type": "number" },
         "collectorTier": { "type": "string", "enum": ["Bronze", "Silver", "Gold", "Platinum", "Legend"] },
         "badges": { "type": "array", "items": { "type": "string" } },
+        "fanEngagementScore": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "name", "email"]
@@ -389,6 +390,20 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "nftId", "reporterId", "reason", "status", "createdAt"]
+    },
+    "EqPreset": {
+      "title": "EqPreset",
+      "description": "User saved equalizer preset",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "bass": { "type": "number" },
+        "mids": { "type": "number" },
+        "treble": { "type": "number" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "name", "bass", "mids", "treble", "userId"]
     }
   },
   "firestore": {
@@ -431,6 +446,10 @@
     "/users/{userId}": {
       "schema": "User",
       "description": "User profiles"
+    },
+    "/users/{userId}/eqPresets/{presetId}": {
+      "schema": "EqPreset",
+      "description": "User saved equalizer presets"
     },
     "/tracks/{trackId}": {
       "schema": "Track",

@@ -1,3 +1,4 @@
+import { EqualizerView } from "./EqualizerView";
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useAudio } from "@/context/AudioContext";
 import {
@@ -185,7 +186,7 @@ const FullPlayer: React.FC = () => {
   };
 
   const [activeView, setActiveView] = useState<
-    "player" | "lyrics" | "comments" | "artist" | "nft" | "krupy" | "ambient"
+    "player" | "lyrics" | "comments" | "artist" | "nft" | "krupy" | "ambient" | "equalizer"
   >("player");
   const [visualizerVariant, setVisualizerVariant] = useState<
     "bars" | "circle" | "particles" | "waves"
@@ -998,6 +999,34 @@ const FullPlayer: React.FC = () => {
                       </span>
                     )}
                   </button>
+
+                  {/* Lyrics Toggle Button */}
+                  <button
+                    onClick={() => setActiveView(activeView === "lyrics" ? "player" : "lyrics")}
+                    className={cn(
+                      "relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full bg-transparent hover:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 border-0 outline-none focus:outline-none",
+                      activeView === "lyrics" ? "text-[#00B4D8]" : "text-[#9AA0AE]"
+                    )}
+                  >
+                    <Mic2 className="w-[20px] h-[20px] sm:w-[28px] sm:h-[28px] md:w-[32px] md:h-[32px]" />
+                    {activeView === "lyrics" && (
+                      <span className="absolute bottom-[2px] sm:bottom-[4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#00B4D8] rounded-full" />
+                    )}
+                  </button>
+
+                  {/* Equalizer Toggle Button */}
+                  <button
+                    onClick={() => setActiveView(activeView === "equalizer" ? "player" : "equalizer")}
+                    className={cn(
+                      "relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full bg-transparent hover:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 border-0 outline-none focus:outline-none",
+                      activeView === "equalizer" ? "text-[#00B4D8]" : "text-[#9AA0AE]"
+                    )}
+                  >
+                    <Sliders className="w-[20px] h-[20px] sm:w-[28px] sm:h-[28px] md:w-[32px] md:h-[32px]" />
+                    {activeView === "equalizer" && (
+                      <span className="absolute bottom-[2px] sm:bottom-[4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#00B4D8] rounded-full" />
+                    )}
+                  </button>
                 </div>
 
                 {/* Dynamic Bottom Utility Accessories Row - No borders */}
@@ -1048,6 +1077,10 @@ const FullPlayer: React.FC = () => {
                   </div>
                 </div>
               </div>
+              <div className="w-full mt-6 space-y-4">
+                {currentTrack.lyrics && <LyricsView lyrics={currentTrack.lyrics} />}
+                <EqualizerView />
+              </div>
             </motion.div>
           </TabsContent>
 
@@ -1055,7 +1088,7 @@ const FullPlayer: React.FC = () => {
           <TabsList
             className={cn(
               "grid w-full max-w-lg mx-auto border-none h-12 p-1 mb-6 relative z-10 rounded-xl",
-              currentTrack.isNFT ? "grid-cols-7" : "grid-cols-6",
+              currentTrack.isNFT ? "grid-cols-6" : "grid-cols-5",
             )}
           >
             <TabsTrigger
@@ -1064,14 +1097,6 @@ const FullPlayer: React.FC = () => {
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4.5 h-4.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m9 9 10.5-3m0 0v11.25m0-11.25L9 9m10.5-3h-1.5M9 9H7.5M9 9v11.25m0 0A3 3 0 1 1 6 17.25M19.5 14.25a3 3 0 1 1-3-3" />
-              </svg>
-            </TabsTrigger>
-            <TabsTrigger
-              value="lyrics"
-              className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white font-bold py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer flex items-center justify-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4.5 h-4.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
               </svg>
             </TabsTrigger>
             <TabsTrigger

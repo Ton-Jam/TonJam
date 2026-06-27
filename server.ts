@@ -15,6 +15,58 @@ import { verifyFirebaseToken, AuthRequest } from './src/middleware/authMiddlewar
 dotenv.config();
 
 let aiInstance: GoogleGenAI | null = null;
+let wrappedModels: any = null;
+let lastRequestTime = 0;
+let isGeminiRateLimited = false;
+let lastRateLimitTime = 0;
+const GEMINI_QUEUE_DELAY = 60000; // 60 seconds between requests
+const CIRCUIT_BREAKER_DURATION = 300000; // 5 minutes circuit breaker
+
+const geminiCache = new Map<string, { response: any, timestamp: number }>();
+const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
+
+async function rateLimitedGeminiCall<T>(fn: () => Promise<T>, cacheKey?: string): Promise<T> {
+    if (cacheKey && geminiCache.has(cacheKey)) {
+        const cached = geminiCache.get(cacheKey)!;
+        if (Date.now() - cached.timestamp < CACHE_DURATION) {
+            console.log("Returning cached Gemini response");
+            return cached.response as T;
+        }
+    }
+
+    if (isGeminiRateLimited) {
+        if (Date.now() - lastRateLimitTime < CIRCUIT_BREAKER_DURATION) {
+            throw new Error("Circuit breaker open: Gemini API rate limited.");
+        } else {
+            isGeminiRateLimited = false;
+        }
+    }
+
+    const now = Date.now();
+    const timeSinceLast = now - lastRequestTime;
+    
+    if (timeSinceLast < GEMINI_QUEUE_DELAY) {
+        const delay = GEMINI_QUEUE_DELAY - timeSinceLast;
+        console.log(`Gemini rate limiting, delaying by ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    
+    lastRequestTime = Date.now();
+    try {
+        const result = await fn();
+        if (cacheKey) {
+            geminiCache.set(cacheKey, { response: result, timestamp: Date.now() });
+        }
+        return result;
+    } catch (error: any) {
+        if (error.status === 429 || error.code === 429) {
+            isGeminiRateLimited = true;
+            lastRateLimitTime = Date.now();
+        }
+        throw error;
+    }
+}
+
 function getGeminiClient(): GoogleGenAI {
     if (!aiInstance) {
         const apiKey = process.env.GEMINI_API_KEY;
@@ -29,13 +81,25 @@ function getGeminiClient(): GoogleGenAI {
                 }
             }
         });
+        
+        // Wrap models.generateContent once
+        const originalModels = aiInstance.models;
+        const originalGenerateContent = originalModels.generateContent.bind(originalModels);
+        wrappedModels = {
+            ...originalModels,
+            generateContent: async (...args: any[]) => {
+                const prompt = args[0]?.contents?.[0]?.parts?.[0]?.text || JSON.stringify(args);
+                return rateLimitedGeminiCall(() => originalGenerateContent(...args), prompt);
+            }
+        };
     }
     return aiInstance;
 }
 
 const ai = {
     get models() {
-        return getGeminiClient().models;
+        getGeminiClient();
+        return wrappedModels;
     },
     get chats() {
         return getGeminiClient().chats;
@@ -119,11 +183,11 @@ async function startServer() {
         const { trackPerformance } = req.body;
         const prompt = `Based on this performance data: ${JSON.stringify(trackPerformance)}, suggest optimal royalty split adjustments to maximize engagement and retention. Provide 3 specific, actionable suggestions. Return JSON format { recommendations: string[] }. KEEP IT CONCISE.`;
         try {
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }],
                 config: { responseMimeType: "application/json" }
-            });
+            }));
             res.json(JSON.parse(response.text!));
         } catch (error) {
             console.warn('Royalty Advice Gemini call failed; serving smart local recommendation fallback:', error);
@@ -142,11 +206,11 @@ async function startServer() {
         const { auditData } = req.body;
         const prompt = `Analyze this royalty audit log data for any anomalous patterns, irregularities, or suspected missing payout events: ${JSON.stringify(auditData)}. Provide a concise summary of your findings as a list of points. If all looks normal, say "No anomalies detected". Return JSON format { findings: string[] }.`;
         try {
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }],
                 config: { responseMimeType: "application/json" }
-            });
+            }));
             res.json(JSON.parse(response.text!));
         } catch (error) {
             console.warn('Royalty Audit Analysis Gemini call failed; serving smart local audit fallback:', error);
@@ -553,10 +617,10 @@ async function startServer() {
                 Return ONLY the bio text, nothing else.
             `;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }]
-            });
+            }));
             const generatedBio = response.text?.trim() || '';
             res.json({ bio: generatedBio });
         } catch (error: any) {

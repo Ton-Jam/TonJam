@@ -148,6 +148,14 @@ service cloud.firestore {
         && data.status in ['pending', 'reviewed', 'resolved'];
     }
 
+    function isValidEqPreset(data) {
+      return data.name is string && data.name.size() <= 100
+        && data.bass is number && data.bass >= 0 && data.bass <= 100
+        && data.mids is number && data.mids >= 0 && data.mids <= 100
+        && data.treble is number && data.treble >= 0 && data.treble <= 100
+        && data.userId is string && data.userId.size() <= 128;
+    }
+
     function isValidJamMessage(data) {
       return data.senderId is string && data.senderId.size() <= 128
         && data.senderName is string && data.senderName.size() <= 100
@@ -221,7 +229,7 @@ service cloud.firestore {
             'likedTrackIds', 'followedUserIds', 'role', 'isVerifiedArtist', 'following', 
             'earnings', 'streamingEarnings', 'nftEarnings', 'jamBalance', 'stakedJam', 
             'pendingJamRewards', 'tjBalance', 'lastStakingUpdate', 'isPremium', 'royaltyConfig',
-            'isVerified', 'verificationStatus', 'xp', 'collectorTier', 'badges'
+            'isVerified', 'verificationStatus', 'xp', 'collectorTier', 'badges', 'fanEngagementScore'
           ])
         ) || (
           // System/Public updates across users (like following, stream earnings)
@@ -463,6 +471,13 @@ service cloud.firestore {
     match /users/{userId}/tasks/{taskId} {
       allow read: if isOwner(userId) || isAdmin();
       allow write: if isOwner(userId) || isAdmin();
+    }
+
+    match /users/{userId}/eqPresets/{presetId} {
+      allow read: if isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && isValidEqPreset(incoming()) && isValidId(presetId) && incoming().userId == userId;
+      allow update: if isSignedIn() && isOwner(userId) && isValidEqPreset(incoming()) && incoming().userId == userId;
+      allow delete: if isSignedIn() && isOwner(userId);
     }
 
     // 🚀 ADMIN CONTROLLED

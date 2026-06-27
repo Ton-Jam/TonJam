@@ -10,6 +10,7 @@ import { createActivityPost } from '@/services/socialService';
 import { getPlaceholderImage, cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { buyNFT, getActiveListingForNFT } from '@/services/marketplaceService';
+import { updateEngagementScore } from '@/services/engagementService';
 import { GasFeeDisplay } from '@/components/GasFeeDisplay';
 import { toast } from 'sonner';
 import { monitorTransaction } from '@/services/tonService';
@@ -132,6 +133,11 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
       }, true);
       
       addUserNFT(updatedNFT, true);
+
+      // Add points for purchasing
+      if (userProfile.uid) {
+        updateEngagementScore(userProfile.uid, 50); // 50 points for purchasing
+      }
 
       // Create a sophisticated activity post
       await createActivityPost(

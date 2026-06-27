@@ -384,6 +384,7 @@ export interface UserProfile {
   location?: string;
   website?: string;
   isPremium?: boolean;
+  fanEngagementScore?: number;
   tonBalance?: number;
   jamBalance?: number;
   tjBalance?: number;

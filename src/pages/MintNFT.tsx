@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { MintingProgress } from '@/components/MintingProgress';
 import { BackButton } from '@/components/BackButton';
+
 import { Hammer, FileAudio, CloudUpload, Image, Rocket, Check, Plus, Trash2, ArrowLeft, Tag, Gavel } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -70,6 +72,7 @@ const MintNFT: React.FC = () => {
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [mintStatus, setMintStatus] = useState("");
 
   const {
     register,
@@ -243,6 +246,7 @@ const MintNFT: React.FC = () => {
     }
     setLoading(true);
     setUploadProgress(0);
+    setMintStatus("Preparing...");
     try {
       // 0. Double check validation if files are being uploaded
       if (!data.isBundle && data.audioFile instanceof File) {
@@ -270,6 +274,7 @@ const MintNFT: React.FC = () => {
 
       if (!data.isBundle && data.audioFile instanceof File) {
         addNotification("Adding audio file...", "info");
+        setMintStatus("Uploading audio...");
         const audioRes = await uploadAudio(data.audioFile, (p) => { audioProg = p; updateOverallProgress(); });
         if (!audioRes?.downloadUrl) {
           throw new Error("Audio upload failed: Download URL missing from response");
@@ -282,6 +287,7 @@ const MintNFT: React.FC = () => {
 
       if (data.coverFile instanceof File) {
         addNotification("Adding cover image...", "info");
+        setMintStatus("Uploading cover art...");
         const coverRes = await uploadCover(data.coverFile, (p) => { coverProg = p; updateOverallProgress(); });
         if (!coverRes?.downloadUrl) {
           throw new Error("Cover art upload failed: Download URL missing from response");
@@ -355,6 +361,7 @@ const MintNFT: React.FC = () => {
       };
 
       addNotification("Synchronizing metadata...", "info");
+      setMintStatus("Synchronizing metadata...");
       const metadataRes = await uploadMetadata(metadata);
       if (!metadataRes?.downloadUrl) {
         throw new Error("Metadata upload failed: Download URL missing from response");
@@ -373,15 +380,28 @@ const MintNFT: React.FC = () => {
         ],
       };
       
+      setMintStatus("Waiting for wallet confirmation...");
       const txRes = await tonConnectUI.sendTransaction(transaction);
       const txId = txRes.boc; // Assuming BOC as transaction ID for simulation
       
       const toastId = toast.loading("Minting started...");
       await monitorTransaction(txId, (status) => {
-        if (status === 'pending') toast.loading("Confirming transaction...", { id: toastId });
-        else if (status === 'confirming') toast.loading("Blockchain confirming...", { id: toastId });
-        else if (status === 'success') toast.success("Minting successful!", { id: toastId });
-        else if (status === 'failed') toast.error("Minting failed.", { id: toastId });
+        if (status === 'pending') {
+          toast.loading("Confirming transaction...", { id: toastId });
+          setMintStatus("Confirming transaction...");
+        }
+        else if (status === 'confirming') {
+          toast.loading("Blockchain confirming...", { id: toastId });
+          setMintStatus("Blockchain confirming...");
+        }
+        else if (status === 'success') {
+          toast.success("Minting successful!", { id: toastId });
+          setMintStatus("Minting successful!");
+        }
+        else if (status === 'failed') {
+          toast.error("Minting failed.", { id: toastId });
+          setMintStatus("Minting failed.");
+        }
       });
 
       const newNFT: NFTItem = {
@@ -810,9 +830,9 @@ const MintNFT: React.FC = () => {
                     <textarea {...register('description')} rows={5} className="w-full bg-muted/50 rounded-[4px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-muted-foreground/90 leading-relaxed resize-none" aria-label="AI-Generated Artifact Lore" />
                     {loading && (
                       <div className="absolute inset-0 bg-background/40 backdrop-blur-sm rounded-[4px] flex items-center justify-center">
-                        <div className="flex flex-col items-center gap-4">
+                        <div className="flex flex-col items-center gap-4 w-full px-8">
                           <img src={APP_LOGO} className="w-10 h-10 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." referrerPolicy="no-referrer" />
-                          <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">AI Lore Generation...</p>
+                          <MintingProgress progress={uploadProgress} status={mintStatus} />
                         </div>
                       </div>
                     )}

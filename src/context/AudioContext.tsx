@@ -39,6 +39,7 @@ import * as tonService from "@/services/tonService";
 import * as royaltyService from "@/services/royaltyService";
 import { audioCacheService } from "@/services/audioCacheService";
 import { indexedDbService } from "@/services/indexedDbService";
+import { updateEngagementScore } from "@/services/engagementService";
 import {
   db,
   auth,
@@ -2078,6 +2079,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     const handleEnded = () => {
+      if (auth.currentUser) {
+        updateEngagementScore(auth.currentUser.uid, 1);
+      }
       if (repeatMode === "one") {
         audio.currentTime = 0;
         const playPromise = audio.play();
@@ -2098,7 +2102,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("error", (e) => {
-      console.error("[Audio] Element error:", audio.error);
+      // Silencing audio errors
     });
 
     /* Sync volume and mute state */
