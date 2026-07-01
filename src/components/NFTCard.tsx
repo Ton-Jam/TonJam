@@ -13,6 +13,7 @@ import SkeletonCard from './SkeletonCard';
 import NFTOptionsModal from './NFTOptionsModal';
 import ManageNFTModal from './ManageNFTModal';
 import { AuctionCountdownTimer } from './AuctionCountdownTimer';
+import { MarqueeTitle } from './MarqueeTitle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -306,7 +307,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           whileHover={{ y: -4, scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          className={`group flex items-center gap-4 p-3 rounded-[4px] bg-muted/10 border border-transparent hover:border-white/5 cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${className}`}
+          className={`group flex items-center gap-4 p-3 rounded-[4px] bg-muted/10 border border-transparent hover:border-blue-500/40 hover:shadow-[0_8px_25px_rgba(59,130,246,0.18)] hover:bg-muted/20 transition-all duration-300 cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${className}`}
           onClick={handleCardClick}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -331,26 +332,26 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                    <div className={`hidden sm:block w-1 h-1 rounded-full bg-gradient-to-r ${getRarityColor(rarity)}`}></div>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                <div className="flex items-center gap-1">
-                  <p 
-                    className="text-[7px] font-semibold text-foreground/80 uppercase tracking-widest truncate hover:text-blue-500 transition-all"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
-                      if (artist) navigate(`/artist/${artist.uid}`);
-                    }}
-                  >
-                    {nft.creator}
-                  </p>
+              <div className="flex items-center gap-2 mt-0.5 min-w-0 w-full flex-wrap">
+                <div 
+                  className="flex items-center gap-1 min-w-0 max-w-[120px] cursor-pointer hover:text-blue-500 transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                    if (artist) navigate(`/artist/${artist.uid}`);
+                  }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <MarqueeTitle text={nft.creator} className="text-[7px] font-semibold text-foreground/80 uppercase tracking-widest" />
+                  </div>
                   {isVerified && (
-                    <span title="Verified Creator">
+                    <span title="Verified Creator" className="shrink-0">
                       <BadgeCheck className="w-2.5 h-2.5 text-blue-400 fill-current inline-block" />
                     </span>
                   )}
                 </div>
                 {collectionName && (
-                  <span className="text-[6.5px] text-indigo-400 font-bold uppercase tracking-widest flex items-center gap-0.5">
+                  <span className="text-[6.5px] text-indigo-400 font-bold uppercase tracking-widest flex items-center gap-0.5 shrink-0">
                     • <Layers className="w-1.5 h-1.5 inline" /> {collectionName}
                   </span>
                 )}
@@ -413,11 +414,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             layout
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -4, scale: 1.02 }}
+            whileHover={{ y: -6, scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className={cn(
-              "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent border border-transparent w-full",
+              "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent border border-transparent hover:border-blue-500/50 hover:bg-white/[0.04] hover:shadow-[0_8px_30px_rgba(59,130,246,0.22)] transition-all duration-300 w-full",
               className
             )}
             onClick={handleCardClick}
@@ -484,13 +485,24 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   <h3 className={`text-[9.5px] font-semibold uppercase tracking-tighter line-clamp-2 whitespace-normal break-words leading-tight ${isActive ? 'text-blue-500' : 'text-foreground'}`}>
                     {nft.title}
                   </h3>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                     <p className="text-[8px] font-medium text-foreground/80 uppercase tracking-[0.1em]">{nft.creator}</p>
-                     {isVerified && (
-                        <span title="Verified Creator"><BadgeCheck className="w-3 h-3 text-blue-400 fill-current inline-block" /></span>
-                     )}
+                  <div className="flex items-center gap-1.5 mt-0.5 min-w-0 w-full flex-wrap">
+                     <div 
+                       className="flex items-center gap-1 min-w-0 max-w-[120px] cursor-pointer hover:text-blue-500 transition-all animate-none"
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                         if (artist) navigate(`/artist/${artist.uid}`);
+                       }}
+                     >
+                       <div className="flex-1 min-w-0">
+                         <MarqueeTitle text={nft.creator} className="text-[8px] font-medium text-foreground/80 uppercase tracking-[0.1em]" />
+                       </div>
+                       {isVerified && (
+                          <span title="Verified Creator" className="shrink-0"><BadgeCheck className="w-3 h-3 text-blue-400 fill-current inline-block" /></span>
+                       )}
+                     </div>
                      {collectionName && (
-                        <span className="text-[7.5px] text-indigo-400 font-bold uppercase tracking-[0.1em] flex items-center gap-0.5" title={`Collection: ${collectionName}`}>
+                        <span className="text-[7.5px] text-indigo-400 font-bold uppercase tracking-[0.1em] flex items-center gap-0.5 shrink-0" title={`Collection: ${collectionName}`}>
                            • <Layers className="w-2.5 h-2.5 inline" /> {collectionName}
                         </span>
                      )}

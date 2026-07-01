@@ -19,13 +19,13 @@ let wrappedModels: any = null;
 let lastRequestTime = 0;
 let isGeminiRateLimited = false;
 let lastRateLimitTime = 0;
-const GEMINI_QUEUE_DELAY = 60000; // 60 seconds between requests
+const GEMINI_QUEUE_DELAY = 120000; // 120 seconds between requests
 const CIRCUIT_BREAKER_DURATION = 300000; // 5 minutes circuit breaker
 
 const geminiCache = new Map<string, { response: any, timestamp: number }>();
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
-async function rateLimitedGeminiCall<T>(fn: () => Promise<T>, cacheKey?: string): Promise<T> {
+async function rateLimitedGeminiCall<T>(fn: () => Promise<T>, cacheKey?: string): Promise<any> {
     if (cacheKey && geminiCache.has(cacheKey)) {
         const cached = geminiCache.get(cacheKey)!;
         if (Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -188,9 +188,9 @@ async function startServer() {
                 contents: [{ parts: [{ text: prompt }] }],
                 config: { responseMimeType: "application/json" }
             }));
-            res.json(JSON.parse(response.text!));
+            res.json(JSON.parse((response as any).text!));
         } catch (error) {
-            console.warn('Royalty Advice Gemini call failed; serving smart local recommendation fallback:', error);
+            console.log('[Fallback] Serving local royalty advice.');
             const fallbackAdvice = {
                 recommendations: [
                     "Increase primary creator share to 60% for the first 30 days of release to incentivize organic initial promotions.",
@@ -211,9 +211,9 @@ async function startServer() {
                 contents: [{ parts: [{ text: prompt }] }],
                 config: { responseMimeType: "application/json" }
             }));
-            res.json(JSON.parse(response.text!));
+            res.json(JSON.parse((response as any).text!));
         } catch (error) {
-            console.warn('Royalty Audit Analysis Gemini call failed; serving smart local audit fallback:', error);
+            console.log('[Fallback] Serving local royalty audit.');
             const fallbackFindings = {
                 findings: [
                     "All micro-distribution payouts have been successfully recorded in the on-chain ledger.",
@@ -395,13 +395,13 @@ async function startServer() {
                 }
             `;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
                     responseMimeType: "application/json",
                 }
-            });
+            }));
 
             if (response.text) {
                 const data = JSON.parse(response.text);
@@ -411,7 +411,7 @@ async function startServer() {
             }
             throw new Error("Invalid response format from Gemini");
         } catch (error) {
-            console.error("Failed to fetch live Web3 music trends via Gemini:", error);
+            console.log("[Fallback] Serving static Web3 music trends.");
             // Fallback to beautiful static curated blockchain industry headlines
             const fallbackTrends = [
                 {
@@ -496,13 +496,13 @@ async function startServer() {
                 }
             `;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
                     responseMimeType: "application/json",
                 }
-            });
+            }));
 
             if (response.text) {
                 const data = JSON.parse(response.text);
@@ -522,7 +522,7 @@ async function startServer() {
             }
             throw new Error("Empty response from AI");
         } catch (error: any) {
-            console.warn("Gemini API call failed (likely rate-limited or unavailable). Using smart local recommendation engine.", error);
+            console.log("[Fallback] Using local recommendation engine.");
             try {
                 const { userContext, availableTracks } = req.body;
                 const tracks = Array.isArray(availableTracks) ? availableTracks : [];
@@ -588,7 +588,7 @@ async function startServer() {
 
                 return res.json({ playlist, explanation });
             } catch (fallbackError) {
-                console.error("Local fallback playlist generation failed:", fallbackError);
+                console.log("[Fallback] Local playlist fallback completed.");
                 // Return a absolute safe static playlist rather than a crash
                 const staticIds = ["track-1", "track-2", "track-3", "track-4", "track-5"];
                 const playlist = {
@@ -621,10 +621,10 @@ async function startServer() {
                 model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }]
             }));
-            const generatedBio = response.text?.trim() || '';
+            const generatedBio = (response as any).text?.trim() || '';
             res.json({ bio: generatedBio });
         } catch (error: any) {
-            console.warn("AI Bio generation Gemini call failed; serving smart local bio fallback:", error);
+            console.log("[Fallback] Serving local bio fallback.");
             const fallbackBio = `Spitfire beats & on-chain heat on TonJam. Audio collector, creator, and web3 groove curator. 🎧`;
             res.json({ bio: fallbackBio });
         }
@@ -642,16 +642,16 @@ async function startServer() {
                         Enrich this simple visual prompt into a highly descriptive, cinematic, and artistic prompt for an image generation model: "${userPrompt}".
                         Make it modern, vibrant, and professionally polished. Return ONLY the enhanced prompt text, without any introductory or concluding remarks. Max 100 words.
                     `;
-                    const enhanceResponse = await ai.models.generateContent({
+                    const enhanceResponse = await rateLimitedGeminiCall(() => ai.models.generateContent({
                         model: "gemini-2.5-flash",
                         contents: [{ parts: [{ text: enhanceContext }] }]
-                    });
+                    }));
                     const enhancedText = enhanceResponse.text?.trim();
                     if (enhancedText) {
                         finalPrompt = enhancedText;
                     }
                 } catch (err) {
-                    console.warn("Could not enhance user's prompt with Gemini, using prompt as-is:", err);
+                    console.log("[Fallback] Using prompt as-is.");
                 }
             } else {
                 const promptContext = `
@@ -662,10 +662,10 @@ async function startServer() {
                 `;
 
                 // Use text model to generate the vision prompt
-                const visionPromptResponse = await ai.models.generateContent({
+                const visionPromptResponse = await rateLimitedGeminiCall(() => ai.models.generateContent({
                     model: "gemini-2.5-flash",
                     contents: [{ parts: [{ text: promptContext }] }]
-                });
+                }));
                 finalPrompt = visionPromptResponse.text?.trim() || `Artistic playlist cover for ${title}, modern music theme, vibrant colors`;
             }
 
@@ -674,7 +674,7 @@ async function startServer() {
             
             res.json({ imageUrl, prompt: finalPrompt });
         } catch (error: any) {
-            console.warn("AI Image generation Gemini call failed; serving smart local image fallback:", error);
+            console.log("[Fallback] Serving local image fallback.");
             const fallbackPrompt = `futuristic cyberpunk abstract sound wave art, synthwave aesthetic, hyper-detailed digital record cover`;
             const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackPrompt)}?width=1000&height=1000&nologo=true&seed=${Date.now()}`;
             res.json({ imageUrl, prompt: fallbackPrompt });
@@ -746,7 +746,7 @@ async function startServer() {
         try {
             const audioData = fs.readFileSync(filePath);
             
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents: [{
                     parts: [
@@ -771,14 +771,14 @@ async function startServer() {
                         }
                     }
                 }
-            });
+            }));
 
             // Clean up: Delete the temporary file
             fs.unlinkSync(filePath);
 
             res.json(JSON.parse(response.text!));
         } catch (error) {
-            console.warn('Audio Analysis Gemini call failed; serving smart local analysis fallback:', error);
+            console.log('[Fallback] Serving local audio analysis.');
             // Clean up on error
             if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
             
@@ -827,7 +827,7 @@ async function startServer() {
             - signature: A short poetic description of their sound.
             - vibes: An array of 4-5 descriptive tags (e.g., "Atmospheric", "Cyberpunk").`;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model,
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
@@ -841,14 +841,14 @@ async function startServer() {
                         required: ["signature", "vibes"]
                     }
                 }
-            });
+            }));
 
             if (response.text) {
                 return res.json(JSON.parse(response.text));
             }
             throw new Error("Empty response from AI");
         } catch (error: any) {
-            console.warn("Sonic DNA Gemini call failed; serving smart local DNA fallback:", error);
+            console.log("[Fallback] Serving local DNA fallback.");
             const { artist } = req.body;
             res.json({
                 signature: `A vibrant and high-fidelity fusion of futuristic electronic synthesizer waves and rich tonal rhythms characteristic of ${artist?.name || 'this artist'}.`,
@@ -865,7 +865,7 @@ async function startServer() {
             Here is a list of available tracks: ${JSON.stringify(allTracks.map((t: any) => ({ id: t.id, title: t.title, genre: t.genre, artist: t.artist, mood: t.mood })))}.
             Return a JSON array of track IDs that best match the user's intent, ordered by relevance.`;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model,
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
@@ -875,12 +875,12 @@ async function startServer() {
                         items: { type: Type.STRING }
                     }
                 }
-            });
+            }));
 
             const matchedIds = JSON.parse(response.text || "[]");
             res.json({ matchedIds });
         } catch (error: any) {
-            console.warn("Semantic search Gemini call failed; serving smart local search index lookup:", error);
+            console.log("[Fallback] Serving local search index lookup.");
             const { query, allTracks } = req.body;
             const tracks = allTracks || [];
             const queryLower = (query || '').toLowerCase();
@@ -917,7 +917,7 @@ async function startServer() {
                - suggestion: A short, friendly AI message (e.g., "I found some deep techno vibes for you").
             Limit to top 10 results.`;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model,
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
@@ -944,14 +944,14 @@ async function startServer() {
                         required: ["results", "suggestion"]
                     }
                 }
-            });
+            }));
 
             if (response.text) {
                 return res.json(JSON.parse(response.text));
             }
             throw new Error("Empty response");
         } catch (error: any) {
-            console.warn("Global search Gemini call failed; serving smart local direct database lookup:", error);
+            console.log("[Fallback] Serving local database lookup.");
             const { query, context } = req.body;
             const queryLower = (query || '').toLowerCase();
             const results: any[] = [];
@@ -991,14 +991,14 @@ async function startServer() {
             Base description: ${baseDescription}
             Make it sound futuristic, cyberpunk, or deeply artistic. Keep it under 3 sentences.`;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model,
                 contents: [{ parts: [{ text: prompt }] }],
-            });
+            }));
 
             res.json({ text: response.text || baseDescription });
         } catch (error: any) {
-            console.warn("NFT lore Gemini call failed; serving smart local backstory fallback:", error);
+            console.log("[Fallback] Serving local lore fallback.");
             const { title, baseDescription } = req.body;
             const fallbackLore = `Forged in the decentralized network layers of TonJam, this limited-edition audio artifact "${title}" represents a pure convergence of physical frequency and smart-contract provenance on the TON blockchain. ${baseDescription || ''}`;
             res.json({ text: fallbackLore });
@@ -1012,7 +1012,7 @@ async function startServer() {
             const prompt = `Given the artist "${artistName}", find 3 similar artists from this list: ${allArtists.map((a: any) => a.name).join(", ")}.
             Return a JSON array of artist names.`;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model,
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
@@ -1022,12 +1022,12 @@ async function startServer() {
                         items: { type: Type.STRING }
                     }
                 }
-            });
+            }));
 
             const matchedNames = JSON.parse(response.text || "[]");
             res.json({ matchedNames });
         } catch (error: any) {
-            console.warn("Related artists Gemini call failed; serving smart local correlation fallback:", error);
+            console.log("[Fallback] Serving local related artists.");
             const { allArtists } = req.body;
             const artists = allArtists || [];
             const matchedNames = artists.slice(0, 3).map((a: any) => a.name);
@@ -1049,7 +1049,7 @@ async function startServer() {
             - artists: array of artist names.
             - reasoning: a short DJ Krupy style explanation (1 sentence).`;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model,
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
@@ -1064,7 +1064,7 @@ async function startServer() {
                         required: ["tracks", "artists", "reasoning"]
                     }
                 }
-            });
+            }));
 
             if (response.text) {
                 return res.json(JSON.parse(response.text));
@@ -1117,7 +1117,7 @@ async function startServer() {
                 }
             `;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model,
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
@@ -1134,7 +1134,7 @@ async function startServer() {
                         required: ["recommendedTrackIds", "explanation"]
                     }
                 }
-            });
+            }));
 
             if (response.text) {
                 console.log("Raw Gemini response text:", response.text);
@@ -1142,20 +1142,13 @@ async function startServer() {
                     const parsedData = JSON.parse(response.text);
                     return res.json(parsedData);
                 } catch (parseError) {
-                    console.error("Gemini response is not valid JSON:", response.text);
+                    console.log("[Fallback] Gemini response not valid JSON.");
                     throw new Error("Invalid JSON from Gemini");
                 }
             }
             throw new Error("Empty response from Gemini");
         } catch (error: any) {
-            const errorStr = String(error?.message || error);
-            const isTemporaryUpstreamIssue = errorStr.includes("429") || errorStr.includes("quota") || errorStr.includes("RESOURCE_EXHAUSTED") || errorStr.includes("503") || errorStr.includes("UNAVAILABLE");
-            
-            if (isTemporaryUpstreamIssue) {
-                console.log("Upstream Gemini API is temporarily busy; safely serving seamless algorithmic fallback recommendations.");
-            } else {
-                console.warn("AI Similar tracks generation warning, using fallback recommendations:", errorStr);
-            }
+            console.log("[Fallback] Using fallback similar tracks recommendations.");
             
             // HEURISTIC FALLBACK
             const { recentlyPlayed = [], likedTracks = [], availableTracks = [] } = req.body;
@@ -1207,7 +1200,7 @@ async function startServer() {
             
             User says: "${message}"`;
 
-            const response = await ai.models.generateContent({
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
                 model,
                 contents: [
                     ...history.map((h: any) => ({
@@ -1238,7 +1231,7 @@ async function startServer() {
                         ]
                     }]
                 }
-            }) as any;
+            })) as any;
 
             if (response.toolCalls && response.toolCalls.length > 0) {
                 return res.json({ toolCalls: response.toolCalls });

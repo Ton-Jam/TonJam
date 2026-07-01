@@ -354,6 +354,15 @@ const TrackCard: React.FC<TrackCardProps> = ({
         >
             <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0 shadow-sm border border-white/5 group-hover:border-blue-500/30 transition-colors">
               <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
+              
+              {/* Play Count Badge on Corner */}
+              {((track.streams !== undefined ? track.streams : track.playCount) || 0) > 0 && (
+                <div className="absolute top-0.5 right-0.5 bg-black/70 backdrop-blur-[2px] text-[7px] font-bold text-white px-1 py-0.2 rounded flex items-center gap-0.5 z-10 select-none">
+                  <Headphones className="w-2 h-2 text-blue-400" />
+                  <span>{formatNumber(track.streams !== undefined ? track.streams : (track.playCount || 0))}</span>
+                </div>
+              )}
+
               <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
                 <button onClick={handlePlay} className="text-white">
                   {track.tokenGating?.enabled && !hasAccess ? (
@@ -448,6 +457,14 @@ const TrackCard: React.FC<TrackCardProps> = ({
                     <div className="absolute top-1 left-1 bg-emerald-600/90 p-0.5 rounded-full">
                         <CheckCircle2 className="w-2 h-2 text-white" />
                     </div>
+                )}
+
+                {/* Play Count Badge on Corner */}
+                {((track.streams !== undefined ? track.streams : track.playCount) || 0) > 0 && (
+                  <div className="absolute top-0.5 right-0.5 bg-black/70 backdrop-blur-[2px] text-[7px] font-bold text-white px-1 py-0.2 rounded flex items-center gap-0.5 z-10 select-none">
+                    <Headphones className="w-2 h-2 text-blue-400" />
+                    <span>{formatNumber(track.streams !== undefined ? track.streams : (track.playCount || 0))}</span>
+                  </div>
                 )}
                 
                 <div className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100'}`}>
@@ -602,6 +619,14 @@ const TrackCard: React.FC<TrackCardProps> = ({
               className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
               onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }}
             />
+
+            {/* Play Count Badge on Corner */}
+            {((track.streams !== undefined ? track.streams : track.playCount) || 0) > 0 && (
+              <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-[2px] text-[8px] font-bold text-white px-1.5 py-0.5 rounded flex items-center gap-0.5 z-10 select-none shadow-md">
+                <Headphones className="w-2.5 h-2.5 text-blue-400" />
+                <span>{formatNumber(track.streams !== undefined ? track.streams : (track.playCount || 0))}</span>
+              </div>
+            )}
             
             <div className={`absolute inset-0 bg-black/40 transition-all duration-300 opacity-0 group-hover:opacity-100 ${isActive ? 'opacity-100' : ''}`}>
               <button 

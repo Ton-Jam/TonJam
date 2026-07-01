@@ -14,9 +14,12 @@ import {
   Twitter,
   Instagram,
   Send,
-  Globe
+  Globe,
+  SlidersHorizontal,
+  X
 } from 'lucide-react';
 
+import { FilterSection } from '@/components/FilterSection';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import ArtistListItem from '@/components/ArtistListItem';
@@ -39,6 +42,9 @@ const UserProfile: React.FC = () => {
   
   const [user, setUser] = useState<UserProfileType | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'activity' | 'network'>('overview');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState<'newest' | 'popular' | 'price-low' | 'price-high'>('newest');
+  const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -109,18 +115,36 @@ const UserProfile: React.FC = () => {
 
   const userPosts = useMemo(() => {
     if (!user) return [];
-    return posts.filter(p => p.userId === user.uid);
-  }, [user, posts]);
+    let list = posts.filter(p => p.userId === user.uid);
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(p => p.content?.toLowerCase().includes(q) || p.authorName?.toLowerCase().includes(q));
+    }
+    return list;
+  }, [user, posts, searchQuery]);
 
   const ownedNfts = useMemo(() => {
     if (!user) return [];
-    return allNFTs.filter(nft => nft.owner === user.walletAddress || nft.owner === user.name);
-  }, [user, allNFTs]);
+    let list = allNFTs.filter(nft => nft.owner === user.walletAddress || nft.owner === user.name);
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(nft => nft.title?.toLowerCase().includes(q) || nft.creator?.toLowerCase().includes(q));
+    }
+    if (sortOption === 'price-low') list.sort((a, b) => parseFloat(a.price || '0') - parseFloat(b.price || '0'));
+    if (sortOption === 'price-high') list.sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0'));
+    return list;
+  }, [user, allNFTs, searchQuery, sortOption]);
 
   const uploadedTracks = useMemo(() => {
     if (!user) return [];
-    return allTracks.filter(t => t.artistId === user.uid);
-  }, [user, allTracks]);
+    let list = allTracks.filter(t => t.artistId === user.uid);
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(t => t.title?.toLowerCase().includes(q) || t.genre?.toLowerCase().includes(q));
+    }
+    if (sortOption === 'popular') list.sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
+    return list;
+  }, [user, allTracks, searchQuery, sortOption]);
 
   const userPlaylists = useMemo(() => {
     if (!user) return [];
@@ -189,7 +213,7 @@ const UserProfile: React.FC = () => {
           </button>
         </div>
         
-        <div className="flex flex-col md:flex-row items-end gap-4 sm:gap-8 -mt-6 sm:-mt-8 pb-6 border-b border-border/50">
+        <div className="flex flex-col md:flex-row items-end gap-4 sm:gap-8 -mt-6 sm:-mt-8 pb-6">
           {/* Profile Picture (Refined Overlap) */}
           <div className="relative flex-shrink-0">
             <div 
@@ -242,17 +266,17 @@ const UserProfile: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. TABS NAVIGATION (Refined) */}
-      <div className="sticky top-[var(--header-height,64px)] z-30 bg-transparent py-4 mb-4 sm:mb-8 overflow-hidden group">
-        <div className="w-full px-6 md:px-12 lg:px-16">
-          <div className="flex items-center gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-row">
+      {/* 3. TABS NAVIGATION & FILTER (Mobile Friendly without Border Lines) */}
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/80 backdrop-blur-md py-3 mb-6">
+        <div className="w-full px-4 sm:px-6 md:px-12 lg:px-16 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto no-scrollbar scroll-row flex-1">
             {['overview', 'inventory', 'activity', 'network'].map(tab => (
               <MTButton 
                 key={tab} 
                 onClick={() => setActiveTab(tab as any)} 
                 variant={activeTab === tab ? "filled" : "outlined"}
                 color="blue"
-                className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap shrink-0"
+                className="rounded-full px-5 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap shrink-0 border-none shadow-none bg-white/5 hover:bg-white/10 data-[variant=filled]:bg-blue-600 data-[variant=filled]:text-white"
                 placeholder=""
                 onPointerEnterCapture={() => {}}
                 onPointerLeaveCapture={() => {}}
@@ -261,7 +285,46 @@ const UserProfile: React.FC = () => {
               </MTButton>
             ))}
           </div>
+
+          <button 
+            onClick={() => setShowFilters(true)}
+            className={cn(
+              "p-2.5 rounded-full transition-all shrink-0 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider border-none shadow-sm",
+              showFilters || searchQuery || sortOption !== 'newest'
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" 
+                : "bg-white/5 text-white/60 hover:bg-white/10"
+            )}
+            title="Filter & Search"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Filter</span>
+          </button>
         </div>
+
+        <div className="mt-4">
+          <FilterSection 
+            isOpen={showFilters}
+            onOpenChange={setShowFilters}
+            activeFilter={activeTab}
+            setActiveFilter={setActiveTab as any}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            sortOption={sortOption}
+            setSortOption={setSortOption}
+          />
+        </div>
+
+        {searchQuery && (
+          <div className="w-full px-4 sm:px-6 md:px-12 lg:px-16 flex items-center gap-2 pt-3 animate-in fade-in duration-300">
+            <div className="px-3 py-1 bg-blue-600/10 text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-lg flex items-center gap-2">
+              Query: {searchQuery}
+              <button onClick={() => setSearchQuery('')} className="hover:text-blue-300">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+            <button onClick={() => setSearchQuery('')} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground border-none">Clear</button>
+          </div>
+        )}
       </div>
 
       <div className="w-full px-6 md:px-12 lg:px-16">
@@ -413,14 +476,14 @@ const UserProfile: React.FC = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-card p-8 rounded-3xl border border-border shadow-sm">
+            <div className="bg-card p-8 rounded-3xl shadow-sm">
               <h3 className="text-xs font-bold uppercase tracking-widest mb-4 text-muted-foreground">About</h3>
               <p className="text-sm text-foreground leading-relaxed mb-6">
                 {user.bio || "No biography available."}
               </p>
 
               {(user.socials?.x || user.socials?.instagram || user.socials?.website || user.socials?.telegram) && (
-                <div className="flex flex-wrap gap-3 pt-6 border-t border-border">
+                <div className="flex flex-wrap gap-3 pt-6">
                   {user.socials?.x && (
                     <a 
                       href={user.socials.x} 

@@ -39,6 +39,7 @@ import FilterPills from '@/components/FilterPills';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn, getPlaceholderImage } from '@/lib/utils';
 import SkeletonCard from '@/components/SkeletonCard';
+import NoResultsState from '@/components/NoResultsState';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
   DropdownMenu, 
@@ -77,6 +78,7 @@ const Library: React.FC = () => {
     artists,
     setIsHeaderSearchOpen,
     searchQuery,
+    setSearchQuery,
     playAll
   } = useAudio();
 
@@ -391,8 +393,14 @@ const Library: React.FC = () => {
                 </AnimatePresence>
                 
                 {!isLoading && libraryItems.length === 0 && (
-                  <div className="col-span-full py-20 text-center">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">No signals found in this sector.</p>
+                  <div className="col-span-full pt-4 pb-12">
+                    <NoResultsState
+                      query={searchQuery.trim() ? searchQuery : undefined}
+                      onReset={() => {
+                        setSearchQuery('');
+                        setFilter('all');
+                      }}
+                    />
                   </div>
                 )}
               </div>

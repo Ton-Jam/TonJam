@@ -455,6 +455,16 @@ const AuctionScreen: React.FC = () => {
               className="pl-12 bg-background/50 border-none rounded-xl h-12"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim()) {
+                  const q = searchQuery.trim();
+                  const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
+                  const curr = saved ? JSON.parse(saved) : [];
+                  const updated = [q, ...curr.filter((h: string) => h !== q)].slice(0, 10);
+                  localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
+                  localStorage.setItem('recentSearches', JSON.stringify(updated));
+                }
+              }}
             />
           </div>
           

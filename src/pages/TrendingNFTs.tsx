@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { getPlaceholderImage } from '@/lib/utils';
 import { MOCK_TRACKS, TON_LOGO } from '@/constants';
 import { Button } from "@/components/ui/button";
+import { MarqueeTitle } from "@/components/MarqueeTitle";
 
 const TrendingNFTs: React.FC = () => {
   const navigate = useNavigate();
@@ -193,9 +194,9 @@ const TrendingNFTs: React.FC = () => {
                     >
                       {nft.title}
                     </h3>
-                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest truncate">
-                      {nft.creator}
-                    </p>
+                    <div className="min-w-0 w-full mt-0.5">
+                      <MarqueeTitle text={nft.creator} className="text-[9px] font-bold text-white/30 uppercase tracking-widest" />
+                    </div>
                   </div>
 
                   <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">

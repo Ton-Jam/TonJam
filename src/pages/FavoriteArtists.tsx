@@ -43,6 +43,16 @@ const FavoriteArtists: React.FC = () => {
                     placeholder="Search Artists..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && searchQuery.trim()) {
+                        const q = searchQuery.trim();
+                        const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
+                        const curr = saved ? JSON.parse(saved) : [];
+                        const updated = [q, ...curr.filter((h: string) => h !== q)].slice(0, 10);
+                        localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
+                        localStorage.setItem('recentSearches', JSON.stringify(updated));
+                      }
+                    }}
                     className="bg-white/[0.03] border border-white/5 rounded-full py-2 px-4 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500/20 transition-all placeholder:text-muted-foreground/20 uppercase font-bold tracking-widest"
                   />
                 )}

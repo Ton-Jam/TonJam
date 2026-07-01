@@ -33,6 +33,7 @@ export const AuctionCountdownTimer: React.FC<AuctionCountdownTimerProps> = ({
   });
 
   const [isEndingSoon, setIsEndingSoon] = useState(false);
+  const [isFinalMinute, setIsFinalMinute] = useState(false);
 
   useEffect(() => {
     if (!nft.auctionEndTime || nft.listingType !== 'auction') {
@@ -54,11 +55,13 @@ export const AuctionCountdownTimer: React.FC<AuctionCountdownTimerProps> = ({
           isEnded: true,
         });
         setIsEndingSoon(false);
+        setIsFinalMinute(false);
         return true; // ended
       }
 
       // Ending soon if less than 1 hour remains
       setIsEndingSoon(difference < 3600000);
+      setIsFinalMinute(difference < 60000);
 
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -112,31 +115,43 @@ export const AuctionCountdownTimer: React.FC<AuctionCountdownTimerProps> = ({
 
   if (variant === 'mini') {
     return (
-      <span className={cn(
-        "font-mono text-[10px] tracking-tight tabular-nums font-semibold",
-        isEndingSoon ? "text-red-500 animate-pulse" : "text-amber-500"
-      )}>
+      <motion.span
+        animate={isFinalMinute ? { color: ["#FFFFFF", "#00B4D8", "#FFFFFF"] } : {}}
+        transition={isFinalMinute ? { duration: 1, repeat: Infinity, ease: "easeInOut" } : {}}
+        className={cn(
+          "font-mono text-[10px] tracking-tight tabular-nums font-semibold",
+          !isFinalMinute && (isEndingSoon ? "text-red-500 animate-pulse" : "text-amber-500")
+        )}
+      >
         {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}
         {formattedHours}:{formattedMinutes}:{formattedSeconds}
-      </span>
+      </motion.span>
     );
   }
 
   if (variant === 'badge') {
     return (
-      <div className={cn(
-        "flex items-center gap-1.5 px-2 py-0.5 rounded-full select-none font-mono text-[9px] font-bold tracking-wider",
-        isEndingSoon 
-          ? "bg-red-500/10 text-red-500 animate-pulse border border-red-500/20" 
-          : "bg-amber-500/10 text-amber-500 border border-amber-500/20",
-        className
-      )}>
-        <Clock className="w-3 h-3 animate-spin" style={{ animationDuration: isEndingSoon ? '4s' : '10s' }} />
-        <span className="tabular-nums">
+      <motion.div
+        animate={isFinalMinute ? { borderColor: ["rgba(255,255,255,0.2)", "rgba(0,180,216,0.2)", "rgba(255,255,255,0.2)"], backgroundColor: ["rgba(255,255,255,0.1)", "rgba(0,180,216,0.1)", "rgba(255,255,255,0.1)"] } : {}}
+        transition={isFinalMinute ? { duration: 1, repeat: Infinity, ease: "easeInOut" } : {}}
+        className={cn(
+          "flex items-center gap-1.5 px-2 py-0.5 rounded-full select-none font-mono text-[9px] font-bold tracking-wider",
+          !isFinalMinute && (isEndingSoon 
+            ? "bg-red-500/10 text-red-500 animate-pulse border border-red-500/20" 
+            : "bg-amber-500/10 text-amber-500 border border-amber-500/20"),
+          className
+        )}
+      >
+        <Clock className={cn("w-3 h-3 animate-spin", isFinalMinute && "text-[#00B4D8]")} style={{ animationDuration: isEndingSoon ? '4s' : '10s' }} />
+        <motion.span
+          animate={isFinalMinute ? { color: ["#FFFFFF", "#00B4D8", "#FFFFFF"] } : {}}
+          transition={isFinalMinute ? { duration: 1, repeat: Infinity, ease: "easeInOut" } : {}}
+          className="tabular-nums"
+        >
           {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}
           {formattedHours}:{formattedMinutes}:{formattedSeconds}
-        </span>
-      </div>
+        </motion.span>
+      </motion.div>
     );
   }
 
@@ -146,15 +161,19 @@ export const AuctionCountdownTimer: React.FC<AuctionCountdownTimerProps> = ({
         <span className="text-[7px] sm:text-[8px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5">
           TIME REMAINING
         </span>
-        <span className={cn(
-          "text-[10px] sm:text-[12px] font-black uppercase tracking-wider font-mono transition-all duration-300 tabular-nums",
-          isEndingSoon 
-            ? "text-red-500 animate-pulse drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]" 
-            : "text-amber-500"
-        )}>
+        <motion.span
+          animate={isFinalMinute ? { color: ["#FFFFFF", "#00B4D8", "#FFFFFF"] } : {}}
+          transition={isFinalMinute ? { duration: 1, repeat: Infinity, ease: "easeInOut" } : {}}
+          className={cn(
+            "text-[10px] sm:text-[12px] font-black uppercase tracking-wider font-mono transition-all duration-300 tabular-nums",
+            !isFinalMinute && (isEndingSoon 
+              ? "text-red-500 animate-pulse drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]" 
+              : "text-amber-500")
+          )}
+        >
           {timeLeft.days > 0 ? `${timeLeft.days}D ` : ''}
           {formattedHours}H {formattedMinutes}M {formattedSeconds}S
-        </span>
+        </motion.span>
       </div>
     );
   }
@@ -169,23 +188,27 @@ export const AuctionCountdownTimer: React.FC<AuctionCountdownTimerProps> = ({
       <div className="flex items-center gap-2">
         <div className={cn(
           "w-2 h-2 rounded-full",
-          isEndingSoon ? "bg-red-500 animate-ping" : "bg-green-500 animate-pulse"
+          isFinalMinute ? "bg-[#00B4D8] animate-pulse" : (isEndingSoon ? "bg-red-500 animate-ping" : "bg-green-500 animate-pulse")
         )} />
         <span className="text-[9px] font-black text-foreground uppercase tracking-widest">
-          Active Auction
+          {isFinalMinute ? "Final Minute" : "Active Auction"}
         </span>
       </div>
       <div className="text-right">
         <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5">
           Time Remaining
         </span>
-        <span className={cn(
-          "text-[12px] font-black font-mono tracking-wider transition-colors duration-300 tabular-nums",
-          isEndingSoon ? "text-red-500 animate-pulse" : "text-amber-500"
-        )}>
+        <motion.span
+          animate={isFinalMinute ? { color: ["#FFFFFF", "#00B4D8", "#FFFFFF"] } : {}}
+          transition={isFinalMinute ? { duration: 1, repeat: Infinity, ease: "easeInOut" } : {}}
+          className={cn(
+            "text-[12px] font-black font-mono tracking-wider transition-colors duration-300 tabular-nums",
+            !isFinalMinute && (isEndingSoon ? "text-red-500 animate-pulse" : "text-amber-500")
+          )}
+        >
           {timeLeft.days > 0 ? `${timeLeft.days}D : ` : ''}
           {formattedHours}H : {formattedMinutes}M : {formattedSeconds}S
-        </span>
+        </motion.span>
       </div>
     </div>
   );

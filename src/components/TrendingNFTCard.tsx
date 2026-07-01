@@ -5,6 +5,7 @@ import { useAudio } from '@/context/AudioContext';
 import { MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { NFTItem } from '@/types';
 import { ShoppingCart, BadgeCheck, Layers } from 'lucide-react';
+import { MarqueeTitle } from './MarqueeTitle';
 
 interface TrendingNFTCardProps {
   nft: NFTItem;
@@ -51,11 +52,11 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
 
   return (
     <motion.div 
-      whileHover={{ scale: 1.05 }}
+      whileHover={{ y: -6, scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={handleCardClick}
-      className="w-[160px] h-[240px] rounded-[4px] bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center p-3 border border-white/5 cursor-pointer"
+      className="w-[160px] h-[240px] rounded-[4px] bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center p-3 border border-white/5 hover:border-blue-500/50 hover:shadow-[0_12px_35px_rgba(59,130,246,0.3)] transition-all duration-300 cursor-pointer"
     >
       {/* Premium Badge */}
       <div className="absolute top-[-8px] left-[-8px] w-[100px] h-[100px] overflow-hidden flex items-center justify-center pointer-events-none">
@@ -71,10 +72,12 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
         className="w-24 h-24 object-cover rounded-[4px] mt-4 mb-2 shadow-lg" 
       />
       
-      <div className="text-center px-1 flex-grow">
-        <h4 className="text-white font-semibold text-[10px] truncate max-w-[120px]">{nft.title}</h4>
-        <div className="flex items-center justify-center gap-1 min-w-0 max-w-[130px] mx-auto">
-          <p className="text-gray-400 text-[9px] font-medium truncate">{nft.creator || nft.artist}</p>
+      <div className="text-center px-1 flex-grow w-full min-w-0">
+        <h4 className="text-white font-semibold text-[10px] truncate max-w-[120px] mx-auto">{nft.title}</h4>
+        <div className="flex items-center justify-center gap-1 min-w-0 max-w-[130px] mx-auto mt-0.5">
+          <div className="flex-1 min-w-0">
+            <MarqueeTitle text={nft.creator || nft.artist || ''} className="text-gray-400 text-[9px] font-medium uppercase" />
+          </div>
           {isVerified && <BadgeCheck className="w-2.5 h-2.5 text-blue-400 fill-current inline-block flex-shrink-0" />}
         </div>
         {collectionName && (

@@ -45,7 +45,6 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { motion } from 'motion/react';
 
 const Settings: React.FC = () => {
@@ -80,43 +79,43 @@ const Settings: React.FC = () => {
   const SettingRow = ({ icon: Icon, title, description, children, onClick }: any) => (
     <div 
       className={cn(
-        "flex items-center justify-between py-2 px-3 transition-all duration-200 rounded-xl",
-        onClick && "cursor-pointer group hover:bg-white/[0.03]"
+        "flex items-center justify-between py-3.5 px-4 transition-all duration-200 rounded-2xl border-none",
+        onClick && "cursor-pointer group hover:bg-white/[0.05]"
       )}
       onClick={onClick}
     >
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-blue-500/5 flex items-center justify-center text-blue-500/80 group-hover:bg-blue-500/10 transition-colors">
-          <Icon className="h-4 w-4" />
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500/20 transition-colors shrink-0">
+          <Icon className="h-5 w-5" />
         </div>
         <div className="flex flex-col">
-          <span className="text-[10px] font-black text-foreground uppercase tracking-tight">{title}</span>
-          <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mt-0.5">{description}</span>
+          <span className="text-xs sm:text-sm font-black text-foreground uppercase tracking-wider">{title}</span>
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest mt-0.5">{description}</span>
         </div>
       </div>
-      <div onClick={(e) => onClick && e.stopPropagation()} className="flex items-center gap-2">
-        {children || <ChevronRight className="h-3 w-3 text-muted-foreground/30 group-hover:translate-x-0.5 transition-transform" />}
+      <div onClick={(e) => onClick && e.stopPropagation()} className="flex items-center gap-3 ml-2 shrink-0">
+        {children || <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:translate-x-1 transition-transform" />}
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-24 pt-4 animate-in fade-in duration-700">
-      <div className="mb-6 text-center lg:text-left flex items-center justify-between opacity-50">
-        <div className="flex items-center gap-2">
-           <ShieldCheck className="h-3 w-3 text-blue-500" />
-           <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em]">System Parameters</span>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-24 pt-6 animate-in fade-in duration-700">
+      <div className="mb-8 text-center sm:text-left flex items-center justify-between opacity-70">
+        <div className="flex items-center gap-2.5">
+           <ShieldCheck className="h-4 w-4 text-blue-500" />
+           <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">System Parameters</span>
         </div>
-        <span className="text-[8px] font-mono text-muted-foreground">v2.4.0</span>
+        <span className="text-xs font-mono text-muted-foreground font-bold">v2.4.0</span>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-transparent p-0 mb-6 flex border-none h-auto gap-2">
+        <TabsList className="bg-transparent p-0 mb-8 flex border-none h-auto gap-2">
           {['general', 'verification', 'notifications', 'interface'].map((tab) => (
             <TabsTrigger 
               key={tab}
               value={tab} 
-              className="flex-1 rounded-lg px-2 py-1.5 text-[8px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:bg-muted/10 transition-all border border-white/5"
+              className="flex-1 rounded-2xl px-3 py-2.5 text-xs font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:bg-white/5 transition-all shadow-none border-none"
             >
               {tab}
             </TabsTrigger>
@@ -124,18 +123,17 @@ const Settings: React.FC = () => {
         </TabsList>
 
         <TabsContent value="general" className="space-y-6">
-          <Card className="bg-background border border-white/10 rounded-3xl overflow-hidden shadow-sm">
-            <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">Identity Core</CardTitle>
+          <Card className="bg-white/5 rounded-3xl overflow-hidden shadow-none border-none">
+            <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between border-none">
+              <CardTitle className="text-xs font-black text-blue-500 uppercase tracking-widest">Identity Core</CardTitle>
             </CardHeader>
-            <CardContent className="p-4 pt-2 space-y-0.5">
+            <CardContent className="p-4 pt-2 space-y-2">
                 <SettingRow 
                     icon={UserCircle} 
                     title="Profile Sync" 
                     description="Edit bio, links and visuals"
                     onClick={() => navigate('/profile-settings')}
                 />
-                <Separator className="bg-white/5 mx-3 w-[calc(100%-1.5rem)]" />
                 <SettingRow 
                     icon={Wallet} 
                     title="Vault Bridge" 
@@ -143,8 +141,8 @@ const Settings: React.FC = () => {
                     onClick={() => navigate('/wallet')}
                 >
                     <div className={cn(
-                    "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter border",
-                    user?.uid ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"
+                    "px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border-none",
+                    user?.uid ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
                     )}>
                     {user?.uid ? "Online" : "Offline"}
                     </div>
@@ -152,55 +150,53 @@ const Settings: React.FC = () => {
             </CardContent>
           </Card>
 
-
-          <Card className="bg-background border border-white/10 rounded-3xl overflow-hidden shadow-sm mt-4">
-            <CardHeader className="p-6 pb-4">
-              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Security Matrix</CardTitle>
+          <Card className="bg-white/5 rounded-3xl overflow-hidden shadow-none border-none">
+            <CardHeader className="p-6 pb-2 border-none">
+              <CardTitle className="text-xs font-black text-blue-500 uppercase tracking-widest">Security Matrix</CardTitle>
             </CardHeader>
-            <CardContent className="p-4 space-y-1">
+            <CardContent className="p-4 pt-2 space-y-2">
               <SettingRow 
                 icon={Key} 
                 title="Secondary Auth" 
                 description="Secure vault verification"
               >
-                <Button variant="ghost" size="sm" className="h-7 px-3 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-500/5 hover:bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                <Button variant="ghost" size="sm" className="h-8 px-4 rounded-full text-xs font-black uppercase tracking-widest bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-none shadow-none">
                   Setup
                 </Button>
               </SettingRow>
-              <Separator className="bg-white/5" />
               <SettingRow 
                 icon={Eye} 
                 title="Ghost Protocol" 
                 description="Public node visibility"
               >
-                <Switch defaultChecked className="scale-75 data-[state=checked]:bg-blue-600" />
+                <Switch defaultChecked className="data-[state=checked]:bg-blue-600" />
               </SettingRow>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="verification" className="space-y-6">
-          <Card className="bg-muted/10 border-white/5 rounded-[4px] overflow-hidden">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Artist verification</CardTitle>
-              <CardDescription className="text-[9px] font-bold uppercase tracking-widest opacity-40">Establish your sonic identity on-chain</CardDescription>
+          <Card className="bg-white/5 rounded-3xl overflow-hidden shadow-none border-none">
+            <CardHeader className="p-6 pb-4 border-none">
+              <CardTitle className="text-xs font-black text-blue-500 uppercase tracking-widest">Artist Verification</CardTitle>
+              <CardDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground mt-1">Establish your sonic identity on-chain</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-blue-600/5 border border-blue-500/10 rounded-[4px]">
+            <CardContent className="p-6 pt-2 space-y-6">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-blue-600/10 rounded-2xl border-none">
                 <div className="flex items-center gap-4 text-center sm:text-left">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-400 shrink-0">
                     <ShieldCheck className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black text-white uppercase tracking-tight">Become Verified Artist</h4>
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none mt-1 opacity-50">Identity protocols and blue badge</p>
+                    <h4 className="text-sm font-black text-white uppercase tracking-wider">Become Verified Artist</h4>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mt-1">Identity protocols and blue badge</p>
                   </div>
                 </div>
                 <Button 
                   onClick={() => setIsVerifyModalOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-[9px] uppercase tracking-widest px-6 h-10 group"
+                  className="bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-xs uppercase tracking-widest px-6 h-11 group shrink-0 border-none shadow-none"
                 >
-                  <Plus className="w-3 h-3 mr-2 group-hover:rotate-90 transition-transform" />
+                  <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" />
                   New Request
                 </Button>
               </div>
@@ -211,50 +207,47 @@ const Settings: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-6">
-          <Card className="bg-muted/10 border-white/5 rounded-[4px] overflow-hidden">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Signal Filters</CardTitle>
+          <Card className="bg-white/5 rounded-3xl overflow-hidden shadow-none border-none">
+            <CardHeader className="p-6 pb-2 border-none">
+              <CardTitle className="text-xs font-black text-blue-500 uppercase tracking-widest">Signal Filters</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1">
+            <CardContent className="p-4 pt-2 space-y-2">
               <SettingRow 
                 icon={Bell} 
                 title="Direct Comms" 
                 description="Transactional alert relay"
               >
-                <Switch checked={preferences.directAlerts} onCheckedChange={(val) => handlePreferenceToggle('directAlerts', val)} className="scale-75 data-[state=checked]:bg-blue-600" />
+                <Switch checked={preferences.directAlerts} onCheckedChange={(val) => handlePreferenceToggle('directAlerts', val)} className="data-[state=checked]:bg-blue-600" />
               </SettingRow>
-              <Separator className="bg-white/5" />
               <SettingRow 
                 icon={Bell} 
                 title="Market Feed" 
                 description="Global asset fluctuations"
               >
-                <Switch checked={preferences.marketActivity} onCheckedChange={(val) => handlePreferenceToggle('marketActivity', val)} className="scale-75 data-[state=checked]:bg-blue-600" />
+                <Switch checked={preferences.marketActivity} onCheckedChange={(val) => handlePreferenceToggle('marketActivity', val)} className="data-[state=checked]:bg-blue-600" />
               </SettingRow>
-              <Separator className="bg-white/5" />
               <SettingRow 
                 icon={Bell} 
                 title="New Drops" 
                 description="Protocol mint notifications"
               >
-                <Switch checked={preferences.dropsAndReleases} onCheckedChange={(val) => handlePreferenceToggle('dropsAndReleases', val)} className="scale-75 data-[state=checked]:bg-blue-600" />
+                <Switch checked={preferences.dropsAndReleases} onCheckedChange={(val) => handlePreferenceToggle('dropsAndReleases', val)} className="data-[state=checked]:bg-blue-600" />
               </SettingRow>
-              <Separator className="bg-white/5" />
-              <div className="flex items-center justify-between py-3 px-1">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/5 flex items-center justify-center text-blue-500/80">
-                        <Wallet className="h-4 w-4" />
+              <div className="flex items-center justify-between py-3.5 px-4 rounded-2xl hover:bg-white/[0.05] transition-all border-none">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+                        <Wallet className="h-5 w-5" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[11px] font-black text-foreground uppercase tracking-tight">Revenue Alert Threshold (TON)</span>
-                        <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mt-0.5">Alert when monthly revenue exceeds</span>
+                        <span className="text-xs sm:text-sm font-black text-foreground uppercase tracking-wider">Revenue Alert Threshold (TON)</span>
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest mt-0.5">Alert when monthly revenue exceeds</span>
                     </div>
                 </div>
                 <input 
                   type="number" 
                   value={preferences.revenueThreshold || 100}
                   onChange={(e) => updatePreferences({...preferences, revenueThreshold: Number(e.target.value)})}
-                  className="w-20 bg-background rounded-full border border-border p-2 text-center text-[10px] font-black"
+                  className="w-24 bg-black/40 rounded-full border-none p-2.5 text-center text-xs font-black text-white outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
             </CardContent>
@@ -262,91 +255,88 @@ const Settings: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="interface" className="space-y-6">
-          <Card className="bg-muted/10 border-white/5 rounded-[4px] overflow-hidden">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Environment Settings</CardTitle>
+          <Card className="bg-white/5 rounded-3xl overflow-hidden shadow-none border-none">
+            <CardHeader className="p-6 pb-2 border-none">
+              <CardTitle className="text-xs font-black text-blue-500 uppercase tracking-widest">Environment Settings</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1">
+            <CardContent className="p-4 pt-2 space-y-2">
                 <SettingRow 
                     icon={theme === 'dark' ? Moon : Sun} 
                     title="Visual Deck" 
                     description="Interface spectral theme"
                 >
                     <Select value={theme} onValueChange={(val: any) => setTheme(val)}>
-                    <SelectTrigger className="w-[100px] h-7 bg-muted/20 border border-white/5 rounded-full text-[9px] font-black uppercase tracking-widest focus:ring-1 focus:ring-blue-500/50">
+                    <SelectTrigger className="w-[120px] h-9 bg-black/30 border-none rounded-full text-xs font-black uppercase tracking-widest px-3.5 outline-none focus:ring-1 focus:ring-blue-500 shadow-none">
                         <SelectValue placeholder="Theme" />
                     </SelectTrigger>
-                    <SelectContent className="bg-background border-white/5 rounded-2xl shadow-2xl">
-                        <SelectItem value="light" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Light</SelectItem>
-                        <SelectItem value="dark" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Dark</SelectItem>
-                        <SelectItem value="system" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Auto</SelectItem>
+                    <SelectContent className="bg-zinc-900 border-none rounded-2xl shadow-2xl">
+                        <SelectItem value="light" className="text-xs font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl py-2.5 px-3 m-1 border-none">Light</SelectItem>
+                        <SelectItem value="dark" className="text-xs font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl py-2.5 px-3 m-1 border-none">Dark</SelectItem>
+                        <SelectItem value="system" className="text-xs font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl py-2.5 px-3 m-1 border-none">Auto</SelectItem>
                     </SelectContent>
                     </Select>
                 </SettingRow>
-                <Separator className="bg-white/5" />
                 <SettingRow 
                     icon={Palette} 
                     title="Artwork Style" 
                     description="Spotify, Vinyl, or Visualizer"
                 >
                     <Select value={artworkStyle} onValueChange={(val: any) => setArtworkStyle(val)}>
-                      <SelectTrigger className="w-[100px] h-7 bg-muted/20 border border-white/5 rounded-full text-[9px] font-black uppercase tracking-widest focus:ring-1 focus:ring-blue-500/50">
+                      <SelectTrigger className="w-[130px] h-9 bg-black/30 border-none rounded-full text-xs font-black uppercase tracking-widest px-3.5 outline-none focus:ring-1 focus:ring-blue-500 shadow-none">
                           <SelectValue placeholder="Style" />
                       </SelectTrigger>
-                      <SelectContent className="bg-background border-white/5 rounded-2xl shadow-2xl">
-                          <SelectItem value="spotify" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Spotify</SelectItem>
-                          <SelectItem value="vinyl" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Vinyl</SelectItem>
-                          <SelectItem value="visualizer" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Visualizer</SelectItem>
+                      <SelectContent className="bg-zinc-900 border-none rounded-2xl shadow-2xl">
+                          <SelectItem value="spotify" className="text-xs font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl py-2.5 px-3 m-1 border-none">Spotify</SelectItem>
+                          <SelectItem value="vinyl" className="text-xs font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl py-2.5 px-3 m-1 border-none">Vinyl</SelectItem>
+                          <SelectItem value="visualizer" className="text-xs font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl py-2.5 px-3 m-1 border-none">Visualizer</SelectItem>
                       </SelectContent>
                     </Select>
                 </SettingRow>
-                <Separator className="bg-white/5" />
                 <SettingRow 
                     icon={WifiOff} 
                     title="Offline Listening" 
                     description="Enable local playback"
                 >
-                  <Switch checked={isOffline} onCheckedChange={toggleOfflineMode} className="scale-75 data-[state=checked]:bg-blue-600" />
+                  <Switch checked={isOffline} onCheckedChange={toggleOfflineMode} className="data-[state=checked]:bg-blue-600" />
                 </SettingRow>                
-                <Separator className="bg-white/5" />
                 <SettingRow 
                     icon={Globe} 
                     title="Relay Region" 
                     description="Optimize data latency"
                 >
                     <Select defaultValue="eu-west">
-                    <SelectTrigger className="w-[100px] h-7 bg-muted/20 border border-white/5 rounded-full text-[9px] font-black uppercase tracking-widest focus:ring-1 focus:ring-blue-500/50">
+                    <SelectTrigger className="w-[120px] h-9 bg-black/30 border-none rounded-full text-xs font-black uppercase tracking-widest px-3.5 outline-none focus:ring-1 focus:ring-blue-500 shadow-none">
                         <SelectValue placeholder="Region" />
                     </SelectTrigger>
-                    <SelectContent className="bg-background border-white/5 rounded-2xl shadow-2xl">
-                        <SelectItem value="eu-west" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">EUROPE</SelectItem>
-                        <SelectItem value="us-east" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">US-EAST</SelectItem>
-                        <SelectItem value="asia" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">ASIA</SelectItem>
+                    <SelectContent className="bg-zinc-900 border-none rounded-2xl shadow-2xl">
+                        <SelectItem value="eu-west" className="text-xs font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl py-2.5 px-3 m-1 border-none">EUROPE</SelectItem>
+                        <SelectItem value="us-east" className="text-xs font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl py-2.5 px-3 m-1 border-none">US-EAST</SelectItem>
+                        <SelectItem value="asia" className="text-xs font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl py-2.5 px-3 m-1 border-none">ASIA</SelectItem>
                     </SelectContent>
                     </Select>
                 </SettingRow>
             </CardContent>
           </Card>
-          <Card className="bg-muted/10 border-white/5 rounded-[4px] overflow-hidden">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Storage Matrix</CardTitle>
+
+          <Card className="bg-white/5 rounded-3xl overflow-hidden shadow-none border-none">
+            <CardHeader className="p-6 pb-2 border-none">
+              <CardTitle className="text-xs font-black text-blue-500 uppercase tracking-widest">Storage Matrix</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1">
+            <CardContent className="p-4 pt-2 space-y-2">
               <SettingRow 
                 icon={Database} 
                 title="Cache Volume" 
                 description={`${cachedCount} tracks cached`}
               >
-                <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mr-4">
+                <div className="text-xs sm:text-sm font-black uppercase tracking-widest text-muted-foreground mr-2">
                   {totalSizeMB} MB
                 </div>
               </SettingRow>
-              <Separator className="bg-white/5" />
-              <div className="p-3">
+              <div className="p-2 pt-4 space-y-2">
                 <Button
                   variant="ghost"
                   onClick={() => setIsStorageModalOpen(true)}
-                  className="w-full h-8 text-[9px] font-black uppercase tracking-widest bg-blue-500/5 text-blue-500 hover:bg-blue-500/10 hover:text-blue-600 rounded-full border border-blue-500/10 mb-2"
+                  className="w-full h-11 text-xs font-black uppercase tracking-widest bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 rounded-full border-none shadow-none"
                 >
                   Manage Individual Tracks
                 </Button>
@@ -354,7 +344,7 @@ const Settings: React.FC = () => {
                   variant="ghost"
                   onClick={clearAllCache}
                   disabled={isPurging || cachedCount === 0}
-                  className="w-full h-8 text-[9px] font-black uppercase tracking-widest bg-red-500/5 text-red-500 hover:bg-red-500/10 hover:text-red-600 rounded-full border border-red-500/10"
+                  className="w-full h-11 text-xs font-black uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 rounded-full border-none shadow-none disabled:opacity-50"
                 >
                   {isPurging ? 'Purging...' : 'Purge All Cache'}
                 </Button>
@@ -375,12 +365,12 @@ const Settings: React.FC = () => {
         <Button 
           variant="ghost" 
           onClick={() => signOut()}
-          className="w-full max-w-xs h-12 bg-red-500/5 hover:bg-red-500/10 text-red-500/60 hover:text-red-500 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-all border border-red-500/10 group"
+          className="w-full max-w-xs h-12 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-full text-xs font-black uppercase tracking-widest transition-all border-none shadow-none group"
         >
           <LogOut className="h-4 w-4 mr-3 transition-transform group-hover:-translate-x-1" />
           Terminate session
         </Button>
-        <p className="mt-6 text-[8px] font-black text-muted-foreground/20 uppercase tracking-[0.5em]">System Build v2.4.0-Stable</p>
+        <p className="mt-6 text-xs font-bold text-muted-foreground/30 uppercase tracking-widest">System Build v2.4.0-Stable</p>
       </div>
 
       {isVerifyModalOpen && (

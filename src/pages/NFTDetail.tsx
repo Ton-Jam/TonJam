@@ -1452,11 +1452,8 @@ const NFTDetail: React.FC = () => {
             <div className="min-h-[400px]">
               <AnimatePresence mode="wait">
                 {activeTab === "details" && (
-                  <motion.div
+                  <div
                     key="details"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
                     className="grid grid-cols-1 md:grid-cols-3 gap-6"
                   >
                     {metadataError && (
@@ -1513,6 +1510,13 @@ const NFTDetail: React.FC = () => {
                             ),
                           )}
                         </div>
+                      </div>
+                    )}
+
+                    {localNft.description && (
+                      <div className="col-span-full p-8 bg-white/[0.03] border border-white/5 rounded-[4px]">
+                        <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-4">Description</h4>
+                        <p className="text-sm text-foreground/80 leading-relaxed">{localNft.description}</p>
                       </div>
                     )}
 
@@ -1587,6 +1591,7 @@ const NFTDetail: React.FC = () => {
                           </div>
                         </div>
                       </div>
+
                     </div>
 
                     <div className="col-span-full md:col-span-2 space-y-4">
@@ -1790,7 +1795,7 @@ const NFTDetail: React.FC = () => {
                         </div>
                       </div>
                     )}
-                  </motion.div>
+                  </div>
                 )}
 
                 {activeTab === "activity" && (

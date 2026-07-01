@@ -25,7 +25,13 @@ interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType>({});
 
-export const useWallet = () => useContext(WalletContext);
+export const useWallet = () => {
+  const context = useContext(WalletContext);
+  if (!context) {
+    throw new Error('useWallet must be used within a WalletProvider');
+  }
+  return context;
+};
 
 export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   return (

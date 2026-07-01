@@ -4,7 +4,7 @@ import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-d
 import Layout from '@/components/Layout';
 import ScrollToTop from '@/components/ScrollToTop';
 
-const Home = lazy(() => import('@/pages/Home'));
+const Home = lazy(() => import('@/pages/JamUp'));
 const Discover = lazy(() => import('@/pages/Discover'));
 const JamSpace = lazy(() => import('@/pages/JamSpace'));
 const Marketplace = lazy(() => import('@/pages/Marketplace'));

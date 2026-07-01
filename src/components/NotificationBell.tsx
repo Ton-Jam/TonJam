@@ -12,11 +12,11 @@ export const NotificationBell: React.FC = () => {
     <Button 
       variant="ghost" 
       size="icon" 
-      className="relative"
+      className="relative hover:bg-transparent !border-0"
       onClick={() => navigate('/notifications')}
       aria-label="Notifications"
     >
-      <BellIcon className="h-[30px] w-[30px]" strokeWidth={2.5} />
+      <BellIcon className="h-[40px] w-[40px]" strokeWidth={2.5} />
       {unreadCount > 0 && (
         <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-background" />
       )}

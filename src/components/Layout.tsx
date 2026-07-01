@@ -30,7 +30,7 @@ import {
   TicketIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline';
-import { Sparkles as SparklesLucide } from 'lucide-react';
+import { Sparkles as SparklesLucide, History, X } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { useAudio, useUserRole } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
@@ -236,8 +236,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isFabActive, setIsFabActive] = useState(true);
   const [activeFilterSubMenu, setActiveFilterSubMenu] = useState<string | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
-    const saved = localStorage.getItem('recentSearches');
-    return saved ? JSON.parse(saved) : ['Lo-fi hip hop', 'Cyberpunk Beats', 'Phonk Vibes'];
+    const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
+    return saved ? JSON.parse(saved) : ['Lo-fi hip hop', 'Cyberpunk Beats', 'Phonk Vibes', 'Genesis NFT'];
   });
   const trendingTopics = useMemo(() => {
     const topTracks = allTracks.sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 3).map(t => t.title);
@@ -246,16 +246,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [allTracks, artists]);
 
   const saveRecentSearch = (query: string) => {
-    if (!query.trim()) return;
-    const updated = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
+    if (!query || !query.trim()) return;
+    const q = query.trim();
+    const updated = [q, ...recentSearches.filter(s => s !== q)].slice(0, 10);
     setRecentSearches(updated);
     localStorage.setItem('recentSearches', JSON.stringify(updated));
+    localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
   };
 
   const removeRecentSearch = (query: string) => {
     const updated = recentSearches.filter(s => s !== query);
     setRecentSearches(updated);
     localStorage.setItem('recentSearches', JSON.stringify(updated));
+    localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
   };
   
   
@@ -271,8 +274,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return 'Search tracks, artists, users, NFTs...';
   };
 
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
+  const handleSearch = (e: any) => {
+    e?.preventDefault?.();
+    if (searchQuery.trim()) {
       saveRecentSearch(searchQuery.trim());
       navigate(`/discover?search=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
@@ -433,8 +437,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             )}
 
-            {!isHome && !isDiscover && !headerTitle && (
-              <div className={cn(
+            <div className={cn(
                 "hidden lg:flex items-center gap-4 flex-1 ml-4 overflow-hidden",
                 isHeaderSearchOpen && isLibrary && "flex absolute inset-0 bg-background z-50 px-4"
               )}>
@@ -472,7 +475,58 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   inputClassName={`border border-border/40 bg-muted/20 rounded-[4px] py-1.5 pl-4 pr-10 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-muted-foreground/30`}
                   autoFocus={isHeaderSearchOpen && isLibrary}
                 >
-                  {filteredResults && (
+                  {!searchQuery.trim() ? (
+                    recentSearches && recentSearches.length > 0 ? (
+                      <div className="p-3 select-none">
+                        <div className="flex items-center justify-between mb-2.5 px-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 text-blue-400">
+                            <History className="w-3.5 h-3.5" />
+                            Recent Searches
+                          </span>
+                          <button
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setRecentSearches([]);
+                              localStorage.removeItem('tonjam_search_history');
+                              localStorage.removeItem('recentSearches');
+                            }}
+                            className="text-[9px] font-black uppercase tracking-wider text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                          >
+                            Clear All
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {recentSearches.map((term, idx) => (
+                            <div
+                              key={idx}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                setSearchQuery(term);
+                                saveRecentSearch(term);
+                                navigate(`/discover?search=${encodeURIComponent(term)}`);
+                                setIsSearchOpen(false);
+                              }}
+                              className="flex items-center gap-1.5 bg-white/5 hover:bg-blue-600/20 hover:border-blue-500/30 border border-white/5 px-3 py-1.5 rounded-xl cursor-pointer transition-all group"
+                            >
+                              <span className="text-xs font-medium text-slate-200 group-hover:text-blue-300">{term}</span>
+                              <button
+                                type="button"
+                                onMouseDown={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  removeRecentSearch(term);
+                                }}
+                                className="text-slate-500 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null
+                  ) : filteredResults ? (
                     <div className="max-h-[70vh] overflow-y-auto custom-scrollbar p-2 space-y-4">
                       {filteredResults.tracks.length > 0 && (
                         <div>
@@ -481,6 +535,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <button
                               key={track.id}
                               onClick={() => {
+                                saveRecentSearch(searchQuery.trim());
                                 playTrack(track);
                                 setIsSearchOpen(false);
                               }}
@@ -505,6 +560,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <button
                               key={playlist.id}
                               onClick={() => {
+                                saveRecentSearch(searchQuery.trim());
                                 navigate(`/playlist/${playlist.id}`);
                                 setIsSearchOpen(false);
                               }}
@@ -529,6 +585,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <button
                               key={artist.uid}
                               onClick={() => {
+                                saveRecentSearch(searchQuery.trim());
                                 navigate(`/artist/${artist.uid}`);
                                 setIsSearchOpen(false);
                               }}
@@ -554,6 +611,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <button
                               key={nft.id}
                               onClick={() => {
+                                saveRecentSearch(searchQuery.trim());
                                 navigate(`/nft/${nft.id}`);
                                 setIsSearchOpen(false);
                               }}
@@ -571,10 +629,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         </div>
                       )}
                     </div>
-                  )}
+                  ) : null}
                 </SearchBar>
               </div>
-            )}
           </div>
 
           <div className={cn("items-center gap-[3px] transition-all duration-300", headerTitle ? "hidden" : "flex")}>
@@ -599,8 +656,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden sm:block" />
 
             {/* Task Center Badge */}
-            <button onClick={() => navigate('/tasks')} className={`flex items-center gap-3 px-3 py-1.5 rounded-[4px] hover:bg-white/5 transition-colors ${!isHome ? 'hidden sm:flex' : ''}`}>
-               <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[20px] h-[20px] object-contain" />
+            <button onClick={() => navigate('/tasks')} className={`flex items-center gap-3 px-3 py-1.5 rounded-[4px] transition-colors hover:bg-transparent ${!isHome ? 'hidden sm:flex' : ''}`}>
+               <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[32px] h-[32px] object-contain" />
                {tonBalance !== null && (
                   <span className="text-[9px] font-black tracking-tighter text-blue-500 opacity-60">{tonBalance.toFixed(2)} TON</span>
                )}

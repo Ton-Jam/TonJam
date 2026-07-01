@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Verified, ChevronUp } from 'lucide-react';
+import { MarqueeTitle } from './MarqueeTitle';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_ARTISTS, MOCK_USER } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
@@ -16,9 +17,11 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
   const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
 
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -4, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={() => navigate(`/nft/${nft.id}`)}
-      className="flex items-center gap-2 p-2 rounded-[4px] hover:bg-muted/50 transition-all cursor-pointer group w-full"
+      className="flex items-center gap-2 p-2 rounded-[4px] border border-transparent hover:border-blue-500/40 hover:shadow-[0_6px_20px_rgba(59,130,246,0.18)] hover:bg-muted/50 transition-all duration-300 cursor-pointer group w-full"
     >
       {/* Rank */}
       <div className="w-6 text-center flex-shrink-0">
@@ -41,9 +44,9 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
         <h4 className="text-[10px] font-bold text-foreground uppercase tracking-[0.05em] truncate group-hover:text-primary transition-colors">
           {nft.title}
         </h4>
-        <div className="flex items-center gap-2 mt-2 min-w-0">
-          <p 
-            className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest truncate hover:text-foreground transition-colors"
+        <div className="flex items-center gap-2 mt-0.5 min-w-0 w-full">
+          <div 
+            className="flex-1 min-w-0 cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               if (artist) {
@@ -53,8 +56,8 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
               }
             }}
           >
-            {nft.creator}
-          </p>
+            <MarqueeTitle text={nft.creator} className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest hover:text-foreground transition-colors" />
+          </div>
           {artist?.verified && (
             <Verified className="h-2.5 w-2.5 text-blue-500 flex-shrink-0" />
           )}
@@ -80,7 +83,7 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
           <span>+{Math.floor(Math.random() * 20 + 5)}%</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

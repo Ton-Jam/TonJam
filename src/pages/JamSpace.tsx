@@ -114,7 +114,7 @@ const JamSpace: React.FC = () => {
         }
       }
     } catch (e) {
-      console.error("Error fetching Web3 Music Trends:", e);
+      console.log("Using default Web3 Music Trends.");
     } finally {
       setIsLoadingTrends(false);
     }

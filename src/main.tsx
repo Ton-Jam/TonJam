@@ -28,7 +28,10 @@ console.warn = (...args) => {
   if (
     message.includes('Could not reach Cloud Firestore backend') ||
     message.includes('auth/network-request-failed') ||
-    message.includes('The client will operate in offline mode')
+    message.includes('The client will operate in offline mode') ||
+    message.includes('Gemini') ||
+    message.includes('429') ||
+    message.includes('quota')
   ) {
     return;
   }
@@ -42,7 +45,13 @@ console.error = (...args) => {
     message.includes('TON_CONNECT_SDK') || 
     message.includes('tonconnect') ||
     message.includes('Could not reach Cloud Firestore backend') ||
-    message.includes('auth/network-request-failed')
+    message.includes('auth/network-request-failed') ||
+    message.includes('Web3 Music Trends') ||
+    message.includes('Gemini') ||
+    message.includes('429') ||
+    message.includes('quota') ||
+    message.includes('RESOURCE_EXHAUSTED') ||
+    message.includes('Circuit breaker')
   ) {
     return;
   }

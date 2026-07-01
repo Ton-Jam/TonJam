@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAudio } from "@/context/AudioContext";
 import { MOCK_TRACKS } from "@/constants";
 import { cn } from "@/lib/utils";
+import { MarqueeTitle } from "../MarqueeTitle";
 
 interface MarketplaceNFTCardProps {
   nft: {
@@ -52,10 +53,11 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
 
   return (
     <motion.div
-      whileHover={{ y: -6 }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={handleCardClick}
       className={cn(
-        "cursor-pointer group relative flex flex-col bg-[#0A113A] rounded-2xl overflow-hidden border border-white/[0.04] transition-all duration-300",
+        "cursor-pointer group relative flex flex-col bg-[#0A113A] rounded-2xl overflow-hidden border border-white/[0.04] hover:border-blue-500/50 hover:shadow-[0_12px_35px_rgba(59,130,246,0.25)] transition-all duration-300",
         className
       )}
     >
@@ -114,10 +116,10 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
         </h3>
 
         {/* Artist Line with Verified Tag */}
-        <div className="flex items-center gap-1 mb-3">
-          <p className="text-[10px] text-[#9AA0AE] font-semibold tracking-wider uppercase truncate">
-            {nft.creator}
-          </p>
+        <div className="flex items-center gap-1 mb-3 min-w-0 w-full">
+          <div className="flex-1 min-w-0">
+            <MarqueeTitle text={nft.creator} className="text-[10px] text-[#9AA0AE] font-semibold tracking-wider uppercase" />
+          </div>
           <BadgeCheck className="w-3.5 h-3.5 text-[#5B6BFF] fill-current shrink-0" />
         </div>
 

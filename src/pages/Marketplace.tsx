@@ -42,6 +42,7 @@ import { cn } from "@/lib/utils";
 
 // Import custom reusable subcomponents
 import { AnalyticsCard } from "@/components/marketplace/AnalyticsCard";
+import { LiveAuctionTicker } from "@/components/marketplace/LiveAuctionTicker";
 import NFTCard from "@/components/NFTCard";
 import { CollectionCard } from "@/components/marketplace/CollectionCard";
 import { RankingCard } from "@/components/marketplace/RankingCard";
@@ -330,6 +331,7 @@ const Marketplace: React.FC = () => {
       <div className="absolute top-1/3 right-1/4 w-[350px] h-[350px] bg-[#00B4D8]/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* --- SECTION 1: MARKETPLACE HERO REMOVED (displayed in global app) --- */}
+      <LiveAuctionTicker />
 
       {/* --- SECTION 9: LIVE SALES FEED (Ticker placed on top for high context) --- */}
       <div className="w-full bg-[#0A113A]/60 py-2.5 border-y border-white/[0.04] mb-6 overflow-hidden relative">

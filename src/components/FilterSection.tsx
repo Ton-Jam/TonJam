@@ -196,12 +196,12 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 ].map((cat) => (
                   <motion.button
                     key={cat.id}
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, x: 2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setActiveFilter(cat.id)}
                     className={cn(
-                      "relative py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer whitespace-nowrap border border-gray-400/30 overflow-hidden",
-                      activeFilter === cat.id ? "text-white" : "bg-white/5 text-zinc-400 hover:bg-white/10"
+                      "relative py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer whitespace-nowrap border-2 border-blue-500 overflow-hidden",
+                      activeFilter === cat.id ? "bg-blue-600 text-white" : "bg-transparent text-blue-500 hover:bg-blue-600/10"
                     )}
                   >
                     {activeFilter === cat.id && (
@@ -211,10 +211,14 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       />
                     )}
-                    <span className="relative z-10 flex items-center gap-2">
+                    <motion.span 
+                        className="relative z-10 flex items-center gap-2"
+                        animate={{ x: activeFilter === cat.id ? 5 : 0 }}
+                        transition={{ duration: 0.2 }}
+                    >
                         <cat.icon className="h-3.5 w-3.5" />
                         {cat.label}
-                    </span>
+                    </motion.span>
                   </motion.button>
                 ))}
               </div>
@@ -235,14 +239,14 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 ].map((opt) => (
                   <motion.button
                     key={opt.id}
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, x: 2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSortOption(opt.id)}
                     className={cn(
-                      "relative py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer border border-gray-400/30 overflow-hidden",
+                      "relative py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer border-2 border-blue-500 overflow-hidden",
                       sortOption === opt.id 
-                        ? "text-white" 
-                        : "bg-white/5 text-zinc-400 hover:bg-white/8 hover:text-white"
+                        ? "bg-blue-600 text-white" 
+                        : "bg-transparent text-blue-500 hover:bg-blue-600/10"
                     )}
                   >
                     {sortOption === opt.id && (
@@ -252,10 +256,14 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       />
                     )}
-                    <span className="relative z-10 flex items-center gap-2">
+                    <motion.span 
+                        className="relative z-10 flex items-center gap-2"
+                        animate={{ x: sortOption === opt.id ? 5 : 0 }}
+                        transition={{ duration: 0.2 }}
+                    >
                         <opt.icon className="h-3 w-3" />
                         {opt.label}
-                    </span>
+                    </motion.span>
                   </motion.button>
                 ))}
               </div>
@@ -321,10 +329,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       whileTap={{ scale: 0.98 }}
                       onClick={() => filters.setRarity!(rarity)}
                       className={cn(
-                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border border-gray-400/30",
+                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-2 border-blue-500",
                         filters.rarity === rarity 
-                          ? "bg-amber-500/10 text-amber-400 shadow-lg shadow-amber-500/15" 
-                          : "bg-white/5 text-zinc-400 hover:bg-white/8 hover:text-white"
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/15" 
+                          : "bg-transparent text-blue-500 hover:bg-blue-600/10"
                       )}
                     >
                       {rarity}
@@ -348,10 +356,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       whileTap={{ scale: 0.98 }}
                       onClick={() => filters.setStatus!(status)}
                       className={cn(
-                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border border-gray-400/30",
+                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-2 border-blue-500",
                         filters.status === status 
-                          ? "bg-purple-500/10 text-purple-400 shadow-lg shadow-purple-500/15" 
-                          : "bg-white/5 text-zinc-400 hover:bg-white/8 hover:text-white"
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/15" 
+                          : "bg-transparent text-blue-500 hover:bg-blue-600/10"
                       )}
                     >
                       {status}

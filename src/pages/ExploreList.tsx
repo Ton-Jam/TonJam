@@ -11,6 +11,7 @@ import ArtistListItem from '@/components/ArtistListItem';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO, CURATED_PLAYLISTS, MOCK_USERS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import PlaylistCard from '@/components/PlaylistCard';
+import NoResultsState from '@/components/NoResultsState';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 const ExploreList: React.FC = () => {
@@ -198,16 +199,8 @@ const ExploreList: React.FC = () => {
 
       {/* Empty State */}
       {!loading && filteredItems.length === 0 && (
-        <div className="py-4 text-center flex flex-col items-center">
-          <Satellite className="h-16 w-16 text-foreground/5 mb-4" />
-          <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">Zero signals detected</p>
-          <button
-            type="button"
-            onClick={() => setSearch('')}
-            className="mt-4 text-[10px] font-bold uppercase text-blue-500 -b -blue-500/30 pb-4"
-          >
-            Reset Scanner
-          </button>
+        <div className="pt-4 pb-12">
+          <NoResultsState query={search ? search : undefined} onReset={() => setSearch('')} />
         </div>
       )}
     </div>
