@@ -47,6 +47,11 @@ const DJKrupy = lazy(() => import('@/pages/DJKrupy'));
 const FollowersFollowing = lazy(() => import('@/pages/FollowersFollowing'));
 const AlbumDetails = lazy(() => import('@/pages/AlbumDetails'));
 const Governance = lazy(() => import('@/pages/Governance'));
+const HomeFeed = lazy(() => import('@/pages/Home'));
+const UIKitShowcase = lazy(() => import('@/pages/UIKitShowcase'));
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const UserAccount = lazy(() => import('@/pages/UserAccount'));
+const ArtistAccount = lazy(() => import('@/pages/ArtistAccount'));
 import { AudioProvider } from '@/context/AudioContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
@@ -242,6 +247,11 @@ const AppContent: React.FC = () => {
               <Route path="/stats" element={<PageWrapper><StatsPreview /></PageWrapper>} />
               <Route path="/login" element={<Login />} />
               <Route path="/user/:id/follows/:type" element={<PageWrapper><FollowersFollowing /></PageWrapper>} />
+              <Route path="/home" element={<PageWrapper><HomeFeed /></PageWrapper>} />
+              <Route path="/uikit" element={<PageWrapper><UIKitShowcase /></PageWrapper>} />
+              <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
+              <Route path="/user-account" element={<PageWrapper><ProtectedRoute><UserAccount /></ProtectedRoute></PageWrapper>} />
+              <Route path="/artist-account" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistAccount /></ProtectedRoute></PageWrapper>} />
             </Routes>
             </React.Suspense>
           </AnimatePresence>

@@ -73,6 +73,7 @@ export const getArtifactPerformance = async (artistId: string): Promise<Artifact
       const salesSnap = await getDocs(
         query(
           collection(db, "transactions"),
+          where("artistId", "==", artistId),
           where("trackId", "==", trackDoc.id),
           where("type", "in", ["nft_sale", "jam_purchase"])
         )

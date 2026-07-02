@@ -38,8 +38,8 @@ import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
-import MiniAudioPlayer from './MiniAudioPlayer';
-import FullPlayer from './FullPlayer';
+import MiniPlayer from './player/MiniPlayer';
+import PlayerScreen from './player/PlayerScreen';
 import AddToPlaylistModal from './AddToPlaylistModal';
 import TrackOptionsModal from './TrackOptionsModal';
 import NFTOptionsModal from './NFTOptionsModal';
@@ -827,9 +827,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         layoutId="player"
         transition={{ duration: 0.35 }}
       >
-        {currentTrack && !isFullPlayerOpen && !isDJKrupy && !isPostDetail && <MiniAudioPlayer isMobileNavHidden={isMobileNavHidden} />}
+        {currentTrack && !isFullPlayerOpen && !isDJKrupy && !isPostDetail && <MiniPlayer isMobileNavHidden={isMobileNavHidden} />}
         <AnimatePresence>
-          {isFullPlayerOpen && <FullPlayer />}
+          {isFullPlayerOpen && <PlayerScreen />}
         </AnimatePresence>
       </motion.div>
 

@@ -438,6 +438,7 @@ service cloud.firestore {
     match /transactions/{txId} {
       // Artists/users can only view their own payout/royalty records, keeping platform data accessible only to admins
       allow read: if isSignedIn() && (
+        (resource.data.keys().contains('participants') && request.auth.uid in resource.data.participants) ||
         (isOwner(resource.data.userId) && (resource.data.type == 'payout' || resource.data.type == 'royalty' || !resource.data.keys().contains('platformData'))) || 
         (resource.data.keys().contains('artistId') && isOwner(resource.data.artistId)) ||
         isAdmin()

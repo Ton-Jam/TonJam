@@ -154,7 +154,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
 
   const NFTMenuContent = () => (
     <>
-      <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Artifact Actions</DropdownMenuLabel>
+      <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">NFT Options</DropdownMenuLabel>
       <DropdownMenuSeparator className="bg-white/5" />
       <DropdownMenuItem onClick={() => onToggleCompare?.(nft)} className="flex items-center gap-3 py-3 px-4 cursor-pointer hover:bg-zinc-800 transition-colors">
         <LayoutGrid className={cn("h-4 w-4", isSelectedForCompare ? "text-emerald-400" : "text-zinc-500")} />
@@ -166,7 +166,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleQuickViewClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Eye className="h-4 w-4" />
-        <span className="text-[10px] font-bold uppercase tracking-widest">Rapid Analysis</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest">Quick View</span>
       </DropdownMenuItem>
       
       {isOwner && (
@@ -174,7 +174,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           <DropdownMenuSeparator className="bg-white/5" />
           <DropdownMenuItem onClick={handleSetAnthem} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
             <Star className={cn("h-4 w-4", isAnthem && "fill-current text-yellow-500")} />
-            <span className="text-[10px] font-black uppercase tracking-widest">{isAnthem ? "Deactivate Anthem" : "Synchronize Anthem"}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">{isAnthem ? "Remove Anthem" : "Set as Anthem"}</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleSendClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
             <Send className="h-4 w-4" />
@@ -207,31 +207,31 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       <DropdownMenuSeparator className="bg-white/5" />
       <DropdownMenuItem onClick={() => navigate(`/nft/${nft.id}`)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <ExternalLink className="h-4 w-4" />
-        <span className="text-[10px] font-bold uppercase tracking-widest">Neural Link</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest">View Details</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Share2 className="h-4 w-4" />
-        <span className="text-[10px] font-bold uppercase tracking-widest">Distribute Signal</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest">Share NFT</span>
       </DropdownMenuItem>
     </>
   );
 
   const ContextMenuContentRefined = () => (
     <ContextMenuContent className="bg-[#0A0A0B] border-white/5 text-white shadow-2xl min-w-[200px] p-1 rounded-xl backdrop-blur-3xl">
-      <ContextMenuLabel className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Neural Context</ContextMenuLabel>
+      <ContextMenuLabel className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">NFT Options</ContextMenuLabel>
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handlePlayClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        <span className="text-[10px] font-black uppercase tracking-widest">Execute Logic</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Play Track</span>
       </ContextMenuItem>
       <ContextMenuItem onClick={handleQuickViewClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         <Eye className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">Scan Data</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Quick View</span>
       </ContextMenuItem>
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         <Share2 className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">Broadcast Signal</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Share NFT</span>
       </ContextMenuItem>
     </ContextMenuContent>
   );
@@ -362,7 +362,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             </div>
             <div className="flex items-center gap-4">
                <div className="hidden md:flex flex-col items-end opacity-40 group-hover:opacity-100 transition-opacity">
-                  <span className="text-[6px] font-bold text-muted-foreground uppercase tracking-widest">Eval</span>
+                  <span className="text-[6px] font-bold text-muted-foreground uppercase tracking-widest">Price</span>
                   <div className="flex items-center gap-1">
                     {currencyMode === 'USD' ? (
                       <span className="text-[12px] font-extrabold text-[#2BE08C]">$</span>
@@ -511,7 +511,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
 
                <div className="flex items-end justify-between mt-1">
                   <div className="space-y-0.5">
-                     <p className="text-[8px] font-medium text-muted-foreground/30 uppercase tracking-[0.1em]">Val_Artifact</p>
+                     <p className="text-[8px] font-medium text-muted-foreground/30 uppercase tracking-[0.1em]">Price</p>
                      <div className="flex items-center gap-1 bg-muted/40 py-0.5 px-2 rounded-[4px] border border-border/10">
                         {currencyMode === 'USD' ? (
                           <span className="text-sm font-black text-[#2BE08C]">$</span>

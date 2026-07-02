@@ -235,7 +235,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const TrackMenuContent = () => (
     <>
-      <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Neural Output</DropdownMenuLabel>
+      <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Track Options</DropdownMenuLabel>
       <DropdownMenuSeparator className="bg-white/5" />
       <DropdownMenuItem onClick={handlePlay} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -256,7 +256,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleViewDetails} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Info className="h-4 w-4" />
-        <span className="text-[10px] font-bold uppercase tracking-widest">Track Intelligence</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest">Track Details</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleMint} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Gem className="h-4 w-4" />
@@ -265,7 +265,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <DropdownMenuSeparator className="bg-white/5" />
       <DropdownMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Share2 className="h-4 w-4" />
-        <span className="text-[10px] font-bold uppercase tracking-widest">Share Signal</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest">Share Track</span>
       </DropdownMenuItem>
       
       {userProfile.ownedTrackIds?.includes(track.id) && (
@@ -280,7 +280,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
           <DropdownMenuSeparator className="bg-white/5" />
           <DropdownMenuItem onClick={onRemove} className="flex items-center gap-3 py-3 px-4 cursor-pointer text-red-500 focus:bg-red-600 focus:text-white transition-colors">
             <Trash2 className="h-4 w-4" />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Terminate Signal</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest">Remove Track</span>
           </DropdownMenuItem>
         </>
       )}
@@ -289,11 +289,11 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const ContextMenuContentRefined = () => (
     <ContextMenuContent className="bg-[#0A0A0B] border-white/5 text-white shadow-2xl min-w-[200px] p-1 rounded-xl backdrop-blur-3xl">
-      <ContextMenuLabel className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Neural Context</ContextMenuLabel>
+      <ContextMenuLabel className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Actions</ContextMenuLabel>
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handlePlay} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        <span className="text-[10px] font-bold uppercase tracking-widest">Execute Playback</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest">Play Track</span>
       </ContextMenuItem>
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handleAddToQueue} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
@@ -312,7 +312,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         <Share2 className="h-4 w-4" />
-        <span className="text-[10px] font-bold uppercase tracking-widest">Share Artifact</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest">Share Track</span>
       </ContextMenuItem>
     </ContextMenuContent>
   );
@@ -408,7 +408,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
                       </p>
                       <div className="flex items-center pt-2 gap-2">
                         <Activity className="h-3 w-3 text-emerald-500" />
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">Neural_Sync Active</span>
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">Artist Active</span>
                       </div>
                     </div>
                   </div>
@@ -518,7 +518,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
                           </p>
                           <div className="flex items-center pt-2 gap-2 text-blue-400">
                              <TrendingUp className="h-3 w-3" />
-                             <span className="text-[8px] font-black uppercase tracking-[0.2em]">Ascending Orbit</span>
+                             <span className="text-[8px] font-black uppercase tracking-[0.2em]">Trending</span>
                           </div>
                         </div>
                       </div>
@@ -542,7 +542,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
                 <div className="hidden md:flex items-center gap-8">
                   {isComingSoon ? (
                     <div className="flex items-center gap-3">
-                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">DRIPPING IN</span>
+                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">RELEASING IN</span>
                       <CountdownTimer targetDate={track.releaseDate!} />
                       <button
                         onClick={handleHypeClick}
@@ -655,7 +655,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
               )}
               {track.isNFT && (
                 <div className="bg-purple-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest border border-purple-400/30">
-                  NFT_ASSET
+                  NFT
                 </div>
               )}
               {associatedNft && !track.isNFT && (
@@ -697,7 +697,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
             {isComingSoon ? (
               <div className="w-full mt-2 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[7.5px] font-bold text-muted-foreground uppercase tracking-widest leading-none">DROP TIME</span>
+                  <span className="text-[7.5px] font-bold text-muted-foreground uppercase tracking-widest leading-none">RELEASE TIME</span>
                   <CountdownTimer targetDate={track.releaseDate!} />
                 </div>
                 <button

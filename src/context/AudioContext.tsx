@@ -89,6 +89,7 @@ interface AudioContextType {
   currentTrack: Track | null;
   isPlaying: boolean;
   queue: Track[];
+  setQueue: React.Dispatch<React.SetStateAction<Track[]>>;
   progress: number;
   isFullPlayerOpen: boolean;
   isShuffle: boolean;
@@ -3144,6 +3145,27 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
             );
         }
 
+        const currentSrc = audioRef.current.src;
+        if (!currentSrc || currentSrc === "" || currentSrc === window.location.href || currentSrc === window.location.origin || currentSrc.endsWith("/")) {
+          let trackSourceUrl = currentTrack.audioUrl || "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3";
+          
+          if (isOffline) {
+            const cachedUrl = await audioCacheService.getCachedTrack(currentTrack.id);
+            if (cachedUrl) {
+              trackSourceUrl = cachedUrl;
+            }
+          }
+          
+          const isRemote = trackSourceUrl.startsWith("http");
+          if (isRemote) {
+            audioRef.current.crossOrigin = "anonymous";
+          } else {
+            audioRef.current.removeAttribute("crossorigin");
+          }
+          audioRef.current.src = trackSourceUrl;
+          audioRef.current.load();
+        }
+
         playPromiseRef.current = audioRef.current.play();
         if (playPromiseRef.current !== undefined) {
           playPromiseRef.current.catch((error) => {
@@ -4229,6 +4251,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         currentTrack,
         isPlaying,
         queue,
+        setQueue,
         progress,
         isFullPlayerOpen,
         isShuffle,
