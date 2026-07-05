@@ -32,13 +32,17 @@ import {
   Square,
   CheckSquare,
   Trash2,
-  Wand2
+  Wand2,
+  Percent
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { BackButton } from "@/components/BackButton";
 import { useAudio } from "@/context/AudioContext";
 import { useAuth } from "@/context/AuthContext";
 import { getPlaceholderImage } from "@/lib/utils";
+import { Artist } from "@/types";
+import RoyaltyDashboard from "@/components/RoyaltyDashboard";
+import RoyaltyConfigModal from "@/components/RoyaltyConfigModal";
 import TrackMonetizationModal from "@/components/TrackMonetizationModal";
 import EditMetadataModal from "@/components/EditMetadataModal";
 import SponsorshipSubmissionModal from "@/components/SponsorshipSubmissionModal";
@@ -70,7 +74,37 @@ export default function ArtistDashboard() {
   const { user, isArtist, isAdmin, loading } = useAuth();
   
   // Tabs state
-  const [activeTab, setActiveTab] = useState<"overview" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty" | "royalties">("overview");
+  const [isRoyaltyModalOpen, setIsRoyaltyModalOpen] = useState(false);
+
+  const artistDataForRoyalty = useMemo(() => {
+    return {
+      uid: userProfile?.uid || '',
+      name: userProfile?.name || userProfile?.username || 'Verified Creator',
+      username: userProfile?.username || '',
+      walletAddress: userProfile?.walletAddress || '',
+      avatarUrl: userProfile?.avatar || '',
+      followers: userProfile?.followers || 0,
+      verified: userProfile?.isVerified || false,
+      isVerifiedArtist: userProfile?.isVerifiedArtist || false,
+      royaltyConfig: userProfile?.royaltyConfig ? {
+        streamingSplits: userProfile.royaltyConfig.streamingSplits || [],
+        nftSaleSplits: userProfile.royaltyConfig.nftSaleSplits || [],
+        streamingPercentage: 0.05,
+        nftSaleShare: 0.10,
+      } : {
+        streamingSplits: [{ address: userProfile?.walletAddress || '', percentage: 1.0, label: 'Main Artist' }],
+        nftSaleSplits: [{ address: userProfile?.walletAddress || '', percentage: 1.0, label: 'Main Artist' }],
+        streamingPercentage: 0.05,
+        nftSaleShare: 0.10,
+      },
+      earnings: {
+        streaming: userProfile?.streamingEarnings || 0,
+        nftSales: userProfile?.nftEarnings || 0,
+        total: userProfile?.earnings || 0,
+      }
+    } as Artist;
+  }, [userProfile]);
 
   // Bulk Selection States
   const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>([]);
@@ -596,6 +630,16 @@ export default function ArtistDashboard() {
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5" /> Fan Connect
+          </button>
+          <button
+            onClick={() => setActiveTab("royalties")}
+            className={`flex-1 min-w-[120px] transition-all duration-300 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 ${
+              activeTab === "royalties" 
+                ? "bg-white/[0.06] text-white shadow-lg shadow-black/30" 
+                : "text-zinc-500 hover:text-white hover:bg-white/[0.02]"
+            }`}
+          >
+            <Percent className="w-3.5 h-3.5" /> Royalties
           </button>
           <button
             onClick={() => setActiveTab("loyalty")}
@@ -1294,6 +1338,15 @@ export default function ArtistDashboard() {
 
               </div>
             )}
+
+            {activeTab === "royalties" && (
+              <div className="space-y-6">
+                <RoyaltyDashboard 
+                  artist={artistDataForRoyalty} 
+                  onConfigure={() => setIsRoyaltyModalOpen(true)}
+                />
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
 
@@ -1333,6 +1386,14 @@ export default function ArtistDashboard() {
         isOpen={isSponsorshipModalOpen}
         onClose={() => setIsSponsorshipModalOpen(false)}
       />
+
+      {isRoyaltyModalOpen && (
+        <RoyaltyConfigModal
+          isOpen={isRoyaltyModalOpen}
+          onClose={() => setIsRoyaltyModalOpen(false)}
+          artist={artistDataForRoyalty}
+        />
+      )}
 
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion, useDragControls, PanInfo } from "motion/react";
-import { Play, Pause, ListMusic, Maximize2, MoreVertical } from "lucide-react";
+import { Play, Pause, ListMusic, MoreVertical } from "lucide-react";
 import { useAudio } from "@/context/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
 
@@ -51,9 +51,10 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={{ top: 0.8, bottom: 0.1 }}
       onDragEnd={handleDragEnd}
-      whileTap={{ cursor: "grabbing" }}
-      className={`fixed left-2 right-2 bg-zinc-950 font-sans rounded-[10px] select-none z-40 flex flex-col pointer-events-auto overflow-hidden shadow-2xl transition-all duration-300 ${
-        isMobileNavHidden ? "bottom-4" : "bottom-20 lg:bottom-4"
+      onClick={() => setFullPlayerOpen(true)}
+      whileTap={{ scale: 0.99 }}
+      className={`fixed left-0 right-0 lg:left-64 bg-zinc-950 font-sans border-t border-white/10 select-none z-40 flex flex-col pointer-events-auto overflow-hidden shadow-2xl transition-all duration-300 cursor-pointer ${
+        isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
       }`}
       style={{ touchAction: "none" }}
       id="tonjam-mini-player"
@@ -67,10 +68,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         />
       </div>
 
-      <div className="flex items-center justify-between px-4 py-3 cursor-grab active:cursor-grabbing">
+      <div className="flex items-center justify-between px-4 py-3">
         {/* Artwork + Title + Artist */}
         <div
-          onClick={() => setFullPlayerOpen(true)}
           className="flex items-center gap-3 flex-1 min-w-0"
           id="mini-metadata-area"
         >
@@ -121,7 +121,10 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           {/* Play/Pause control */}
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={togglePlay}
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlay();
+            }}
             className="w-9 h-9 rounded-full bg-white text-zinc-950 flex items-center justify-center shadow"
             id="mini-play-toggle"
             aria-label={isPlaying ? "Pause" : "Play"}
@@ -132,16 +135,6 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               <Play className="w-4 h-4 fill-current pl-0.5" />
             )}
           </motion.button>
-
-          {/* Full Screen expand trigger */}
-          <button
-            onClick={() => setFullPlayerOpen(true)}
-            className="p-2 text-zinc-400 hover:text-white transition-colors"
-            id="mini-expand"
-            aria-label="Expand"
-          >
-            <Maximize2 className="w-4 h-4" />
-          </button>
 
           {/* Option Menu Toggle */}
           <button

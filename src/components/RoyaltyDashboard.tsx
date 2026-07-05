@@ -22,6 +22,7 @@ const CartesianGridRC = CartesianGrid as any;
 
 interface RoyaltyDashboardProps {
   artist: Artist;
+  onConfigure?: () => void;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -47,11 +48,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
+const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure }) => {
   const earnings = artist.earnings || { streaming: 0, nftSales: 0, total: 0 };
   const config = artist.royaltyConfig;
   const streamingPercentage = config?.streamingPercentage ?? 0.05;
   const nftSaleShare = config?.nftSaleShare ?? 0.10;
+
+  const streamingSplits = config?.streamingSplits || [];
+  const nftSaleSplits = config?.nftSaleSplits || [];
 
   const monthlyData = React.useMemo(() => {
     const streamingTotal = earnings.streaming || 0;
@@ -200,19 +204,29 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
       </div>
 
       {/* Royalty Configuration */}
-      <div className="glass border border-neutral-500/10 p-2 rounded-[4px] bg-foreground/[0.01]">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-10 h-10 bg-blue-600/20 rounded-[4px] flex items-center justify-center">
-            <Settings className="h-4 w-4 text-blue-400" />
+      <div className="glass border border-neutral-500/10 p-4 rounded-[4px] bg-foreground/[0.01] space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.05] pb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-blue-600/20 rounded-[4px] flex items-center justify-center">
+              <Settings className="h-4 w-4 text-blue-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground uppercase tracking-tighter">Distribution Protocol</h3>
+              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Automated Smart Contract Settings</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-foreground uppercase tracking-tighter">Distribution Protocol</h3>
-            <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Automated Smart Contract Settings</p>
-          </div>
+          {onConfigure && (
+            <button
+              onClick={onConfigure}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[4px] text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+            >
+              Configure Splits
+            </button>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
               <div className="flex justify-between mb-2">
                 <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Streaming Share</label>
@@ -236,23 +250,80 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
             </div>
           </div>
 
-          <div className="bg-blue-600/5 p-2 rounded-[4px]">
-            <h4 className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em] mb-2">Contract Status</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                <span className="text-[9px] font-bold text-muted-foreground/80 uppercase">Verified on TON Mainnet</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                <span className="text-[9px] font-bold text-muted-foreground/80 uppercase">Immutable Logic Active</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                <span className="text-[9px] font-bold text-muted-foreground/80 uppercase">Real-time Settlement Enabled</span>
+          <div className="bg-blue-600/5 p-4 rounded-[4px] border border-blue-500/10 flex flex-col justify-between">
+            <div>
+              <h4 className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em] mb-3">Contract Status</h4>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_#22c55e]"></div>
+                  <span className="text-[9px] font-bold text-muted-foreground/80 uppercase">Verified on TON Mainnet</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_#22c55e]"></div>
+                  <span className="text-[9px] font-bold text-muted-foreground/80 uppercase">Immutable Logic Active</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_#22c55e]"></div>
+                  <span className="text-[9px] font-bold text-muted-foreground/80 uppercase">Real-time Settlement Enabled</span>
+                </div>
               </div>
             </div>
-            <p className="text-[8px] text-foreground/30 mt-2 leading-relaxed">"Royalties are distributed automatically via the TonJam Forge protocol upon every successful transaction or stream event."</p>
+            <p className="text-[8px] text-foreground/30 mt-4 leading-relaxed font-semibold italic">
+              "Royalties are distributed automatically via the TonJam Forge protocol upon every successful transaction or stream event."
+            </p>
+          </div>
+        </div>
+
+        {/* Dynamic Splits List */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          {/* Streaming Splits Card */}
+          <div className="bg-black/30 p-4 rounded-[4px] border border-white/[0.03] space-y-3">
+            <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-widest flex items-center justify-between">
+              <span>Streaming Split Recipients</span>
+              <span className="text-[9px] px-2 py-0.5 bg-blue-500/10 rounded text-blue-400 font-mono">
+                {streamingSplits.length} Accounts
+              </span>
+            </h4>
+            {streamingSplits.length === 0 ? (
+              <p className="text-[9px] text-zinc-500 uppercase tracking-wider">No custom splits configured. Defaulting to 100% to creator.</p>
+            ) : (
+              <div className="space-y-2 max-h-[160px] overflow-y-auto no-scrollbar">
+                {streamingSplits.map((split, i) => (
+                  <div key={`stream-${split.address}-${i}`} className="flex items-center justify-between text-[10px] p-2 bg-white/[0.01] rounded border border-white/[0.02]">
+                    <div className="space-y-0.5 truncate pr-2">
+                      <span className="font-bold text-white uppercase block">{split.label || 'Collaborator'}</span>
+                      <span className="text-[8px] font-mono text-zinc-500 block truncate">{split.address || 'No wallet address'}</span>
+                    </div>
+                    <span className="text-blue-400 font-black font-mono">{(split.percentage * 100).toFixed(1)}%</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* NFT Splits Card */}
+          <div className="bg-black/30 p-4 rounded-[4px] border border-white/[0.03] space-y-3">
+            <h4 className="text-[10px] font-bold text-amber-500 uppercase tracking-widest flex items-center justify-between">
+              <span>NFT Royalty Recipients</span>
+              <span className="text-[9px] px-2 py-0.5 bg-amber-500/10 rounded text-amber-400 font-mono">
+                {nftSaleSplits.length} Accounts
+              </span>
+            </h4>
+            {nftSaleSplits.length === 0 ? (
+              <p className="text-[9px] text-zinc-500 uppercase tracking-wider">No custom splits configured. Defaulting to 100% to creator.</p>
+            ) : (
+              <div className="space-y-2 max-h-[160px] overflow-y-auto no-scrollbar">
+                {nftSaleSplits.map((split, i) => (
+                  <div key={`nft-${split.address}-${i}`} className="flex items-center justify-between text-[10px] p-2 bg-white/[0.01] rounded border border-white/[0.02]">
+                    <div className="space-y-0.5 truncate pr-2">
+                      <span className="font-bold text-white uppercase block">{split.label || 'Collaborator'}</span>
+                      <span className="text-[8px] font-mono text-zinc-500 block truncate">{split.address || 'No wallet address'}</span>
+                    </div>
+                    <span className="text-amber-500 font-black font-mono">{(split.percentage * 100).toFixed(1)}%</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

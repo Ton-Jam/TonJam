@@ -1,0 +1,76 @@
+import React, { useRef } from "react";
+import { ChevronLeft, ChevronRight, Sparkles, Flame, Sliders } from "lucide-react";
+import NFTCard from "@/components/NFTCard";
+import { NFTItem } from "@/types";
+
+interface FeaturedMusicNFTsProps {
+  nfts: NFTItem[];
+  title?: string;
+  subtitle?: string;
+}
+
+export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
+  nfts,
+  title = "Featured Music NFTs",
+  subtitle = "Premium master recording digital collectibles on TON"
+}) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const scrollAmount = 260;
+      scrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  return (
+    <div className="w-full relative" id="marketplace-featured-music-nfts">
+      <div className="flex items-center justify-between mb-4">
+        <div className="space-y-0.5 text-left">
+          <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-[#2BE08C]" />
+            {title}
+          </h2>
+          <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
+            {subtitle}
+          </p>
+        </div>
+
+        {/* Carousel buttons */}
+        <div className="flex gap-1.5">
+          <button
+            onClick={() => scroll("left")}
+            className="w-8 h-8 rounded-[10px] bg-zinc-900 border border-zinc-800/40 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
+            aria-label="Previous tracks"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => scroll("right")}
+            className="w-8 h-8 rounded-[10px] bg-zinc-900 border border-zinc-800/40 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
+            aria-label="Next tracks"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Horizontal List of NFT Cards */}
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory scroll-smooth w-full"
+      >
+        {nfts.map((nft) => (
+          <NFTCard
+            key={nft.id}
+            nft={{ ...nft, owner: 'marketplace' } as any}
+            className="w-48 flex-shrink-0 snap-start"
+          />
+        ))}
+      </div>
+    </div>
+  );
+};

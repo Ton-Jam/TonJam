@@ -116,7 +116,7 @@ const ArtistOnboarding: React.FC = () => {
     setIsLoading(true);
 
     try {
-      let audioUrl = 'https://storage.googleapis.com/media-session/sintel/snow-fight.mp3';
+      let audioUrl = 'https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3';
       let coverUrl = trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track');
 
       if (trackData.audioFile) {

@@ -352,19 +352,22 @@ service cloud.firestore {
     }
 
     match /taskCompletions/{id} {
-      allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow list: if isSignedIn();
       allow create: if isSignedIn() && isOwner(incoming().userId);
     }
 
     match /verificationRequests/{requestId} {
-      allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow list: if isSignedIn();
       allow create: if isSignedIn() && isOwner(incoming().userId) && isValidVerificationRequest(incoming()) && isValidId(requestId);
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
     match /task_completions/{id} {
-      allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow list: if isSignedIn();
       allow create: if isSignedIn() && isOwner(incoming().userId);
     }
 
@@ -412,7 +415,8 @@ service cloud.firestore {
 
     // 💰 ROYALTIES
     match /royalties/{royaltyId} {
-      allow read: if isSignedIn() && (isOwner(royaltyId) || isAdmin() || (resource != null && resource.data.artistId == request.auth.uid));
+      allow get: if isSignedIn() && (isOwner(royaltyId) || isAdmin() || (resource != null && resource.data.artistId == request.auth.uid));
+      allow list: if isSignedIn();
       allow create: if isSignedIn() && isValidId(royaltyId) && isValidRoyalty(incoming());
       allow update: if isSignedIn() && (
         isAdmin() || 
@@ -437,12 +441,13 @@ service cloud.firestore {
     // 💡 it is highly recommended to create a composite index on: (userId, type, timestamp)
     match /transactions/{txId} {
       // Artists/users can only view their own payout/royalty records, keeping platform data accessible only to admins
-      allow read: if isSignedIn() && (
+      allow get: if isSignedIn() && (
         (resource.data.keys().contains('participants') && request.auth.uid in resource.data.participants) ||
         (isOwner(resource.data.userId) && (resource.data.type == 'payout' || resource.data.type == 'royalty' || !resource.data.keys().contains('platformData'))) || 
         (resource.data.keys().contains('artistId') && isOwner(resource.data.artistId)) ||
         isAdmin()
       );
+      allow list: if isSignedIn();
       // Transactions are typically created by the system/user and then are IMMUTABLE
       allow create: if isSignedIn() && (isOwner(incoming().userId) || (incoming().keys().contains('artistId') && isOwner(incoming().artistId))) && isValidId(txId);
       allow update, delete: if false; // Pillar 7: Transactions must be immutable
@@ -470,12 +475,14 @@ service cloud.firestore {
     }
     
     match /users/{userId}/tasks/{taskId} {
-      allow read: if isOwner(userId) || isAdmin();
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isOwner(userId) || isAdmin();
       allow write: if isOwner(userId) || isAdmin();
     }
 
     match /users/{userId}/eqPresets/{presetId} {
-      allow read: if isOwner(userId);
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
       allow create: if isSignedIn() && isOwner(userId) && isValidEqPreset(incoming()) && isValidId(presetId) && incoming().userId == userId;
       allow update: if isSignedIn() && isOwner(userId) && isValidEqPreset(incoming()) && incoming().userId == userId;
       allow delete: if isSignedIn() && isOwner(userId);
@@ -530,7 +537,8 @@ service cloud.firestore {
     }
 
     match /userMissionProgress/{trackingId} {
-      allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow list: if isSignedIn();
       allow create: if isSignedIn() && isOwner(incoming().userId) && isValidUserMissionProgress(incoming()) && isValidId(trackingId);
       allow update: if isSignedIn() && isOwner(incoming().userId) && isValidUserMissionProgress(incoming()) && incoming().userId == existing().userId;
     }

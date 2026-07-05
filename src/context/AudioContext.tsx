@@ -2987,7 +2987,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
       let sourceUrl =
         track.audioUrl ||
-        "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3";
+        "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
 
       if (isOffline) {
         const cachedUrl = await audioCacheService.getCachedTrack(track.id);
@@ -3035,11 +3035,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           // Fallback 1: Same URL but without crossOrigin (fixes CORS but disables frequencies visualizer)
           { url: sourceUrl, crossOrigin: false },
           // Fallback 2: Stable public asset URL (CORS allowed)
-          { url: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3", crossOrigin: true },
+          { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: true },
           // Fallback 3: Stable public asset URL (no CORS)
-          { url: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3", crossOrigin: false },
-          // Fallback 4: Alternate Google Asset MP3 (no CORS)
           { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: false },
+          // Fallback 4: Alternate soundhelix mp3 as additional fallback
+          { url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", crossOrigin: false },
           // Fallback 5: Silent data URI (failsafe offline backup)
           { url: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=", crossOrigin: false }
         ];
@@ -3147,7 +3147,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
         const currentSrc = audioRef.current.src;
         if (!currentSrc || currentSrc === "" || currentSrc === window.location.href || currentSrc === window.location.origin || currentSrc.endsWith("/")) {
-          let trackSourceUrl = currentTrack.audioUrl || "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3";
+          let trackSourceUrl = currentTrack.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
           
           if (isOffline) {
             const cachedUrl = await audioCacheService.getCachedTrack(currentTrack.id);
@@ -3178,12 +3178,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
               if (currentTrack) {
                 console.warn("[Audio] Attempting recovery during toggle...");
                 
-                const trackSourceUrl = currentTrack.audioUrl || "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3";
+                const trackSourceUrl = currentTrack.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
                 const toggleFallbacks = [
                   { url: trackSourceUrl, crossOrigin: false },
-                  { url: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3", crossOrigin: true },
-                  { url: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3", crossOrigin: false },
+                  { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: true },
                   { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: false },
+                  { url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", crossOrigin: false },
                   { url: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=", crossOrigin: false }
                 ];
 

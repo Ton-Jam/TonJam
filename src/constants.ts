@@ -27,7 +27,7 @@ export const MOCK_TRACKS: Track[] = [
     artist: 'DJ Krupy', 
     artistId: 'dj-krupy', 
     coverUrl: 'https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=600&height=600&nologo=true', 
-    audioUrl: 'https://storage.googleapis.com/media-session/sintel/snow-fight.mp3', 
+    audioUrl: 'https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3', 
     duration: 210, 
     genre: 'Electronic', 
     mood: 'Energetic',
