@@ -982,3 +982,44 @@ body {
     transform: translateY(-2px);
   }
 }
+
+/* Global Modals and Toasts Navy Blue Background Override */
+[data-slot="dialog-content"],
+[data-slot="alert-dialog-content"],
+[role="dialog"],
+[role="alertdialog"],
+.cn-toast,
+[data-sonner-toast],
+.toast {
+  background-color: #0A113A !important;
+  background: #0A113A !important;
+}
+
+/* Ensure inner container panels in modals match the navy blue theme */
+[role="dialog"] .bg-zinc-950,
+[role="dialog"] .bg-neutral-900,
+[role="dialog"] .bg-black,
+[role="dialog"] .bg-zinc-900,
+[role="dialog"] .bg-zinc-800,
+[role="dialog"] .bg-\[\#0a0a0a\],
+[role="dialog"] .bg-\[\#0b0f14\],
+[role="dialog"] .bg-\[\#0A0A0B\],
+[role="dialog"] .bg-card,
+[role="dialog"] .bg-background,
+[role="alertdialog"] .bg-zinc-950,
+[role="alertdialog"] .bg-neutral-900,
+[role="alertdialog"] .bg-black,
+[role="alertdialog"] .bg-zinc-900,
+[role="alertdialog"] .bg-zinc-800,
+[role="alertdialog"] .bg-card,
+[role="alertdialog"] .bg-background {
+  background-color: #0A113A !important;
+  background: #0A113A !important;
+}
+
+[data-sonner-toast],
+.cn-toast,
+.toast {
+  color: #f8fafc !important;
+}
+

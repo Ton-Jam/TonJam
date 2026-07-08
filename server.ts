@@ -1517,6 +1517,7 @@ async function startServer() {
     });
 
     // Spotify OAuth Config
+    // Spotify OAuth Config
     const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
     const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
@@ -1525,7 +1526,7 @@ async function startServer() {
             return res.status(500).json({ error: 'Spotify Client ID not configured' });
         }
         const redirectUri = getSpotifyRedirectUri(req);
-        const scopes = 'user-read-private user-read-email';
+        const scopes = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative user-library-read';
         const url = `https://accounts.spotify.com/authorize?response_type=code&client_id=${SPOTIFY_CLIENT_ID}&scope=${encodeURIComponent(scopes)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
         res.json({ url });
     });
@@ -1568,7 +1569,10 @@ async function startServer() {
                     <body>
                         <script>
                             if (window.opener) {
-                                window.opener.postMessage({ type: 'SPOTIFY_VERIFIED', data: ${JSON.stringify(profile)} }, '*');
+                                window.opener.postMessage({ 
+                                    type: 'SPOTIFY_VERIFIED', 
+                                    data: ${JSON.stringify({ ...profile, access_token })} 
+                                }, '*');
                                 window.close();
                             } else {
                                 document.body.innerHTML = '<h1>Verification Successful</h1><p>You can close this window now.</p>';
@@ -1583,6 +1587,55 @@ async function startServer() {
         } catch (error: any) {
             console.error('Spotify Auth Error:', error.response?.data || error.message);
             res.status(500).send('Authentication failed');
+        }
+    });
+
+    // Get user's Spotify playlists proxy
+    app.get('/api/spotify/playlists', async (req, res) => {
+        const token = req.query.token as string;
+        if (!token) return res.status(400).json({ error: 'Access token is required' });
+
+        try {
+            const response = await axios.get('https://api.spotify.com/v1/me/playlists?limit=50', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            res.json(response.data);
+        } catch (error: any) {
+            console.error('Spotify Playlists Proxy Error:', error.response?.data || error.message);
+            res.status(500).json({ error: 'Failed to fetch Spotify playlists' });
+        }
+    });
+
+    // Get Spotify playlist tracks proxy
+    app.get('/api/spotify/playlist-tracks', async (req, res) => {
+        const token = req.query.token as string;
+        const playlistId = req.query.playlistId as string;
+        if (!token || !playlistId) return res.status(400).json({ error: 'Token and playlistId are required' });
+
+        try {
+            const response = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            res.json(response.data);
+        } catch (error: any) {
+            console.error('Spotify Playlist Tracks Proxy Error:', error.response?.data || error.message);
+            res.status(500).json({ error: 'Failed to fetch Spotify playlist tracks' });
+        }
+    });
+
+    // Get user's Spotify liked tracks proxy
+    app.get('/api/spotify/liked-songs', async (req, res) => {
+        const token = req.query.token as string;
+        if (!token) return res.status(400).json({ error: 'Access token is required' });
+
+        try {
+            const response = await axios.get('https://api.spotify.com/v1/me/tracks?limit=50', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            res.json(response.data);
+        } catch (error: any) {
+            console.error('Spotify Liked Songs Proxy Error:', error.response?.data || error.message);
+            res.status(500).json({ error: 'Failed to fetch Spotify liked songs' });
         }
     });
 

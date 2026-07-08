@@ -16,6 +16,7 @@ import { doc, getDoc, setDoc, serverTimestamp, getDocFromServer } from 'firebase
 import { auth, db, googleProvider, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { UserProfile } from '@/types';
 import { clearDriveToken } from '@/services/googleDriveService';
+import { syncBookmarksFromFirestore } from '@/services/bookmarkService';
 
 interface AuthContextType {
   user: User | null;
@@ -148,6 +149,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => unsubscribe();
   }, []);
+
+  // Sync user's bookmarked posts from Firestore to My Library and JamSpace view in real-time
+  useEffect(() => {
+    if (user?.uid) {
+      console.log(`[AuthContext] Initiating background bookmarks sync for user: ${user.uid}`);
+      const unsubscribeSync = syncBookmarksFromFirestore(user.uid);
+      return () => unsubscribeSync();
+    }
+  }, [user?.uid]);
 
   const signInWithGoogle = async () => {
     try {

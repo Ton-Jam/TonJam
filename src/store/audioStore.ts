@@ -11,6 +11,8 @@ interface AudioState {
   progress: number;
   isFullPlayerOpen: boolean;
   isShuffle: boolean;
+  isSmartShuffle: boolean;
+  smartShuffleMode: 'mood' | 'genre';
   repeatMode: RepeatMode;
   volume: number;
   isMuted: boolean;
@@ -22,6 +24,8 @@ interface AudioState {
   setProgress: (progress: number | ((prev: number) => number)) => void;
   setIsFullPlayerOpen: (isOpen: boolean | ((prev: boolean) => boolean)) => void;
   setIsShuffle: (isShuffle: boolean | ((prev: boolean) => boolean)) => void;
+  setIsSmartShuffle: (isSmartShuffle: boolean | ((prev: boolean) => boolean)) => void;
+  setSmartShuffleMode: (mode: 'mood' | 'genre' | ((prev: 'mood' | 'genre') => 'mood' | 'genre')) => void;
   setRepeatMode: (mode: RepeatMode | ((prev: RepeatMode) => RepeatMode)) => void;
   setVolume: (volume: number | ((prev: number) => number)) => void;
   setIsMuted: (isMuted: boolean | ((prev: boolean) => boolean)) => void;
@@ -43,6 +47,8 @@ export const useAudioStore = create<AudioState>()(
       progress: 0,
       isFullPlayerOpen: false,
       isShuffle: false,
+      isSmartShuffle: false,
+      smartShuffleMode: 'mood',
       repeatMode: 'off',
       volume: 1,
       isMuted: false,
@@ -53,6 +59,8 @@ export const useAudioStore = create<AudioState>()(
       setProgress: (progress) => set((state) => ({ progress: typeof progress === 'function' ? progress(state.progress) : progress })),
       setIsFullPlayerOpen: (isOpen) => set((state) => ({ isFullPlayerOpen: typeof isOpen === 'function' ? isOpen(state.isFullPlayerOpen) : isOpen })),
       setIsShuffle: (isShuffle) => set((state) => ({ isShuffle: typeof isShuffle === 'function' ? isShuffle(state.isShuffle) : isShuffle })),
+      setIsSmartShuffle: (isSmartShuffle) => set((state) => ({ isSmartShuffle: typeof isSmartShuffle === 'function' ? isSmartShuffle(state.isSmartShuffle) : isSmartShuffle })),
+      setSmartShuffleMode: (mode) => set((state) => ({ smartShuffleMode: typeof mode === 'function' ? mode(state.smartShuffleMode) : mode })),
       setRepeatMode: (mode) => set((state) => ({ repeatMode: typeof mode === 'function' ? mode(state.repeatMode) : mode })),
       setVolume: (volume) => set((state) => ({ volume: typeof volume === 'function' ? volume(state.volume) : volume })),
       setIsMuted: (isMuted) => set((state) => ({ isMuted: typeof isMuted === 'function' ? isMuted(state.isMuted) : isMuted })),
@@ -105,6 +113,8 @@ export const useAudioStore = create<AudioState>()(
         currentTrack: state.currentTrack,
         queue: state.queue,
         isShuffle: state.isShuffle,
+        isSmartShuffle: state.isSmartShuffle,
+        smartShuffleMode: state.smartShuffleMode,
         repeatMode: state.repeatMode,
         volume: state.volume,
         isMuted: state.isMuted

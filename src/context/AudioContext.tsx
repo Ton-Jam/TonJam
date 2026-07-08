@@ -93,6 +93,8 @@ interface AudioContextType {
   progress: number;
   isFullPlayerOpen: boolean;
   isShuffle: boolean;
+  isSmartShuffle: boolean;
+  smartShuffleMode: 'mood' | 'genre';
   repeatMode: RepeatMode;
   notifications: Notification[];
   playlists: Playlist[];
@@ -137,6 +139,8 @@ interface AudioContextType {
   closePlayer: () => Promise<void>;
   setFullPlayerOpen: (open: boolean) => void;
   toggleShuffle: () => void;
+  toggleSmartShuffle: () => void;
+  setSmartShuffleMode: (mode: 'mood' | 'genre') => void;
   toggleRepeat: () => void;
   addNotification: (
     message: string,
@@ -351,6 +355,58 @@ const STORAGE_KEYS = {
   FOLLOWED_USERS: "tonjam_followed_users",
 };
 
+const smartShuffleQueue = (tracks: Track[], mode: 'mood' | 'genre', currentTrackId?: string): Track[] => {
+  if (tracks.length <= 1) return [...tracks];
+  
+  let baseTracks = [...tracks];
+  let firstTrack: Track | null = null;
+  if (currentTrackId) {
+    const idx = baseTracks.findIndex(t => t.id === currentTrackId);
+    if (idx !== -1) {
+      firstTrack = baseTracks[idx];
+      baseTracks.splice(idx, 1);
+    }
+  }
+
+  const groups: Record<string, Track[]> = {};
+  baseTracks.forEach(track => {
+    let key = 'Unknown';
+    if (mode === 'mood') {
+      key = track.mood ? track.mood.trim() : 'Chill';
+    } else {
+      key = track.genre ? track.genre.trim() : 'Electronic';
+    }
+    
+    if (key) {
+      key = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+    } else {
+      key = 'Unknown';
+    }
+    
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+    groups[key].push(track);
+  });
+
+  Object.keys(groups).forEach(key => {
+    groups[key].sort(() => Math.random() - 0.5);
+  });
+
+  const groupKeys = Object.keys(groups).sort(() => Math.random() - 0.5);
+
+  let shuffledList: Track[] = [];
+  groupKeys.forEach(key => {
+    shuffledList = [...shuffledList, ...groups[key]];
+  });
+
+  if (firstTrack) {
+    shuffledList = [firstTrack, ...shuffledList];
+  }
+
+  return shuffledList;
+};
+
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -372,6 +428,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsFullPlayerOpen: setFullPlayerOpen,
     isShuffle,
     setIsShuffle,
+    isSmartShuffle,
+    setIsSmartShuffle,
+    smartShuffleMode,
+    setSmartShuffleMode,
     repeatMode,
     setRepeatMode,
     volume,
@@ -512,7 +572,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   >(null);
 
   const [playlistFolders, setPlaylistFolders] = useState<PlaylistFolder[]>([]);
-  const [collections, setCollections] = useState<Collection[]>([]);
+  const [collections, setCollections] = useState<Collection[]>(() => {
+    try {
+      const saved = localStorage.getItem('tonjam_collections');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [firestorePlaylistFolders, setFirestorePlaylistFolders] = useState<
     PlaylistFolder[]
   >([]);
@@ -2053,7 +2120,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
-      audioRef.current.crossOrigin = "anonymous";
+      audioRef.current.removeAttribute("crossorigin");
       try {
         const AudioContextClass =
           window.AudioContext || (window as any).webkitAudioContext;
@@ -2989,6 +3056,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         track.audioUrl ||
         "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
 
+      if (sourceUrl.includes("tonjam.io")) {
+        sourceUrl = "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+      }
+
       if (isOffline) {
         const cachedUrl = await audioCacheService.getCachedTrack(track.id);
         if (cachedUrl) {
@@ -3094,7 +3165,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         };
 
         const isRemote = sourceUrl.startsWith("http");
-        playWithFallback(sourceUrl, isRemote);
+        // Always try playing without crossOrigin first for stable and seamless playback of external audio assets
+        playWithFallback(sourceUrl, false);
 
         setIsPlaying(true);
 
@@ -3146,8 +3218,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         const currentSrc = audioRef.current.src;
-        if (!currentSrc || currentSrc === "" || currentSrc === window.location.href || currentSrc === window.location.origin || currentSrc.endsWith("/")) {
+        if (!currentSrc || currentSrc === "" || currentSrc === window.location.href || currentSrc === window.location.origin || currentSrc.endsWith("/") || currentSrc.includes("tonjam.io")) {
           let trackSourceUrl = currentTrack.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+          if (trackSourceUrl.includes("tonjam.io")) {
+            trackSourceUrl = "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+          }
           
           if (isOffline) {
             const cachedUrl = await audioCacheService.getCachedTrack(currentTrack.id);
@@ -3156,12 +3231,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
             }
           }
           
-          const isRemote = trackSourceUrl.startsWith("http");
-          if (isRemote) {
-            audioRef.current.crossOrigin = "anonymous";
-          } else {
-            audioRef.current.removeAttribute("crossorigin");
-          }
+          // Always try playing without crossOrigin first for stable and seamless playback of external audio assets
+          audioRef.current.removeAttribute("crossorigin");
           audioRef.current.src = trackSourceUrl;
           audioRef.current.load();
         }
@@ -3173,12 +3244,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
               error.name !== "AbortError" &&
               !error.message?.includes("interrupted")
             ) {
-              console.error("[Audio] Playback error during toggle:", error);
+              console.warn("[Audio] Playback issue during toggle play, recovering:", error);
               /* If it failed because of source issues, try to reload with fallbacks */
               if (currentTrack) {
                 console.warn("[Audio] Attempting recovery during toggle...");
                 
-                const trackSourceUrl = currentTrack.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+                let trackSourceUrl = currentTrack.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+                if (trackSourceUrl.includes("tonjam.io")) {
+                  trackSourceUrl = "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+                }
+
                 const toggleFallbacks = [
                   { url: trackSourceUrl, crossOrigin: false },
                   { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: true },
@@ -3187,7 +3262,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
                   { url: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=", crossOrigin: false }
                 ];
 
-                let tFallbackIndex = 0;
+                // Since we start by trying trackSourceUrl, if that fails, the next try should be index 1
+                let tFallbackIndex = 1;
 
                 const playToggleFallback = (url: string, useCrossOrigin: boolean) => {
                   if (!audioRef.current) return;
@@ -3208,6 +3284,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
                         if (!isAbort) {
                           if (tFallbackIndex < toggleFallbacks.length) {
                             const next = toggleFallbacks[tFallbackIndex++];
+                            console.warn(`[Audio] Switch toggle fallback to index ${tFallbackIndex - 1}:`, next.url);
                             playToggleFallback(next.url, next.crossOrigin);
                           } else {
                             console.error("[Audio] Toggle recovery completely failed:", e);
@@ -3225,7 +3302,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
                   }
                 };
 
-                playToggleFallback(trackSourceUrl, trackSourceUrl.startsWith("http"));
+                playToggleFallback(trackSourceUrl, false);
               }
             }
           });
@@ -3246,7 +3323,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     const index = queue.findIndex((t) => t.id === currentTrack.id);
-    if (isShuffle) {
+    if (isShuffle && !isSmartShuffle) {
       const nextIndex = Math.floor(Math.random() * queue.length);
       playTrack(queue[nextIndex]);
     } else if (index !== -1 && index < queue.length - 1) {
@@ -3465,7 +3542,27 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsShuffle(nextShuffle);
     localStorage.setItem(STORAGE_KEYS.SHUFFLE, String(nextShuffle));
     if (nextShuffle) {
-      setQueue((prev) => [...prev].sort(() => Math.random() - 0.5));
+      if (isSmartShuffle) {
+        const smartShuffled = smartShuffleQueue(queue, smartShuffleMode, currentTrack?.id);
+        setQueue(smartShuffled);
+      } else {
+        setQueue((prev) => [...prev].sort(() => Math.random() - 0.5));
+      }
+    }
+  };
+
+  const toggleSmartShuffle = () => {
+    const nextSmart = !isSmartShuffle;
+    setIsSmartShuffle(nextSmart);
+    if (nextSmart) {
+      setIsShuffle(true);
+      const smartShuffled = smartShuffleQueue(queue, smartShuffleMode, currentTrack?.id);
+      setQueue(smartShuffled);
+      const modeLabel = smartShuffleMode === 'mood' ? 'Mood' : 'Genre';
+      addNotification(`Smart Shuffle active: Grouped by ${modeLabel}`, "success");
+    } else {
+      setIsShuffle(false);
+      addNotification("Smart Shuffle deactivated", "info");
     }
   };
 
@@ -4255,6 +4352,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         progress,
         isFullPlayerOpen,
         isShuffle,
+        isSmartShuffle,
+        smartShuffleMode,
         repeatMode,
         notifications,
         playlists,
@@ -4283,6 +4382,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         closePlayer,
         setFullPlayerOpen,
         toggleShuffle,
+        toggleSmartShuffle,
+        setSmartShuffleMode,
         toggleRepeat,
         addNotification,
         setTrackToAddToPlaylist,
@@ -4434,10 +4535,10 @@ export const useAudio = () => {
             createdAt: new Date().toISOString()
           };
         }
-        if (prop === "queue" || prop === "playlists" || prop === "recentlyPlayed" || prop === "likedTrackIds" || prop === "followedUserIds" || prop === "posts" || prop === "tasks" || prop === "transactions" || prop === "allTracks" || prop === "allNFTs" || prop === "artists") {
+        if (prop === "queue" || prop === "playlists" || prop === "recentlyPlayed" || prop === "likedTrackIds" || prop === "followedUserIds" || prop === "posts" || prop === "tasks" || prop === "transactions" || prop === "allTracks" || prop === "allNFTs" || prop === "artists" || prop === "collections" || prop === "playlistFolders" || prop === "firestorePlaylistFolders") {
           return [];
         }
-        if (prop === "isPlaying" || prop === "isFullPlayerOpen" || prop === "isShuffle" || prop === "isLoading" || prop === "isOffline") {
+        if (prop === "isPlaying" || prop === "isFullPlayerOpen" || prop === "isShuffle" || prop === "isSmartShuffle" || prop === "isLoading" || prop === "isOffline") {
           return false;
         }
         if (prop === "progress" || prop === "volume") {
@@ -4445,6 +4546,9 @@ export const useAudio = () => {
         }
         if (prop === "repeatMode") {
           return "off";
+        }
+        if (prop === "smartShuffleMode") {
+          return "mood";
         }
         // Fallback for functions: return any noop function so that calling it won't crash either
         return () => {};

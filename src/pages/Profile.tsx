@@ -1,3 +1,3 @@
-import { ProfileScreen } from './ProfileScreen';
+import { ProfilePage } from './Profile/ProfilePage';
 
-export default ProfileScreen;
+export default ProfilePage;

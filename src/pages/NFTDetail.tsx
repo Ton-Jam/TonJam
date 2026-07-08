@@ -98,6 +98,7 @@ import { getPlaceholderImage, cn } from "@/lib/utils";
 import { PriceSparkline } from "@/components/PriceSparkline";
 import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
 import { QuickBid } from "@/components/QuickBid";
+import { NFTBidTracker } from "@/components/NFTBidTracker";
 import { CollectionStats } from "@/components/CollectionStats";
 import { Interactive3DViewer } from "@/components/Interactive3DViewer";
 
@@ -1259,6 +1260,10 @@ const NFTDetail: React.FC = () => {
                   <Share2 className="h-3.5 w-3.5 text-blue-400" /> Share
                 </button>
               </div>
+
+              {localNft && (
+                <NFTBidTracker nft={localNft} className="mt-4" />
+              )}
 
               {isAuction && !isOwner && !isAuctionEnded && (
                 <div className="mt-4">

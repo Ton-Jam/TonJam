@@ -13,6 +13,7 @@ import {
   Music,
   ExternalLink,
   ChevronDown,
+  ChevronLeft,
   Trash2,
   Check,
   ChevronUp,
@@ -255,89 +256,84 @@ export const PlayerScreen: React.FC = () => {
 
   return (
     <motion.div
-      initial={{ y: "100%" }}
-      animate={{ y: 0 }}
-      exit={{ y: "100%" }}
-      transition={{ type: "spring", damping: 26, stiffness: 220 }}
-      drag="y"
-      dragConstraints={{ top: 0 }}
-      dragElastic={{ top: 0.1, bottom: 0.8 }}
-      onDragEnd={handleDragEnd}
-      className="fixed inset-0 bg-zinc-950 text-white font-sans z-50 flex flex-col overflow-hidden select-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25, ease: "easeInOut" }}
+      className="fixed inset-0 bg-[#0A113A] text-white font-sans z-50 overflow-y-auto flex flex-col select-none"
       id="tonjam-fullscreen-player"
     >
-      {/* Back/Close Drag Handle Handle */}
-      <div className="w-full flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
-        <div className="w-12 h-1.5 bg-zinc-800 rounded-full" />
-      </div>
-
-      {/* Header Bar */}
-      <div className="flex items-center justify-between px-6 py-2" id="player-header">
-        <button
-          onClick={() => setFullPlayerOpen(false)}
-          className="p-2 text-zinc-400 hover:text-white transition-colors"
-          id="btn-close-player"
-        >
-          <ChevronDown className="w-6 h-6" />
-        </button>
-
-        {/* Tab View Selection buttons */}
-        <div className="flex items-center bg-zinc-900 rounded-full p-0.5 text-xs font-semibold">
+      {/* Header Wrapper (relative so it scrolls off-screen naturally) */}
+      <div className="relative w-full bg-[#0A113A] border-none shrink-0" id="player-sticky-header">
+        {/* Header Bar */}
+        <div className="flex items-center justify-between px-6 py-4" id="player-header">
           <button
-            onClick={() => setActiveTab("player")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-full transition-all uppercase tracking-wider text-[10px]",
-              activeTab === "player" ? "bg-blue-600 text-white" : "text-zinc-400 hover:text-white"
-            )}
+            onClick={() => setFullPlayerOpen(false)}
+            className="p-2 text-zinc-400 hover:text-white transition-colors flex items-center gap-1"
+            id="btn-close-player"
           >
-            Player
+            <ChevronLeft className="w-6 h-6" />
+            <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">Back</span>
           </button>
-          <button
-            onClick={() => setActiveTab("lyrics")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-full transition-all uppercase tracking-wider text-[10px] flex items-center gap-1",
-              activeTab === "lyrics" ? "bg-blue-600 text-white" : "text-zinc-400 hover:text-white"
-            )}
-          >
-            <Mic2 className="w-3 h-3" />
-            Lyrics
-          </button>
-          {currentTrack.isNFT && (
+
+          {/* Tab View Selection buttons */}
+          <div className="flex items-center bg-white/5 rounded-full p-0.5 text-xs font-semibold">
             <button
-              onClick={() => setActiveTab("nft")}
+              onClick={() => setActiveTab("player")}
               className={cn(
-                "px-3.5 py-1.5 rounded-full transition-all uppercase tracking-wider text-[10px] flex items-center gap-1",
-                activeTab === "nft" ? "bg-blue-600 text-white" : "text-zinc-400 hover:text-white"
+                "px-3.5 py-1.5 rounded-full transition-all uppercase tracking-wider text-[10px]",
+                activeTab === "player" ? "bg-blue-600 text-white" : "text-zinc-400 hover:text-white"
               )}
             >
-              <Gem className="w-3 h-3" />
-              NFT Info
+              Player
             </button>
-          )}
-        </div>
+            <button
+              onClick={() => setActiveTab("lyrics")}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full transition-all uppercase tracking-wider text-[10px] flex items-center gap-1",
+                activeTab === "lyrics" ? "bg-blue-600 text-white" : "text-zinc-400 hover:text-white"
+              )}
+            >
+              <Mic2 className="w-3 h-3" />
+              Lyrics
+            </button>
+            {currentTrack.isNFT && (
+              <button
+                onClick={() => setActiveTab("nft")}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-full transition-all uppercase tracking-wider text-[10px] flex items-center gap-1",
+                  activeTab === "nft" ? "bg-blue-600 text-white" : "text-zinc-400 hover:text-white"
+                )}
+              >
+                <Gem className="w-3 h-3" />
+                NFT Info
+              </button>
+            )}
+          </div>
 
-        {/* Share Button */}
-        <button
-          onClick={async () => {
-            const shareUrl = `${window.location.origin}/#/track/${currentTrack.id}`;
-            const result = await shareContent({
-              title: `${currentTrack.title} by ${currentTrack.artist}`,
-              text: `Check out this song on TonJam!`,
-              url: shareUrl
-            });
-            if (result.success) {
-              toast.success("Link copied!");
-            }
-          }}
-          className="p-2 text-zinc-400 hover:text-white transition-colors"
-          id="btn-share-track"
-        >
-          <Share2 className="w-5 h-5" />
-        </button>
+          {/* Share Button */}
+          <button
+            onClick={async () => {
+              const shareUrl = `${window.location.origin}/#/track/${currentTrack.id}`;
+              const result = await shareContent({
+                title: `${currentTrack.title} by ${currentTrack.artist}`,
+                text: `Check out this song on TonJam!`,
+                url: shareUrl
+              });
+              if (result.success) {
+                toast.success("Link copied!");
+              }
+            }}
+            className="p-2 text-zinc-400 hover:text-white transition-colors"
+            id="btn-share-track"
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Main Responsive Canvas Content Area */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col items-center justify-center max-w-md mx-auto w-full gap-6">
+      <div className="flex-1 px-0 py-4 flex flex-col items-center justify-between max-w-md mx-auto w-full gap-4 relative z-10 pb-6 shrink-0">
         <AnimatePresence mode="wait">
           {activeTab === "player" && (
             <motion.div
@@ -345,16 +341,16 @@ export const PlayerScreen: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full flex flex-col items-center gap-6"
+              className="w-full flex flex-col items-center gap-4"
             >
-              {/* Large Animated Album Art Cover with Gestures */}
+              {/* Large Animated Album Art Cover with Gestures (Edge-to-Edge on Mobile) */}
               <div
                 onClick={handleArtworkTap}
                 onTouchStart={handlePressStart}
                 onTouchEnd={handlePressEnd}
                 onMouseDown={handlePressStart}
                 onMouseUp={handlePressEnd}
-                className="relative aspect-square w-full max-w-[280px] sm:max-w-[320px] rounded-2xl bg-zinc-900 shadow-2xl overflow-hidden cursor-pointer group"
+                className="relative aspect-square w-full sm:max-w-[380px] md:max-w-[400px] rounded-b-3xl sm:rounded-3xl bg-zinc-900/50 shadow-2xl overflow-hidden cursor-pointer group transition-all duration-300"
                 id="artwork-gesture-box"
               >
                 <motion.img
@@ -388,37 +384,37 @@ export const PlayerScreen: React.FC = () => {
                 </AnimatePresence>
               </div>
 
-              {/* Title & Artist & Badges Metadata Row */}
-              <div className="w-full flex justify-between items-center px-1">
-                <div className="flex flex-col min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-bold tracking-tight text-white truncate max-w-[240px]" id="full-track-title">
+              {/* Title & Artist (Left Side) & Action Buttons (Right Side) Metadata Row */}
+              <div className="w-full flex justify-between items-center px-6 mt-4 gap-4">
+                <div className="flex flex-col items-start text-left min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap w-full">
+                    <h1 className="text-2xl font-black tracking-tight text-white truncate max-w-[240px] sm:max-w-[280px]" id="full-track-title">
                       {currentTrack.title}
                     </h1>
                     {currentTrack.isNFT && (
-                      <span className="flex items-center gap-0.5 bg-blue-600/20 text-blue-400 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full" id="nft-badge">
-                        <Gem className="w-2 h-2" />
+                      <span className="flex items-center gap-0.5 bg-blue-600/25 text-blue-400 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0" id="nft-badge">
+                        <Gem className="w-2.5 h-2.5" />
                         NFT
                       </span>
                     )}
                   </div>
-                  <p className="text-sm font-medium text-zinc-400 mt-1 flex items-center gap-1.5" id="full-track-artist">
+                  <p className="text-sm font-semibold text-zinc-400 flex items-center gap-1.5 mt-1" id="full-track-artist">
                     {currentTrack.artist}
                     {currentTrack.artistVerified && (
-                      <span className="w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center text-[8px] text-white font-black" id="artist-verified-check">
+                      <span className="w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center text-[8px] text-white font-black shrink-0" id="artist-verified-check">
                         ✓
                       </span>
                     )}
                   </p>
                 </div>
 
-                {/* Controls Left Column Options like Like button & Cache */}
-                <div className="flex items-center gap-2">
+                {/* Like & Download Icons on the other side */}
+                <div className="flex items-center gap-4 shrink-0">
                   <button
                     onClick={() => handleDownloadToggle()}
                     disabled={isDownloading}
                     className={cn(
-                      "p-2.5 rounded-full transition-colors",
+                      "p-2 rounded-full transition-colors",
                       isCached ? "text-green-500 bg-green-500/10" : "text-zinc-400 hover:text-white"
                     )}
                     id="btn-download-full"
@@ -431,7 +427,7 @@ export const PlayerScreen: React.FC = () => {
                     whileTap={{ scale: 0.85 }}
                     onClick={() => toggleLikeTrack(currentTrack.id)}
                     className={cn(
-                      "p-2.5 rounded-full transition-colors",
+                      "p-2 rounded-full transition-colors",
                       isLiked ? "text-red-500 bg-red-500/10" : "text-zinc-400 hover:text-white"
                     )}
                     id="btn-like-full"
@@ -450,7 +446,7 @@ export const PlayerScreen: React.FC = () => {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              className="w-full h-[320px] sm:h-[380px] flex flex-col justify-between"
+              className="w-full h-[320px] sm:h-[380px] flex flex-col justify-between px-6"
             >
               {/* Synced lyrics container */}
               <div
@@ -486,7 +482,7 @@ export const PlayerScreen: React.FC = () => {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              className="w-full flex flex-col gap-5 text-left"
+              className="w-full flex flex-col gap-5 text-left px-6"
               id="nft-details-panel"
             >
               <div className="bg-zinc-900 rounded-[10px] p-5 flex flex-col gap-4">
@@ -549,19 +545,23 @@ export const PlayerScreen: React.FC = () => {
         </AnimatePresence>
 
         {/* Dynamic Progress Scrub slider */}
-        <Progress
-          progress={progress}
-          duration={trackDuration}
-          onSeek={seek}
-          isSeeking={isSeeking}
-          setIsSeeking={setIsSeeking}
-        />
+        <div className="w-full px-6">
+          <Progress
+            progress={progress}
+            duration={trackDuration}
+            onSeek={seek}
+            isSeeking={isSeeking}
+            setIsSeeking={setIsSeeking}
+          />
+        </div>
 
         {/* Dynamic Controls section */}
-        <PlayerControls />
+        <div className="w-full px-6 flex justify-center">
+          <PlayerControls />
+        </div>
 
         {/* Bottom toolbar for Queue Bottom Sheet Trigger & Add To Playlist */}
-        <div className="w-full flex justify-between items-center text-zinc-400 px-2 pt-2">
+        <div className="w-full flex justify-between items-center text-zinc-400 px-8 pt-2">
           <button
             onClick={() => setTrackToAddToPlaylist(currentTrack)}
             className="flex items-center gap-1.5 hover:text-white text-xs font-bold uppercase tracking-widest"
@@ -598,7 +598,7 @@ export const PlayerScreen: React.FC = () => {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed bottom-0 left-0 right-0 max-h-[80vh] bg-zinc-950 rounded-t-2xl z-50 overflow-hidden flex flex-col pointer-events-auto shadow-[0_-12px_40px_rgba(0,0,0,0.8)]"
+              className="fixed bottom-0 left-0 right-0 max-h-[80vh] bg-[#0A113A] rounded-t-2xl z-50 overflow-hidden flex flex-col pointer-events-auto shadow-[0_-12px_40px_rgba(0,0,0,0.8)]"
               id="queue-bottom-sheet"
             >
               {/* Header */}

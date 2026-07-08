@@ -158,11 +158,19 @@ export const Interactive3DViewer: React.FC<Interactive3DViewerProps> = ({
         }}
         className="relative w-full h-full rounded-2xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] bg-neutral-950/80 backdrop-blur-md border border-white/10 transition-shadow duration-300 flex items-center justify-center group"
       >
-        {/* High-fidelity artwork image */}
-        <img
+        {/* High-fidelity artwork image with interactive Framer Motion hover scale-up effect */}
+        <motion.img
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover transition-all duration-700"
+          className="w-full h-full object-cover"
+          animate={{
+            scale: isHovered ? 1.05 : 1,
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 150,
+            damping: 25
+          }}
           style={{ transform: 'translateZ(0px)' }}
           referrerPolicy="no-referrer"
         />

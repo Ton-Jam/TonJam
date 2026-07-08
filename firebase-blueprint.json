@@ -404,6 +404,20 @@
         "userId": { "type": "string" }
       },
       "required": ["id", "name", "bass", "mids", "treble", "userId"]
+    },
+    "Bookmark": {
+      "title": "Bookmark",
+      "description": "User bookmarked post reference",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "postId": { "type": "string" },
+        "content": { "type": "string" },
+        "postData": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "postId"]
     }
   },
   "firestore": {
@@ -450,6 +464,10 @@
     "/users/{userId}/eqPresets/{presetId}": {
       "schema": "EqPreset",
       "description": "User saved equalizer presets"
+    },
+    "/users/{userId}/bookmarks/{bookmarkId}": {
+      "schema": "Bookmark",
+      "description": "User bookmarked posts"
     },
     "/tracks/{trackId}": {
       "schema": "Track",

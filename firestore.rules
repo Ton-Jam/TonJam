@@ -488,6 +488,14 @@ service cloud.firestore {
       allow delete: if isSignedIn() && isOwner(userId);
     }
 
+    match /users/{userId}/bookmarks/{bookmarkId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isOwner(userId) || isAdmin();
+      allow create: if isSignedIn() && isOwner(userId) && isValidId(bookmarkId);
+      allow update: if isSignedIn() && isOwner(userId) && isValidId(bookmarkId);
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
     // 🚀 ADMIN CONTROLLED
     match /sponsoredContent/{id} {
       allow read: if true;

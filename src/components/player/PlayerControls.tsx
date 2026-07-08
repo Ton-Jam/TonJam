@@ -45,6 +45,10 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
     prevTrack,
     isShuffle,
     toggleShuffle,
+    isSmartShuffle,
+    toggleSmartShuffle,
+    smartShuffleMode,
+    setSmartShuffleMode,
     repeatMode,
     toggleRepeat,
     volume,
@@ -325,18 +329,110 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
 
       {/* Main Core Controls Playback Row */}
       <div className="flex items-center justify-between px-2" id="tonjam-core-buttons-row">
-        {/* Shuffle Button */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={toggleShuffle}
-          className={`p-2 rounded-full transition-colors ${
-            isShuffle ? "text-blue-500" : "text-zinc-500 hover:text-white"
-          }`}
-          id="btn-shuffle"
-          aria-label="Shuffle"
-        >
-          <Shuffle className="w-5 h-5" />
-        </motion.button>
+        {/* Smart Shuffle Button with Dropdown Options */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              className={`p-2 rounded-full transition-colors relative flex items-center justify-center ${
+                isShuffle 
+                  ? isSmartShuffle 
+                    ? "text-emerald-400 bg-emerald-500/10" 
+                    : "text-blue-500 bg-blue-500/10" 
+                  : "text-zinc-500 hover:text-white"
+              }`}
+              id="btn-shuffle"
+              aria-label="Shuffle Options"
+            >
+              <Shuffle className="w-5 h-5" />
+              {isSmartShuffle && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full border border-zinc-950 animate-ping" />
+              )}
+            </motion.button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56 bg-[#0A113A] border border-white/10 text-white p-1.5 rounded-xl shadow-2xl z-50">
+            <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-zinc-400 px-2 py-1 font-bold">
+              Shuffle Mode
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-white/10 my-1" />
+            <DropdownMenuItem
+              onClick={() => {
+                if (isShuffle && isSmartShuffle) {
+                  toggleSmartShuffle(); 
+                } else if (!isShuffle) {
+                  toggleShuffle();
+                }
+              }}
+              className={`text-xs px-2 py-2 rounded-lg cursor-pointer flex items-center justify-between transition-colors ${
+                isShuffle && !isSmartShuffle ? "bg-blue-600 text-white font-medium" : "hover:bg-white/5 text-zinc-300"
+              }`}
+            >
+              <span>Standard Shuffle</span>
+              {isShuffle && !isSmartShuffle && <span className="w-1.5 h-1.5 bg-white rounded-full" />}
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => {
+                if (smartShuffleMode !== 'mood') {
+                  setSmartShuffleMode('mood');
+                }
+                if (!isSmartShuffle) {
+                  toggleSmartShuffle();
+                } else {
+                  setSmartShuffleMode('mood');
+                }
+              }}
+              className={`text-xs px-2 py-2 rounded-lg cursor-pointer flex items-center justify-between transition-colors ${
+                isShuffle && isSmartShuffle && smartShuffleMode === 'mood' ? "bg-emerald-600 text-white font-medium" : "hover:bg-white/5 text-zinc-300"
+              }`}
+            >
+              <div className="flex flex-col text-left">
+                <span>Smart Shuffle: Mood</span>
+                <span className="text-[9px] text-zinc-400">Groups Chill, Energetic, etc.</span>
+              </div>
+              {isShuffle && isSmartShuffle && smartShuffleMode === 'mood' && <span className="w-1.5 h-1.5 bg-white rounded-full" />}
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => {
+                if (smartShuffleMode !== 'genre') {
+                  setSmartShuffleMode('genre');
+                }
+                if (!isSmartShuffle) {
+                  toggleSmartShuffle();
+                } else {
+                  setSmartShuffleMode('genre');
+                }
+              }}
+              className={`text-xs px-2 py-2 rounded-lg cursor-pointer flex items-center justify-between transition-colors ${
+                isShuffle && isSmartShuffle && smartShuffleMode === 'genre' ? "bg-emerald-600 text-white font-medium" : "hover:bg-white/5 text-zinc-300"
+              }`}
+            >
+              <div className="flex flex-col text-left">
+                <span>Smart Shuffle: Genre</span>
+                <span className="text-[9px] text-zinc-400">Groups Electronic, Synthwave...</span>
+              </div>
+              {isShuffle && isSmartShuffle && smartShuffleMode === 'genre' && <span className="w-1.5 h-1.5 bg-white rounded-full" />}
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator className="bg-white/10 my-1" />
+            <DropdownMenuItem
+              onClick={() => {
+                if (isShuffle) {
+                  if (isSmartShuffle) {
+                    toggleSmartShuffle();
+                  } else {
+                    toggleShuffle();
+                  }
+                }
+              }}
+              disabled={!isShuffle}
+              className="text-xs px-2 py-2 rounded-lg cursor-pointer text-red-400 hover:bg-red-500/10 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              Disable Shuffle
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Previous Button */}
         <motion.button

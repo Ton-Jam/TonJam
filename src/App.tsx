@@ -62,6 +62,7 @@ import { useProactivePreloader } from '@/hooks/useProactivePreloader';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ToastProvider } from '@/components/layout/ToastProvider';
 import { motion, AnimatePresence } from 'motion/react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, limit, query } from 'firebase/firestore';
@@ -275,13 +276,15 @@ const App: React.FC = () => {
             <AuthProvider>
               <AudioProvider>
                 <TooltipProvider>
-                  <NotificationProvider>
-                    <Toaster theme="light" position="top-right" />
-                    <Router>
-                      <ScrollToTop />
-                      <AppContent />
-                    </Router>
-                  </NotificationProvider>
+                  <ToastProvider>
+                    <NotificationProvider>
+                      <Toaster theme="light" position="top-right" />
+                      <Router>
+                        <ScrollToTop />
+                        <AppContent />
+                      </Router>
+                    </NotificationProvider>
+                  </ToastProvider>
                 </TooltipProvider>
               </AudioProvider>
             </AuthProvider>

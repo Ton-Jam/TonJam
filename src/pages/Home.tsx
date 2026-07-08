@@ -27,7 +27,11 @@ import {
   Volume2,
   Mic2,
   Headphones,
-  Guitar
+  Guitar,
+  Moon,
+  Target,
+  Smile,
+  Frown
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "@/context/AudioContext";
@@ -49,6 +53,7 @@ import NFTCard from "@/components/NFTCard";
 import TrackCard from "@/components/TrackCard";
 import GenreCard from "@/components/GenreCard";
 import CommunityFeedCard from "@/components/CommunityFeedCard";
+import MoodPlaylist from "@/components/MoodPlaylist";
 import { Artist, Track, NFTItem } from "@/types";
 
 // ==========================================
@@ -112,7 +117,8 @@ const Home: React.FC = () => {
     isPlaying,
     followedUserIds,
     toggleFollowUser,
-    tasks
+    tasks,
+    playAll
   } = useAudio();
 
   // Real active tasks and follow status calculations
@@ -151,6 +157,35 @@ const Home: React.FC = () => {
   // GLOBAL FILTER STATE
   // ------------------------------------------
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+
+  // ------------------------------------------
+  // MOOD-BASED DYNAMIC PLAYLIST CURATION
+  // ------------------------------------------
+  const MOOD_GENRES_MAP = useMemo<Record<string, string[]>>(() => ({
+    chill: ['lofi', 'ambient', 'jazz', 'r&b', 'classical', 'synthwave'],
+    energetic: ['electronic', 'techno', 'house', 'rock', 'afrobeats', 'pop', 'synthwave', 'amapiano'],
+    focus: ['lofi', 'ambient', 'classical', 'synthwave'],
+    happy: ['pop', 'funk', 'reggae', 'afrobeats', 'amapiano'],
+    melancholic: ['lofi', 'r&b', 'jazz', 'rock', 'ambient']
+  }), []);
+
+  const curatedMoodTracks = useMemo(() => {
+    if (!selectedMood) return [];
+    
+    const mappedGenres = MOOD_GENRES_MAP[selectedMood] || [];
+    const tracksSource = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
+    
+    return tracksSource.filter((track) => {
+      const trackMoodLower = track.mood?.toLowerCase() || '';
+      const isMoodMatch = trackMoodLower === selectedMood || trackMoodLower.includes(selectedMood);
+      
+      const trackGenreLower = track.genre?.toLowerCase() || '';
+      const isGenreMatch = mappedGenres.some(g => trackGenreLower.includes(g) || g.includes(trackGenreLower));
+      
+      return isMoodMatch || isGenreMatch;
+    });
+  }, [selectedMood, allTracks, MOOD_GENRES_MAP]);
 
   // ------------------------------------------
   // 10 MOCK TRENDING NFT COLLECTIONS
@@ -449,6 +484,81 @@ const Home: React.FC = () => {
         </div>
 
         <FilterPills selectedGenre={selectedCategory} onSelect={setSelectedCategory} />
+
+        {/* ==========================================
+            MOOD-BASED DISCOVERY FILTER & PLAYLIST CURATION
+            ========================================== */}
+        <motion.div 
+          animate={{
+            backgroundColor: selectedMood === 'chill' ? 'rgba(0, 242, 254, 0.04)' :
+                             selectedMood === 'energetic' ? 'rgba(255, 8, 68, 0.04)' :
+                             selectedMood === 'focus' ? 'rgba(0, 205, 172, 0.04)' :
+                             selectedMood === 'happy' ? 'rgba(250, 217, 97, 0.04)' :
+                             selectedMood === 'melancholic' ? 'rgba(179, 82, 228, 0.04)' :
+                             'rgba(16, 26, 59, 0.0)',
+            boxShadow: selectedMood === 'chill' ? '0 10px 30px -10px rgba(0, 242, 254, 0.05)' :
+                       selectedMood === 'energetic' ? '0 10px 30px -10px rgba(255, 8, 68, 0.05)' :
+                       selectedMood === 'focus' ? '0 10px 30px -10px rgba(0, 205, 172, 0.05)' :
+                       selectedMood === 'happy' ? '0 10px 30px -10px rgba(250, 217, 97, 0.05)' :
+                       selectedMood === 'melancholic' ? '0 10px 30px -10px rgba(179, 82, 228, 0.05)' :
+                       '0 0px 0px 0px rgba(0,0,0,0)'
+          }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
+          className="space-y-4 text-left p-4 rounded-3xl -mx-4 transition-all"
+        >
+          <div className="flex items-center justify-between px-0.5">
+            <div>
+              <h2 className="text-lg font-black tracking-tight text-white">
+                Mood Alignment
+              </h2>
+              <p className="text-[10px] text-[#9AA0AE] mt-0.5 leading-tight">
+                Select a frequency to dynamically forge a genre-curated mix
+              </p>
+            </div>
+            <Sparkles className="w-4 h-4 text-[#F5D547] shrink-0 animate-pulse" />
+          </div>
+
+          {/* Mood Selector Pills (Horizontal Scroll) */}
+          <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 px-0.5">
+            {[
+              { id: 'chill', name: 'Chill', icon: Moon, description: 'Ambient, Lofi, Jazz & Classical frequencies', color: 'from-[#00F2FE] to-[#4FACFE]', textAccent: 'text-[#00F2FE]' },
+              { id: 'energetic', name: 'Hype', icon: Zap, description: 'Techno, Electronic, Rock & Afrobeats beats', color: 'from-[#FF0844] to-[#FFB199]', textAccent: 'text-[#FF0844]' },
+              { id: 'focus', name: 'Focus', icon: Target, description: 'Deep study ambient & classical tones', color: 'from-[#00CDAC] to-[#8DDAD3]', textAccent: 'text-[#00CDAC]' },
+              { id: 'happy', name: 'Happy', icon: Smile, description: 'Upbeat pop, funk & sunny vibes', color: 'from-[#FAD961] to-[#F76B1C]', textAccent: 'text-[#FAD961]' },
+              { id: 'melancholic', name: 'Deep', icon: Frown, description: 'Nostalgic lofi & slow r&b layers', color: 'from-[#B352E4] to-[#761AC2]', textAccent: 'text-[#B352E4]' },
+            ].map((mood) => {
+              const MoodIcon = mood.icon;
+              const isSelected = selectedMood === mood.id;
+              return (
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  key={mood.id}
+                  onClick={() => setSelectedMood(selectedMood === mood.id ? null : mood.id)}
+                  className={`flex flex-col items-center justify-center p-3.5 rounded-2xl w-[92px] shrink-0 transition-all duration-300 outline-none cursor-pointer border-none text-center ${
+                    isSelected 
+                      ? `bg-gradient-to-br ${mood.color} text-slate-950 shadow-lg shadow-indigo-500/10` 
+                      : 'bg-[#101A3B]/60 hover:bg-[#101A3B] text-white'
+                  }`}
+                >
+                  <MoodIcon className={`w-5 h-5 mb-1.5 ${isSelected ? 'text-slate-950' : mood.textAccent}`} />
+                  <span className={`text-[11px] font-black tracking-tight ${isSelected ? 'text-slate-950' : 'text-slate-200'}`}>
+                    {mood.name}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Curated Dynamic Playlist Section (Renders when a mood is selected) */}
+          <MoodPlaylist
+            selectedMood={selectedMood}
+            onClear={() => setSelectedMood(null)}
+            tracks={curatedMoodTracks}
+            onPlayTrack={playTrack}
+            onPlayAll={playAll}
+          />
+        </motion.div>
 
         {/* ==========================================
             BROWSE GENRES (Horizontal Scroll)
