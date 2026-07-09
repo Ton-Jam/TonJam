@@ -276,37 +276,38 @@ export const PlayerScreen: React.FC = () => {
             <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">Back</span>
           </button>
 
-          {/* Tab View Selection buttons */}
-          <div className="flex items-center bg-white/5 rounded-full p-0.5 text-xs font-semibold">
+          {/* Tab View Selection buttons (Icons only for a cleaner UI) */}
+          <div className="flex items-center bg-white/5 rounded-full p-1 text-xs font-semibold" id="player-view-toggle">
             <button
               onClick={() => setActiveTab("player")}
+              title="Player"
               className={cn(
-                "px-3.5 py-1.5 rounded-full transition-all uppercase tracking-wider text-[10px]",
+                "p-2 rounded-full transition-all flex items-center justify-center",
                 activeTab === "player" ? "bg-blue-600 text-white" : "text-zinc-400 hover:text-white"
               )}
             >
-              Player
+              <Music className="w-4 h-4" />
             </button>
             <button
               onClick={() => setActiveTab("lyrics")}
+              title="Lyrics"
               className={cn(
-                "px-3.5 py-1.5 rounded-full transition-all uppercase tracking-wider text-[10px] flex items-center gap-1",
+                "p-2 rounded-full transition-all flex items-center justify-center",
                 activeTab === "lyrics" ? "bg-blue-600 text-white" : "text-zinc-400 hover:text-white"
               )}
             >
-              <Mic2 className="w-3 h-3" />
-              Lyrics
+              <Mic2 className="w-4 h-4" />
             </button>
             {currentTrack.isNFT && (
               <button
                 onClick={() => setActiveTab("nft")}
+                title="NFT Info"
                 className={cn(
-                  "px-3.5 py-1.5 rounded-full transition-all uppercase tracking-wider text-[10px] flex items-center gap-1",
+                  "p-2 rounded-full transition-all flex items-center justify-center",
                   activeTab === "nft" ? "bg-blue-600 text-white" : "text-zinc-400 hover:text-white"
                 )}
               >
-                <Gem className="w-3 h-3" />
-                NFT Info
+                <Gem className="w-4 h-4" />
               </button>
             )}
           </div>

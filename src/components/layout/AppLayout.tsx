@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ToastProvider } from './ToastProvider';
 import { ModalProvider } from './ModalProvider';
 import { GlobalHeader } from './GlobalHeader';
@@ -36,6 +37,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   progress = 0.45,
 }) => {
   const [isQueueOpen, setIsQueueOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <ToastProvider>
@@ -57,7 +59,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               showWallet={true}
               onWalletClick={() => alert('Wallet Connection modal active')}
               showNotifications={true}
-              onNotificationsClick={() => alert('Notifications Hub active')}
+              onNotificationsClick={() => navigate('/notifications')}
             />
           </div>
 

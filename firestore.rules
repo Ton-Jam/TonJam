@@ -126,6 +126,16 @@ service cloud.firestore {
         && data.xpReward is number;
     }
 
+    function isValidNotification(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && data.category is string && data.category.size() <= 50
+        && data.title is string && data.title.size() <= 200
+        && data.description is string && data.description.size() <= 1000
+        && data.timestamp is string
+        && data.read is bool;
+    }
+
     function isValidUserMissionProgress(data) {
       return data.userId is string && data.userId.size() <= 128
         && data.missionId is string && data.missionId.size() <= 128
@@ -493,6 +503,14 @@ service cloud.firestore {
       allow list: if isOwner(userId) || isAdmin();
       allow create: if isSignedIn() && isOwner(userId) && isValidId(bookmarkId);
       allow update: if isSignedIn() && isOwner(userId) && isValidId(bookmarkId);
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    match /users/{userId}/notifications/{notificationId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isOwner(userId) || isAdmin();
+      allow create: if isSignedIn() && isOwner(userId) && isValidNotification(incoming()) && isValidId(notificationId) && incoming().userId == userId;
+      allow update: if isSignedIn() && isOwner(userId) && isValidNotification(incoming()) && incoming().userId == userId;
       allow delete: if isSignedIn() && isOwner(userId);
     }
 

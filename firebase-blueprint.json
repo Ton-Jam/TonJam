@@ -418,9 +418,31 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "postId"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notification signal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "category": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "read": { "type": "boolean" },
+        "avatarUrl": { "type": "string" },
+        "thumbnailUrl": { "type": "string" },
+        "quickAction": { "type": "object" }
+      },
+      "required": ["id", "userId", "category", "title", "description", "timestamp", "read"]
     }
   },
   "firestore": {
+    "/users/{userId}/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User notifications subcollection"
+    },
     "/reports/{reportId}": {
       "schema": "Report",
       "description": "Content reports"

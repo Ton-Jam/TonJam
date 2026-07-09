@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { Bell, Wallet, Search, ArrowLeft, MoreHorizontal } from 'lucide-react';
 import { APP_LOGO } from '@/constants';
+import { NotificationBell } from '@/components/NotificationBell';
 
 interface GlobalHeaderProps {
   title?: string;
@@ -108,13 +109,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         )}
 
         {showNotifications && (
-          <button
-            onClick={onNotificationsClick}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 active:scale-95 transition-all"
-            aria-label="Notifications"
-          >
-            <Bell className="w-5 h-5" />
-          </button>
+          <NotificationBell onClick={onNotificationsClick} />
         )}
 
         {rightActionSlot}
