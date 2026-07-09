@@ -997,22 +997,39 @@ body {
 
 /* Ensure inner container panels in modals match the navy blue theme */
 [role="dialog"] .bg-zinc-950,
+[role="dialog"].bg-zinc-950,
 [role="dialog"] .bg-neutral-900,
+[role="dialog"].bg-neutral-900,
 [role="dialog"] .bg-black,
+[role="dialog"].bg-black,
 [role="dialog"] .bg-zinc-900,
+[role="dialog"].bg-zinc-900,
 [role="dialog"] .bg-zinc-800,
+[role="dialog"].bg-zinc-800,
 [role="dialog"] .bg-\[\#0a0a0a\],
+[role="dialog"].bg-\[\#0a0a0a\],
 [role="dialog"] .bg-\[\#0b0f14\],
+[role="dialog"].bg-\[\#0b0f14\],
 [role="dialog"] .bg-\[\#0A0A0B\],
+[role="dialog"].bg-\[\#0A0A0B\],
 [role="dialog"] .bg-card,
+[role="dialog"].bg-card,
 [role="dialog"] .bg-background,
+[role="dialog"].bg-background,
 [role="alertdialog"] .bg-zinc-950,
+[role="alertdialog"].bg-zinc-950,
 [role="alertdialog"] .bg-neutral-900,
+[role="alertdialog"].bg-neutral-900,
 [role="alertdialog"] .bg-black,
+[role="alertdialog"].bg-black,
 [role="alertdialog"] .bg-zinc-900,
+[role="alertdialog"].bg-zinc-900,
 [role="alertdialog"] .bg-zinc-800,
+[role="alertdialog"].bg-zinc-800,
 [role="alertdialog"] .bg-card,
-[role="alertdialog"] .bg-background {
+[role="alertdialog"].bg-card,
+[role="alertdialog"] .bg-background,
+[role="alertdialog"].bg-background {
   background-color: #0A113A !important;
   background: #0A113A !important;
 }

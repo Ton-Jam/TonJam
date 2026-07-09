@@ -220,7 +220,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.95, opacity: 0, y: 15 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-                className="w-full max-w-sm bg-[#0C0D14]/95 backdrop-blur-xl rounded-2xl p-5 shadow-2xl pointer-events-auto flex flex-col select-none"
+                className="w-full max-w-sm bg-[#0A113A] rounded-2xl p-5 pointer-events-auto flex flex-col select-none"
               >
                 {/* Header title */}
                 <div className="flex items-center justify-between mb-4">
