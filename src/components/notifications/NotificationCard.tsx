@@ -20,6 +20,8 @@ import {
   Send 
 } from 'lucide-react';
 import { TonJamNotification, NotificationCategory, NotificationQuickAction } from './types';
+import { TonJamButton } from '@/components/ui/buttons/TonJamButton';
+import { CardTitle, Label } from '@/components/ui/typography/Typography';
 
 interface NotificationCardProps {
   notification: TonJamNotification;
@@ -161,20 +163,20 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
           )}
         </div>
 
-        {/* MIDDLE TEXT AREA */}
+         {/* MIDDLE TEXT AREA */}
         <div className="flex-1 min-w-0 flex flex-col text-left">
           <div className="flex items-center justify-between gap-2 mb-1">
-            <span className={`text-[9px] font-black uppercase tracking-[0.15em] ${isUnread ? 'text-blue-400' : 'text-slate-500'}`}>
+            <Label className={`text-[9px] font-black uppercase tracking-[0.15em] ${isUnread ? 'text-blue-400' : 'text-slate-500'}`}>
               {meta.label}
-            </span>
+            </Label>
             <span className="text-[10px] font-medium text-slate-500">
               {formatTimeAgo(notification.timestamp)}
             </span>
           </div>
 
-          <h4 className={`text-xs font-black tracking-normal uppercase truncate ${isUnread ? 'text-white' : 'text-slate-300'}`}>
+          <CardTitle className={`text-xs font-black tracking-normal uppercase truncate ${isUnread ? 'text-white' : 'text-slate-300'} border-none`}>
             {notification.title}
-          </h4>
+          </CardTitle>
 
           <p className="text-xs font-semibold leading-relaxed text-slate-400 mt-1 select-none">
             {notification.description}
@@ -183,41 +185,39 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
           {/* SNAPPY QUICK ACTION BUTTONS */}
           {notification.quickAction && (
             <div className="mt-3.5 flex flex-wrap gap-2">
-              <button
+              <TonJamButton
                 onClick={(e) => {
                   e.stopPropagation();
                   if (notification.quickAction) {
                     onActionClick(notification.quickAction, notification);
                   }
                 }}
+                variant="primary"
+                size="sm"
                 className={`
-                  flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-                  text-[10px] font-black uppercase tracking-wider transition-all
-                  cursor-pointer border-none shadow-sm outline-none active:scale-95
+                  flex items-center gap-1.5 px-3 py-1.5 rounded-lg h-8
                   ${notification.quickAction.type === 'claim'
-                    ? 'bg-gradient-to-r from-red-500 to-amber-500 text-white hover:brightness-110 shadow-red-500/10'
-                    : 'bg-blue-600 text-white hover:bg-blue-500 shadow-blue-500/10'
+                    ? 'bg-gradient-to-r from-red-500 to-amber-500 text-white hover:brightness-110 shadow-red-500/10 border-none'
+                    : ''
                   }
                 `}
               >
                 {ActionIcon && <ActionIcon className="w-3.5 h-3.5" />}
                 <span>{notification.quickAction.label}</span>
-              </button>
+              </TonJamButton>
 
               {/* Instant dismiss shortcut */}
-              <button
+              <TonJamButton
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(notification.id);
                 }}
-                className="
-                  px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider
-                  bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.08]
-                  cursor-pointer transition-colors border-none outline-none active:scale-95
-                "
+                variant="outline"
+                size="sm"
+                className="px-2.5 py-1.5 rounded-lg h-8 text-slate-400 hover:text-white"
               >
                 Dismiss
-              </button>
+              </TonJamButton>
             </div>
           )}
         </div>

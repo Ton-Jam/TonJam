@@ -20,8 +20,8 @@ const MarketplaceCard: React.FC<MarketplaceCardProps> = ({
 }) => {
   return (
     <motion.div
-      whileHover={{ y: -3 }}
-      className="w-[165px] shrink-0 rounded-2xl bg-[#0A113A]/45 p-3.5 flex flex-col justify-between space-y-3 text-left shadow-md border-none"
+      whileHover={{ y: -5, scale: 1.03 }}
+      className="w-[165px] shrink-0 rounded-2xl bg-[#0A113A]/45 p-3.5 flex flex-col justify-between space-y-3 text-left shadow-md border-none hover:bg-[#0A113A]/75 hover:shadow-[0_0_20px_rgba(91,107,255,0.3)] transition-all duration-300"
     >
       <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-[#050A24]">
         <img src={image} alt="" className="w-full h-full object-cover" />

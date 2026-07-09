@@ -28,11 +28,11 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
 
   return (
     <motion.div
-      whileHover={{ y: -4, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+      whileHover={{ y: -4, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        "cursor-pointer group flex items-center gap-4 p-3 bg-[#0A113A] rounded-2xl border border-white/[0.04] transition-all duration-300",
+        "cursor-pointer group flex items-center gap-4 p-3 bg-[#0A113A] rounded-2xl border border-white/[0.04] hover:border-[#5B6BFF]/30 hover:shadow-[0_0_20px_rgba(91,107,255,0.25)] transition-all duration-300",
         className
       )}
     >

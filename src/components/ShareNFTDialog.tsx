@@ -71,47 +71,47 @@ const ShareNFTDialog: React.FC<ShareNFTDialogProps> = ({ isOpen, onClose, nft })
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-neutral-900 border-white/5 text-white p-0 overflow-hidden rounded-2xl">
-        <DialogHeader className="p-6 pb-2">
-          <div className="flex items-center gap-2 mb-2">
-            <Share2 className="w-4 h-4 text-blue-500" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500">Signal Broadcast</span>
+      <DialogContent className="sm:max-w-md bg-neutral-900 border-white/5 text-white p-0 overflow-hidden rounded-2xl max-h-[96vh] overflow-y-auto">
+        <DialogHeader className="p-4 pb-2 sm:p-6 sm:pb-3 text-left">
+          <div className="flex items-center gap-2 mb-1">
+            <Share2 className="w-3.5 h-3.5 text-blue-500" />
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-500">Signal Broadcast</span>
           </div>
-          <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Share Artifact</DialogTitle>
-          <DialogDescription className="text-zinc-500 text-[11px] uppercase tracking-widest font-bold">
+          <DialogTitle className="text-lg sm:text-2xl font-black uppercase tracking-tighter">Share Artifact</DialogTitle>
+          <DialogDescription className="text-zinc-500 text-[10px] sm:text-[11px] uppercase tracking-widest font-bold">
             Project your collection across the digital mesh
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-6 pt-2 space-y-6">
+        <div className="p-4 pt-1 sm:p-6 sm:pt-2 space-y-4 sm:space-y-5">
           {/* NFT Preview Mini */}
-          <div className="flex items-center gap-4 p-3 bg-white/[0.03] rounded-xl border border-white/5">
+          <div className="flex items-center gap-3 p-2.5 bg-white/[0.03] rounded-xl border border-white/5">
             <img 
               src={nft.imageUrl} 
               alt={nft.title} 
-              className="w-16 h-16 rounded-lg object-cover shadow-2xl border border-white/10"
+              className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-cover shadow-2xl border border-white/10"
             />
             <div className="min-w-0">
-              <h4 className="font-black uppercase tracking-tight text-white truncate">{nft.title}</h4>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">By {nft.artist}</p>
+              <h4 className="text-xs sm:text-sm font-black uppercase tracking-tight text-white truncate">{nft.title}</h4>
+              <p className="text-[9px] sm:text-[10px] text-zinc-500 font-bold uppercase tracking-widest">By {nft.artist}</p>
             </div>
           </div>
 
           {/* QR Code Section */}
-          <div className="flex flex-col items-center justify-center p-6 bg-white/[0.02] rounded-2xl border border-dashed border-white/10 relative group">
-            <div className="bg-white p-3 rounded-xl shadow-[0_0_50px_rgba(255,255,255,0.1)]">
+          <div className="flex flex-col items-center justify-center p-3 sm:p-5 bg-white/[0.02] rounded-2xl border border-dashed border-white/10 relative group">
+            <div className="bg-white p-2.5 rounded-xl shadow-[0_0_50px_rgba(255,255,255,0.1)]">
               <QRCodeSVG 
                 id="nft-qr-code"
                 value={shareUrl} 
-                size={160}
+                size={130}
                 level="H"
                 includeMargin={false}
                 imageSettings={{
                   src: "/logo.png", // Assuming logo exists
                   x: undefined,
                   y: undefined,
-                  height: 30,
-                  width: 30,
+                  height: 24,
+                  width: 24,
                   excavate: true,
                 }}
               />
@@ -119,51 +119,51 @@ const ShareNFTDialog: React.FC<ShareNFTDialogProps> = ({ isOpen, onClose, nft })
             <Button 
               variant="ghost" 
               size="sm" 
-              className="mt-4 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white"
+              className="mt-2.5 h-8 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white"
               onClick={downloadQRCode}
             >
-              <Download className="w-3 h-3 mr-2" /> Download QR Code
+              <Download className="w-3 h-3 mr-1.5" /> Download QR Code
             </Button>
           </div>
 
           {/* Sharing Links */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="flex gap-2">
               <Input 
                 value={shareUrl} 
                 readOnly 
-                className="bg-black/40 border-white/10 text-[10px] font-mono text-zinc-400 h-10 rounded-xl"
+                className="bg-black/40 border-white/10 text-[10px] font-mono text-zinc-400 h-9 sm:h-10 rounded-xl"
               />
               <Button 
                 onClick={handleCopyLink}
-                className="bg-white text-black hover:bg-zinc-200 h-10 px-4 rounded-xl shrink-0"
+                className="bg-white text-black hover:bg-zinc-200 h-9 sm:h-10 px-3 sm:px-4 rounded-xl shrink-0"
               >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <Button 
                 onClick={handleShareTwitter}
                 variant="outline"
-                className="border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 text-white rounded-xl h-12"
+                className="border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 text-white rounded-xl h-10 sm:h-12"
               >
-                <Twitter className="w-4 h-4 mr-2 text-[#1DA1F2]" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Twitter / X</span>
+                <Twitter className="w-3.5 h-3.5 mr-1.5 text-[#1DA1F2]" />
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Twitter / X</span>
               </Button>
               <Button 
                 onClick={handleShareTelegram}
                 variant="outline"
-                className="border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 text-white rounded-xl h-12"
+                className="border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 text-white rounded-xl h-10 sm:h-12"
               >
-                <Send className="w-4 h-4 mr-2 text-[#24A1DE]" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Telegram</span>
+                <Send className="w-3.5 h-3.5 mr-1.5 text-[#24A1DE]" />
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Telegram</span>
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="p-4 bg-black/40 text-center">
+        <div className="p-3 bg-black/40 text-center">
             <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em]">TonJam Protocol Engine V2.4</p>
         </div>
       </DialogContent>

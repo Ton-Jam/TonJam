@@ -18,6 +18,13 @@ import { TonJamNotification, NotificationFilter, NotificationQuickAction } from 
 import NotificationFilters from './NotificationFilters';
 import NotificationCard from './NotificationCard';
 import NotificationSettings from './NotificationSettings';
+import { TonJamButton } from '@/components/ui/buttons/TonJamButton';
+import { 
+  PageTitle, 
+  SectionTitle, 
+  Label, 
+  ButtonText 
+} from '@/components/ui/typography/Typography';
 
 export const NotificationScreen: React.FC = () => {
   const { 
@@ -163,12 +170,12 @@ export const NotificationScreen: React.FC = () => {
 
     return (
       <div className="flex flex-col gap-3">
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 pt-1 flex items-center justify-between">
+        <SectionTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 pt-1 flex items-center justify-between border-none">
           <span>{title}</span>
-          <span className="text-[9px] font-semibold text-slate-600 bg-white/[0.03] px-2 py-0.5 rounded-full select-none">
+          <Label className="text-[9px] font-semibold text-slate-600 bg-white/[0.03] px-2 py-0.5 rounded-full select-none normal-case">
             {list.length} signals
-          </span>
-        </h3>
+          </Label>
+        </SectionTitle>
         <div className="flex flex-col gap-2.5 px-4">
           <AnimatePresence mode="popLayout">
             {list.map((item) => (
@@ -195,7 +202,7 @@ export const NotificationScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-[calc(100vh-64px)] bg-[#050608] text-slate-100 font-sans pb-16 relative">
+    <div className="flex flex-col w-full min-h-[calc(100vh-64px)] bg-[#0A113A] text-slate-100 font-sans pb-16 relative">
       
       {/* OFFLINE STATUS BANNER (NO BORDERS) */}
       <AnimatePresence>
@@ -213,34 +220,36 @@ export const NotificationScreen: React.FC = () => {
       </AnimatePresence>
 
       {/* STICKY HEADER (NO BORDERS) */}
-      <div className="sticky top-0 z-20 w-full bg-[#050608]/90 backdrop-blur-md flex flex-col shrink-0">
+      <div className="sticky top-0 z-20 w-full bg-[#0A113A]/90 backdrop-blur-md flex flex-col shrink-0">
         
         {/* TOP RAIL */}
         <div className="flex items-center justify-between px-4 py-3.5">
           <div className="flex items-center gap-2">
             {showSettings ? (
-              <button 
+              <TonJamButton 
                 onClick={() => setShowSettings(false)}
-                className="p-1 rounded-full text-slate-400 hover:text-white cursor-pointer transition-colors border-none bg-transparent"
+                variant="ghost"
+                size="sm"
+                className="h-9 w-9 p-0 rounded-full text-slate-400 hover:text-white cursor-pointer transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
-              </button>
+              </TonJamButton>
             ) : (
               <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
             )}
             <div>
-              <h1 className="text-sm font-black tracking-widest uppercase text-white">
+              <PageTitle className="text-sm font-black tracking-widest uppercase text-white leading-none border-none">
                 {showSettings ? 'Telemetry Settings' : 'Signals Hub'}
-              </h1>
+              </PageTitle>
               {!showSettings && (
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-blue-400">
+                  <Label className="text-[9px] font-black uppercase tracking-wider text-blue-400">
                     {unreadCount} unread
-                  </span>
+                  </Label>
                   <span className="text-[8px] font-bold text-slate-600">•</span>
-                  <span className="text-[9px] font-semibold text-slate-400">
+                  <Label className="text-[9px] font-semibold text-slate-400 normal-case">
                     {notifications.length} total cached
-                  </span>
+                  </Label>
                 </div>
               )}
             </div>
@@ -249,29 +258,27 @@ export const NotificationScreen: React.FC = () => {
           {/* DYNAMIC HEADER ACTIONS */}
           <div className="flex items-center gap-1">
             {!showSettings && unreadCount > 0 && (
-              <button
+              <TonJamButton
                 onClick={markAllAsRead}
-                className="
-                  p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 
-                  transition-all cursor-pointer border-none flex items-center gap-1.5
-                "
+                variant="ghost"
+                size="sm"
+                className="h-9 px-3 text-slate-400 hover:text-white flex items-center gap-1.5"
                 title="Mark all as read"
               >
                 <CheckCheck className="w-4 h-4" />
-                <span className="text-[10px] font-black uppercase tracking-wider hidden sm:inline">Mark Read</span>
-              </button>
+                <ButtonText className="text-[10px] font-black uppercase tracking-wider hidden sm:inline">Mark Read</ButtonText>
+              </TonJamButton>
             )}
 
-            <button
+            <TonJamButton
               onClick={() => setShowSettings(!showSettings)}
-              className={`
-                p-2 rounded-lg transition-all cursor-pointer border-none
-                ${showSettings ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}
-              `}
+              variant={showSettings ? 'primary' : 'ghost'}
+              size="sm"
+              className="h-9 w-9 p-0 rounded-lg"
               title="Notification Settings"
             >
               <Settings className="w-5 h-5" />
-            </button>
+            </TonJamButton>
           </div>
         </div>
 
@@ -282,7 +289,7 @@ export const NotificationScreen: React.FC = () => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col gap-2 pb-2 shrink-0"
+              className="flex flex-col gap-2.5 py-3 shrink-0 bg-[#0A113A]"
             >
               {/* SEARCH INPUT BAR */}
               <div className="px-4">
@@ -299,12 +306,14 @@ export const NotificationScreen: React.FC = () => {
                     "
                   />
                   {searchQuery && (
-                    <button 
+                    <TonJamButton 
                       onClick={() => setSearchQuery('')}
-                      className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest border-none cursor-pointer bg-transparent"
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto px-2 py-1 text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest cursor-pointer bg-transparent"
                     >
                       Clear
-                    </button>
+                    </TonJamButton>
                   )}
                 </div>
               </div>
@@ -382,17 +391,14 @@ export const NotificationScreen: React.FC = () => {
                   {/* HIGH-PERFORMANCE INFINITE SCROLL / LOAD MORE BUTTON */}
                   {filteredNotifications.length > visibleCount && (
                     <div className="px-4 pb-8 pt-2 flex justify-center">
-                      <button
+                      <TonJamButton
                         onClick={handleLoadMore}
-                        className="
-                          px-6 py-3 rounded-full bg-white/[0.03] hover:bg-white/[0.06] text-slate-300
-                          text-[10px] font-black uppercase tracking-widest cursor-pointer transition-colors
-                          active:scale-95 border-none outline-none flex items-center gap-2
-                        "
+                        variant="secondary"
+                        className="w-full sm:w-auto h-11 px-6 rounded-full flex items-center justify-center gap-2"
                       >
                         <Activity className="w-3.5 h-3.5 text-blue-500 animate-pulse" />
-                        <span>Sync next 20 signals ({filteredNotifications.length - visibleCount} remaining)</span>
-                      </button>
+                        <ButtonText>Sync next 20 signals ({filteredNotifications.length - visibleCount} remaining)</ButtonText>
+                      </TonJamButton>
                     </div>
                   )}
                 </div>
@@ -407,9 +413,9 @@ export const NotificationScreen: React.FC = () => {
                     <Inbox className="w-8 h-8" />
                   </div>
                   
-                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-300">
+                  <PageTitle className="text-sm font-black uppercase tracking-widest text-slate-300 border-none">
                     {activeFilter === 'unread' ? 'Clean Signal Status' : 'Registry Empty'}
-                  </h3>
+                  </PageTitle>
                   
                   <p className="text-xs text-slate-500 font-semibold max-w-xs leading-relaxed mt-2">
                     {activeFilter === 'unread' 
@@ -418,16 +424,13 @@ export const NotificationScreen: React.FC = () => {
                     }
                   </p>
 
-                  <button
+                  <TonJamButton
                     onClick={() => simulateNotification()}
-                    className="
-                      mt-6 px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white
-                      text-[10px] font-black uppercase tracking-widest cursor-pointer transition-colors
-                      border-none outline-none active:scale-95 shadow-md shadow-blue-500/10
-                    "
+                    variant="primary"
+                    className="mt-6 px-6 rounded-full shadow-md shadow-blue-500/10"
                   >
-                    Broadcast Simulation Signal
-                  </button>
+                    <ButtonText>Broadcast Simulation Signal</ButtonText>
+                  </TonJamButton>
                 </motion.div>
               )}
             </motion.div>

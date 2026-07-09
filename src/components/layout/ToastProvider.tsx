@@ -59,7 +59,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const getBgColor = (type: ToastType) => {
-    return 'bg-[#0A122C]/95';
+    return 'bg-[#0A113A]';
   };
 
   return (
@@ -77,7 +77,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.2 } }}
               className={`
-                w-full p-4 rounded-xl shadow-2xl flex items-start gap-3 pointer-events-auto backdrop-blur-md select-none
+                w-full p-4 rounded-xl shadow-2xl flex items-start gap-3 pointer-events-auto select-none
                 ${getBgColor(item.type)}
               `}
             >
