@@ -376,19 +376,20 @@ async function startServer() {
     app.get('/api/web3-music-trends', async (req, res) => {
         try {
             const prompt = `
-                Generate a list of 5 curated, highly realistic and up-to-date industry headlines and trends regarding Web3, music NFTs, blockchain music platforms (like Audius, Sound.xyz, Catalog, Gala Music, SFC, TonJam), and artists integrating tokenized audio.
-                Include realistic timestamps, reputable sources (like Water & Music, Billboard, Cointelegraph, Decrypt, or TonJam Pulse), and detailed descriptions.
+                Search the web for the latest daily headlines and trends regarding the TON blockchain and the NFT industry, specifically focusing on Web3 Music, digital collectibles, and blockchain platforms.
+                Based on the search results, curate a list of 5 up-to-date industry headlines.
+                Include realistic timestamps (e.g. from the search results), the reputable source names, and detailed descriptions.
                 
                 You must return a JSON object with a single key "trends" containing an array of objects matching this schema exactly:
                 {
                   "trends": [
                     {
                       "id": "string (sequential unique id)",
-                      "title": "string (engaging, realistic headline)",
-                      "source": "string (reputable crypto/music source name)",
-                      "timestamp": "string (e.g., '2 hours ago', 'Yesterday', '3 days ago')",
+                      "title": "string (engaging headline based on real search data)",
+                      "source": "string (source of the news)",
+                      "timestamp": "string (e.g., '2 hours ago', 'Today')",
                       "summary": "string (1-2 sentences with details about the trend)",
-                      "category": "string (e.g. 'NFT', 'Licensing', 'Streaming', 'Community')",
+                      "category": "string (e.g. 'NFT', 'TON', 'Platform')",
                       "impact": "string ('High', 'Medium', 'Low')"
                     }
                   ]
@@ -396,9 +397,10 @@ async function startServer() {
             `;
 
             const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: [{ parts: [{ text: prompt }] }],
+                model: "gemini-3.5-flash",
+                contents: prompt,
                 config: {
+                    tools: [{ googleSearch: {} }],
                     responseMimeType: "application/json",
                 }
             }));
@@ -406,11 +408,18 @@ async function startServer() {
             if (response.text) {
                 const data = JSON.parse(response.text);
                 if (data && Array.isArray(data.trends)) {
-                    return res.json({ trends: data.trends });
+                    // Extract URLs from grounding metadata
+                    let sources = [];
+                    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+                    if (chunks) {
+                        sources = chunks.map(chunk => chunk.web?.uri).filter(Boolean);
+                    }
+                    return res.json({ trends: data.trends, groundingSources: sources });
                 }
             }
             throw new Error("Invalid response format from Gemini");
         } catch (error) {
+            console.error("[Web3Trends Error]:", error);
             console.log("[Fallback] Serving static Web3 music trends.");
             // Fallback to beautiful static curated blockchain industry headlines
             const fallbackTrends = [
@@ -722,28 +731,20 @@ async function startServer() {
         res.json({ user: req.user });
     });
 
-    let cachedTonPrice: number | null = null;
+    let cachedTonPrice = 7.50; // Pre-initialize with realistic fallback to guarantee instant response
     let lastCacheUpdate = 0;
     let lastRetryTime = 0;
+    let isFetching = false; // Prevent overlapping background fetches
     const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
     const RETRY_DELAY = 2 * 60 * 1000; // 2 minutes delay after failure
 
-    app.get('/api/ton-price', async (req, res) => {
+    const fetchTonPriceInBackground = async () => {
+        if (isFetching) return;
+        isFetching = true;
         const now = Date.now();
-        
-        // Return cached price if valid
-        if (cachedTonPrice && (now - lastCacheUpdate < CACHE_DURATION)) {
-            return res.json({ price: cachedTonPrice });
-        }
-
-        // Don't retry too quickly if we just failed
-        if (now - lastRetryTime < RETRY_DELAY && cachedTonPrice) {
-            return res.json({ price: cachedTonPrice, isCachedFallback: true });
-        }
-
         try {
             const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd', {
-                timeout: 2000, // Reduced timeout to prevent client-side hangs
+                timeout: 3000,
                 headers: { 'Accept': 'application/json' }
             });
             const tonPrice = response.data['the-open-network']?.usd;
@@ -751,25 +752,30 @@ async function startServer() {
             if (tonPrice) {
                 cachedTonPrice = tonPrice;
                 lastCacheUpdate = now;
-                lastRetryTime = 0; // Reset retry time on success
-                return res.json({ price: tonPrice });
-            } else {
-                throw new Error('Price not found in response');
+                lastRetryTime = 0;
             }
         } catch (error: any) {
             lastRetryTime = now;
-            
-            // If we have a cached price, return it even if expired as fallback
-            if (cachedTonPrice) {
-                return res.json({ price: cachedTonPrice, isExpiredFallback: true });
-            }
-
-            // Fallback to a reasonable static price if everything fails
-            const FALLBACK_PRICE = 7.50;
-            cachedTonPrice = FALLBACK_PRICE;
-            lastCacheUpdate = now;
-            res.json({ price: FALLBACK_PRICE, isHardcodedFallback: true });
+        } finally {
+            isFetching = false;
         }
+    };
+
+    // Kick off first fetch in background immediately on startup
+    fetchTonPriceInBackground().catch(() => {});
+
+    app.get('/api/ton-price', (req, res) => {
+        const now = Date.now();
+        
+        // If cache has expired and we are not within retry delay, trigger background update
+        if (now - lastCacheUpdate > CACHE_DURATION) {
+            if (now - lastRetryTime > RETRY_DELAY) {
+                fetchTonPriceInBackground().catch(() => {});
+            }
+        }
+
+        // Return cached/fallback price instantly
+        return res.json({ price: cachedTonPrice });
     });
 
     app.post('/api/upload', upload.fields([

@@ -339,7 +339,7 @@ export const PlayerScreen: React.FC = () => {
       </div>
 
       {/* Main Responsive Canvas Content Area */}
-      <div className="flex-1 px-0 py-4 flex flex-col items-center justify-between max-w-md mx-auto w-full gap-4 relative z-10 pb-6 shrink-0">
+      <div className="flex-1 px-0 py-4 flex flex-col items-center justify-between max-w-md mx-auto w-full gap-4 relative z-10 pb-24 shrink-0">
         <AnimatePresence mode="wait">
           {activeTab === "player" && (
             <motion.div

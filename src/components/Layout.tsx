@@ -140,7 +140,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     optionsCallbacks,
     setOptionsTrack,
     createPost,
-    headerTitle
+    headerTitle,
+    setFullPlayerOpen
   } = useAudio();
 
   const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
@@ -923,14 +924,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="lg:hidden">
         {/* Mobile Navigation */}
       {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
-        <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 h-16 transition-all duration-300 ${isMobileNavHidden ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+        <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[70] h-16 transition-all duration-300 ${isMobileNavHidden ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-blue-600/20 via-blue-500/50 to-blue-600/20 z-10" />
           <nav className="h-full w-full bg-black/60 backdrop-blur-xl border-t border-white/10 px-2 flex justify-around items-center shadow-[0_-8px_32px_rgba(0,0,0,0.5)] mobile-nav-opaque" aria-label="Mobile Navigation">
-            <MobileNavItem to="/" icon={HomeIcon} label="Home" />
-            <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
-            <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jamspace" />
-            <MobileNavItem to="/library" icon={RectangleStackIcon} label="Library" />
-            <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Market" />
+            <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
+            <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
+            <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jamspace" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
+            <MobileNavItem to="/library" icon={RectangleStackIcon} label="Library" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
+            <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Market" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
           </nav>
         </div>
       )}
@@ -1123,10 +1124,11 @@ const NavItem = ({ to, icon: Icon, label, onClick, className = "" }: { to: strin
   </NavLink>
 );
 
-const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => (
+const MobileNavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: any; label: string; onClick?: () => void }) => (
       <NavLink 
         to={to} 
         aria-label={label}
+        onClick={onClick}
         className={({ isActive }) => `
           flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full rounded-[4px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mobile-nav-item
           ${isActive ? 'text-blue-500' : 'text-white hover:text-white hover:bg-white/5'}

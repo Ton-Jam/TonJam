@@ -137,13 +137,13 @@ export const PriceSparkline: React.FC<PriceSparklineProps> = ({ basePrice, histo
   };
 
   return (
-    <div className="flex flex-col gap-1.5 min-w-[140px] sm:min-w-[170px] bg-transparent selection:bg-transparent">
-      <div className="flex items-center justify-between">
-        <span className="text-[7px] sm:text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest">
-          {hoveredDay ? hoveredDay : "historical trend"}
+    <div className="flex flex-col gap-0.5 w-full bg-transparent selection:bg-transparent overflow-hidden">
+      <div className="flex items-center justify-between text-[6.5px]">
+        <span className="font-bold text-muted-foreground/60 uppercase tracking-widest truncate">
+          {hoveredDay ? hoveredDay : "floor trend"}
         </span>
         <span
-          className={`text-[8px] font-black tracking-tight ${
+          className={`font-bold tracking-tight ${
             changePercent >= 0 ? "text-emerald-500" : "text-rose-500"
           }`}
         >
@@ -155,31 +155,31 @@ export const PriceSparkline: React.FC<PriceSparklineProps> = ({ basePrice, histo
         </span>
       </div>
 
-      <div className="h-[28px] sm:h-[32px] w-full relative">
+      <div className="h-[16px] w-full relative">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={sparklineData}
-            margin={{ top: 2, right: 2, left: 2, bottom: 2 }}
+            margin={{ top: 1, right: 1, left: 1, bottom: 1 }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
           >
             <defs>
               <linearGradient id="sparklineGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                <stop offset="0%" stopColor={changePercent >= 0 ? "#10b981" : "#f43f5e"} stopOpacity={0.2} />
+                <stop offset="100%" stopColor={changePercent >= 0 ? "#10b981" : "#f43f5e"} stopOpacity={0} />
               </linearGradient>
             </defs>
             <Area
               type="monotone"
               dataKey="price"
               stroke={changePercent >= 0 ? "#10b981" : "#f43f5e"}
-              strokeWidth={1.5}
+              strokeWidth={1}
               fill="url(#sparklineGrad)"
               dot={false}
               activeDot={{
-                r: 3,
+                r: 2,
                 stroke: "#ffffff",
-                strokeWidth: 1,
+                strokeWidth: 0.5,
                 fill: changePercent >= 0 ? "#10b981" : "#f43f5e",
               }}
             />

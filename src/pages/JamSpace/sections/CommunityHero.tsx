@@ -21,7 +21,7 @@ export const CommunityHero: React.FC<CommunityHeroProps> = ({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="relative w-full overflow-hidden bg-[#0c133a] border border-white/5 rounded-[12px] p-8 text-white shadow-2xl"
+      className="relative w-full overflow-hidden bg-blue-950 border border-white/5 rounded-[12px] p-8 text-white shadow-2xl"
     >
       {/* Decorative ambient color nodes */}
       <div className="absolute -right-10 -top-10 w-64 h-64 bg-blue-600/20 rounded-full blur-[100px] pointer-events-none" />

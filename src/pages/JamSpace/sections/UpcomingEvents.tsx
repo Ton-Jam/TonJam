@@ -26,7 +26,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
         {events.map((ev) => (
           <motion.div
             key={ev.id}
-            className="bg-[#0c133a] border border-white/5 rounded-[12px] p-4 flex gap-4 items-center justify-between"
+            className="bg-blue-950 border border-white/5 rounded-[12px] p-4 flex gap-4 items-center justify-between"
             whileHover={{ scale: 1.01 }}
           >
             <div className="flex gap-4 items-center min-w-0">

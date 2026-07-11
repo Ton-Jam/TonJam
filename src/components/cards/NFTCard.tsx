@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Heart, Bookmark, Eye, Layers, Clock } from 'lucide-react';
 import { NFTPlaceholder } from '../placeholders/NFTPlaceholder';
+import { PriceSparkline } from '../PriceSparkline';
 
 export interface NFTData {
   id: string;
@@ -19,6 +20,7 @@ export interface NFTData {
   isBookmarked?: boolean;
   isLiveAuction?: boolean;
   isVerified?: boolean;
+  history?: any[];
 }
 
 interface NFTCardProps {
@@ -44,6 +46,12 @@ export const NFTCard: React.FC<NFTCardProps> = ({
   const [isLikedState, setIsLikedState] = useState(nft?.isLiked || false);
   const [isBookmarkedState, setIsBookmarkedState] = useState(nft?.isBookmarked || false);
   const [timeLeft, setTimeLeft] = useState('');
+
+  const basePriceNum = React.useMemo(() => {
+    if (!nft?.price) return 0;
+    const num = parseFloat(nft.price.replace(' TON', '').trim());
+    return isNaN(num) ? 0 : num;
+  }, [nft?.price]);
 
   // Calculate live countdown
   useEffect(() => {
@@ -177,6 +185,11 @@ export const NFTCard: React.FC<NFTCardProps> = ({
             </span>
           )}
         </div>
+      </div>
+
+      {/* Mini Price Sparkline Trend */}
+      <div className="mt-2 select-none pointer-events-auto">
+        <PriceSparkline basePrice={basePriceNum} history={nft.history} />
       </div>
 
       {/* Market Indicators */}

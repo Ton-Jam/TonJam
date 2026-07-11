@@ -57,6 +57,7 @@ import CommunityFeedCard from "@/components/CommunityFeedCard";
 import MoodPlaylist from "@/components/MoodPlaylist";
 import FeaturedArtists from "@/components/FeaturedArtists";
 import { Artist, Track, NFTItem } from "@/types";
+import NFTExplorer from "@/components/NFTExplorer";
 
 // ==========================================
 // MOCK DATA & INTERFACES FOR HOME "JAM UP"
@@ -747,6 +748,13 @@ const Home: React.FC = () => {
           </div>
         </div>
 
+
+        {/* ==========================================
+            SECTION: NFT EXPLORER
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <NFTExplorer />
+        </div>
 
         {/* ==========================================
             SECTION 2: TRENDING TRACKS

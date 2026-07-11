@@ -30,7 +30,7 @@ export const LiveSpaces: React.FC<LiveSpacesProps> = ({
           return (
             <motion.div
               key={sp.id}
-              className="w-[280px] shrink-0 snap-start bg-[#0c133a] border border-white/5 rounded-[12px] p-5 flex flex-col justify-between group transition-all"
+              className="w-[280px] shrink-0 snap-start bg-blue-950 border border-white/5 rounded-[12px] p-5 flex flex-col justify-between group transition-all"
               whileHover={{ scale: 1.02 }}
             >
               <div className="space-y-4">

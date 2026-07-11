@@ -7,6 +7,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { cn, getPlaceholderImage, shareContent } from '@/lib/utils';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import NFTQuickViewModal from './NFTQuickViewModal';
+import { PriceSparkline } from './PriceSparkline';
 import SendNFTModal from './SendNFTModal';
 import SellNFTModal from './SellNFTModal';
 import SkeletonCard from './SkeletonCard';
@@ -58,6 +59,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     }
     return nft.price.replace(' TON', '').trim();
   }, [nft?.price, currencyMode]);
+
+  const basePriceNum = React.useMemo(() => {
+    if (!nft?.price) return 0;
+    const num = parseFloat(nft.price.replace(' TON', '').trim());
+    return isNaN(num) ? 0 : num;
+  }, [nft?.price]);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -361,6 +368,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               </div>
             </div>
             <div className="flex items-center gap-4">
+               {/* Mini Sparkline for Row layout */}
+               <div className="hidden lg:block w-[100px] shrink-0 selection:bg-transparent">
+                  <PriceSparkline basePrice={basePriceNum} history={nft.history} />
+               </div>
+
                <div className="hidden md:flex flex-col items-end opacity-40 group-hover:opacity-100 transition-opacity">
                   <span className="text-[6px] font-bold text-muted-foreground uppercase tracking-widest">Price</span>
                   <div className="flex items-center gap-1">
@@ -522,6 +534,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                         </span>
                      )}
                   </div>
+               </div>
+
+               {/* Mini Price Sparkline Trend */}
+               <div className="mt-2 mb-2 px-0.5 selection:bg-transparent">
+                 <PriceSparkline basePrice={basePriceNum} history={nft.history} />
                </div>
 
                <div className="flex items-end justify-between mt-1">
