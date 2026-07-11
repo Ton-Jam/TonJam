@@ -6,23 +6,32 @@ interface SearchSuggestionListProps {
   suggestions: string[];
   query: string;
   onSelect: (term: string) => void;
+  isSearching?: boolean;
 }
 
 export const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
   suggestions,
   query,
-  onSelect
+  onSelect,
+  isSearching = false
 }) => {
-  if (suggestions.length === 0) return null;
+  if (suggestions.length === 0 && !isSearching) return null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="absolute top-12 left-0 right-0 bg-[#050A24] border border-white/5 rounded-2xl overflow-hidden shadow-2xl z-50 p-2"
+      className="absolute top-12 left-0 right-0 bg-[#0c133a] border border-white/10 rounded-[12px] overflow-hidden shadow-2xl z-50 p-1"
     >
-      <div className="space-y-1">
+      <div className="space-y-0.5">
+        {isSearching && (
+          <div className="px-4 py-3 flex items-center gap-3 text-slate-400">
+            <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Scanning Frequencies...</span>
+          </div>
+        )}
+        
         {suggestions.map((suggestion, index) => {
           // Highlight match if query exists
           const lowerSuggestion = suggestion.toLowerCase();
@@ -33,7 +42,7 @@ export const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
             <button
               key={`suggestion-${index}-${suggestion}`}
               onClick={() => onSelect(suggestion)}
-              className="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 active:scale-[0.99] transition-all flex items-center justify-between group cursor-pointer"
+              className="w-full text-left px-4 py-3 rounded-[12px] hover:bg-white/5 active:scale-[0.99] transition-all flex items-center justify-between group cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <Search className="w-4 h-4 text-slate-500 group-hover:text-white" />
@@ -41,7 +50,7 @@ export const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
                   {matchIndex !== -1 ? (
                     <>
                       {suggestion.slice(0, matchIndex)}
-                      <span className="text-[#0052FF] font-extrabold">
+                      <span className="text-[#00B4D8] font-extrabold">
                         {suggestion.slice(matchIndex, matchIndex + query.length)}
                       </span>
                       {suggestion.slice(matchIndex + query.length)}

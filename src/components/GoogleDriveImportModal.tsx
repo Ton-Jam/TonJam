@@ -25,7 +25,7 @@ import {
   clearDriveToken,
   DriveItem
 } from '@/services/googleDriveService';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface GoogleDriveImportModalProps {
   isOpen: boolean;
@@ -91,7 +91,8 @@ export const GoogleDriveImportModal: React.FC<GoogleDriveImportModalProps> = ({
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
-    if (!searchQuery.trim()) {
+    const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+    if (!safeSearchQuery.trim()) {
       fetchFolderContents(token, currentFolder);
       return;
     }
@@ -99,7 +100,7 @@ export const GoogleDriveImportModal: React.FC<GoogleDriveImportModalProps> = ({
     setLoading(true);
     setSelectedItem(null);
     try {
-      const searchResults = await searchDriveFiles(token, searchQuery);
+      const searchResults = await searchDriveFiles(token, safeSearchQuery.trim());
       setItems(searchResults);
     } catch (err: any) {
       addNotification(err.message || 'Search execution failed', 'error');

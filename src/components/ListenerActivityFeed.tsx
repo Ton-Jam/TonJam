@@ -15,7 +15,7 @@ import {
   Clock,
   Volume2
 } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Track } from '@/types';
 
 interface ListenerActivityFeedProps {

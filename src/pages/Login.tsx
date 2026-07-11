@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { uploadFile } from '@/services/storageService';

@@ -12,7 +12,7 @@ import {
   Volume2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { TJ_COIN_ICON, TON_LOGO, MOCK_TRACKS } from "@/constants";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";

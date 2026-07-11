@@ -1,7 +1,7 @@
 import React from 'react';
 import { Info, Share2, Send, Tag, Coins, Star, User, ExternalLink, Copy, Verified, ChevronRight, Trash } from 'lucide-react';
 import { NFTItem } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { getPlaceholderImage } from '@/lib/utils';
 import { Button } from "@/components/ui/button"

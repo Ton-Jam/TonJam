@@ -3,7 +3,7 @@ import { collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTim
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { SongRequest } from '@/types';
 import { TON_LOGO } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { CheckCircle, XCircle, Play, Send, Loader2 } from 'lucide-react';
 
 interface SongRequestsTabProps {

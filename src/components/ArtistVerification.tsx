@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Artist } from '@/types';
 import { Verified, Loader2, ShieldCheck } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
-import { useAuth } from '@/context/AuthContext';
+import { useAudio } from '@/contexts/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 

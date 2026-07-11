@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { X, Image, Share2, Sparkles, Music, Check, Send, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MOCK_USER, APP_LOGO } from "@/constants";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES, shareContent } from "@/lib/utils";
 import { uploadPostImage } from "@/services/storageService";
 

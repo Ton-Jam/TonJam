@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Users, Copy, CheckCircle2, Gift, Share2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { shareContent } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 

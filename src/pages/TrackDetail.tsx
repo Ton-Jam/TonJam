@@ -34,7 +34,7 @@ import {
   Send
 } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, TJ_COIN_ICON } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'motion/react';

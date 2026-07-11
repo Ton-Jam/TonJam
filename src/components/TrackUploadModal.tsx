@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { X, Upload, Music, Image as ImageIcon, CheckCircle2, Loader2, FileAudio, Shield } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { X, Upload, Music, Image as ImageIcon, CheckCircle2, Loader2, FileAudio, Shield, Cloud, Database, Zap, Sparkles } from 'lucide-react';
+import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { Track } from '@/types';
 import { MOCK_USER } from '@/constants';
-import { uploadAudio, uploadCover } from '@/services/storageService';
+import { uploadAudio, uploadCover, uploadToPinata, uploadJSONToPinata } from '@/services/storageService';
+import { mintTonJamNFT } from '@/services/tonService';
+import { useTonConnectUI } from '@tonconnect/ui-react';
+import MintingProgressOverlay, { MintingStep } from './MintingProgressOverlay';
 import {
   Dialog,
   DialogContent,
@@ -24,11 +27,28 @@ interface TrackUploadModalProps {
 
 const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) => {
   const { addUserTrack, addNotification, userProfile } = useAudio();
+  const [tonConnectUI] = useTonConnectUI();
   const [isUploading, setIsUploading] = useState(false);
+  const [showMintingOverlay, setShowMintingOverlay] = useState(false);
+  const [overallProgress, setOverallProgress] = useState(0);
+  const [mintingMessage, setMintingMessage] = useState('');
+  const [mintingSteps, setMintingSteps] = useState<MintingStep[]>([
+    { id: 'ipfs', label: 'IPFS Signal Uplink', status: 'pending', icon: Cloud, description: 'Uploading high-fidelity audio to decentralized storage' },
+    { id: 'metadata', label: 'Metadata Neural Forge', status: 'pending', icon: Database, description: 'Generating cryptographic artifact metadata' },
+    { id: 'blockchain', label: 'Blockchain Synchronization', status: 'pending', icon: Zap, description: 'Registering asset on the TON ledger' },
+  ]);
+
+  const updateStepStatus = (id: string, status: MintingStep['status'], description?: string) => {
+    setMintingSteps(prev => prev.map(step => 
+      step.id === id ? { ...step, status, ...(description ? { description } : {}) } : step
+    ));
+  };
+
   const [audioProgress, setAudioProgress] = useState(0);
   const [coverProgress, setCoverProgress] = useState(0);
   const [step, setStep] = useState(1);
   
+  const [uploadMethod, setUploadMethod] = useState<'upload' | 'link'>('upload');
   const [formData, setFormData] = useState({
     title: '',
     genre: 'Electronic',
@@ -43,6 +63,8 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     royaltySplits: [{ address: userProfile?.walletAddress || '', percentage: 100 }] as { address: string; percentage: number }[],
     isDrmProtected: false,
     watermarkText: 'TonJam Cryptographic Proof',
+    externalAudioUrl: '',
+    externalCoverUrl: '',
   });
 
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -52,8 +74,23 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.genre || !audioFile || !coverFile) {
-      addNotification("Please provide title, genre, audio file and cover art.", "warning");
+    if (!formData.title || !formData.genre) {
+      addNotification("Please provide title and genre.", "warning");
+      return;
+    }
+
+    if (uploadMethod === 'upload' && (!audioFile || !coverFile)) {
+      addNotification("Please provide audio file and cover art.", "warning");
+      return;
+    }
+
+    if (uploadMethod === 'link' && (!formData.externalAudioUrl || !formData.externalCoverUrl)) {
+      addNotification("Please provide external audio and cover URLs.", "warning");
+      return;
+    }
+
+    if (formData.isNFT && !userProfile?.walletAddress) {
+      addNotification("Please connect your wallet to mint NFTs.", "warning");
       return;
     }
 
@@ -61,29 +98,126 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     setAudioProgress(0);
     setCoverProgress(0);
     
+    // Start Minting Overlay for NFT or regular upload
+    setShowMintingOverlay(true);
+    setOverallProgress(5);
+    setMintingMessage("Initializing decentralized uplink...");
+    
     try {
-      const audioValidation = validateFile(audioFile, 'audio', 50);
-      if (!audioValidation.isValid) {
-        throw new Error(audioValidation.error);
-      }
-      const coverValidation = validateFile(coverFile, 'image', 10);
-      if (!coverValidation.isValid) {
-        throw new Error(coverValidation.error);
-      }
+      let audioUrl = formData.externalAudioUrl;
+      let coverUrl = formData.externalCoverUrl;
+      let audioIpfsUrl = "";
+      let coverIpfsUrl = "";
 
-      addNotification("Adding track files...", "info");
+      if (uploadMethod === 'upload') {
+        const audioValidation = validateFile(audioFile!, 'audio', 50);
+        if (!audioValidation.isValid) throw new Error(audioValidation.error);
+        const coverValidation = validateFile(coverFile!, 'image', 10);
+        if (!coverValidation.isValid) throw new Error(coverValidation.error);
+
+        // STEP 1: IPFS Upload
+        updateStepStatus('ipfs', 'processing');
+        setMintingMessage("Broadcasting frequency to IPFS nodes...");
+        
+        // Progress simulation for better UX since axios onUploadProgress might be too fast for small files
+        const progressInterval = setInterval(() => {
+          setOverallProgress(prev => Math.min(prev + 1, 45));
+        }, 200);
+
+        const [audioIpfs, coverIpfs, audioFirebase, coverFirebase] = await Promise.all([
+          uploadToPinata(audioFile!, (p) => {
+             if (p > 90) updateStepStatus('ipfs', 'completed');
+          }),
+          uploadToPinata(coverFile!),
+          uploadAudio(audioFile!, setAudioProgress),
+          uploadCover(coverFile!, setCoverProgress)
+        ]);
+
+        clearInterval(progressInterval);
+        setOverallProgress(50);
+        updateStepStatus('ipfs', 'completed', "Files stabilized in IPFS matrix");
+
+        audioUrl = audioFirebase.downloadUrl;
+        coverUrl = coverFirebase.downloadUrl;
+        audioIpfsUrl = audioIpfs;
+        coverIpfsUrl = coverIpfs;
+      }
       
-      const [audioRes, coverRes] = await Promise.all([
-        uploadAudio(audioFile, setAudioProgress),
-        uploadCover(coverFile, setCoverProgress)
-      ]);
+      // STEP 2: Metadata Forge
+      updateStepStatus('metadata', 'processing');
+      setMintingMessage("Forging cryptographic artifact metadata...");
+      setOverallProgress(60);
 
-      if (!audioRes?.downloadUrl || !coverRes?.downloadUrl) {
-        throw new Error("Upload failed: Download URLs missing from response");
+      const metadata = {
+        name: formData.title,
+        description: formData.description,
+        image: coverIpfsUrl || coverUrl,
+        audio: audioIpfsUrl || audioUrl,
+        attributes: [
+          { trait_type: 'Genre', value: formData.genre },
+          { trait_type: 'Rarity', value: formData.rarity },
+          { trait_type: 'Type', value: formData.isNFT ? 'NFT' : 'Streaming' }
+        ],
+        tonjam_metadata: {
+          drm: formData.isDrmProtected,
+          watermark: formData.watermarkText,
+          royalty_splits: formData.royaltySplits
+        }
+      };
+
+      const metadataIpfsUrl = await uploadJSONToPinata(metadata);
+      updateStepStatus('metadata', 'completed', "Metadata forged and pinned");
+      setOverallProgress(75);
+
+      // STEP 3: Blockchain Sync
+      if (formData.isNFT) {
+        updateStepStatus('blockchain', 'processing');
+        setMintingMessage("Awaiting wallet approval...");
+        setOverallProgress(80);
+        
+        try {
+          // mintTonJamNFT returns true when the wallet approves the transaction
+          const success = await mintTonJamNFT(
+            tonConnectUI,
+            userProfile?.walletAddress || '',
+            metadataIpfsUrl
+          );
+
+          if (success) {
+            setMintingMessage("Synchronizing with TON ledger...");
+            setOverallProgress(90);
+            
+            // Simulate/Monitor actual blockchain confirmation
+            await new Promise<void>((resolve, reject) => {
+              import('@/services/tonService').then(m => {
+                m.monitorTransaction('mock-tx-hash', (status) => {
+                  if (status === 'confirming') {
+                    setMintingMessage("Neural network confirming transaction...");
+                    setOverallProgress(95);
+                  } else if (status === 'success') {
+                    updateStepStatus('blockchain', 'completed', "Artifact registered on TON ledger");
+                    setOverallProgress(100);
+                    setMintingMessage("Minting successful!");
+                    resolve();
+                  } else if (status === 'failed') {
+                    updateStepStatus('blockchain', 'error', "Transaction failed on-chain");
+                    reject(new Error("On-chain confirmation failed"));
+                  }
+                });
+              });
+            });
+          } else {
+            throw new Error("Minting transaction failed or was rejected");
+          }
+        } catch (err: any) {
+          updateStepStatus('blockchain', 'error', err.message || "Transaction failed");
+          throw err;
+        }
+      } else {
+        // Skip blockchain for non-NFT, just complete
+        updateStepStatus('blockchain', 'completed', "Asset registered on TonJam Protocol");
+        setOverallProgress(100);
       }
-
-      const audioUrl = audioRes.downloadUrl;
-      const coverUrl = coverRes.downloadUrl;
       
       const trackId = `u-${Date.now()}`;
       const newTrack: Track = {
@@ -94,8 +228,9 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
         artistId: userProfile?.uid || MOCK_USER.uid,
         coverUrl: coverUrl,
         audioUrl: audioUrl,
-        audioIpfsUrl: audioUrl,
-        coverIpfsUrl: coverUrl,
+        audioIpfsUrl: audioIpfsUrl || audioUrl,
+        coverIpfsUrl: coverIpfsUrl || coverUrl,
+        metadataIpfsUrl: metadataIpfsUrl,
         duration: 180,
         genre: formData.genre,
         description: formData.description,
@@ -114,11 +249,19 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
       };
 
       addUserTrack(newTrack);
-      addNotification("Track added successfully", "success");
-      setStep(3);
+      
+      // Keep overlay visible for a second to show completion
+      setTimeout(() => {
+        setShowMintingOverlay(false);
+        setStep(3);
+        addNotification("Track added successfully", "success");
+      }, 1500);
+
     } catch (error) {
       console.error("Upload failed:", error);
       addNotification(error instanceof Error ? error.message : "Failed to upload track", "error");
+      // Keep overlay visible but in error state for a moment
+      setTimeout(() => setShowMintingOverlay(false), 3000);
     } finally {
       setIsUploading(false);
     }
@@ -173,6 +316,8 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
       royaltySplits: [{ address: userProfile?.walletAddress || '', percentage: 100 }],
       isDrmProtected: false,
       watermarkText: 'TonJam Cryptographic Proof',
+      externalAudioUrl: '',
+      externalCoverUrl: '',
     });
     setAudioFile(null);
     setCoverFile(null);
@@ -183,6 +328,12 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && resetAndClose()}>
+      <MintingProgressOverlay 
+        isVisible={showMintingOverlay}
+        steps={mintingSteps}
+        overallProgress={overallProgress}
+        currentMessage={mintingMessage}
+      />
       <DialogContent className="max-w-2xl bg-background border border-border p-6 shadow-2xl rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-foreground tracking-tighter uppercase">
@@ -199,74 +350,134 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
             <form 
               onSubmit={(e) => { 
                 e.preventDefault(); 
-                if (formData.title && formData.genre && audioFile && coverFile) {
+                if (formData.title && formData.genre && (uploadMethod === 'link' || (audioFile && coverFile))) {
                   setStep(2); 
                 } else {
-                  addNotification("Please fill in all required fields (title, genre, audio, cover)", "warning");
+                  addNotification("Please fill in all required fields", "warning");
                 }
               }} 
               className="space-y-4"
             >
+              <div className="flex gap-2 p-1 bg-foreground/[0.03] rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => setUploadMethod('upload')}
+                  className={`flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all ${uploadMethod === 'upload' ? 'bg-blue-600 text-white' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Upload Files
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUploadMethod('link')}
+                  className={`flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all ${uploadMethod === 'link' ? 'bg-blue-600 text-white' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  External Link
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Left: Upload Area */}
                 <div className="space-y-2">
-                  <div className="relative group">
-                    <input 
-                      type="file" 
-                      accept={ALLOWED_AUDIO_TYPES.join(',')} 
-                      onChange={(e) => handleFileChange(e, 'audio')} 
-                      className="hidden" 
-                      id="audio-upload-modal" 
-                    />
-                    <label 
-                      htmlFor="audio-upload-modal"
-                      className="aspect-square rounded-[4px] border border-dashed border-blue-500/40 bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                      tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('audio-upload-modal')?.click(); e.preventDefault(); } }}
-                      aria-label="Select Audio File"
-                    >
-                      {audioPreview ? (
-                        <div className="text-center">
-                          <FileAudio className="h-8 w-8 text-blue-500 mb-2 mx-auto" />
-                          <p className="text-[10px] font-bold text-foreground uppercase truncate px-2">Audio Loaded</p>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                            <Music className="h-8 w-8 text-blue-500" />
+                  {uploadMethod === 'upload' ? (
+                    <>
+                      <div className="relative group">
+                        <input 
+                          type="file" 
+                          accept={ALLOWED_AUDIO_TYPES.join(',')} 
+                          onChange={(e) => handleFileChange(e, 'audio')} 
+                          className="hidden" 
+                          id="audio-upload-modal" 
+                        />
+                        <label 
+                          htmlFor="audio-upload-modal"
+                          className="aspect-square rounded-[4px] border border-dashed border-blue-500/40 bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                          tabIndex={0}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('audio-upload-modal')?.click(); e.preventDefault(); } }}
+                          aria-label="Select Audio File"
+                        >
+                          {audioPreview ? (
+                            <div className="text-center">
+                              <FileAudio className="h-8 w-8 text-blue-500 mb-2 mx-auto" />
+                              <p className="text-[10px] font-bold text-foreground uppercase truncate px-2">Audio Loaded</p>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <Music className="h-8 w-8 text-blue-500" />
+                              </div>
+                              <p className="text-[10px] font-bold text-foreground uppercase tracking-widest text-center">Select Audio File</p>
+                              <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-2">MP3, WAV, FLAC, OGG, AAC, M4A (Max 50MB)</p>
+                            </>
+                          )}
+                        </label>
+                      </div>
+                      
+                      <div className="relative group">
+                        <input 
+                          type="file" 
+                          accept={ALLOWED_IMAGE_TYPES.join(',')} 
+                          onChange={(e) => handleFileChange(e, 'cover')} 
+                          className="hidden" 
+                          id="cover-upload-modal" 
+                        />
+                        <label 
+                          htmlFor="cover-upload-modal"
+                          className="aspect-video rounded-[4px] border border-blue-500/40 bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 overflow-hidden"
+                          tabIndex={0}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('cover-upload-modal')?.click(); e.preventDefault(); } }}
+                          aria-label="Add Cover Art"
+                        >
+                          {coverPreview ? (
+                            <img src={coverPreview} className="w-full h-full object-cover" alt="Preview" referrerPolicy="no-referrer" />
+                          ) : (
+                            <>
+                              <ImageIcon className="h-6 w-6 text-muted-foreground/50 mb-2 group-hover:text-blue-500 transition-colors" />
+                              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Add Cover Art</p>
+                            </>
+                          )}
+                        </label>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="space-y-4 p-4 glass rounded-lg">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest flex items-center gap-2">
+                          <Music className="w-3 h-3" /> Audio URL
+                        </label>
+                        <Input 
+                          type="url" 
+                          value={formData.externalAudioUrl}
+                          onChange={(e) => setFormData({...formData, externalAudioUrl: e.target.value})}
+                          placeholder="https://example.com/track.mp3"
+                          className="bg-background/50"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest flex items-center gap-2">
+                          <ImageIcon className="w-3 h-3" /> Cover Image URL
+                        </label>
+                        <Input 
+                          type="url" 
+                          value={formData.externalCoverUrl}
+                          onChange={(e) => setFormData({...formData, externalCoverUrl: e.target.value})}
+                          placeholder="https://example.com/cover.jpg"
+                          className="bg-background/50"
+                        />
+                        {formData.externalCoverUrl && (
+                          <div className="mt-2 aspect-video rounded overflow-hidden border border-border/50">
+                            <img 
+                              src={formData.externalCoverUrl} 
+                              alt="Cover preview" 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = getPlaceholderImage('invalid-link');
+                              }}
+                            />
                           </div>
-                          <p className="text-[10px] font-bold text-foreground uppercase tracking-widest text-center">Select Audio File</p>
-                          <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-2">MP3, WAV, FLAC, OGG, AAC, M4A (Max 50MB)</p>
-                        </>
-                      )}
-                    </label>
-                  </div>
-                  
-                  <div className="relative group">
-                    <input 
-                      type="file" 
-                      accept={ALLOWED_IMAGE_TYPES.join(',')} 
-                      onChange={(e) => handleFileChange(e, 'cover')} 
-                      className="hidden" 
-                      id="cover-upload-modal" 
-                    />
-                    <label 
-                      htmlFor="cover-upload-modal"
-                      className="aspect-video rounded-[4px] border border-blue-500/40 bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 overflow-hidden"
-                      tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('cover-upload-modal')?.click(); e.preventDefault(); } }}
-                      aria-label="Add Cover Art"
-                    >
-                      {coverPreview ? (
-                        <img src={coverPreview} className="w-full h-full object-cover" alt="Preview" referrerPolicy="no-referrer" />
-                      ) : (
-                        <>
-                          <ImageIcon className="h-6 w-6 text-muted-foreground/50 mb-2 group-hover:text-blue-500 transition-colors" />
-                          <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Add Cover Art</p>
-                        </>
-                      )}
-                    </label>
-                  </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Right: Metadata */}

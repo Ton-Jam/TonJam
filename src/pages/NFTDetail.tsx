@@ -65,10 +65,10 @@ import {
   APP_LOGO,
   TJ_COIN_ICON,
 } from "@/constants";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { useTokenGating } from "@/hooks/useTokenGating";
 import { NFTItem, Track, NFTOffer } from "@/types";
-import { fetchNFTMetadata } from "@/services/nftService";
+import { fetchNFTMetadata, fetchFloorPriceHistory } from "@/services/nftService";
 import { db } from "@/lib/firebase";
 import { doc, onSnapshot, updateDoc, increment } from "firebase/firestore";
 import {
@@ -88,6 +88,7 @@ import ShareNFTDialog from "@/components/ShareNFTDialog";
 import NFTCard from "@/components/NFTCard";
 import SendNFTModal from "@/components/SendNFTModal";
 import ReportNFTModal from "@/components/ReportNFTModal";
+import PriceAlertModal from "@/components/PriceAlertModal";
 import { MarketActivityChart } from "@/components/MarketActivityChart";
 import { FloorPriceChart } from "@/components/FloorPriceChart";
 import ConfirmationModal from "@/components/ConfirmationModal";
@@ -121,35 +122,20 @@ const NFTDetail: React.FC = () => {
     return allNFTs.find((n) => n.id === id) || null;
   }, [id, allNFTs]);
 
-  const floorPriceTrend = useMemo(() => {
-    if (!localNft) return [];
-    const basePrice = parseFloat(localNft.price || "0") || 1.5;
-    const days = 30;
-    const data: { date: string; price: number }[] = [];
-    const now = new Date();
+  const [floorPriceTrend, setFloorPriceTrend] = useState<{ date: string; price: number }[]>([]);
+  const [isLoadingTrend, setIsLoadingTrend] = useState(true);
 
-    let seed = 0;
-    if (localNft.id) {
-      for (let i = 0; i < localNft.id.length; i++) {
-        seed += localNft.id.charCodeAt(i);
-      }
-    }
+  useEffect(() => {
+    const loadTrend = async () => {
+      if (!localNft?.contractAddress) return;
+      setIsLoadingTrend(true);
+      const history = await fetchFloorPriceHistory(localNft.contractAddress || localNft.id);
+      setFloorPriceTrend(history);
+      setIsLoadingTrend(false);
+    };
 
-    let currentPrice = Math.max(0.05, basePrice * 0.75);
-    for (let i = days; i >= 0; i--) {
-      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-      const sinWave = Math.sin((i + seed) * 0.45) * (basePrice * 0.12);
-      const target = basePrice + sinWave;
-      currentPrice = currentPrice * 0.8 + target * 0.2;
-      data.push({
-        date: dateStr,
-        price: parseFloat(currentPrice.toFixed(2)),
-      });
-    }
-    data[data.length - 1].price = parseFloat(basePrice.toFixed(2));
-    return data;
-  }, [localNft]);
+    loadTrend();
+  }, [localNft?.id, localNft?.contractAddress]);
 
   // View Counter Effect: Real-time update increment and listener
   useEffect(() => {
@@ -216,6 +202,7 @@ const NFTDetail: React.FC = () => {
   const [showSendModal, setShowSendModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showPriceAlertModal, setShowPriceAlertModal] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const isOwner = useMemo(() => {
@@ -790,6 +777,13 @@ const NFTDetail: React.FC = () => {
               title="Share Protocol"
             >
               <Share2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setShowPriceAlertModal(true)}
+              className="w-10 h-10 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-muted-foreground hover:text-amber-400 hover:border-amber-400/50 transition-all"
+              title="Price Alert"
+            >
+              <Bell className="h-4 w-4" />
             </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -2256,6 +2250,14 @@ const NFTDetail: React.FC = () => {
           onClose={() => setShowReportModal(false)}
           nft={localNft}
           userAddress={userAddress || userProfile.walletAddress || "anonymous"}
+        />
+      )}
+
+      {showPriceAlertModal && localNft && (
+        <PriceAlertModal
+          isOpen={showPriceAlertModal}
+          onClose={() => setShowPriceAlertModal(false)}
+          nft={localNft}
         />
       )}
 

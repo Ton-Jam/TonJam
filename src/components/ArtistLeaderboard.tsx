@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getPlaceholderImage } from '@/lib/utils';
 import { Artist } from '@/types';
 import { followUser } from '@/services/socialService';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { toast } from 'sonner';
 
 interface ArtistLeaderboardProps {

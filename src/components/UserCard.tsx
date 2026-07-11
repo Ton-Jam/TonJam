@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Verified, Users, UserPlus, UserCheck } from 'lucide-react';
 import { Artist, UserProfile } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
 
 import { MOCK_ARTISTS } from '@/constants';

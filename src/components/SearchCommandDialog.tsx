@@ -9,7 +9,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Search, Music, User, ShoppingBag, ListMusic, History, Sparkles } from 'lucide-react';
 import { Track, Artist, NFTItem } from '@/types';
 

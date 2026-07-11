@@ -25,7 +25,7 @@ import NFTCard from '@/components/NFTCard';
 import ArtistListItem from '@/components/ArtistListItem';
 import SocialFeed from '@/components/SocialFeed';
 import PlaylistCard from '@/components/PlaylistCard';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage, cn, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 import { UserProfile as UserProfileType } from '@/types';
 import { motion, AnimatePresence } from 'motion/react';

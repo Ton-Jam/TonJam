@@ -13,6 +13,7 @@ interface TrendingSectionProps {
   trendingNft: NFTItem | null;
   trendingCollection: { id: string; name: string; coverUrl: string; floorPrice: string } | null;
   onPlaySong: (track: Track) => void;
+  title?: string;
 }
 
 export const TrendingSection: React.FC<TrendingSectionProps> = ({
@@ -22,7 +23,8 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
   trendingPlaylist,
   trendingNft,
   trendingCollection,
-  onPlaySong
+  onPlaySong,
+  title
 }) => {
   const navigate = useNavigate();
 
@@ -95,7 +97,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
       <div className="flex items-center justify-between">
         <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
           <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Active Wave Indicators</span>
+          <span>{title || "Active Wave Indicators"}</span>
         </h3>
       </div>
 
@@ -109,10 +111,10 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
               key={`trending-card-${card.id}`}
               whileHover={{ y: -4, scale: 1.01 }}
               onClick={card.action}
-              className="w-[280px] shrink-0 bg-[#090f2d] hover:bg-[#121A3E]/20 rounded-xl border border-white/5 overflow-hidden flex flex-col justify-between aspect-[16/10] cursor-pointer group"
+              className="w-[280px] shrink-0 bg-[#0c133a] rounded-[12px] border border-white/5 overflow-hidden flex flex-col justify-between aspect-[16/10] cursor-pointer group"
             >
               <div className="p-4 flex items-start gap-3 flex-1 min-w-0">
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-white/5 bg-slate-900">
+                <div className="relative w-16 h-16 rounded-[8px] overflow-hidden shrink-0 border border-white/5 bg-slate-900">
                   <img
                     src={imageSrc}
                     alt={card.name}
@@ -127,14 +129,14 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
                 </div>
 
                 <div className="flex-1 min-w-0 space-y-1">
-                  <span className="text-[7.5px] bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+                  <span className="text-[7.5px] bg-[#00B4D8]/15 text-[#00B4D8] px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
                     {card.badge}
                   </span>
                   <div className="flex items-center gap-1 text-[9px] font-mono text-slate-500 uppercase font-bold tracking-widest pt-1">
                     <Icon className="w-3 h-3 text-slate-400 shrink-0" />
                     <span>{card.title}</span>
                   </div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors pt-1">
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors pt-1">
                     {card.name}
                   </h4>
                   <p className="text-[10px] text-slate-400 truncate">{card.subtitle}</p>

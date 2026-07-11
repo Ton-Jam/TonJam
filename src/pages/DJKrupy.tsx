@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { chatWithKrupy, ChatAssistantResponse } from '@/services/geminiService';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';

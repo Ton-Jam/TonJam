@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Send, User, Shield, Loader2, CheckCircle2, ArrowRight } from 'lucide-react';
 import { NFTItem } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { getPlaceholderImage } from '@/lib/utils';
 import LoadingOverlay from './LoadingOverlay';

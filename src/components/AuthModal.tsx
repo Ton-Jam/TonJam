@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
 import { triggerHaptic } from '@/lib/haptics';

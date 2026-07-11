@@ -1,5 +1,6 @@
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage, auth } from '../lib/firebase';
+import axios from 'axios';
 
 export interface StorageUploadResponse {
   downloadUrl: string;
@@ -7,9 +8,10 @@ export interface StorageUploadResponse {
 }
 
 /**
- * Generic upload function to Firebase Storage
+ * Generic upload function to Firebase Storage (Mocked for now)
  */
 export const uploadFile = async (file: File | Blob, path: string, onProgress?: (progress: number) => void): Promise<StorageUploadResponse> => {
+  // Existing mock logic for other parts of the app
   return new Promise((resolve) => {
     let progress = 0;
     const interval = setInterval(() => {
@@ -26,6 +28,50 @@ export const uploadFile = async (file: File | Blob, path: string, onProgress?: (
       }
     }, 200);
   });
+};
+
+/**
+ * Uploads a file to Pinata IPFS via server proxy
+ */
+export const uploadToPinata = async (file: File, onProgress?: (progress: number) => void): Promise<string> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const response = await axios.post('/api/pinata/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    onUploadProgress: (progressEvent) => {
+      if (onProgress && progressEvent.total) {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        onProgress(percentCompleted);
+      }
+    }
+  });
+  
+  if (!response.data.success) {
+    throw new Error('Pinata upload failed');
+  }
+  
+  return `https://gateway.pinata.cloud/ipfs/${response.data.ipfsHash}`;
+};
+
+/**
+ * Uploads JSON metadata to Pinata IPFS via server proxy
+ */
+export const uploadJSONToPinata = async (json: any, onProgress?: (progress: number) => void): Promise<string> => {
+  // JSON uploads are usually small, so we just simulate progress if needed or handle instantly
+  if (onProgress) onProgress(50);
+  
+  const response = await axios.post('/api/pinata/upload-json', json);
+  
+  if (onProgress) onProgress(100);
+  
+  if (!response.data.success) {
+    throw new Error('Pinata metadata upload failed');
+  }
+  
+  return `https://gateway.pinata.cloud/ipfs/${response.data.ipfsHash}`;
 };
 
 /**

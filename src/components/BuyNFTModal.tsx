@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Loader2, CheckCircle2, Info, Wallet, Music as MusicIcon, Zap, ShieldCheck, Share2, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { TON_LOGO } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { processNFTSaleRoyalty } from '@/services/royaltyService';
@@ -102,20 +102,11 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
             description: "Validator validation in progress. This will take a moment..."
           });
         } else if (status === 'success') {
-          toast.success("Transaction success!", { 
-            id: toastId,
-            description: `You are now the certified owner of "${nft.title}"!`,
-            duration: 8000,
-            action: {
-              label: "View Wallet",
-              onClick: () => navigate("/wallet")
-            }
-          });
+          toast.dismiss(toastId);
+          addNotification("Transaction success!", "success", 8000, `You are now the certified owner of "${nft.title}"!`);
         } else if (status === 'failed') {
-          toast.error("Transaction failed", { 
-            id: toastId,
-            description: "The network reverted the transaction or the signature was rejected."
-          });
+          toast.dismiss(toastId);
+          addNotification("Transaction failed", "error", 4000, "The network reverted the transaction or the signature was rejected.");
         }
       });
       
@@ -154,11 +145,11 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
         }
       );
       
-      addNotification("Asset successfully synced to vault.", "success");
+      addNotification("Asset successfully synced to vault.", "success", 4000, "Check your collection to view the updated metadata.");
       setIsSuccess(true);
     } catch (e) {
       console.error(e);
-      addNotification("Sync protocol aborted.", "error");
+      addNotification("Sync protocol aborted.", "error", 4000, "Transaction could not be verified on the TON network.");
     } finally {
       setIsProcessing(false);
     }

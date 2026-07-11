@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { collection, doc, setDoc, deleteDoc, query, where, onSnapshot } from 'firebase/firestore';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface LikeButtonProps {
   targetId: string;

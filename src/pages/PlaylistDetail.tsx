@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Music2, Play, Shuffle, Trash2, Camera, Pencil, Check, X, Sparkles, MoreHorizontal, Send, Heart } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import TrackCard from '@/components/TrackCard';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import PlaylistCoverGenerator from '@/components/PlaylistCoverGenerator';

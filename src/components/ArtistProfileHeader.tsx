@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import LikeButton from './LikeButton';
 import { Twitter, Instagram, Globe, Send, Disc, LayoutDashboard, Settings, Hammer, Edit2, Zap, UserPlus, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { toast } from 'sonner';
 import { Artist } from '@/types';
 import { getPlaceholderImage, cn } from '@/lib/utils';

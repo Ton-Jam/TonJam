@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Track } from '@/types';
 import { GENRES } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Settings, Info, Music, Activity, HelpCircle } from 'lucide-react';
 
 interface EditMetadataModalProps {

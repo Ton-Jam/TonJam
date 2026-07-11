@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useToast } from '@/components/layout/ToastProvider';
 import { 
   LibraryTrack, LibraryArtist, LibraryAlbum, LibraryNFT, LibraryPlaylist, 

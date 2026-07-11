@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Heart, Play, MoreHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';

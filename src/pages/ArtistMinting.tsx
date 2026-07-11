@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Music, Image, Box, Loader2, Upload, Info, Check, ChevronRight, Plus, Percent, Cloud, Zap, Sparkles, Database } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
-import { uploadAudio, uploadCover, uploadMetadata } from '@/services/storageService';
+import { uploadToPinata, uploadJSONToPinata } from '@/services/storageService';
 import { Track, NFTItem, RoyaltySplitExtended } from '@/types';
 import { BackButton } from '@/components/BackButton';
 import LoadingOverlay from '@/components/LoadingOverlay';
@@ -23,7 +23,7 @@ const ArtistMinting: React.FC = () => {
   const [loadingMessage, setLoadingMessage] = useState('Processing...');
   
   const [mintingSteps, setMintingSteps] = useState<MintingStep[]>([
-    { id: 'upload', label: 'Asset Portal', status: 'pending', description: 'Cloud deployment', icon: Cloud },
+    { id: 'upload', label: 'IPFS Deployment', status: 'pending', description: 'Pinata Gateway', icon: Cloud },
     { id: 'metadata', label: 'Neural Metadata', status: 'pending', description: 'Artifact genesis', icon: Sparkles },
     { id: 'transaction', label: 'TON Protocol', status: 'pending', description: 'Blockchain sync', icon: Zap },
     { id: 'registry', label: 'Local Registry', status: 'pending', description: 'Database anchor', icon: Database },
@@ -131,7 +131,7 @@ const ArtistMinting: React.FC = () => {
     
     setIsLoading(true);
     setLoadingType('upload');
-    setLoadingMessage('Uploading assets to storage...');
+    setLoadingMessage('Deploying assets to IPFS via Pinata...');
     
     // Reset steps
     setMintingSteps(steps => steps.map(s => ({ ...s, status: 'pending' })));
@@ -148,15 +148,14 @@ const ArtistMinting: React.FC = () => {
       let coverUrl = selectedTrack?.coverUrl || '';
 
       if (trackData.audioFile) {
-        setLoadingMessage('Broadcasting audio signal...');
-        const { downloadUrl } = await uploadAudio(trackData.audioFile);
-        audioUrl = downloadUrl;
+        setLoadingMessage('Broadcasting audio to IPFS network...');
+        audioUrl = await uploadToPinata(trackData.audioFile);
       }
       setOverallProgress(25);
+      
       if (trackData.coverFile) {
-        setLoadingMessage('Transmitting visual data...');
-        const { downloadUrl } = await uploadCover(trackData.coverFile);
-        coverUrl = downloadUrl;
+        setLoadingMessage('Transmitting visual data to Pinata...');
+        coverUrl = await uploadToPinata(trackData.coverFile);
       } else if (trackData.coverPreview) {
         coverUrl = trackData.coverPreview;
       }
@@ -165,14 +164,14 @@ const ArtistMinting: React.FC = () => {
       updateStep('metadata', 'processing', 45);
 
       setLoadingType('mint');
-      setLoadingMessage('Creating metadata artifact...');
+      setLoadingMessage('Pinning metadata artifact to IPFS...');
 
       const royaltySplitsDecimals = royaltySplits.map(s => ({
         ...s,
         percentage: s.percentage / 100
       }));
 
-      // Create and upload metadata
+      // Create and upload metadata to Pinata
       const metadata = {
         name: trackData.title,
         description: trackData.description,
@@ -192,7 +191,7 @@ const ArtistMinting: React.FC = () => {
         ]
       };
       
-      const metadataRes = await uploadMetadata(metadata);
+      const ipfsMetadataUrl = await uploadJSONToPinata(metadata);
       
       updateStep('metadata', 'completed', 55);
       updateStep('transaction', 'processing', 65);
@@ -200,7 +199,7 @@ const ArtistMinting: React.FC = () => {
       setLoadingType('transaction');
       setLoadingMessage('Confirming on TON Blockchain...');
 
-      await mintTonJamNFT(tonConnectUI, wallet, metadataRes.downloadUrl);
+      await mintTonJamNFT(tonConnectUI, wallet, ipfsMetadataUrl);
       
       updateStep('transaction', 'completed', 85);
       updateStep('registry', 'processing', 90);
@@ -226,7 +225,7 @@ const ArtistMinting: React.FC = () => {
         editions: trackData.editions,
         royaltySplits: royaltySplitsDecimals,
         minted: (selectedTrack?.minted || 0) + 1,
-        metadataUrl: metadataRes.downloadUrl,
+        metadataUrl: ipfsMetadataUrl,
         updatedAt: new Date().toISOString(),
         lyrics: trackData.lyrics,
         isExclusive: trackData.hasExclusive,
@@ -272,7 +271,7 @@ const ArtistMinting: React.FC = () => {
           url: trackData.exclusiveUrl,
           description: trackData.exclusiveDescription
         }] : [],
-        ipfsUrl: metadataRes.downloadUrl,
+        ipfsUrl: ipfsMetadataUrl,
         history: [{ event: 'Minted', from: 'NullAddress', to: userProfile.name || 'Unknown', date: new Date().toISOString(), price: finalPrice }]
       };
       
@@ -284,7 +283,7 @@ const ArtistMinting: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 800));
 
       setIsLoading(false);
-      addNotification("Track minted as NFT successfully!", "success");
+      addNotification("Track minted as NFT successfully on TON!", "success");
       navigate('/artist-dashboard');
     } catch (error) {
       console.error("Minting failed:", error);
@@ -293,7 +292,7 @@ const ArtistMinting: React.FC = () => {
       setMintingSteps(steps => steps.map(s => s.status === 'processing' ? { ...s, status: 'error' } : s));
       
       setIsLoading(false);
-      addNotification("Minting failed. Check your connection.", "error");
+      addNotification("Minting failed. IPFS or Blockchain sync error.", "error");
     }
   };
 

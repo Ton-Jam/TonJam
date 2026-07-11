@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { Post, PostComment } from '@/types';
 import { Button } from '@/components/ui/button';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_USER } from '@/constants';
 import { AnimatePresence, motion } from 'motion/react';

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '@/lib/utils';
 import { 
   Settings2, 
   CheckCheck, 
@@ -81,8 +82,9 @@ export const NotificationScreen: React.FC = () => {
       if (!categoryMatches) return false;
 
       // 2. Search query matching
-      if (searchQuery.trim() !== '') {
-        const query = searchQuery.toLowerCase();
+      const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+      if (safeSearchQuery.trim() !== '') {
+        const query = safeSearchQuery.toLowerCase().trim();
         return (
           item.title.toLowerCase().includes(query) ||
           item.description.toLowerCase().includes(query) ||
@@ -202,16 +204,16 @@ export const NotificationScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-[calc(100vh-64px)] bg-[#0A113A] text-slate-100 font-sans pb-16 relative">
+    <div className="flex flex-col w-full min-h-[calc(100vh-64px)] bg-background text-text-primary font-sans pb-20 sm:pb-16 relative">
       
-      {/* OFFLINE STATUS BANNER (NO BORDERS) */}
+      {/* OFFLINE STATUS BANNER */}
       <AnimatePresence>
         {isOffline && (
           <motion.div 
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="w-full bg-amber-500/10 text-amber-500 py-2.5 px-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider select-none shrink-0"
+            className="w-full bg-error/10 text-error py-2.5 px-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider select-none shrink-0"
           >
             <WifiOff className="w-4 h-4 shrink-0 animate-pulse" />
             <span>Connection Interrupted. Cache Mode Enabled.</span>
@@ -219,37 +221,35 @@ export const NotificationScreen: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* STICKY HEADER (NO BORDERS) */}
-      <div className="sticky top-0 z-20 w-full bg-[#0A113A]/90 backdrop-blur-md flex flex-col shrink-0">
+      {/* STICKY HEADER */}
+      <div className="sticky top-0 z-20 w-full bg-background/95 backdrop-blur-lg flex flex-col shrink-0">
         
         {/* TOP RAIL */}
-        <div className="flex items-center justify-between px-4 py-3.5">
+        <div className="flex items-center justify-between px-4 py-2.5 sm:py-3.5">
           <div className="flex items-center gap-2">
             {showSettings ? (
-              <TonJamButton 
+              <button 
                 onClick={() => setShowSettings(false)}
-                variant="ghost"
-                size="sm"
-                className="h-9 w-9 p-0 rounded-full text-slate-400 hover:text-white cursor-pointer transition-colors"
+                className="h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-full text-text-muted hover:text-text-primary transition-colors bg-surface"
               >
-                <ArrowLeft className="w-5 h-5" />
-              </TonJamButton>
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
             ) : (
-              <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
+              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-primary rounded-full animate-pulse" />
             )}
             <div>
-              <PageTitle className="text-sm font-black tracking-widest uppercase text-white leading-none border-none">
+              <h1 className="text-sm font-black tracking-widest uppercase text-text-primary leading-none">
                 {showSettings ? 'Telemetry Settings' : 'Signals Hub'}
-              </PageTitle>
+              </h1>
               {!showSettings && (
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <Label className="text-[9px] font-black uppercase tracking-wider text-blue-400">
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-primary">
                     {unreadCount} unread
-                  </Label>
-                  <span className="text-[8px] font-bold text-slate-600">•</span>
-                  <Label className="text-[9px] font-semibold text-slate-400 normal-case">
-                    {notifications.length} total cached
-                  </Label>
+                  </span>
+                  <span className="text-[8px] font-bold text-divider">•</span>
+                  <span className="text-[9px] font-semibold text-text-muted">
+                    {notifications.length} total
+                  </span>
                 </div>
               )}
             </div>
@@ -258,62 +258,59 @@ export const NotificationScreen: React.FC = () => {
           {/* DYNAMIC HEADER ACTIONS */}
           <div className="flex items-center gap-1">
             {!showSettings && unreadCount > 0 && (
-              <TonJamButton
+              <button
                 onClick={markAllAsRead}
-                variant="ghost"
-                size="sm"
-                className="h-9 px-3 text-slate-400 hover:text-white flex items-center gap-1.5"
+                className="h-8 sm:h-9 px-3 text-text-muted hover:text-text-primary flex items-center gap-1.5 bg-surface rounded-button border border-divider"
                 title="Mark all as read"
               >
-                <CheckCheck className="w-4 h-4" />
-                <ButtonText className="text-[10px] font-black uppercase tracking-wider hidden sm:inline">Mark Read</ButtonText>
-              </TonJamButton>
+                <CheckCheck className="w-3.5 h-3.5" />
+                <span className="text-[9px] font-black uppercase tracking-wider hidden xs:inline">Mark Read</span>
+              </button>
             )}
 
-            <TonJamButton
+            <button
               onClick={() => setShowSettings(!showSettings)}
-              variant={showSettings ? 'primary' : 'ghost'}
-              size="sm"
-              className="h-9 w-9 p-0 rounded-lg"
+              className={cn(
+                "h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-button transition-all",
+                showSettings ? "bg-primary text-black" : "bg-surface text-text-muted hover:text-text-primary border border-divider"
+              )}
               title="Notification Settings"
             >
-              <Settings className="w-5 h-5" />
-            </TonJamButton>
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
           </div>
         </div>
 
-        {/* SEARCH & FILTERS DYNAMIC TABS - Only visible on Notifications Main View */}
+        {/* SEARCH & FILTERS */}
         <AnimatePresence>
           {!showSettings && (
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col gap-2.5 py-3 shrink-0 bg-[#0A113A]"
+              className="flex flex-col gap-2 py-2 sm:py-3 shrink-0 bg-background"
             >
               {/* SEARCH INPUT BAR */}
               <div className="px-4">
-                <div className="relative w-full rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus-within:bg-white/[0.06] transition-colors flex items-center px-3.5 py-2.5">
-                  <Search className="w-4 h-4 text-slate-500 shrink-0" />
+                <div className="relative w-full rounded-card bg-surface border border-divider hover:border-primary/30 focus-within:border-primary transition-colors flex items-center px-3.5 py-2.5">
+                  <Search className="w-3.5 h-3.5 text-text-muted shrink-0" />
                   <input
                     type="text"
-                    placeholder="Query signals cache..."
+                    placeholder="Query signals..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="
-                      w-full bg-transparent border-none text-xs text-white placeholder-slate-500 
+                      w-full bg-transparent border-none text-xs text-text-primary placeholder-text-muted 
                       ml-2.5 outline-none font-semibold leading-none
                     "
                   />
                   {searchQuery && (
-                    <TonJamButton 
+                    <button 
                       onClick={() => setSearchQuery('')}
-                      variant="ghost"
-                      size="sm"
-                      className="h-auto px-2 py-1 text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest cursor-pointer bg-transparent"
+                      className="text-[10px] font-black text-text-muted hover:text-text-primary uppercase tracking-widest"
                     >
                       Clear
-                    </TonJamButton>
+                    </button>
                   )}
                 </div>
               </div>
@@ -332,7 +329,6 @@ export const NotificationScreen: React.FC = () => {
       <div className="flex-1 w-full max-w-lg mx-auto flex flex-col pt-3 z-10">
         <AnimatePresence mode="wait">
           {isLoading ? (
-            // SKELETON CARDS LOADING (NO BORDERS)
             <motion.div 
               key="loading-skeleton"
               initial={{ opacity: 0 }}
@@ -341,27 +337,19 @@ export const NotificationScreen: React.FC = () => {
               className="flex flex-col gap-4 px-4 py-2"
             >
               <div className="flex items-center gap-2.5 mb-2 px-1">
-                <Loader2 className="w-3.5 h-3.5 text-blue-500 animate-spin" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">
                   Synchronizing telemetry registers...
                 </span>
               </div>
               {Array.from({ length: 5 }).map((_, idx) => (
                 <div 
                   key={idx} 
-                  className="w-full h-24 rounded-2xl bg-white/[0.02] flex items-center gap-4 p-4 animate-pulse"
-                >
-                  <div className="w-11 h-11 rounded-full bg-white/[0.04]" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-2.5 bg-white/[0.04] rounded-full w-24" />
-                    <div className="h-3.5 bg-white/[0.05] rounded-full w-[80%]" />
-                    <div className="h-2 bg-white/[0.03] rounded-full w-[95%]" />
-                  </div>
-                </div>
+                  className="w-full h-20 rounded-card bg-surface border border-divider animate-pulse"
+                />
               ))}
             </motion.div>
           ) : showSettings ? (
-            // SETTINGS OVERLAY
             <motion.div 
               key="settings-panel"
               initial={{ opacity: 0, scale: 0.98 }}
@@ -373,7 +361,6 @@ export const NotificationScreen: React.FC = () => {
               <NotificationSettings onClose={() => setShowSettings(false)} />
             </motion.div>
           ) : (
-            // MAIN CONTENT CHANNELS
             <motion.div 
               key="notifications-list"
               initial={{ opacity: 0 }}
@@ -388,49 +375,46 @@ export const NotificationScreen: React.FC = () => {
                   {renderGroup('This Week', groupedNotifications.thisWeek)}
                   {renderGroup('Earlier', groupedNotifications.earlier)}
 
-                  {/* HIGH-PERFORMANCE INFINITE SCROLL / LOAD MORE BUTTON */}
+                  {/* INFINITE SCROLL */}
                   {filteredNotifications.length > visibleCount && (
                     <div className="px-4 pb-8 pt-2 flex justify-center">
-                      <TonJamButton
+                      <button
                         onClick={handleLoadMore}
-                        variant="secondary"
-                        className="w-full sm:w-auto h-11 px-6 rounded-full flex items-center justify-center gap-2"
+                        className="w-full sm:w-auto h-11 px-6 rounded-button bg-surface border border-divider flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest hover:border-primary transition-all"
                       >
-                        <Activity className="w-3.5 h-3.5 text-blue-500 animate-pulse" />
-                        <ButtonText>Sync next 20 signals ({filteredNotifications.length - visibleCount} remaining)</ButtonText>
-                      </TonJamButton>
+                        <Activity className="w-3.5 h-3.5 text-primary animate-pulse" />
+                        <span>Sync next 20 signals ({filteredNotifications.length - visibleCount} remaining)</span>
+                      </button>
                     </div>
                   )}
                 </div>
               ) : (
-                // EMPTY STATE CHANNELS (NO BORDERS)
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="py-24 px-6 flex flex-col items-center justify-center text-center select-none"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white/[0.02] flex items-center justify-center mb-5 text-slate-600">
+                  <div className="w-16 h-16 rounded-full bg-surface border border-divider flex items-center justify-center mb-5 text-text-muted">
                     <Inbox className="w-8 h-8" />
                   </div>
                   
-                  <PageTitle className="text-sm font-black uppercase tracking-widest text-slate-300 border-none">
+                  <h2 className="text-sm font-black uppercase tracking-widest text-text-primary">
                     {activeFilter === 'unread' ? 'Clean Signal Status' : 'Registry Empty'}
-                  </PageTitle>
+                  </h2>
                   
-                  <p className="text-xs text-slate-500 font-semibold max-w-xs leading-relaxed mt-2">
+                  <p className="text-[11px] text-text-muted font-semibold max-w-xs leading-relaxed mt-2 uppercase">
                     {activeFilter === 'unread' 
                       ? 'No unread telemetry signals detected. All active frequency alerts are cleared!'
                       : 'No signals matched your query criteria. Synchronize developer triggers or alter your filters.'
                     }
                   </p>
 
-                  <TonJamButton
+                  <button
                     onClick={() => simulateNotification()}
-                    variant="primary"
-                    className="mt-6 px-6 rounded-full shadow-md shadow-blue-500/10"
+                    className="mt-6 px-6 py-3 bg-primary text-black rounded-button text-[10px] font-black uppercase tracking-widest shadow-xl hover:scale-105 transition-all"
                   >
-                    <ButtonText>Broadcast Simulation Signal</ButtonText>
-                  </TonJamButton>
+                    Broadcast Simulation Signal
+                  </button>
                 </motion.div>
               )}
             </motion.div>

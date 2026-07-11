@@ -28,9 +28,9 @@ export const ContinueListeningSection: React.FC<ContinueListeningSectionProps> =
             key={`continue-listening-${track.id}`}
             whileHover={{ y: -2 }}
             onClick={() => onPlayTrack(track)}
-            className="p-4 rounded-xl bg-gradient-to-r from-[#0c133a]/50 to-[#070a24]/60 border border-white/5 flex items-center gap-4 cursor-pointer group transition-all"
+            className="p-4 rounded-[12px] bg-[#0c133a] border border-white/5 flex items-center gap-4 cursor-pointer group transition-all"
           >
-            <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-white/5 bg-slate-900">
+            <div className="relative w-14 h-14 rounded-[8px] overflow-hidden shrink-0 border border-white/5 bg-slate-900">
               <img
                 src={track.coverUrl || getPlaceholderImage(track.title)}
                 alt={track.title}
@@ -43,10 +43,10 @@ export const ContinueListeningSection: React.FC<ContinueListeningSectionProps> =
             </div>
 
             <div className="flex-1 min-w-0">
-              <span className="text-[7px] bg-[#0052FF]/10 text-[#0052FF] px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+              <span className="text-[7px] bg-[#00B4D8]/10 text-[#00B4D8] px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
                 RESUME
               </span>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors mt-1">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors mt-1">
                 {track.title}
               </h4>
               <p className="text-[10px] text-slate-400 truncate">{track.artist}</p>

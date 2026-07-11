@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NFTItem } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { X, Tag, Gavel, Loader2, Calendar, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {

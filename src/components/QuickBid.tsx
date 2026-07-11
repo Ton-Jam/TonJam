@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Gavel, Loader2, Sparkles, AlertCircle } from "lucide-react";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { NFTItem } from "@/types";
 import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
 import { placeBid, getTonBalance } from "@/services/tonService";
-import { cn } from "@/lib/utils";
+import { getPlaceholderImage, cn } from "@/lib/utils";
+import ConfirmationModal from "./ConfirmationModal";
 
 interface QuickBidProps {
   nft: NFTItem;
@@ -17,6 +18,7 @@ export const QuickBid: React.FC<QuickBidProps> = ({ nft, className, onBidPlaced 
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState<number>(userProfile.tonBalance || 0);
 
   // Calculate current watermark
@@ -75,6 +77,11 @@ export const QuickBid: React.FC<QuickBidProps> = ({ nft, className, onBidPlaced 
       return;
     }
 
+    setIsConfirmOpen(true);
+  };
+
+  const confirmBid = async () => {
+    setIsConfirmOpen(false);
     setIsProcessing(true);
     addNotification(`Initiating Quick Bid of ${selectedBid} TON via connected wallet...`, "info");
 
@@ -175,6 +182,25 @@ export const QuickBid: React.FC<QuickBidProps> = ({ nft, className, onBidPlaced 
           {isProcessing ? "BROADCASTING..." : "CONFIRM QUICK BID"}
         </button>
       </div>
+
+      <ConfirmationModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={confirmBid}
+        title="Execute Quick Bid?"
+        description="Verify signal parameters before broadcasting to the TON blockchain relay."
+        confirmText="Confirm to Mint"
+        assetName={nft.title}
+        assetImage={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
+        tonAmount={selectedBid}
+        networkFee="0.05"
+        floorPrice={nft.price}
+        walletBalance={walletBalance.toFixed(2)}
+        totalAmount={(parseFloat(selectedBid) + 0.05).toFixed(2)}
+        fromAddress={userAddress}
+        recipient={nft.owner}
+        transactionType="Bid Execution"
+      />
     </div>
   );
 };

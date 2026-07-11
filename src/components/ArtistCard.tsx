@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Verified, UserPlus, UserCheck, MoreHorizontal } from 'lucide-react';
 import { Artist } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { cn, getPlaceholderImage } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -84,21 +84,21 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
 
   return (
     <motion.div
-      whileHover={{ y: -8, scale: 1.02 }}
+      whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98 }}
-      className={cn("group flex flex-col items-center text-center relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-lg p-4 bg-transparent hover:bg-white/[0.02] w-full artist-card-custom-style", className)}
+      className={cn("group flex flex-col items-center text-center relative cursor-pointer transition-all duration-300 rounded-card p-4 bg-surface hover:bg-hover w-full", className)}
       onClick={handleCardClick}
     >
-      <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden bg-neutral-900 transition-all mb-3 border border-white/5 shadow-md">
+      <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-avatar overflow-hidden bg-background transition-all mb-3 border border-border-subtle">
         <img 
           src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
           alt={artist.name} 
-          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-full" 
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 rounded-avatar" 
           onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }}
         />
         {onMoreClick && (
           <button
-             className="absolute top-2 right-2 p-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10 text-white hover:text-blue-400 hover:bg-black/80 transition-all"
+             className="absolute top-2 right-2 p-1.5 bg-background/80 backdrop-blur-md rounded-avatar border border-border-subtle text-text-primary hover:text-primary transition-all"
              onClick={(e) => { e.stopPropagation(); onMoreClick(artist); }}
           >
             <MoreHorizontal className="h-3.5 w-3.5" />
@@ -108,27 +108,24 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
 
       <div className="w-full flex flex-col items-center gap-1">
         <div className="flex items-center gap-1.5 justify-center max-w-full">
-          <h3 className="text-xs font-black uppercase tracking-tight text-white truncate max-w-[150px]">
+          <h3 className="text-card-title text-text-primary truncate max-w-[150px]">
             {artist.name}
           </h3>
-          {artist.verified && <Verified className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />}
+          {artist.verified && <Verified className="w-3.5 h-3.5 text-verified flex-shrink-0" />}
         </div>
         
-        <p className="text-[10px] font-bold text-muted-foreground/60 tracking-wider truncate mb-3">
+        <p className="text-caption truncate mb-3">
           @{artist.username || artist.name.toLowerCase().replace(/\s+/g, '')}
         </p>
 
-        <button 
+        <Button 
+          variant={isFollowing ? "secondary" : "primary"}
+          size="sm"
           onClick={handleFollowClick}
-          className={cn(
-            "w-full cursor-pointer transition-all rounded-full h-8 text-[9px] font-black uppercase tracking-widest text-white shadow-sm",
-            isFollowing 
-              ? "bg-neutral-800 text-neutral-400 border border-neutral-700/50 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20" 
-              : "bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 shadow-[0_2px_10px_rgba(37,99,235,0.15)]"
-          )}
+          className="w-full h-8 text-[9px] uppercase tracking-widest"
         >
           {isFollowing ? 'UNFOLLOW' : 'FOLLOW'}
-        </button>
+        </Button>
       </div>
     </motion.div>
   );

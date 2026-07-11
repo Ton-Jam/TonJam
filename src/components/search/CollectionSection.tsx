@@ -7,16 +7,17 @@ import { CollectionItem } from './search-types';
 
 interface CollectionSectionProps {
   collections: CollectionItem[];
+  title?: string;
 }
 
-export const CollectionSection: React.FC<CollectionSectionProps> = ({ collections }) => {
+export const CollectionSection: React.FC<CollectionSectionProps> = ({ collections, title }) => {
   const navigate = useNavigate();
 
   return (
     <div className="space-y-4">
       <div className="space-y-1">
         <span className="text-[9px] font-mono font-bold text-cyan-400 uppercase tracking-widest">Marketplace Classifications</span>
-        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Popular Collections</h3>
+        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">{title || "Popular Collections"}</h3>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -28,9 +29,9 @@ export const CollectionSection: React.FC<CollectionSectionProps> = ({ collection
               key={`collection-${col.id}`}
               whileHover={{ y: -3 }}
               onClick={() => navigate(`/marketplace`)}
-              className="bg-[#090f2d] hover:bg-[#121A3E]/20 rounded-xl border border-white/5 p-4 flex gap-4 cursor-pointer group"
+              className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex gap-4 cursor-pointer group"
             >
-              <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-white/5">
+              <div className="relative w-16 h-16 rounded-[8px] overflow-hidden shrink-0 bg-slate-900 border border-white/5">
                 <img
                   src={imageSrc}
                   alt={col.name}
@@ -41,7 +42,7 @@ export const CollectionSection: React.FC<CollectionSectionProps> = ({ collection
 
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div className="space-y-0.5">
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors">
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                     {col.name}
                   </h4>
                   <p className="text-[10px] text-slate-400 truncate">by {col.creator}</p>

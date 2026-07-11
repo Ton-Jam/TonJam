@@ -42,7 +42,7 @@ export const RecentSearchSection: React.FC<RecentSearchSectionProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.2 }}
-              className="flex items-center gap-1 bg-[#132354]/40 hover:bg-[#132354]/80 text-white rounded-full pl-3 pr-2 py-1 cursor-pointer group"
+              className="flex items-center gap-1 bg-[#0c133a] hover:bg-[#132354] text-white rounded-[12px] border border-white/5 pl-3 pr-2 py-1.5 cursor-pointer group"
             >
               <span
                 onClick={() => onSelect(term)}

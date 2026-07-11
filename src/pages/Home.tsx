@@ -34,15 +34,16 @@ import {
   Frown
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { TJ_COIN_ICON, TON_LOGO, MOCK_TRACKS } from "@/constants";
 import confetti from "canvas-confetti";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { fadeIn, slideUp, staggerChildren } from "@/motion";
 import FilterPills from "@/components/FilterPills";
 import ContinueListeningCard from "@/components/ContinueListeningCard";
 
@@ -54,6 +55,7 @@ import TrackCard from "@/components/TrackCard";
 import GenreCard from "@/components/GenreCard";
 import CommunityFeedCard from "@/components/CommunityFeedCard";
 import MoodPlaylist from "@/components/MoodPlaylist";
+import FeaturedArtists from "@/components/FeaturedArtists";
 import { Artist, Track, NFTItem } from "@/types";
 
 // ==========================================
@@ -433,11 +435,16 @@ const Home: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0A113A] text-white pb-32 overflow-x-hidden selection:bg-[#5B6BFF]/30">
+    <motion.div 
+      initial="initial"
+      animate="animate"
+      variants={fadeIn}
+      className="min-h-screen bg-background text-text-primary pb-32 overflow-x-hidden selection:bg-primary/30"
+    >
       
-      {/* GLOWING ORBIT BACKGROUND BLURS - Boundary-Free, No outlines */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#5B6BFF]/10 rounded-full blur-[160px] pointer-events-none -z-10" />
-      <div className="absolute top-[800px] right-0 w-[400px] h-[400px] bg-[#00B4D8]/8 rounded-full blur-[140px] pointer-events-none -z-10" />
+      {/* DESIGN SYSTEM BACKGROUND ACCENTS */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="absolute top-[800px] right-0 w-[400px] h-[400px] bg-verified/5 rounded-full blur-[140px] pointer-events-none -z-10" />
       <div className="absolute top-[1800px] left-[-100px] w-[500px] h-[500px] bg-[#2BE08C]/5 rounded-full blur-[180px] pointer-events-none -z-10" />
 
       {/* Main Container constrained for premium mobile-first preview */}
@@ -453,20 +460,20 @@ const Home: React.FC = () => {
           className="space-y-4 text-left"
         >
           <div className="space-y-1">
-            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5 font-sans leading-none pt-2">
+            <h1 className="text-page-title text-text-primary flex items-center gap-1.5 pt-2">
               Good Evening <span className="animate-bounce">👋</span>
             </h1>
-            <p className="text-sm font-medium text-[#9AA0AE] font-sans">
+            <p className="text-body text-text-secondary">
               Welcome Back, {userProfile?.username || "Collector"}
             </p>
-            <p className="text-[11px] text-[#9AA0AE]/80 font-normal font-sans">
+            <p className="text-caption">
               Discover new sounds, collect music NFTs and earn rewards.
             </p>
           </div>
         </motion.div>
 
         <div className="space-y-3 text-left">
-          <h2 className="text-xs font-black tracking-widest text-[#9AA0AE] uppercase px-4">
+          <h2 className="text-xs font-black tracking-widest text-text-muted uppercase px-4">
             Continue Listening
           </h2>
           <div ref={listeningRef} className="flex gap-4 overflow-x-auto no-scrollbar pb-3 pl-4" style={{ scrollBehavior: 'smooth' }}>
@@ -508,14 +515,14 @@ const Home: React.FC = () => {
         >
           <div className="flex items-center justify-between px-0.5">
             <div>
-              <h2 className="text-lg font-black tracking-tight text-white">
+              <h2 className="text-section-title text-text-primary">
                 Mood Alignment
               </h2>
-              <p className="text-[10px] text-[#9AA0AE] mt-0.5 leading-tight">
+              <p className="text-caption mt-0.5">
                 Select a frequency to dynamically forge a genre-curated mix
               </p>
             </div>
-            <Sparkles className="w-4 h-4 text-[#F5D547] shrink-0 animate-pulse" />
+            <Sparkles className="w-4 h-4 text-reward shrink-0 animate-pulse" />
           </div>
 
           {/* Mood Selector Pills (Horizontal Scroll) */}
@@ -561,10 +568,15 @@ const Home: React.FC = () => {
         </motion.div>
 
         {/* ==========================================
+            FEATURED ARTISTS (Horizontal Scroll)
+            ========================================== */}
+        <FeaturedArtists />
+
+        {/* ==========================================
             BROWSE GENRES (Horizontal Scroll)
             ========================================== */}
         <div className="space-y-3 text-left">
-          <h2 className="text-lg font-black tracking-tight text-white px-0.5">
+          <h2 className="text-section-title text-text-primary px-0.5">
             Browse Genres
           </h2>
           <div className="flex gap-4 overflow-x-auto no-scrollbar pb-3 px-0.5">
@@ -599,21 +611,21 @@ const Home: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-2xl bg-gradient-to-br from-[#101A3B] to-[#0A113A]/90 p-5 relative overflow-hidden text-left border-none shadow-xl"
+          className="rounded-card bg-surface p-5 relative overflow-hidden text-left"
         >
           {/* Flame ambient light */}
-          <div className="absolute top-[40px] right-[-40px] w-28 h-28 bg-[#2BE08C]/12 rounded-full blur-[35px] pointer-events-none" />
+          <div className="absolute top-[40px] right-[-40px] w-28 h-28 bg-success/10 rounded-full blur-[35px] pointer-events-none" />
 
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-[#2BE08C]/10 flex items-center justify-center shrink-0">
-                <Flame className="w-5 h-5 text-[#2BE08C] fill-[#2BE08C]/20" />
+              <div className="w-9 h-9 rounded-button bg-success/10 flex items-center justify-center shrink-0">
+                <Flame className="w-5 h-5 text-success fill-success/20" />
               </div>
               <div>
-                <h3 className="text-sm font-black text-white">
+                <h3 className="text-sm font-bold text-text-primary">
                   Earn up to {dailyEarnable > 0 ? dailyEarnable : 0} TJ Today
                 </h3>
-                <p className="text-[10px] text-[#9AA0AE]">
+                <p className="text-caption">
                   Keep alignment rewards streaming
                 </p>
               </div>
@@ -622,35 +634,35 @@ const Home: React.FC = () => {
             {/* Simulated Live Coins Balance and routing */}
             <div className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full shrink-0">
               <img src={TJ_COIN_ICON} alt="TJ" className="w-4 h-4 object-contain" />
-              <span className="text-[11px] font-black font-mono tracking-tight text-white">
+              <span className="text-mono text-text-primary">
                 {parseFloat(String(userProfile?.jamBalance || '0')).toLocaleString()}
               </span>
-              <span className="text-[9px] font-bold text-[#9AA0AE] ml-1">JAM</span>
+              <span className="text-[9px] font-bold text-text-muted ml-1">JAM</span>
             </div>
           </div>
 
           {/* Quick inline micro progress slider bar */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#9AA0AE]">
+            <div className="flex items-center justify-between text-caption uppercase tracking-wider">
               <span>Missions Completed</span>
-              <span className="text-[#2BE08C]">{completedCount} / {totalCount} Complete</span>
+              <span className="text-success">{completedCount} / {totalCount} Complete</span>
             </div>
-            <div className="w-full h-1.5 bg-[#050A24] rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-background rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-[#2BE08C] to-[#00B4D8] rounded-full transition-all duration-300" 
+                className="h-full bg-gradient-to-r from-success to-primary rounded-full transition-all duration-300" 
                 style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
               />
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/[0.03] flex items-center justify-between gap-3">
-            <span className="text-[10px] text-[#9AA0AE] truncate max-w-[200px]">
+          <div className="mt-4 pt-3 border-t border-divider flex items-center justify-between gap-3">
+            <span className="text-caption truncate max-w-[200px]">
               Next: {nextUpTask.title} ({nextUpTask.reward})
             </span>
             <Button
               size="sm"
               onClick={() => navigate("/tasks")}
-              className="h-8 bg-[#5B6BFF] hover:bg-[#4856ea] text-white font-bold text-[10px] uppercase tracking-widest px-4 rounded-full cursor-pointer border-none shrink-0"
+              className="h-8 bg-primary hover:bg-primary-hover text-background font-bold text-[10px] uppercase tracking-widest px-4 rounded-full"
             >
               View Tasks <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
             </Button>
@@ -662,11 +674,11 @@ const Home: React.FC = () => {
             SECTION 3: SPONSORED JAM FEED
             ========================================== */}
         <div className="space-y-3 text-left">
-          <h2 className="text-lg font-black tracking-tight text-white px-0.5">
+          <h2 className="text-section-title text-text-primary px-0.5">
             Featured Launches & Updates
           </h2>
 
-          <div className="relative rounded-2xl overflow-hidden bg-[#0A113A]/50 backdrop-blur-xl h-[170px] border-none shadow-xl">
+          <div className="relative rounded-card overflow-hidden bg-surface h-[170px]">
             <AnimatePresence mode="wait">
               {sponsoredPromos.map((item, idx) => {
                 if (idx !== currentPromoIndex) return null;
@@ -688,19 +700,20 @@ const Home: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-[#050A24] via-[#050A24]/70 to-transparent" />
                     
                     <div className="relative z-10 space-y-1">
-                      <div className="inline-block px-2 py-0.5 rounded bg-[#5B6BFF] text-[8px] font-black uppercase tracking-widest text-white leading-none">
+                      <Badge variant="default" className="text-[8px] uppercase tracking-widest">
                         {item.badge}
-                      </div>
-                      <h3 className="text-base font-extrabold text-white mt-1.5 leading-tight tracking-tight">
+                      </Badge>
+                      <h3 className="text-card-title text-text-primary mt-1.5">
                         {item.title}
                       </h3>
-                      <p className="text-xs text-[#9AA0AE] leading-normal max-w-[280px]">
+                      <p className="text-caption leading-normal max-w-[280px]">
                         {item.description}
                       </p>
                       
                       <div className="pt-2">
                         <Button
                           size="sm"
+                          variant="primary"
                           onClick={() => {
                             if (item.badge === "LIVE") {
                               confetti({ particleCount: 50 });
@@ -708,7 +721,7 @@ const Home: React.FC = () => {
                               navigate("/marketplace");
                             }
                           }}
-                          className="h-7 bg-[#00B4D8] hover:bg-[#009bba] text-[#050A24] font-black text-[9px] uppercase tracking-widest px-3.5 rounded-full cursor-pointer leading-none border-none"
+                          className="h-7 text-[9px] uppercase tracking-widest px-3.5 rounded-full"
                         >
                           {item.ctaText}
                         </Button>
@@ -740,10 +753,10 @@ const Home: React.FC = () => {
             ========================================== */}
         <div className="space-y-3 text-left">
           <div className="flex items-center justify-between px-0.5">
-            <h2 className="text-lg font-black tracking-tight text-white">
+            <h2 className="text-section-title text-text-primary">
               Trending Now
             </h2>
-            <button onClick={() => navigate("/marketplace")} className="text-xs font-bold text-[#5B6BFF] flex items-center outline-none cursor-pointer border-none bg-transparent">
+            <button onClick={() => navigate("/marketplace")} className="text-xs font-bold text-primary flex items-center outline-none cursor-pointer border-none bg-transparent">
               All <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -1055,7 +1068,7 @@ const Home: React.FC = () => {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 };
 

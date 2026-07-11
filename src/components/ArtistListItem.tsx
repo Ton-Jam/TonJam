@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Verified, UserPlus, UserCheck, ChevronRight, Play, Activity } from 'lucide-react';
 import { Artist } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 

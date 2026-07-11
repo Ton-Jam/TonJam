@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { X, Plus, Music, Search } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Track } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 
@@ -20,9 +20,10 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
   };
 
   const filteredPlaylists = useMemo(() => {
-    if (!searchQuery.trim()) return playlists;
+    const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+    if (!safeSearchQuery.trim()) return playlists;
     
-    const query = searchQuery.toLowerCase();
+    const query = safeSearchQuery.toLowerCase().trim();
     return playlists.filter(playlist => 
       playlist.title.toLowerCase().includes(query)
     );

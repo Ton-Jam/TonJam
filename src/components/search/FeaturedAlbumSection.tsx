@@ -7,16 +7,17 @@ import { getPlaceholderImage } from '@/lib/utils';
 
 interface FeaturedAlbumSectionProps {
   albums: Album[];
+  title?: string;
 }
 
-export const FeaturedAlbumSection: React.FC<FeaturedAlbumSectionProps> = ({ albums }) => {
+export const FeaturedAlbumSection: React.FC<FeaturedAlbumSectionProps> = ({ albums, title }) => {
   const navigate = useNavigate();
 
   return (
     <div className="space-y-4">
       <div className="space-y-1">
         <span className="text-[9px] font-mono font-bold text-pink-400 uppercase tracking-widest">Cohesive Masterpieces</span>
-        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Featured Albums</h3>
+        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">{title || "Featured Albums"}</h3>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -28,9 +29,9 @@ export const FeaturedAlbumSection: React.FC<FeaturedAlbumSectionProps> = ({ albu
               key={`featured-album-${album.id}`}
               whileHover={{ y: -4 }}
               onClick={() => navigate(`/album/${album.id}`)}
-              className="bg-[#090f2d] hover:bg-[#121A3E]/20 rounded-xl border border-white/5 p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
+              className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
             >
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-slate-950 border border-white/5">
+              <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-950 border border-white/5">
                 <img
                   src={imageSrc}
                   alt={album.title}
@@ -43,7 +44,7 @@ export const FeaturedAlbumSection: React.FC<FeaturedAlbumSectionProps> = ({ albu
               </div>
 
               <div className="mt-3 space-y-1 truncate">
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors">
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                   {album.title}
                 </h4>
                 <p className="text-[10px] text-slate-400 truncate">{album.artist}</p>

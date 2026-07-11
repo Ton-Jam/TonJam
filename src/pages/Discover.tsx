@@ -12,9 +12,31 @@ import {
   SlidersHorizontal,
   LayoutGrid,
   Radio,
-  Play
+  Play,
+  Activity,
+  Zap,
+  ShieldCheck,
+  Sparkles,
+  ChevronRight,
+  Coins,
+  Gem,
+  Megaphone,
+  Radio as RadioIcon,
+  Users
 } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { 
+  collection, 
+  query as firestoreQuery, 
+  where, 
+  getDocs, 
+  limit, 
+  orderBy, 
+  startAt, 
+  endAt,
+  DocumentData
+} from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useAudio } from '@/contexts/AudioContext';
 import { auth } from '@/lib/firebase';
 import { getPlaceholderImage } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -36,6 +58,11 @@ import { ContinueListeningSection } from '@/components/search/ContinueListeningS
 import { RecentlyPlayedSection } from '@/components/search/RecentlyPlayedSection';
 import { SearchResults } from '@/components/search/SearchResults';
 import { SearchSuggestionList } from '@/components/search/SearchSuggestionList';
+import { WelcomeHero } from "@/components/search/WelcomeHero";
+import { SponsoredJamFeed } from "@/components/search/SponsoredJamFeed";
+import { LiveSpaces } from "@/components/search/LiveSpaces";
+import { EarnTJPreview } from "@/components/search/EarnTJPreview";
+import { CommunityActivity } from "@/components/search/CommunityActivity";
 import QRScanner from '@/components/QRScanner';
 import { 
   FullDiscoverSkeleton, 
@@ -45,6 +72,7 @@ import {
 } from '@/components/search/Skeletons';
 import { CollectionItem } from '@/components/search/search-types';
 import useDebounce from '@/hooks/use-debounce';
+import { Button } from "@/components/ui/button";
 
 // High-fidelity Mock/Fallback Data to populate un-seeded firebase fields elegantly
 const POPULAR_COLLECTIONS: CollectionItem[] = [
@@ -124,6 +152,8 @@ export const Discover: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [visibleItemsCount, setVisibleItemsCount] = useState(6);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Recently Viewed NFTs Tracking
   const [recentlyViewedNfts, setRecentlyViewedNfts] = useState<any[]>(() => {
@@ -145,31 +175,60 @@ export const Discover: React.FC = () => {
     }
   });
 
-  // Calculate Autocomplete Suggestions based on typing query
-  const suggestions = useMemo(() => {
-    if (!query.trim()) return [];
-    const lowerQuery = query.toLowerCase().trim();
-    const matches: string[] = [];
+  // Real-time Firestore Search Suggestions
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!debouncedQuery.trim() || debouncedQuery.length < 2) {
+        setSuggestions([]);
+        return;
+      }
 
-    // Gather unique matching names from tracks, artists, NFTs, and playlists
-    allTracks.forEach((t) => {
-      if (t.title?.toLowerCase().includes(lowerQuery) && !matches.includes(t.title)) {
-        matches.push(t.title);
-      }
-    });
-    artists.forEach((a) => {
-      if (a.name?.toLowerCase().includes(lowerQuery) && !matches.includes(a.name)) {
-        matches.push(a.name);
-      }
-    });
-    allNFTs.forEach((n) => {
-      if (n.title?.toLowerCase().includes(lowerQuery) && !matches.includes(n.title)) {
-        matches.push(n.title);
-      }
-    });
+      setIsSearching(true);
+      try {
+        const q = debouncedQuery.trim();
+        const capitalizedQ = q.charAt(0).toUpperCase() + q.slice(1);
+        const matchesSet = new Set<string>();
 
-    return matches.slice(0, 5);
-  }, [query, allTracks, artists, allNFTs]);
+        // We run queries for both the exact query and the capitalized version 
+        // to handle standard naming conventions in Firestore
+        const fetchBatch = async (searchTerm: string) => {
+          const endTerm = searchTerm + '\uf8ff';
+          
+          const tQuery = firestoreQuery(collection(db, 'tracks'), where('title', '>=', searchTerm), where('title', '<=', endTerm), limit(3));
+          const aQuery = firestoreQuery(collection(db, 'users'), where('role', '==', 'artist'), where('name', '>=', searchTerm), where('name', '<=', endTerm), limit(3));
+          const cQuery = firestoreQuery(collection(db, 'collections'), where('name', '>=', searchTerm), where('name', '<=', endTerm), limit(3));
+
+          const [tSnap, aSnap, cSnap] = await Promise.all([getDocs(tQuery), getDocs(aQuery), getDocs(cQuery)]);
+          
+          tSnap.forEach(doc => matchesSet.add(doc.data().title));
+          aSnap.forEach(doc => matchesSet.add(doc.data().name));
+          cSnap.forEach(doc => matchesSet.add(doc.data().name));
+        };
+
+        await fetchBatch(q);
+        if (capitalizedQ !== q) {
+          await fetchBatch(capitalizedQ);
+        }
+
+        // Merge with local data for fuzzy matching (case-insensitive)
+        const lowerQ = q.toLowerCase();
+        allTracks.forEach(t => {
+          if (t.title.toLowerCase().includes(lowerQ)) matchesSet.add(t.title);
+        });
+        artists.forEach(a => {
+          if (a.name.toLowerCase().includes(lowerQ)) matchesSet.add(a.name);
+        });
+
+        setSuggestions(Array.from(matchesSet).slice(0, 8));
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    fetchSuggestions();
+  }, [debouncedQuery, allTracks]);
 
   // Calculate listener profile metrics
   const favoriteGenre = useMemo(() => {
@@ -325,13 +384,13 @@ export const Discover: React.FC = () => {
               isFocused={isFocused}
             />
 
-            {/* Glowing Suggestions Dropdown Overlay */}
             <AnimatePresence>
-              {isFocused && suggestions.length > 0 && (
+              {isFocused && (query.length >= 2 || isSearching) && (
                 <SearchSuggestionList
                   suggestions={suggestions}
                   query={query}
                   onSelect={handleSelectSearchTerm}
+                  isSearching={isSearching}
                 />
               )}
             </AnimatePresence>
@@ -339,8 +398,8 @@ export const Discover: React.FC = () => {
 
           <button
             onClick={handleRefresh}
-            className={`p-2.5 rounded-full bg-[#0c133a] text-white hover:bg-[#0052FF] transition-all shrink-0 active:scale-95 ${
-              isRefreshing ? 'animate-spin text-[#0052FF]' : ''
+            className={`p-2.5 rounded-full bg-[#0c133a] text-white hover:bg-[#00B4D8] transition-all shrink-0 active:scale-95 ${
+              isRefreshing ? 'animate-spin text-[#00B4D8]' : ''
             }`}
             title="Refresh frequencies"
           >
@@ -363,7 +422,7 @@ export const Discover: React.FC = () => {
         ) : query.trim() !== '' && query !== debouncedQuery ? (
           <div className="space-y-8 animate-pulse">
             <div className="space-y-4">
-              <span className="text-[9px] font-mono font-bold text-[#0052FF] uppercase tracking-widest">Aura Sync Scanning...</span>
+              <span className="text-[9px] font-mono font-bold text-[#00B4D8] uppercase tracking-widest">Aura Sync Scanning...</span>
               {activeFilter === 'tracks' && <TracksSkeleton count={6} />}
               {activeFilter === 'artists' && <ArtistsSkeleton count={4} />}
               {activeFilter === 'nfts' && <CardsSkeleton count={4} />}
@@ -386,189 +445,158 @@ export const Discover: React.FC = () => {
             onClearQuery={() => setQuery('')}
           />
         ) : (
-          /* Default Discovery Feed */
-          <div className="space-y-12">
+          <div className="space-y-12 pb-24">
             
-            {/* For You Section */}
-            {(activeFilter === 'all' || activeFilter === 'trending') && (
+            {/* 1. Welcome Hero */}
+            <section className="px-4 pt-4">
+              <WelcomeHero />
+            </section>
+
+            {/* 2. Continue Listening */}
+            <section>
+              {recentlyPlayed.length > 0 && (
+                <ContinueListeningSection 
+                  tracks={recentlyPlayed} 
+                  onPlayTrack={playTrack} 
+                />
+              )}
+            </section>
+
+            {/* 3. Trending NFT Collections */}
+            <section>
+              <CollectionSection 
+                collections={POPULAR_COLLECTIONS} 
+                title="Trending NFT Collections"
+              />
+            </section>
+
+            {/* 4. Sponsored Jam Feed */}
+            <section>
+              <SponsoredJamFeed />
+            </section>
+
+            {/* 5. New Drops (Featured Albums) */}
+            <section>
+              <FeaturedAlbumSection
+                title="New Drops"
+                albums={allTracks.slice(0, 4).map(t => ({
+                  id: t.albumId || 'alb-1',
+                  title: t.title,
+                  artist: t.artist,
+                  artistId: t.artistId || 'art-1',
+                  coverUrl: t.coverUrl,
+                  releaseYear: 2026,
+                  trackIds: [t.id],
+                  genre: t.genre
+                }))}
+              />
+            </section>
+
+            {/* 6. Trending Songs */}
+            <section>
+              <TrendingSection
+                title="Trending Songs"
+                trendingSong={allTracks[0]}
+                trendingArtist={null}
+                trendingAlbum={null}
+                trendingPlaylist={null}
+                trendingNft={null}
+                trendingCollection={null}
+                onPlaySong={playTrack}
+              />
+            </section>
+
+            {/* 7. Trending Artists */}
+            <section>
+              <FeaturedArtistSection
+                title="Trending Artists"
+                artists={artists.slice(0, 4)}
+                followedIds={followedUserIds}
+                onToggleFollow={toggleFollowUser}
+              />
+            </section>
+
+            {/* 8. Live Spaces */}
+            <section>
+              <LiveSpaces />
+            </section>
+
+            {/* 9. Recommended For You */}
+            <section>
               <ForYouSection
                 recommendedTracks={recommendedTracks}
                 onPlayTrack={playTrack}
                 listeningStreak={4}
                 favoriteGenre={favoriteGenre}
               />
-            )}
+            </section>
 
-            {/* Recently Searched Panel */}
-            {searchHistory.length > 0 && (
-              <RecentSearchSection
-                searches={searchHistory}
-                onSelect={handleSelectSearchTerm}
-                onRemove={handleRemoveSearchTerm}
-                onClearAll={handleClearAllHistory}
+            {/* 10. Earn TJ Preview */}
+            <section className="px-4">
+              <EarnTJPreview />
+            </section>
+
+            {/* 11. Marketplace Picks (Trending NFTs) */}
+            <section>
+              <TrendingNFTSection 
+                title="Marketplace Picks"
+                nfts={allNFTs.slice(0, 4)} 
               />
-            )}
+            </section>
 
-            {/* Trending Section */}
-            {(activeFilter === 'all' || activeFilter === 'trending') && (
-              <TrendingSection
-                trendingSong={allTracks[0] || null}
-                trendingArtist={artists[0] || null}
-                trendingAlbum={null}
-                trendingPlaylist={allUserPlaylists[0] || null}
-                trendingNft={allNFTs[0] || null}
-                trendingCollection={POPULAR_COLLECTIONS[0]}
-                onPlaySong={playTrack}
+            {/* 12. Favorite Artists */}
+            <section>
+              <RecommendedSection
+                recommendedTracks={[]}
+                recommendedArtists={artists.slice(1, 5)}
+                onPlayTrack={playTrack}
               />
-            )}
+            </section>
 
-            {/* Continue Listening Resume Row */}
-            {recentlyPlayed.length > 0 && (activeFilter === 'all' || activeFilter === 'tracks') && (
-              <ContinueListeningSection tracks={recentlyPlayed} onPlayTrack={playTrack} />
-            )}
-
-            {/* Featured Artists */}
-            {(activeFilter === 'all' || activeFilter === 'artists') && artists.length > 0 && (
-              <FeaturedArtistSection
-                artists={artists.slice(0, 4)}
-                followedIds={followedUserIds}
-                onToggleFollow={toggleFollowUser}
-              />
-            )}
-
-            {/* Featured Albums */}
-            {(activeFilter === 'all' || activeFilter === 'albums') && (
-              <FeaturedAlbumSection
-                albums={allTracks
-                  .slice(0, 4)
-                  .map((t) => ({ id: t.albumId || 'alb-1', title: t.title + ' Master', artist: t.artist, artistId: t.artistId, coverUrl: t.coverUrl, releaseYear: 2026, trackIds: [t.id], genre: t.genre }))}
-              />
-            )}
-
-            {/* Featured Playlists */}
-            {(activeFilter === 'all' || activeFilter === 'playlists') && allUserPlaylists.length > 0 && (
-              <FeaturedPlaylistSection
-                playlists={allUserPlaylists.slice(0, 4)}
-                onPlayPlaylist={(p) => {
-                  const pTracks = p.trackIds?.map(id => allTracks.find(t => t.id === id)).filter(Boolean) as any[];
-                  if (pTracks && pTracks.length > 0) playAll(pTracks);
-                }}
-              />
-            )}
-
-            {/* Trending NFTs Drop Section */}
-            {(activeFilter === 'all' || activeFilter === 'nfts') && allNFTs.length > 0 && (
-              <TrendingNFTSection nfts={allNFTs.slice(0, 4)} />
-            )}
-
-            {/* Live Auctions */}
-            {(activeFilter === 'all' || activeFilter === 'auctions') && liveAuctions.length > 0 && (
-              <LiveAuctionSection auctions={liveAuctions} />
-            )}
-
-            {/* Popular Collections */}
-            {(activeFilter === 'all' || activeFilter === 'collections') && (
-              <CollectionSection collections={POPULAR_COLLECTIONS} />
-            )}
-
-            {/* Trending Genres List */}
-            {(activeFilter === 'all' || activeFilter === 'genres') && (
+            {/* 13. Trending Topics */}
+            <section className="px-4">
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">Network Taxonomy</span>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Trending Genres</h3>
+                  <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <Hash className="w-3 h-3" /> Broadcast Signals
+                  </span>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Trending Topics</h3>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {TRENDING_GENRES.map((gen) => (
-                    <motion.div
-                      key={gen.id}
-                      whileHover={{ y: -2 }}
-                      onClick={() => handleSelectSearchTerm(gen.name)}
-                      className={`p-4 rounded-xl ${gen.color} relative overflow-hidden h-24 flex flex-col justify-between cursor-pointer group`}
-                    >
-                      <h4 className="text-sm font-bold uppercase tracking-wider text-white">{gen.name}</h4>
-                      <span className="text-[9px] font-mono text-white/70 uppercase font-semibold">{gen.count}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Trending Hashtags List */}
-            {activeFilter === 'all' && (
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">Broadcast Signals</span>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Trending Hashtags</h3>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   {TRENDING_HASHTAGS.map((hash) => (
                     <motion.div
                       key={hash.id}
                       whileHover={{ scale: 1.01, backgroundColor: 'rgba(255,255,255,0.03)' }}
                       onClick={() => handleSelectSearchTerm(hash.name)}
-                      className="p-4 rounded-xl bg-[#090f2d] border border-white/5 flex flex-col justify-between cursor-pointer group h-20"
+                      className="p-4 rounded-[12px] bg-[#0c133a] border border-white/5 flex flex-col justify-between cursor-pointer group h-20"
                     >
-                      <span className="text-xs font-bold text-[#0052FF] tracking-wider">{hash.name}</span>
+                      <span className="text-xs font-bold text-[#00B4D8] tracking-wider">{hash.name}</span>
                       <span className="text-[9px] font-mono text-slate-500 uppercase font-semibold">{hash.posts}</span>
                     </motion.div>
                   ))}
                 </div>
               </div>
-            )}
+            </section>
 
-            {/* Recommended Split Section */}
-            {activeFilter === 'all' && (
-              <RecommendedSection
-                recommendedTracks={allTracks.slice(1, 5)}
-                recommendedArtists={artists.slice(1, 5)}
-                onPlayTrack={playTrack}
+            {/* 14. Recently Minted */}
+            <section>
+              <TrendingNFTSection 
+                title="Recently Minted"
+                nfts={allNFTs.slice().reverse().slice(0, 4)} 
               />
-            )}
+            </section>
 
-            {/* Recently Played History */}
-            {recentlyPlayed.length > 0 && activeFilter === 'all' && (
-              <RecentlyPlayedSection tracks={recentlyPlayed} onPlayTrack={playTrack} />
-            )}
+            {/* 15. Community Activity */}
+            <section className="px-4">
+              <CommunityActivity />
+            </section>
 
-            {/* Suggested Users to follow */}
-            {activeFilter === 'all' && (
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">Network Graph</span>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Suggested Users</h3>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {SUGGESTED_USERS.map((usr) => (
-                    <div
-                      key={usr.uid}
-                      className="bg-[#090f2d] border border-white/5 p-4 rounded-xl flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-900 border border-white/5">
-                          <img src={usr.avatar} alt={usr.name} className="w-full h-full object-cover" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-white uppercase tracking-wider">{usr.name}</h4>
-                          <p className="text-[9px] text-slate-500 font-mono">@{usr.username}</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => toggleFollowUser(usr.uid)}
-                        className={`p-1.5 rounded-full ${
-                          followedUserIds.includes(usr.uid)
-                            ? 'bg-transparent text-emerald-400'
-                            : 'bg-white/5 hover:bg-white/10 text-white'
-                        } transition-all`}
-                        title="Follow"
-                      >
-                        <UserPlus className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* 16. Recently Played */}
+            <section>
+              {recentlyPlayed.length > 0 && (
+                <RecentlyPlayedSection tracks={recentlyPlayed.slice(0, 8)} onPlayTrack={playTrack} />
+              )}
+            </section>
 
             {/* Sentinel element for infinite scroll tracking */}
             <div ref={sentinelRef} className="h-4 w-full" />

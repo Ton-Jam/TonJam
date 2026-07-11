@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Zap, ArrowRight } from "lucide-react"
 import { TJ_COIN_ICON, TON_LOGO } from "@/constants"
 import { useTonAddress } from '@tonconnect/ui-react'
-import { useAudio } from '@/context/AudioContext'
+import { useAudio } from '@/contexts/AudioContext'
 import { cn } from '@/lib/utils'
 import {
   Card,
@@ -20,7 +20,7 @@ export function CardSmall({ onClick }: { onClick?: () => void }) {
   const isConnected = !!userAddress;
 
   return (
-    <Card size="sm" className="mx-auto w-full max-w-sm bg-blue-950/20 backdrop-blur-md hover:bg-blue-950/30 transition-all border-none relative overflow-hidden flex flex-col justify-between shadow-xl">
+    <Card className="mx-auto w-full max-w-sm bg-blue-950/20 backdrop-blur-md hover:bg-blue-950/30 transition-all border-none relative overflow-hidden flex flex-col justify-between shadow-xl">
       <CardHeader className="pb-1.5">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-black uppercase tracking-wider text-white">Buy TJ Coin</CardTitle>

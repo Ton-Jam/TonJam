@@ -7,7 +7,7 @@ import { AuctionCountdownTimer } from '@/components/AuctionCountdownTimer';
 import { motion, AnimatePresence } from 'motion/react';
 import { Gavel, Clock, Sparkles, TrendingUp, AlertCircle, Cpu, RefreshCw } from 'lucide-react';
 import { TON_LOGO } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { cn } from '@/lib/utils';
 

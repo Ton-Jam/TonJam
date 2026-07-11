@@ -77,6 +77,7 @@ export class Track {
   description?: string;
   audioIpfsUrl?: string;
   coverIpfsUrl?: string;
+  metadataIpfsUrl?: string;
   royaltySplits?: RoyaltySplit[];
   lyrics?: string = '';
   isExclusive?: boolean;
@@ -88,6 +89,7 @@ export class Track {
   tokenGating?: TokenGating;
   isDrmProtected?: boolean;
   watermarkText?: string;
+  floorPriceChange?: number; // Percentage change, e.g., 5.2 or -2.1
 }
 
 export interface NFTTrait {
@@ -173,6 +175,7 @@ export interface NFTItem {
   startingBid?: string;
   royalty?: number;
   tokenGating?: TokenGating;
+  floorPriceChange?: number; // Percentage change, e.g., 5.2 or -2.1
 }
 
 export interface SongRequest {
@@ -242,6 +245,7 @@ export interface Artist {
   bio?: string;
   bannerUrl?: string;
   bannerImageUrl?: string;
+  coverPhoto?: string;
   socials?: {
     x?: string;
     spotify?: string;
@@ -362,18 +366,38 @@ export interface PlaylistFolder {
   updatedAt?: string;
 }
 
+export interface PriceAlert {
+  id: string;
+  userId: string;
+  nftId: string;
+  nftTitle: string;
+  nftImageUrl: string;
+  targetPrice: string;
+  condition: 'below' | 'above';
+  status: 'active' | 'triggered' | 'cancelled';
+  channels: ('app' | 'push' | 'email')[];
+  createdAt: string;
+}
+
 export interface UserProfile {
   uid: string;
   name: string;
   username: string;
   avatar: string;
   bannerUrl?: string;
+  coverPhoto?: string;
   bio?: string;
   walletAddress?: string;
   followers: number;
   following: number;
   earnings: number;
   isVerifiedArtist?: boolean;
+  milestones?: {
+    totalSales: number;
+    totalListeners: number;
+    salesThreshold: number;
+    listenersThreshold: number;
+  };
   socials?: {
     x?: string;
     spotify?: string;

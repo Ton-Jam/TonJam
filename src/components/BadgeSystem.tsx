@@ -17,7 +17,7 @@ import {
   Zap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { UserProfile, NFTItem } from '@/types';
 import { GlassProgressBar } from '@/components/aicanvas/glass-progress';
 import { motion, AnimatePresence } from 'motion/react';

@@ -16,7 +16,7 @@ import {
   LayoutGrid,
   List
 } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem, Track } from '@/types';
 import { motion, AnimatePresence } from 'motion/react';
 import { getPlaceholderImage } from '@/lib/utils';

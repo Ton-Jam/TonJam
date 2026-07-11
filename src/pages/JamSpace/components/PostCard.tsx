@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { Post, Reply } from '../types';
 import { Track } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface PostCardProps {
   post: Post;

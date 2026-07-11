@@ -80,8 +80,9 @@ const LimitedNFTs: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && searchQuery.trim()) {
-                  const q = searchQuery.trim();
+                const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+                if (e.key === 'Enter' && safeSearchQuery.trim()) {
+                  const q = safeSearchQuery.trim();
                   const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
                   const curr = saved ? JSON.parse(saved) : [];
                   const updated = [q, ...curr.filter((h: string) => h !== q)].slice(0, 10);

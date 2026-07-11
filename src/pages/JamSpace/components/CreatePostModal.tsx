@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, ImageIcon, Music, Coins, List, HelpCircle, User, MessageCircle } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface CreatePostModalProps {
   isOpen: boolean;

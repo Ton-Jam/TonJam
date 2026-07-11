@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Music, Image, Info, Box, Upload, Loader2, Camera, Image as ImageIcon } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { uploadFile, uploadAudio, uploadCover } from '@/services/storageService';
 import { Track, NFTItem } from '@/types';

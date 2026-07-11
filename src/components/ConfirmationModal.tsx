@@ -32,6 +32,8 @@ interface ConfirmationModalProps {
   fromAddress?: string;
   recipient?: string;
   transactionType?: string;
+  floorPrice?: string;
+  walletBalance?: string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -53,6 +55,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   fromAddress,
   recipient,
   transactionType,
+  floorPrice,
+  walletBalance,
 }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -101,6 +105,20 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Network Fee</span>
                 <span className="font-mono text-neutral-400 font-bold">~{networkFee || "0.05"} TON</span>
               </div>
+
+              {floorPrice && (
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Floor Price</span>
+                  <span className="font-mono text-cyan-400 font-bold">{floorPrice} TON</span>
+                </div>
+              )}
+
+              {walletBalance && (
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Wallet Balance</span>
+                  <span className="font-mono text-emerald-400 font-bold">{walletBalance} TON</span>
+                </div>
+              )}
 
               {fromAddress && (
                 <div className="flex justify-between items-center text-[10px] pt-1">

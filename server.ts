@@ -722,6 +722,56 @@ async function startServer() {
         res.json({ user: req.user });
     });
 
+    let cachedTonPrice: number | null = null;
+    let lastCacheUpdate = 0;
+    let lastRetryTime = 0;
+    const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+    const RETRY_DELAY = 2 * 60 * 1000; // 2 minutes delay after failure
+
+    app.get('/api/ton-price', async (req, res) => {
+        const now = Date.now();
+        
+        // Return cached price if valid
+        if (cachedTonPrice && (now - lastCacheUpdate < CACHE_DURATION)) {
+            return res.json({ price: cachedTonPrice });
+        }
+
+        // Don't retry too quickly if we just failed
+        if (now - lastRetryTime < RETRY_DELAY && cachedTonPrice) {
+            return res.json({ price: cachedTonPrice, isCachedFallback: true });
+        }
+
+        try {
+            const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd', {
+                timeout: 2000, // Reduced timeout to prevent client-side hangs
+                headers: { 'Accept': 'application/json' }
+            });
+            const tonPrice = response.data['the-open-network']?.usd;
+            
+            if (tonPrice) {
+                cachedTonPrice = tonPrice;
+                lastCacheUpdate = now;
+                lastRetryTime = 0; // Reset retry time on success
+                return res.json({ price: tonPrice });
+            } else {
+                throw new Error('Price not found in response');
+            }
+        } catch (error: any) {
+            lastRetryTime = now;
+            
+            // If we have a cached price, return it even if expired as fallback
+            if (cachedTonPrice) {
+                return res.json({ price: cachedTonPrice, isExpiredFallback: true });
+            }
+
+            // Fallback to a reasonable static price if everything fails
+            const FALLBACK_PRICE = 7.50;
+            cachedTonPrice = FALLBACK_PRICE;
+            lastCacheUpdate = now;
+            res.json({ price: FALLBACK_PRICE, isHardcodedFallback: true });
+        }
+    });
+
     app.post('/api/upload', upload.fields([
         { name: 'audio', maxCount: 1 },
         { name: 'cover', maxCount: 1 }
@@ -736,6 +786,82 @@ async function startServer() {
         const coverUrl = files.cover ? `/uploads/${files.cover[0].filename}` : null;
 
         res.json({ audioUrl, coverUrl, audioFilename: files.audio[0].filename });
+    });
+
+    app.post('/api/pinata/upload', upload.single('file'), async (req, res) => {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const pinataJwt = process.env.PINATA_JWT;
+        if (!pinataJwt) {
+            return res.status(500).json({ error: 'Pinata JWT is not configured' });
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('file', fs.createReadStream(req.file.path));
+            
+            const metadata = JSON.stringify({
+                name: req.file.originalname,
+            });
+            formData.append('pinataMetadata', metadata);
+            
+            const options = JSON.stringify({
+                cidVersion: 0,
+            });
+            formData.append('pinataOptions', options);
+
+            const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
+                maxBodyLength: Infinity,
+                headers: {
+                    'Authorization': `Bearer ${pinataJwt}`,
+                    ...formData.getHeaders()
+                }
+            });
+
+            // Cleanup local file
+            fs.unlinkSync(req.file.path);
+
+            res.json({
+                success: true,
+                ipfsHash: response.data.IpfsHash,
+                pinSize: response.data.PinSize,
+                timestamp: response.data.Timestamp
+            });
+        } catch (error: any) {
+            console.error('Error uploading to Pinata:', error.response?.data || error.message);
+            if (req.file && fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+            }
+            res.status(500).json({ error: 'Failed to upload to IPFS' });
+        }
+    });
+
+    app.post('/api/pinata/upload-json', async (req, res) => {
+        const pinataJwt = process.env.PINATA_JWT;
+        if (!pinataJwt) {
+            return res.status(500).json({ error: 'Pinata JWT is not configured' });
+        }
+
+        try {
+            const response = await axios.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', req.body, {
+                headers: {
+                    'Authorization': `Bearer ${pinataJwt}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            res.json({
+                success: true,
+                ipfsHash: response.data.IpfsHash,
+                pinSize: response.data.PinSize,
+                timestamp: response.data.Timestamp
+            });
+        } catch (error: any) {
+            console.error('Error uploading JSON to Pinata:', error.response?.data || error.message);
+            res.status(500).json({ error: 'Failed to upload metadata to IPFS' });
+        }
     });
 
     app.post('/api/analyze-audio-file', upload.single('audio'), async (req, res) => {
@@ -1637,6 +1763,24 @@ async function startServer() {
             console.error('Spotify Liked Songs Proxy Error:', error.response?.data || error.message);
             res.status(500).json({ error: 'Failed to fetch Spotify liked songs' });
         }
+    });
+
+    // TON Connect Manifest Dynamic Route
+    app.get('/tonconnect-manifest.json', (req, res) => {
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = req.get('host');
+        const origin = `${protocol}://${host}`;
+        
+        const manifest = {
+            url: origin,
+            name: "TonJam",
+            iconUrl: "https://i.postimg.cc/63GsZHzq/TonJam-icon.png",
+            termsOfUseUrl: origin,
+            privacyPolicyUrl: origin
+        };
+        
+        res.header('Access-Control-Allow-Origin', '*');
+        res.json(manifest);
     });
 
     const isVercel = !!process.env.VERCEL;

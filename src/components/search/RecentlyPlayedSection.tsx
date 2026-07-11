@@ -28,9 +28,9 @@ export const RecentlyPlayedSection: React.FC<RecentlyPlayedSectionProps> = ({
             key={`recently-played-${track.id}`}
             whileHover={{ y: -3 }}
             onClick={() => onPlayTrack(track)}
-            className="w-[140px] shrink-0 bg-[#090f2d] hover:bg-[#121A3E]/15 p-3 rounded-xl border border-white/5 cursor-pointer group flex flex-col justify-between transition-all"
+            className="w-[140px] shrink-0 bg-[#0c133a] p-3 rounded-[12px] border border-white/5 cursor-pointer group flex flex-col justify-between transition-all"
           >
-            <div className="relative aspect-square rounded-lg overflow-hidden bg-slate-900 border border-white/5">
+            <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-900 border border-white/5">
               <img
                 src={track.coverUrl || getPlaceholderImage(track.title)}
                 alt={track.title}
@@ -43,7 +43,7 @@ export const RecentlyPlayedSection: React.FC<RecentlyPlayedSectionProps> = ({
             </div>
 
             <div className="mt-2.5 truncate">
-              <h4 className="text-[11px] font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors">
+              <h4 className="text-[11px] font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                 {track.title}
               </h4>
               <p className="text-[9px] text-slate-400 truncate">{track.artist}</p>

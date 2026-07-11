@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { AuctionCountdownTimer } from '../AuctionCountdownTimer';
 import { useNavigate } from 'react-router-dom';
 import { Flame } from 'lucide-react';

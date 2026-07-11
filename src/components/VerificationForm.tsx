@@ -14,7 +14,7 @@ import {
   X,
   Brain
 } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';

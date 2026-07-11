@@ -17,7 +17,7 @@ import {
   Copy,
   Check
 } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { doc, getDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';

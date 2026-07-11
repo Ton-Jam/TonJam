@@ -26,7 +26,7 @@ import { Separator } from '@/components/ui/separator';
 import { Track, RoyaltySplit } from '@/types';
 import { GENRES } from '@/constants';
 import RoyaltySplitManager from './RoyaltySplitManager';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Gem, Coins, Layers, Info, Lock } from 'lucide-react';
 
 const metadataSchema = z.object({

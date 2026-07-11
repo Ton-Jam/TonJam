@@ -405,6 +405,22 @@
       },
       "required": ["id", "name", "bass", "mids", "treble", "userId"]
     },
+    "Collection": {
+      "title": "Collection",
+      "description": "Curated set of music/NFTs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "creator": { "type": "string" },
+        "coverUrl": { "type": "string" },
+        "itemsCount": { "type": "number" },
+        "ownersCount": { "type": "number" },
+        "floorPrice": { "type": "string" },
+        "totalVolume": { "type": "string" }
+      },
+      "required": ["id", "name", "creator"]
+    },
     "Bookmark": {
       "title": "Bookmark",
       "description": "User bookmarked post reference",
@@ -436,6 +452,24 @@
         "quickAction": { "type": "object" }
       },
       "required": ["id", "userId", "category", "title", "description", "timestamp", "read"]
+    },
+    "PriceAlert": {
+      "title": "PriceAlert",
+      "description": "User price alert for an NFT",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "nftId": { "type": "string" },
+        "nftTitle": { "type": "string" },
+        "nftImageUrl": { "type": "string" },
+        "targetPrice": { "type": "string" },
+        "condition": { "type": "string", "enum": ["below", "above"] },
+        "status": { "type": "string", "enum": ["active", "triggered", "cancelled"] },
+        "channels": { "type": "array", "items": { "type": "string", "enum": ["app", "push", "email"] } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "nftId", "targetPrice", "condition", "status", "createdAt"]
     }
   },
   "firestore": {
@@ -491,6 +525,10 @@
       "schema": "Bookmark",
       "description": "User bookmarked posts"
     },
+    "/users/{userId}/priceAlerts/{alertId}": {
+      "schema": "PriceAlert",
+      "description": "User price alerts for NFTs"
+    },
     "/tracks/{trackId}": {
       "schema": "Track",
       "description": "Music tracks"
@@ -534,6 +572,10 @@
     "/transactions/{transactionId}": {
       "schema": "Transaction",
       "description": "Platform transactions"
+    },
+    "/collections/{collectionId}": {
+      "schema": "Collection",
+      "description": "Music and NFT collections"
     },
     "/playlists/{playlistId}": {
       "schema": "Playlist",

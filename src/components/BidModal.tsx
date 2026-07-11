@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2, Gavel } from 'lucide-react';
 import { TON_LOGO, APP_LOGO } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { placeBid, getTonPrice, getTonBalance } from '@/services/tonService';
@@ -107,7 +107,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
       };
       /* Update NFT with new offer and update current price to reflect highest bid */
       updateNFT(nft.id, { price: bidAmount, offers: [newOffer, ...(nft.offers || [])] });
-      addNotification(`Bid of ${bidAmount} TON placed!`, "success");
+      addNotification(`Bid of ${bidAmount} TON placed!`, "success", 5000, `Your offer for "${nft.title}" is now the active high watermark.`);
       if (onBidPlaced) {
         onBidPlaced();
       }
@@ -225,11 +225,13 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
         onConfirm={confirmBid}
         title="Execute Bid Protocol?"
         description="Verify signal parameters before broadcasting to the TON blockchain relay."
-        confirmText="Confirm & Broadcast"
+        confirmText="Confirm to Mint"
         assetName={nft.title}
         assetImage={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
         tonAmount={bidAmount}
         networkFee="0.05"
+        floorPrice={nft.price}
+        walletBalance={walletBalance.toFixed(2)}
         totalAmount={(parseFloat(bidAmount) + 0.05).toFixed(2)}
         fromAddress={userAddress}
         recipient={nft.owner}

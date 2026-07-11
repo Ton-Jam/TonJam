@@ -7,8 +7,8 @@ import {
   MapPin, Award, Send, MessageCircle 
 } from "lucide-react";
 import { toast } from "sonner";
-import { useAudio } from "@/context/AudioContext";
-import { useAuth } from "@/context/AuthContext";
+import { useAudio } from "@/contexts/AudioContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn, getPlaceholderImage } from "@/lib/utils";
 
 // Custom Modals from existing codebase
@@ -201,7 +201,7 @@ const ArtistProfile: React.FC = () => {
 
         {/* Cover Image */}
         <img 
-          src={artist.bannerImageUrl || artist.bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1600, 600)} 
+          src={artist.coverPhoto || artist.bannerImageUrl || artist.bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1600, 600)} 
           className="w-full h-full object-cover select-none" 
           alt="" 
         />

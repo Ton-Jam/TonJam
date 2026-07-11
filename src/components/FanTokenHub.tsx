@@ -4,8 +4,8 @@ import {
   Tv, Tag, Check, HelpCircle, Loader2, Plus, AlertCircle, Copy, BarChart2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useAuth } from '@/context/AuthContext';
-import { useAudio } from '@/context/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Artist, Track, FanTokenBalance, ArtistPoll, ArtistPollVote } from '@/types';
 import { 
   getFanTokenBalance, 

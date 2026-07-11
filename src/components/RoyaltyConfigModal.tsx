@@ -3,7 +3,7 @@ import { X, Plus, Trash2, Save, Info, Percent, Wallet, User } from 'lucide-react
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { Artist, RoyaltySplit } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface RoyaltyConfigModalProps {
   isOpen: boolean;

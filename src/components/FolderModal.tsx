@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Folder, Loader2, CheckCircle2 } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { PlaylistFolder } from '@/types';
 import { Button } from "@/components/ui/button";
 

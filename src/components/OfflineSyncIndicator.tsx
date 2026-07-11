@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Wifi, WifiOff, RefreshCw, CheckCircle, Database, AlertCircle } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { indexedDbService } from '@/services/indexedDbService';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';

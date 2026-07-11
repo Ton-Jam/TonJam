@@ -23,7 +23,7 @@ import {
   Gem,
   Award
 } from "lucide-react";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import Progress from "./Progress";
 import PlayerControls from "./PlayerControls";
 import { getPlaceholderImage, shareContent, cn } from "@/lib/utils";
@@ -256,10 +256,15 @@ export const PlayerScreen: React.FC = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.25, ease: "easeInOut" }}
+      initial={{ y: "100%", opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: "100%", opacity: 0 }}
+      transition={{ 
+        type: "spring", 
+        damping: 30, 
+        stiffness: 300,
+        opacity: { duration: 0.2 }
+      }}
       className="fixed inset-0 bg-[#0A113A] text-white font-sans z-50 overflow-y-auto flex flex-col select-none"
       id="tonjam-fullscreen-player"
     >

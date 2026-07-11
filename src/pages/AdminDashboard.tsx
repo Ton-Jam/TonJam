@@ -23,7 +23,7 @@ import {
   Trash2, 
   CheckCircle
 } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { TON_LOGO } from '@/constants';
 import { ButtonGroupInput } from '@/components/ButtonGroupInput';
 import { Button } from '@/components/ui/button';

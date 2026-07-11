@@ -9,7 +9,7 @@ import NFTCard from '@/components/NFTCard';
 import PlaylistListItem from '@/components/PlaylistListItem';
 import ArtistListItem from '@/components/ArtistListItem';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO, CURATED_PLAYLISTS, MOCK_USERS } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import PlaylistCard from '@/components/PlaylistCard';
 import NoResultsState from '@/components/NoResultsState';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';

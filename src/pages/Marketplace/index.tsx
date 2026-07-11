@@ -24,7 +24,7 @@ import BidModal from "@/components/BidModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, SlidersHorizontal, ArrowUpRight, Sparkles } from "lucide-react";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 
 const Marketplace: React.FC = () => {
   const navigate = useNavigate();

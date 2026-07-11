@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Info, Loader2 } from 'lucide-react';
 import { NFTItem, NFTOffer } from '@/types';
 import { TON_LOGO, APP_LOGO } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { acceptBid } from '@/services/tonService';
 import {

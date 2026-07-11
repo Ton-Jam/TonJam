@@ -4,6 +4,7 @@ import { MintNFTButton } from './MintNFTButton';
 import { EarningsCard } from './EarningsCard';
 import { AnalyticsCard } from './AnalyticsCard';
 import { ProfileData } from '@/components/profile/ProfileTypes';
+import ArtistRevenueDashboard from '@/components/ArtistRevenueDashboard';
 
 interface CreatorToolsProps {
   profile: ProfileData;
@@ -11,7 +12,7 @@ interface CreatorToolsProps {
 
 export const CreatorTools: React.FC<CreatorToolsProps> = ({ profile }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="space-y-1">
         <h3 className="text-lg font-bold tracking-tight text-white uppercase font-sans">
           Creator Control Hub
@@ -31,6 +32,10 @@ export const CreatorTools: React.FC<CreatorToolsProps> = ({ profile }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <EarningsCard />
         <AnalyticsCard artistName={profile.name} />
+      </div>
+
+      <div className="pt-4 border-t border-white/5">
+        <ArtistRevenueDashboard />
       </div>
     </div>
   );

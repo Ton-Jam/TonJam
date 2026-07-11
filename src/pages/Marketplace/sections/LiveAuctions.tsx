@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight, Zap, Play, Pause, Heart, Gavel, Clock, Eye } from "lucide-react";
 import { LiveAuction } from "../types";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
 
 interface LiveAuctionsProps {

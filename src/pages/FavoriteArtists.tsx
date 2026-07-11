@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Users, Search, MoreHorizontal, UserPlus, CheckCircle2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -44,8 +44,9 @@ const FavoriteArtists: React.FC = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && searchQuery.trim()) {
-                        const q = searchQuery.trim();
+                      const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+                      if (e.key === 'Enter' && safeSearchQuery.trim()) {
+                        const q = safeSearchQuery.trim();
                         const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
                         const curr = saved ? JSON.parse(saved) : [];
                         const updated = [q, ...curr.filter((h: string) => h !== q)].slice(0, 10);

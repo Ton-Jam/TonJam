@@ -23,7 +23,7 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
       {/* Recommended Tracks Sub-column */}
       <div className="space-y-4">
         <div className="space-y-1">
-          <span className="text-[9px] font-mono font-bold text-[#0052FF] uppercase tracking-widest">Recommended Sounds</span>
+          <span className="text-[9px] font-mono font-bold text-[#00B4D8] uppercase tracking-widest">Recommended Sounds</span>
           <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Recommended Tracks</h3>
         </div>
 
@@ -33,10 +33,10 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
               key={`rec-track-${track.id}`}
               whileHover={{ x: 3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
               onClick={() => onPlayTrack(track)}
-              className="p-3 rounded-xl bg-[#090f2d] hover:bg-[#121A3E]/15 border border-white/5 flex items-center justify-between cursor-pointer group"
+              className="p-3 rounded-[12px] bg-[#0c133a] border border-white/5 flex items-center justify-between cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/5 bg-slate-900">
+                <div className="relative w-10 h-10 rounded-[8px] overflow-hidden shrink-0 border border-white/5 bg-slate-900">
                   <img
                     src={track.coverUrl || getPlaceholderImage(track.title)}
                     alt={track.title}
@@ -49,7 +49,7 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
                 </div>
 
                 <div className="truncate pr-2">
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors">
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                     {track.title}
                   </h4>
                   <p className="text-[10px] text-slate-400 truncate">{track.artist}</p>
@@ -73,7 +73,7 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
       {/* Recommended Artists Sub-column */}
       <div className="space-y-4">
         <div className="space-y-1">
-          <span className="text-[9px] font-mono font-bold text-cyan-400 uppercase tracking-widest">Aligned Creators</span>
+          <span className="text-[9px] font-mono font-bold text-[#00B4D8] uppercase tracking-widest">Aligned Creators</span>
           <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Recommended Artists</h3>
         </div>
 
@@ -86,7 +86,7 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
                 key={`rec-artist-${artist.uid}`}
                 whileHover={{ x: 3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
                 onClick={() => navigate(`/artist/${artist.uid}`)}
-                className="p-3 rounded-xl bg-[#090f2d] hover:bg-[#121A3E]/15 border border-white/5 flex items-center justify-between cursor-pointer group"
+                className="p-3 rounded-[12px] bg-[#0c133a] border border-white/5 flex items-center justify-between cursor-pointer group"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/5 bg-slate-900">
@@ -100,11 +100,11 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
 
                   <div className="truncate pr-2">
                     <div className="flex items-center gap-1">
-                      <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-cyan-400 transition-colors">
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                         {artist.name}
                       </h4>
                       {artist.verified && (
-                        <BadgeCheck className="w-4 h-4 text-[#0052FF] fill-current" />
+                        <BadgeCheck className="w-4 h-4 text-[#00B4D8] fill-current" />
                       )}
                     </div>
                     <p className="text-[9px] text-slate-400 uppercase tracking-widest font-mono font-bold">

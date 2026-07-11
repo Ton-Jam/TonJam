@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { Post, PostComment } from '@/types';
 import { MOCK_USER, MOCK_ARTISTS, APP_LOGO } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import TrackCard from '@/components/TrackCard';
 import { motion, AnimatePresence } from 'motion/react'; 
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';

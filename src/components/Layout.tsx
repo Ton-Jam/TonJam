@@ -32,8 +32,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { Sparkles as SparklesLucide, History, X } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
-import { useAudio, useUserRole } from '@/context/AudioContext';
-import { useAuth } from '@/context/AuthContext';
+import { useAudio, useUserRole } from '@/contexts/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTonPrice } from '@/contexts/TonPriceContext';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
@@ -103,7 +104,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isNotifications = location.pathname === '/notifications';
   const isWallet = location.pathname === '/wallet';
   const isProfile = location.pathname === '/profile' || location.pathname.startsWith('/profile/');
-  const isProfileSettings = location.pathname === '/profile/settings';
+  const isSettings = location.pathname === '/settings';
   const isGovernance = location.pathname.startsWith('/governance');
   const isAdmin = location.pathname.startsWith('/admin');
   const isLoginPage = location.pathname === '/login';
@@ -141,7 +142,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     createPost,
     headerTitle
   } = useAudio();
+
+  const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+
   const { user, signInWithGoogle, signOut } = useAuth();
+  const { price: tonPriceData, loading: tonPriceLoading } = useTonPrice();
   const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect: disconnectEvm } = useDisconnect();
@@ -169,9 +174,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
 
   const filteredResults = useMemo(() => {
-    if (!searchQuery.trim()) return null;
+    if (!safeSearchQuery.trim()) return null;
 
-    const query = searchQuery.toLowerCase();
+    const query = safeSearchQuery.toLowerCase().trim();
     
     const sortFn = (a: string, b: string) => {
       const aLower = a.toLowerCase();
@@ -276,9 +281,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const handleSearch = (e: any) => {
     e?.preventDefault?.();
-    if (searchQuery.trim()) {
-      saveRecentSearch(searchQuery.trim());
-      navigate(`/discover?search=${encodeURIComponent(searchQuery.trim())}`);
+    if (safeSearchQuery.trim()) {
+      saveRecentSearch(safeSearchQuery.trim());
+      navigate(`/discover?search=${encodeURIComponent(safeSearchQuery.trim())}`);
       setIsSearchOpen(false);
     }
   };
@@ -369,7 +374,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </a>
 
       {/* Header */}
-      {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isProfile && !isUserProfile && !isArtistProfile && !isDiscover && (
+      {!isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isLoginPage && !isDiscover && (
         <motion.header 
           className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md' : 'bg-transparent'}`}
         >
@@ -425,7 +430,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     "font-bold uppercase tracking-widest truncate transition-all duration-300",
                     headerTitle ? "text-sm" : "text-[12px] tracking-tighter max-w-[120px]"
                   )}>
-                    {headerTitle || (isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : isPostDetail ? 'Post' : isWallet ? 'Wallet' : isSearch ? 'Search' : isProfileSettings ? 'Settings' : isProfile ? 'Profile' : isDiscover ? 'Discover' : isTasks ? 'Tasks' : isGovernance ? 'Governance' : isAdmin ? 'Admin' : (location.pathname.split('/')[1] || '').replace('-', ' ')))}
+                    {headerTitle || (isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : isPostDetail ? 'Post' : isWallet ? 'Wallet' : isSearch ? 'Search' : isSettings ? 'Settings' : isProfile ? 'Profile' : isDiscover ? 'Discover' : isTasks ? 'Tasks' : isGovernance ? 'Governance' : isAdmin ? 'Admin' : (location.pathname.split('/')[1] || '').replace('-', ' ')))}
                   </span>
                 </div>
                 {headerTitle && !isHome && (
@@ -475,7 +480,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   inputClassName={`border border-border/40 bg-muted/20 rounded-[4px] py-1.5 pl-4 pr-10 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-muted-foreground/30`}
                   autoFocus={isHeaderSearchOpen && isLibrary}
                 >
-                  {!searchQuery.trim() ? (
+                  {!safeSearchQuery.trim() ? (
                     recentSearches && recentSearches.length > 0 ? (
                       <div className="p-3 select-none">
                         <div className="flex items-center justify-between mb-2.5 px-1">
@@ -535,7 +540,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <button
                               key={track.id}
                               onClick={() => {
-                                saveRecentSearch(searchQuery.trim());
+                                saveRecentSearch(safeSearchQuery.trim());
                                 playTrack(track);
                                 setIsSearchOpen(false);
                               }}
@@ -560,7 +565,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <button
                               key={playlist.id}
                               onClick={() => {
-                                saveRecentSearch(searchQuery.trim());
+                                saveRecentSearch(safeSearchQuery.trim());
                                 navigate(`/playlist/${playlist.id}`);
                                 setIsSearchOpen(false);
                               }}
@@ -585,7 +590,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <button
                               key={artist.uid}
                               onClick={() => {
-                                saveRecentSearch(searchQuery.trim());
+                                saveRecentSearch(safeSearchQuery.trim());
                                 navigate(`/artist/${artist.uid}`);
                                 setIsSearchOpen(false);
                               }}
@@ -611,7 +616,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <button
                               key={nft.id}
                               onClick={() => {
-                                saveRecentSearch(searchQuery.trim());
+                                saveRecentSearch(safeSearchQuery.trim());
                                 navigate(`/nft/${nft.id}`);
                                 setIsSearchOpen(false);
                               }}
@@ -654,6 +659,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
 
             <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden sm:block" />
+
+            {/* TON Price Ticker */}
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-muted/20">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black tracking-widest uppercase text-muted-foreground/70">TON</span>
+              </div>
+              <span className="text-[11px] font-black tracking-tighter text-foreground">
+                {tonPriceLoading ? '...' : `$${tonPriceData?.toFixed(2)}`}
+              </span>
+            </div>
+
+            <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden lg:block" />
 
             {/* Task Center Badge */}
             <button onClick={() => navigate('/tasks')} className={`flex items-center gap-3 px-3 py-1.5 rounded-[4px] transition-colors hover:bg-transparent ${!isHome ? 'hidden sm:flex' : ''}`}>
@@ -822,16 +840,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </main>
 
-      {/* Audio Player */}
-      <motion.div
-        layoutId="player"
-        transition={{ duration: 0.35 }}
-      >
-        {currentTrack && !isFullPlayerOpen && !isDJKrupy && !isPostDetail && <MiniPlayer isMobileNavHidden={isMobileNavHidden} />}
+      {/* Audio Player Container */}
+      <div className="relative">
+        {currentTrack && !isDJKrupy && !isPostDetail && (
+          <MiniPlayer isMobileNavHidden={isMobileNavHidden} />
+        )}
+        
         <AnimatePresence>
           {isFullPlayerOpen && <PlayerScreen />}
         </AnimatePresence>
-      </motion.div>
+      </div>
 
       {trackToAddToPlaylist && (
         <AddToPlaylistModal 
@@ -940,19 +958,39 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
   const { isArtist, isAdmin } = useUserRole();
   return (
   <>
-    <div className="flex items-center justify-between mb-2">
+    <div className="flex items-center justify-between mb-6 px-2">
       <Link to="/" onClick={onNavigate} className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm" aria-label="TonJam Home">
         <motion.img 
           layoutId="app-logo"
           src={APP_LOGO} 
           alt="" 
-          className="w-[44px] h-[44px] object-contain" 
+          className="w-[40px] h-[40px] object-contain" 
           aria-hidden="true" 
         />
-        <span className="font-bold text-lg tracking-tight text-foreground uppercase">Discover</span>
+        <span className="font-bold text-lg tracking-tight text-foreground uppercase">JamSpace</span>
       </Link>
       <ModeToggle />
     </div>
+
+    {user && (
+      <Link 
+        to="/profile" 
+        onClick={onNavigate}
+        className="flex items-center gap-3 p-3 mb-6 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-all group"
+      >
+        <Avatar className="w-10 h-10 rounded-lg">
+          <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt="" className="object-cover" />
+          <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-lg text-xs font-bold">
+            {user.displayName ? user.displayName.slice(0, 2).toUpperCase() : '??'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col min-w-0">
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Session Active</span>
+          <span className="text-xs font-black tracking-tighter truncate text-foreground group-hover:text-blue-500 transition-colors">{user.displayName}</span>
+        </div>
+        <ChevronRightIcon className="w-4 h-4 ml-auto text-muted-foreground/30 group-hover:text-blue-500 transition-colors" />
+      </Link>
+    )}
 
     <nav className="flex-1 space-y-3" aria-label="Main Navigation">
       <NavItem to="/" icon={HomeIcon} label="Home" onClick={onNavigate} />
@@ -971,6 +1009,9 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
         )}
         {(isArtist || isAdmin || userProfile?.isVerifiedArtist) && (
           <NavItem to="/artist-dashboard" icon={Squares2X2Icon} label="Artist Dashboard" onClick={onNavigate} />
+        )}
+        {(isArtist || isAdmin || userProfile?.isVerifiedArtist) && (
+          <NavItem to="/artist-portfolio" icon={SparklesIcon} label="Portfolio" onClick={onNavigate} />
         )}
         {isAdmin && (
           <NavItem to="/admin" icon={ShieldCheckIcon} label="Admin Console" onClick={onNavigate} />

@@ -10,7 +10,7 @@ import {
   Zap
 } from "lucide-react";
 import { UserProfile, NFTItem } from "@/types";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { motion } from "motion/react";

@@ -9,15 +9,30 @@ function cn(...inputs: ClassValue[]) {
 
 interface HorizontalSectionProps {
   title: string;
+  subtitle?: string;
+  onViewAll?: () => void;
   children: React.ReactNode;
   className?: string;
 }
 
-export const HorizontalSection = ({ title, children, className }: HorizontalSectionProps) => {
+export const HorizontalSection = ({ title, subtitle, onViewAll, children, className }: HorizontalSectionProps) => {
   return (
     <section className={cn("my-[24px]", className)}>
-      <div className="px-4 mb-[12px]">
-        <SectionTitle>{title}</SectionTitle>
+      <div className="px-4 mb-[12px] flex items-end justify-between">
+        <div className="flex flex-col">
+          <SectionTitle>{title}</SectionTitle>
+          {subtitle && (
+            <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{subtitle}</p>
+          )}
+        </div>
+        {onViewAll && (
+          <button 
+            onClick={onViewAll}
+            className="text-[10px] font-black uppercase tracking-widest text-blue-500 hover:text-blue-400 transition-colors flex items-center gap-1"
+          >
+            View All
+          </button>
+        )}
       </div>
       <div className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-4 px-4 -mx-4 pb-4">
         {React.Children.map(children, (child) => (

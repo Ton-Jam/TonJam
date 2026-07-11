@@ -34,7 +34,7 @@ import NFTCard from '@/components/NFTCard';
 import SectionHeader from '@/components/SectionHeader';
 import { AuctionAnalyticsSection } from '@/components/AuctionAnalyticsSection';
 import { BidDashboard } from '@/components/BidDashboard';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -456,8 +456,9 @@ const AuctionScreen: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && searchQuery.trim()) {
-                  const q = searchQuery.trim();
+                const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+                if (e.key === 'Enter' && safeSearchQuery.trim()) {
+                  const q = safeSearchQuery.trim();
                   const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
                   const curr = saved ? JSON.parse(saved) : [];
                   const updated = [q, ...curr.filter((h: string) => h !== q)].slice(0, 10);

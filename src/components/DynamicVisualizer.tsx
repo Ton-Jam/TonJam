@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useMemo } from 'react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 

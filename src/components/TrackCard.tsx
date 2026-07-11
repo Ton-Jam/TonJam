@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, Pause, MoreVertical, Headphones, Clock, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock, ChevronDown, ChevronUp, Activity, Key, User, Info, Gem, Trash2, ArrowUp, ArrowDown, TrendingUp, TrendingDown, Download, CheckCircle2 } from 'lucide-react';
 import { Track } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { MOCK_ARTISTS, TJ_COIN_ICON, MOCK_NFTS } from '@/constants';
 import { cn, getPlaceholderImage, shareContent, formatNumber } from '@/lib/utils';
 import confetti from 'canvas-confetti';
@@ -56,8 +56,8 @@ const CountdownTimer: React.FC<{ targetDate: string }> = ({ targetDate }) => {
   }, [calculateTimeLeft]);
 
   return (
-    <div className="flex items-center gap-1 font-mono text-[8px] sm:text-[9px] uppercase tracking-wider text-amber-500 bg-amber-500/10 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-[4px] select-none">
-      <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500 animate-[pulse_1.5s_infinite]" />
+    <div className="flex items-center gap-1 font-mono text-[8px] sm:text-[9px] uppercase tracking-wider text-reward bg-reward/10 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-[4px] select-none">
+      <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-reward animate-[pulse_1.5s_infinite]" />
       <span>
         {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}
         {String(timeLeft.hours).padStart(2, '0')}h{' '}
@@ -346,7 +346,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
         <motion.div 
           whileHover={{ scale: 1.015 }}
           whileTap={{ scale: 0.98 }}
-          className={`group flex items-center gap-5 p-3 rounded-[4px] hover:bg-white/5 transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 ${className}`}
+          className={`group flex items-center gap-5 p-3 rounded-card hover:bg-hover transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-primary/50 ${className}`}
           onClick={handleCardClickInner}
           onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
           role="button"
@@ -430,8 +430,8 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <ContextMenu>
         <ContextMenuTrigger>
           <motion.div 
-          whileHover={{ opacity: 1, backgroundColor: "rgba(255, 255, 255, 0.05)" }}
-          className={`flex flex-col w-full group/row border-b border-zinc-700 last:border-0 transition-colors rounded-[4px] ${className}`}
+          whileHover={{ opacity: 1, backgroundColor: "var(--color-hover)" }}
+          className={`flex flex-col w-full group/row border-b border-divider last:border-0 transition-colors rounded-card ${className}`}
         >
             <div 
               className="flex items-center gap-4 px-4 sm:px-8 py-2 sm:py-3 cursor-pointer w-full outline-none focus-visible:bg-white/5"
@@ -575,6 +575,27 @@ const TrackCard: React.FC<TrackCardProps> = ({
                         <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Length</span>
                         <span className="text-[9px] font-medium text-foreground">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
                       </div>
+                      {track.isNFT && track.price && (
+                        <div className="flex flex-col items-end min-w-[70px] group-hover/row:opacity-100 transition-opacity">
+                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Floor Price</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[9px] font-bold text-emerald-400 font-mono">{track.price} TON</span>
+                            {track.floorPriceChange !== undefined && (
+                              <div className={cn(
+                                "flex items-center gap-0.5 px-1 rounded-[2px]",
+                                track.floorPriceChange >= 0 ? "text-emerald-400 bg-emerald-400/10" : "text-rose-500 bg-rose-500/10"
+                              )}>
+                                {track.floorPriceChange >= 0 ? (
+                                  <ArrowUp className="w-1.5 h-1.5 fill-current" />
+                                ) : (
+                                  <ArrowDown className="w-1.5 h-1.5 fill-current" />
+                                )}
+                                <span className="text-[6px] font-black">{Math.abs(track.floorPriceChange).toFixed(1)}%</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
@@ -602,7 +623,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
           whileTap={{ scale: 0.97 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
           className={cn(
-            "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent border border-transparent w-full",
+            "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded-card p-2 bg-transparent border border-transparent w-full",
             className
           )}
           onClick={handleCardClickInner}
@@ -724,9 +745,31 @@ const TrackCard: React.FC<TrackCardProps> = ({
               </div>
             ) : (
               <div className="flex items-center justify-between w-full mt-2">
-                <div className="flex items-center gap-1 text-[9px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
-                    <Headphones className="w-3 h-3" />
-                    {formatNumber(track.playCount || 0)}
+                <div className="flex flex-col items-start gap-1">
+                  <div className="flex items-center gap-1 text-[9px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
+                      <Headphones className="w-3 h-3" />
+                      {formatNumber(track.playCount || 0)}
+                  </div>
+                  {track.isNFT && track.price && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/5 px-1 py-0.5 rounded border border-emerald-400/10">
+                        {track.price} TON
+                      </span>
+                      {track.floorPriceChange !== undefined && (
+                        <div className={cn(
+                          "flex items-center gap-0.5 px-1 rounded-[2px]",
+                          track.floorPriceChange >= 0 ? "text-emerald-400 bg-emerald-400/10" : "text-rose-500 bg-rose-500/10"
+                        )}>
+                          {track.floorPriceChange >= 0 ? (
+                            <ArrowUp className="w-2 h-2 fill-current" />
+                          ) : (
+                            <ArrowDown className="w-2 h-2 fill-current" />
+                          )}
+                          <span className="text-[6.5px] font-black">{Math.abs(track.floorPriceChange).toFixed(1)}%</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <button

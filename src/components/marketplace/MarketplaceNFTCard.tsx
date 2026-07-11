@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Play, Pause, BadgeCheck, Disc, Wallet, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { MOCK_TRACKS } from "@/constants";
 import { cn } from "@/lib/utils";
 import { MarqueeTitle } from "../MarqueeTitle";

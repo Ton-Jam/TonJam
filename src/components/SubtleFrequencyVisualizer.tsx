@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useAnimationFrame } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface SubtleFrequencyVisualizerProps {
   isPlaying: boolean;

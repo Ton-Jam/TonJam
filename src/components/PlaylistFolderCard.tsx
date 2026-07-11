@@ -21,7 +21,7 @@ import {
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import PlaylistCard from './PlaylistCard';
 
 interface PlaylistFolderCardProps {

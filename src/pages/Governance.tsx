@@ -22,7 +22,7 @@ import { Proposal, Vote } from '@/types';
 import { auth } from '@/lib/firebase';
 import { formatDistanceToNow } from 'date-fns';
 import SectionHeader from '@/components/SectionHeader';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import TreasuryDashboard from '@/components/TreasuryDashboard';
 

@@ -5,6 +5,7 @@ import { collection, getDocs, query, where, onSnapshot } from "firebase/firestor
 import { 
   Music, 
   Gem, 
+  User,
   Coins, 
   Upload, 
   LayoutDashboard, 
@@ -37,8 +38,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { BackButton } from "@/components/BackButton";
-import { useAudio } from "@/context/AudioContext";
-import { useAuth } from "@/context/AuthContext";
+import { useAudio } from "@/contexts/AudioContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { getPlaceholderImage } from "@/lib/utils";
 import { Artist } from "@/types";
 import RoyaltyDashboard from "@/components/RoyaltyDashboard";
@@ -61,6 +62,7 @@ import { FloorPriceChart } from "@/components/FloorPriceChart";
 import { StreamingStatsChart } from "@/components/StreamingStatsChart";
 import { NFTChart } from "@/components/NFTChart";
 import { ArtistAnalyticsChart } from "@/components/ArtistAnalyticsChart";
+import CreatorDashboard from "@/components/CreatorDashboard";
 
 import {
   Carousel,
@@ -74,7 +76,7 @@ export default function ArtistDashboard() {
   const { user, isArtist, isAdmin, loading } = useAuth();
   
   // Tabs state
-  const [activeTab, setActiveTab] = useState<"overview" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty" | "royalties">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "creator" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty" | "royalties" | "portfolio">("overview");
   const [isRoyaltyModalOpen, setIsRoyaltyModalOpen] = useState(false);
 
   const artistDataForRoyalty = useMemo(() => {
@@ -592,6 +594,16 @@ export default function ArtistDashboard() {
             <LayoutDashboard className="w-3.5 h-3.5" /> Overview
           </button>
           <button
+            onClick={() => setActiveTab("creator")}
+            className={`flex-1 min-w-[120px] transition-all duration-300 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 ${
+              activeTab === "creator" 
+                ? "bg-white/[0.06] text-white shadow-lg shadow-black/30" 
+                : "text-zinc-500 hover:text-white hover:bg-white/[0.02]"
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5 text-yellow-500" /> Creator Alpha
+          </button>
+          <button
             onClick={() => setActiveTab("sonic")}
             className={`flex-1 min-w-[120px] transition-all duration-300 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 ${
               activeTab === "sonic" 
@@ -650,6 +662,16 @@ export default function ArtistDashboard() {
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-yellow-500 animate-pulse" /> Loyalty
+          </button>
+          <button
+            onClick={() => setActiveTab("portfolio")}
+            className={`flex-1 min-w-[120px] transition-all duration-300 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 ${
+              activeTab === "portfolio" 
+                ? "bg-white/[0.06] text-white shadow-lg shadow-black/30" 
+                : "text-zinc-500 hover:text-white hover:bg-white/[0.02]"
+            }`}
+          >
+            <User className="w-3.5 h-3.5 text-cyan-400" /> Portfolio
           </button>
         </div>
 
@@ -712,6 +734,11 @@ export default function ArtistDashboard() {
                   </div>
                 </div>
               </>
+            )}
+
+            {/* CREATOR DASHBOARD TAB */}
+            {activeTab === "creator" && (
+              <CreatorDashboard />
             )}
 
             {/* SONIC TAB */}
@@ -864,13 +891,6 @@ export default function ArtistDashboard() {
                             <Wand2 className="w-3 h-3" /> Mass-Mint as NFTs
                           </button>
                           <button
-                            onClick={handleBulkDelete}
-                            disabled={isBulkProcessing}
-                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                          >
-                            <Trash2 className="w-3 h-3" /> Batch-Delete drafts
-                          </button>
-                          <button
                             onClick={() => setSelectedTrackIds([])}
                             disabled={isBulkProcessing}
                             className="text-zinc-500 hover:text-zinc-300 text-[9px] font-black uppercase tracking-widest px-2 py-1.5 cursor-pointer"
@@ -1003,6 +1023,88 @@ export default function ArtistDashboard() {
                   <StreamingStatsChart data={[{ day: "Mon", plays: 2400 }, { day: "Tue", plays: 3100 }, { day: "Wed", plays: 2900 }, { day: "Thu", plays: 4200 }, { day: "Fri", plays: 5900 }]} />
                   <NFTChart data={[{ date: "May 24", value: 140 }, { date: "May 25", value: 180 }, { date: "May 26", value: 210 }, { date: "May 27", value: 290 }]} />
                   <ArtistAnalyticsChart data={[{ subject: "Streams", A: 95 }, { subject: "NFT Sales", A: 75 }, { subject: "Social Buzz", A: 90 }, { subject: "Direct DMs", A: 85 }]} />
+                </div>
+              </div>
+            )}
+
+            {/* PORTFOLIO TAB */}
+            {activeTab === "portfolio" && (
+              <div className="space-y-4">
+                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-2xl border border-white/5 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-black uppercase tracking-tight flex items-center gap-2">
+                         Portfolio Showcase <Sparkles className="w-4 h-4 text-amber-400" />
+                      </h3>
+                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Preview how your profile appears to collectors and the community</p>
+                    </div>
+                    <button 
+                      onClick={() => navigate('/artist-portfolio')}
+                      className="text-[10px] font-black text-cyan-400 hover:text-cyan-300 uppercase tracking-widest flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10 transition-all"
+                    >
+                      Full Screen <ExternalLink className="w-3 h-3" />
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <User className="w-3.5 h-3.5 text-zinc-500" />
+                        <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Biography Narrative</h4>
+                      </div>
+                      <div className="p-5 bg-black/40 rounded-2xl border border-white/5 shadow-inner">
+                        <p className="text-xs text-zinc-300 leading-relaxed font-medium italic">
+                          "{userProfile?.bio || "No biography provided. Head to your profile settings to craft your story."}"
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                         <div className="flex flex-col">
+                            <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Location</span>
+                            <span className="text-xs font-bold">{userProfile?.location || "Distributed Node"}</span>
+                         </div>
+                         <div className="flex flex-col">
+                            <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Genre</span>
+                            <span className="text-xs font-bold text-cyan-400">{userProfile?.favoriteGenres?.[0] || "Electronic"}</span>
+                         </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Gem className="w-3.5 h-3.5 text-zinc-500" />
+                          <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Featured NFTs</h4>
+                        </div>
+                        <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{nfts.length} Total</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3">
+                        {nfts.slice(0, 3).map((nft) => (
+                          <div key={nft.id} className="aspect-square rounded-2xl overflow-hidden border border-white/5 group relative shadow-lg">
+                            <img src={nft.imageUrl || nft.coverUrl || getPlaceholderImage(nft.title)} className="w-full h-full object-cover" alt="" />
+                            <div className="absolute inset-0 bg-cyan-500/20 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                              <Gem className="w-4 h-4 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        ))}
+                        {nfts.length === 0 && (
+                          <div className="col-span-3 py-10 text-center bg-black/20 rounded-2xl border border-dashed border-white/10 flex flex-col items-center justify-center gap-2">
+                            <Music className="w-6 h-6 text-zinc-800" />
+                            <p className="text-[9px] font-bold text-zinc-700 uppercase tracking-[0.2em]">Zero artifacts minted</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-white/5 flex flex-col items-center gap-3">
+                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.3em]">Signature Dashboard View</p>
+                    <button 
+                      onClick={() => navigate('/artist-portfolio')}
+                      className="px-8 py-3 bg-white text-black hover:bg-zinc-200 font-black text-[10px] uppercase tracking-[0.25em] rounded-full transition-all shadow-xl shadow-white/5"
+                    >
+                      Enter High-Fidelity Portfolio
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

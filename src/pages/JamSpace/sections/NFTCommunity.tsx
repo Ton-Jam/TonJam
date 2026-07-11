@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Sparkles, Coins, Flame, ArrowUpRight, TrendingUp } from 'lucide-react';
 import { NFTDiscussion } from '../types';
 import { MOCK_NFT_DISCUSSIONS } from '../mock';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 export const NFTCommunity: React.FC = () => {
   const { addNotification } = useAudio();

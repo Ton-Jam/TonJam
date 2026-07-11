@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, ShieldCheck, Twitter, Music, Wallet, CheckCircle2, Loader2, Globe } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { db, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { useEffect } from 'react';

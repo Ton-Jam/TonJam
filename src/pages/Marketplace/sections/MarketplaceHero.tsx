@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Play, Pause, Disc, Sparkles, Flame, Clock, Heart, Share2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NFTItem } from "@/types";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
 
 interface MarketplaceHeroProps {

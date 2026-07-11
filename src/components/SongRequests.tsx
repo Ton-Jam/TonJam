@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { SongRequest } from '@/types';
 import { Loader2, Check, X, Gift } from 'lucide-react';
 

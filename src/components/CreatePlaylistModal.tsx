@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, Image as ImageIcon, Loader2, CheckCircle2, Music, Lock, Globe, Users, Tag } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Switch } from "@/components/ui/switch";
 import { validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Play, Music, ChevronRight } from 'lucide-react';
 import { Playlist } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
 
 interface PlaylistListItemProps {

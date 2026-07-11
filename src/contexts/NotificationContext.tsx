@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Notification, NotificationPreferences } from '@/types';
 import { notificationService } from '@/services/notificationService';
-import { useAuth } from '@/context/AuthContext';
-import { useAudio } from '@/context/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface NotificationContextType {
   notifications: Notification[];

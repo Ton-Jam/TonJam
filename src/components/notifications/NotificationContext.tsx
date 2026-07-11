@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { TonJamNotification, NotificationPreferences, NotificationCategory } from './types';
 import { generateMockNotifications } from './mock/mockNotifications';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   collection, 
   getDocs, 

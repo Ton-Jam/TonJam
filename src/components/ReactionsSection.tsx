@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { collection, doc, setDoc, deleteDoc, query, where, onSnapshot } from 'firebase/firestore';
 import { motion } from 'motion/react';

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, Loader2, Link2, Twitter, Instagram, Globe, MessageSquare } from 'lucide-react';
 import { UserProfile as UserProfileType } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { uploadFile } from '@/services/storageService';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';

@@ -79,7 +79,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           <motion.div
             whileHover={{ y: -3 }}
             onClick={() => navigate(`/artist/${results.artists[0].uid}`)}
-            className="p-5 rounded-xl bg-gradient-to-br from-[#0c133a]/50 to-[#070a24]/60 border border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 cursor-pointer group"
+            className="p-5 rounded-[12px] bg-[#0c133a] border border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 cursor-pointer group"
           >
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border border-white/10 bg-slate-900">
@@ -91,11 +91,11 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-1">
-                  <h4 className="text-sm font-bold text-white uppercase tracking-wider group-hover:text-cyan-400 transition-colors">
+                  <h4 className="text-sm font-bold text-white uppercase tracking-wider group-hover:text-[#00B4D8] transition-colors">
                     {results.artists[0].name}
                   </h4>
                   {results.artists[0].verified && (
-                    <BadgeCheck className="w-5 h-5 text-[#0052FF] fill-current" />
+                    <BadgeCheck className="w-5 h-5 text-[#00B4D8] fill-current" />
                   )}
                 </div>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">
@@ -113,7 +113,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 e.stopPropagation();
                 onToggleFollow(results.artists[0].uid);
               }}
-              className="text-[9px] font-bold uppercase tracking-widest bg-[#0052FF] text-white hover:bg-[#0052FF]/85 rounded-lg h-8"
+              className="text-[9px] font-bold uppercase tracking-widest bg-[#00B4D8] text-[#050A24] hover:bg-[#00B4D8]/85 rounded-[8px] h-8"
             >
               {followedUserIds.includes(results.artists[0].uid) ? 'FOLLOWING' : '+ FOLLOW'}
             </Button>
@@ -131,10 +131,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-track-${track.id}`}
                 whileHover={{ x: 2, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
                 onClick={() => onPlayTrack(track)}
-                className="p-3 rounded-xl bg-[#090f2d] border border-white/5 flex items-center justify-between cursor-pointer group transition-all"
+                className="p-3 rounded-[12px] bg-[#0c133a] border border-white/5 flex items-center justify-between cursor-pointer group transition-all"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/5 bg-slate-900">
+                  <div className="relative w-10 h-10 rounded-[8px] overflow-hidden shrink-0 border border-white/5 bg-slate-900">
                     <img
                       src={track.coverUrl || getPlaceholderImage(track.title)}
                       alt={track.title}
@@ -145,7 +145,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     </div>
                   </div>
                   <div className="truncate">
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors">
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                       {track.title}
                     </h4>
                     <p className="text-[10px] text-slate-400 truncate">{track.artist}</p>
@@ -173,9 +173,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-nft-${nft.id}`}
                 whileHover={{ y: -4 }}
                 onClick={() => navigate(`/nft/${nft.id}`)}
-                className="bg-[#090f2d] hover:bg-[#121A3E]/20 rounded-xl border border-white/5 p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
+                className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
               >
-                <div className="relative aspect-square rounded-lg overflow-hidden bg-slate-950 border border-white/5">
+                <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-950 border border-white/5">
                   <img
                     src={nft.imageUrl || nft.coverUrl || getPlaceholderImage(nft.title)}
                     alt={nft.title}
@@ -183,10 +183,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                   />
                 </div>
                 <div className="mt-3 truncate">
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors">
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                     {nft.title}
                   </h4>
-                  <p className="text-[9px] font-mono text-[#0052FF] font-bold">{nft.price} TON</p>
+                  <p className="text-[9px] font-mono text-[#00B4D8] font-bold">{nft.price} TON</p>
                 </div>
               </motion.div>
             ))}
@@ -204,7 +204,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-artist-${artist.uid}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/artist/${artist.uid}`)}
-                className="bg-[#090f2d] hover:bg-[#121A3E]/20 rounded-xl border border-white/5 p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
+                className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
               >
                 <div className="relative h-16 w-16 rounded-full overflow-hidden border border-white/5">
                   <img
@@ -213,10 +213,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-white group-hover:text-cyan-400 transition-colors truncate w-full">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-white group-hover:text-[#00B4D8] transition-colors truncate w-full">
                   {artist.name}
                 </h4>
-                <p className="text-[9px] text-[#0052FF] font-mono font-bold tracking-widest uppercase">
+                <p className="text-[9px] text-[#00B4D8] font-mono font-bold tracking-widest uppercase">
                   {artist.genre || 'Creator'}
                 </p>
               </motion.div>
@@ -235,16 +235,16 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-album-${album.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/album/${album.id}`)}
-                className="bg-[#090f2d] hover:bg-[#121A3E]/20 rounded-xl border border-white/5 p-4 cursor-pointer group transition-all"
+                className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 cursor-pointer group transition-all"
               >
-                <div className="relative aspect-square rounded-lg overflow-hidden bg-slate-900 border border-white/5">
+                <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-900 border border-white/5">
                   <img
                     src={album.coverUrl || getPlaceholderImage(album.title)}
                     alt={album.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
                   />
                 </div>
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate mt-3 group-hover:text-[#0052FF] transition-colors">
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate mt-3 group-hover:text-[#00B4D8] transition-colors">
                   {album.title}
                 </h4>
                 <p className="text-[9px] text-slate-400 truncate">{album.artist}</p>
@@ -264,16 +264,16 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-playlist-${playlist.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/playlist/${playlist.id}`)}
-                className="bg-[#090f2d] hover:bg-[#121A3E]/20 rounded-xl border border-white/5 p-4 cursor-pointer group transition-all"
+                className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 cursor-pointer group transition-all"
               >
-                <div className="relative aspect-square rounded-lg overflow-hidden bg-slate-900 border border-white/5">
+                <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-900 border border-white/5">
                   <img
                     src={playlist.coverUrl || getPlaceholderImage(playlist.title)}
                     alt={playlist.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
                   />
                 </div>
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate mt-3 group-hover:text-[#0052FF] transition-colors">
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate mt-3 group-hover:text-[#00B4D8] transition-colors">
                   {playlist.title}
                 </h4>
                 <p className="text-[9px] text-slate-400 truncate">by {playlist.creator}</p>
@@ -293,7 +293,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-user-${usr.uid}`}
                 whileHover={{ y: -2 }}
                 onClick={() => navigate(`/user/${usr.uid}`)}
-                className="p-4 rounded-xl bg-[#090f2d] hover:bg-[#121A3E]/15 border border-white/5 flex items-center justify-between cursor-pointer group transition-all"
+                className="p-4 rounded-[12px] bg-[#0c133a] border border-white/5 flex items-center justify-between cursor-pointer group transition-all"
               >
                 <div className="flex items-center gap-3">
                   <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/5 bg-slate-900">
@@ -304,7 +304,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-cyan-400 transition-colors">
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-[#00B4D8] transition-colors">
                       {usr.name}
                     </h4>
                     <p className="text-[9px] text-slate-400 font-mono">@{usr.username || 'user'}</p>
@@ -317,7 +317,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     e.stopPropagation();
                     onToggleFollow(usr.uid);
                   }}
-                  className="text-[8px] font-bold uppercase tracking-widest bg-transparent border border-white/10 text-white hover:bg-white/5 rounded-lg h-7"
+                  className="text-[8px] font-bold uppercase tracking-widest bg-transparent border border-white/10 text-white hover:bg-white/5 rounded-[8px] h-7"
                 >
                   {followedUserIds.includes(usr.uid) ? 'FOLLOWING' : '+ FOLLOW'}
                 </Button>

@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, PanInfo, useAnimation } from 'motion/react';
+import { cn } from '@/lib/utils';
 import { 
   Play, 
   UserPlus, 
@@ -84,22 +85,21 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   onActionClick,
 }) => {
   const cardControls = useAnimation();
-  const meta = CATEGORY_META[notification.category] || { icon: HelpCircle, color: 'text-slate-400 bg-slate-500/10', label: 'Alert' };
+  const meta = CATEGORY_META[notification.category] || { icon: HelpCircle, color: 'text-text-muted bg-surface', label: 'Alert' };
   const CategoryIcon = meta.icon;
   const isUnread = !notification.read;
 
   const handleDragEnd = async (_event: any, info: PanInfo) => {
     const threshold = 100;
     if (info.offset.x < -threshold) {
-      // Swiped Left -> Delete with beautiful animation
+      // Swiped Left -> Delete
       await cardControls.start({ x: '-100%', opacity: 0, transition: { duration: 0.2 } });
       onDelete(notification.id);
     } else if (info.offset.x > threshold) {
-      // Swiped Right -> Mark Read with beautiful spring back
+      // Swiped Right -> Mark Read
       onMarkRead(notification.id);
       cardControls.start({ x: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } });
     } else {
-      // Recoil back to center
       cardControls.start({ x: 0, transition: { type: 'spring', stiffness: 300, damping: 25 } });
     }
   };
@@ -107,16 +107,16 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   const ActionIcon = notification.quickAction ? ACTION_ICONS[notification.quickAction.type] || HelpCircle : null;
 
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl bg-slate-950/40 select-none">
-      {/* BACKGROUND SWIPE ACTIONS INDICATORS (NO BORDERS) */}
-      <div className="absolute inset-0 flex justify-between items-center px-6 pointer-events-none z-0">
-        <div className="flex items-center gap-2 text-emerald-400 font-black text-xs uppercase tracking-wider">
-          <Check className="w-5 h-5 shrink-0" />
+    <div className="relative w-full overflow-hidden rounded-card bg-surface select-none border border-divider">
+      {/* BACKGROUND SWIPE ACTIONS INDICATORS */}
+      <div className="absolute inset-0 flex justify-between items-center px-4 pointer-events-none z-0">
+        <div className="flex items-center gap-1.5 text-success font-black text-[9px] uppercase tracking-wider">
+          <Check className="w-3 h-3 shrink-0" />
           <span>Read</span>
         </div>
-        <div className="flex items-center gap-2 text-red-500 font-black text-xs uppercase tracking-wider">
+        <div className="flex items-center gap-1.5 text-error font-black text-[9px] uppercase tracking-wider">
           <span>Delete</span>
-          <Trash2 className="w-5 h-5 shrink-0" />
+          <Trash2 className="w-3 h-3 shrink-0" />
         </div>
       </div>
 
@@ -130,18 +130,18 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         animate={cardControls}
         style={{ x: 0 }}
         className={`
-          relative z-10 w-full p-4 rounded-2xl flex items-start gap-3.5
+          relative z-10 w-full p-2 sm:p-2.5 rounded-card flex items-start gap-2 sm:gap-3
           transition-all duration-300 touch-pan-y
           ${isUnread 
-            ? 'bg-gradient-to-r from-blue-500/10 to-transparent shadow-[inset_4px_0_0_rgba(59,130,246,1)]' 
-            : 'bg-white/[0.02] hover:bg-white/[0.04]'
+            ? 'bg-primary/5 border-l-2 border-primary' 
+            : 'bg-surface hover:bg-background/40'
           }
         `}
       >
         {/* AVATAR OR CATEGORY CIRCLE */}
         <div className="relative shrink-0 select-none">
           {notification.avatarUrl ? (
-            <div className="w-11 h-11 rounded-full overflow-hidden bg-slate-800">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden bg-background border border-divider">
               <img 
                 src={notification.avatarUrl} 
                 alt="" 
@@ -150,81 +150,75 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
               />
             </div>
           ) : (
-            <div className={`w-11 h-11 rounded-full flex items-center justify-center ${meta.color}`}>
-              <CategoryIcon className="w-5 h-5" />
+            <div className={cn("w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center", meta.color)}>
+              <CategoryIcon className="w-3 h-3 sm:w-4" />
             </div>
           )}
 
-          {/* Miniature sub-icon for avatar items */}
           {notification.avatarUrl && (
-            <div className={`absolute -bottom-1 -right-1 w-5.5 h-5.5 rounded-full flex items-center justify-center ${meta.color} shadow-md`}>
-              <CategoryIcon className="w-2.5 h-2.5" />
+            <div className={cn("absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center shadow-md ring-1 ring-background", meta.color)}>
+              <CategoryIcon className="w-2 sm:w-2.5 h-2 sm:h-2.5" />
             </div>
           )}
         </div>
 
          {/* MIDDLE TEXT AREA */}
         <div className="flex-1 min-w-0 flex flex-col text-left">
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <Label className={`text-[9px] font-black uppercase tracking-[0.15em] ${isUnread ? 'text-blue-400' : 'text-slate-500'}`}>
+          <div className="flex items-center justify-between gap-2 mb-0.5">
+            <span className={cn("text-[8px] font-black uppercase tracking-wider", isUnread ? 'text-primary' : 'text-text-muted')}>
               {meta.label}
-            </Label>
-            <span className="text-[10px] font-medium text-slate-500">
+            </span>
+            <span className="text-[8px] font-bold text-text-muted whitespace-nowrap">
               {formatTimeAgo(notification.timestamp)}
             </span>
           </div>
 
-          <CardTitle className={`text-xs font-black tracking-normal uppercase truncate ${isUnread ? 'text-white' : 'text-slate-300'} border-none`}>
+          <h4 className={cn("text-[11px] sm:text-xs font-black tracking-tight uppercase truncate leading-tight", isUnread ? 'text-text-primary' : 'text-text-muted')}>
             {notification.title}
-          </CardTitle>
+          </h4>
 
-          <p className="text-xs font-semibold leading-relaxed text-slate-400 mt-1 select-none">
+          <p className="text-[10px] font-medium text-text-muted mt-0.5 select-none line-clamp-1">
             {notification.description}
           </p>
 
           {/* SNAPPY QUICK ACTION BUTTONS */}
           {notification.quickAction && (
-            <div className="mt-3.5 flex flex-wrap gap-2">
-              <TonJamButton
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   if (notification.quickAction) {
                     onActionClick(notification.quickAction, notification);
                   }
                 }}
-                variant="primary"
-                size="sm"
-                className={`
-                  flex items-center gap-1.5 px-3 py-1.5 rounded-lg h-8
-                  ${notification.quickAction.type === 'claim'
-                    ? 'bg-gradient-to-r from-red-500 to-amber-500 text-white hover:brightness-110 shadow-red-500/10 border-none'
-                    : ''
-                  }
-                `}
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1 rounded-button h-6 text-[8px] font-black uppercase tracking-wider transition-all",
+                  notification.quickAction.type === 'claim'
+                    ? "bg-primary text-black hover:scale-105"
+                    : "bg-background text-text-primary hover:bg-divider"
+                )}
               >
-                {ActionIcon && <ActionIcon className="w-3.5 h-3.5" />}
+                {ActionIcon && <ActionIcon className="w-2.5 h-2.5" />}
                 <span>{notification.quickAction.label}</span>
-              </TonJamButton>
+              </button>
 
-              {/* Instant dismiss shortcut */}
-              <TonJamButton
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(notification.id);
                 }}
-                variant="outline"
-                size="sm"
-                className="px-2.5 py-1.5 rounded-lg h-8 text-slate-400 hover:text-white"
+                className="px-1.5 rounded-button h-6 text-text-muted hover:text-error transition-colors"
+                title="Dismiss"
               >
-                Dismiss
-              </TonJamButton>
+                <Trash2 className="w-2.5 h-2.5" />
+              </button>
             </div>
           )}
         </div>
 
-        {/* OPTIONAL ALBUM ART / NFT THUMBNAIL */}
+        {/* OPTIONAL ALBUM ART */}
         {notification.thumbnailUrl && (
-          <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-900 select-none shadow-md">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg overflow-hidden shrink-0 bg-background select-none border border-divider">
             <img 
               src={notification.thumbnailUrl} 
               alt="" 
@@ -234,11 +228,11 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
           </div>
         )}
 
-        {/* UNREAD GLOW PULSE INDICATOR DOT */}
+        {/* UNREAD INDICATOR DOT */}
         {isUnread && (
-          <div className="absolute top-4 right-4 flex h-2 w-2 select-none">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          <div className="absolute top-2 right-2 flex h-1 w-1 select-none">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-1 w-1 bg-primary"></span>
           </div>
         )}
       </motion.div>

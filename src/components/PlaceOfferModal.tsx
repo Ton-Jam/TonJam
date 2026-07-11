@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Loader2, Handshake } from 'lucide-react';
 import { TON_LOGO } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import {

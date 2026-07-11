@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, useDragControls, PanInfo } from "motion/react";
 import { Play, Pause, ListMusic, MoreVertical } from "lucide-react";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
 
 interface MiniPlayerProps {

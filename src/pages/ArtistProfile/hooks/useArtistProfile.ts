@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { Artist, Track, NFTItem } from "@/types";
 import { MOCK_ARTISTS, MOCK_TRACKS, MOCK_NFTS } from "@/constants";
-import { useAudio } from "@/context/AudioContext";
-import { useAuth } from "@/context/AuthContext";
+import { useAudio } from "@/contexts/AudioContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { 
   getArtistStats, 

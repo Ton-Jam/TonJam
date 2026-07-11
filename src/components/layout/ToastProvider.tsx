@@ -48,13 +48,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const getIcon = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />;
+        return <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />;
+        return <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />;
       case 'error':
-        return <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />;
+        return <XCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />;
       case 'info':
-        return <Info className="w-5 h-5 text-blue-400 flex-shrink-0" />;
+        return <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />;
     }
   };
 
@@ -83,12 +83,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             >
               {getIcon(item.type)}
               <div className="flex-1 min-w-0">
-                <h5 className="text-[11px] font-black uppercase tracking-wider text-white">
-                  {item.title}
-                </h5>
                 {item.description && (
-                  <p className="text-[10px] font-semibold text-slate-300 mt-0.5 leading-relaxed">
+                  <p className="text-[10px] font-bold text-white leading-relaxed">
                     {item.description}
+                  </p>
+                )}
+                {!item.description && (
+                   <p className="text-[10px] font-bold text-white leading-relaxed">
+                    {item.title}
                   </p>
                 )}
               </div>

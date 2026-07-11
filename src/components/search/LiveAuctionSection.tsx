@@ -63,24 +63,24 @@ export const LiveAuctionSection: React.FC<LiveAuctionSectionProps> = ({ auctions
             <motion.div
               key={`auction-${auction.id}`}
               whileHover={{ y: -3 }}
-              className="bg-[#090f2d] hover:bg-[#121A3E]/20 rounded-xl border border-white/5 p-4 flex gap-4 cursor-pointer group"
+              className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex gap-4 cursor-pointer group"
               onClick={() => navigate(`/nft/${auction.id}`)}
             >
-              <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-white/5">
+              <div className="relative w-24 h-24 rounded-[8px] overflow-hidden shrink-0 bg-slate-900 border border-white/5">
                 <img
                   src={imageSrc}
                   alt={auction.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => { e.currentTarget.src = getPlaceholderImage(auction.title); }}
                 />
-                <div className="absolute top-1.5 left-1.5 bg-red-600 text-[6.5px] font-mono font-bold text-white px-1 py-0.5 rounded uppercase tracking-widest flex items-center gap-1 animate-pulse">
+                <div className="absolute top-1.5 left-1.5 bg-red-600 text-[6.5px] font-mono font-bold text-white px-1 py-0.5 rounded uppercase tracking-widest flex items-center gap-1">
                   <span>LIVE</span>
                 </div>
               </div>
 
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors">
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                     {auction.title}
                   </h4>
                   <p className="text-[10px] text-slate-400 truncate">by {auction.artist || auction.creator}</p>
@@ -102,7 +102,7 @@ export const LiveAuctionSection: React.FC<LiveAuctionSectionProps> = ({ auctions
 
                 <Button
                   size="sm"
-                  className="w-full py-1 text-[8px] font-bold uppercase tracking-widest rounded-lg h-7 bg-[#0052FF] text-white hover:bg-[#0052FF]/85 active:scale-95 transition-all mt-1"
+                  className="w-full py-1 text-[8px] font-bold uppercase tracking-widest rounded-[8px] h-7 bg-[#00B4D8] text-[#050A24] hover:bg-[#00B4D8]/85 active:scale-95 transition-all mt-1"
                 >
                   PLACE BID
                 </Button>

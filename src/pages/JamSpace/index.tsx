@@ -12,8 +12,8 @@ import {
   RefreshCw,
   FolderOpen
 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { useAudio } from '@/context/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 // Import our custom JamSpace modules
 import { useJamSpaceData } from './hooks/useJamSpaceData';
@@ -36,6 +36,7 @@ import { CreatePostModal } from './components/CreatePostModal';
 import { NotificationsPanel } from './components/NotificationsPanel';
 import { PostCard } from './components/PostCard';
 import { JamSpaceHeader } from './components/JamSpaceHeader';
+import { JamSpaceQuickCompose } from './components/JamSpaceQuickCompose';
 import { 
   HeroSkeleton, 
   LiveSpacesSkeleton, 
@@ -77,43 +78,34 @@ const JamSpaceMain: React.FC = () => {
 
   return (
     <div className={`w-full min-h-screen ${jamData.isDarkMode ? 'bg-[#090b11]' : 'bg-slate-50'} text-white pb-24 font-sans`}>
-      {/* Top Controller Ribbon / Network State Bar */}
-      <div className="bg-slate-950/90 text-slate-400 border-b border-white/[0.03] text-[10px] font-mono tracking-widest uppercase py-2 px-4 flex justify-between items-center z-40 relative">
-        <div className="flex items-center gap-1.5 font-bold">
-          <Globe className="w-3.5 h-3.5 text-[#0052FF]" />
-          <span>TonJam Android Gateway • NODE #491</span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          {/* Theme Switcher */}
-          <button 
-            onClick={() => jamData.setIsDarkMode(!jamData.isDarkMode)}
-            className="text-[9px] hover:text-white transition-colors uppercase font-extrabold cursor-pointer"
-          >
-            {jamData.isDarkMode ? '🌙 Dark Active' : '☀️ Light Active'}
-          </button>
-
-          {/* Connection Switcher */}
-          <button 
-            onClick={toggleConnection} 
-            className={`flex items-center gap-1.5 font-bold ${isOnline ? 'text-emerald-400' : 'text-red-400'} cursor-pointer`}
-          >
-            {isOnline ? (
-              <>
-                <Wifi className="w-3.5 h-3.5" />
-                <span>ONLINE</span>
-              </>
-            ) : (
-              <>
-                <WifiOff className="w-3.5 h-3.5 animate-pulse" />
-                <span>OFFLINE</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
       <div className="w-full max-w-7xl mx-auto px-4 py-6 sm:px-6 space-y-8 relative">
+        {/* Top Header Controls (Integrated Ribbon functions) */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+              {isOnline ? 'Network Synchronized' : 'Offline Mode'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => jamData.setIsDarkMode(!jamData.isDarkMode)}
+              className="p-2 bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors"
+              title="Toggle Theme"
+            >
+              {jamData.isDarkMode ? <Sparkles className="w-4 h-4" /> : <RefreshCw className="w-4 h-4" />}
+            </button>
+            <button 
+              onClick={toggleConnection}
+              className="p-2 bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors"
+              title={isOnline ? "Go Offline" : "Go Online"}
+            >
+              {isOnline ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+
         {/* Skeletons vs Normal view loading toggle */}
         {jamData.isLoading ? (
           <div className="space-y-8">
@@ -218,7 +210,10 @@ const JamSpaceMain: React.FC = () => {
               {/* LEFT MAIN GRID STREAM (Col span 8) */}
               <div className="lg:col-span-8 space-y-8">
                 
-                {/* 4. LIVE SPACES */}
+                {/* 4. QUICK COMPOSE */}
+                <JamSpaceQuickCompose onSubmit={handleCreatePostSubmit} />
+
+                {/* 5. LIVE SPACES */}
                 <LiveSpaces 
                   spaces={jamData.spaces}
                   activeSpace={jamData.activeSpace}

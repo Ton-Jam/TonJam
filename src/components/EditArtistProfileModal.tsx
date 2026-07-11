@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { UserPen, X, Twitter, Send, Music, Globe, Instagram, Image as ImageIcon, Upload, Loader2, Calendar, MapPin, Ticket, Clock, PlusCircle, Trash2 } from 'lucide-react';
 import { Artist, ArtistEvent } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { uploadFile } from '@/services/storageService';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';

@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "motion/react";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import SubtleFrequencyVisualizer from "./SubtleFrequencyVisualizer";
 import { useNavigate } from "react-router-dom";
 import {

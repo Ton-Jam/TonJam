@@ -1,7 +1,7 @@
 import React from 'react';
 import { Share, ExternalLink, Trash2, Flag, UserPlus, ChevronRight } from 'lucide-react';
 import { Post } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { getPlaceholderImage, shareContent, cn } from '@/lib/utils';
 import { Button } from "@/components/ui/button"

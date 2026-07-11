@@ -6,7 +6,7 @@ import { Hammer, FileAudio, CloudUpload, Image, Rocket, Check, Plus, Trash2, Arr
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { toNano } from '@ton/core';
 import { NFTItem, Track, NFTTrait } from '@/types';

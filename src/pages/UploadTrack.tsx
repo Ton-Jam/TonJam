@@ -17,7 +17,7 @@ import {
   Activity
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { uploadAudio, uploadCover, uploadMetadata } from "@/services/storageService";
 import { mintTonJamNFT } from "@/services/tonService";
 import { validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from "@/lib/utils";

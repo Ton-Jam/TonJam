@@ -24,19 +24,19 @@ export const ForYouSection: React.FC<ForYouSectionProps> = ({
         {/* Sync Summary Card */}
         <motion.div
           whileHover={{ y: -2 }}
-          className="p-5 rounded-xl bg-gradient-to-br from-[#0c133a]/60 to-[#070a24]/80 border border-white/5 flex flex-col justify-between"
+          className="p-5 rounded-[12px] bg-[#0c133a] border border-white/5 flex flex-col justify-between"
         >
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
-              <span className="text-[9px] font-mono font-bold text-purple-400 uppercase tracking-widest">Neural Sync</span>
+              <Sparkles className="w-4 h-4 text-[#00B4D8]" />
+              <span className="text-[9px] font-mono font-bold text-[#00B4D8] uppercase tracking-widest">Neural Sync</span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed font-bold uppercase tracking-wide">
-              Frequencies aligned to your favorite wave, <span className="text-[#0052FF]">{favoriteGenre}</span>.
+              Frequencies aligned to your favorite wave, <span className="text-[#00B4D8]">{favoriteGenre}</span>.
             </p>
           </div>
           <div className="flex items-center gap-3 pt-4 text-[9px] font-mono text-slate-500 uppercase tracking-widest">
-            <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+            <Radio className="w-3.5 h-3.5 text-cyan-400" />
             <span>Updates hourly based on listen telemetry</span>
           </div>
         </motion.div>
@@ -44,11 +44,11 @@ export const ForYouSection: React.FC<ForYouSectionProps> = ({
         {/* Streak Stats Card */}
         <motion.div
           whileHover={{ y: -2 }}
-          className="p-5 rounded-xl bg-gradient-to-br from-[#0c133a]/60 to-[#070a24]/80 border border-white/5 flex flex-col justify-between"
+          className="p-5 rounded-[12px] bg-[#0c133a] border border-white/5 flex flex-col justify-between"
         >
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Flame className="w-4 h-4 text-orange-400 animate-bounce" />
+              <Flame className="w-4 h-4 text-orange-400" />
               <span className="text-[9px] font-mono font-bold text-orange-400 uppercase tracking-widest">Streak Level</span>
             </div>
             <p className="text-xs text-slate-300 font-bold uppercase tracking-wide">
@@ -69,7 +69,7 @@ export const ForYouSection: React.FC<ForYouSectionProps> = ({
         </h3>
 
         {recommendedTracks.length === 0 ? (
-          <div className="p-8 text-center bg-[#07102e]/40 rounded-xl text-slate-500 text-xs font-bold uppercase tracking-wider">
+          <div className="p-8 text-center bg-[#090f2d] rounded-[12px] text-slate-500 text-xs font-bold uppercase tracking-wider">
             Loading your wave recommendations...
           </div>
         ) : (
@@ -79,9 +79,9 @@ export const ForYouSection: React.FC<ForYouSectionProps> = ({
                 key={`foryou-track-${track.id}`}
                 whileHover={{ y: -3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
                 onClick={() => onPlayTrack(track)}
-                className="p-4 rounded-xl bg-[#090f2d] border border-white/5 flex items-center gap-4 cursor-pointer transition-all duration-200 group"
+                className="p-4 rounded-[12px] bg-[#090f2d] border border-white/5 flex items-center gap-4 cursor-pointer transition-all duration-200 group"
               >
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
+                <div className="relative w-16 h-16 rounded-[8px] overflow-hidden shrink-0">
                   <img
                     src={track.coverUrl || getPlaceholderImage(track.title)}
                     alt={track.title}
@@ -95,11 +95,11 @@ export const ForYouSection: React.FC<ForYouSectionProps> = ({
 
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[7px] bg-[#0052FF]/10 text-[#0052FF] px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+                    <span className="text-[7px] bg-[#00B4D8]/10 text-[#00B4D8] px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
                       {track.recommendationReason || 'AI Suggested'}
                     </span>
                   </div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors">
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                     {track.title}
                   </h4>
                   <p className="text-[10px] text-slate-400 truncate">{track.artist}</p>

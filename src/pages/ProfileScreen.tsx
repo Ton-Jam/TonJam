@@ -362,11 +362,7 @@ const ProfileScreenContent: React.FC = () => {
 
 export const ProfileScreen: React.FC = () => {
   return (
-    <ToastProvider>
-      <ModalProvider>
-        <ProfileScreenContent />
-      </ModalProvider>
-    </ToastProvider>
+    <ProfileScreenContent />
   );
 };
 

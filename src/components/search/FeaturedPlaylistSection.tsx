@@ -32,9 +32,9 @@ export const FeaturedPlaylistSection: React.FC<FeaturedPlaylistSectionProps> = (
               key={`featured-playlist-${playlist.id}`}
               whileHover={{ y: -4 }}
               onClick={() => navigate(`/playlist/${playlist.id}`)}
-              className="bg-[#090f2d] hover:bg-[#121A3E]/20 rounded-xl border border-white/5 p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
+              className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
             >
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-slate-950 border border-white/5">
+              <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-950 border border-white/5">
                 <img
                   src={imageSrc}
                   alt={playlist.title}
@@ -46,14 +46,14 @@ export const FeaturedPlaylistSection: React.FC<FeaturedPlaylistSectionProps> = (
                     e.stopPropagation();
                     onPlayPlaylist(playlist);
                   }}
-                  className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 hover:scale-110 active:scale-95 transition-all shadow-lg border border-white/20"
+                  className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#00B4D8] text-[#050A24] flex items-center justify-center scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 hover:scale-110 active:scale-95 transition-all shadow-lg border border-white/20"
                 >
-                  <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+                  <Play className="w-4 h-4 fill-current ml-0.5" />
                 </button>
               </div>
 
               <div className="mt-3 space-y-1 truncate">
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#0052FF] transition-colors">
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                   {playlist.title}
                 </h4>
                 <p className="text-[10px] text-slate-400 truncate flex items-center gap-1">

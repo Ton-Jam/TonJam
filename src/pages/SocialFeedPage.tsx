@@ -1,6 +1,6 @@
 import React from 'react';
 import SocialFeed from '@/components/SocialFeed';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 const SocialFeedPage: React.FC = () => {
   const { posts } = useAudio();

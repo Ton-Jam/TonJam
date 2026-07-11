@@ -3,7 +3,7 @@ import { Search, Users, Sparkles, Hash, ArrowUpRight, Check, Plus, Volume2 } fro
 import { motion, AnimatePresence } from 'motion/react';
 import { Community, Artist } from '../types';
 import { MOCK_COMMUNITIES, MOCK_ARTISTS } from '../mock';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface JamSpaceHeaderProps {
   searchQuery: string;
@@ -47,23 +47,24 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
   }, []);
 
   // Filter recommendations based on search
-  const filteredCommunities = searchQuery.trim()
+  const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+  const filteredCommunities = safeSearchQuery.trim()
     ? MOCK_COMMUNITIES.filter(c =>
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.category.toLowerCase().includes(searchQuery.toLowerCase())
+        c.name.toLowerCase().includes(safeSearchQuery.toLowerCase()) ||
+        c.description.toLowerCase().includes(safeSearchQuery.toLowerCase()) ||
+        c.category.toLowerCase().includes(safeSearchQuery.toLowerCase())
       )
     : MOCK_COMMUNITIES.slice(0, 2); // Show top 2 when empty
 
-  const filteredArtists = searchQuery.trim()
+  const filteredArtists = safeSearchQuery.trim()
     ? MOCK_ARTISTS.filter(a =>
-        a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.genre.toLowerCase().includes(searchQuery.toLowerCase())
+        a.name.toLowerCase().includes(safeSearchQuery.toLowerCase()) ||
+        a.genre.toLowerCase().includes(safeSearchQuery.toLowerCase())
       )
     : MOCK_ARTISTS.slice(0, 2); // Show top 2 when empty
 
-  const filteredTopics = searchQuery.trim()
-    ? trendingTopics.filter(t => t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredTopics = safeSearchQuery.trim()
+    ? trendingTopics.filter(t => t.tag.toLowerCase().includes(safeSearchQuery.toLowerCase()))
     : trendingTopics;
 
   const hasResults = filteredCommunities.length > 0 || filteredArtists.length > 0 || filteredTopics.length > 0;

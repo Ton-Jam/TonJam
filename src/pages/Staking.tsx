@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Lock, Unlock, Zap, TrendingUp, Coins, Info, ArrowUpRight, History, Sparkles, Filter, ArrowDownUp, Clock, AlertTriangle } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { JAM_PRICE_USD } from '@/constants';
 import ConfirmationModal from '@/components/ConfirmationModal';

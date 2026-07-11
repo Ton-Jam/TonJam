@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import NFTCard from '@/components/NFTCard';
 import EmptyNFTState from '@/components/EmptyNFTState';
 import ManageNFTModal from '@/components/ManageNFTModal';

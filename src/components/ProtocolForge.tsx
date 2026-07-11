@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Lock, Hammer, Antenna, PlusCircle } from 'lucide-react';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { beginCell, toNano, Address } from '@ton/core';
 import { APP_LOGO, TON_LOGO } from '@/constants';
 import { cn } from '@/lib/utils';

@@ -20,7 +20,7 @@ import {
   LayoutDashboard
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage, cn } from '@/lib/utils';
 
 // Import local Profile Components
@@ -604,9 +604,8 @@ export const ProfilePage: React.FC = () => {
   const user = userProfile;
 
   return (
-    <ToastProvider>
-      <ModalProvider>
-        {(() => {
+    <>
+      {(() => {
           if (isOwnProfile && user?.isVerifiedArtist) {
             return <ArtistDashboardProfile />
           }
@@ -617,8 +616,7 @@ export const ProfilePage: React.FC = () => {
 
           return <VisitorProfile />
         })()}
-      </ModalProvider>
-    </ToastProvider>
+    </>
   );
 };
 

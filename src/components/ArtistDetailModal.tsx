@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { X, Verified, UserPlus, UserCheck, Music, Disc, ExternalLink, Play, Pause, TrendingUp, Zap, ChevronDown, ChevronUp, Clock, Activity, Key, Twitter, Instagram, Globe, Send } from 'lucide-react';
 import { Artist, Track } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_TRACKS } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';

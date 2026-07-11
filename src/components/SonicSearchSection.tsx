@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Loader2, Disc, User, Gem, Sparkles, Navigation, Play, ArrowUpRight, X, Terminal, Cpu } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { globalAISearch } from '@/services/geminiService';
 import { ButtonGroupInput } from './ButtonGroupInput';
 import { Track, Artist } from '@/types';

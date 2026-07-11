@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { NFTItem } from '@/types';
 import { ShoppingCart, BadgeCheck, Layers } from 'lucide-react';

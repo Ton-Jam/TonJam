@@ -175,8 +175,9 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
       }
     }
 
-    if (searchQuery.trim() !== '') {
-      const q = searchQuery.toLowerCase();
+    const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+    if (safeSearchQuery.trim() !== '') {
+      const q = safeSearchQuery.toLowerCase().trim();
       result = result.filter(p => 
         p.content.toLowerCase().includes(q) || 
         p.user.name.toLowerCase().includes(q) || 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { cn, getPlaceholderImage, shareContent } from '@/lib/utils';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import NFTQuickViewModal from './NFTQuickViewModal';
@@ -304,10 +304,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         <ContextMenuTrigger>
         <motion.div 
           layout
-          whileHover={{ y: -4, scale: 1.02 }}
+          whileHover={{ y: -6, scale: 1.03, boxShadow: "0 12px 24px -6px rgba(59, 130, 246, 0.3)" }}
           whileTap={{ scale: 0.97 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          className={`group flex items-center gap-4 p-3 rounded-[4px] bg-muted/10 border border-transparent hover:border-blue-500/40 hover:shadow-[0_8px_25px_rgba(59,130,246,0.18)] hover:bg-muted/20 transition-all duration-300 cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${className}`}
+          className={`group flex items-center gap-4 p-3 rounded-[4px] bg-muted/10 border border-transparent hover:border-blue-500/40 hover:bg-muted/20 transition-all duration-300 cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${className}`}
           onClick={handleCardClick}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -378,6 +378,21 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                     >
                       {formattedPrice}
                     </motion.span>
+
+                    {/* Price Change Indicator */}
+                    {nft.floorPriceChange !== undefined && (
+                      <div className={cn(
+                        "flex items-center gap-0.5 px-1 rounded-[2px]",
+                        nft.floorPriceChange >= 0 ? "text-emerald-400 bg-emerald-400/10" : "text-rose-500 bg-rose-500/10"
+                      )}>
+                        {nft.floorPriceChange >= 0 ? (
+                          <ArrowUp className="w-1.5 h-1.5 fill-current" />
+                        ) : (
+                          <ArrowDown className="w-1.5 h-1.5 fill-current" />
+                        )}
+                        <span className="text-[6px] font-black">{Math.abs(nft.floorPriceChange).toFixed(1)}%</span>
+                      </div>
+                    )}
                   </div>
                </div>
                
@@ -414,11 +429,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             layout
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -6, scale: 1.02 }}
+            whileHover={{ y: -10, scale: 1.05, boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.5)" }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className={cn(
-              "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent border border-transparent hover:border-blue-500/50 hover:bg-white/[0.04] hover:shadow-[0_8px_30px_rgba(59,130,246,0.22)] transition-all duration-300 w-full",
+              "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent border border-transparent hover:border-blue-500/60 hover:bg-white/[0.05] transition-all duration-300 w-full",
               className
             )}
             onClick={handleCardClick}
@@ -512,7 +527,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                <div className="flex items-end justify-between mt-1">
                   <div className="space-y-0.5">
                      <p className="text-[8px] font-medium text-muted-foreground/30 uppercase tracking-[0.1em]">Price</p>
-                     <div className="flex items-center gap-1 bg-muted/40 py-0.5 px-2 rounded-[4px] border border-border/10">
+                     <div className="flex items-center gap-1.5 bg-muted/40 py-0.5 px-2 rounded-[4px] border border-border/10">
                         {currencyMode === 'USD' ? (
                           <span className="text-sm font-black text-[#2BE08C]">$</span>
                         ) : (
@@ -527,6 +542,21 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                         >
                           {formattedPrice}
                         </motion.span>
+
+                        {/* Price Change Indicator */}
+                        {nft.floorPriceChange !== undefined && (
+                          <div className={cn(
+                            "flex items-center gap-0.5 px-1 rounded-[2px] ml-1",
+                            nft.floorPriceChange >= 0 ? "text-emerald-400 bg-emerald-400/10" : "text-rose-500 bg-rose-500/10"
+                          )}>
+                            {nft.floorPriceChange >= 0 ? (
+                              <ArrowUp className="w-2 h-2 fill-current" />
+                            ) : (
+                              <ArrowDown className="w-2 h-2 fill-current" />
+                            )}
+                            <span className="text-[7px] font-black">{Math.abs(nft.floorPriceChange).toFixed(1)}%</span>
+                          </div>
+                        )}
                      </div>
                   </div>
                   

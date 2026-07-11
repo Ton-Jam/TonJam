@@ -136,6 +136,17 @@ service cloud.firestore {
         && data.read is bool;
     }
 
+    function isValidPriceAlert(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && data.nftId is string && data.nftId.size() <= 128
+        && data.targetPrice is string && data.targetPrice.size() <= 20
+        && data.condition in ['below', 'above']
+        && data.status in ['active', 'triggered', 'cancelled']
+        && data.channels is list
+        && data.createdAt is string;
+    }
+
     function isValidUserMissionProgress(data) {
       return data.userId is string && data.userId.size() <= 128
         && data.missionId is string && data.missionId.size() <= 128
@@ -205,6 +216,12 @@ service cloud.firestore {
       return data.artistId is string && data.artistId.size() <= 128
         && (!data.keys().contains('totalEarned') || data.totalEarned is number)
         && (!data.keys().contains('pendingWithdrawal') || data.pendingWithdrawal is number);
+    }
+
+    function isValidCollection(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 200
+        && data.creator is string && data.creator.size() <= 128;
     }
 
     // 🏷 MARKETPLACE LISTINGS
@@ -353,6 +370,13 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isSignedIn();
       allow update: if isSignedIn() && (isAdmin() || isOwner(existing().artistId) || isOwner(existing().requesterId));
+      allow delete: if isAdmin();
+    }
+
+    match /collections/{collectionId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidCollection(incoming()) && isValidId(collectionId);
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -511,6 +535,14 @@ service cloud.firestore {
       allow list: if isOwner(userId) || isAdmin();
       allow create: if isSignedIn() && isOwner(userId) && isValidNotification(incoming()) && isValidId(notificationId) && incoming().userId == userId;
       allow update: if isSignedIn() && isOwner(userId) && isValidNotification(incoming()) && incoming().userId == userId;
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    match /users/{userId}/priceAlerts/{alertId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isOwner(userId) || isAdmin();
+      allow create: if isSignedIn() && isOwner(userId) && isValidPriceAlert(incoming()) && isValidId(alertId) && incoming().userId == userId;
+      allow update: if isSignedIn() && isOwner(userId) && isValidPriceAlert(incoming()) && incoming().userId == userId;
       allow delete: if isSignedIn() && isOwner(userId);
     }
 

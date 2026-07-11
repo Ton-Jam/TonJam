@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Send, Coins, Zap, ShieldCheck, Info } from 'lucide-react';
 import { Artist } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { distributeRoyalties } from '@/services/royaltyService';
 import { createActivityPost } from '@/services/socialService';
 import { useTonConnectUI } from '@tonconnect/ui-react';

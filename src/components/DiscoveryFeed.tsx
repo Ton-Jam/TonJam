@@ -1,24 +1,66 @@
 import React, { useMemo } from 'react';
 import { Sparkles, TrendingUp, Zap, Gem, Play } from 'lucide-react';
 import { PlayIcon, ShoppingBagIcon } from '@heroicons/react/24/solid';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import TrackCard from './TrackCard';
 import NFTCard from './NFTCard';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Badge } from './ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { cn } from '@/lib/utils';
 
 const DiscoveryFeed: React.FC = () => {
-  const { getRecommendations, playAll, discoverWeekly } = useAudio();
+  const { getRecommendations, playAll, discoverWeekly, allTracks } = useAudio();
   const navigate = useNavigate();
+  const [selectedGenre, setSelectedGenre] = React.useState<string | null>(null);
   
   const { recommendedTracks, recommendedNFTs } = useMemo(() => getRecommendations(), [getRecommendations]);
 
+  const genres = useMemo(() => {
+    const set = new Set<string>();
+    allTracks.forEach(t => { if (t.genre) set.add(t.genre); });
+    return Array.from(set).sort();
+  }, [allTracks]);
+
+  const trendingTracks = useMemo(() => {
+    return [...allTracks].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 10);
+  }, [allTracks]);
+
+  const filteredTracks = useMemo(() => {
+    if (!selectedGenre) return trendingTracks;
+    return allTracks.filter(t => t.genre === selectedGenre).slice(0, 10);
+  }, [allTracks, selectedGenre, trendingTracks]);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pt-0">
+      {/* Genre Selector */}
+      <section className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+        <button
+          onClick={() => setSelectedGenre(null)}
+          className={cn(
+            "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+            !selectedGenre ? "bg-blue-600 text-white" : "bg-white/5 text-muted-foreground hover:bg-white/10"
+          )}
+        >
+          All Trends
+        </button>
+        {genres.map(genre => (
+          <button
+            key={genre}
+            onClick={() => setSelectedGenre(genre)}
+            className={cn(
+              "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+              selectedGenre === genre ? "bg-blue-600 text-white" : "bg-white/5 text-muted-foreground hover:bg-white/10"
+            )}
+          >
+            {genre}
+          </button>
+        ))}
+      </section>
+
       {/* Discover Weekly Banner - High Fidelity */}
-      {discoverWeekly && (
+      {discoverWeekly && !selectedGenre && (
         <section className="mb-4">
           <div 
             onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
@@ -63,7 +105,16 @@ const DiscoveryFeed: React.FC = () => {
                     <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest">Active Relay</span>
                     <span className="text-[10px] font-bold text-white/80">{discoverWeekly.trackIds?.length || 0} Artists Synced</span>
                   </div>
-                  <button className="h-14 w-14 sm:h-20 sm:w-20 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-500 group/play">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (discoverWeekly.trackIds) {
+                        const tracks = allTracks.filter(t => discoverWeekly.trackIds?.includes(t.id));
+                        playAll(tracks);
+                      }
+                    }}
+                    className="h-14 w-14 sm:h-20 sm:w-20 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-500 group/play"
+                  >
                     <Play className="h-6 w-6 sm:h-10 sm:w-10 fill-black translate-x-0.5 group-hover:scale-110 transition-transform" />
                   </button>
                 </div>
@@ -81,6 +132,43 @@ const DiscoveryFeed: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* Global Hotness / Trending Tracks */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-rose-400" />
+            </div>
+            <div>
+              <h2 className="text-[11px] font-bold text-foreground uppercase tracking-tight font-display">
+                {selectedGenre ? `${selectedGenre} Signals` : 'Global Hotness'}
+              </h2>
+              <p className="text-[7.5px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">
+                {selectedGenre ? `Curated ${selectedGenre} tracks from the network` : 'Peak signal frequencies across the network'}
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={() => playAll(filteredTracks)}
+            className="text-[9px] font-black text-rose-500 uppercase tracking-widest hover:text-rose-400 transition-colors"
+          >
+            Play All {selectedGenre || 'Trends'}
+          </button>
+        </div>
+
+        <div className="scroll-row">
+          {filteredTracks.map((track, idx) => (
+            <div 
+              key={`trending-${track.id}-${idx}`} 
+              className="w-[165px] shrink-0 animate-in fade-in slide-in-from-bottom-4 duration-500"
+              style={{ animationDelay: `${idx * 50}ms` }}
+            >
+              <TrackCard track={track} variant="default" className="w-[165px]" />
+            </div>
+          ))}
+        </div>
+      </section>
 
       {recommendedTracks.length === 0 && recommendedNFTs.length === 0 ? null : (
         <div className="flex flex-col md:flex-row gap-6">

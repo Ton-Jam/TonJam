@@ -40,9 +40,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const navigate = useNavigate();
 
   return (
-    <ToastProvider>
-      <ModalProvider>
-        <div className="min-h-screen w-full bg-[#050608] text-slate-100 flex flex-col relative overflow-hidden font-sans">
+    <div className="min-h-screen w-full bg-[#050608] text-slate-100 flex flex-col relative overflow-hidden font-sans">
           {/* Ambient Background Glow Particles */}
           <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
             <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[40%] bg-blue-900/15 rounded-full blur-[140px]" />
@@ -125,9 +123,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             activeTab={activeTab}
             onTabChange={onTabChange}
           />
-        </div>
-      </ModalProvider>
-    </ToastProvider>
+    </div>
   );
 };
 export default AppLayout;

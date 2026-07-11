@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Sparkles, Sliders, Music, Waves, Activity, Zap } from 'lucide-react';
 
 interface AudioVisualizerProps {

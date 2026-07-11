@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, Upload, Loader2, Link2, Twitter, Instagram, Globe, MessageSquare, ArrowLeft, Check } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { useAudio } from '@/context/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { uploadFile } from '@/services/storageService';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';

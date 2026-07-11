@@ -37,3 +37,38 @@ export const fetchNFTMetadata = async (nftIdOrAddress: string): Promise<NFTItem 
     return null;
   }
 };
+
+/**
+ * Fetches floor price history for a given collection address over the last 30 days
+ * Simulates data from TON blockchain
+ */
+export const fetchFloorPriceHistory = async (collectionAddress: string): Promise<{ date: string; price: number }[]> => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 600));
+
+  // Generate 30 days of mock data
+  const data = [];
+  const now = new Date();
+  
+  // Base price for the collection (randomized for realism)
+  // Seed based on address string length or content to be deterministic for the session
+  const seed = collectionAddress.length * 10;
+  let currentPrice = 5 + (seed % 15); 
+
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(now.getDate() - i);
+    
+    // Random fluctuation (±3-5% daily)
+    const daySeed = Math.sin(seed + i) * 10000;
+    const fluctuation = (daySeed - Math.floor(daySeed) - 0.48) * 0.08; 
+    currentPrice = Math.max(0.1, currentPrice * (1 + fluctuation));
+    
+    data.push({
+      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      price: parseFloat(currentPrice.toFixed(2))
+    });
+  }
+
+  return data;
+};

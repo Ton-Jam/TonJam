@@ -25,7 +25,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       {/* Cover Image Container */}
       <div className="relative w-full h-44 sm:h-56 md:h-64 overflow-hidden bg-slate-950">
         <img 
-          src={profile.bannerUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&h=400&q=80'} 
+          src={profile.coverPhoto || profile.bannerUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&h=400&q=80'} 
           alt="Profile cover" 
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"

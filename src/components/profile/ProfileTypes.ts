@@ -6,6 +6,7 @@ export interface ProfileData {
   username: string;
   avatar: string;
   bannerUrl?: string;
+  coverPhoto?: string;
   bio?: string;
   genre?: string;
   country?: string;

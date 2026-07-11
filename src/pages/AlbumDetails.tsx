@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Play, Pause, Heart, Share2, MoreHorizontal, ArrowLeft, Clock } from 'lucide-react';
-import { useAudio } from '@/context/AudioContext';
+import { Play, Pause, Heart, Share2, MoreHorizontal, ArrowLeft, Clock, TrendingUp, Activity } from 'lucide-react';
+import { useAudio } from '@/contexts/AudioContext';
 import { Track } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import { MOCK_TRACKS } from '@/constants';
+import { FloorPriceChart } from '@/components/FloorPriceChart';
+import { fetchFloorPriceHistory } from '@/services/nftService';
 
 const AlbumDetails = () => {
   const { id } = useParams();
@@ -13,6 +15,8 @@ const AlbumDetails = () => {
   const { playTrack, currentTrack, isPlaying, togglePlay, setHeaderTitle } = useAudio();
   const [albumTracks, setAlbumTracks] = useState<Track[]>([]);
   const [isLiked, setIsLiked] = useState(false);
+  const [floorPriceHistory, setFloorPriceHistory] = useState<{ date: string; price: number }[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   // Mock album data since we don't have a real album collection yet
   const album = {
@@ -23,8 +27,21 @@ const AlbumDetails = () => {
     releaseYear: '2026',
     trackCount: 8,
     totalDuration: '32:45',
-    description: 'A journey through the neon-lit streets of Neo-Tokyo. This album blends synthwave with modern trap beats to create a unique sonic landscape.'
+    description: 'A journey through the neon-lit streets of Neo-Tokyo. This album blends synthwave with modern trap beats to create a unique sonic landscape.',
+    floorPrice: '12.5',
+    volume: '1,240'
   };
+
+  useEffect(() => {
+    const loadHistory = async () => {
+      setIsLoadingHistory(true);
+      const history = await fetchFloorPriceHistory(id || 'default-collection');
+      setFloorPriceHistory(history);
+      setIsLoadingHistory(false);
+    };
+
+    loadHistory();
+  }, [id]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -104,6 +121,53 @@ const AlbumDetails = () => {
             >
               {album.description}
             </motion.p>
+          </div>
+        </div>
+
+        {/* Collection Analytics Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+          <div className="lg:col-span-2">
+            {!isLoadingHistory && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <FloorPriceChart 
+                  data={floorPriceHistory} 
+                  title="Collection Floor Price Trend" 
+                  collectionName={album.title}
+                />
+              </motion.div>
+            )}
+          </div>
+          <div className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+              className="bg-surface/40 border border-border-subtle rounded-card p-6 h-full flex flex-col justify-center"
+            >
+              <h3 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-4">Quick Stats</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-end">
+                  <span className="text-sm text-text-muted">Floor Price</span>
+                  <span className="text-xl font-black text-text-primary">{album.floorPrice} TON</span>
+                </div>
+                <div className="flex justify-between items-end">
+                  <span className="text-sm text-text-muted">Total Volume</span>
+                  <span className="text-xl font-black text-text-primary">{album.volume} TON</span>
+                </div>
+                <div className="flex justify-between items-end">
+                  <span className="text-sm text-text-muted">Owners</span>
+                  <span className="text-xl font-black text-text-primary">342</span>
+                </div>
+              </div>
+              <button className="mt-8 w-full bg-primary text-background font-bold py-3 rounded-button hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                View on TON Explorer
+              </button>
+            </motion.div>
           </div>
         </div>
 

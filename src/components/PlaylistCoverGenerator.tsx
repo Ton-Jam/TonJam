@@ -3,7 +3,7 @@ import { Sparkles, LayoutGrid, Loader2, X, Check, Image as ImageIcon } from 'luc
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Playlist, Track } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface PlaylistCoverGeneratorProps {
   isOpen: boolean;

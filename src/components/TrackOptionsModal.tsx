@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ListMusic, Plus, Coins, Share2, Trash2, Heart, Info, User, Gem, ArrowUp, ArrowDown, ChevronRight, X } from 'lucide-react';
 import { Track } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { cn, getPlaceholderImage } from '@/lib/utils';
 import AddToPlaylistModal from './AddToPlaylistModal';

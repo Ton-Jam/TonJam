@@ -11,11 +11,11 @@ export const TracksSkeleton: React.FC<SkeletonProps> = ({ count = 4 }) => {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={`skeleton-track-${i}`}
-          className="p-3 rounded-xl bg-[#090f2d] flex items-center justify-between w-full"
+          className="p-3 rounded-[12px] bg-[#0c133a] flex items-center justify-between w-full"
         >
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {/* Album cover skeleton */}
-            <div className="w-10 h-10 rounded-xl bg-[#132354] animate-pulse shrink-0" />
+            <div className="w-10 h-10 rounded-[8px] bg-[#132354] animate-pulse shrink-0" />
             
             <div className="space-y-2 flex-1 min-w-0 pr-4">
               {/* Title skeleton */}
@@ -43,10 +43,10 @@ export const CardsSkeleton: React.FC<SkeletonProps> = ({ count = 4 }) => {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={`skeleton-card-${i}`}
-          className="bg-[#090f2d] rounded-xl p-4 flex flex-col justify-between aspect-[4/5] w-full"
+          className="bg-[#0c133a] rounded-[12px] p-4 flex flex-col justify-between aspect-[4/5] w-full"
         >
           {/* Image skeleton */}
-          <div className="aspect-square rounded-xl bg-[#132354] animate-pulse w-full" />
+          <div className="aspect-square rounded-[8px] bg-[#132354] animate-pulse w-full" />
           
           <div className="mt-4 space-y-2.5">
             {/* Title */}
@@ -60,7 +60,7 @@ export const CardsSkeleton: React.FC<SkeletonProps> = ({ count = 4 }) => {
                 <div className="h-1.5 bg-[#132354] rounded w-8 animate-pulse" />
                 <div className="h-2.5 bg-[#132354] rounded w-12 animate-pulse" />
               </div>
-              <div className="h-5 bg-[#132354] rounded-lg w-12 animate-pulse" />
+              <div className="h-5 bg-[#132354] rounded-[8px] w-12 animate-pulse" />
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@ export const ArtistsSkeleton: React.FC<SkeletonProps> = ({ count = 4 }) => {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={`skeleton-artist-${i}`}
-          className="bg-[#090f2d] rounded-xl p-4 flex flex-col items-center justify-between space-y-4 text-center w-full"
+          className="bg-[#0c133a] rounded-[12px] p-4 flex flex-col items-center justify-between space-y-4 text-center w-full"
         >
           {/* Circular avatar skeleton */}
           <div className="h-20 w-20 rounded-full bg-[#132354] animate-pulse" />
@@ -90,7 +90,7 @@ export const ArtistsSkeleton: React.FC<SkeletonProps> = ({ count = 4 }) => {
           </div>
 
           {/* Follow button skeleton */}
-          <div className="h-8 bg-[#132354] rounded-lg w-full animate-pulse" />
+          <div className="h-8 bg-[#132354] rounded-[8px] w-full animate-pulse" />
         </div>
       ))}
     </div>
@@ -103,10 +103,10 @@ export const TrendingSkeleton: React.FC<SkeletonProps> = ({ count = 3 }) => {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={`skeleton-trending-${i}`}
-          className="w-[280px] shrink-0 bg-[#090f2d] rounded-xl p-4 flex items-start gap-3 aspect-[16/10]"
+          className="w-[280px] shrink-0 bg-[#0c133a] rounded-[12px] p-4 flex items-start gap-3 aspect-[16/10]"
         >
           {/* Cover image */}
-          <div className="w-16 h-16 rounded-xl bg-[#132354] animate-pulse shrink-0" />
+          <div className="w-16 h-16 rounded-[8px] bg-[#132354] animate-pulse shrink-0" />
 
           <div className="flex-1 space-y-2.5">
             {/* Tag/Badge */}
@@ -127,16 +127,16 @@ export const FullDiscoverSkeleton: React.FC = () => {
     <div className="space-y-12 animate-fade-in w-full">
       {/* For you sync cards skeleton */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-5 rounded-xl bg-[#090f2d] h-28 animate-pulse" />
-        <div className="p-5 rounded-xl bg-[#090f2d] h-28 animate-pulse" />
+        <div className="p-5 rounded-[12px] bg-[#0c133a] h-28 animate-pulse" />
+        <div className="p-5 rounded-[12px] bg-[#0c133a] h-28 animate-pulse" />
       </div>
 
       {/* Suggested neural stream tracks */}
       <div className="space-y-4">
         <div className="h-3 bg-[#132354] rounded w-1/4 animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-[#090f2d] h-24 animate-pulse" />
-          <div className="p-4 rounded-xl bg-[#090f2d] h-24 animate-pulse" />
+          <div className="p-4 rounded-[12px] bg-[#0c133a] h-24 animate-pulse" />
+          <div className="p-4 rounded-[12px] bg-[#0c133a] h-24 animate-pulse" />
         </div>
       </div>
 

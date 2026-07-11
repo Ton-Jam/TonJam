@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { Trash2, MessageSquare } from 'lucide-react';

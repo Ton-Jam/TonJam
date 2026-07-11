@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Send, Sparkles, Music, Mic2, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { chatWithKrupy, ChatAssistantResponse } from '@/services/geminiService';
 import { toast } from 'sonner';
 

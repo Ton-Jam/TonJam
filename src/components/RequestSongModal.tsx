@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { XCircle } from 'lucide-react';
 
 interface RequestSongModalProps {

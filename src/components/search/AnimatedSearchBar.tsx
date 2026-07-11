@@ -97,7 +97,7 @@ export const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
   };
 
   return (
-    <div className="relative w-full flex items-center bg-[#07102e] rounded-full p-0.5 border border-white/5 shadow-inner">
+    <div className="relative w-full flex items-center bg-[#07102e] rounded-[12px] p-0.5 border border-white/5">
       <div className="pl-4 text-slate-400">
         <Search className="w-4 h-4" />
       </div>
@@ -109,7 +109,7 @@ export const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
           onChange={(e) => onChange(e.target.value)}
           onFocus={onFocus}
           onBlur={onBlur}
-          className="w-full h-full bg-transparent border-none outline-none focus:ring-0 text-white text-xs font-bold uppercase tracking-widest pl-3 pr-10 placeholder-transparent"
+          className="w-full h-full bg-transparent border-none outline-none focus:ring-0 text-white text-[11px] font-bold uppercase tracking-widest pl-3 pr-10 placeholder-transparent"
           aria-label="Search TonJam"
         />
 
@@ -121,7 +121,7 @@ export const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
               animate={{ y: 0, opacity: 0.5 }}
               exit={{ y: -15, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs font-bold uppercase tracking-widest"
+              className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[11px] font-bold uppercase tracking-widest"
             >
               {PLACEHOLDERS[placeholderIndex]}
             </motion.div>
@@ -133,7 +133,7 @@ export const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
         {value && (
           <button
             onClick={onClear}
-            className="p-1.5 hover:bg-white/10 active:scale-90 rounded-full transition-all text-slate-400 hover:text-white"
+            className="p-1.5 hover:bg-white/5 active:scale-90 rounded-[8px] transition-all text-slate-400 hover:text-white"
             title="Clear search"
           >
             <X className="w-4 h-4" />
@@ -142,8 +142,8 @@ export const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
 
         <button
           onClick={toggleVoiceSearch}
-          className={`p-1.5 hover:bg-white/10 active:scale-90 rounded-full transition-all ${
-            isListening ? 'text-red-500 animate-pulse' : 'text-slate-400 hover:text-white'
+          className={`p-1.5 hover:bg-white/5 active:scale-90 rounded-[8px] transition-all ${
+            isListening ? 'text-[#00B4D8] animate-pulse' : 'text-slate-400 hover:text-white'
           }`}
           title="Voice Search"
         >
@@ -152,7 +152,7 @@ export const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
 
         <button
           onClick={onQrScan}
-          className="p-1.5 hover:bg-white/10 active:scale-90 rounded-full transition-all text-slate-400 hover:text-white"
+          className="p-1.5 hover:bg-white/5 active:scale-90 rounded-[8px] transition-all text-slate-400 hover:text-white"
           title="Scan QR Code"
         >
           <QrCode className="w-4 h-4" />

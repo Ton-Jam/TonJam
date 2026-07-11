@@ -4,8 +4,8 @@ import {
   Layers, Loader2, Sparkles, Trophy, Check, ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useAuth } from '@/context/AuthContext';
-import { useAudio } from '@/context/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { Artist, Track, FanTokenBalance, NFTItem } from '@/types';
 import { db } from '@/lib/firebase';
 import { collection, query, where, doc, onSnapshot, getDocs } from 'firebase/firestore';

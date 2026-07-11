@@ -3,7 +3,7 @@ import { X, Tag, Gavel, Info, AlertTriangle, Clock } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO } from '@/constants';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import LoadingOverlay from './LoadingOverlay';
 import { listNFT } from '@/services/marketplaceService';
 

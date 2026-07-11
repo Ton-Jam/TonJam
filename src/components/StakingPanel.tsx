@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { TJ_COIN_ICON, TON_LOGO } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import StakingRewardsCalculator from './StakingRewardsCalculator';
 import CompoundingSimulator from './CompoundingSimulator';
 import { Switch } from '@/components/ui/switch';

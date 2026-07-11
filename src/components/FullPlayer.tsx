@@ -1,6 +1,6 @@
 import { EqualizerView } from "./EqualizerView";
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { useAudio } from "@/context/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 import {
   Heart,
   Share2,

@@ -439,7 +439,7 @@ export const purchaseJAM = async (
 export const deployTonJamCollection = async (
   tonConnectUI: TonConnectUI,
   ownerAddress: string,
-  metadataUrl: string = "https://tonjam.app/collection.json"
+  metadataUrl: string = typeof window !== 'undefined' ? `${window.location.origin}/collection.json` : "https://tonjam.app/collection.json"
 ): Promise<string> => {
   try {
     const owner = Address.parse(ownerAddress);

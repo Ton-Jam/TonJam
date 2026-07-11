@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { toast } from "sonner";
+import { useToast } from "@/components/layout/ToastProvider";
 import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
 import { useAccount } from "wagmi";
 import {
@@ -146,6 +146,7 @@ interface AudioContextType {
     message: string,
     type?: "success" | "info" | "error" | "warning",
     duration?: number,
+    description?: string
   ) => void;
   setTrackToAddToPlaylist: (track: Track | null) => void;
   setOptionsTrack: (
@@ -410,6 +411,7 @@ const smartShuffleQueue = (tracks: Track[], mode: 'mood' | 'genre', currentTrack
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { toast: toastUI } = useToast();
   const [tonConnectUI] = useTonConnectUI();
   const tonAddress = useTonAddress();
   const { address: evmAddress } = useAccount();
@@ -996,10 +998,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           const diff = endTime - now;
           
           if (diff > 0 && diff <= 30 * 60 * 1000 && !alertedAuctions.current.has(nft.id)) {
-            toast.warning(`Auction ending soon`, {
-              description: `Auction for "${nft.title}" ends in less than 30 minutes!`,
-              duration: 10000,
-            });
+            addNotification(`Auction ending soon`, "warning", 10000, `Auction for "${nft.title}" ends in less than 30 minutes!`);
             alertedAuctions.current.add(nft.id);
           }
         }
@@ -2189,12 +2188,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const addNotification = (
     message: string,
     type: "success" | "info" | "error" | "warning" = "info",
-    duration: number = 3000,
+    duration: number = 4000,
+    description?: string,
   ) => {
-    if (type === "success") toast.success(message, { duration });
-    else if (type === "error") toast.error(message, { duration });
-    else if (type === "warning") toast.warning(message, { duration });
-    else toast.info(message, { duration });
+    toastUI(type, message, description, duration);
   };
 
   useEffect(() => {
@@ -3427,21 +3424,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       if (isLiked) {
-        toast.info("Track removed from favorites", {
-          description: `"${trackTitle}" by ${trackArtist}`,
-          action: {
-            label: "Undo",
-            onClick: () => toggleLikeTrack(trackId)
-          }
-        });
+        addNotification("Track removed from favorites", "info", 3000, `"${trackTitle}" by ${trackArtist}`);
       } else {
-        toast.success("Track added to favorites", {
-          description: `"${trackTitle}" by ${trackArtist}`,
-          action: {
-            label: "Undo",
-            onClick: () => toggleLikeTrack(trackId)
-          }
-        });
+        addNotification("Track added to favorites", "success", 3000, `"${trackTitle}" by ${trackArtist}`);
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `tracks/${trackId}`);
@@ -4096,13 +4081,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           return pl;
         }),
       );
-      toast.success("Added to playlist", {
-        description: `"${track.title}" added to "${playlist.title}"`,
-        action: {
-          label: "Undo",
-          onClick: () => removeTrackFromPlaylist(playlistId, track.id)
-        }
-      });
+      toastUI("success", "Added to playlist", `"${track.title}" added to "${playlist.title}"`, 3000);
     } catch (error) {
       handleFirestoreError(
         error,
@@ -4141,13 +4120,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       );
       const track = allTracks.find((t) => t.id === trackId);
       const trackTitle = track ? track.title : "Track";
-      toast.info("Removed from playlist", {
-        description: `"${trackTitle}" removed from "${playlist.title}"`,
-        action: track ? {
-          label: "Undo",
-          onClick: () => addTrackToPlaylist(playlistId, track)
-        } : undefined
-      });
+      toastUI("info", "Removed from playlist", `"${trackTitle}" removed from "${playlist.title}"`, 3000);
     } catch (error) {
       handleFirestoreError(
         error,

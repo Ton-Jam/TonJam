@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Play, Music, Sparkles, FolderPlus, MoreVertical, Trash2, Pencil, Folder } from 'lucide-react';
 import { Playlist } from '@/types';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
