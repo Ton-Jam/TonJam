@@ -93,7 +93,7 @@ export const buyNFT = async (
   });
 
   // 4. Record transaction and distribute royalties
-  await processNFTSaleRoyalty(nft, parseFloat(listing.price));
+  await processNFTSaleRoyalty(nft, parseFloat(listing.price), listing.sellerId);
 
   return txId;
 };

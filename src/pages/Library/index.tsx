@@ -16,6 +16,8 @@ import { ListeningHistory } from './components/ListeningHistory';
 import { EmptyState } from './components/EmptyState';
 import { CardSkeleton, StatsSkeleton, RowSkeleton } from './components/Skeletons';
 import { LibraryImporter } from './components/LibraryImporter';
+import { RoyaltiesDashboard } from './components/RoyaltiesDashboard';
+import { ArtistProfile } from '@/components/ArtistProfile';
 
 import { 
   Sparkles, Heart, Download, Zap, Disc, Clock, Search, List, LayoutGrid, 
@@ -28,11 +30,12 @@ const LibraryPage: React.FC = () => {
   const data = useLibraryData();
   const [viewLayout, setViewLayout] = useState<'grid' | 'list'>('grid');
   const [showImporter, setShowImporter] = useState(false);
+  const [selectedArtistProfileId, setSelectedArtistProfileId] = useState<string>('dj-krupy');
 
   // Expanded and comprehensive filter chips
   const filterChips = [
     'All', 'Tracks', 'Playlists', 'Albums', 'Artists', 'Downloads', 
-    'NFT Music', 'Recently Played', 'History', 'Analytics', 'Import'
+    'NFT Music', 'Royalties', 'Recently Played', 'History', 'Analytics', 'Import'
   ];
 
   // Map quick action clicks to direct active chip filters
@@ -248,8 +251,11 @@ const LibraryPage: React.FC = () => {
 
                 {/* 8. ARTISTS */}
                 {(data.activeChip === 'All' || data.activeChip === 'Artists' || data.activeChip === 'Favorites') && (
-                  <div id="artists-section">
+                  <div id="artists-section" className="space-y-8">
                     <Artists artists={data.artists} />
+                    <div className="pt-4">
+                      <ArtistProfile artistId={selectedArtistProfileId} onArtistChange={setSelectedArtistProfileId} />
+                    </div>
                   </div>
                 )}
 
@@ -317,6 +323,13 @@ const LibraryPage: React.FC = () => {
                 {(data.activeChip === 'All' || data.activeChip === 'Analytics') && (
                   <div id="analytics-section">
                     <AnalyticsSection analytics={data.analytics} />
+                  </div>
+                )}
+
+                {/* 14. ROYALTIES DASHBOARD */}
+                {(data.activeChip === 'All' || data.activeChip === 'Royalties') && (
+                  <div id="royalties-section">
+                    <RoyaltiesDashboard />
                   </div>
                 )}
 

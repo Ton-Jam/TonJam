@@ -128,6 +128,123 @@ export async function distributeRoyalties(
 }
 
 /**
+ * Distributes NFT resale royalties automatically.
+ * Platform Fee: 10%
+ * Royalty Commission (Original Artist/Collabs): e.g. 10% (from splits, or fallback)
+ * Seller (Current Owner) Proceeds: 80% (remaining)
+ */
+export async function distributeNFTRoyaltiesWithSeller(
+  amount: number,
+  artistId: string,
+  sellerId: string,
+  royaltySplits: RoyaltySplit[],
+  metadata: Partial<Transaction> = {}
+): Promise<void> {
+  // 10% platform fee
+  const platformFee = amount * PLATFORM_FEE_PERCENTAGE;
+  
+  // Calculate royalty commission (e.g. 10%)
+  const royaltyCommissionPercent = 0.10;
+  const totalRoyaltyCommission = amount * royaltyCommissionPercent;
+
+  // Seller gets everything else
+  const sellerProceeds = amount - platformFee - totalRoyaltyCommission;
+
+  try {
+    const batch = writeBatch(db);
+
+    // 1. Credit the platform treasury
+    if (platformFee > 0) {
+      const treasuryRef = doc(db, 'system/treasury');
+      batch.set(treasuryRef, {
+        balance: increment(platformFee),
+        totalFeesCollected: increment(platformFee),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+
+    // 2. Credit the Original Artist (split)
+    // If no custom splits, artist gets 100% of the royalty commission
+    if (!royaltySplits || royaltySplits.length === 0) {
+      const artistRef = doc(db, 'royalties', artistId);
+      batch.set(artistRef, {
+        artistId,
+        totalEarned: increment(totalRoyaltyCommission),
+        pendingWithdrawal: increment(totalRoyaltyCommission),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } else {
+      // Split the royalty commission among co-creators
+      const collaboratorShares = royaltySplits.map(split => ({
+        address: split.address,
+        amount: totalRoyaltyCommission * split.percentage,
+        label: split.label,
+      }));
+
+      const totalCollabShare = collaboratorShares.reduce((sum, split) => sum + split.amount, 0);
+      const artistShare = Math.max(0, totalRoyaltyCommission - totalCollabShare);
+
+      if (artistShare > 0) {
+        const artistRef = doc(db, 'royalties', artistId);
+        batch.set(artistRef, {
+          artistId,
+          totalEarned: increment(artistShare),
+          pendingWithdrawal: increment(artistShare),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+
+      collaboratorShares.forEach(share => {
+        const collabId = share.address;
+        if (collabId && share.amount > 0) {
+          const collabRef = doc(db, 'royalties', collabId);
+          batch.set(collabRef, {
+            artistId: collabId,
+            totalEarned: increment(share.amount),
+            pendingWithdrawal: increment(share.amount),
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        }
+      });
+    }
+
+    // 3. Credit the Seller (Current Owner)
+    if (sellerId && sellerProceeds > 0) {
+      const sellerRef = doc(db, 'royalties', sellerId);
+      batch.set(sellerRef, {
+        artistId: sellerId,
+        totalEarned: increment(sellerProceeds),
+        pendingWithdrawal: increment(sellerProceeds),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+
+    // 4. Record Detailed Resale Transaction
+    const txRef = doc(collection(db, 'transactions'));
+    const participants = [artistId, sellerId, auth.currentUser?.uid].filter(Boolean) as string[];
+    const txData = {
+      type: 'nft_sale',
+      amount,
+      userId: auth.currentUser?.uid || 'system',
+      platformFee,
+      artistShare: totalRoyaltyCommission, // the creator royalty component
+      sellerProceeds,
+      timestamp: new Date().toISOString(),
+      serverTimestamp: serverTimestamp(),
+      status: 'completed',
+      participants,
+      ...metadata
+    };
+    batch.set(txRef, txData);
+
+    await batch.commit();
+    console.log(`NFT Royalty & Payout distribution complete. Seller proceeds: ${sellerProceeds}, Creator Royalty: ${totalRoyaltyCommission}`);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'royalties');
+  }
+}
+
+/**
  * Process a stream royalty (micro-payment)
  */
 export async function processStreamRoyalty(track: Track) {
@@ -144,12 +261,13 @@ export async function processStreamRoyalty(track: Track) {
 /**
  * Process an NFT sale royalty
  */
-export async function processNFTSaleRoyalty(nft: NFTItem, salePrice: number) {
-  await distributeRoyalties(
+export async function processNFTSaleRoyalty(nft: NFTItem, salePrice: number, sellerId?: string) {
+  const actualSellerId = sellerId || nft.ownerId || nft.owner || nft.creator || 'system_seller';
+  await distributeNFTRoyaltiesWithSeller(
     salePrice,
     nft.artistId || nft.creator,
+    actualSellerId,
     nft.royaltySplits || [],
-    'nft_sale',
     { nftId: nft.id, trackId: nft.trackId }
   );
 }

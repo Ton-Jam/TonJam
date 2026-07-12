@@ -77,7 +77,7 @@ const JamSpaceMain: React.FC = () => {
   };
 
   return (
-    <div className={`w-full min-h-screen ${jamData.isDarkMode ? 'bg-blue-950' : 'bg-slate-50'} text-white pb-24 font-sans`}>
+    <div className={`w-full min-h-screen bg-[#050A24] text-white pb-24 font-sans`}>
       <div className="w-full max-w-7xl mx-auto px-4 py-6 sm:px-6 space-y-8 relative">
         {/* Top Header Controls (Integrated Ribbon functions) */}
         <div className="flex items-center justify-between mb-2">
@@ -211,7 +211,7 @@ const JamSpaceMain: React.FC = () => {
               <div className="lg:col-span-8 space-y-8">
                 
                 {/* 4. QUICK COMPOSE */}
-                <JamSpaceQuickCompose onSubmit={handleCreatePostSubmit} />
+                <JamSpaceQuickCompose onClick={() => setIsComposeOpen(true)} onSubmit={handleCreatePostSubmit} />
 
                 {/* 5. LIVE SPACES */}
                 <LiveSpaces 

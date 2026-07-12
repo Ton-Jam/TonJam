@@ -452,6 +452,49 @@ const Home: React.FC = () => {
       <div className="max-w-md mx-auto px-4 pt-6 space-y-8 pb-12">
 
         {/* ==========================================
+            SECTION 14: COMMUNITY ACTIVITY FEED (Infinite Scrolling Support)
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-lg font-black tracking-tight text-white">
+              Community Activity Feed
+            </h2>
+            <Activity className="w-4.5 h-4.5 text-[#2BE08C] animate-pulse" />
+          </div>
+
+          <div className="rounded-2xl bg-[#0A113A]/50 p-4 border-none shadow-md text-left">
+            <ScrollArea className="h-72 w-full pr-3">
+              <div className="space-y-3.5">
+                {communityActivities.map((act, index) => (
+                  <React.Fragment key={act.id}>
+                    <CommunityFeedCard
+                      username={act.username}
+                      action={act.action}
+                      target={act.target}
+                      time={getRelativeTimeStr(act)}
+                      avatar={act.avatar}
+                      accentColor={act.accentColor}
+                    />
+                    {index < communityActivities.length - 1 && (
+                      <Separator className="my-3 opacity-30" />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            </ScrollArea>
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={loadMoreActivities}
+              className="w-full h-8 text-[9px] font-black uppercase tracking-widest bg-white/[0.02] text-[#9AA0AE]/80 hover:bg-white/5 border-none rounded-xl mt-4 cursor-pointer flex items-center gap-1 justify-center leading-none"
+            >
+              Load Older Stream Activities <ArrowUpRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+
+        {/* ==========================================
             SECTION 1: PERSONALIZED WELCOME HERO
             ========================================== */}
         <motion.div 
@@ -1016,50 +1059,6 @@ const Home: React.FC = () => {
                 }}
               />
             ))}
-          </div>
-        </div>
-
-
-        {/* ==========================================
-            SECTION 14: COMMUNITY ACTIVITY FEED (Infinite Scrolling Support)
-            ========================================== */}
-        <div className="space-y-3 text-left">
-          <div className="flex items-center justify-between px-0.5">
-            <h2 className="text-lg font-black tracking-tight text-white">
-              Community Activity Feed
-            </h2>
-            <Activity className="w-4.5 h-4.5 text-[#2BE08C] animate-pulse" />
-          </div>
-
-          <div className="rounded-2xl bg-[#0A113A]/50 p-4 border-none shadow-md text-left">
-            <ScrollArea className="h-72 w-full pr-3">
-              <div className="space-y-3.5">
-                {communityActivities.map((act, index) => (
-                  <React.Fragment key={act.id}>
-                    <CommunityFeedCard
-                      username={act.username}
-                      action={act.action}
-                      target={act.target}
-                      time={getRelativeTimeStr(act)}
-                      avatar={act.avatar}
-                      accentColor={act.accentColor}
-                    />
-                    {index < communityActivities.length - 1 && (
-                      <Separator className="my-3 opacity-30" />
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-            </ScrollArea>
-
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={loadMoreActivities}
-              className="w-full h-8 text-[9px] font-black uppercase tracking-widest bg-white/[0.02] text-[#9AA0AE]/80 hover:bg-white/5 border-none rounded-xl mt-4 cursor-pointer flex items-center gap-1 justify-center leading-none"
-            >
-              Load Older Stream Activities <ArrowUpRight className="w-3.5 h-3.5" />
-            </Button>
           </div>
         </div>
 
