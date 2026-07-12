@@ -18,6 +18,7 @@ import { TonPriceProvider } from "@/contexts/TonPriceContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
+import { Analytics } from '@vercel/analytics/react';
 
 import AppRouter from "@/router/AppRouter";
 
@@ -48,6 +49,7 @@ export default function App() {
                                       position="top-center"
                                       closeButton
                                     />
+                                    <Analytics />
                                   </TJProvider>
                                 </TaskProvider>
                               </NotificationProvider>
