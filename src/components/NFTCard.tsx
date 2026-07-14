@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers } from 'lucide-react';
+import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers, History } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/contexts/AudioContext';
 import { cn, getPlaceholderImage, shareContent } from '@/lib/utils';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import NFTQuickViewModal from './NFTQuickViewModal';
+import { NFTTransactionHistoryModal } from './NFTTransactionHistoryModal';
 import { PriceSparkline } from './PriceSparkline';
 import SendNFTModal from './SendNFTModal';
 import SellNFTModal from './SellNFTModal';
@@ -70,6 +71,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   if (isLoading) {
     return <SkeletonCard variant={variant} />;
@@ -113,6 +115,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const handleQuickViewClick = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     setIsQuickViewOpen(true);
+  };
+
+  const handleHistoryClick = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setIsHistoryModalOpen(true);
   };
 
   const handleSendClick = (e?: React.MouseEvent) => {
@@ -175,6 +182,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         <Eye className="h-4 w-4" />
         <span className="text-[10px] font-bold uppercase tracking-widest">Quick View</span>
       </DropdownMenuItem>
+      <DropdownMenuItem onClick={handleHistoryClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
+        <History className="h-4 w-4" />
+        <span className="text-[10px] font-bold uppercase tracking-widest">Ledger History</span>
+      </DropdownMenuItem>
       
       {isOwner && (
         <>
@@ -234,6 +245,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       <ContextMenuItem onClick={handleQuickViewClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         <Eye className="h-4 w-4" />
         <span className="text-[10px] font-black uppercase tracking-widest">Quick View</span>
+      </ContextMenuItem>
+      <ContextMenuItem onClick={handleHistoryClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
+        <History className="h-4 w-4" />
+        <span className="text-[10px] font-black uppercase tracking-widest">Ledger History</span>
       </ContextMenuItem>
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
@@ -537,7 +552,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                </div>
 
                {/* Mini Price Sparkline Trend */}
-               <div className="mt-2 mb-2 px-0.5 selection:bg-transparent">
+               <div className="mt-2 mb-2 px-0.5 selection:bg-transparent w-20 max-w-[80px]">
                  <PriceSparkline basePrice={basePriceNum} history={nft.history} />
                </div>
 
@@ -604,6 +619,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         onClose={() => setIsQuickViewOpen(false)} 
       />
 
+      <NFTTransactionHistoryModal
+        nft={nft}
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+      />
+
       <SendNFTModal
         nft={nft}
         isOpen={isSendModalOpen}
@@ -617,6 +638,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           onSend={() => setIsSendModalOpen(true)}
           onBuy={() => navigate(`/nft/${nft.id}`)}
           onList={() => setIsSellModalOpen(true)}
+          onHistory={() => setIsHistoryModalOpen(true)}
         />
       )}
 

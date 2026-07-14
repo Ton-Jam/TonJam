@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAudio } from '@/contexts/AudioContext';
+import { useNFT } from '@/contexts/NFTContext';
 import { getPlaceholderImage, cn } from '@/lib/utils';
 
 // Import local Profile Components
@@ -131,6 +132,7 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
   const toast = useToast();
   const { openModal } = useModal();
   const { userProfile: currentUserProfile, artists } = useAudio();
+  const { nfts: contextNfts, getNFTsByArtist } = useNFT();
   const isOwnProfile = !visitorId;
   
   const [profile, setProfile] = useState<ProfileData>(() => {
@@ -357,13 +359,19 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
           />
         );
 
-      case 'nfts':
+      case 'nfts': {
+        const profileNFTs = isOwnProfile 
+          ? contextNfts 
+          : getNFTsByArtist(profile.uid).length > 0 
+            ? getNFTsByArtist(profile.uid) 
+            : contextNfts.filter(nft => nft.artistId === profile.uid || nft.creator.toLowerCase() === profile.name.toLowerCase());
         return (
           <NFTSection 
-            nfts={MOCK_NFTS} 
+            nfts={profileNFTs} 
             isOwnProfile={isOwnProfile} 
           />
         );
+      }
 
       case 'playlists':
         return (

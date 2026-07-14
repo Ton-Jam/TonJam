@@ -63,6 +63,7 @@ import { SponsoredJamFeed } from "@/components/search/SponsoredJamFeed";
 import { LiveSpaces } from "@/components/search/LiveSpaces";
 import { EarnTJPreview } from "@/components/search/EarnTJPreview";
 import { CommunityActivity } from "@/components/search/CommunityActivity";
+import { TrendingMusicChart } from "@/components/search/TrendingMusicChart";
 import QRScanner from '@/components/QRScanner';
 import { 
   FullDiscoverSkeleton, 
@@ -450,6 +451,11 @@ export const Discover: React.FC = () => {
             {/* 1. Welcome Hero */}
             <section className="px-4 pt-4">
               <WelcomeHero />
+            </section>
+
+            {/* Real-time Community Trending Chart */}
+            <section className="px-4">
+              <TrendingMusicChart />
             </section>
 
             {/* 2. Continue Listening */}

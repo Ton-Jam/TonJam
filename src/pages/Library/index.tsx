@@ -28,9 +28,19 @@ import { motion, AnimatePresence } from 'motion/react';
 const LibraryPage: React.FC = () => {
   const { userProfile } = useAuth();
   const data = useLibraryData();
-  const [viewLayout, setViewLayout] = useState<'grid' | 'list'>('grid');
+  const [viewLayout, setViewLayout] = useState<'grid' | 'list'>('list');
   const [showImporter, setShowImporter] = useState(false);
   const [selectedArtistProfileId, setSelectedArtistProfileId] = useState<string>('dj-krupy');
+  const [nftSearchQuery, setNftSearchQuery] = useState('');
+
+  // Filter NFTs dynamically by title or artist name
+  const filteredNfts = data.nfts.filter(nft => {
+    if (!nftSearchQuery) return true;
+    const q = nftSearchQuery.toLowerCase();
+    return nft.title.toLowerCase().includes(q) || nft.artist.toLowerCase().includes(q);
+  });
+
+  const filteredNftsFloorValue = filteredNfts.reduce((acc, nft) => acc + nft.floorPriceTon, 0);
 
   // Expanded and comprehensive filter chips
   const filterChips = [
@@ -76,25 +86,9 @@ const LibraryPage: React.FC = () => {
   };
 
   return (
-    <div className="page-container w-full min-h-screen bg-slate-950 text-white pb-24">
+    <div className="page-container w-full min-h-screen bg-[#0b1329] text-white pb-24">
       <div className="px-4 py-6 sm:px-6 w-full max-w-7xl mx-auto space-y-8">
         
-        {/* 1. LIBRARY HERO */}
-        {data.isLoading ? (
-          <StatsSkeleton />
-        ) : (
-          <LibraryHero 
-            userAvatar={userProfile?.avatar || (userProfile as any)?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'}
-            userName={userProfile?.name || 'Collector'}
-            likedCount={data.likedCount}
-            downloadCount={data.downloadCount}
-            nftCount={data.nftCount}
-            playlistCount={data.playlistCount}
-            albumCount={data.rawAlbums.length}
-            listeningHours={data.analytics.totalListeningHours}
-          />
-        )}
-
         {/* 2. QUICK ACTIONS */}
         {!data.isLoading && (
           <QuickActions 
@@ -118,6 +112,20 @@ const LibraryPage: React.FC = () => {
                 className="w-full bg-slate-900 border border-white/5 rounded-[10px] pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-[#0052FF] transition-all text-white placeholder:text-slate-500"
               />
             </div>
+
+            {/* Dedicated NFT Search Input */}
+            {(data.activeChip === 'All' || data.activeChip === 'NFT Music' || data.activeChip === 'Collections') && (
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+                <input
+                  type="text"
+                  placeholder="Filter NFTs by title or artist..."
+                  value={nftSearchQuery}
+                  onChange={(e) => setNftSearchQuery(e.target.value)}
+                  className="w-full bg-slate-900 border border-white/5 rounded-[10px] pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 transition-all text-white placeholder:text-slate-500 font-medium"
+                />
+              </div>
+            )}
 
             {/* Grid vs List View Toggle */}
             <div className="flex items-center gap-2 self-end md:self-auto">
@@ -238,6 +246,7 @@ const LibraryPage: React.FC = () => {
                       onCreatePlaylist={data.createPlaylist}
                       onDeletePlaylist={data.deletePlaylist}
                       onTogglePin={data.togglePinPlaylist}
+                      layout={viewLayout}
                     />
                   </div>
                 )}
@@ -245,7 +254,7 @@ const LibraryPage: React.FC = () => {
                 {/* 7. ALBUMS */}
                 {(data.activeChip === 'All' || data.activeChip === 'Albums' || data.activeChip === 'Favorites') && (
                   <div id="albums-section">
-                    <Albums albums={data.albums} />
+                    <Albums albums={data.albums} layout={viewLayout} />
                   </div>
                 )}
 
@@ -283,8 +292,9 @@ const LibraryPage: React.FC = () => {
                 {(data.activeChip === 'All' || data.activeChip === 'NFT Music' || data.activeChip === 'Collections') && (
                   <div id="nft-collection-section">
                     <NFTCollection 
-                      nfts={data.nfts} 
-                      totalFloorValue={data.totalNftsFloorValue} 
+                      nfts={filteredNfts} 
+                      totalFloorValue={filteredNftsFloorValue} 
+                      layout={viewLayout}
                     />
                   </div>
                 )}

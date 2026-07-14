@@ -77,7 +77,7 @@ export const Progress: React.FC<ProgressProps> = ({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        className="relative h-2 w-full bg-zinc-800 rounded-full cursor-pointer group transition-all"
+        className="relative h-1 w-full bg-zinc-800 rounded-full cursor-pointer group transition-all"
         id="tonjam-progress-bar-track"
       >
         {/* Filled Area */}

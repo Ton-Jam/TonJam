@@ -188,7 +188,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
       </div>
 
       {/* Mini Price Sparkline Trend */}
-      <div className="mt-2 select-none pointer-events-auto">
+      <div className="mt-2 select-none pointer-events-auto w-20 max-w-[80px]">
         <PriceSparkline basePrice={basePriceNum} history={nft.history} />
       </div>
 

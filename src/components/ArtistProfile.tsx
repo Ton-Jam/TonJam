@@ -8,6 +8,7 @@ import { useArtist } from '@/contexts/ArtistContext';
 import { Artist, NFTItem } from '@/types';
 import NFTCard from '@/components/NFTCard';
 import { toast } from 'sonner';
+import { ArtistProfileSkeleton } from '@/pages/Library/components/Skeletons';
 
 interface ArtistProfileProps {
   artistId?: string;
@@ -74,14 +75,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
   };
 
   if (isLoading) {
-    return (
-      <div className="w-full py-16 flex flex-col items-center justify-center space-y-4">
-        <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-          Synchronizing Artist Ledger...
-        </span>
-      </div>
-    );
+    return <ArtistProfileSkeleton />;
   }
 
   if (!currentArtist) {
@@ -94,9 +88,10 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="space-y-8 text-left font-sans text-white"
     >
       {/* Selector Dropdown to showcase reuse & switcher capability */}

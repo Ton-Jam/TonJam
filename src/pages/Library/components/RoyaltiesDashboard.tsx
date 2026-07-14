@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, Coins, Music, Gem, ExternalLink, Wallet, Sparkles, 
   ChevronRight, RefreshCw, AlertCircle, ArrowUpRight, Check, Play
@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import * as RechartsPrimitive from 'recharts';
 import confetti from 'canvas-confetti';
 import { useToast } from '@/components/layout/ToastProvider';
+import { RoyaltiesSkeleton } from './Skeletons';
 
 const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } = RechartsPrimitive as any;
 
@@ -20,12 +21,20 @@ const LegendRC = Legend as any;
 
 export const RoyaltiesDashboard: React.FC = () => {
   const toast = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimedTotal, setClaimedTotal] = useState(24.50);
   const [pendingBalance, setPendingBalance] = useState(4.82);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week');
   const [simLogs, setSimLogs] = useState<Array<{ text: string; type: 'info' | 'success' | 'metric' }>>([]);
   const [activeSimulation, setActiveSimulation] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 550);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Earnings Data
   const weeklyEarnings = [
@@ -190,6 +199,10 @@ export const RoyaltiesDashboard: React.FC = () => {
     }
     return null;
   };
+
+  if (isLoading) {
+    return <RoyaltiesSkeleton />;
+  }
 
   return (
     <div className="space-y-8 text-left select-none">

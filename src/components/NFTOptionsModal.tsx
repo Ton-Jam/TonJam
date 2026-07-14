@@ -1,5 +1,5 @@
 import React from 'react';
-import { Info, Share2, Send, Tag, Coins, Star, User, ExternalLink, Copy, Verified, ChevronRight, Trash } from 'lucide-react';
+import { Info, Share2, Send, Tag, Coins, Star, User, ExternalLink, Copy, Verified, ChevronRight, Trash, History } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
@@ -22,9 +22,10 @@ interface NFTOptionsModalProps {
   onSend?: () => void;
   onList?: () => void;
   onBuy?: () => void;
+  onHistory?: () => void;
 }
 
-const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend, onList, onBuy }) => {
+const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend, onList, onBuy, onHistory }) => {
   const navigate = useNavigate();
   const { addNotification, userProfile, setAnthem } = useAudio();
 
@@ -65,6 +66,10 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
         if (onBuy) onBuy();
         onClose();
         break;
+      case 'history':
+        if (onHistory) onHistory();
+        onClose();
+        break;
       case 'tonscan':
         window.open(`https://tonscan.org/nft/${nft.contractAddress || nft.id}`, '_blank');
         onClose();
@@ -103,6 +108,7 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
   const options = [
     { id: 'details', icon: Info, label: 'View Details', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('details') },
     { id: 'creator', icon: User, label: 'View Creator', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('creator') },
+    { id: 'history', icon: History, label: 'Ledger History', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('history') },
   ];
 
   if (isOwner) {

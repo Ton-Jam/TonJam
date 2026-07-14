@@ -12,7 +12,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onChangeTab
     { id: 'overview', label: 'Overview' },
     { id: 'tracks', label: 'Tracks' },
     { id: 'albums', label: 'Albums' },
-    { id: 'nfts', label: 'NFTs' },
+    { id: 'nfts', label: 'Collection Gallery' },
     { id: 'playlists', label: 'Playlists' },
     ...(isArtist ? [{ id: 'posts', label: 'Community Feed' }] : []),
     { id: 'about', label: 'About' },

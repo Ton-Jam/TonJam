@@ -394,7 +394,7 @@ export const PlayerScreen: React.FC = () => {
               <div className="w-full flex justify-between items-center px-6 mt-4 gap-4">
                 <div className="flex flex-col items-start text-left min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap w-full">
-                    <h1 className="text-2xl font-black tracking-tight text-white truncate max-w-[240px] sm:max-w-[280px]" id="full-track-title">
+                    <h1 className="text-2xl font-bold tracking-tight text-white truncate max-w-[240px] sm:max-w-[280px]" id="full-track-title">
                       {currentTrack.title}
                     </h1>
                     {currentTrack.isNFT && (

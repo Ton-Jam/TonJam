@@ -90,9 +90,10 @@
     width: 100% !important;
   }
 
-  /* Force dark-space background globally on all components in dark mode */
+  /* Dark Glass UI Theme with Global Navy Blue Background and Neon Accents */
   .dark {
-    background-color: #0A113A !important;
+    background: radial-gradient(circle at 50% 0%, #0A1647 0%, #050A24 100%) !important;
+    background-color: #050A24 !important;
   }
   .dark body,
   .dark .bg-background,
@@ -108,8 +109,11 @@
   .dark .bg-zinc-950\/60,
   .dark .bg-zinc-950\/80,
   .dark .bg-zinc-900\/50 {
-    background-color: #0A113A !important;
+    background: radial-gradient(circle at 50% 0%, #0A1647 0%, #050A24 100%) !important;
+    background-color: #050A24 !important;
   }
+
+  /* Frosted semi-transparent glass surfaces for panels, cards, containers */
   .dark .bg-card,
   .dark .bg-secondary,
   .dark .bg-zinc-800,
@@ -119,11 +123,7 @@
   .dark main section,
   .dark .section-container,
   .dark .bg-zinc-900\/40,
-  .dark .bg-zinc-900\/60 {
-    background-color: #0a113a !important;
-  }
-
-  /* Make sections, panels, and container backdrops lay completely clean and flat on Navy Blue */
+  .dark .bg-zinc-900\/60,
   .dark [class*="bg-[#0A113A]/50"],
   .dark [class*="bg-[#0A113A]/60"],
   .dark [class*="bg-[#0A113A]/40"],
@@ -149,33 +149,59 @@
   .dark [class*="bg-zinc-900/40"],
   .dark [class*="bg-zinc-900/60"],
   .dark [class*="bg-zinc-950/60"],
-  .dark [class*="bg-zinc-950/80"],
-  .dark [class*="backdrop-blur-"]:not(.mini-player-opaque):not(.mobile-nav-opaque),
-  .dark .backdrop-blur-md:not(.mini-player-opaque):not(.mobile-nav-opaque),
-  .dark .backdrop-blur-lg:not(.mini-player-opaque):not(.mobile-nav-opaque),
-  .dark .backdrop-blur-xl:not(.mini-player-opaque):not(.mobile-nav-opaque) {
-    background-color: transparent !important;
-    background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
+  .dark [class*="bg-zinc-950/80"] {
+    background-color: rgba(10, 17, 58, 0.45) !important;
+    background: rgba(10, 17, 58, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
   }
 
-  /* Ensure the mobile navigation bar and mini player have rich, luxurious, non-transparent dark obsidian with real frosted glass blur */
-  .dark .mini-player-opaque {
-    background-color: rgba(5, 10, 36, 0.96) !important;
-    background: rgba(5, 10, 36, 0.96) !important;
-    backdrop-filter: blur(28px) !important;
-    -webkit-backdrop-filter: blur(28px) !important;
-    box-shadow: none !important;
+  /* Interactive state for glass elements */
+  .dark .bg-card:hover,
+  .dark [class*="bg-white/0.05"]:hover,
+  .dark [class*="bg-white/[0.05]"]:hover,
+  .dark [class*="bg-white/[0.06]"]:hover,
+  .dark [class*="bg-white/[0.08]"]:hover {
+    background-color: rgba(10, 17, 58, 0.6) !important;
+    background: rgba(10, 17, 58, 0.6) !important;
+    box-shadow: 0 0 15px rgba(0, 180, 216, 0.15) !important;
+    border-color: rgba(0, 180, 216, 0.2) !important;
   }
 
+  /* Neon Primary and accents for active interactives */
+  .dark .btn-primary,
+  .dark .bg-primary {
+    background: linear-gradient(135deg, #00B4D8 0%, #009CC0 100%) !important;
+    box-shadow: 0 0 12px rgba(0, 180, 216, 0.4) !important;
+    border: none !important;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+    transition: all 0.2s ease-in-out;
+  }
+  .dark .btn-primary:hover,
+  .dark .bg-primary:hover {
+    background: linear-gradient(135deg, #33C7E5 0%, #00B4D8 100%) !important;
+    box-shadow: 0 0 20px rgba(0, 180, 216, 0.65) !important;
+  }
+
+  /* Neon focus styling for inputs */
+  .dark input:focus,
+  .dark textarea:focus,
+  .dark select:focus {
+    border-color: #00B4D8 !important;
+    box-shadow: 0 0 10px rgba(0, 180, 216, 0.3) !important;
+    background-color: rgba(5, 10, 36, 0.75) !important;
+  }
+
+  /* Ensure the mobile navigation bar and mini player have frosted glass */
+  .dark .mini-player-opaque,
   .dark .mobile-nav-opaque {
-    background-color: rgba(5, 10, 36, 0.96) !important;
-    background: rgba(5, 10, 36, 0.96) !important;
-    backdrop-filter: blur(28px) !important;
-    -webkit-backdrop-filter: blur(28px) !important;
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.65) !important;
+    background-color: rgba(5, 10, 36, 0.75) !important;
+    background: rgba(5, 10, 36, 0.75) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5) !important;
   }
 
   /* Force premium subtle silver outlines for target task card components */
