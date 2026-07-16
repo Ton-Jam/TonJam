@@ -481,7 +481,7 @@ const Tasks: React.FC = () => {
       <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-primary/10 to-transparent blur-[160px] pointer-events-none -z-10" />
       <div className="absolute top-[600px] right-[-150px] w-[350px] h-[350px] bg-verified/5 blur-[120px] pointer-events-none -z-10" />
 
-      <div className="max-w-md mx-auto px-4 pt-6 space-y-6">
+      <div className="w-full max-w-full px-4 sm:px-6 md:px-8 pt-6 space-y-6">
 
         {/* SECTION 1: EARN TJ HEADER */}
         <motion.div 

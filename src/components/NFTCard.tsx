@@ -34,6 +34,8 @@ import {
 } from "@/components/ui/context-menu";
 
 import { motion } from 'motion/react';
+import { cardTokens } from '@/design';
+
 
 interface NFTCardProps {
   nft: NFTItem;
@@ -456,11 +458,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             layout
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -10, scale: 1.05, boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.5)" }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ y: -6, scale: cardTokens.animation.hoverScale, boxShadow: "0 15px 30px -10px rgba(59, 130, 246, 0.3)" }}
+            whileTap={{ scale: cardTokens.animation.tapScale }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            style={{ width: cardTokens.nftTrack.width, height: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
             className={cn(
-              "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent border border-transparent hover:border-blue-500/60 hover:bg-white/[0.05] transition-all duration-300 w-full",
+              "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 bg-[#0A113A]/50 hover:bg-white/[0.05] transition-all duration-300 flex flex-col justify-between overflow-hidden",
               className
             )}
             onClick={handleCardClick}
@@ -475,7 +478,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             aria-label={`View NFT ${nft.title}`}
           >
             {/* Image Container - 1:1 Aspect Ratio with NFT Gradient Border */}
-            <div className="relative aspect-square overflow-hidden bg-neutral-900 transition-all rounded-[4px] mb-2 border border-white/5">
+            <div 
+              style={{ height: '115px', borderRadius: '6px' }}
+              className="relative w-full overflow-hidden bg-neutral-900 transition-all mb-1.5 flex-shrink-0"
+            >
               <img
                 src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
                 loading="lazy"
@@ -488,24 +494,19 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${getRarityColor(rarity)}`} />
               
               {/* Top Overlays */}
-              <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-10 pointer-events-none">
+              <div className="absolute top-1.5 left-1.5 right-1.5 flex justify-between items-start z-10 pointer-events-none">
                  <div className="flex flex-col gap-1">
-                    <span className={cn("px-1.5 py-0.5 bg-black/50 backdrop-blur-md rounded-[4px] text-[8px] font-bold uppercase tracking-[0.1em] text-white border border-white/10 shadow-lg flex items-center gap-1", supplyIndicator.className)}>
-                      {supplyIndicator.icon === 'Star' && <Star className="w-2 h-2 fill-current text-yellow-400 animate-spin-slow" />}
-                      {supplyIndicator.icon === 'Gem' && <Gem className="w-2 h-2" />}
+                    <span className={cn("px-1 py-0.2 bg-black/50 backdrop-blur-md rounded-[2px] text-[6.5px] font-bold uppercase tracking-[0.1em] text-white border border-white/10 shadow-lg flex items-center gap-0.5", supplyIndicator.className)}>
+                      {supplyIndicator.icon === 'Star' && <Star className="w-1.5 h-1.5 fill-current text-yellow-400 animate-spin-slow" />}
+                      {supplyIndicator.icon === 'Gem' && <Gem className="w-1.5 h-1.5" />}
                       {supplyIndicator.label}
                     </span>
                     {nft.listingType === 'auction' && (
                       <AuctionCountdownTimer nft={nft} variant="badge" />
                     )}
-                    {rarity && (
-                      <span className={`px-1.5 py-0.5 bg-gradient-to-r ${getRarityColor(rarity)} rounded-[4px] text-[8px] font-bold uppercase tracking-[0.1em] text-white shadow-lg border border-white/10`}>
-                        {rarity}
-                      </span>
-                    )}
                  </div>
                  
-                 <div className="flex gap-2 pointer-events-auto">
+                 <div className="flex gap-1 pointer-events-auto">
                     <MoreOptionsButton />
                   </div>
               </div>
@@ -514,15 +515,18 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               <div className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                  <button 
                    onClick={handlePlayClick} 
-                   className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-2xl shadow-blue-600/30 border border-white/20"
+                   className="absolute bottom-1.5 left-1.5 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-2xl shadow-blue-600/30 border border-white/20"
                  >
-                   {isActive && isPlaying ? <Pause className="h-4 w-4 fill-current animate-pulse" /> : <Play className="h-4 w-4 fill-current ml-0.5" />}
+                   {isActive && isPlaying ? <Pause className="h-3 w-3 fill-current animate-pulse" /> : <Play className="h-3 w-3 fill-current ml-0.5" />}
                  </button>
               </div>
             </div>
       
             {/* Artifact Data Footer */}
-            <div className="px-0.5 flex flex-col gap-1">
+            <div 
+              style={{ height: cardTokens.nftTrack.bottomMetadataHeight }}
+              className="px-0.5 flex flex-col justify-between"
+            >
                <div className="space-y-0.5">
                   <h3 className={`text-[9.5px] font-semibold uppercase tracking-tighter line-clamp-2 whitespace-normal break-words leading-tight ${isActive ? 'text-blue-500' : 'text-foreground'}`}>
                     {nft.title}
@@ -552,16 +556,16 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                </div>
 
                {/* Mini Price Sparkline Trend */}
-               <div className="mt-2 mb-2 px-0.5 selection:bg-transparent w-20 max-w-[80px]">
+               <div className="selection:bg-transparent w-16 max-w-[64px]">
                  <PriceSparkline basePrice={basePriceNum} history={nft.history} />
                </div>
 
-               <div className="flex items-end justify-between mt-1">
+               <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                     <p className="text-[8px] font-medium text-muted-foreground/30 uppercase tracking-[0.1em]">Price</p>
-                     <div className="flex items-center gap-1.5 bg-muted/40 py-0.5 px-2 rounded-[4px] border border-border/10">
+
+                     <div className="flex items-center gap-1.5 bg-muted/40 py-0.5 px-1.5 rounded-[4px] border border-border/10">
                         {currencyMode === 'USD' ? (
-                          <span className="text-sm font-black text-[#2BE08C]">$</span>
+                          <span className="text-[9.5px] font-extrabold text-[#2BE08C]">$</span>
                         ) : (
                           <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
                         )}
@@ -570,7 +574,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                           initial={{ opacity: 0, y: -2 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, ease: "easeOut" }}
-                          className="text-sm font-black text-foreground tracking-tighter inline-block"
+                          className="text-[9.5px] font-extrabold text-foreground tracking-tighter inline-block"
                         >
                           {formattedPrice}
                         </motion.span>
@@ -595,8 +599,9 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   <button 
                     onClick={handleActionClick} 
                     disabled={!isOwner && isAuctionEnded}
+                    style={{ height: cardTokens.nftTrack.mintButtonHeight }}
                     className={cn(
-                      "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 h-7 px-4 text-[9px] font-black uppercase tracking-[0.1em] text-white",
+                      "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 px-3 text-[8px] font-black uppercase tracking-[0.1em] text-white flex items-center justify-center leading-none",
                       isOwner 
                         ? 'bg-muted text-foreground' 
                         : (isAuctionEnded

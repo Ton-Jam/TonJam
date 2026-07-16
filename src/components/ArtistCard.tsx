@@ -10,6 +10,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 import { motion } from 'motion/react';
+import { cardTokens } from '@/design';
+
 
 interface ArtistCardProps {
   artist?: Artist;
@@ -84,45 +86,50 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.98 }}
-      className={cn("group flex flex-col items-center text-center relative cursor-pointer transition-all duration-300 rounded-card p-4 bg-surface hover:bg-hover w-full", className)}
+      whileHover={{ y: -4, scale: cardTokens.animation.hoverScale }}
+      whileTap={{ scale: cardTokens.animation.tapScale }}
+      style={{ width: cardTokens.artist.width, padding: cardTokens.global.padding, borderRadius: cardTokens.global.borderRadius }}
+      className={cn("group flex flex-col items-center text-center relative cursor-pointer transition-all duration-300 bg-[#0A113A]/50 hover:bg-white/[0.05]", className)}
       onClick={handleCardClick}
     >
-      <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-avatar overflow-hidden bg-background transition-all mb-3 border border-border-subtle">
+      <div 
+        style={{ width: cardTokens.artist.avatarSize, height: cardTokens.artist.avatarSize }}
+        className="relative rounded-full overflow-hidden bg-background transition-all mb-2 border border-white/5 flex-shrink-0"
+      >
         <img 
           src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
           alt={artist.name} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 rounded-avatar" 
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
           onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }}
         />
         {onMoreClick && (
           <button
-             className="absolute top-2 right-2 p-1.5 bg-background/80 backdrop-blur-md rounded-avatar border border-border-subtle text-text-primary hover:text-primary transition-all"
+             className="absolute top-1.5 right-1.5 p-1 bg-black/60 backdrop-blur-md rounded-full border border-white/10 text-white/80 hover:text-white transition-all"
              onClick={(e) => { e.stopPropagation(); onMoreClick(artist); }}
           >
-            <MoreHorizontal className="h-3.5 w-3.5" />
+            <MoreHorizontal className="h-3 w-3" />
           </button>
         )}
       </div>
 
-      <div className="w-full flex flex-col items-center gap-1">
-        <div className="flex items-center gap-1.5 justify-center max-w-full">
-          <h3 className="text-card-title text-text-primary truncate max-w-[150px]">
+      <div className="w-full flex flex-col items-center gap-0.5">
+        <div className="flex items-center gap-1 justify-center max-w-full">
+          <h3 className="text-[12px] font-bold text-foreground truncate max-w-[100px] uppercase tracking-tight">
             {artist.name}
           </h3>
-          {artist.verified && <Verified className="w-3.5 h-3.5 text-verified flex-shrink-0" />}
+          {artist.verified && <Verified className="w-3 h-3 text-blue-400 fill-current flex-shrink-0" />}
         </div>
         
-        <p className="text-caption truncate mb-3">
-          @{artist.username || artist.name.toLowerCase().replace(/\s+/g, '')}
+        <p className="text-[10px] text-muted-foreground truncate mb-2 uppercase tracking-wider font-semibold">
+          {artist.followers ? `${artist.followers.toLocaleString()} fans` : 'artist'}
         </p>
 
         <Button 
           variant={isFollowing ? "secondary" : "primary"}
           size="sm"
           onClick={handleFollowClick}
-          className="w-full h-8 text-[9px] uppercase tracking-widest"
+          style={{ height: cardTokens.artist.followButtonHeight }}
+          className="w-full text-[8px] uppercase tracking-widest font-black rounded-full"
         >
           {isFollowing ? 'UNFOLLOW' : 'FOLLOW'}
         </Button>

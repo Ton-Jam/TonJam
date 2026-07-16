@@ -62,7 +62,7 @@ import { WelcomeHero } from "@/components/search/WelcomeHero";
 import { SponsoredJamFeed } from "@/components/search/SponsoredJamFeed";
 import { LiveSpaces } from "@/components/search/LiveSpaces";
 import { EarnTJPreview } from "@/components/search/EarnTJPreview";
-import { CommunityActivity } from "@/components/search/CommunityActivity";
+import { SocialActivityFeed } from "@/components/SocialActivityFeed";
 import { TrendingMusicChart } from "@/components/search/TrendingMusicChart";
 import QRScanner from '@/components/QRScanner';
 import { 
@@ -129,6 +129,21 @@ const SUGGESTED_USERS = [
   { uid: 'sug-3', name: 'Quantum Beatmaker', username: 'quantum_beats', avatar: 'https://picsum.photos/seed/quantum/100/100', followers: 4890 }
 ];
 
+const GENRES = [
+  { id: 'All', label: 'All Styles', emoji: '🎵' },
+  { id: 'Phonk', label: 'Phonk', emoji: '🚗' },
+  { id: 'Synthwave', label: 'Synthwave', emoji: '🌌' },
+  { id: 'Acoustic Cyber', label: 'Acoustic Cyber', emoji: '🎸' },
+  { id: 'Afro-TON', label: 'Afro-TON', emoji: '🥁' },
+  { id: 'Electronic', label: 'Electronic', emoji: '⚡' },
+  { id: 'Hip Hop', label: 'Hip Hop', emoji: '🎤' },
+  { id: 'Techno', label: 'Techno', emoji: '🌀' },
+  { id: 'Ambient', label: 'Ambient', emoji: '🍃' },
+  { id: 'Rock', label: 'Rock', emoji: '🔥' },
+  { id: 'Pop', label: 'Pop', emoji: '✨' },
+  { id: 'Lo-Fi', label: 'Lo-Fi', emoji: '☕' }
+];
+
 export const Discover: React.FC = () => {
   const navigate = useNavigate();
   const {
@@ -155,6 +170,7 @@ export const Discover: React.FC = () => {
   const [visibleItemsCount, setVisibleItemsCount] = useState(6);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedGenre, setSelectedGenre] = useState<string>('All');
 
   // Recently Viewed NFTs Tracking
   const [recentlyViewedNfts, setRecentlyViewedNfts] = useState<any[]>(() => {
@@ -266,7 +282,13 @@ export const Discover: React.FC = () => {
   // Search Results Calculations
   const filteredResults = useMemo(() => {
     const q = debouncedQuery.toLowerCase().trim();
-    if (!q) {
+    const matchesGenre = (genre: string | undefined | null) => {
+      if (selectedGenre === 'All') return true;
+      if (!genre) return false;
+      return genre.toLowerCase() === selectedGenre.toLowerCase();
+    };
+
+    if (!q && selectedGenre === 'All') {
       return {
         tracks: [],
         artists: [],
@@ -277,34 +299,54 @@ export const Discover: React.FC = () => {
       };
     }
 
+    // Filter bases first by selectedGenre
+    const baseTracks = allTracks.filter(t => matchesGenre(t.genre));
+    const baseArtists = artists.filter(a => matchesGenre(a.genre));
+    const baseNFTs = allNFTs.filter(n => matchesGenre((n as any).genre) || matchesGenre((n as any).style));
+    const basePlaylists = allUserPlaylists.filter(p => matchesGenre((p as any).genre));
+
+    if (!q) {
+      // Return everything matching the style if no search text is typed
+      return {
+        tracks: baseTracks,
+        artists: baseArtists,
+        albums: (baseTracks
+          .map((t) => ({ id: t.albumId || '', title: t.title + ' Album', artist: t.artist, coverUrl: t.coverUrl }))
+          .filter((a) => a.id) as any[]),
+        playlists: basePlaylists,
+        nfts: baseNFTs,
+        users: []
+      };
+    }
+
     return {
-      tracks: allTracks.filter(
+      tracks: baseTracks.filter(
         (t) =>
           t.title?.toLowerCase().includes(q) ||
           t.artist?.toLowerCase().includes(q) ||
           t.genre?.toLowerCase().includes(q)
       ),
-      artists: artists.filter(
+      artists: baseArtists.filter(
         (a) =>
           a.name?.toLowerCase().includes(q) ||
           a.genre?.toLowerCase().includes(q)
       ),
-      albums: (allTracks
+      albums: (baseTracks
         .map((t) => ({ id: t.albumId || '', title: t.title + ' Album', artist: t.artist, coverUrl: t.coverUrl }))
         .filter((a) => a.id && a.title.toLowerCase().includes(q)) as any[]),
-      playlists: allUserPlaylists.filter(
+      playlists: basePlaylists.filter(
         (p) =>
           p.title?.toLowerCase().includes(q) ||
           p.description?.toLowerCase().includes(q)
       ),
-      nfts: allNFTs.filter((n) => n.title?.toLowerCase().includes(q)),
+      nfts: baseNFTs.filter((n) => n.title?.toLowerCase().includes(q)),
       users: firestoreUsers.filter(
         (u) =>
           u.name?.toLowerCase().includes(q) ||
           u.username?.toLowerCase().includes(q)
       ) as any[]
     };
-  }, [debouncedQuery, allTracks, artists, allUserPlaylists, allNFTs, firestoreUsers]);
+  }, [debouncedQuery, allTracks, artists, allUserPlaylists, allNFTs, firestoreUsers, selectedGenre]);
 
   // Simulate Pull-To-Refresh Interaction
   const handleRefresh = () => {
@@ -412,6 +454,28 @@ export const Discover: React.FC = () => {
         <div className="w-full px-4 md:px-8 pt-3 pb-1 overflow-hidden">
           <QuickFilters activeFilter={activeFilter} onFilterChange={setActiveFilter} />
         </div>
+
+        {/* Horizontal scrollable list of music genres */}
+        <div className="w-full px-4 md:px-8 pt-1.5 pb-2 overflow-x-auto no-scrollbar flex gap-2 select-none">
+          {GENRES.map((genre) => {
+            const isSelected = selectedGenre === genre.id;
+            return (
+              <button
+                key={genre.id}
+                onClick={() => setSelectedGenre(genre.id)}
+                className={`relative px-3.5 py-1.5 shrink-0 rounded-[12px] text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-colors duration-200 overflow-hidden flex items-center gap-1.5 ${
+                  isSelected 
+                    ? 'bg-[#00B4D8]/15 text-[#00B4D8]' 
+                    : 'bg-[#0c133a] text-slate-400 hover:text-white hover:bg-[#121c4e]'
+                }`}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
+              >
+                <span>{genre.emoji}</span>
+                <span>{genre.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Main Discover Canvas Container */}
@@ -435,15 +499,18 @@ export const Discover: React.FC = () => {
               )}
             </div>
           </div>
-        ) : debouncedQuery.trim() ? (
+        ) : (debouncedQuery.trim() || selectedGenre !== 'All') ? (
           <SearchResults
-            query={debouncedQuery}
+            query={debouncedQuery || selectedGenre}
             activeFilter={activeFilter}
             results={filteredResults}
             onPlayTrack={playTrack}
             followedUserIds={followedUserIds}
             onToggleFollow={toggleFollowUser}
-            onClearQuery={() => setQuery('')}
+            onClearQuery={() => {
+              setQuery('');
+              setSelectedGenre('All');
+            }}
           />
         ) : (
           <div className="space-y-12 pb-24">
@@ -592,9 +659,9 @@ export const Discover: React.FC = () => {
               />
             </section>
 
-            {/* 15. Community Activity */}
+            {/* 15. Community Activity (Real-time Social Activity Feed) */}
             <section className="px-4">
-              <CommunityActivity />
+              <SocialActivityFeed />
             </section>
 
             {/* 16. Recently Played */}

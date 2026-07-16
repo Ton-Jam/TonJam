@@ -25,7 +25,7 @@ export default function ArtistAnalytics() {
         <div className="w-8" />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto p-4 sm:p-8 space-y-8 mt-4">
+      <div className="relative z-10 w-full max-w-full p-4 sm:p-8 space-y-8 mt-4">
         <ArtistRevenueDashboard />
       </div>
     </div>

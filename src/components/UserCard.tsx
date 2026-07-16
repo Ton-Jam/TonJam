@@ -3,16 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { Verified, Users, UserPlus, UserCheck } from 'lucide-react';
 import { Artist, UserProfile } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, cn } from '@/lib/utils';
+import { cardTokens } from '@/design';
 
 import { MOCK_ARTISTS } from '@/constants';
 
 interface UserCardProps {
   user: Artist | UserProfile;
   variant?: 'portrait' | 'compact' | 'row';
+  className?: string;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
+const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait', className = '' }) => {
   const navigate = useNavigate();
   const { followedUserIds, toggleFollowUser, userProfile } = useAudio();
 
@@ -128,7 +130,8 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
   return (
     <div 
       onClick={handleClick}
-      className="group relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent hover:bg-white/[0.03] border border-transparent w-full"
+      style={{ width: cardTokens.user.width, padding: cardTokens.global.padding, borderRadius: cardTokens.global.borderRadius }}
+      className={cn("group relative cursor-pointer bg-[#0A113A]/50 hover:bg-white/[0.05] transition-all duration-300 flex flex-col justify-between items-center text-center overflow-hidden", className)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -139,43 +142,39 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       tabIndex={0}
       aria-label={`View profile of ${user.name}`}
     >
-      <div className="relative aspect-square overflow-hidden bg-neutral-900 transition-all rounded-[4px] mb-2 border border-white/5">
+      <div 
+        style={{ width: cardTokens.user.avatarSize, height: cardTokens.user.avatarSize }}
+        className="relative rounded-full overflow-hidden bg-neutral-900 mb-2.5 border border-white/5 flex-shrink-0"
+      >
         <img 
           src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} 
           alt={user.name} 
-          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
           onError={(e) => { e.currentTarget.src = getPlaceholderImage(`user-${user.uid}`); }}
         />
       </div>
       
-      <div className="px-0.5 flex flex-col gap-1">
-        <div className="space-y-0.5">
-          <div className="flex items-center gap-1">
-            <h3 className="text-xs font-black uppercase tracking-tighter line-clamp-2 whitespace-normal break-words leading-tight text-foreground truncate">
+      <div className="w-full flex flex-col gap-1 text-center items-center">
+        <div className="space-y-0.5 w-full">
+          <div className="flex items-center gap-1 justify-center max-w-full">
+            <h3 style={{ fontSize: cardTokens.user.usernameSize }} className="font-extrabold uppercase tracking-tight text-foreground truncate max-w-[80px] leading-tight">
               {user.name}
             </h3>
-            {verified && <Verified className="w-2.5 h-2.5 text-primary flex-shrink-0" />}
+            {verified && <Verified className="text-blue-400 fill-current flex-shrink-0" style={{ width: cardTokens.user.verifiedBadgeSize, height: cardTokens.user.verifiedBadgeSize }} />}
           </div>
-          <p className="text-[10px] font-medium text-foreground/80 uppercase tracking-[0.1em] truncate">
+          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate w-full">
             {genre || 'COLLECTOR'}
           </p>
         </div>
 
-        <div className="flex items-end justify-between mt-2">
-          <div className="space-y-0.5">
-            <p className="text-[8px] font-medium text-muted-foreground/30 uppercase tracking-[0.1em]">Network Fans</p>
-            <div className="flex items-center gap-1 bg-muted/40 py-0.5 px-2 rounded-[4px] border border-border/10 text-muted-foreground text-[10px] font-extrabold tracking-widest">
-              {user.followers?.toLocaleString() || 0}
-            </div>
-          </div>
-          
+        <div className="w-full mt-2">
           {!isOwnProfile && (
             <button 
               onClick={handleFollow}
-              className={`cursor-pointer transition-all rounded-[4px] border-b-[2px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[4px] active:border-b-[1px] active:brightness-90 active:translate-y-[1px] h-8 px-3 text-[9px] font-black uppercase tracking-[0.1em] text-white
+              className={`cursor-pointer transition-all rounded-full h-7 w-full text-[8px] font-black uppercase tracking-[0.1em] text-white flex items-center justify-center
                 ${isFollowing 
-                  ? 'bg-muted text-foreground border-border' 
-                  : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 border-blue-600'
+                  ? 'bg-muted text-foreground border border-border' 
+                  : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 shadow-lg shadow-blue-500/20'
                 }
               `}
               aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
+import { colors, radius, spacing, typography } from "@/design";
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -43,8 +44,15 @@ export function BottomSheet({ isOpen, onClose, title, children, className }: Bot
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 220 }}
+            style={{
+              borderTopLeftRadius: radius.sheet,
+              borderTopRightRadius: radius.sheet,
+              backgroundColor: colors.dark.surface,
+              borderColor: colors.dark.border,
+              fontFamily: typography.fontFamily.primary,
+            }}
             className={cn(
-              "fixed bottom-0 left-0 right-0 bg-surface rounded-t-sheet border-t border-border-subtle z-[1400] max-h-[85vh] overflow-y-auto flex flex-col pb-safe shadow-2xl",
+              "fixed bottom-0 left-0 right-0 border-t z-[1400] max-h-[85vh] overflow-y-auto flex flex-col pb-safe shadow-2xl",
               className
             )}
           >
@@ -55,9 +63,22 @@ export function BottomSheet({ isOpen, onClose, title, children, className }: Bot
 
             {/* Header */}
             {(title || onClose) && (
-              <div className="flex items-center justify-between px-6 pb-4 shrink-0">
+              <div
+                style={{
+                  paddingLeft: spacing[24],
+                  paddingRight: spacing[24],
+                  paddingBottom: spacing[16],
+                }}
+                className="flex items-center justify-between shrink-0"
+              >
                 {title ? (
-                  <h3 className="text-sm font-black uppercase tracking-wider text-text-primary">
+                  <h3
+                    style={{
+                      fontSize: typography.fontSize.caption,
+                      fontFamily: typography.fontFamily.primary,
+                    }}
+                    className="font-black uppercase tracking-wider text-text-primary"
+                  >
                     {title}
                   </h3>
                 ) : (
@@ -75,10 +96,20 @@ export function BottomSheet({ isOpen, onClose, title, children, className }: Bot
             )}
 
             {/* Content */}
-            <div className="px-6 pb-8 overflow-y-auto">{children}</div>
+            <div
+              style={{
+                paddingLeft: spacing[24],
+                paddingRight: spacing[24],
+                paddingBottom: spacing[32],
+              }}
+              className="overflow-y-auto"
+            >
+              {children}
+            </div>
           </motion.div>
         </>
       )}
     </AnimatePresence>
   );
 }
+

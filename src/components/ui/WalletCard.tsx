@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Wallet, ArrowUpRight, ArrowDownLeft, ShieldCheck } from "lucide-react";
-import { colors } from "@/design";
+import { colors, radius, spacing, typography } from "@/design";
 import { Button } from "./button";
 
 interface WalletCardProps {
@@ -20,9 +20,15 @@ export function WalletCard({
 }: WalletCardProps) {
   return (
     <div 
-      className="p-5 rounded-card bg-surface border border-border-subtle flex flex-col justify-between"
-      style={{ backgroundColor: colors.dark.surface, borderColor: colors.dark.border }}
+      className="p-5 border flex flex-col justify-between"
+      style={{
+        backgroundColor: colors.dark.surface,
+        borderColor: colors.dark.border,
+        borderRadius: radius.card,
+        fontFamily: typography.fontFamily.primary,
+      }}
     >
+
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-full bg-white/5">

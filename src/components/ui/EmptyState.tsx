@@ -1,6 +1,7 @@
 import * as React from "react";
 import { FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { colors, radius, spacing, typography } from "@/design";
 
 interface EmptyStateProps extends React.ComponentProps<"div"> {
   title?: string;
@@ -8,11 +9,20 @@ interface EmptyStateProps extends React.ComponentProps<"div"> {
   icon?: React.ReactNode;
 }
 
-export function EmptyState({ className, title = "No items found", description, icon, ...props }: EmptyStateProps) {
+export function EmptyState({ className, title = "No items found", description, icon, style, ...props }: EmptyStateProps) {
+  const tokenStyle: React.CSSProperties = {
+    borderRadius: radius.card,
+    borderColor: colors.dark.border,
+    fontFamily: typography.fontFamily.primary,
+    padding: spacing[32],
+    ...style,
+  };
+
   return (
     <div
+      style={tokenStyle}
       className={cn(
-        "flex flex-col items-center justify-center text-center p-8 rounded-card bg-surface/30 border border-border-subtle",
+        "flex flex-col items-center justify-center text-center border bg-surface/30",
         className
       )}
       {...props}
@@ -20,14 +30,27 @@ export function EmptyState({ className, title = "No items found", description, i
       <div className="mb-3 text-text-muted shrink-0">
         {icon || <FolderOpen className="size-8 opacity-40" />}
       </div>
-      <h3 className="text-xs font-black uppercase tracking-wider text-text-primary mb-1">
+      <h3
+        style={{
+          fontSize: typography.fontSize.caption,
+          fontFamily: typography.fontFamily.primary,
+        }}
+        className="font-black uppercase tracking-wider text-text-primary mb-1"
+      >
         {title}
       </h3>
       {description && (
-        <p className="text-[10px] font-medium text-text-muted max-w-xs leading-normal">
+        <p
+          style={{
+            fontSize: typography.fontSize.label,
+            color: colors.dark.textMuted,
+          }}
+          className="font-medium max-w-xs leading-normal"
+        >
           {description}
         </p>
       )}
     </div>
   );
 }
+

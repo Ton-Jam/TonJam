@@ -87,7 +87,7 @@ const LibraryPage: React.FC = () => {
 
   return (
     <div className="page-container w-full min-h-screen bg-[#0b1329] text-white pb-24">
-      <div className="px-4 py-6 sm:px-6 w-full max-w-7xl mx-auto space-y-8">
+      <div className="px-4 py-6 sm:px-6 md:px-8 w-full max-w-full space-y-8">
         
         {/* 2. QUICK ACTIONS */}
         {!data.isLoading && (

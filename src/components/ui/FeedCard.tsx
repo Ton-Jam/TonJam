@@ -3,6 +3,7 @@ import { Heart, MessageSquare, Share2, MoreHorizontal } from "lucide-react";
 import { Button } from "./button";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { VerifiedBadge } from "./VerifiedBadge";
+import { colors, radius, spacing, typography } from "@/design";
 
 interface FeedCardProps {
   author?: {
@@ -33,7 +34,16 @@ export function FeedCard({
   onShare,
 }: FeedCardProps) {
   return (
-    <div className="p-5 rounded-card bg-surface border border-border-subtle flex flex-col gap-3">
+    <div
+      style={{
+        backgroundColor: colors.dark.surface,
+        borderColor: colors.dark.border,
+        borderRadius: radius.card,
+        fontFamily: typography.fontFamily.primary,
+        padding: spacing[20],
+      }}
+      className="border flex flex-col gap-3"
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

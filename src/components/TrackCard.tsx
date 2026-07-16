@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from 'motion/react';
+import { cardTokens } from '@/design';
+
 
 const CountdownTimer: React.FC<{ targetDate: string }> = ({ targetDate }) => {
   const calculateTimeLeft = React.useCallback(() => {
@@ -320,10 +322,11 @@ const TrackCard: React.FC<TrackCardProps> = ({
   const MoreOptionsButton = () => (
     <button 
       onClick={handleOptions}
-      className="p-2 rounded-xl transition-all hover:bg-white/10 text-foreground hover:text-blue-400 flex-shrink-0 active:scale-90"
+      style={{ width: cardTokens.track.actionIconSize, height: cardTokens.track.actionIconSize }}
+      className="p-1 rounded-xl transition-all hover:bg-white/10 text-foreground hover:text-blue-400 flex-shrink-0 active:scale-90 flex items-center justify-center"
       aria-label="Track options"
     >
-      <MoreVertical className="h-6 w-6" strokeWidth={3} />
+      <MoreVertical style={{ width: cardTokens.track.actionIconSize, height: cardTokens.track.actionIconSize }} strokeWidth={3} />
     </button>
   );
 
@@ -344,15 +347,19 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <ContextMenu>
         <ContextMenuTrigger>
         <motion.div 
-          whileHover={{ scale: 1.015 }}
-          whileTap={{ scale: 0.98 }}
-          className={`group flex items-center gap-5 p-3 rounded-card hover:bg-hover transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-primary/50 ${className}`}
+          whileHover={{ scale: cardTokens.animation.hoverScale }}
+          whileTap={{ scale: cardTokens.animation.tapScale }}
+          style={{ height: cardTokens.track.height, padding: cardTokens.track.padding, borderRadius: cardTokens.global.borderRadius }}
+          className={`group flex items-center gap-4 hover:bg-hover transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-primary/50 ${className}`}
           onClick={handleCardClickInner}
           onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
           role="button"
           tabIndex={0}
         >
-            <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0 shadow-sm border border-white/5 group-hover:border-blue-500/30 transition-colors">
+            <div 
+              style={{ width: cardTokens.track.artworkSize, height: cardTokens.track.artworkSize }}
+              className="relative rounded-[4px] overflow-hidden flex-shrink-0 shadow-sm border border-white/5 group-hover:border-blue-500/30 transition-colors"
+            >
               <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
               
               {/* Play Count Badge on Corner */}
@@ -379,7 +386,12 @@ const TrackCard: React.FC<TrackCardProps> = ({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className={`text-[9px] font-bold uppercase tracking-tighter line-clamp-2 whitespace-normal break-words ${isActive ? 'text-primary' : 'text-foreground'}`}>{track.title}</h4>
+                <h4 
+                  style={{ fontSize: cardTokens.track.titleSize }}
+                  className={`font-semibold uppercase tracking-tighter line-clamp-1 whitespace-nowrap overflow-hidden text-ellipsis ${isActive ? 'text-primary' : 'text-text-primary'}`}
+                >
+                  {track.title}
+                </h4>
                 {isComingSoon && (
                   <span className="text-[6.5px] font-black tracking-widest text-[#050A24] bg-amber-500 px-1 py-0.2 rounded-[2px] uppercase animate-pulse">
                     SOON
@@ -389,7 +401,8 @@ const TrackCard: React.FC<TrackCardProps> = ({
               <HoverCard>
                 <HoverCardTrigger asChild>
                   <p 
-                    className="text-[8.5px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-0.5 group-hover:text-primary transition-colors hover:underline cursor-pointer inline-block"
+                    style={{ fontSize: cardTokens.track.artistSize }}
+                    className="font-medium text-text-muted uppercase tracking-[0.2em] mt-0.5 group-hover:text-primary transition-colors hover:underline cursor-pointer inline-block"
                     onClick={handleArtistClick}
                   >
                     {track.artist}
@@ -431,10 +444,12 @@ const TrackCard: React.FC<TrackCardProps> = ({
         <ContextMenuTrigger>
           <motion.div 
           whileHover={{ opacity: 1, backgroundColor: "var(--color-hover)" }}
-          className={`flex flex-col w-full group/row border-b border-divider last:border-0 transition-colors rounded-card ${className}`}
+          style={{ borderRadius: cardTokens.global.borderRadius }}
+          className={`flex flex-col w-full group/row border-b border-divider last:border-0 transition-colors ${className}`}
         >
             <div 
-              className="flex items-center gap-4 px-4 sm:px-8 py-2 sm:py-3 cursor-pointer w-full outline-none focus-visible:bg-white/5"
+              style={{ height: cardTokens.track.height, padding: cardTokens.track.padding }}
+              className="flex items-center gap-4 cursor-pointer w-full outline-none focus-visible:bg-white/5"
               onClick={handleCardClickInner}
               onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
               role="button"
@@ -448,7 +463,8 @@ const TrackCard: React.FC<TrackCardProps> = ({
               )}
 
               <div 
-                className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0 cursor-pointer shadow-sm group/thumb border border-white/5 group-hover/row:border-blue-500/20 transition-colors" 
+                style={{ width: cardTokens.track.artworkSize, height: cardTokens.track.artworkSize }}
+                className="relative rounded-[4px] overflow-hidden flex-shrink-0 cursor-pointer shadow-sm group/thumb border border-white/5 group-hover/row:border-blue-500/20 transition-colors" 
                 onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
               >
                 <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-700" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
@@ -486,7 +502,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className={`text-xs font-bold uppercase tracking-tight line-clamp-2 whitespace-normal break-words ${isActive ? 'text-primary' : 'text-foreground'}`}>
+                  <h4 
+                    style={{ fontSize: cardTokens.track.titleSize }}
+                    className={`font-semibold uppercase tracking-tight line-clamp-1 whitespace-nowrap overflow-hidden text-ellipsis ${isActive ? 'text-primary' : 'text-text-primary'}`}
+                  >
                     {track.title}
                   </h4>
                   {isComingSoon && (
@@ -499,7 +518,8 @@ const TrackCard: React.FC<TrackCardProps> = ({
                   <HoverCard>
                     <HoverCardTrigger asChild>
                       <p 
-                        className="text-[8.5px] font-black text-foreground/80 uppercase tracking-[0.2em] truncate hover:text-primary transition-colors cursor-pointer hover:underline"
+                        style={{ fontSize: cardTokens.track.artistSize }}
+                        className="font-medium text-text-muted uppercase tracking-[0.2em] truncate hover:text-primary transition-colors cursor-pointer hover:underline"
                         onClick={handleArtistClick}
                       >
                         {track.artist}

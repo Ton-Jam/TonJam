@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Task } from '@/types';
 import { TJ_COIN_ICON } from '@/constants';
 import { Button } from '@/components/ui/button';
+import { cardTokens } from '@/design';
 
 interface TaskCardProps {
   task: Task;
@@ -107,14 +108,16 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
   return (
     <motion.div
       layout
-      whileHover={{ y: -1 }}
+      whileHover={{ y: -2, scale: cardTokens.animation.hoverScale }}
+      whileTap={{ scale: cardTokens.animation.tapScale }}
       onClick={handleCardClick}
-      className={`relative w-full rounded-xl transition-all duration-300 select-none overflow-hidden cursor-pointer flex flex-col justify-between p-3 border border-slate-800 ${
+      style={{ padding: cardTokens.mission.padding, borderRadius: cardTokens.global.borderRadius }}
+      className={`relative w-full transition-all duration-300 select-none overflow-hidden cursor-pointer flex flex-col justify-between border border-transparent ${
         task.claimed 
-          ? 'bg-slate-900/50 opacity-65' 
+          ? 'bg-[#0A113A]/30 opacity-60' 
           : task.completed
-            ? 'bg-slate-900 border-emerald-500/20'
-            : 'bg-slate-950 border-slate-800 hover:border-blue-500/30'
+            ? 'bg-[#0A113A]/70'
+            : 'bg-[#0A113A]/50 hover:bg-white/[0.05]'
       }`}
     >
       {/* Header: Type and Rarity */}
@@ -124,29 +127,29 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
           {getRarityBadge()}
         </div>
         
-        <span className="text-[9px] font-mono font-bold text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded">
+        <span className="text-[9px] font-mono font-bold text-slate-400 bg-black/40 px-1.5 py-0.5 rounded">
           {task.progress}/{task.total}
         </span>
       </div>
 
       {/* Main Content Info */}
       <div className="flex items-start gap-2.5 mb-3">
-        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-900 shrink-0">
+        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-black/40 shrink-0">
           {getIcon()}
         </div>
 
         <div className="space-y-0.5 flex-1 min-w-0">
-          <h4 className="text-xs font-bold text-slate-200 leading-snug tracking-tight">
+          <h4 className="text-xs font-bold text-white leading-snug tracking-tight uppercase">
             {task.title}
           </h4>
-          <p className="text-[10px] text-slate-500 leading-tight">
+          <p className="text-[10px] text-muted-foreground leading-tight">
             {task.description}
           </p>
         </div>
       </div>
 
       {/* Footer: Bottom row with Rewards and CTA Button */}
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800">
+      <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-white/[0.03]">
         <div className="flex items-center gap-1.5">
             <span className="text-xs font-bold text-white">{task.reward}</span>
             <img src={TJ_COIN_ICON} alt="TJ" className="w-3.5 h-3.5 object-contain" referrerPolicy="no-referrer" />
@@ -155,7 +158,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
 
         <div className="shrink-0">
           {task.claimed ? (
-            <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest bg-slate-800 px-2 py-1 rounded inline-block">
+            <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest bg-white/5 px-2 py-1 rounded inline-block">
               Claimed
             </span>
           ) : task.completed ? (
@@ -163,7 +166,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
               size="sm"
               onClick={handleClaim}
               disabled={isClaiming}
-              className="h-7 text-[9px] font-bold uppercase px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md cursor-pointer"
+              style={{ height: cardTokens.mission.buttonHeight }}
+              className="text-[9px] font-bold uppercase px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full cursor-pointer flex items-center justify-center leading-none"
             >
               {isClaiming ? 'Claiming...' : 'Claim'}
             </Button>

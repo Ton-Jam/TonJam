@@ -8,6 +8,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { uploadToPinata, uploadJSONToPinata } from '@/services/storageService';
 import { mintTonJamNFT } from '@/services/tonService';
+import { createActivityPost } from '@/services/socialService';
 import { validateFile } from '@/lib/utils';
 import { 
   Dialog, 
@@ -48,6 +49,76 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
   const [price, setPrice] = useState(preselectedTrack?.price || '2.5');
   const [editions, setEditions] = useState(preselectedTrack?.editions || '100');
   const [lyrics, setLyrics] = useState(preselectedTrack?.lyrics || '');
+
+  // Gemini Tone Analysis State
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analyzedTone, setAnalyzedTone] = useState<{
+    genre: string;
+    moods: string[];
+    energy: string;
+    tempo: string;
+    instruments: string[];
+    analysisSummary: string;
+  } | null>(null);
+
+  const handleAnalyzeTone = async () => {
+    if (!audioFile && !audioPreview) {
+      addNotification("Please load or upload an audio file first", "warning");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      let res;
+      if (audioFile) {
+        const formData = new FormData();
+        formData.append('audio', audioFile);
+        formData.append('title', title);
+        formData.append('genre', genre);
+        res = await fetch('/api/gemini/analyze-tone', {
+          method: 'POST',
+          body: formData,
+        });
+      } else {
+        res = await fetch('/api/gemini/analyze-tone', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            audioUrl: audioPreview,
+            title: title,
+            genre: genre,
+          }),
+        });
+      }
+
+      if (!res.ok) throw new Error('Tone analysis failed');
+      const data = await res.json();
+      
+      setAnalyzedTone(data);
+      if (data.genre) setGenre(data.genre);
+      if (data.analysisSummary) {
+        setDescription(data.analysisSummary);
+      }
+      
+      addNotification("Sonic profile analyzed by Gemini!", "success");
+    } catch (e) {
+      console.error(e);
+      addNotification("Sonic analysis fallback triggered", "warning");
+      // Fallback
+      setAnalyzedTone({
+        genre: genre || "Electronic",
+        moods: ["Energetic", "Futuristic", "Atmospheric"],
+        energy: "High",
+        tempo: "128",
+        instruments: ["Synthesizer", "Drum Machine", "Synth Bass"],
+        analysisSummary: "An energetic and futuristic electronic sequence with neon accents and steady synthesizer loops."
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   // Files & Previews
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -253,7 +324,14 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
           { trait_type: "Genre", value: genre },
           { trait_type: "RoyaltySplits", value: JSON.stringify(formattedRoyaltySplits) },
           { trait_type: "Editions", value: editions },
-          ...(lyrics ? [{ trait_type: "Lyrics", value: lyrics }] : [])
+          ...(lyrics ? [{ trait_type: "Lyrics", value: lyrics }] : []),
+          ...(analyzedTone ? [
+            { trait_type: "Moods", value: analyzedTone.moods.join(', ') },
+            { trait_type: "Energy", value: analyzedTone.energy },
+            { trait_type: "Tempo (BPM)", value: analyzedTone.tempo },
+            { trait_type: "Instruments", value: analyzedTone.instruments.join(', ') },
+            { trait_type: "Tone Analysis", value: analyzedTone.analysisSummary }
+          ] : [])
         ]
       };
 
@@ -332,6 +410,23 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
       };
 
       await addUserNFT(newNFT);
+
+      // Log real-time activity in Firestore
+      if (userProfile?.uid) {
+        await createActivityPost(
+          userProfile.uid,
+          userProfile.name || 'Unknown Artist',
+          userProfile.avatar || '',
+          `minted a new music NFT: "${title}"`,
+          'nft_mint',
+          {
+            targetId: newNFT.id,
+            artistName: userProfile.name || 'Unknown Artist',
+            paymentAmount: price,
+            paymentCurrency: 'TON'
+          }
+        ).catch(err => console.error("Failed to log activity post:", err));
+      }
 
       setOverallProgress(100);
       setProgressMsg("Minting successful!");
@@ -469,6 +564,62 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
                         </button>
                       )}
                     </div>
+
+                    {(audioFile || audioPreview) && (
+                      <div className="space-y-3">
+                        <button
+                          type="button"
+                          onClick={handleAnalyzeTone}
+                          disabled={isAnalyzing}
+                          className="w-full py-2.5 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 hover:from-cyan-500/30 hover:to-purple-500/30 border border-cyan-500/30 text-cyan-400 disabled:opacity-50 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                        >
+                          {isAnalyzing ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              Deconstructing Audio Frequencies...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-3.5 h-3.5 fill-cyan-400" />
+                              Analyze Tone with Gemini
+                            </>
+                          )}
+                        </button>
+
+                        {analyzedTone && (
+                          <div className="p-3 bg-white/5 rounded-xl space-y-2.5">
+                            <div className="flex items-center gap-1.5 text-cyan-400">
+                              <Sparkles className="w-3.5 h-3.5 fill-cyan-400" />
+                              <span className="text-[9px] font-black uppercase tracking-widest">Gemini Sonic Signature</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-[8px] font-bold uppercase tracking-wider text-white/60">
+                              <div className="bg-white/5 p-2 rounded-lg">
+                                <span className="text-white/40 block mb-0.5">Energy</span>
+                                <span className="text-white font-black">{analyzedTone.energy}</span>
+                              </div>
+                              <div className="bg-white/5 p-2 rounded-lg">
+                                <span className="text-white/40 block mb-0.5">Tempo</span>
+                                <span className="text-white font-mono font-black">{analyzedTone.tempo} BPM</span>
+                              </div>
+                              <div className="bg-white/5 p-2 rounded-lg col-span-2">
+                                <span className="text-white/40 block mb-0.5">Detected Moods</span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {analyzedTone.moods.map((m, idx) => (
+                                    <span key={idx} className="px-1.5 py-0.5 bg-purple-500/20 text-purple-300 rounded text-[7px] font-black">
+                                      {m}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="bg-white/5 p-2 rounded-lg col-span-2">
+                                <span className="text-white/40 block mb-0.5">Instruments</span>
+                                <span className="text-white font-medium normal-case">{analyzedTone.instruments.join(', ')}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Right Column: Key Details */}

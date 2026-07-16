@@ -740,7 +740,7 @@ export default function ArtistDashboard() {
         <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600 rounded-full" />
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto p-2 sm:p-4 space-y-4">
+      <div className="relative z-10 w-full max-w-full p-2 sm:p-4 space-y-4">
         
         {/* Banner Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/[0.02] backdrop-blur-md p-4 sm:p-6 rounded-2xl shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]">

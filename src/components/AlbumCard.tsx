@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Play, Disc3, MoreHorizontal } from 'lucide-react';
 import { Album } from '@/types';
 import AlbumOptionsModal from '@/components/AlbumOptionsModal';
+import { cardTokens } from '@/design';
 
 interface AlbumCardProps {
   album: Album;
@@ -18,15 +19,16 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index, className = '' }) =
   return (
     <>
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ delay: index * 0.1 }}
+      whileHover={{ y: -4, scale: cardTokens.animation.hoverScale }}
+      whileTap={{ scale: cardTokens.animation.tapScale }}
+      transition={{ delay: index * 0.05 }}
       onClick={() => navigate(`/album/${album.id}`)}
-      className={`group relative w-full cursor-pointer ${className}`}
+      style={{ width: cardTokens.album.width, padding: cardTokens.global.padding, borderRadius: cardTokens.global.borderRadius }}
+      className={`group relative cursor-pointer bg-[#0A113A]/50 hover:bg-white/[0.05] transition-all duration-300 flex flex-col justify-between overflow-hidden ${className}`}
     >
-      <div className="relative aspect-square rounded-[4px] overflow-hidden mb-4 bg-white/[0.05] border border-white/5 group-hover:border-blue-500/30 transition-all shadow-2xl">
+      <div className="relative aspect-square rounded-[6px] overflow-hidden mb-3 bg-white/[0.05] border border-white/5 group-hover:border-blue-500/30 transition-all shadow-md flex-shrink-0">
         {album.coverUrl ? (
           <img
             src={album.coverUrl}
@@ -35,29 +37,31 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index, className = '' }) =
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Disc3 className="w-12 h-12 text-white/20" />
+            <Disc3 className="w-10 h-10 text-white/20" />
           </div>
         )}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
-          <button className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all shadow-2xl">
-            <Play className="w-6 h-6 fill-current ml-1" />
+          <button className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all shadow-lg">
+            <Play className="w-4 h-4 fill-white ml-0.5 text-white" />
           </button>
         </div>
         <button 
             onClick={(e) => { e.stopPropagation(); setIsOptionsModalOpen(true); }}
-            className="absolute top-2 right-2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
         >
-            <MoreHorizontal className="w-4 h-4" />
+            <MoreHorizontal className="w-3.5 h-3.5" />
         </button>
       </div>
-      <div className="px-1">
-        <h3 className="text-white font-black text-xs uppercase tracking-tighter truncate group-hover:text-blue-400 transition-colors">
-          {album.title}
-        </h3>
-        <p className="text-white/70 font-bold text-[10px] uppercase tracking-wide mt-0.5 truncate">
-          {album.artist}
-        </p>
-        <p className="text-white/40 text-[9px] font-bold uppercase tracking-widest mt-1">
+      <div className="px-0.5 flex flex-col justify-between flex-grow">
+        <div>
+          <h3 style={{ fontSize: cardTokens.album.titleSize }} className="text-white font-black uppercase tracking-tighter truncate group-hover:text-blue-400 transition-colors leading-tight">
+            {album.title}
+          </h3>
+          <p style={{ fontSize: cardTokens.album.artistSize }} className="text-white/70 font-bold uppercase tracking-wide mt-0.5 truncate">
+            {album.artist}
+          </p>
+        </div>
+        <p className="text-white/40 text-[9px] font-bold uppercase tracking-widest mt-1.5">
           {album.trackIds?.length || 0} tracks
         </p>
       </div>

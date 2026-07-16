@@ -1,0 +1,72 @@
+import { Task } from "../types";
+
+export const mockTasks: Task[] = [
+  {
+    id: "tsk-1",
+    title: "Daily Stream Marathon",
+    subtitle: "Listen to 5 different tracks today",
+    description: "Keep the music streaming! Stream at least 5 unique tracks to support independent creators.",
+    reward: "15 JAM",
+    points: 15,
+    completed: true,
+    claimed: true,
+    type: "daily",
+    progress: 5,
+    total: 5,
+    color: "from-blue-500 to-indigo-500",
+    iconName: "Headphones",
+    rarity: "common",
+    priority: "high"
+  },
+  {
+    id: "tsk-2",
+    title: "Lekki Backer",
+    subtitle: "Collect any music NFT on the marketplace",
+    description: "Purchase any limited or unique edition music NFT from any verified artist to support their on-chain catalog.",
+    reward: "100 JAM",
+    points: 100,
+    completed: false,
+    claimed: false,
+    type: "onchain",
+    progress: 0,
+    total: 1,
+    color: "from-amber-400 to-red-500",
+    iconName: "Coins",
+    rarity: "epic",
+    priority: "medium"
+  },
+  {
+    id: "tsk-3",
+    title: "Vibe Endorser",
+    subtitle: "Share 3 tracks to your feed today",
+    description: "Help spread the vibe! Share 3 tracks to the TonJam social feed so your friends can discover them.",
+    reward: "20 JAM",
+    points: 20,
+    completed: false,
+    claimed: false,
+    type: "social",
+    progress: 1,
+    total: 3,
+    color: "from-emerald-400 to-teal-500",
+    iconName: "Share2",
+    rarity: "common",
+    priority: "low"
+  },
+  {
+    id: "tsk-4",
+    title: "Decentralized Staker",
+    subtitle: "Stake 2000+ JAM into any creator pool",
+    description: "Demonstrate long-term support. Stake at least 2000 JAM in any artist staking pool to earn passive rewards.",
+    reward: "250 JAM",
+    points: 250,
+    completed: true,
+    claimed: false,
+    type: "milestone",
+    progress: 5000,
+    total: 2000,
+    color: "from-purple-500 to-pink-500",
+    iconName: "Zap",
+    rarity: "rare",
+    priority: "high"
+  }
+];

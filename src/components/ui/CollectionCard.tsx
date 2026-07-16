@@ -1,7 +1,7 @@
 import * as React from "react";
 import { ChevronRight } from "lucide-react";
 import { VerifiedBadge } from "./VerifiedBadge";
-import { colors } from "@/design";
+import { colors, radius, spacing, typography } from "@/design";
 
 interface CollectionCardProps {
   name?: string;
@@ -25,8 +25,13 @@ export function CollectionCard({
   return (
     <div
       onClick={onClick}
-      className="group relative rounded-card bg-surface overflow-hidden border border-border-subtle cursor-pointer transition-all duration-300 hover:scale-[1.01]"
-      style={{ backgroundColor: colors.dark.surface, borderColor: colors.dark.border }}
+      className="group relative overflow-hidden border cursor-pointer transition-all duration-300 hover:scale-[1.01]"
+      style={{
+        backgroundColor: colors.dark.surface,
+        borderColor: colors.dark.border,
+        borderRadius: radius.card,
+        fontFamily: typography.fontFamily.primary,
+      }}
     >
       <div className="aspect-square w-full overflow-hidden relative">
         <img

@@ -75,7 +75,7 @@ export const createActivityPost = async (
   userName: string, 
   userAvatar: string, 
   content: string, 
-  activityType: 'tip' | 'nft_purchase' | 'fan_club_join' | 'track_release',
+  activityType: 'tip' | 'nft_purchase' | 'fan_club_join' | 'track_release' | 'nft_mint',
   metadata: {
     targetId?: string;
     artistName?: string;

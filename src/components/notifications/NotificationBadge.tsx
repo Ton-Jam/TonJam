@@ -35,9 +35,9 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({ count, cla
         className={`
           absolute -top-1 -right-1 
           flex items-center justify-center 
-          bg-red-500 text-white font-black 
-          text-[9px] px-1.5 h-4.5 min-w-4.5 rounded-full 
-          shadow-lg shadow-red-500/20 
+          bg-[#00B4D8] text-[#050A24] font-black 
+          text-[8px] px-1 h-3.5 min-w-3.5 rounded-full 
+          shadow-lg shadow-[#00B4D8]/30 
           select-none leading-none
           ${className}
         `}

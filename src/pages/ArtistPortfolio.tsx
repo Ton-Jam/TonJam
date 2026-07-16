@@ -157,7 +157,7 @@ export default function ArtistPortfolio() {
         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full" />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-8 md:pt-12 space-y-8">
+      <div className="relative z-10 w-full max-w-full px-4 pt-8 md:pt-12 space-y-8">
         
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">

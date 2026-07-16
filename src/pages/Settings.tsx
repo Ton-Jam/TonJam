@@ -286,7 +286,7 @@ const Settings: React.FC = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24 pt-6 animate-in fade-in duration-700">
+    <div className="w-full max-w-full px-4 sm:px-6 md:px-8 pb-24 pt-6 animate-in fade-in duration-700">
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">

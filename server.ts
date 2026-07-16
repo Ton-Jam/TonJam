@@ -879,7 +879,7 @@ async function startServer() {
             const audioData = fs.readFileSync(filePath);
             
             const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3.5-flash",
                 contents: [{
                     parts: [
                         {
@@ -916,6 +916,106 @@ async function startServer() {
             
             // Smart local fallback for analysis
             res.json({ genre: "Electronic", moods: ["Energetic", "Futuristic", "Atmospheric"] });
+        }
+    });
+
+    app.post('/api/gemini/analyze-tone', upload.single('audio'), async (req, res) => {
+        const filePath = req.file?.path;
+        const audioUrl = req.body.audioUrl;
+        
+        try {
+            let audioData: Buffer | null = null;
+            let mimeType = "audio/mpeg";
+
+            if (filePath && fs.existsSync(filePath)) {
+                audioData = fs.readFileSync(filePath);
+                if (req.file?.mimetype) mimeType = req.file.mimetype;
+            } else if (audioUrl) {
+                if (audioUrl.startsWith('/uploads/')) {
+                    const localPath = path.join(process.cwd(), 'public', audioUrl);
+                    if (fs.existsSync(localPath)) {
+                        audioData = fs.readFileSync(localPath);
+                        if (audioUrl.endsWith('.wav')) mimeType = 'audio/wav';
+                        else if (audioUrl.endsWith('.ogg')) mimeType = 'audio/ogg';
+                        else if (audioUrl.endsWith('.m4a')) mimeType = 'audio/x-m4a';
+                    }
+                } else if (audioUrl.startsWith('http')) {
+                    const response = await axios.get(audioUrl, { responseType: 'arraybuffer', timeout: 8000 });
+                    audioData = Buffer.from(response.data);
+                    const contentType = response.headers['content-type'];
+                    if (contentType) mimeType = contentType;
+                }
+            }
+
+            const promptText = `
+                Analyze this audio track (its rhythm, tone, instrumentation, energy, and atmosphere) and generate metadata to categorize it as a Web3 music NFT automatically.
+                We support these standard genres: Electronic, Hip Hop, Rock, Pop, Jazz, Classical, Ambient, Techno, Synthwave. Make sure the returned genre is exactly one of these, or closest to it.
+                Provide:
+                - genre: Must be one of the standard genres.
+                - moods: An array of 3-4 atmospheric descriptors (e.g. "Futuristic", "Ethereal", "Energetic", "Melancholic", "Aggressive", "Warm").
+                - energy: Energy level ("Low", "Medium", "High").
+                - tempo: Estimated BPM (e.g. "120", "140").
+                - instruments: An array of 2-3 prominent instruments (e.g. "Synthesizer", "Drum Machine", "Acoustic Guitar", "Pads").
+                - analysisSummary: A 1-2 sentence poetic and descriptive sonic profile of the track (e.g., "A brilliant fusion of space-age synthesizers and pulsating drum sequences that evokes a nocturnal neon highway.")
+            `;
+
+            let contents: any[] = [];
+            if (audioData) {
+                contents.push({
+                    inlineData: {
+                        mimeType,
+                        data: audioData.toString("base64")
+                    }
+                });
+            } else {
+                contents.push({ text: `Analyze tone request: Title: ${req.body.title || "Unknown Track"}. Genre: ${req.body.genre || "Unknown"}.` });
+            }
+            contents.push({ text: promptText });
+
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
+                model: "gemini-3.5-flash",
+                contents: [{ parts: contents }],
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            genre: { type: Type.STRING },
+                            moods: { type: Type.ARRAY, items: { type: Type.STRING } },
+                            energy: { type: Type.STRING },
+                            tempo: { type: Type.STRING },
+                            instruments: { type: Type.ARRAY, items: { type: Type.STRING } },
+                            analysisSummary: { type: Type.STRING }
+                        },
+                        required: ["genre", "moods", "energy", "tempo", "instruments", "analysisSummary"]
+                    }
+                }
+            }));
+
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+
+            if (response.text) {
+                res.json(JSON.parse(response.text));
+            } else {
+                throw new Error("Empty response from Gemini");
+            }
+        } catch (error) {
+            console.log('[Fallback] Serving local tone analysis.');
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+            
+            // Smart local fallback for analysis
+            res.json({
+                genre: req.body.genre || "Electronic",
+                moods: ["Energetic", "Futuristic", "Atmospheric"],
+                energy: "High",
+                tempo: "128",
+                instruments: ["Synthesizer", "Drum Machine", "Synth Bass"],
+                analysisSummary: "An energetic and futuristic electronic sequence with neon accents and steady synthesizer loops."
+            });
         }
     });
 

@@ -38,6 +38,11 @@ import {
   SkipForward,
   Repeat,
   Shuffle,
+  GripVertical,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { MOCK_ARTISTS, MOCK_TRACKS, DJ_KRUPY_AVATAR } from "@/constants";
@@ -82,7 +87,7 @@ const LyricsView: React.FC<{ lyrics: string }> = ({ lyrics }) => {
   const lines = lyrics.split("\n");
 
   return (
-    <ScrollArea className="w-full h-[450px] pr-4">
+    <ScrollArea className="w-full h-[280px] xs:h-[340px] sm:h-[420px] md:h-[480px] pr-4">
       <div className="space-y-4 text-left mask-image-gradient py-4">
         {lines.map((line, i) => (
           <motion.p
@@ -119,6 +124,7 @@ const FullPlayer: React.FC = () => {
     toggleLikeTrack,
     likedTrackIds,
     queue,
+    setQueue,
     playTrack,
     volume,
     setVolume,
@@ -194,6 +200,56 @@ const FullPlayer: React.FC = () => {
     "bars" | "circle" | "particles" | "waves"
   >("bars");
   const [showQueue, setShowQueue] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const moveTrackUp = (index: number) => {
+    if (index === 0) return;
+    const newQueue = [...queue];
+    const temp = newQueue[index];
+    newQueue[index] = newQueue[index - 1];
+    newQueue[index - 1] = temp;
+    setQueue(newQueue);
+  };
+
+  const moveTrackDown = (index: number) => {
+    if (index === queue.length - 1) return;
+    const newQueue = [...queue];
+    const temp = newQueue[index];
+    newQueue[index] = newQueue[index + 1];
+    newQueue[index + 1] = temp;
+    setQueue(newQueue);
+  };
+
+  const removeTrackFromQueue = (index: number) => {
+    const newQueue = queue.filter((_, idx) => idx !== index);
+    setQueue(newQueue);
+  };
+
+  const clearQueue = () => {
+    setQueue([]);
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    
+    const newQueue = [...queue];
+    const item = newQueue[draggedIndex];
+    newQueue.splice(draggedIndex, 1);
+    newQueue.splice(index, 0, item);
+    setDraggedIndex(index);
+    setQueue(newQueue);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
   const { artworkStyle, setArtworkStyle } = useAudio();
 
   // Dynamic color based on mood and variant
@@ -540,7 +596,7 @@ const FullPlayer: React.FC = () => {
                       />
 
                       {/* Main cover art frame - No border lines, crisp radius and heavy shadow */}
-                      <div className="relative w-full aspect-square overflow-hidden rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none">
+                      <div className="relative w-[160px] h-[160px] xs:w-[200px] xs:h-[200px] sm:w-[260px] sm:h-[260px] md:w-[300px] md:h-[300px] overflow-hidden rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none mx-auto">
                         <img
                           src={
                             currentTrack.coverUrl ||
@@ -653,7 +709,7 @@ const FullPlayer: React.FC = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.35, ease: "easeOut" }}
-                      className="relative w-[180px] h-[180px] min-[400px]:w-[240px] min-[400px]:h-[240px] sm:w-[320px] sm:h-[320px] lg:w-[400px] lg:h-[400px] flex flex-col items-center justify-center rounded-2xl overflow-hidden bg-black/40 backdrop-blur-sm shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none px-4 py-8 group"
+                      className="relative w-[160px] h-[160px] min-[400px]:w-[200px] min-[400px]:h-[200px] sm:w-[260px] sm:h-[260px] lg:w-[300px] lg:h-[300px] flex flex-col items-center justify-center rounded-2xl overflow-hidden bg-black/40 backdrop-blur-sm shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none px-4 py-8 group"
                     >
                       {/* Interactive Aura reflection breathing with audio track mood */}
                       <div
@@ -743,7 +799,7 @@ const FullPlayer: React.FC = () => {
                     </motion.div>
 
                     <motion.div
-                      className="flex items-center gap-2 mt-1.5"
+                      className="flex items-center justify-between gap-3 mt-1.5 w-full"
                       key={`${currentTrack.id}-artist`}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -753,20 +809,34 @@ const FullPlayer: React.FC = () => {
                         ease: "easeInOut",
                       }}
                     >
-                      <p
-                        className="text-sm sm:text-base font-medium text-neutral-400 hover:text-white hover:underline transition-all cursor-pointer"
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <p
+                          className="text-sm sm:text-base font-medium text-neutral-400 hover:text-white hover:underline transition-all cursor-pointer truncate"
+                          onClick={() => {
+                            setFullPlayerOpen(false);
+                            navigate(`/artist/${currentTrack.artistId}`);
+                          }}
+                        >
+                          {currentTrack.artist}
+                        </p>
+                        {artistData?.verified && (
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 text-blue-500 flex-shrink-0">
+                            <path fillRule="evenodd" d="M8.603 3.712A3 3 0 0 1 12 2.25a3 3 0 0 1 3.397 1.462l.148.243a4.5 4.5 0 0 0 1.932 1.932l.243.148a3 3 0 0 1 1.462 3.397 3.397 3.397 0 0 0-1.462 3.397l-.243.148a4.5 4.5 0 0 0-1.932 1.932l-.148.243a3 3 0 0 1-3.397 1.462c-.397 0-.79-.112-1.144-.326l-.243-.148a4.5 4.5 0 0 0-1.932-1.932l-.243-.148a3 3 0 0 1-1.462-3.397 3.397 3.397 0 0 0 1.462-3.397l.243-.148a4.5 4.5 0 0 0 1.932-1.932l.148-.243Zm6.207 7.03a.75.75 0 0 0-1.06-1.06l-3.5 3.5-1.5-1.5a.75.75 0 1 0-1.06 1.06l2.03 2.03a.75.75 0 0 0 1.06 0l4.03-4.03Z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+
+                      <button
                         onClick={() => {
                           setFullPlayerOpen(false);
                           navigate(`/artist/${currentTrack.artistId}`);
                         }}
+                        className="flex items-center gap-1 px-2.5 py-1 bg-white/5 hover:bg-white/10 active:scale-95 transition-all rounded-full text-[9px] font-bold uppercase tracking-wider text-slate-300 border-none cursor-pointer shrink-0"
                       >
-                        {currentTrack.artist}
-                      </p>
-                      {artistData?.verified && (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 text-blue-500 flex-shrink-0">
-                          <path fillRule="evenodd" d="M8.603 3.712A3 3 0 0 1 12 2.25a3 3 0 0 1 3.397 1.462l.148.243a4.5 4.5 0 0 0 1.932 1.932l.243.148a3 3 0 0 1 1.462 3.397 3.397 3.397 0 0 0-1.462 3.397l-.243.148a4.5 4.5 0 0 0-1.932 1.932l-.148.243a3 3 0 0 1-3.397 1.462c-.397 0-.79-.112-1.144-.326l-.243-.148a4.5 4.5 0 0 0-1.932-1.932l-.243-.148a3 3 0 0 1-1.462-3.397 3.397 3.397 0 0 0 1.462-3.397l.243-.148a4.5 4.5 0 0 0 1.932-1.932l.148-.243Zm6.207 7.03a.75.75 0 0 0-1.06-1.06l-3.5 3.5-1.5-1.5a.75.75 0 1 0-1.06 1.06l2.03 2.03a.75.75 0 0 0 1.06 0l4.03-4.03Z" clipRule="evenodd" />
-                        </svg>
-                      )}
+                        <User className="w-3 h-3 text-[#00B4D8]" />
+                        <span>Artist Profile</span>
+                        <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                      </button>
                     </motion.div>
                   </div>
 
@@ -819,9 +889,9 @@ const FullPlayer: React.FC = () => {
                 {currentTrack.lyrics && (
                   <div
                     onClick={() => setActiveView("lyrics")}
-                    className="hidden md:block rounded-2xl hover:bg-white/5 p-5 h-36 overflow-hidden relative cursor-pointer group transition-all"
+                    className="w-full rounded-2xl bg-white/[0.03] hover:bg-white/5 p-4 sm:p-5 h-28 sm:h-36 overflow-hidden relative cursor-pointer group transition-all"
                   >
-                    <div className="absolute top-4 right-5 flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-3 sm:top-4 right-4 sm:right-5 flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                       <span className="text-[8px] font-black uppercase tracking-widest text-neutral-400">
                         Full Lyrics
                       </span>
@@ -829,18 +899,18 @@ const FullPlayer: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
                       </svg>
                     </div>
-                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-2">
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-1.5">
                       Lyrics Preview
                     </p>
-                    <div className="space-y-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <div className="space-y-1 opacity-75 group-hover:opacity-100 transition-opacity">
                       {currentTrack.lyrics
                         .split("\n")
-                        .slice(0, 3)
+                        .slice(0, 2)
                         .map((line, i) => (
                           <p
                             key={i}
                             className={cn(
-                              "text-sm sm:text-base font-extrabold tracking-tight truncate leading-normal",
+                              "text-xs sm:text-sm font-extrabold tracking-tight truncate leading-normal",
                               i === 0 ? "text-white" : "text-neutral-400",
                             )}
                           >
@@ -855,9 +925,9 @@ const FullPlayer: React.FC = () => {
                 {!currentTrack.lyrics && recommendations && (
                   <div
                     onClick={() => setActiveView("krupy")}
-                    className="hidden md:block rounded-2xl hover:bg-white/5 p-5 h-36 overflow-hidden relative cursor-pointer group transition-all"
+                    className="w-full rounded-2xl bg-white/[0.03] hover:bg-white/5 p-4 sm:p-5 h-28 sm:h-36 overflow-hidden relative cursor-pointer group transition-all"
                   >
-                    <div className="absolute top-4 right-5 flex items-center gap-1.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-3 sm:top-4 right-4 sm:right-5 flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                       <span className="text-[8px] font-black uppercase tracking-widest text-blue-400">
                         DJ AIRLAB
                       </span>
@@ -865,10 +935,10 @@ const FullPlayer: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.096-.813L9 9.196l.813 5.096L15 15l-5.096.813ZM19.5 12l.18.319.319.18-.319.18-.18.319-.18-.319-.319-.18.319-.18.18-.319ZM15 4.5l.18.319.319.18-.319.18-.18.319-.18-.319-.319-.18.319-.18.18-.319Z" />
                       </svg>
                     </div>
-                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400 mb-2">
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400 mb-1.5">
                       AI Trivia Insight
                     </p>
-                    <p className="text-xs font-bold leading-relaxed text-zinc-300 italic line-clamp-3">
+                    <p className="text-[11px] sm:text-xs font-bold leading-relaxed text-zinc-300 italic line-clamp-2 sm:line-clamp-3">
                       "{recommendations.reasoning}"
                     </p>
                   </div>
@@ -1040,7 +1110,7 @@ const FullPlayer: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="w-full mt-6 space-y-4">
+              <div className="hidden md:block w-full mt-6 space-y-4">
                 {currentTrack.lyrics && <LyricsView lyrics={currentTrack.lyrics} />}
                 <EqualizerView />
               </div>
@@ -1116,7 +1186,7 @@ const FullPlayer: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col h-[460px] max-w-2xl mx-auto rounded-2xl bg-zinc-900/40 backdrop-blur-md overflow-hidden shadow-2xl pb-4 mt-2"
+              className="flex flex-col h-[380px] xs:h-[440px] sm:h-[480px] max-w-2xl mx-auto rounded-2xl bg-zinc-900/40 backdrop-blur-md overflow-hidden shadow-2xl pb-4 mt-2"
             >
               <div className="flex items-center gap-3 p-4 bg-zinc-800/10">
                 <div className="w-10 h-10 rounded-full bg-neutral-850 flex items-center justify-center p-0.5 shadow-sm">
@@ -1349,7 +1419,7 @@ const FullPlayer: React.FC = () => {
                 </button>
               </div>
 
-              <ScrollArea className="flex-1 h-[360px] pr-2">
+              <ScrollArea className="flex-1 h-[260px] xs:h-[320px] sm:h-[400px] pr-2">
                 <div className="space-y-3 pb-4 no-scrollbar">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <div
@@ -1569,9 +1639,10 @@ const FullPlayer: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="max-w-2xl mx-auto mt-2"
+              className="max-w-2xl mx-auto mt-2 space-y-6 pb-12"
             >
               <SoundscapeMixer />
+              <EqualizerView />
             </motion.div>
           </TabsContent>
         </Tabs>
@@ -1601,25 +1672,35 @@ const FullPlayer: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 220 }}
-              className="fixed inset-0 z-[70] bg-[#0A113A] w-full flex flex-col pt-8 select-none border-none"
+              className="fixed inset-y-0 right-0 z-[70] bg-[#070b1e]/95 backdrop-blur-2xl w-full md:max-w-md md:w-[450px] flex flex-col pt-8 select-none border-none shadow-[0_0_80px_rgba(0,0,0,0.85)] md:rounded-l-3xl"
             >
               <div className="flex items-center justify-between px-4 sm:px-8 pb-4">
                 <div>
                   <h3 className="text-xl font-extrabold text-white tracking-tight">
-                    Up Next
+                    Play Queue
                   </h3>
                   <p className="text-[9px] font-black uppercase text-neutral-500 tracking-wider mt-0.5">
-                    Awaiting Transmission
+                    Drag or Click Arrow Buttons to Reorder
                   </p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowQueue(false)}
-                  className="rounded-full bg-neutral-850 text-neutral-450 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer w-10 h-10"
-                >
-                  <ChevronDown className="h-6 w-6" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  {queue.length > 0 && (
+                    <button
+                      onClick={clearQueue}
+                      className="text-xs font-bold text-red-400/85 hover:text-red-400 hover:bg-red-500/10 px-3 py-1.5 bg-red-500/5 rounded-lg transition-all cursor-pointer border-none shrink-0"
+                    >
+                      Clear Queue
+                    </button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowQueue(false)}
+                    className="rounded-full bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer w-10 h-10 flex items-center justify-center border-none"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
               </div>
 
               <ScrollArea className="flex-1 w-full">
@@ -1648,24 +1729,106 @@ const FullPlayer: React.FC = () => {
 
                   <div className="space-y-2 pb-10">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 mb-3 px-4 sm:px-8">
-                      Queued Tracks
+                      Upcoming Queue ({queue.length})
                     </p>
                     {queue.length > 0 ? (
-                      <div className="space-y-1">
-                        {queue.map((track, i) => (
-                          <motion.div
-                            key={`${track.id}-${i}`}
-                            initial={{ opacity: 0, x: -5 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.04 }}
-                          >
-                            <TrackCard
-                              track={track}
-                              variant="row"
-                              index={i}
-                            />
-                          </motion.div>
-                        ))}
+                      <div className="space-y-2">
+                        {queue.map((track, i) => {
+                          const isCurrent = currentTrack?.id === track.id;
+                          const isDragged = draggedIndex === i;
+                          return (
+                            <motion.div
+                              key={`${track.id}-${i}`}
+                              layout
+                              draggable
+                              onDragStart={(e) => handleDragStart(e as any, i)}
+                              onDragOver={(e) => handleDragOver(e as any, i)}
+                              onDragEnd={handleDragEnd}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ 
+                                opacity: isDragged ? 0.4 : 1, 
+                                scale: isDragged ? 0.98 : 1,
+                                y: 0
+                              }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                              className={cn(
+                                "flex items-center gap-3 p-3 mx-4 sm:mx-8 rounded-xl transition-all group select-none",
+                                isCurrent 
+                                  ? "bg-emerald-500/5 hover:bg-emerald-500/10" 
+                                  : "bg-zinc-900/40 hover:bg-zinc-900/60",
+                                isDragged && "shadow-lg bg-zinc-850"
+                              )}
+                            >
+                              {/* Drag Handle */}
+                              <div className="cursor-grab active:cursor-grabbing text-neutral-500 hover:text-neutral-300 transition-colors p-1 shrink-0">
+                                <GripVertical className="w-4 h-4" />
+                              </div>
+
+                              {/* Cover Art and mini play button overlay */}
+                              <div 
+                                onClick={() => playTrack(track)}
+                                className="relative w-11 h-11 rounded-lg overflow-hidden cursor-pointer shrink-0 group/cover"
+                              >
+                                <img 
+                                  src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
+                                  alt={track.title} 
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/cover:opacity-100 flex items-center justify-center transition-all">
+                                  {isCurrent && isPlaying ? (
+                                    <Pause className="w-4 h-4 text-white fill-white" />
+                                  ) : (
+                                    <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Track title & artist details */}
+                              <div 
+                                onClick={() => playTrack(track)}
+                                className="flex-1 min-w-0 cursor-pointer"
+                              >
+                                <p className={cn(
+                                  "text-sm font-semibold truncate leading-tight",
+                                  isCurrent ? "text-emerald-400" : "text-white"
+                                )}>
+                                  {track.title}
+                                </p>
+                                <p className="text-[11px] font-medium text-neutral-400 truncate mt-0.5">
+                                  {track.artist}
+                                </p>
+                              </div>
+
+                              {/* Reordering Controls (Buttons + Remove) */}
+                              <div className="flex items-center gap-1 shrink-0 opacity-80 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={() => moveTrackUp(i)}
+                                  disabled={i === 0}
+                                  className="p-1 rounded-md text-neutral-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer border-none bg-transparent"
+                                  title="Move Up"
+                                >
+                                  <ArrowUp className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => moveTrackDown(i)}
+                                  disabled={i === queue.length - 1}
+                                  className="p-1 rounded-md text-neutral-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer border-none bg-transparent"
+                                  title="Move Down"
+                                >
+                                  <ArrowDown className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => removeTrackFromQueue(i)}
+                                  className="p-1 rounded-md text-neutral-400 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer border-none bg-transparent"
+                                  title="Remove from Queue"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="py-12 text-center text-neutral-500 font-bold text-xs uppercase tracking-widest pl-1 select-none">

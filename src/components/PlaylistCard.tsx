@@ -4,7 +4,7 @@ import { Playlist } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, cn } from '@/lib/utils';
 import PlaylistCoverGenerator from './PlaylistCoverGenerator';
 import PlaylistOptionsModal from './PlaylistOptionsModal';
 import {
@@ -20,6 +20,8 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { motion } from 'motion/react';
+import { cardTokens } from '@/design';
+
 
 interface PlaylistCardProps {
   playlist: Playlist;
@@ -132,29 +134,30 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
   return (
     <>
     <motion.div 
-      whileHover={{ y: -4, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ y: -4, scale: cardTokens.animation.hoverScale }}
+      whileTap={{ scale: cardTokens.animation.tapScale }}
       onClick={onClick} 
-      className={`group relative cursor-pointer p-2 rounded-[4px] w-full ${className}`}
+      style={{ width: cardTokens.playlist.width, padding: cardTokens.global.padding, borderRadius: cardTokens.global.borderRadius }}
+      className={cn("group relative cursor-pointer bg-[#0A113A]/50 hover:bg-white/[0.05] transition-all duration-300 flex flex-col justify-between overflow-hidden", className)}
     >
       {/* Image Container - 1:1 Aspect Ratio */}
-      <div className="relative aspect-square rounded-[4px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
+      <div className="relative aspect-square rounded-[6px] overflow-hidden bg-neutral-900 shadow-md mb-2 flex-shrink-0">
         {renderCover()}
-        <div className="absolute inset-0 flex items-center justify-center gap-3">
+        <div className="absolute inset-0 flex items-center justify-center gap-2">
           <button 
             onClick={handlePlay}
-            className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300"
+            className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300"
           >
-            <Play className="h-4 w-4 text-white fill-white ml-0.5" />
+            <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
           </button>
           
           {isOwner && (
             <button 
               onClick={(e) => { e.stopPropagation(); setIsGeneratorOpen(true); }}
-              className="w-10 h-10 rounded-full bg-neutral-800/80 backdrop-blur-md flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300 delay-75 hover:bg-neutral-700"
+              className="w-8 h-8 rounded-full bg-neutral-800/80 backdrop-blur-md flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300 delay-75 hover:bg-neutral-700"
               title="Generate Cover"
             >
-              <Sparkles className="h-4 w-4 text-blue-400" />
+              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
             </button>
           )}
         </div>
@@ -169,27 +172,30 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       />
       
       {/* Content Below Card */}
-      <div className="px-3">
-        <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-foreground group-hover:text-primary transition-colors">
-          {playlist.title}
-        </h3>
-        <p 
-          className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block mt-1.5"
-          onClick={(e) => {
-            e.stopPropagation();
-            const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);
-            if (artist) {
-              navigate(`/artist/${artist.uid}`);
-            } else if (playlist.creator === MOCK_USER.name) {
-              navigate('/profile');
-            }
-          }}
-        >
-          {playlist.creator}
-        </p>
+      <div className="px-0.5 flex flex-col justify-between flex-grow">
+        <div>
+          <h3 style={{ fontSize: cardTokens.playlist.titleSize }} className="font-bold uppercase tracking-tight truncate text-foreground group-hover:text-primary transition-colors leading-tight">
+            {playlist.title}
+          </h3>
+          <p 
+            style={{ fontSize: cardTokens.playlist.descriptionSize }}
+            className="font-semibold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block mt-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);
+              if (artist) {
+                navigate(`/artist/${artist.uid}`);
+              } else if (playlist.creator === MOCK_USER.name) {
+                navigate('/profile');
+              }
+            }}
+          >
+            {playlist.creator}
+          </p>
+        </div>
         
         {/* Stats */}
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex items-center justify-between pt-1.5 mt-auto">
           <span className="text-[8px] font-semibold text-foreground/30 uppercase tracking-widest">
             {playlist.trackCount} Tracks
           </span>
@@ -197,7 +203,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6 rounded-[4px] hover:bg-black/5"
+            className="h-5 w-5 rounded-[4px] hover:bg-black/5"
             onClick={(e) => { e.stopPropagation(); setIsOptionsModalOpen(true); }}
           >
             <MoreVertical className="h-3 w-3 text-muted-foreground" />

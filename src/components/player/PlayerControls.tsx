@@ -133,14 +133,14 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   return (
     <div className="w-full flex flex-col gap-6 font-sans py-4" id="tonjam-controls-container">
       {/* Playback speed, sleep timer, device, and audio quality control bar */}
-      <div className="flex items-center justify-between gap-2 px-1 text-zinc-400 text-xs">
+      <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar px-1 text-zinc-400 text-xs w-full py-0.5 select-none">
         {/* Speed Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
-              className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-zinc-900 h-8 rounded-full flex items-center gap-1.5"
+              className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-zinc-900 h-8 rounded-full flex items-center gap-1.5 shrink-0"
               id="btn-playback-speed"
             >
               <Gauge className="w-3.5 h-3.5" />
@@ -174,7 +174,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className={`text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-900 h-8 rounded-full flex items-center gap-1.5 ${
+              className={`text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-900 h-8 rounded-full flex items-center gap-1.5 shrink-0 ${
                 sleepTimeLeft !== null ? "text-blue-500" : "text-zinc-400 hover:text-white"
               }`}
               id="btn-sleep-timer"
@@ -217,7 +217,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-zinc-900 h-8 rounded-full flex items-center gap-1.5"
+              className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-zinc-900 h-8 rounded-full flex items-center gap-1.5 shrink-0"
               id="btn-audio-quality"
             >
               <Music4 className="w-3.5 h-3.5" />
@@ -280,7 +280,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-zinc-900 h-8 rounded-full flex items-center gap-1.5"
+              className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-zinc-900 h-8 rounded-full flex items-center gap-1.5 shrink-0"
               id="btn-device-selector"
             >
               <Laptop className="w-3.5 h-3.5" />

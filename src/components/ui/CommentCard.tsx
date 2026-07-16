@@ -2,6 +2,7 @@ import * as React from "react";
 import { Heart } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { VerifiedBadge } from "./VerifiedBadge";
+import { colors, typography } from "@/design";
 
 interface CommentCardProps {
   author?: {
@@ -25,7 +26,12 @@ export function CommentCard({
   onLike,
 }: CommentCardProps) {
   return (
-    <div className="flex gap-3 py-3">
+    <div
+      style={{
+        fontFamily: typography.fontFamily.primary,
+      }}
+      className="flex gap-3 py-3"
+    >
       <Avatar className="size-8 shrink-0 border border-white/5">
         <AvatarImage src={author.avatar} alt={author.name} />
         <AvatarFallback className="font-black text-[10px] text-text-muted bg-white/5 uppercase">
