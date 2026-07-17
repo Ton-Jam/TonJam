@@ -92,11 +92,7 @@
 
   /* Dark Glass UI Theme with Global Navy Blue Background and Neon Accents */
   .dark {
-    background-image: url("./assets/images/tonjam_bg_1784230762517.jpg") !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
+    background: radial-gradient(circle at 50% 0%, #0A1647 0%, #050A24 100%) !important;
     background-color: #050A24 !important;
   }
   .dark body,
@@ -113,11 +109,7 @@
   .dark .bg-zinc-950\/60,
   .dark .bg-zinc-950\/80,
   .dark .bg-zinc-900\/50 {
-    background-image: url("./assets/images/tonjam_bg_1784230762517.jpg") !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
+    background: radial-gradient(circle at 50% 0%, #0A1647 0%, #050A24 100%) !important;
     background-color: #050A24 !important;
   }
 

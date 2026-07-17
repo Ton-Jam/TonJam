@@ -47,6 +47,7 @@ import { NFTSection } from './shared/NFTSection';
 import { PlaylistSection } from './shared/PlaylistSection';
 import { PostsSection } from './shared/PostsSection';
 import { AboutSection } from './shared/AboutSection';
+import { UserProfileDashboard } from '@/components/profile/UserProfileDashboard';
 
 import { MOCK_PROFILE, ProfileData } from '@/components/profile/ProfileTypes';
 import { PageContainer } from '@/components/layout/PageContainer';
@@ -342,6 +343,9 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
             <ActivityCard />
           </div>
         );
+
+      case 'dashboard':
+        return <UserProfileDashboard />;
 
       case 'tracks':
         return (

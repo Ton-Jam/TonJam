@@ -8,6 +8,7 @@ import { getPlaceholderImage } from '@/lib/utils';
 import { MOCK_TRACKS } from '@/constants';
 import { FloorPriceChart } from '@/components/FloorPriceChart';
 import { fetchFloorPriceHistory } from '@/services/nftService';
+import { CollectionSummaryCards } from '@/components/marketplace/CollectionSummaryCards';
 
 const AlbumDetails = () => {
   const { id } = useParams();
@@ -124,6 +125,16 @@ const AlbumDetails = () => {
           </div>
         </div>
 
+        {/* Collection Summary Stat Cards */}
+        <div className="mb-8" id="album-collection-summary-wrapper">
+          <CollectionSummaryCards
+            collectionName={album.title}
+            customVolume={album.volume}
+            customOwners={342}
+            customItems={album.trackCount}
+          />
+        </div>
+
         {/* Collection Analytics Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
           <div className="lg:col-span-2">
@@ -146,24 +157,13 @@ const AlbumDetails = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 }}
-              className="bg-surface/40 border border-border-subtle rounded-card p-6 h-full flex flex-col justify-center"
+              className="bg-[#101A3B]/20 backdrop-blur-md rounded-2xl p-6 h-full flex flex-col justify-center text-left"
             >
-              <h3 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-4">Quick Stats</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-end">
-                  <span className="text-sm text-text-muted">Floor Price</span>
-                  <span className="text-xl font-black text-text-primary">{album.floorPrice} TON</span>
-                </div>
-                <div className="flex justify-between items-end">
-                  <span className="text-sm text-text-muted">Total Volume</span>
-                  <span className="text-xl font-black text-text-primary">{album.volume} TON</span>
-                </div>
-                <div className="flex justify-between items-end">
-                  <span className="text-sm text-text-muted">Owners</span>
-                  <span className="text-xl font-black text-text-primary">342</span>
-                </div>
-              </div>
-              <button className="mt-8 w-full bg-primary text-background font-bold py-3 rounded-button hover:opacity-90 transition-all flex items-center justify-center gap-2">
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Contract Ledger</h3>
+              <p className="text-xs text-slate-300 leading-relaxed mb-6">
+                This music NFT collection is fully indexed on the TON network. Ownership, royalties, and metadata files are stored in decentralized smart contract nodes.
+              </p>
+              <button className="w-full bg-primary text-background font-bold py-3.5 rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer">
                 <TrendingUp className="w-4 h-4" />
                 View on TON Explorer
               </button>

@@ -61,6 +61,8 @@ import FeaturedArtists from "@/components/FeaturedArtists";
 import { SocialActivityFeed } from "@/components/SocialActivityFeed";
 import { Artist, Track, NFTItem } from "@/types";
 import NFTExplorer from "@/components/NFTExplorer";
+import Web3MusicTrends from "@/components/Web3MusicTrends";
+import TrendingChart from "@/components/TrendingChart";
 
 // ==========================================
 // MOCK DATA & INTERFACES FOR HOME "JAM UP"
@@ -646,6 +648,10 @@ const Home: React.FC = () => {
           </div>
         </div>
 
+        {/* ==========================================
+            TRENDING CHART SECTION (Recharts/D3)
+            ========================================== */}
+        <TrendingChart />
 
         {/* ==========================================
             SECTION 9: EARN TJ PREVIEW
@@ -1153,6 +1159,12 @@ const Home: React.FC = () => {
             ))}
           </div>
         </div>
+
+
+        {/* ==========================================
+            WEB3 TRENDS SECTION (Google Search Grounding Headlines)
+            ========================================== */}
+        <Web3MusicTrends />
 
 
         {/* ==========================================

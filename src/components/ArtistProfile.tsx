@@ -28,6 +28,34 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
   const [artistNfts, setArtistNfts] = useState<NFTItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [followedArtists, setFollowedArtists] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('followed_artists');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const isFollowing = followedArtists.includes(activeId);
+
+  const toggleFollow = () => {
+    if (!currentArtist) return;
+    
+    let updated: string[];
+    if (isFollowing) {
+      updated = followedArtists.filter(id => id !== activeId);
+      toast.success(`Unfollowed ${currentArtist.name}`);
+    } else {
+      updated = [...followedArtists, activeId];
+      toast.success(`Followed ${currentArtist.name}!`, {
+        description: `You will now receive notifications about ${currentArtist.name}'s new music and NFT drops.`
+      });
+    }
+    setFollowedArtists(updated);
+    localStorage.setItem('followed_artists', JSON.stringify(updated));
+  };
+
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
@@ -182,7 +210,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
                 <div className="text-center">
                   <span className="text-[9px] text-slate-500 uppercase font-black tracking-wider block">Followers</span>
                   <span className="text-sm font-mono font-bold text-white">
-                    {currentArtist.followers?.toLocaleString() || '0'}
+                    {((currentArtist.followers || 0) + (isFollowing ? 1 : 0)).toLocaleString()}
                   </span>
                 </div>
                 {currentArtist.monthlyListeners && (
@@ -197,6 +225,27 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
                   </>
                 )}
               </div>
+
+              <button 
+                onClick={toggleFollow}
+                className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 cursor-pointer active:scale-95 text-white ${
+                  isFollowing 
+                    ? 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/10' 
+                    : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/10'
+                }`}
+              >
+                {isFollowing ? (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Following</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Follow</span>
+                  </>
+                )}
+              </button>
 
               <button 
                 onClick={handleShare}

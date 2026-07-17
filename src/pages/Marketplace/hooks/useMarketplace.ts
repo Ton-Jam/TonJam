@@ -66,12 +66,15 @@ export const useMarketplace = () => {
         result = result.filter((t) => !(t as any).albumId);
         break;
       case "Auctions":
+      case "Live Auctions":
         result = result.filter((t) => t.listingType === "auction");
         break;
       case "Fixed Price":
+      case "Buy Now":
         result = result.filter((t) => t.listingType === "fixed");
         break;
       case "New":
+      case "Newly Minted":
         // Newest tracks
         result = result.slice(0, 50);
         break;

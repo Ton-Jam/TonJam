@@ -4,45 +4,13 @@ import { ChevronLeft, ChevronRight, Zap, Play, Pause, Heart, Gavel, Clock, Eye }
 import { LiveAuction } from "../types";
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
+import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
 
 interface LiveAuctionsProps {
   auctions: LiveAuction[];
   onPlaceBid: (auction: LiveAuction) => void;
   onSelectNFT: (nft: any) => void;
 }
-
-// Simple Countdown sub-component for LiveAuctions
-const AuctionCountdown: React.FC<{ endsAt: string }> = ({ endsAt }) => {
-  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
-
-  useEffect(() => {
-    const calculateTime = () => {
-      const difference = +new Date(endsAt) - +new Date();
-      if (difference <= 0) {
-        return { hours: 0, minutes: 0, seconds: 0 };
-      }
-      return {
-        hours: Math.floor(difference / (1000 * 60 * 60)),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60)
-      };
-    };
-
-    setTimeLeft(calculateTime());
-    const interval = setInterval(() => {
-      setTimeLeft(calculateTime());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [endsAt]);
-
-  return (
-    <span className="font-mono font-black text-white text-[10px]">
-      {timeLeft.hours.toString().padStart(2, "0")}:
-      {timeLeft.minutes.toString().padStart(2, "0")}:
-      {timeLeft.seconds.toString().padStart(2, "0")}
-    </span>
-  );
-};
 
 export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
   auctions,
@@ -131,11 +99,11 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
                 </div>
 
                 {/* Countdown display at bottom of image */}
-                <div className="absolute bottom-2 left-2 right-2 p-1.5 bg-zinc-950/90 rounded-[4px] border border-zinc-800/30 flex items-center justify-between">
+                <div className="absolute bottom-2 left-2 right-2 p-1.5 bg-zinc-950/90 rounded-[4px] flex items-center justify-between">
                   <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1">
                     <Clock className="w-3 h-3 text-[#FF3A5C]" /> Ends In
                   </span>
-                  <AuctionCountdown endsAt={auc.endsAt} />
+                  <AuctionCountdownTimer nft={{ ...auc.nft, endsAt: auc.endsAt } as any} variant="mini" />
                 </div>
               </div>
 

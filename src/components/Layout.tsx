@@ -28,7 +28,8 @@ import {
   PlusIcon,
   StarIcon,
   TicketIcon,
-  SparklesIcon
+  SparklesIcon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 import { Sparkles as SparklesLucide, History, X } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
@@ -955,8 +956,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   );
 };
 
+import { useI18n } from '@/contexts/I18nContext';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+
 const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any; userProfile: any; signOut: () => void; onNavigate?: () => void }) => {
   const { isArtist, isAdmin } = useUserRole();
+  const { t } = useI18n();
+
   return (
   <>
     <div className="flex items-center justify-between mb-6 px-2">
@@ -970,7 +976,10 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
         />
         <span className="font-bold text-lg tracking-tight text-foreground uppercase">JamSpace</span>
       </Link>
-      <ModeToggle />
+      <div className="flex items-center gap-2">
+        <LanguageSwitcher />
+        <ModeToggle />
+      </div>
     </div>
 
     {user && (
@@ -994,36 +1003,37 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
     )}
 
     <nav className="flex-1 space-y-3" aria-label="Main Navigation">
-      <NavItem to="/" icon={HomeIcon} label="Home" onClick={onNavigate} />
-      <NavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={onNavigate} />
+      <NavItem to="/" icon={HomeIcon} label={t('nav.home')} onClick={onNavigate} />
+      <NavItem to="/discover" icon={MagnifyingGlassIcon} label={t('nav.discover')} onClick={onNavigate} />
       <NavItem to="/dj-krupy" icon={SparklesLucide} label="DJ Krupy AI" onClick={onNavigate} className="text-blue-500 bg-blue-500/5 border border-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.1)]" />
-      <NavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" onClick={onNavigate} />
-      <NavItem to="/auctions" icon={StarIcon} label="Auctions" onClick={onNavigate} />
-      <NavItem to="/genesis-forge" icon={TicketIcon} label="Genesis" onClick={onNavigate} />
-      <NavItem to="/library" icon={RectangleStackIcon} label="Library" onClick={onNavigate} />
-      <NavItem to="/marketplace" icon={ShoppingBagIcon} label="NFT Market" onClick={onNavigate} />
+      <NavItem to="/jamspace" icon={PaperAirplaneIcon} label={t('nav.jamspace')} onClick={onNavigate} />
+      <NavItem to="/auctions" icon={StarIcon} label={t('nav.auctions')} onClick={onNavigate} />
+      <NavItem to="/genesis-forge" icon={TicketIcon} label={t('nav.genesis')} onClick={onNavigate} />
+      <NavItem to="/library" icon={RectangleStackIcon} label={t('nav.library')} onClick={onNavigate} />
+      <NavItem to="/marketplace" icon={ShoppingBagIcon} label={t('nav.marketplace')} onClick={onNavigate} />
+      <NavItem to="/referrals" icon={UserGroupIcon} label={t('nav.referrals')} onClick={onNavigate} />
       
       <div className="pt-4 pb-4">
-        <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Account</p>
+        <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">{t('nav.account')}</p>
         {(isArtist || isAdmin || userProfile?.isVerifiedArtist) && (
-          <NavItem to={`/artist/${userProfile?.uid}`} icon={UserIcon} label="Artist Profile" onClick={onNavigate} />
+          <NavItem to={`/artist/${userProfile?.uid}`} icon={UserIcon} label={t('nav.artist_profile')} onClick={onNavigate} />
         )}
         {(isArtist || isAdmin || userProfile?.isVerifiedArtist) && (
-          <NavItem to="/artist-dashboard" icon={Squares2X2Icon} label="Artist Dashboard" onClick={onNavigate} />
+          <NavItem to="/artist-dashboard" icon={Squares2X2Icon} label={t('nav.artist_dashboard')} onClick={onNavigate} />
         )}
         {(isArtist || isAdmin || userProfile?.isVerifiedArtist) && (
-          <NavItem to="/artist-portfolio" icon={SparklesIcon} label="Portfolio" onClick={onNavigate} />
+          <NavItem to="/artist-portfolio" icon={SparklesIcon} label={t('nav.portfolio')} onClick={onNavigate} />
         )}
         {isAdmin && (
-          <NavItem to="/admin" icon={ShieldCheckIcon} label="Admin Console" onClick={onNavigate} />
+          <NavItem to="/admin" icon={ShieldCheckIcon} label={t('nav.admin_console')} onClick={onNavigate} />
         )}
-        <NavItem to="/profile" icon={UserIcon} label="User Profile" onClick={onNavigate} />
-        <NavItem to="/my-nfts" icon={TicketIcon} label="My NFTs" onClick={onNavigate} />
-        <NavItem to="/wallet" icon={WalletIcon} label="Wallet" onClick={onNavigate} />
-        <NavItem to="/governance" icon={ShieldCheckIcon} label="Governance" onClick={onNavigate} />
-        <NavItem to="/staking" icon={ArrowTrendingUpIcon} label="Staking" onClick={onNavigate} />
-        <NavItem to="/about" icon={ShieldCheckIcon} label="About Us" onClick={onNavigate} />
-        <NavItem to="/settings" icon={Cog6ToothIcon} label="Settings" onClick={onNavigate} />
+        <NavItem to="/profile" icon={UserIcon} label={t('nav.user_profile')} onClick={onNavigate} />
+        <NavItem to="/my-nfts" icon={TicketIcon} label={t('nav.my_nfts')} onClick={onNavigate} />
+        <NavItem to="/wallet" icon={WalletIcon} label={t('nav.wallet')} onClick={onNavigate} />
+        <NavItem to="/governance" icon={ShieldCheckIcon} label={t('nav.governance')} onClick={onNavigate} />
+        <NavItem to="/staking" icon={ArrowTrendingUpIcon} label={t('nav.staking')} onClick={onNavigate} />
+        <NavItem to="/about" icon={ShieldCheckIcon} label={t('nav.about')} onClick={onNavigate} />
+        <NavItem to="/settings" icon={Cog6ToothIcon} label={t('nav.settings')} onClick={onNavigate} />
         {user && (
           <button 
             onClick={() => {
@@ -1034,7 +1044,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             aria-label="Sign Out"
           >
             <ArrowRightOnRectangleIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
-            <span className="text-[10px] uppercase font-bold tracking-widest text-left">Sign Out</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-left">{t('nav.sign_out')}</span>
           </button>
         )}
       </div>
@@ -1048,7 +1058,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             aria-label="Upload new track"
           >
             <ArrowUpTrayIcon className="h-4 w-4" />
-            <span className="text-[10px] uppercase font-bold tracking-widest">Upload Track</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest">{t('nav.upload_track')}</span>
           </Link>
           
           <Link 
@@ -1058,7 +1068,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             aria-label="Mint new NFT"
           >
             <PlusCircleIcon className="h-4 w-4" />
-            <span className="text-[10px] uppercase font-bold tracking-widest">Mint NFT</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest">{t('nav.mint_nft')}</span>
           </Link>
         </div>
       ) : (
@@ -1070,7 +1080,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             aria-label="Become an Artist"
           >
             <StarIcon className="h-4 w-4" />
-            <span className="text-[10px] uppercase font-bold tracking-widest">Become Artist</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest">{t('nav.become_artist')}</span>
           </Link>
         </div>
       )}
@@ -1081,7 +1091,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           <div className="flex items-center gap-2">
             <img src={TJ_COIN_ICON} alt="JAM Token" className="w-[26px] h-[26px] object-contain" />
             <div>
-              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">JAM Price</p>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{t('nav.jam_price')}</p>
               <p className="text-sm font-bold text-foreground tracking-tighter">${JAM_PRICE_USD.toFixed(3)}</p>
             </div>
           </div>
@@ -1092,7 +1102,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
         
         <div className="pt-2 flex items-center justify-between">
           <div>
-            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Your Balance</p>
+            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{t('nav.your_balance')}</p>
             <p className="text-sm font-bold text-blue-500 tracking-tighter">{parseFloat(String(userProfile.jamBalance || '0')).toLocaleString()} JAM</p>
           </div>
           <Link to="/wallet" className="p-3 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors">

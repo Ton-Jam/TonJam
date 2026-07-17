@@ -118,15 +118,6 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                 ))}
               </div>
 
-              {/* Springy Active Background Indicator Pill */}
-              {isActive && (
-                <motion.div
-                  layoutId="bottom-nav-active-pill"
-                  transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-                  className="absolute inset-x-2 top-1.5 bottom-1.5 bg-blue-500/10 rounded-xl -z-10"
-                />
-              )}
-
               {/* Icon Container with active scaling */}
               <div className="relative pointer-events-none">
                 <motion.div

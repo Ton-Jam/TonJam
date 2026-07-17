@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { TrendingUp, Globe, ExternalLink, Activity } from 'lucide-react';
+import { Globe, ExternalLink, Activity, Sparkles } from 'lucide-react';
+import { motion } from 'motion/react';
 
 interface Trend {
   id: string;
@@ -43,14 +44,14 @@ export const Web3MusicTrends: React.FC<Web3MusicTrendsProps> = ({ className = ''
 
   if (loading) {
     return (
-      <div className={`bg-slate-900 border border-white/[0.03] rounded-2xl p-6 ${className}`}>
+      <div className={`bg-[#0A1128]/50 backdrop-blur-md rounded-3xl p-6 ${className}`}>
         <div className="flex items-center gap-2 mb-6 animate-pulse">
           <div className="w-6 h-6 bg-blue-500/20 rounded-full" />
           <div className="h-4 w-40 bg-white/10 rounded" />
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse bg-slate-800/50 rounded-xl p-4">
+            <div key={i} className="animate-pulse bg-white/[0.02] rounded-2xl p-4">
               <div className="h-4 w-3/4 bg-white/10 rounded mb-2" />
               <div className="h-3 w-1/4 bg-white/5 rounded" />
             </div>
@@ -65,65 +66,73 @@ export const Web3MusicTrends: React.FC<Web3MusicTrendsProps> = ({ className = ''
   }
 
   return (
-    <div className={`bg-slate-900 border border-white/[0.03] rounded-2xl p-6 ${className}`}>
-      <div className="flex items-center justify-between mb-6">
+    <div className={`bg-[#0A1128]/50 backdrop-blur-md rounded-3xl p-6 ${className}`}>
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-500/10 p-2 rounded-lg">
+          <div className="bg-blue-500/10 p-2 rounded-xl">
             <Activity className="w-5 h-5 text-blue-400" />
           </div>
-          <h2 className="text-xl font-black text-white tracking-tight">Web3 Music Trends</h2>
+          <div>
+            <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-1.5">
+              TON & Web3 Music Trends
+              <Sparkles className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+            </h2>
+            <p className="text-[10px] text-slate-400 font-medium">Real-time headlines grounded by Google Search</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 relative">
+        <div className="flex items-center gap-2 bg-emerald-500/10 px-2.5 py-1 rounded-full">
+          <span className="flex h-1.5 w-1.5 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Live Intel</span>
+          <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">Live Intel</span>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* Vertically Scrollable List with Zero Borders */}
+      <div className="max-h-[380px] overflow-y-auto pr-1.5 space-y-3 scrollbar-thin scrollbar-thumb-white/5 scrollbar-track-transparent">
         {trends.map((trend) => (
-          <div 
+          <motion.div 
+            whileHover={{ scale: 1.01, backgroundColor: "rgba(255, 255, 255, 0.03)" }}
             key={trend.id} 
-            className="group bg-[#0A1128] border border-white/[0.05] hover:border-blue-500/30 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10"
+            className="group bg-white/[0.015] rounded-2xl p-4.5 transition-all duration-300"
           >
-            <div className="flex justify-between items-start mb-3">
-              <span className="px-2 py-1 bg-white/[0.03] border border-white/[0.05] rounded-[4px] text-[9px] font-black uppercase tracking-widest text-slate-300">
+            <div className="flex justify-between items-start gap-2 mb-2">
+              <span className="px-2 py-0.5 bg-blue-500/10 rounded-md text-[8px] font-black uppercase tracking-widest text-blue-400">
                 {trend.category}
               </span>
-              <span className={`px-2 py-1 rounded-[4px] text-[9px] font-black uppercase tracking-widest border
-                ${trend.impact === 'High' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 
-                  trend.impact === 'Medium' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
-                  'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}
+              <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest
+                ${trend.impact === 'High' ? 'bg-rose-500/10 text-rose-400' : 
+                  trend.impact === 'Medium' ? 'bg-amber-500/10 text-amber-400' : 
+                  'bg-emerald-500/10 text-emerald-400'}`}
               >
                 {trend.impact} Impact
               </span>
             </div>
             
-            <h3 className="text-white font-bold text-sm leading-tight mb-2 group-hover:text-blue-400 transition-colors">
+            <h3 className="text-white font-bold text-sm leading-snug mb-1.5 group-hover:text-blue-400 transition-colors">
               {trend.title}
             </h3>
             
-            <p className="text-slate-400 text-xs leading-relaxed mb-4 line-clamp-2">
+            <p className="text-slate-400 text-xs leading-relaxed mb-3">
               {trend.summary}
             </p>
             
-            <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest border-t border-white/[0.05] pt-3 mt-auto">
+            <div className="flex items-center justify-between text-[9px] text-slate-500 font-bold uppercase tracking-widest pt-2.5 bg-transparent">
               <span className="flex items-center gap-1">
-                <Globe className="w-3 h-3" />
+                <Globe className="w-3 h-3 text-slate-500" />
                 {trend.source}
               </span>
               <span>{trend.timestamp}</span>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
       
       {sources.length > 0 && (
-        <div className="mt-6 pt-4 border-t border-white/[0.05]">
-          <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Sources Grounding</h4>
-          <div className="flex flex-wrap gap-2">
+        <div className="mt-5 pt-4 bg-transparent">
+          <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2">Sources Grounding</h4>
+          <div className="flex flex-wrap gap-1.5">
             {sources.map((source, index) => {
                try {
                  const url = new URL(source);
@@ -133,7 +142,7 @@ export const Web3MusicTrends: React.FC<Web3MusicTrendsProps> = ({ className = ''
                     href={source} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[9px] font-mono text-slate-400 hover:text-blue-400 transition-colors bg-white/[0.02] px-2 py-1 rounded"
+                    className="flex items-center gap-1 text-[9px] font-mono text-slate-400 hover:text-blue-400 transition-colors bg-white/[0.02] hover:bg-white/[0.04] px-2.5 py-1 rounded-lg"
                   >
                     {url.hostname.replace('www.', '')}
                     <ExternalLink className="w-2.5 h-2.5" />

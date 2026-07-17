@@ -48,8 +48,10 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onClick }) =
       aria-label={`Notifications, ${unreadCount} unread`}
     >
       {/* Bell Icon with ring animation */}
-      <motion.div animate={controls}>
+      <motion.div animate={controls} className="relative inline-flex">
         <Bell className="w-5 h-5 shrink-0" />
+        {/* Notification badge overlay */}
+        <NotificationBadge count={unreadCount} />
       </motion.div>
 
       {/* Ripple visual overlay */}
@@ -58,9 +60,6 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onClick }) =
         initial={{ scale: 0, opacity: 0 }}
         whileTap={{ scale: 2.2, opacity: 1, transition: { duration: 0.4 } }}
       />
-
-      {/* Notification badge overlay */}
-      <NotificationBadge count={unreadCount} />
     </motion.button>
   );
 };

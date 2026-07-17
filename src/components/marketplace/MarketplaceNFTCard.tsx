@@ -6,6 +6,7 @@ import { useAudio } from "@/contexts/AudioContext";
 import { MOCK_TRACKS } from "@/constants";
 import { cn } from "@/lib/utils";
 import { MarqueeTitle } from "../MarqueeTitle";
+import { AuctionCountdownTimer } from "../AuctionCountdownTimer";
 
 interface MarketplaceNFTCardProps {
   nft: {
@@ -17,6 +18,10 @@ interface MarketplaceNFTCardProps {
     imageUrl: string;
     artistVerified?: boolean;
     edition?: string;
+    listingType?: 'fixed' | 'auction';
+    auctionEndTime?: string;
+    traits?: any[];
+    attributes?: any[];
   };
   className?: string;
 }
@@ -94,15 +99,25 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
 
         {/* Real-time Streaming status indicator tab */}
         {isCurrentlyPlaying && (
-          <div className="absolute top-3 left-3 bg-[#2BE08C] text-black text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1">
+          <div className={cn(
+            "absolute top-3 bg-[#2BE08C] text-black text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1 z-10",
+            nft.listingType === 'auction' ? "right-3" : "left-3"
+          )}>
             <span className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
             Streaming
           </div>
         )}
 
+        {/* Real-time Auction Countdown timer */}
+        {nft.listingType === 'auction' && (
+          <div className="absolute top-3 left-3 z-10">
+            <AuctionCountdownTimer nft={nft as any} variant="badge" />
+          </div>
+        )}
+
         {/* Edition tracker watermark */}
         {nft.edition && (
-          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold tracking-widest uppercase px-2 py-0.5 rounded">
+          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold tracking-widest uppercase px-2 py-0.5 rounded z-10">
             {nft.edition}
           </div>
         )}

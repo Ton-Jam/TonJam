@@ -101,6 +101,7 @@ import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
 import { QuickBid } from "@/components/QuickBid";
 import { NFTBidTracker } from "@/components/NFTBidTracker";
 import { CollectionStats } from "@/components/CollectionStats";
+import { CollectionSummaryCards } from '@/components/marketplace/CollectionSummaryCards';
 import { Interactive3DViewer } from "@/components/Interactive3DViewer";
 
 const NFTDetail: React.FC = () => {
@@ -1090,12 +1091,15 @@ const NFTDetail: React.FC = () => {
               </div>
             </header>
 
-            <CollectionStats 
-              nft={localNft} 
-              allNFTs={allNFTs} 
-              allCollections={collections} 
-              transactions={transactions} 
-            />
+            {/* Summary Stat Cards block with total volume, owners, and items */}
+            <div className="mb-6">
+              <CollectionSummaryCards 
+                nft={localNft} 
+                allNFTs={allNFTs} 
+                collections={collections} 
+                transactions={transactions} 
+              />
+            </div>
 
             {/* Pricing Section - Hardware Style */}
             <div className={cn(
@@ -1246,6 +1250,12 @@ const NFTDetail: React.FC = () => {
                   className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
                 >
                   <Coins className="h-3.5 w-3.5 text-blue-400" /> Support
+                </button>
+                <button
+                  onClick={() => setShowPriceAlertModal(true)}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3"
+                >
+                  <Bell className="h-3.5 w-3.5 text-amber-400" /> Alert
                 </button>
                 <button
                   onClick={handleShare}

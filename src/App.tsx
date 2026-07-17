@@ -21,50 +21,55 @@ import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 import AppRouter from "@/router/AppRouter";
 
+import { I18nProvider } from "@/contexts/I18nContext";
+
 export default function App() {
   return (
     <TonConnectUIProvider manifestUrl={typeof window !== 'undefined' ? `${window.location.origin}/tonconnect-manifest.json` : 'https://tonjam.app/tonconnect-manifest.json'}>
       <ToastProvider>
         <ModalProvider>
           <ThemeProvider>
-        <TooltipProvider>
-          <AuthProvider>
-            <UserProvider>
-              <WalletProvider>
-                <TonPriceProvider>
-                  <AudioProvider>
-                    <LibraryProvider>
-                      <ArtistProvider>
-                        <NFTProvider>
-                          <FeedProvider>
-                            <FollowProvider>
-                              <NotificationProvider>
-                                <TaskProvider>
-                                  <TJProvider>
-                                    <AppRouter />
+            <I18nProvider>
+              <TooltipProvider>
+                <AuthProvider>
+                  <UserProvider>
+                    <WalletProvider>
+                      <TonPriceProvider>
+                        <AudioProvider>
+                          <LibraryProvider>
+                            <ArtistProvider>
+                              <NFTProvider>
+                                <FeedProvider>
+                                  <FollowProvider>
+                                    <NotificationProvider>
+                                      <TaskProvider>
+                                        <TJProvider>
+                                          <AppRouter />
 
-                                    <Toaster
-                                      richColors
-                                      position="top-center"
-                                      closeButton
-                                    />
-                                  </TJProvider>
-                                </TaskProvider>
-                              </NotificationProvider>
-                            </FollowProvider>
-                          </FeedProvider>
-                        </NFTProvider>
-                      </ArtistProvider>
-                    </LibraryProvider>
-                  </AudioProvider>
-                </TonPriceProvider>
-              </WalletProvider>
-            </UserProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </ThemeProvider>
+                                          <Toaster
+                                            richColors
+                                            position="top-center"
+                                            closeButton
+                                          />
+                                        </TJProvider>
+                                      </TaskProvider>
+                                    </NotificationProvider>
+                                  </FollowProvider>
+                                </FeedProvider>
+                              </NFTProvider>
+                            </ArtistProvider>
+                          </LibraryProvider>
+                        </AudioProvider>
+                      </TonPriceProvider>
+                    </WalletProvider>
+                  </UserProvider>
+                </AuthProvider>
+              </TooltipProvider>
+            </I18nProvider>
+          </ThemeProvider>
         </ModalProvider>
       </ToastProvider>
     </TonConnectUIProvider>
   );
 }
+

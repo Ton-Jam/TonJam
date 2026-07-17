@@ -13,6 +13,7 @@ import { TopBuyers } from "./sections/TopBuyers";
 import { MarketplaceStatistics } from "./sections/MarketplaceStatistics";
 import { RecentSales } from "./sections/RecentSales";
 import { DiscoverGenres } from "./sections/DiscoverGenres";
+import { FloorPriceHistoryTracker } from "@/components/marketplace/FloorPriceHistoryTracker";
 import { EmptyState } from "./components/EmptyStates";
 import { 
   HeroSkeleton, 
@@ -55,9 +56,9 @@ const Marketplace: React.FC = () => {
 
   // Filters categories list
   const filterCategories = [
-    "All", "Music NFTs", "Albums", "Singles", "Collections", 
-    "Auctions", "Fixed Price", "New", "Trending", "Highest Volume", 
-    "Verified Artists", "Free Mint"
+    "All", "Live Auctions", "Buy Now", "Newly Minted", "Verified Artists", 
+    "Music NFTs", "Albums", "Singles", "Collections", 
+    "Trending", "Highest Volume", "Free Mint"
   ];
 
   const handleSelectNFT = (nft: any) => {
@@ -238,7 +239,12 @@ const Marketplace: React.FC = () => {
               />
             )}
 
-            {/* 10. Marketplace Analytics & Stats */}
+            {/* 10. Floor Price History Tracker */}
+            {!searchTerm && (
+              <FloorPriceHistoryTracker collections={trendingCollections as any} />
+            )}
+
+            {/* 11. Marketplace Analytics & Stats */}
             {!searchTerm && (
               <MarketplaceStatistics stats={analyticsStats} />
             )}

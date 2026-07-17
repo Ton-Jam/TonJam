@@ -35,18 +35,40 @@ export const AuctionCountdownTimer: React.FC<AuctionCountdownTimerProps> = ({
   const [isEndingSoon, setIsEndingSoon] = useState(false);
   const [isFinalMinute, setIsFinalMinute] = useState(false);
 
+  // Extract from metadata if not directly available
+  const endTimeValue = React.useMemo(() => {
+    if (nft.auctionEndTime) return nft.auctionEndTime;
+    if (nft.auctionEndDate) return nft.auctionEndDate;
+    if ((nft as any).auctionEndsAt) return (nft as any).auctionEndsAt;
+    if ((nft as any).endsAt) return (nft as any).endsAt;
+
+    // Check traits or attributes
+    const metadataList = [...(nft.traits || []), ...(nft.attributes || [])];
+    const expirationKeys = [
+      'expiration', 'auction end', 'end time', 'expires', 'endtime', 
+      'auction end time', 'auction_end', 'auction_end_time', 'expiry', 'expiration_time'
+    ];
+
+    for (const trait of metadataList) {
+      if (trait?.trait_type && expirationKeys.includes(trait.trait_type.toLowerCase())) {
+        return trait.value;
+      }
+    }
+    return null;
+  }, [nft]);
+
   useEffect(() => {
-    if (!nft.auctionEndTime || nft.listingType !== 'auction') {
+    if (!endTimeValue) {
       setTimeLeft(prev => ({ ...prev, isEnded: true }));
       return;
     }
 
     const calculateTime = () => {
-      const endTime = new Date(nft.auctionEndTime!).getTime();
+      const endTime = new Date(endTimeValue).getTime();
       const now = Date.now();
       const difference = endTime - now;
 
-      if (difference <= 0) {
+      if (isNaN(endTime) || difference <= 0) {
         setTimeLeft({
           days: 0,
           hours: 0,
@@ -99,7 +121,7 @@ export const AuctionCountdownTimer: React.FC<AuctionCountdownTimerProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [nft.auctionEndTime, nft.listingType, onEnded]);
+  }, [endTimeValue, onEnded]);
 
   if (timeLeft.isEnded) {
     return (

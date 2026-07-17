@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "motion/react";
-import tonjamBg from "@/assets/images/tonjam_bg_1784230762517.jpg";
 
 const LoadingScreen: React.FC = () => {
   return (
@@ -9,11 +8,9 @@ const LoadingScreen: React.FC = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden font-ui bg-[#050A24]"
+      className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden font-ui"
       style={{
-        backgroundImage: `url(${tonjamBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        background: "radial-gradient(circle at 50% 0%, #0A1647 0%, #050A24 100%)",
       }}
     >
       <div className="relative z-10 flex flex-col items-center gap-8 -translate-y-12">

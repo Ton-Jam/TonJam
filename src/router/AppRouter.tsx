@@ -61,6 +61,8 @@ const ArtistOnboarding = lazy(() => import('@/pages/ArtistOnboarding'));
 const ArtistAnalytics = lazy(() => import('@/pages/ArtistAnalytics'));
 const ArtistPortfolio = lazy(() => import('@/pages/ArtistPortfolio'));
 
+const Referrals = lazy(() => import('@/pages/Referrals'));
+
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
     initial={{ opacity: 0, x: 20, scale: 0.98 }}
@@ -227,6 +229,7 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/home" element={<PageWrapper><HomeFeed /></PageWrapper>} />
                   <Route path="/uikit" element={<PageWrapper><UIKitShowcase /></PageWrapper>} />
                   <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
+                  <Route path="/referrals" element={<PageWrapper><ProtectedRoute><Referrals /></ProtectedRoute></PageWrapper>} />
                 </Routes>
               </React.Suspense>
             </AnimatePresence>
