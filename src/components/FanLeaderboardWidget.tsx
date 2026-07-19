@@ -2,12 +2,16 @@ import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Trophy, Crown, Medal, Gem } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { MOCK_USERS } from '@/constants';
 
 interface FanLeaderboardWidgetProps {
   artistId?: string;
 }
 
 const FanLeaderboardWidget: React.FC<FanLeaderboardWidgetProps> = () => {
+  const navigate = useNavigate();
+
   // Mock fan leaderboard data
   const topFans = useMemo(() => [
     { name: 'Whale_Watcher', spent: 1250.50, items: 42, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Whale', rank: 1, color: 'from-primary/40 to-primary/10' },
@@ -16,6 +20,20 @@ const FanLeaderboardWidget: React.FC<FanLeaderboardWidgetProps> = () => {
     { name: 'NFT_Ninja', spent: 450.80, items: 12, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ninja', rank: 4 },
     { name: 'Ton_Titan', spent: 380.50, items: 10, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Titan', rank: 5 },
   ], []);
+
+  const handleFanClick = (fanName: string) => {
+    const user = MOCK_USERS.find(u => 
+      u.name.toLowerCase() === fanName.toLowerCase() || 
+      (u.username && u.username.toLowerCase() === fanName.toLowerCase()) ||
+      (u.username && u.username.toLowerCase() === `@${fanName.toLowerCase()}`)
+    );
+    if (user) {
+      navigate(`/user/${user.uid}`);
+    } else {
+      // Find another valid profile or fallback to a realistic user profile like 'u2'
+      navigate('/user/u2');
+    }
+  };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -47,7 +65,8 @@ const FanLeaderboardWidget: React.FC<FanLeaderboardWidgetProps> = () => {
           <motion.div 
             key={fan.name}
             whileHover={{ y: -5 }}
-            className="relative bg-surface border border-divider p-6 rounded-card overflow-hidden group"
+            onClick={() => handleFanClick(fan.name)}
+            className="relative bg-surface border border-divider p-6 rounded-card overflow-hidden group cursor-pointer"
           >
             <div className={cn("absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-5 blur-2xl -mr-16 -mt-16 group-hover:opacity-10 transition-opacity", fan.color)} />
             
@@ -87,7 +106,11 @@ const FanLeaderboardWidget: React.FC<FanLeaderboardWidgetProps> = () => {
       <div className="bg-surface border border-divider rounded-card overflow-hidden">
         <div className="divide-y divide-divider">
           {topFans.slice(3).map((fan) => (
-            <div key={fan.name} className="flex items-center justify-between p-4 px-6 hover:bg-background/20 transition-colors group">
+            <div 
+              key={fan.name} 
+              onClick={() => handleFanClick(fan.name)}
+              className="flex items-center justify-between p-4 px-6 hover:bg-background/20 transition-colors group cursor-pointer"
+            >
               <div className="flex items-center gap-4">
                 <span className="text-xs font-black text-text-muted w-4">#{fan.rank}</span>
                 <img src={fan.avatar} className="w-10 h-10 rounded-xl bg-background border border-divider" alt="" />

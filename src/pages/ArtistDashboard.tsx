@@ -38,7 +38,8 @@ import {
   AlertCircle,
   Check,
   Loader2,
-  Image as ImageIcon
+  ImageIcon,
+  Handshake
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { BackButton } from "@/components/BackButton";
@@ -53,6 +54,7 @@ import EditMetadataModal from "@/components/EditMetadataModal";
 import SponsorshipSubmissionModal from "@/components/SponsorshipSubmissionModal";
 import { BadgeSystem } from "@/components/BadgeSystem";
 import CollectorTier from "@/components/CollectorTier";
+import { CollabRequestsManager } from "@/components/CollabRequestsManager";
 
 import SongRequestsTab from "@/components/SongRequestsTab";
 import AlbumCard from "@/components/AlbumCard";
@@ -80,7 +82,7 @@ export default function ArtistDashboard() {
   const { user, isArtist, isAdmin, loading } = useAuth();
   
   // Tabs state
-  const [activeTab, setActiveTab] = useState<"overview" | "creator" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty" | "royalties" | "portfolio">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "creator" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty" | "royalties" | "portfolio" | "collabs">("overview");
   const [isRoyaltyModalOpen, setIsRoyaltyModalOpen] = useState(false);
 
   const artistDataForRoyalty = useMemo(() => {
@@ -189,7 +191,7 @@ export default function ArtistDashboard() {
       errors.cover = "Cover art image is required";
     }
 
-    setUploadErrors(errors);
+    // setUploadErrors(errors);
   }, [uploadTitle, uploadGenre, uploadAudioFile, uploadCoverFile, isUploadFormTouched]);
 
   // Enhanced upload drag-and-drop states & refs
@@ -575,7 +577,7 @@ export default function ArtistDashboard() {
     }
 
     if (Object.keys(errors).length > 0) {
-      setUploadErrors(errors);
+      // setUploadErrors(errors);
       addNotification("Please correct the form errors before broadcasting.", "warning");
       return;
     }
@@ -854,6 +856,16 @@ export default function ArtistDashboard() {
             }`}
           >
             <User className="w-3.5 h-3.5 text-cyan-400" /> Portfolio
+          </button>
+          <button
+            onClick={() => setActiveTab("collabs")}
+            className={`flex-1 min-w-[120px] transition-all duration-300 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 ${
+              activeTab === "collabs" 
+                ? "bg-white/[0.06] text-white shadow-lg shadow-black/30" 
+                : "text-zinc-500 hover:text-white hover:bg-white/[0.02]"
+            }`}
+          >
+            <Handshake className="w-3.5 h-3.5 text-emerald-400" /> Collabs
           </button>
         </div>
 
@@ -1590,6 +1602,11 @@ export default function ArtistDashboard() {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* COLLABS TAB */}
+            {activeTab === "collabs" && (
+              <CollabRequestsManager />
             )}
 
             {/* NFT SALES TAB */}

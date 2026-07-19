@@ -349,14 +349,14 @@ export const PlayerScreen: React.FC = () => {
               exit={{ opacity: 0, scale: 0.95 }}
               className="w-full flex flex-col items-center gap-4"
             >
-              {/* Large Animated Album Art Cover with Gestures (Edge-to-Edge on Mobile) */}
+              {/* Large Animated Album Art Cover with Gestures (Audiomack style - padded) */}
               <div
                 onClick={handleArtworkTap}
                 onTouchStart={handlePressStart}
                 onTouchEnd={handlePressEnd}
                 onMouseDown={handlePressStart}
                 onMouseUp={handlePressEnd}
-                className="relative aspect-square w-full sm:max-w-[380px] md:max-w-[400px] rounded-b-3xl sm:rounded-3xl bg-zinc-900/50 shadow-2xl overflow-hidden cursor-pointer group transition-all duration-300"
+                className="relative aspect-square w-[85%] max-w-[320px] sm:max-w-[380px] md:max-w-[400px] rounded-2xl sm:rounded-3xl bg-zinc-900/50 shadow-2xl overflow-hidden cursor-pointer group transition-all duration-300 mt-2"
                 id="artwork-gesture-box"
               >
                 <motion.img

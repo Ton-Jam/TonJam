@@ -171,6 +171,8 @@ const NFTDetail: React.FC = () => {
           updateNFT(localNft.id, { views: nftData.views }, true);
         }
       }
+    }, (error) => {
+      console.warn("Error listening to NFT views:", error);
     });
 
     return () => unsub();
@@ -403,6 +405,8 @@ const NFTDetail: React.FC = () => {
            updateNFT(localNft.id, { history: nftData.history }, true);
         }
       }
+    }, (error) => {
+      console.warn("Error listening to NFT history:", error);
     });
     return () => unsub();
   }, [activeTab, localNft?.id, localNft?.history]);
@@ -423,6 +427,84 @@ const NFTDetail: React.FC = () => {
 
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [isEndingSoon, setIsEndingSoon] = useState<boolean>(false);
+
+  // Live bid stream simulation for active auctions
+  useEffect(() => {
+    if (!localNft || !isAuction || isAuctionEnded) return;
+
+    // Simulation runs every 35-55 seconds randomly
+    const runSimulation = () => {
+      // Don't simulate if the user is currently placing a bid
+      if (isPlacingBid) return;
+
+      const randomOfferers = [
+        "UQDa_SarahJ_Collector_x9y1_7384",
+        "UQC_Emeka_LagosVibes_9911_v8s2",
+        "UQC_Alex_KrupyFan_4831_m1s9",
+        "UQD_VaporWave_Lord_1109_p4k8",
+        "UQCc_Arseny_RaveMaster_2281_f92k"
+      ];
+      // Exclude current user from simulated bidders
+      const userWallet = userProfile?.walletAddress || "";
+      const filteredOfferers = randomOfferers.filter(o => o !== userWallet);
+      const randomOfferer = filteredOfferers[Math.floor(Math.random() * filteredOfferers.length)];
+      
+      const currentHighest = localNft.offers && localNft.offers.length > 0 
+        ? parseFloat(localNft.offers[0].price) 
+        : parseFloat(localNft.price);
+      
+      const bidIncrease = 1 + (Math.floor(Math.random() * 4) + 2) / 100; // 2% to 5% increase
+      const simulatedBid = (currentHighest * bidIncrease).toFixed(2);
+
+      const newOffer = {
+        id: `offer-sim-${Date.now()}`,
+        offerer: randomOfferer,
+        price: simulatedBid,
+        timestamp: new Date().toISOString(),
+        duration: "24h",
+      };
+
+      const newHistoryItem = {
+        id: `hist-sim-${Date.now()}`,
+        event: 'Bid',
+        price: `${simulatedBid} TON`,
+        from: randomOfferer,
+        to: localNft.owner || 'Auction Smart Contract',
+        date: new Date().toISOString(),
+      };
+
+      updateNFT(localNft.id, {
+        price: simulatedBid,
+        offers: [newOffer, ...(localNft.offers || [])],
+        history: [newHistoryItem, ...(localNft.history || [])],
+      });
+
+      addNotification(
+        `New network bid: @${randomOfferer.slice(0, 8)}... bid ${simulatedBid} TON`,
+        "info"
+      );
+
+      // Flash a toast for visual transparency feedback
+      import('sonner').then(({ toast }) => {
+        toast.info("Live Bid Received", {
+          description: `@${randomOfferer.slice(0, 8)}... placed a bid of ${simulatedBid} TON.`,
+        });
+      });
+    };
+
+    // Organic random delay: first bid in 20-40 seconds, then every 35-55s
+    const initialDelay = 20000 + Math.random() * 20000;
+    const initialTimer = setTimeout(() => {
+      runSimulation();
+      
+      const interval = setInterval(runSimulation, 35000 + Math.random() * 20000);
+      return () => clearInterval(interval);
+    }, initialDelay);
+
+    return () => {
+      clearTimeout(initialTimer);
+    };
+  }, [localNft?.id, isAuction, isAuctionEnded, isPlacingBid, userProfile?.walletAddress]);
 
   useEffect(() => {
     if (!isAuction || !localNft?.auctionEndTime) return;

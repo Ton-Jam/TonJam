@@ -144,6 +144,21 @@ const GENRES = [
   { id: 'Lo-Fi', label: 'Lo-Fi', emoji: '☕' }
 ];
 
+const MARKETPLACE_GENRES = [
+  { id: 'All', label: 'All Styles', emoji: '🎵', streams: '4.5M' },
+  { id: 'Phonk', label: 'Phonk', emoji: '🚗', streams: '1.2M' },
+  { id: 'Synthwave', label: 'Synthwave', emoji: '🌌', streams: '940K' },
+  { id: 'Acoustic Cyber', label: 'Acoustic Cyber', emoji: '🎸', streams: '780K' },
+  { id: 'Afro-TON', label: 'Afro-TON', emoji: '🥁', streams: '650K' },
+  { id: 'Electronic', label: 'Electronic', emoji: '⚡', streams: '1.5M' },
+  { id: 'Hip Hop', label: 'Hip Hop', emoji: '🎤', streams: '880K' },
+  { id: 'Techno', label: 'Techno', emoji: '🌀', streams: '520K' },
+  { id: 'Ambient', label: 'Ambient', emoji: '🍃', streams: '310K' },
+  { id: 'Rock', label: 'Rock', emoji: '🔥', streams: '430K' },
+  { id: 'Pop', label: 'Pop', emoji: '✨', streams: '750K' },
+  { id: 'Lo-Fi', label: 'Lo-Fi', emoji: '☕', streams: '290K' }
+];
+
 export const Discover: React.FC = () => {
   const navigate = useNavigate();
   const {
@@ -171,6 +186,18 @@ export const Discover: React.FC = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string>('All');
+  const [selectedMarketplaceGenre, setSelectedMarketplaceGenre] = useState<string>('All');
+
+  const filteredMarketplaceNFTs = useMemo(() => {
+    if (selectedMarketplaceGenre === 'All') {
+      return allNFTs;
+    }
+    return allNFTs.filter((nft: any) => {
+      const track = allTracks.find((t: any) => t.id === nft.trackId);
+      const nftGenre = nft.genre || nft.style || track?.genre || '';
+      return nftGenre.toLowerCase() === selectedMarketplaceGenre.toLowerCase();
+    });
+  }, [allNFTs, allTracks, selectedMarketplaceGenre]);
 
   // Recently Viewed NFTs Tracking
   const [recentlyViewedNfts, setRecentlyViewedNfts] = useState<any[]>(() => {
@@ -609,12 +636,117 @@ export const Discover: React.FC = () => {
               <EarnTJPreview />
             </section>
 
-            {/* 11. Marketplace Picks (Trending NFTs) */}
-            <section>
-              <TrendingNFTSection 
-                title="Marketplace Picks"
-                nfts={allNFTs.slice(0, 4)} 
-              />
+            {/* 11. Trending Genres & Marketplace Picks */}
+            <section className="space-y-6">
+              <div className="space-y-1">
+                <span className="text-[9px] font-mono font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <TrendingUp className="w-3 h-3 text-indigo-400" /> ON-CHAIN SOUNDSCAPES
+                </span>
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Trending Genres</h3>
+              </div>
+
+              {/* Horizontal scrollable pills with subtexts */}
+              <div className="w-full overflow-x-auto no-scrollbar flex gap-3 select-none pb-2">
+                {MARKETPLACE_GENRES.map((genre) => {
+                  const isSelected = selectedMarketplaceGenre === genre.id;
+                  return (
+                    <button
+                      key={`marketplace-genre-${genre.id}`}
+                      onClick={() => setSelectedMarketplaceGenre(genre.id)}
+                      className={`relative px-4 py-3 shrink-0 rounded-2xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all duration-200 overflow-hidden flex flex-col items-start gap-1 ${
+                        isSelected 
+                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' 
+                          : 'bg-[#0c133a] text-slate-400 hover:text-white hover:bg-[#121c4e]'
+                      }`}
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs">{genre.emoji}</span>
+                        <span>{genre.label}</span>
+                      </div>
+                      <span className={`text-[7.5px] font-mono font-medium ${isSelected ? 'text-indigo-200' : 'text-slate-500'}`}>
+                        {genre.streams} Streams
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Underneath: The Marketplace Picks matching this category */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                    Marketplace Picks: <span className="text-indigo-400 font-bold">{selectedMarketplaceGenre}</span> ({filteredMarketplaceNFTs.length} items)
+                  </span>
+                </div>
+
+                <AnimatePresence mode="popLayout">
+                  {filteredMarketplaceNFTs.length > 0 ? (
+                    <motion.div 
+                      layout
+                      className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+                    >
+                      {filteredMarketplaceNFTs.slice(0, 8).map((nft) => {
+                        const imageSrc = nft.imageUrl || nft.coverUrl || getPlaceholderImage(nft.title);
+                        return (
+                          <motion.div
+                            layout
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            key={`marketplace-genre-nft-${nft.id}`}
+                            whileHover={{ y: -4 }}
+                            onClick={() => navigate(`/nft/${nft.id}`)}
+                            className="bg-[#0c133a] rounded-2xl p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
+                          >
+                            <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-950">
+                              <img
+                                src={imageSrc}
+                                alt={nft.title}
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                onError={(e) => { e.currentTarget.src = getPlaceholderImage(nft.title); }}
+                              />
+                              <div className="absolute top-2 left-2 bg-[#050A24]/95 text-[7px] font-mono font-bold text-[#00B4D8] px-1.5 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
+                                <Gem className="w-2.5 h-2.5 text-[#00B4D8]" />
+                                <span>MINTED</span>
+                              </div>
+                            </div>
+
+                            <div className="mt-3 space-y-1 truncate">
+                              <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
+                                {nft.title}
+                              </h4>
+                              <p className="text-[10px] text-slate-400 truncate">{nft.artist || nft.creator}</p>
+                              
+                              <div className="flex justify-between items-center pt-2 mt-2">
+                                <div className="space-y-0.5">
+                                  <p className="text-[7.5px] font-mono text-slate-500 uppercase tracking-wider">VALUE</p>
+                                  <p className="text-[10px] font-mono font-extrabold text-white">{nft.price} TON</p>
+                                </div>
+                                <div className="text-right space-y-0.5">
+                                  <p className="text-[7.5px] font-mono text-slate-500 uppercase tracking-wider">SUPPLY</p>
+                                  <p className="text-[9px] font-mono font-bold text-slate-300">{nft.edition || '1/1'}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="py-12 flex flex-col items-center justify-center text-center bg-[#0c133a]/30 rounded-2xl p-6"
+                    >
+                      <span className="text-xl mb-2">💎</span>
+                      <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">No items listed in {selectedMarketplaceGenre}</p>
+                      <p className="text-[10px] text-slate-500 max-w-xs">Be the first to mint a premium Web3 music collectible under this category!</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </section>
 
             {/* 12. Favorite Artists */}

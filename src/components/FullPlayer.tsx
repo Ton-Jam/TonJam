@@ -1,3 +1,4 @@
+import WaveformProgress from "./WaveformProgress";
 import { EqualizerView } from "./EqualizerView";
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useAudio } from "@/contexts/AudioContext";
@@ -946,25 +947,12 @@ const FullPlayer: React.FC = () => {
 
                 {/* Sleek Spotify-like Progress Slider */}
                 <div className="relative pt-6 pb-2 px-1 group/slider-deck">
-                  <div
-                    className="relative w-full h-6 flex items-center cursor-pointer group/seek-deck select-none rounded bg-transparent z-10"
-                    onMouseDown={(e) => { setIsSeeking(true); handleProgressScrub(e); }}
-                    onMouseMove={(e) => { if (isSeeking) handleProgressScrub(e); }}
-                    onMouseUp={(e) => { setIsSeeking(false); handleProgressScrub(e); }}
-                    onMouseLeave={(e) => { if (isSeeking) setIsSeeking(false); }}
-                    onTouchStart={(e) => { setIsSeeking(true); handleProgressScrub(e); }}
-                    onTouchMove={(e) => { if (isSeeking) handleProgressScrub(e); }}
-                    onTouchEnd={(e) => { setIsSeeking(false); handleProgressScrub(e); }}
-                  >
-                    <div className="w-full h-1 bg-white/10 rounded-full relative transition-all group-hover/seek-deck:h-1.5 overflow-hidden">
-                      <div
-                        className="absolute top-0 left-0 h-full bg-white rounded-full group-hover/seek-deck:bg-[#00B4D8] transition-all duration-75"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                    <div
-                      className="absolute top-1/2 -translate-y-1/2 size-3.5 bg-white rounded-full opacity-0 group-hover/seek-deck:opacity-100 shadow-xl pointer-events-none transition-all duration-200 -ml-1.5 ring-2 ring-white/20"
-                      style={{ left: `${progress}%` }}
+                  <div className="relative w-full h-12 sm:h-14 flex items-center justify-center cursor-pointer group/seek-deck select-none rounded bg-transparent z-10 overflow-hidden">
+                    <WaveformProgress 
+                      height={40} 
+                      className="w-full h-full opacity-80 group-hover/seek-deck:opacity-100 transition-opacity"
+                      waveColor="rgba(255, 255, 255, 0.2)"
+                      progressColor="#ffffff"
                     />
                   </div>
                   <div className="flex justify-between text-[10px] font-bold text-[#9AA0AE] tracking-wider font-mono mt-2 z-10 relative">

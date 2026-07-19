@@ -24,6 +24,8 @@ import {
   Task,
   SponsoredContent,
   Collection,
+  CollabRequest,
+  CollabMessage,
 } from "@/types";
 import {
   MOCK_PLAYLISTS,
@@ -188,6 +190,10 @@ interface AudioContextType {
   userNFTs: NFTItem[];
   userBids: NFTItem[];
   collections: Collection[];
+  collabRequests: CollabRequest[];
+  addCollabRequest: (req: CollabRequest) => void;
+  updateCollabRequest: (id: string, updates: Partial<CollabRequest>) => void;
+  addCollabMessage: (requestId: string, message: CollabMessage) => void;
   allTracks: Track[];
   allNFTs: NFTItem[];
   artists: Artist[];
@@ -582,6 +588,45 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       return [];
     }
   });
+
+  const [collabRequests, setCollabRequests] = useState<CollabRequest[]>(() => {
+    try {
+      const saved = localStorage.getItem('tonjam_collab_requests');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  const addCollabRequest = useCallback((req: CollabRequest) => {
+    setCollabRequests(prev => {
+      const updated = [req, ...prev];
+      localStorage.setItem('tonjam_collab_requests', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const updateCollabRequest = useCallback((id: string, updates: Partial<CollabRequest>) => {
+    setCollabRequests(prev => {
+      const updated = prev.map(r => r.id === id ? { ...r, ...updates } : r);
+      localStorage.setItem('tonjam_collab_requests', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const addCollabMessage = useCallback((requestId: string, message: CollabMessage) => {
+    setCollabRequests(prev => {
+      const updated = prev.map(r => {
+        if (r.id === requestId) {
+          return { ...r, messages: [...r.messages, message] };
+        }
+        return r;
+      });
+      localStorage.setItem('tonjam_collab_requests', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   const [firestorePlaylistFolders, setFirestorePlaylistFolders] = useState<
     PlaylistFolder[]
   >([]);
@@ -4473,6 +4518,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         collections,
         addCollection,
         updateCollection,
+        collabRequests,
+        addCollabRequest,
+        updateCollabRequest,
+        addCollabMessage,
       }}
     >
       {children}

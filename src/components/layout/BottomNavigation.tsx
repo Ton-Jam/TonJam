@@ -80,7 +80,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 mobile-nav-opaque pb-[calc(env(safe-area-inset-bottom,0px)+12px)] select-none">
+    <nav className={`fixed bottom-0 left-0 right-0 z-50 mobile-nav-opaque pb-[calc(env(safe-area-inset-bottom,0px)+12px)] select-none ${activeTab ? 'mobile-nav-no-backdrop' : ''}`}>
       {/* Top micro gloss line for subtle alignment (NO border line) */}
       <div className="h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent w-full" />
 

@@ -10,6 +10,28 @@ export interface Collection {
   updatedAt?: string;
 }
 
+export interface CollabMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: string;
+}
+
+export interface CollabRequest {
+  id: string;
+  senderId: string;
+  senderName: string;
+  receiverId: string;
+  receiverName: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  proposedSplit: number; // percentage for sender
+  trackTitle: string;
+  description: string;
+  messages: CollabMessage[];
+  createdAt: string;
+}
+
 export interface Notification {
   id: string;
   userId: string;

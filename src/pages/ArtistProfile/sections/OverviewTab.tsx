@@ -33,6 +33,24 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   const latestPost = posts[0];
   const popularTracks = tracks.slice(0, 4);
 
+  const topCollectors = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    nfts.forEach(nft => {
+      if (nft.owner && nft.owner.length > 5) { // Ensure it's a real address roughly
+        counts[nft.owner] = (counts[nft.owner] || 0) + 1;
+      }
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([address, count]) => ({ address, count }));
+  }, [nfts]);
+
+  const shortenAddress = (addr: string) => {
+    if (!addr || addr.length < 8) return addr;
+    return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
+  };
+
   return (
     <div className="space-y-12 animate-in fade-in" id="overview-tab-root">
       
@@ -138,6 +156,30 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           ))}
         </div>
       </section>
+
+      {/* Top Collectors Leaderboard */}
+      {topCollectors.length > 0 && (
+        <section className="bg-neutral-900/40 p-5 rounded-[10px] border border-neutral-800 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Award className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Top Collectors</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {topCollectors.map((collector, idx) => (
+              <div key={collector.address} className="bg-black/40 p-4 rounded-xl border border-white/5 flex flex-col items-center gap-2 relative">
+                <div className="absolute top-2 left-2 text-[10px] font-black text-white/30">#{idx + 1}</div>
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border border-emerald-500/30 flex items-center justify-center">
+                  <span className="text-emerald-400 font-bold text-xs">{collector.address.slice(0, 2)}</span>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-mono font-bold text-white truncate max-w-[100px]">{shortenAddress(collector.address)}</p>
+                  <p className="text-[10px] font-black text-emerald-400 mt-1">{collector.count} NFTs</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Featured Album & Trending NFT Side-By-Side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

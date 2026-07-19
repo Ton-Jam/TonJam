@@ -15,8 +15,10 @@ import {
   RefreshCw,
   Info,
   Copy,
-  Check
+  Check,
+  Users
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAudio } from '@/contexts/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
@@ -675,6 +677,34 @@ const Wallet: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* Refer-a-Fan Banner */}
+      <section className="relative rounded-[4px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black p-4 lg:p-6 flex flex-col md:flex-row items-center justify-between gap-6 border border-amber-500/20">
+        <div className="absolute top-0 right-0 w-1/2 h-full opacity-5 pointer-events-none">
+          <Users className="w-full h-full text-amber-500" />
+        </div>
+        <div className="relative z-10 max-w-xl space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-500 text-[9px] font-bold uppercase tracking-[0.2em] mb-2">
+            <Users className="h-3 w-3" />
+            Refer-a-Fan Program
+          </div>
+          <h2 className="text-2xl font-black uppercase tracking-tighter text-foreground">
+            Invite Friends, <span className="text-amber-500">Earn JAM</span>
+          </h2>
+          <p className="text-sm text-muted-foreground/80 font-medium">
+            Generate your unique referral link to invite friends. You both receive 50 JAM Coins and a 5% discount on marketplace fees for successful sign-ups!
+          </p>
+        </div>
+        <div className="relative z-10 w-full md:w-auto shrink-0">
+          <Link 
+            to="/referrals"
+            className="w-full md:w-auto px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black font-black uppercase tracking-widest rounded-[4px] transition-all flex items-center justify-center gap-3 cursor-pointer shadow-lg shadow-amber-500/20 active:scale-95"
+          >
+            Get Referral Link
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
 
       {/* Wallet Recommendations & Guidelines */}
       <section className="space-y-4">

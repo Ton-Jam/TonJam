@@ -52,11 +52,15 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
 
   return (
     <motion.div 
-      whileHover={{ y: -6, scale: 1.05 }}
+      whileHover={{ 
+        y: -6, 
+        scale: 1.05,
+        boxShadow: "0 0 25px rgba(59, 130, 246, 0.35)"
+      }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={handleCardClick}
-      className="w-[160px] h-[240px] rounded-[4px] bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center p-3 border border-white/5 hover:border-blue-500/50 hover:shadow-[0_12px_35px_rgba(59,130,246,0.3)] transition-all duration-300 cursor-pointer"
+      className="w-[160px] h-[240px] rounded-[4px] bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center p-3 border border-white/5 hover:border-blue-500/50 transition-all duration-300 cursor-pointer"
     >
       {/* Premium Badge */}
       <div className="absolute top-[-8px] left-[-8px] w-[100px] h-[100px] overflow-hidden flex items-center justify-center pointer-events-none">

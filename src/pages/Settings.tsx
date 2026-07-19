@@ -39,6 +39,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { useNotification } from '@/contexts/NotificationContext';
 import { useTheme } from '@/components/theme-provider';
 import { useCacheManagement } from '@/hooks/useCacheManagement';
+import { useI18n } from '@/contexts/I18nContext';
 import StorageManagementModal from '@/components/StorageManagementModal';
 import { cn, validateFile } from '@/lib/utils';
 import { NotificationPreferences, RoyaltySplit, Collaborator } from '@/types';
@@ -71,6 +72,7 @@ const Settings: React.FC = () => {
   const { user, userProfile, signOut } = useAuth();
   const { isOffline, toggleOfflineMode, artworkStyle, setArtworkStyle } = useAudio();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage } = useI18n();
   const { totalSizeMB, cachedCount, clearAllCache, isPurging } = useCacheManagement();
   const tonAddress = useTonAddress();
   
@@ -706,6 +708,23 @@ const Settings: React.FC = () => {
                             <SelectItem value="dark" className="text-[10px] font-black uppercase tracking-widest">Dark</SelectItem>
                             <SelectItem value="system" className="text-[10px] font-black uppercase tracking-widest">System</SelectItem>
                         </SelectContent>
+                        </Select>
+                    </SettingRow>
+
+                    <SettingRow 
+                        icon={Globe} 
+                        title="Display Language" 
+                        description="Select the interface presentation language"
+                    >
+                        <Select value={language} onValueChange={(val: any) => setLanguage(val as 'en' | 'ru' | 'uk')}>
+                          <SelectTrigger className="w-[120px] h-10 bg-black/30 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest px-4 shadow-none">
+                              <SelectValue placeholder="Language" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-zinc-900 border border-white/5 rounded-2xl shadow-2xl">
+                              <SelectItem value="en" className="text-[10px] font-black uppercase tracking-widest">English</SelectItem>
+                              <SelectItem value="ru" className="text-[10px] font-black uppercase tracking-widest">Русский</SelectItem>
+                              <SelectItem value="uk" className="text-[10px] font-black uppercase tracking-widest">Українська</SelectItem>
+                          </SelectContent>
                         </Select>
                     </SettingRow>
 

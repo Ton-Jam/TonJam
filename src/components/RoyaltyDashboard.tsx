@@ -386,19 +386,51 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
                 {streamingSplits.length} Accounts
               </span>
             </h4>
+
+            {streamingSplits.length > 0 && (
+              <div className="h-2 w-full bg-white/[0.02] rounded-full overflow-hidden flex">
+                {streamingSplits.map((split, i) => {
+                  const colors = ['bg-blue-500', 'bg-emerald-500', 'bg-purple-500', 'bg-pink-500', 'bg-cyan-500', 'bg-amber-500'];
+                  return (
+                    <div
+                      key={`stream-bar-${split.address}-${i}`}
+                      className={`${colors[i % colors.length]} transition-all duration-500`}
+                      style={{ width: `${split.percentage * 100}%` }}
+                      title={`${split.label || 'Collaborator'}: ${(split.percentage * 100).toFixed(1)}%`}
+                    />
+                  );
+                })}
+              </div>
+            )}
+
             {streamingSplits.length === 0 ? (
               <p className="text-[9px] text-zinc-500 uppercase tracking-wider">No custom splits configured. Defaulting to 100% to creator.</p>
             ) : (
-              <div className="space-y-2 max-h-[160px] overflow-y-auto no-scrollbar">
-                {streamingSplits.map((split, i) => (
-                  <div key={`stream-${split.address}-${i}`} className="flex items-center justify-between text-[10px] p-2 bg-white/[0.01] rounded">
-                    <div className="space-y-0.5 truncate pr-2">
-                      <span className="font-bold text-white uppercase block">{split.label || 'Collaborator'}</span>
-                      <span className="text-[8px] font-mono text-zinc-500 block truncate">{split.address || 'No wallet address'}</span>
+              <div className="space-y-2 max-h-[220px] overflow-y-auto no-scrollbar">
+                {streamingSplits.map((split, i) => {
+                  const colors = ['text-blue-400', 'text-emerald-400', 'text-purple-400', 'text-pink-400', 'text-cyan-400', 'text-amber-400'];
+                  const shareAmount = ((earnings.streaming || 0) * split.percentage).toFixed(4);
+                  return (
+                    <div key={`stream-${split.address}-${i}`} className="flex items-center justify-between text-[10px] p-2 bg-white/[0.01] rounded">
+                      <div className="space-y-0.5 truncate pr-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
+                          <span className="font-bold text-white uppercase block truncate">{split.label || 'Collaborator'}</span>
+                        </div>
+                        <span className="text-[8px] font-mono text-zinc-500 block truncate ml-3">{split.address || 'No wallet address'}</span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-blue-400 font-black font-mono block">{(split.percentage * 100).toFixed(1)}%</span>
+                        <span className="text-[8px] font-mono text-zinc-400 block">{shareAmount} TON</span>
+                      </div>
                     </div>
-                    <span className="text-blue-400 font-black font-mono">{(split.percentage * 100).toFixed(1)}%</span>
-                  </div>
-                ))}
+                  );
+                })}
+                {streamingSplits.length === 1 && streamingSplits[0].percentage === 1 && (
+                  <p className="text-[8px] text-zinc-500 italic mt-2 text-center">
+                    All streaming royalties flow to you. Add other artists or producers under 'Configure Splits' to split automatically.
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -411,19 +443,51 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
                 {nftSaleSplits.length} Accounts
               </span>
             </h4>
+
+            {nftSaleSplits.length > 0 && (
+              <div className="h-2 w-full bg-white/[0.02] rounded-full overflow-hidden flex">
+                {nftSaleSplits.map((split, i) => {
+                  const colors = ['bg-amber-500', 'bg-cyan-500', 'bg-emerald-500', 'bg-pink-500', 'bg-purple-500', 'bg-blue-500'];
+                  return (
+                    <div
+                      key={`nft-bar-${split.address}-${i}`}
+                      className={`${colors[i % colors.length]} transition-all duration-500`}
+                      style={{ width: `${split.percentage * 100}%` }}
+                      title={`${split.label || 'Collaborator'}: ${(split.percentage * 100).toFixed(1)}%`}
+                    />
+                  );
+                })}
+              </div>
+            )}
+
             {nftSaleSplits.length === 0 ? (
               <p className="text-[9px] text-zinc-500 uppercase tracking-wider">No custom splits configured. Defaulting to 100% to creator.</p>
             ) : (
-              <div className="space-y-2 max-h-[160px] overflow-y-auto no-scrollbar">
-                {nftSaleSplits.map((split, i) => (
-                  <div key={`nft-${split.address}-${i}`} className="flex items-center justify-between text-[10px] p-2 bg-white/[0.01] rounded">
-                    <div className="space-y-0.5 truncate pr-2">
-                      <span className="font-bold text-white uppercase block">{split.label || 'Collaborator'}</span>
-                      <span className="text-[8px] font-mono text-zinc-500 block truncate">{split.address || 'No wallet address'}</span>
+              <div className="space-y-2 max-h-[220px] overflow-y-auto no-scrollbar">
+                {nftSaleSplits.map((split, i) => {
+                  const colors = ['text-amber-400', 'text-cyan-400', 'text-emerald-400', 'text-pink-400', 'text-purple-400', 'text-blue-400'];
+                  const shareAmount = ((earnings.nftSales || 0) * split.percentage).toFixed(2);
+                  return (
+                    <div key={`nft-${split.address}-${i}`} className="flex items-center justify-between text-[10px] p-2 bg-white/[0.01] rounded">
+                      <div className="space-y-0.5 truncate pr-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                          <span className="font-bold text-white uppercase block truncate">{split.label || 'Collaborator'}</span>
+                        </div>
+                        <span className="text-[8px] font-mono text-zinc-500 block truncate ml-3">{split.address || 'No wallet address'}</span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-amber-500 font-black font-mono block">{(split.percentage * 100).toFixed(1)}%</span>
+                        <span className="text-[8px] font-mono text-zinc-400 block">{shareAmount} TON</span>
+                      </div>
                     </div>
-                    <span className="text-amber-500 font-black font-mono">{(split.percentage * 100).toFixed(1)}%</span>
-                  </div>
-                ))}
+                  );
+                })}
+                {nftSaleSplits.length === 1 && nftSaleSplits[0].percentage === 1 && (
+                  <p className="text-[8px] text-zinc-500 italic mt-2 text-center">
+                    All NFT secondary sales flow to you. Click 'Configure Splits' to divide secondary proceeds among your collaborators.
+                  </p>
+                )}
               </div>
             )}
           </div>

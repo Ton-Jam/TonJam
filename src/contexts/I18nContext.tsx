@@ -40,6 +40,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.jam_price': 'JAM Price',
     'nav.your_balance': 'Your Balance',
     'nav.referrals': 'Referrals',
+    'nav.launchpad': 'NFT Launchpad',
   },
   ru: {
     'nav.home': 'Главная',
@@ -72,6 +73,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.jam_price': 'Цена JAM',
     'nav.your_balance': 'Ваш баланс',
     'nav.referrals': 'Рефералы',
+    'nav.launchpad': 'NFT Лаунчпад',
   },
   uk: {
     'nav.home': 'Головна',
@@ -104,6 +106,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.jam_price': 'Ціна JAM',
     'nav.your_balance': 'Ваш баланс',
     'nav.referrals': 'Реферали',
+    'nav.launchpad': 'NFT Лаунчпад',
   }
 };
 

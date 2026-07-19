@@ -60,6 +60,7 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const ArtistOnboarding = lazy(() => import('@/pages/ArtistOnboarding'));
 const ArtistAnalytics = lazy(() => import('@/pages/ArtistAnalytics'));
 const ArtistPortfolio = lazy(() => import('@/pages/ArtistPortfolio'));
+const NFTLaunchpad = lazy(() => import('@/pages/NFTLaunchpad'));
 
 const Referrals = lazy(() => import('@/pages/Referrals'));
 
@@ -187,6 +188,7 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/discover" element={<PageWrapper><Discover /></PageWrapper>} />
                   <Route path="/jamspace" element={<PageWrapper><JamSpace /></PageWrapper>} />
                   <Route path="/marketplace" element={<PageWrapper><Marketplace /></PageWrapper>} />
+                  <Route path="/launchpad" element={<PageWrapper><NFTLaunchpad /></PageWrapper>} />
                   <Route path="/auctions" element={<PageWrapper><AuctionScreen /></PageWrapper>} />
                   <Route path="/genesis-forge" element={<PageWrapper><GenesisScreen /></PageWrapper>} />
                   <Route path="/limited-editions" element={<PageWrapper><LimitedNFTs /></PageWrapper>} />

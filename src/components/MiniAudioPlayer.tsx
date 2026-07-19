@@ -36,6 +36,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import WaveformProgress from "./WaveformProgress";
+
 interface MiniAudioPlayerProps {
   onOptionsClick?: () => void;
   isMobileNavHidden?: boolean;
@@ -360,31 +362,18 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
 
           {/* Live Progress Bar with Time Labels */}
           <div className="flex items-center gap-3 w-full max-w-sm md:max-w-md">
-            <span className="text-[10px] font-bold text-zinc-500 w-8 text-right font-mono select-none">
+            <span className="text-[10px] font-bold text-zinc-500 w-8 text-right font-mono select-none shrink-0">
               {formatTime(currentTime)}
             </span>
-            <div
-              className="relative flex-1 h-4 flex items-center cursor-pointer group/seek-deck select-none rounded bg-transparent"
-              onClick={handleProgressScrub}
-              onTouchStart={handleProgressScrub}
-              onTouchMove={(e) => {
-                if (e.touches.length > 0) {
-                  handleProgressScrub(e);
-                }
-              }}
-            >
-              <div className="w-full h-[2px] bg-zinc-700/60 rounded-full relative transition-all group-hover/seek-deck:h-[4px] overflow-hidden">
-                <div
-                  className="absolute top-0 left-0 h-full bg-blue-500 rounded-full group-hover/seek-deck:bg-emerald-400 transition-all duration-75"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <div
-                className="absolute top-1/2 -translate-y-1/2 size-[10px] bg-white rounded-full opacity-0 group-hover/seek-deck:opacity-100 shadow-md pointer-events-none transition-opacity -ml-1"
-                style={{ left: `${progress}%` }}
+            <div className="flex-1 min-w-0 h-6 flex items-center justify-center relative overflow-hidden group/seek-deck">
+              <WaveformProgress 
+                height={24} 
+                className="w-full h-full opacity-80 group-hover/seek-deck:opacity-100 transition-opacity" 
+                waveColor="rgba(255, 255, 255, 0.15)"
+                progressColor="#3b82f6"
               />
             </div>
-            <span className="text-[10px] font-bold text-zinc-500 w-8 text-left font-mono select-none">
+            <span className="text-[10px] font-bold text-zinc-500 w-8 text-left font-mono select-none shrink-0">
               {formatTime(duration)}
             </span>
           </div>

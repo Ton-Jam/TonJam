@@ -77,7 +77,9 @@ const HomeScreen: React.FC = () => {
   const { 
     playTrack, 
     userProfile, 
-    allTracks
+    allTracks,
+    recentlyPlayed,
+    likedTrackIds
   } = useAudio();
 
   // 10 mock Collections
@@ -195,6 +197,57 @@ const HomeScreen: React.FC = () => {
     }, 5000);
     return () => clearInterval(timer);
   }, []);
+
+  const [recommendedTrackList, setRecommendedTrackList] = useState<any[]>([]);
+  const [recommendationReason, setRecommendationReason] = useState<string>("Tuning DJ Krupy's AI matrix to recommend on-chain gems for you...");
+  const [recommendationsLoading, setRecommendationsLoading] = useState<boolean>(true);
+
+  const fetchRecommendations = async () => {
+    setRecommendationsLoading(true);
+    try {
+      const response = await fetch('/api/gemini/similar-tracks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recentlyPlayed: recentlyPlayed || [],
+          likedTracks: likedTrackIds || [],
+          availableTracks: allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS
+        })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.recommendedTrackIds && Array.isArray(data.recommendedTrackIds)) {
+          const matched = (allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).filter(t => 
+            data.recommendedTrackIds.includes(t.id)
+          );
+          if (matched.length > 0) {
+            setRecommendedTrackList(matched);
+          } else {
+            setRecommendedTrackList((allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 5));
+          }
+        } else {
+          setRecommendedTrackList((allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 5));
+        }
+        if (data.explanation) {
+          setRecommendationReason(data.explanation);
+        } else {
+          setRecommendationReason("A custom blend of premium audio tracks chosen based on your recent activity on the TON network.");
+        }
+      } else {
+        throw new Error("Failed recommendation response");
+      }
+    } catch (err) {
+      console.error("AI recommendations failed", err);
+      setRecommendedTrackList((allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 5));
+      setRecommendationReason("DJ Krupy's primary relay is resting, but these premium on-chain frequencies are perfectly tuned for your ears.");
+    } finally {
+      setRecommendationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [likedTrackIds?.length, recentlyPlayed?.length, allTracks?.length]);
 
   return (
     <div className="space-y-8 select-none">
@@ -416,47 +469,95 @@ const HomeScreen: React.FC = () => {
       </div>
 
       {/* SECTION 8: RECOMMENDED FOR YOU */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-black text-white">Recommended For You</h2>
+      <div className="space-y-3.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-black text-white">Recommended For You</h2>
+            <span className="px-2 py-0.5 text-[8px] font-black bg-indigo-500/10 text-indigo-400 rounded-full uppercase tracking-widest">
+              AI Powered
+            </span>
+          </div>
+          <button 
+            onClick={() => {
+              fetchRecommendations();
+              confetti({ particleCount: 15, spread: 30 });
+            }}
+            disabled={recommendationsLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 rounded-xl hover:bg-indigo-500/20 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-none disabled:opacity-50"
+          >
+            <Sparkles className={`w-3 h-3 ${recommendationsLoading ? 'animate-spin' : ''}`} />
+            Recalibrate
+          </button>
+        </div>
+
+        {/* DJ Krupy's Speech Bubble (Flat styling - no borders!) */}
+        <div className="bg-[#0A113A]/35 p-4 rounded-2xl flex items-start gap-3 relative overflow-hidden">
+          <div className="w-8 h-8 rounded-full bg-indigo-600/20 flex items-center justify-center shrink-0 text-indigo-400">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-black text-[#5B6BFF] uppercase tracking-widest">DJ Krupy AI</span>
+            <p className="text-xs text-slate-300 leading-relaxed italic">
+              "{recommendationReason}"
+            </p>
+          </div>
+        </div>
+
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          {recommendedTracks.map(track => (
-            <div
-              key={track.id}
-              className="w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/50 p-3 flex flex-col justify-between space-y-2.5"
-            >
-              <div className="relative aspect-square rounded-xl overflow-hidden">
-                <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
-                <span className="absolute top-1.5 left-1.5 text-[8px] font-black bg-[#5B6BFF] px-2 py-0.5 rounded-sm">Track</span>
-              </div>
-              <h4 className="text-xs font-black text-white truncate">{track.title}</h4>
-              <Button
-                size="sm"
-                onClick={() => playTrack(track)}
-                className="w-full h-6 text-[8.5px] font-black bg-white/5 border-none text-[#9AA0AE] hover:text-white"
+          {recommendationsLoading ? (
+            // Custom high fidelity loading skeleton
+            [1, 2, 3, 4].map(i => (
+              <div
+                key={i}
+                className="w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/30 p-3 flex flex-col justify-between space-y-2.5 animate-pulse"
               >
-                Listen
-              </Button>
-            </div>
-          ))}
-          {recommendedNFTs.map(nft => (
-            <div
-              key={nft.id}
-              className="w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/50 p-3 flex flex-col justify-between space-y-2.5"
-            >
-              <div className="relative aspect-square rounded-xl overflow-hidden">
-                <img src={nft.cover} className="w-full h-full object-cover" alt="" />
-                <span className="absolute top-1.5 left-1.5 text-[8px] font-black bg-[#00B4D8] text-[#050A24] px-2 py-0.5 rounded-sm">NFT</span>
+                <div className="relative aspect-square rounded-xl bg-white/5 overflow-hidden" />
+                <div className="h-3 bg-white/10 rounded w-3/4" />
+                <div className="h-6 bg-white/5 rounded-xl w-full" />
               </div>
-              <h4 className="text-xs font-black text-white truncate">{nft.title}</h4>
-              <Button
-                size="sm"
-                onClick={() => confetti({ particleCount: 15 })}
-                className="w-full h-6 text-[8.5px] font-black bg-white/5 border-none text-[#00B4D8] hover:text-white"
-              >
-                Bid
-              </Button>
-            </div>
-          ))}
+            ))
+          ) : (
+            <>
+              {recommendedTrackList.map(track => (
+                <div
+                  key={track.id}
+                  className="w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/50 p-3 flex flex-col justify-between space-y-2.5 hover:bg-[#101A3B]/60 transition-colors"
+                >
+                  <div className="relative aspect-square rounded-xl overflow-hidden group">
+                    <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
+                    <span className="absolute top-1.5 left-1.5 text-[8px] font-black bg-[#5B6BFF] px-2 py-0.5 rounded-sm">Track</span>
+                  </div>
+                  <h4 className="text-xs font-black text-white truncate">{track.title}</h4>
+                  <Button
+                    size="sm"
+                    onClick={() => playTrack(track)}
+                    className="w-full h-6 text-[8.5px] font-black bg-white/5 border-none text-[#9AA0AE] hover:text-white"
+                  >
+                    Listen
+                  </Button>
+                </div>
+              ))}
+              {recommendedNFTs.map(nft => (
+                <div
+                  key={nft.id}
+                  className="w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/50 p-3 flex flex-col justify-between space-y-2.5 hover:bg-[#101A3B]/60 transition-colors"
+                >
+                  <div className="relative aspect-square rounded-xl overflow-hidden">
+                    <img src={nft.cover} className="w-full h-full object-cover" alt="" />
+                    <span className="absolute top-1.5 left-1.5 text-[8px] font-black bg-[#00B4D8] text-[#050A24] px-2 py-0.5 rounded-sm">NFT</span>
+                  </div>
+                  <h4 className="text-xs font-black text-white truncate">{nft.title}</h4>
+                  <Button
+                    size="sm"
+                    onClick={() => confetti({ particleCount: 15 })}
+                    className="w-full h-6 text-[8.5px] font-black bg-white/5 border-none text-[#00B4D8] hover:text-white"
+                  >
+                    Bid
+                  </Button>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
 

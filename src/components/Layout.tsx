@@ -31,7 +31,7 @@ import {
   SparklesIcon,
   UserGroupIcon
 } from '@heroicons/react/24/outline';
-import { Sparkles as SparklesLucide, History, X } from 'lucide-react';
+import { Sparkles as SparklesLucide, History, X, Rocket } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { useAudio, useUserRole } from '@/contexts/AudioContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -957,7 +957,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 };
 
 import { useI18n } from '@/contexts/I18nContext';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any; userProfile: any; signOut: () => void; onNavigate?: () => void }) => {
   const { isArtist, isAdmin } = useUserRole();
@@ -977,7 +976,6 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
         <span className="font-bold text-lg tracking-tight text-foreground uppercase">JamSpace</span>
       </Link>
       <div className="flex items-center gap-2">
-        <LanguageSwitcher />
         <ModeToggle />
       </div>
     </div>
@@ -1011,6 +1009,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       <NavItem to="/genesis-forge" icon={TicketIcon} label={t('nav.genesis')} onClick={onNavigate} />
       <NavItem to="/library" icon={RectangleStackIcon} label={t('nav.library')} onClick={onNavigate} />
       <NavItem to="/marketplace" icon={ShoppingBagIcon} label={t('nav.marketplace')} onClick={onNavigate} />
+      <NavItem to="/launchpad" icon={Rocket} label={t('nav.launchpad')} onClick={onNavigate} />
       <NavItem to="/referrals" icon={UserGroupIcon} label={t('nav.referrals')} onClick={onNavigate} />
       
       <div className="pt-4 pb-4">

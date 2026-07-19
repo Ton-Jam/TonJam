@@ -21,6 +21,7 @@ export interface NFTData {
   isLiveAuction?: boolean;
   isVerified?: boolean;
   history?: any[];
+  listingType?: 'fixed' | 'auction';
 }
 
 interface NFTCardProps {
@@ -28,6 +29,7 @@ interface NFTCardProps {
   isLoading?: boolean;
   onMint?: (nft: NFTData) => void;
   onBid?: (nft: NFTData) => void;
+  onCollect?: (nft: NFTData) => void;
   onLike?: (nft: NFTData) => void;
   onBookmark?: (nft: NFTData) => void;
   className?: string;
@@ -38,6 +40,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
   isLoading = false,
   onMint,
   onBid,
+  onCollect,
   onLike,
   onBookmark,
   className = '',
@@ -97,6 +100,11 @@ export const NFTCard: React.FC<NFTCardProps> = ({
   const handleBidClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onBid) onBid(nft);
+  };
+
+  const handleCollectClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onCollect) onCollect(nft);
   };
 
   const handleLikeClick = (e: React.MouseEvent) => {
@@ -235,6 +243,13 @@ export const NFTCard: React.FC<NFTCardProps> = ({
             className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-wider rounded-[6px] transition-all active:scale-95 text-center"
           >
             Place Bid
+          </button>
+        ) : (nft.listingType === 'fixed' || (nft.price && nft.mintStatus !== 'sold_out')) ? (
+          <button
+            onClick={handleCollectClick}
+            className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[10px] uppercase tracking-wider rounded-[6px] transition-all shadow-md active:scale-95 text-center"
+          >
+            Collect
           </button>
         ) : (
           <div className="flex-1 py-1.5 bg-white/5 text-[#9AA0AE] font-black text-[10px] uppercase tracking-widest rounded-[6px] text-center">

@@ -410,7 +410,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
                 </HoverCardTrigger>
                 <HoverCardContent className="w-64 bg-zinc-950/90 backdrop-blur-xl border-white/10 p-4">
                   <div className="flex justify-between space-x-4">
-                    <Avatar className="h-10 w-10 ring-2 ring-blue-500/20">
+                    <Avatar 
+                      className="h-10 w-10 ring-2 ring-blue-500/20 cursor-pointer hover:opacity-80 transition-all animate-none"
+                      onClick={handleArtistClick}
+                    >
                       <AvatarImage src={artist?.avatarUrl} />
                       <AvatarFallback className="text-[10px] bg-blue-500/10 text-blue-400">{track.artist?.slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
@@ -527,7 +530,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
                     </HoverCardTrigger>
                     <HoverCardContent className="w-64 bg-zinc-950/90 backdrop-blur-xl border-white/10 p-4">
                       <div className="flex justify-between space-x-4">
-                        <Avatar className="h-10 w-10 ring-2 ring-blue-500/20">
+                        <Avatar 
+                          className="h-10 w-10 ring-2 ring-blue-500/20 cursor-pointer hover:opacity-80 transition-all animate-none"
+                          onClick={handleArtistClick}
+                        >
                           <AvatarImage src={artist?.avatarUrl} />
                           <AvatarFallback className="text-[10px] bg-blue-500/10 text-blue-400">{track.artist?.slice(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>

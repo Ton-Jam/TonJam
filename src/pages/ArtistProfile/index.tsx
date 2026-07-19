@@ -17,6 +17,7 @@ import TipArtistModal from "@/components/TipArtistModal";
 import ArtistOptionsModal from "@/components/ArtistOptionsModal";
 import { FanTokenHub } from "@/components/FanTokenHub";
 import { FanPowerTracker } from "@/components/FanPowerTracker";
+import { CollabRequestModal } from "./components/CollabRequestModal";
 
 // Hook & Subsections
 import { useArtistProfile } from "./hooks/useArtistProfile";
@@ -83,6 +84,7 @@ const ArtistProfile: React.FC = () => {
   const [showEditModal, setShowEditModal] = React.useState(false);
   const [showTipModal, setShowTipModal] = React.useState(false);
   const [showArtistOptions, setShowArtistOptions] = React.useState(false);
+  const [showCollabModal, setShowCollabModal] = React.useState(false);
 
   // Set header title on scroll
   React.useEffect(() => {
@@ -317,6 +319,15 @@ const ArtistProfile: React.FC = () => {
             <Zap className="w-3.5 h-3.5 fill-current text-cyan-400 animate-pulse" /> Support Artist
           </button>
 
+          {!isOwnProfile && (
+            <button 
+              onClick={() => setShowCollabModal(true)}
+              className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-amber-400 border border-amber-500/25 transition-all rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+            >
+              <Gem className="w-3.5 h-3.5" /> Request Collab
+            </button>
+          )}
+
           <button 
             onClick={() => navigate("/mint")}
             className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-purple-400 border border-purple-500/25 transition-all rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer"
@@ -509,6 +520,9 @@ const ArtistProfile: React.FC = () => {
         )}
         {showArtistOptions && (
           <ArtistOptionsModal artist={artist} onClose={() => setShowArtistOptions(false)} />
+        )}
+        {showCollabModal && (
+          <CollabRequestModal targetArtist={artist} isOpen={showCollabModal} onClose={() => setShowCollabModal(false)} />
         )}
       </AnimatePresence>
     </div>

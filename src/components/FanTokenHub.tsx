@@ -171,6 +171,8 @@ export const FanTokenHub: React.FC<FanTokenHubProps> = ({ artist }) => {
               setVotedPollIds(prev => prev.includes(poll.id) ? prev : [...prev, poll.id]);
             }
           }
+        }, (error) => {
+          console.warn(`Error loading votes for poll ${poll.id}:`, error);
         });
       });
     }, (error) => {
