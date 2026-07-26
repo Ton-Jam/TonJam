@@ -96,6 +96,7 @@ import { FloorPriceChart } from "@/components/FloorPriceChart";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import CommentsSection from "@/components/CommentsSection";
 import ReactionsSection from "@/components/ReactionsSection";
+import { NFTBlockchainMetadata } from "@/components/NFTBlockchainMetadata";
 import confetti from "canvas-confetti";
 import { getPlaceholderImage, cn } from "@/lib/utils";
 import { PriceSparkline } from "@/components/PriceSparkline";
@@ -985,6 +986,9 @@ const NFTDetail: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            {/* Blockchain-specific Metadata & Owner Provenance History */}
+            <NFTBlockchainMetadata nft={localNft} />
 
             {/* Historical Floor Price Trend (30 Days) */}
             <FloorPriceChart data={floorPriceTrend} title="Floor Price Trend (30 Days)" />

@@ -695,11 +695,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             }}
             whileTap={{ scale: cardTokens.animation.tapScale }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            style={{ width: cardTokens.nftTrack.width, height: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
+            style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             className={cn(
-              "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 bg-[#0A113A]/50 hover:bg-white/[0.05] transition-all duration-300 flex flex-col justify-between overflow-hidden",
+              "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 bg-[#0A113A]/60 hover:bg-[#101A3B] transition-all duration-300 flex flex-col overflow-hidden",
               className
             )}
             onClick={handleCardClick}
@@ -715,8 +715,8 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           >
             {/* Image Container - 1:1 Aspect Ratio with NFT Gradient Border */}
             <div 
-              style={{ height: '115px', borderRadius: '6px' }}
-              className="relative w-full overflow-hidden bg-neutral-900 transition-all mb-1.5 flex-shrink-0"
+              style={{ height: '135px', borderRadius: '8px' }}
+              className="relative w-full overflow-hidden bg-neutral-950 transition-all flex-shrink-0"
             >
               <img
                 src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
@@ -732,9 +732,9 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               {/* Top Overlays */}
               <div className="absolute top-1.5 left-1.5 right-1.5 flex justify-between items-start z-10 pointer-events-none">
                  <div className="flex flex-col gap-1">
-                    <span className={cn("px-1 py-0.2 bg-black/50 backdrop-blur-md rounded-[2px] text-[6.5px] font-bold uppercase tracking-[0.1em] text-white border border-white/10 shadow-lg flex items-center gap-0.5", supplyIndicator.className)}>
-                      {supplyIndicator.icon === 'Star' && <Star className="w-1.5 h-1.5 fill-current text-yellow-400 animate-spin-slow" />}
-                      {supplyIndicator.icon === 'Gem' && <Gem className="w-1.5 h-1.5" />}
+                    <span className={cn("px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded text-[7px] font-bold uppercase tracking-[0.1em] text-white shadow-lg flex items-center gap-0.5", supplyIndicator.className)}>
+                      {supplyIndicator.icon === 'Star' && <Star className="w-2 h-2 fill-current text-yellow-400 animate-spin-slow" />}
+                      {supplyIndicator.icon === 'Gem' && <Gem className="w-2 h-2" />}
                       {supplyIndicator.label}
                     </span>
                     {nft.listingType === 'auction' && (
@@ -760,7 +760,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                  <button
                    onClick={handlePreviewToggle}
                    className={cn(
-                     "py-1 px-2 rounded-full text-[8px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all duration-200 select-none cursor-pointer border-none",
+                     "py-1 px-2.5 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all duration-200 select-none cursor-pointer border-none",
                      isPlayingPreview 
                        ? "bg-[#2BE08C] text-black shadow-lg shadow-[#2BE08C]/30 animate-pulse" 
                        : "bg-[#5B6BFF] text-white hover:bg-[#5B6BFF]/90 shadow-lg shadow-[#5B6BFF]/20"
@@ -783,20 +783,20 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                    )}
                  </button>
 
-                 <div className="flex gap-4 mt-1">
+                 <div className="flex gap-3 mt-1">
                     <button 
                       onClick={handlePlayClick} 
-                      className="w-6 h-6 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg border-none"
+                      className="w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg border-none"
                       title="Play Full Track"
                     >
-                      {isActive && isPlaying ? <Pause className="h-3 w-3 fill-current animate-pulse" /> : <Play className="h-3 w-3 fill-current ml-0.5" />}
+                      {isActive && isPlaying ? <Pause className="h-3.5 w-3.5 fill-current animate-pulse" /> : <Play className="h-3.5 w-3.5 fill-current ml-0.5" />}
                     </button>
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
                         setIs3DModalOpen(true);
                       }} 
-                      className="w-6 h-6 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg border-none"
+                      className="w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg border-none"
                       title="View 3D Artwork"
                     >
                       <RotateCw className="h-3.5 w-3.5" />
@@ -844,18 +844,16 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               )}
             </div>
       
-            {/* Artifact Data Footer */}
-            <div 
-              style={{ height: cardTokens.nftTrack.bottomMetadataHeight }}
-              className="px-0.5 flex flex-col justify-between"
-            >
-               <div className="space-y-0.5">
-                  <h3 className={`text-[9.5px] font-semibold uppercase tracking-tighter line-clamp-2 whitespace-normal break-words leading-tight ${isActive ? 'text-blue-500' : 'text-foreground'}`}>
+            {/* Artifact Data Details Section Under Cover Photo */}
+            <div className="flex-1 flex flex-col justify-between pt-2.5 space-y-2">
+               {/* Title & Creator */}
+               <div className="space-y-1">
+                  <h3 className={`text-[11px] font-bold uppercase tracking-tight truncate leading-snug ${isActive ? 'text-blue-400' : 'text-white'}`}>
                     {nft.title}
                   </h3>
-                  <div className="flex items-center gap-1.5 mt-0.5 min-w-0 w-full flex-wrap">
+                  <div className="flex items-center gap-1.5 min-w-0 w-full text-slate-400 text-[10px]">
                      <div 
-                       className="flex items-center gap-1 min-w-0 max-w-[120px] cursor-pointer hover:text-blue-500 transition-all animate-none"
+                       className="flex items-center gap-1 min-w-0 max-w-[120px] cursor-pointer hover:text-blue-400 transition-all"
                        onClick={(e) => {
                          e.stopPropagation();
                          const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
@@ -863,98 +861,97 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                        }}
                      >
                        <div className="flex-1 min-w-0">
-                         <MarqueeTitle text={nft.creator} className="text-[8px] font-medium text-foreground/80 uppercase tracking-[0.1em]" />
+                         <MarqueeTitle text={nft.creator} className="text-[10px] font-semibold text-slate-300 uppercase tracking-wide" />
                        </div>
                        {isVerified && (
                           <span title="Verified Creator" className="shrink-0"><BadgeCheck className="w-3 h-3 text-blue-400 fill-current inline-block" /></span>
                        )}
                      </div>
                      {collectionName && (
-                        <span className="text-[7.5px] text-indigo-400 font-bold uppercase tracking-[0.1em] flex items-center gap-0.5 shrink-0" title={`Collection: ${collectionName}`}>
+                        <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider flex items-center gap-0.5 shrink-0" title={`Collection: ${collectionName}`}>
                            • <Layers className="w-2.5 h-2.5 inline" /> {collectionName}
                         </span>
                      )}
                   </div>
                </div>
 
-               {/* Mini Price Sparkline Trend */}
-               <div className="selection:bg-transparent w-16 max-w-[64px]">
-                 <PriceSparkline basePrice={basePriceNum} history={nft.history} />
+               {/* Price Tag & Mini Sparkline Row */}
+               <div className="flex items-center justify-between gap-1 pt-0.5">
+                  <div className="flex items-center gap-1 bg-white/5 py-1 px-2 rounded-lg">
+                     {currencyMode === 'USD' ? (
+                       <span className="text-[10px] font-extrabold text-[#2BE08C]">$</span>
+                     ) : (
+                       <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
+                     )}
+                     <motion.span 
+                       key={`${nft.price}-${currencyMode}`}
+                       initial={{ opacity: 0, y: -2 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       transition={{ duration: 0.3, ease: "easeOut" }}
+                       className="text-[11px] font-extrabold text-white font-mono tracking-tight"
+                     >
+                       {formattedPrice}
+                     </motion.span>
+                     {/* Price Change Indicator */}
+                     {nft.floorPriceChange !== undefined && (
+                       <div className={cn(
+                         "flex items-center gap-0.5 px-1 rounded ml-0.5",
+                         nft.floorPriceChange >= 0 ? "text-emerald-400 bg-emerald-400/10" : "text-rose-400 bg-rose-500/10"
+                       )}>
+                         {nft.floorPriceChange >= 0 ? (
+                           <ArrowUp className="w-2 h-2 fill-current" />
+                         ) : (
+                           <ArrowDown className="w-2 h-2 fill-current" />
+                         )}
+                         <span className="text-[8px] font-bold">{Math.abs(nft.floorPriceChange).toFixed(1)}%</span>
+                       </div>
+                     )}
+                  </div>
+
+                  {/* Sparkline chart */}
+                  <div className="selection:bg-transparent w-12 shrink-0">
+                    <PriceSparkline basePrice={basePriceNum} history={nft.history} />
+                  </div>
                </div>
 
-               <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                     <div className="flex items-center gap-1.5 bg-muted/40 py-0.5 px-1.5 rounded-[4px] border border-border/10">
-                        {currencyMode === 'USD' ? (
-                          <span className="text-[9.5px] font-extrabold text-[#2BE08C]">$</span>
-                        ) : (
-                          <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
-                        )}
-                        <motion.span 
-                          key={`${nft.price}-${currencyMode}`}
-                          initial={{ opacity: 0, y: -2 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, ease: "easeOut" }}
-                          className="text-[9.5px] font-extrabold text-foreground tracking-tighter inline-block"
-                        >
-                          {formattedPrice}
-                        </motion.span>
-                        {/* Price Change Indicator */}
-                        {nft.floorPriceChange !== undefined && (
-                          <div className={cn(
-                            "flex items-center gap-0.5 px-1 rounded-[2px] ml-1",
-                            nft.floorPriceChange >= 0 ? "text-emerald-400 bg-emerald-400/10" : "text-rose-500 bg-rose-500/10"
-                          )}>
-                            {nft.floorPriceChange >= 0 ? (
-                              <ArrowUp className="w-2 h-2 fill-current" />
-                            ) : (
-                              <ArrowDown className="w-2 h-2 fill-current" />
-                            )}
-                            <span className="text-[7px] font-black">{Math.abs(nft.floorPriceChange).toFixed(1)}%</span>
-                          </div>
-                        )}
-                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={handleShare}
-                      className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all active:scale-95"
-                      title="Share NFT"
-                    >
-                      <Share2 className="w-3.5 h-3.5" />
-                    </button>
-                    <motion.button 
-                      onClick={handleActionClick} 
-                      disabled={(!isOwner && isAuctionEnded) || isPurchasing}
-                      style={{ height: cardTokens.nftTrack.mintButtonHeight }}
-                      animate={(!isOwner && nft.listingType === 'auction' && !isAuctionEnded && isEndingSoon) ? {
-                        scale: [1, 1.08, 1],
-                        boxShadow: [
-                          "0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 0 0 0px rgba(239, 68, 68, 0.4)",
-                          "0 10px 15px -3px rgba(239, 68, 68, 0.5), 0 0 0 6px rgba(239, 68, 68, 0)",
-                          "0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 0 0 0px rgba(239, 68, 68, 0.4)"
-                        ]
-                      } : {}}
-                      transition={(!isOwner && nft.listingType === 'auction' && !isAuctionEnded && isEndingSoon) ? {
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      } : {}}
-                      className={cn(
-                        "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 px-4 text-[9px] font-black uppercase tracking-[0.1em] text-white flex items-center justify-center leading-none",
-                        isOwner 
-                          ? 'bg-muted text-foreground' 
-                          : (isAuctionEnded || isPurchasing
-                              ? 'bg-white/5 text-white/20'
-                              : (nft.listingType === 'auction' && isEndingSoon)
-                                ? 'bg-gradient-to-r from-red-600 to-orange-500 shadow-lg shadow-red-500/20'
-                                : 'bg-gradient-to-r from-blue-600 to-blue-400 shadow-lg shadow-blue-500/30 ring-1 ring-blue-400/50')
-                      )}
-                    >
-                      {isOwner ? (nft.listingType ? <Settings className="w-3 h-3" /> : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : (isPurchasing ? 'BUYING' : 'BUY'))}
-                    </motion.button>
-                  </div>
+               {/* Action Row */}
+               <div className="flex items-center gap-2 pt-0.5">
+                 <button 
+                   onClick={handleShare}
+                   className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all active:scale-95 shrink-0"
+                   title="Share NFT"
+                 >
+                   <Share2 className="w-3.5 h-3.5" />
+                 </button>
+                 <motion.button 
+                   onClick={handleActionClick} 
+                   disabled={(!isOwner && isAuctionEnded) || isPurchasing}
+                   animate={(!isOwner && nft.listingType === 'auction' && !isAuctionEnded && isEndingSoon) ? {
+                     scale: [1, 1.04, 1],
+                     boxShadow: [
+                       "0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 0 0 0px rgba(239, 68, 68, 0.4)",
+                       "0 10px 15px -3px rgba(239, 68, 68, 0.5), 0 0 0 6px rgba(239, 68, 68, 0)",
+                       "0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 0 0 0px rgba(239, 68, 68, 0.4)"
+                     ]
+                   } : {}}
+                   transition={(!isOwner && nft.listingType === 'auction' && !isAuctionEnded && isEndingSoon) ? {
+                     duration: 1.5,
+                     repeat: Infinity,
+                     ease: "easeInOut"
+                   } : {}}
+                   className={cn(
+                     "flex-1 h-8 cursor-pointer transition-all rounded-xl hover:scale-102 active:scale-95 text-[10px] font-black uppercase tracking-wider text-white flex items-center justify-center leading-none",
+                     isOwner 
+                       ? 'bg-white/10 text-white' 
+                       : (isAuctionEnded || isPurchasing
+                           ? 'bg-white/5 text-white/20'
+                           : (nft.listingType === 'auction' && isEndingSoon)
+                             ? 'bg-gradient-to-r from-red-600 to-orange-500 shadow-lg shadow-red-500/20'
+                             : 'bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/20')
+                   )}
+                 >
+                   {isOwner ? (nft.listingType ? <Settings className="w-3.5 h-3.5" /> : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : (isPurchasing ? 'BUYING' : 'BUY'))}
+                 </motion.button>
                </div>
             </div>
           </motion.div>

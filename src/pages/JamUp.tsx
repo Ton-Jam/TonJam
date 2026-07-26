@@ -30,6 +30,7 @@ import confetti from 'canvas-confetti';
 // --- New Premium Home Components ---
 import { HomeQuickAccess } from '@/components/home/HomeQuickAccess';
 import { HomeVibeTicker } from '@/components/home/HomeVibeTicker';
+import { TrendingNFTVolumeChart } from '@/components/home/TrendingNFTVolumeChart';
 import ContinueListeningCard from '@/components/ContinueListeningCard';
 import MoodPlaylist from '@/components/MoodPlaylist';
 import { Moon, Target, Smile, Frown } from 'lucide-react';
@@ -523,6 +524,13 @@ export default function JamUp() {
         )}
 
         {/* Trending NFTs */}
+        {showNFTs && (
+          <SectionWrapper>
+            <TrendingNFTVolumeChart />
+          </SectionWrapper>
+        )}
+
+        {/* Digital Collectibles */}
         {showNFTs && allNFTs.length > 0 && (
           <SectionWrapper>
             <HorizontalSection 
