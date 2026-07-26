@@ -30,6 +30,7 @@ export interface TrackData {
   playedAt?: string;
   listenPercentage?: number;
   recommendationReason?: string;
+  audioUrl?: string;
 }
 
 export interface AlbumData {

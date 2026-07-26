@@ -1,4 +1,20 @@
 
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  iconUrl?: string;
+  criteria: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+}
+
+export interface UserAchievement {
+  id: string;
+  userId: string;
+  achievementId: string;
+  unlockedAt: string;
+}
+
 export interface Collection {
   id: string;
   artistId: string;
@@ -377,6 +393,15 @@ export interface Playlist {
   tags?: string[];
   folderId?: string;
   updatedAt?: string;
+}
+
+export interface NFTFolder {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  nftIds: string[];
+  createdAt: string;
 }
 
 export interface PlaylistFolder {

@@ -191,6 +191,21 @@ service cloud.firestore {
         && data.balance is number;
     }
 
+    function isValidAchievement(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.title is string && data.title.size() <= 100
+        && data.description is string && data.description.size() <= 500
+        && data.criteria is string && data.criteria.size() <= 100
+        && data.rarity in ['common', 'rare', 'epic', 'legendary'];
+    }
+
+    function isValidUserAchievement(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && data.achievementId is string && data.achievementId.size() <= 128
+        && data.unlockedAt is string;
+    }
+
     function isValidUnlockedExclusiveContent(data) {
       return data.id is string && data.id.size() <= 128
         && data.userId is string && data.userId.size() <= 128
@@ -641,6 +656,18 @@ service cloud.firestore {
         isAdmin() || 
         (incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'updatedAt']) && isValidFanToken(incoming()))
       );
+    }
+
+    match /achievements/{achievementId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidAchievement(incoming()) && isValidId(achievementId);
+    }
+
+    match /users/{userId}/achievements/{userAchievementId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUserAchievement(incoming()) && isValidId(userAchievementId);
+      allow update, delete: if false; // Achievement history is immutable
     }
 
     match /unlockedContents/{unlockedId} {

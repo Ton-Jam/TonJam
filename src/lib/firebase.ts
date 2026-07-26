@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
 import { 
   getFirestore, 
   initializeFirestore, 
@@ -38,6 +38,7 @@ export const db = initializeFirestore(app, {
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
+export const twitterProvider = new TwitterAuthProvider();
 
 // Add a specific test for the provided database ID
 async function testConnection(retries = 3) {

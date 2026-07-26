@@ -26,6 +26,7 @@ import {
   Collection,
   CollabRequest,
   CollabMessage,
+  NFTFolder,
 } from "@/types";
 import {
   MOCK_PLAYLISTS,
@@ -294,6 +295,12 @@ interface AudioContextType {
     playlistId: string,
     folderId: string | null,
   ) => Promise<void>;
+  nftFolders: NFTFolder[];
+  createNFTFolder: (name: string, description?: string) => Promise<void>;
+  updateNFTFolder: (id: string, name: string, description?: string) => Promise<void>;
+  deleteNFTFolder: (id: string) => Promise<void>;
+  addNFTToFolder: (folderId: string, nftId: string) => Promise<void>;
+  removeNFTFromFolder: (folderId: string, nftId: string) => Promise<void>;
   updateRoyaltyConfig: (
     artistId: string,
     config: Artist["royaltyConfig"],
@@ -580,6 +587,17 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   >(null);
 
   const [playlistFolders, setPlaylistFolders] = useState<PlaylistFolder[]>([]);
+  const [nftFolders, setNftFolders] = useState<NFTFolder[]>(() => {
+    const saved = localStorage.getItem('tonjam_nft_folders');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
   const [collections, setCollections] = useState<Collection[]>(() => {
     try {
       const saved = localStorage.getItem('tonjam_collections');
@@ -3837,6 +3855,72 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const createNFTFolder = async (name: string, description?: string) => {
+    if (!auth.currentUser) return;
+    const folderId = `nft-folder-${Date.now()}`;
+    const newFolder: NFTFolder = {
+      id: folderId,
+      userId: auth.currentUser.uid,
+      name,
+      description,
+      nftIds: [],
+      createdAt: new Date().toISOString(),
+    };
+    setNftFolders(prev => {
+      const updated = [...prev, newFolder];
+      localStorage.setItem('tonjam_nft_folders', JSON.stringify(updated));
+      return updated;
+    });
+    addNotification(`Collection folder "${name}" created`, "success");
+  };
+
+  const updateNFTFolder = async (id: string, name: string, description?: string) => {
+    setNftFolders(prev => {
+      const updated = prev.map(f => f.id === id ? { ...f, name, description } : f);
+      localStorage.setItem('tonjam_nft_folders', JSON.stringify(updated));
+      return updated;
+    });
+    addNotification(`Folder updated`, "success");
+  };
+
+  const deleteNFTFolder = async (id: string) => {
+    setNftFolders(prev => {
+      const updated = prev.filter(f => f.id !== id);
+      localStorage.setItem('tonjam_nft_folders', JSON.stringify(updated));
+      return updated;
+    });
+    addNotification(`Folder deleted`, "info");
+  };
+
+  const addNFTToFolder = async (folderId: string, nftId: string) => {
+    setNftFolders(prev => {
+      const updated = prev.map(f => {
+        if (f.id === folderId) {
+          if (f.nftIds.includes(nftId)) return f;
+          return { ...f, nftIds: [...f.nftIds, nftId] };
+        }
+        return f;
+      });
+      localStorage.setItem('tonjam_nft_folders', JSON.stringify(updated));
+      return updated;
+    });
+    addNotification(`NFT added to folder`, "success");
+  };
+
+  const removeNFTFromFolder = async (folderId: string, nftId: string) => {
+    setNftFolders(prev => {
+      const updated = prev.map(f => {
+        if (f.id === folderId) {
+          return { ...f, nftIds: f.nftIds.filter(id => id !== nftId) };
+        }
+        return f;
+      });
+      localStorage.setItem('tonjam_nft_folders', JSON.stringify(updated));
+      return updated;
+    });
+    addNotification(`NFT removed from folder`, "info");
+  };
+
   const generateDiscoverWeekly = async (userDescription?: string, forceRegenerate = false) => {
     setIsLoading(true);
     try {
@@ -4457,6 +4541,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         renameFolder,
         deleteFolder,
         movePlaylistToFolder,
+        nftFolders,
+        createNFTFolder,
+        updateNFTFolder,
+        deleteNFTFolder,
+        addNFTToFolder,
+        removeNFTFromFolder,
         sponsoredPosts,
         tasks,
         addTask,

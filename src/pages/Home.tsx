@@ -63,6 +63,10 @@ import { Artist, Track, NFTItem } from "@/types";
 import NFTExplorer from "@/components/NFTExplorer";
 import Web3MusicTrends from "@/components/Web3MusicTrends";
 import TrendingChart from "@/components/TrendingChart";
+import { TopTrendingNFTsWidget } from "@/components/TopTrendingNFTsWidget";
+import TopArtistsSection from "@/components/TopArtistsSection";
+import CollectionSpotlight from "@/components/CollectionSpotlight";
+import { TonPriceChart } from "@/components/TonPriceChart";
 
 // ==========================================
 // MOCK DATA & INTERFACES FOR HOME "JAM UP"
@@ -490,11 +494,6 @@ const Home: React.FC = () => {
       <div className="w-full max-w-full px-4 sm:px-6 md:px-8 pt-6 space-y-8 pb-12">
 
         {/* ==========================================
-            SECTION 14: COMMUNITY ACTIVITY FEED (Real-time Firestore Events)
-            ========================================== */}
-        <SocialActivityFeed />
-
-        {/* ==========================================
             SECTION 1: PERSONALIZED WELCOME HERO
             ========================================== */}
         <motion.div 
@@ -503,18 +502,28 @@ const Home: React.FC = () => {
           transition={{ duration: 0.3 }}
           className="space-y-4 text-left"
         >
-          <div className="space-y-1">
-            <h1 className="text-page-title text-text-primary flex items-center gap-1.5 pt-2">
-              Good Evening <span className="animate-bounce">👋</span>
-            </h1>
-            <p className="text-body text-text-secondary">
-              Welcome Back, {userProfile?.username || "Collector"}
-            </p>
-            <p className="text-caption">
-              Discover new sounds, collect music NFTs and earn rewards.
-            </p>
+          <div className="flex gap-4">
+            <div className="space-y-1 flex-1">
+              <h1 className="text-page-title text-text-primary flex items-center gap-1.5 pt-2">
+                Good Evening <span className="animate-bounce">👋</span>
+              </h1>
+              <p className="text-body text-text-secondary">
+                Welcome Back, {userProfile?.username || "Collector"}
+              </p>
+              <p className="text-caption">
+                Discover new sounds, collect music NFTs and earn rewards.
+              </p>
+            </div>
+            <div className="w-1/3">
+              <TonPriceChart />
+            </div>
           </div>
         </motion.div>
+
+        {/* ==========================================
+            SECTION 14: COMMUNITY ACTIVITY FEED (Real-time Firestore Events)
+            ========================================== */}
+        <SocialActivityFeed />
 
         <div className="space-y-3 text-left">
           <h2 className="text-xs font-black tracking-widest text-text-muted uppercase px-4">
@@ -652,6 +661,7 @@ const Home: React.FC = () => {
             TRENDING CHART SECTION (Recharts/D3)
             ========================================== */}
         <TrendingChart />
+        <TopTrendingNFTsWidget />
 
         {/* ==========================================
             SECTION 9: EARN TJ PREVIEW
@@ -876,6 +886,16 @@ const Home: React.FC = () => {
 
 
         {/* ==========================================
+            SECTION 6: TOP ARTISTS BY SALES VOLUME
+            ========================================== */}
+        <TopArtistsSection />
+
+        {/* ==========================================
+            SECTION 6.1: COLLECTION SPOTLIGHT
+            ========================================== */}
+        <CollectionSpotlight />
+
+        {/* ==========================================
             SECTION 6: TRENDING ARTISTS (Ranked Leaderboard based on NFT Sales and Follower Growth)
             ========================================== */}
         <div className="space-y-4 text-left">
@@ -1093,7 +1113,7 @@ const Home: React.FC = () => {
                 key={nft.id} 
                 nft={nft} 
                 variant="default" 
-                className="w-[165px] shrink-0" 
+                className="w-[165px] shrink-0 border border-white/10 rounded-lg" 
               />
             ))}
           </div>
@@ -1128,7 +1148,7 @@ const Home: React.FC = () => {
                   description: '',
                   isAuction: false
                 } as any}
-                className="w-[165px] shrink-0"
+                className="w-[165px] shrink-0 border border-white/10 rounded-lg"
               />
             ))}
           </div>
@@ -1181,7 +1201,7 @@ const Home: React.FC = () => {
                 key={nft.id} 
                 nft={nft} 
                 variant="default"
-                className="w-[165px] shrink-0"
+                className="w-[165px] shrink-0 border border-white/10 rounded-lg"
                 onAction={(nftItem) => {
                   if (nftItem.owner !== userProfile?.walletAddress) {
                     handleMintNFT(nftItem.id);

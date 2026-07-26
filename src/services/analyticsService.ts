@@ -1,5 +1,7 @@
 import { db } from "../lib/firebase";
 import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
+import { getArtists } from "./userService";
+import { User } from "../types";
 
 export interface MonthlyRevenue {
   month: string;
@@ -12,6 +14,41 @@ export interface ArtifactPerformance {
   streams: number;
   sales: number;
 }
+
+export const getTopArtistsBySales = async (): Promise<{ artist: User, totalSales: number }[]> => {
+  try {
+    const txSnap = await getDocs(
+      query(
+        collection(db, "transactions"),
+        where("type", "==", "nft_sale")
+      )
+    );
+
+    const salesPerArtist: Record<string, number> = {};
+
+    txSnap.forEach(doc => {
+      const data = doc.data();
+      const artistId = data.participants?.[0]; // Assuming artist is the first participant
+      if (artistId) {
+        salesPerArtist[artistId] = (salesPerArtist[artistId] || 0) + (data.amount || 0);
+      }
+    });
+
+    const artists = await getArtists();
+    const result = artists
+      .filter(artist => salesPerArtist[artist.uid])
+      .map(artist => ({
+        artist,
+        totalSales: salesPerArtist[artist.uid]
+      }))
+      .sort((a, b) => b.totalSales - a.totalSales);
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching top artists by sales:", error);
+    return [];
+  }
+};
 
 export const getArtistRevenueBreakdown = async (artistId: string): Promise<MonthlyRevenue[]> => {
   try {

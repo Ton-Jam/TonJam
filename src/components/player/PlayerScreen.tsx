@@ -26,6 +26,7 @@ import {
 import { useAudio } from "@/contexts/AudioContext";
 import Progress from "./Progress";
 import PlayerControls from "./PlayerControls";
+import { WaveformVisualizer } from "./WaveformVisualizer";
 import { getPlaceholderImage, shareContent, cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -549,6 +550,11 @@ export const PlayerScreen: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Dynamic Waveform Visualizer */}
+        <div className="w-full px-6">
+          <WaveformVisualizer key={currentTrack.audioUrl} audioUrl={currentTrack.audioUrl} className="h-20 w-full mb-2" />
+        </div>
 
         {/* Dynamic Progress Scrub slider */}
         <div className="w-full px-6">

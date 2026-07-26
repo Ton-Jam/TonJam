@@ -72,6 +72,7 @@ export const tracks: TrackData[] = Array.from({ length: 500 }, (_, i) => {
     playedAt: `${randomRange(2, 59)}m ago`,
     listenPercentage: randomRange(20, 100),
     recommendationReason: i % 10 === 0 ? `Based on ${randomElement(GENRES)}` : undefined,
+    audioUrl: `https://archive.org/download/testmp3testfile/test.mp3`,
   };
 });
 

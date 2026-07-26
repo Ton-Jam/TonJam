@@ -64,6 +64,7 @@ import { LiveSpaces } from "@/components/search/LiveSpaces";
 import { EarnTJPreview } from "@/components/search/EarnTJPreview";
 import { SocialActivityFeed } from "@/components/SocialActivityFeed";
 import { TrendingMusicChart } from "@/components/search/TrendingMusicChart";
+import { ArtistDiscoveryAI } from '@/components/ArtistDiscoveryAI';
 import QRScanner from '@/components/QRScanner';
 import { 
   FullDiscoverSkeleton, 
@@ -560,6 +561,11 @@ export const Discover: React.FC = () => {
                   onPlayTrack={playTrack} 
                 />
               )}
+            </section>
+
+            {/* AI Artist Discovery */}
+            <section className="px-4">
+              <ArtistDiscoveryAI />
             </section>
 
             {/* 3. Trending NFT Collections */}

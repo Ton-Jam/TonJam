@@ -1,6 +1,7 @@
 import React from 'react';
 import { Heart, MessageSquare, Share2, ShoppingCart, Coins, UserPlus, Clock } from 'lucide-react';
 import { ActivityEvent, MOCK_ACTIVITY_LOGS } from './ProfileTypes';
+import { ActivityChart } from './ActivityChart';
 
 export const ActivityTab: React.FC = () => {
   const getEventIcon = (type: string) => {
@@ -24,6 +25,8 @@ export const ActivityTab: React.FC = () => {
 
   return (
     <div className="space-y-3.5 text-white font-sans pb-8">
+      <ActivityChart />
+
       <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
         Recent Activity Logs
       </h3>

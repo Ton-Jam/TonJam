@@ -32,7 +32,7 @@ export function NFTChart({ data }: Props) {
   return (
     <Card className="border-border bg-card/50">
       <CardHeader className="py-3">
-        <CardTitle className="text-sm font-black uppercase text-foreground">NFT Value Trend</CardTitle>
+        <CardTitle className="text-sm font-black uppercase text-foreground">Sales Trends</CardTitle>
       </CardHeader>
       <CardContent className="px-2 pb-2">
         <ChartContainer

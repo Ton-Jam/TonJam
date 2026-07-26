@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { BackButton } from "@/components/BackButton";
+import { NFTChart } from "@/components/NFTChart";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -56,6 +57,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useModal } from "@/components/layout/ModalProvider";
 import {
   MOCK_NFTS,
   MOCK_USER,
@@ -97,6 +99,7 @@ import ReactionsSection from "@/components/ReactionsSection";
 import confetti from "canvas-confetti";
 import { getPlaceholderImage, cn } from "@/lib/utils";
 import { PriceSparkline } from "@/components/PriceSparkline";
+import { RecentBidsList } from "@/components/RecentBidsList";
 import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
 import { QuickBid } from "@/components/QuickBid";
 import { NFTBidTracker } from "@/components/NFTBidTracker";
@@ -207,6 +210,32 @@ const NFTDetail: React.FC = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showPriceAlertModal, setShowPriceAlertModal] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const salesData = useMemo(() => {
+    if (!localNft?.history) return [];
+    
+    // Reverse to get chronological order if history is newest-first
+    const soldEvents = [...localNft.history].reverse().filter(h => h.event === "Sold" && h.price);
+    
+    if (soldEvents.length === 0) {
+      // Return mock data if there are no actual sales to show the chart
+      const basePrice = parseInt(localNft.price || "20");
+      return [
+        { date: "Day 1", value: Math.max(1, basePrice * 0.5) },
+        { date: "Day 5", value: Math.max(1, basePrice * 0.7) },
+        { date: "Day 10", value: Math.max(1, basePrice * 0.65) },
+        { date: "Day 15", value: Math.max(1, basePrice * 0.8) },
+        { date: "Day 20", value: Math.max(1, basePrice * 1.1) },
+        { date: "Day 25", value: Math.max(1, basePrice * 0.95) },
+        { date: "Today", value: basePrice }
+      ];
+    }
+    
+    return soldEvents.map(h => ({
+      date: h.date,
+      value: parseFloat(h.price!)
+    }));
+  }, [localNft]);
 
   const isOwner = useMemo(() => {
     if (!localNft) return false;
@@ -427,6 +456,7 @@ const NFTDetail: React.FC = () => {
 
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [isEndingSoon, setIsEndingSoon] = useState<boolean>(false);
+  const { openModal } = useModal();
 
   // Live bid stream simulation for active auctions
   useEffect(() => {
@@ -977,7 +1007,7 @@ const NFTDetail: React.FC = () => {
                     const artist = MOCK_ARTISTS.find(
                       (a) => a.name === localNft.creator,
                     );
-                    if (artist) navigate(`/artist/${artist.uid}`);
+                    if (artist) openModal('artistProfile', artist.name, { artistId: artist.uid });
                   }}
                 >
                   <div className="relative w-10 h-10">
@@ -1819,70 +1849,7 @@ const NFTDetail: React.FC = () => {
                             <div className="w-1.5 h-4 bg-orange-500 rounded-full" />
                             Active Bids
                           </h4>
-                          <div className="space-y-4">
-                            {localNft.offers && localNft.offers.length > 0 ? (
-                              [...localNft.offers]
-                                .sort(
-                                  (a, b) =>
-                                    parseFloat(b.price) - parseFloat(a.price),
-                                )
-                                .map((offer, i) => {
-                                  const isTopBid =
-                                    parseFloat(offer.price) ===
-                                    highestOfferPrice;
-                                  return (
-                                    <div
-                                      key={offer.id || i}
-                                      className={cn(
-                                        "flex items-center justify-between p-4 rounded-[4px] border transition-all hover:bg-white/[0.04]",
-                                        isTopBid
-                                          ? "bg-amber-500/10 border-amber-500/30"
-                                          : "bg-white/[0.02] border-white/5",
-                                      )}
-                                    >
-                                      <div className="flex items-center gap-4">
-                                        <div className="relative">
-                                          <div className="w-10 h-10 rounded-xl bg-muted overflow-hidden flex-shrink-0 border border-white/10">
-                                            <img
-                                              src={`https://picsum.photos/100/100?seed=${offer.offerer}`}
-                                              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
-                                              alt=""
-                                            />
-                                          </div>
-                                        </div>
-                                        <div className="flex flex-col">
-                                          <span className="text-sm font-black text-foreground uppercase tracking-widest">
-                                            @{(offer.offerer || "").slice(0, 8)}
-                                            ...
-                                          </span>
-                                          <div className="flex flex-col gap-0.5 mt-0.5">
-                                            {isTopBid && (
-                                              <span className="text-[9px] text-amber-500 font-bold uppercase tracking-widest">
-                                                Highest Bidder
-                                              </span>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="text-right">
-                                        <span className="text-base font-black text-foreground">
-                                          {offer.price} TON
-                                        </span>
-                                        <span className="block text-[8px] text-muted-foreground uppercase tracking-widest mt-1">
-                                          {new Date(
-                                            offer.timestamp || Date.now(),
-                                          ).toLocaleDateString()}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  );
-                                })
-                            ) : (
-                              <div className="text-center py-12 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                                No bids placed yet
-                              </div>
-                            )}
-                          </div>
+                          <RecentBidsList offers={localNft.offers} highestOfferPrice={highestOfferPrice} />
                         </div>
                       </div>
                     )}
@@ -1895,8 +1862,12 @@ const NFTDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="bg-white/[0.02] border border-border rounded-[4px] p-6 lg:p-8"
+                    className="bg-white/[0.02] border border-border rounded-[4px] p-6 lg:p-8 space-y-8"
                   >
+                    <div className="mb-6">
+                      <NFTChart data={salesData} />
+                    </div>
+
                     <div className="relative pl-6 sm:pl-0">
                       {/* Vertical line - hidden on small screens if we wanted it to be centered, but let's make it left-aligned */}
                       <div className="absolute left-[31px] sm:left-[35px] top-0 bottom-0 w-px bg-white/10" />

@@ -10,9 +10,11 @@ function Avatar({
   className,
   size = "default",
   style,
+  onClick,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Root> & {
   size?: "default" | "sm" | "lg"
+  onClick?: React.MouseEventHandler<HTMLElement>;
 }) {
   return (
     <AvatarPrimitive.Root
@@ -26,8 +28,10 @@ function Avatar({
       }}
       className={cn(
         "group/avatar relative flex size-10 shrink-0 select-none border data-[size=lg]:size-12 data-[size=sm]:size-8",
+        onClick && "cursor-pointer",
         className
       )}
+      onClick={onClick}
       {...props}
     />
   )

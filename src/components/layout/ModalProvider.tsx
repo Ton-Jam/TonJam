@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Share2, AlertOctagon, Wallet, ListPlus, Flame, Gift } from 'lucide-react';
+import { ArtistProfile } from '@/components/ArtistProfile';
 
-export type ModalType = 'share' | 'report' | 'playlist' | 'wallet' | 'artistAction' | 'nftAction';
+import { MintNFTModal } from '@/components/modal/MintNFTModal';
+
+export type ModalType = 'share' | 'report' | 'playlist' | 'wallet' | 'artistAction' | 'nftAction' | 'artistProfile' | 'mintNFT';
 
 interface ModalConfig {
   type: ModalType;
@@ -191,6 +194,21 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             </div>
           </div>
         );
+
+      case 'artistProfile':
+        return (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="h-full"
+          >
+            <ArtistProfile artistId={props.artistId} />
+          </motion.div>
+        );
+
+      case 'mintNFT':
+        return <MintNFTModal />;
 
       default:
         return null;

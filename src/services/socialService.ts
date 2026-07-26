@@ -115,3 +115,17 @@ export const followUser = async (followerId: string, followingId: string) => {
     handleFirestoreError(error, OperationType.CREATE, 'follows');
   }
 };
+
+export const followCollection = async (userId: string, collectionId: string) => {
+  try {
+    const followId = `${userId}_${collectionId}`;
+    await setDoc(doc(db, 'follows', followId), {
+      followerId: userId,
+      followingId: collectionId,
+      type: 'collection',
+      createdAt: serverTimestamp()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, 'follows');
+  }
+};

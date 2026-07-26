@@ -1,5 +1,5 @@
 import React from 'react';
-import { Info, Share2, Send, Tag, Coins, Star, User, ExternalLink, Copy, Verified, ChevronRight, Trash, History } from 'lucide-react';
+import { Info, Share2, Send, Tag, Coins, Star, User, ExternalLink, Copy, Verified, ChevronRight, Trash, History, List as ListIcon } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
@@ -23,9 +23,10 @@ interface NFTOptionsModalProps {
   onList?: () => void;
   onBuy?: () => void;
   onHistory?: () => void;
+  onAddToFolder?: () => void;
 }
 
-const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend, onList, onBuy, onHistory }) => {
+const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend, onList, onBuy, onHistory, onAddToFolder }) => {
   const navigate = useNavigate();
   const { addNotification, userProfile, setAnthem } = useAudio();
 
@@ -70,6 +71,10 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
         if (onHistory) onHistory();
         onClose();
         break;
+      case 'add-folder':
+        if (onAddToFolder) onAddToFolder();
+        onClose();
+        break;
       case 'tonscan':
         window.open(`https://tonscan.org/nft/${nft.contractAddress || nft.id}`, '_blank');
         onClose();
@@ -112,6 +117,7 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
   ];
 
   if (isOwner) {
+    options.push({ id: 'add-folder', icon: ListIcon, label: 'Save to Collection', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('add-folder') });
     options.push({ id: 'anthem', icon: Star, label: isAnthem ? 'Remove Anthem' : 'Set as Anthem', color: isAnthem ? 'text-amber-500' : 'text-foreground', iconColor: isAnthem ? 'text-amber-500 fill-current' : 'text-muted-foreground group-hover:text-amber-400', action: () => handleAction('anthem') });
     options.push({ id: 'send', icon: Send, label: 'Send NFT', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('send') });
     options.push({ id: 'list', icon: Tag, label: 'List for Sale', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('list') });

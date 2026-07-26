@@ -5,6 +5,8 @@ import {
   Users, Radio, Flame, Calendar, MapPin, Bell, ExternalLink, 
   ThumbsUp, Volume2, Plus, ArrowRight 
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 // --- TS INTERFACES ---
 
@@ -66,6 +68,7 @@ export const FeedCard: React.FC<{
   onShare?: (post: SocialPostData) => void;
   className?: string;
 }> = ({ post, isLoading, onLike, onComment, onShare, className = '' }) => {
+  const navigate = useNavigate();
   const [liked, setLiked] = useState(post?.isLiked || false);
   const [likesCount, setLikesCount] = useState(post?.likesCount || 0);
 
@@ -99,9 +102,9 @@ export const FeedCard: React.FC<{
       {/* Header */}
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-slate-950">
-            <img src={post.authorAvatar} alt={post.authorName} className="w-full h-full object-cover" />
-          </div>
+          <Avatar className="w-10 h-10 border border-white/5" onClick={() => navigate(`/profile/${post.authorUsername}`)}>
+            <AvatarImage src={post.authorAvatar} alt={post.authorName} />
+          </Avatar>
           <div className="min-w-0">
             <div className="flex items-center gap-1">
               <span className="text-[13px] font-black truncate">{post.authorName}</span>

@@ -15,6 +15,9 @@ import SellNFTModal from './SellNFTModal';
 import SkeletonCard from './SkeletonCard';
 import NFTOptionsModal from './NFTOptionsModal';
 import ManageNFTModal from './ManageNFTModal';
+import BidModal from './BidModal';
+import AddToNFTFolderModal from './AddToNFTFolderModal';
+import NFTFolderModal from './NFTFolderModal';
 import { AuctionCountdownTimer } from './AuctionCountdownTimer';
 import { MarqueeTitle } from './MarqueeTitle';
 import {
@@ -85,6 +88,9 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isBidModalOpen, setIsBidModalOpen] = useState(false);
+  const [isAddToFolderModalOpen, setIsAddToFolderModalOpen] = useState(false);
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
 
   const [isHovered, setIsHovered] = useState(false);
   const [isEndingSoon, setIsEndingSoon] = useState(false);
@@ -293,7 +299,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         setIsSellModalOpen(true);
       }
     } else if (nft.listingType === 'auction') {
-      navigate(`/nft/${nft.id}`);
+      setIsBidModalOpen(true);
     } else if (!isAuctionEnded) {
       // BUY / COLLECT flow
       if (!tonConnectUI.connected) {
@@ -330,14 +336,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const handleShare = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
     const shareUrl = `${window.location.origin}/#/nft/${nft.id}`;
-    const result = await shareContent({
-      title: `NFT: ${nft.title} by ${nft.creator}`,
-      text: `Check out this NFT on TonJam: ${nft.title}`,
-      url: shareUrl,
-    });
-
-    if (result.success) {
-      addNotification(result.method === 'clipboard' ? 'Link copied!' : 'Shared!', 'success');
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      addNotification('Copied!', 'success');
+    } catch (err) {
+      addNotification('Failed to copy link', 'error');
     }
   };
 
@@ -881,7 +884,6 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
 
                <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-
                      <div className="flex items-center gap-1.5 bg-muted/40 py-0.5 px-1.5 rounded-[4px] border border-border/10">
                         {currencyMode === 'USD' ? (
                           <span className="text-[9.5px] font-extrabold text-[#2BE08C]">$</span>
@@ -897,7 +899,6 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                         >
                           {formattedPrice}
                         </motion.span>
-
                         {/* Price Change Indicator */}
                         {nft.floorPriceChange !== undefined && (
                           <div className={cn(
@@ -915,36 +916,45 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                      </div>
                   </div>
                   
-                  <motion.button 
-                    onClick={handleActionClick} 
-                    disabled={(!isOwner && isAuctionEnded) || isPurchasing}
-                    style={{ height: cardTokens.nftTrack.mintButtonHeight }}
-                    animate={(!isOwner && nft.listingType === 'auction' && !isAuctionEnded && isEndingSoon) ? {
-                      scale: [1, 1.08, 1],
-                      boxShadow: [
-                        "0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 0 0 0px rgba(239, 68, 68, 0.4)",
-                        "0 10px 15px -3px rgba(239, 68, 68, 0.5), 0 0 0 6px rgba(239, 68, 68, 0)",
-                        "0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 0 0 0px rgba(239, 68, 68, 0.4)"
-                      ]
-                    } : {}}
-                    transition={(!isOwner && nft.listingType === 'auction' && !isAuctionEnded && isEndingSoon) ? {
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    } : {}}
-                    className={cn(
-                      "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 px-3 text-[8px] font-black uppercase tracking-[0.1em] text-white flex items-center justify-center leading-none",
-                      isOwner 
-                        ? 'bg-muted text-foreground' 
-                        : (isAuctionEnded || isPurchasing
-                            ? 'bg-white/5 text-white/20'
-                            : (nft.listingType === 'auction' && isEndingSoon)
-                              ? 'bg-gradient-to-r from-red-600 to-orange-500 shadow-lg shadow-red-500/20'
-                              : 'bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-lg shadow-emerald-500/20')
-                    )}
-                  >
-                    {isOwner ? (nft.listingType ? <Settings className="w-3 h-3" /> : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : (isPurchasing ? 'COLLECTING' : 'COLLECT'))}
-                  </motion.button>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={handleShare}
+                      className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all active:scale-95"
+                      title="Share NFT"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                    </button>
+                    <motion.button 
+                      onClick={handleActionClick} 
+                      disabled={(!isOwner && isAuctionEnded) || isPurchasing}
+                      style={{ height: cardTokens.nftTrack.mintButtonHeight }}
+                      animate={(!isOwner && nft.listingType === 'auction' && !isAuctionEnded && isEndingSoon) ? {
+                        scale: [1, 1.08, 1],
+                        boxShadow: [
+                          "0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 0 0 0px rgba(239, 68, 68, 0.4)",
+                          "0 10px 15px -3px rgba(239, 68, 68, 0.5), 0 0 0 6px rgba(239, 68, 68, 0)",
+                          "0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 0 0 0px rgba(239, 68, 68, 0.4)"
+                        ]
+                      } : {}}
+                      transition={(!isOwner && nft.listingType === 'auction' && !isAuctionEnded && isEndingSoon) ? {
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      } : {}}
+                      className={cn(
+                        "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 px-4 text-[9px] font-black uppercase tracking-[0.1em] text-white flex items-center justify-center leading-none",
+                        isOwner 
+                          ? 'bg-muted text-foreground' 
+                          : (isAuctionEnded || isPurchasing
+                              ? 'bg-white/5 text-white/20'
+                              : (nft.listingType === 'auction' && isEndingSoon)
+                                ? 'bg-gradient-to-r from-red-600 to-orange-500 shadow-lg shadow-red-500/20'
+                                : 'bg-gradient-to-r from-blue-600 to-blue-400 shadow-lg shadow-blue-500/30 ring-1 ring-blue-400/50')
+                      )}
+                    >
+                      {isOwner ? (nft.listingType ? <Settings className="w-3 h-3" /> : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : (isPurchasing ? 'BUYING' : 'BUY'))}
+                    </motion.button>
+                  </div>
                </div>
             </div>
           </motion.div>
@@ -978,6 +988,23 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           onBuy={() => navigate(`/nft/${nft.id}`)}
           onList={() => setIsSellModalOpen(true)}
           onHistory={() => setIsHistoryModalOpen(true)}
+          onAddToFolder={() => setIsAddToFolderModalOpen(true)}
+        />
+      )}
+
+      {isAddToFolderModalOpen && (
+        <AddToNFTFolderModal
+          nft={nft}
+          isOpen={isAddToFolderModalOpen}
+          onClose={() => setIsAddToFolderModalOpen(false)}
+          onCreateNew={() => setIsCreateFolderModalOpen(true)}
+        />
+      )}
+
+      {isCreateFolderModalOpen && (
+        <NFTFolderModal
+          isOpen={isCreateFolderModalOpen}
+          onClose={() => setIsCreateFolderModalOpen(false)}
         />
       )}
 
@@ -1001,6 +1028,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           nft={nft}
           isOpen={is3DModalOpen}
           onClose={() => setIs3DModalOpen(false)}
+        />
+      )}
+      {isBidModalOpen && (
+        <BidModal
+          nft={nft}
+          onClose={() => setIsBidModalOpen(false)}
         />
       )}
     </>

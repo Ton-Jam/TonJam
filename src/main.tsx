@@ -3,7 +3,6 @@ import './index.css';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import App from './App';
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 /**
  * TON Connect SDK Analytics Error Suppression
@@ -66,6 +65,6 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+      <App />
   </React.StrictMode>
 );

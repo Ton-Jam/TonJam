@@ -5,15 +5,17 @@ import {
   signInWithPopup, 
   signInWithCredential,
   GoogleAuthProvider,
+  TwitterAuthProvider,
   signOut as firebaseSignOut,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
   sendPasswordResetEmail,
-  signInAnonymously
+  signInAnonymously,
+  linkWithPopup
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, getDocFromServer } from 'firebase/firestore';
-import { auth, db, googleProvider, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { auth, db, googleProvider, twitterProvider, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { UserProfile } from '@/types';
 import { clearDriveToken } from '@/services/googleDriveService';
 import { syncBookmarksFromFirestore } from '@/services/bookmarkService';
@@ -26,6 +28,7 @@ interface AuthContextType {
   isArtist: boolean;
   isCollector: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithTwitter: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ user?: User; error?: any }>;
   signUpWithEmail: (email: string, password: string, metadata?: { username?: string }) => Promise<{ user?: User; error?: any }>;
   sendPasswordReset: (email: string) => Promise<{ error?: any }>;
@@ -42,6 +45,7 @@ const AuthContext = createContext<AuthContextType>({
   isArtist: false,
   isCollector: true,
   signInWithGoogle: async () => {},
+  signInWithTwitter: async () => {},
   signInWithEmail: async () => ({ error: 'Not implemented' }),
   signUpWithEmail: async () => ({ error: 'Not implemented' }),
   sendPasswordReset: async () => ({ error: 'Not implemented' }),
@@ -244,6 +248,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithTwitter = async () => {
+    try {
+      if (user) {
+        await linkWithPopup(auth.currentUser!, twitterProvider);
+      } else {
+        await signInWithPopup(auth, twitterProvider);
+      }
+    } catch (error: any) {
+      console.error('Error signing in/linking with Twitter:', error);
+      throw error;
+    }
+  };
+
   const signInWithEmail = async (email: string, password: string) => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
@@ -331,6 +348,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isArtist,
       isCollector,
       signInWithGoogle, 
+      signInWithTwitter,
       signInWithEmail,
       signUpWithEmail,
       sendPasswordReset,

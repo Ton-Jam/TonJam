@@ -14,6 +14,7 @@ import { MarketplaceStatistics } from "./sections/MarketplaceStatistics";
 import { RecentSales } from "./sections/RecentSales";
 import { DiscoverGenres } from "./sections/DiscoverGenres";
 import { FloorPriceHistoryTracker } from "@/components/marketplace/FloorPriceHistoryTracker";
+import { MarketTrendsChart } from "@/components/MarketTrendsChart";
 import { EmptyState } from "./components/EmptyStates";
 import { 
   HeroSkeleton, 
@@ -242,6 +243,11 @@ const Marketplace: React.FC = () => {
             {/* 10. Floor Price History Tracker */}
             {!searchTerm && (
               <FloorPriceHistoryTracker collections={trendingCollections as any} />
+            )}
+
+            {/* Market Trends Visualization */}
+            {!searchTerm && (
+              <MarketTrendsChart />
             )}
 
             {/* 11. Marketplace Analytics & Stats */}

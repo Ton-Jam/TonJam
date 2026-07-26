@@ -1,5 +1,31 @@
 {
   "entities": {
+    "Achievement": {
+      "title": "Achievement",
+      "description": "Definition of an achievement badge",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "iconUrl": { "type": "string" },
+        "criteria": { "type": "string" },
+        "rarity": { "type": "string", "enum": ["common", "rare", "epic", "legendary"] }
+      },
+      "required": ["id", "title", "description", "criteria"]
+    },
+    "UserAchievement": {
+      "title": "UserAchievement",
+      "description": "User progress on an achievement",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "achievementId": { "type": "string" },
+        "unlockedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "achievementId", "unlockedAt"]
+    },
     "User": {
       "title": "User",
       "description": "User profile",
@@ -473,6 +499,14 @@
     }
   },
   "firestore": {
+    "/achievements/{achievementId}": {
+      "schema": "Achievement",
+      "description": "System achievements definitions"
+    },
+    "/users/{userId}/achievements/{userAchievementId}": {
+      "schema": "UserAchievement",
+      "description": "User unlocked achievements"
+    },
     "/users/{userId}/notifications/{notificationId}": {
       "schema": "Notification",
       "description": "User notifications subcollection"

@@ -32,6 +32,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '@/services/storageService';
 import { BadgeSystem } from '@/components/BadgeSystem';
 import { DailyMissions } from '@/components/DailyMissions';
+import { AchievementList } from '@/components/profile/AchievementList';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -534,6 +535,9 @@ const UserProfile: React.FC = () => {
 
             <div className="bg-card p-8 rounded-3xl shadow-sm">
               <BadgeSystem user={user} isOwnProfile={false} />
+            </div>
+            <div className="bg-card p-8 rounded-3xl shadow-sm">
+              <AchievementList userId={user.uid} />
             </div>
             {id === userProfile.uid && (
               <div className="bg-card p-8 rounded-3xl shadow-sm">

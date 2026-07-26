@@ -1344,6 +1344,47 @@ async function startServer() {
         }
     });
 
+    app.post('/api/gemini/artist-discovery', async (req, res) => {
+        try {
+            const { playHistory, allArtists } = req.body;
+            const model = "gemini-2.5-flash";
+            const prompt = `Based on the user's streaming history: ${JSON.stringify(playHistory)}, suggest 5 music artists they might like from this list: ${allArtists.map((a: any) => a.name).join(", ")}. Only recommend artists from the list that they haven't listened to heavily yet, or just recommend good matches. For each recommendation, provide a short 1-sentence reason why they would like them based on their history.
+            
+            Return a JSON array of objects with "name" and "reason" fields.`;
+
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
+                model,
+                contents: [{ parts: [{ text: prompt }] }],
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.ARRAY,
+                        items: { 
+                            type: Type.OBJECT,
+                            properties: {
+                                name: { type: Type.STRING },
+                                reason: { type: Type.STRING }
+                            },
+                            required: ["name", "reason"]
+                        }
+                    }
+                }
+            }));
+
+            const recommendations = JSON.parse(response.text || "[]");
+            res.json({ recommendations });
+        } catch (error: any) {
+            console.log("[Fallback] Serving local artist discovery.");
+            const { allArtists } = req.body;
+            const artists = allArtists || [];
+            const recommendations = artists.slice(0, 5).map((a: any) => ({
+                name: a.name,
+                reason: "Recommended based on your local activity."
+            }));
+            res.json({ recommendations });
+        }
+    });
+
     app.post('/api/gemini/related-artists', async (req, res) => {
         try {
             const { artistName, allArtists } = req.body;
