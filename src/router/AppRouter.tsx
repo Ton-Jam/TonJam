@@ -14,7 +14,7 @@ import { seedDatabase } from '@/services/seedService';
 import { resolveEndedAuctions } from '@/services/auctionService';
 
 // Lazy imports
-const Home = lazy(() => import('@/pages/JamUp'));
+const Home = lazy(() => import('@/pages/Home'));
 const Discover = lazy(() => import('@/pages/Discover'));
 const JamSpace = lazy(() => import('@/pages/JamSpace'));
 const Marketplace = lazy(() => import('@/pages/Marketplace'));

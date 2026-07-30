@@ -68,6 +68,12 @@ import TopArtistsSection from "@/components/TopArtistsSection";
 import CollectionSpotlight from "@/components/CollectionSpotlight";
 import { TonPriceChart } from "@/components/TonPriceChart";
 
+// Dedicated Home Components
+import { HomeVibeTicker } from "@/components/home/HomeVibeTicker";
+import { HomeQuickAccess } from "@/components/home/HomeQuickAccess";
+import { TrendingNFTVolumeChart } from "@/components/home/TrendingNFTVolumeChart";
+import RecentlyMintedNFTs from "@/components/RecentlyMintedNFTs";
+
 // ==========================================
 // MOCK DATA & INTERFACES FOR HOME "JAM UP"
 // ==========================================
@@ -521,6 +527,38 @@ const Home: React.FC = () => {
         </motion.div>
 
         {/* ==========================================
+            TRENDING FEED SECTION (Top Section)
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-section-title text-text-primary flex items-center gap-2">
+              <Flame className="w-5 h-5 text-amber-400 fill-amber-400/20 animate-pulse" />
+              Trending Feed
+            </h2>
+            <button onClick={() => navigate("/marketplace")} className="text-xs font-bold text-primary flex items-center outline-none cursor-pointer border-none bg-transparent">
+              All <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
+            {(allTracks && allTracks.length > 0 ? [...allTracks].sort((a,b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 8) : MOCK_TRACKS.slice(0, 8)).map((track) => (
+              <TrackCard 
+                key={track.id} 
+                track={track} 
+                variant="default"
+                className="w-[165px] shrink-0"
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Live Vibe Ticker */}
+        <HomeVibeTicker />
+
+        {/* Quick Access Grid */}
+        <HomeQuickAccess />
+
+        {/* ==========================================
             SECTION 14: COMMUNITY ACTIVITY FEED (Real-time Firestore Events)
             ========================================== */}
         <SocialActivityFeed />
@@ -811,31 +849,6 @@ const Home: React.FC = () => {
             ========================================== */}
         <div className="space-y-3 text-left">
           <NFTExplorer />
-        </div>
-
-        {/* ==========================================
-            SECTION 2: TRENDING TRACKS
-            ========================================== */}
-        <div className="space-y-3 text-left">
-          <div className="flex items-center justify-between px-0.5">
-            <h2 className="text-section-title text-text-primary">
-              Trending Now
-            </h2>
-            <button onClick={() => navigate("/marketplace")} className="text-xs font-bold text-primary flex items-center outline-none cursor-pointer border-none bg-transparent">
-              All <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
-            {(allTracks && allTracks.length > 0 ? [...allTracks].sort((a,b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 5) : MOCK_TRACKS.slice(0, 5)).map((track) => (
-              <TrackCard 
-                key={track.id} 
-                track={track} 
-                variant="default"
-                className="w-[165px] shrink-0"
-              />
-            ))}
-          </div>
         </div>
 
 
@@ -1181,10 +1194,14 @@ const Home: React.FC = () => {
         </div>
 
 
-        {/* ==========================================
-            WEB3 TRENDS SECTION (Google Search Grounding Headlines)
-            ========================================== */}
+        {/* Web3 Music Trends */}
         <Web3MusicTrends />
+
+        {/* Trending NFT Volume Chart */}
+        <TrendingNFTVolumeChart />
+
+        {/* Recently Minted NFTs Component */}
+        <RecentlyMintedNFTs />
 
 
         {/* ==========================================

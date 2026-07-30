@@ -83,15 +83,21 @@ export class Track {
   id!: string;
   songId!: string;
   albumId?: string;
+  album?: string;
   title!: string;
   artist!: string;
   artistId!: string;
+  artistAvatar?: string;
   coverUrl!: string;
   audioUrl!: string;
   duration!: number; // in seconds
   genre: string = 'Unknown';
   mood?: 'chill' | 'energetic' | 'focus' | 'happy' | 'melancholic' | 'Unknown' | string = 'Unknown';
   isNFT!: boolean;
+  nftId?: string;
+  nftPrice?: string;
+  nftCollection?: string;
+  isHighFidelity?: boolean;
   artistVerified?: boolean;
   price?: string; 
   listingType?: 'fixed' | 'auction';
