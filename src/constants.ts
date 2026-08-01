@@ -446,11 +446,11 @@ export const GENRES = [
 export const CURATED_PLAYLISTS: Playlist[] = [
   { 
     id: 'curated-1', 
-    title: 'TON Top 50', 
-    coverUrl: 'https://image.pollinations.ai/prompt/playlist%20cover%20TON%20Top%2050?width=600&height=600&nologo=true', 
+    title: 'GRAM Top 50', 
+    coverUrl: 'https://image.pollinations.ai/prompt/playlist%20cover%20GRAM%20Top%2050?width=600&height=600&nologo=true', 
     trackCount: 10, 
-    creator: 'TonJam Editorial', 
-    description: 'The most streamed tracks on the TON network this week.',
+    creator: 'GramJam Editorial', 
+    description: 'The most streamed tracks on the GRAM network this week.',
     trackIds: ['4', '3', '1', '8', '6', '2', '9', '5', '7', '10']
   },
   { 
@@ -458,7 +458,7 @@ export const CURATED_PLAYLISTS: Playlist[] = [
     title: 'NFT Alpha', 
     coverUrl: 'https://image.pollinations.ai/prompt/playlist%20cover%20NFT%20Alpha?width=600&height=600&nologo=true', 
     trackCount: 5, 
-    creator: 'TonJam Curators', 
+    creator: 'GramJam Curators', 
     description: 'Rare music NFTs currently trending in the marketplace.',
     trackIds: ['1', '3', '6', '8', '10']
   },
@@ -479,7 +479,7 @@ export const MOCK_USER: UserProfile = {
   username: '@dj_krupy',
   avatar: 'https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png',
   bannerUrl: '/default_tonjam_banner.jpg',
-  bio: 'Pioneering the Krupy Vibez on TON. Underground electronic beats and rare synthwave NFTs collector.',
+  bio: 'Pioneering the Krupy Vibez on GRAM. Underground electronic beats and rare synthwave NFTs collector.',
   walletAddress: 'UQCc_DJ_Krupy_Vibez_x9y1_8888',
   followers: 1240,
   following: 562,
@@ -655,7 +655,7 @@ export const MOCK_ARTISTS: Artist[] = [
     },
     earnings: { streaming: 154.5, nftSales: 892.4, total: 1046.9 },
     events: [
-      { id: 'e-krupy-1', artistId: 'dj-krupy', title: 'Solar Pulse Genesis', date: '2024-12-25', time: '22:00', venue: 'TON Digital Arena', location: 'Metaverse', ticketUrl: 'https://tonjam.io/tickets/krupy' }
+      { id: 'e-krupy-1', artistId: 'dj-krupy', title: 'Solar Pulse Genesis', date: '2024-12-25', time: '22:00', venue: 'GRAM Digital Arena', location: 'Metaverse', ticketUrl: 'https://gramjam.io/tickets/krupy' }
     ]
   },
   { 
@@ -668,7 +668,7 @@ export const MOCK_ARTISTS: Artist[] = [
     verified: true,
     isVerifiedArtist: true,
     genre: 'Hip Hop',
-    bio: "Global icon bringing the best of hip hop to the TonJam network.",
+    bio: "Global icon bringing the best of hip hop to the GramJam network.",
     bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/drake', instagram: 'https://instagram.com/drake' },
     royaltyConfig: { 
@@ -946,7 +946,7 @@ export const MOCK_POSTS: Post[] = [
     userId: 'u1', 
     userName: 'DJ Krupy', 
     userAvatar: 'https://image.pollinations.ai/prompt/cool%20dj%20profile%20picture%20cyberpunk%20neon%20glasses?width=400&height=400&nologo=true', 
-    content: 'Just dropped my new single "Solar Pulse" on TonJam! Check out the limited NFT edition too. 🔥🚀', 
+    content: 'Just dropped my new single "Solar Pulse" on GramJam! Check out the limited NFT edition too. 🔥🚀', 
     trackId: '1', 
     likes: 1245, 
     reposts: 242,
@@ -1026,7 +1026,7 @@ export const MOCK_USERS: UserProfile[] = [
     username: '@sarahj',
     avatar: 'https://image.pollinations.ai/prompt/young%20woman%20avatar%20with%20cool%20glasses%20and%20headphones?width=400&height=400&nologo=true',
     bannerUrl: "/default_tonjam_banner.jpg",
-    bio: 'Digital art enthusiast and music lover. Collectible hunter on TON.',
+    bio: 'Digital art enthusiast and music lover. Collectible hunter on GRAM.',
     followers: 450,
     following: 120,
     earnings: 0,

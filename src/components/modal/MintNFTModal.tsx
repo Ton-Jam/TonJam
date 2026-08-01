@@ -1,21 +1,21 @@
 import React from 'react';
 import { useModal } from '@/components/layout/ModalProvider';
-import { ListNFTForm } from '@/components/ListNFTForm';
+import { MintNFTModal as MintNFTModalFull } from '@/components/MintNFTModal';
 
 export const MintNFTModal: React.FC = () => {
   const { closeModal } = useModal();
 
   return (
-    <div className="py-2">
-      <ListNFTForm
-        onCancel={closeModal}
-        onSuccess={() => {
-          setTimeout(() => {
-            closeModal();
-          }, 2000);
-        }}
-      />
-    </div>
+    <MintNFTModalFull
+      isOpen={true}
+      onClose={closeModal}
+      onSuccess={() => {
+        setTimeout(() => {
+          closeModal();
+        }, 1500);
+      }}
+    />
   );
 };
+
 

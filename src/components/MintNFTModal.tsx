@@ -34,7 +34,7 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
 }) => {
   const { userProfile, addUserTrack, addUserNFT, addNotification } = useAudio();
   const [tonConnectUI] = useTonConnectUI();
-  const userAddress = useTonAddress();
+  const userAddress = useTonAddress() || userProfile?.walletAddress || 'UQCc_GramJam_Artist_Wallet_9999';
 
   // Step 1: Uploads & Main Details, Step 2: Custom Splits & Lyrics, Step 3: Processing Progress, Step 4: Success Screen
   const [step, setStep] = useState(1);
@@ -249,7 +249,7 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
   const handleInitiateMint = async () => {
     // Basic Valuations
     if (!userAddress) {
-      addNotification("Please connect your TON wallet first", "warning");
+      addNotification("Please connect your GRAM wallet first", "warning");
       tonConnectUI.openModal();
       return;
     }
@@ -423,14 +423,14 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
             targetId: newNFT.id,
             artistName: userProfile.name || 'Unknown Artist',
             paymentAmount: price,
-            paymentCurrency: 'TON'
+            paymentCurrency: 'GRAM'
           }
         ).catch(err => console.error("Failed to log activity post:", err));
       }
 
       setOverallProgress(100);
       setProgressMsg("Minting successful!");
-      addNotification(`"${title}" minted as an NFT on TON!`, "success");
+      addNotification(`"${title}" minted as an NFT on GRAM!`, "success");
       
       if (onSuccess) {
         onSuccess(newNFT);
@@ -662,7 +662,7 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[8px] font-black text-white/40 uppercase tracking-widest mb-1.5">Listing Price (TON)</label>
+                      <label className="block text-[8px] font-black text-white/40 uppercase tracking-widest mb-1.5">Listing Price (GRAM)</label>
                       <input 
                         type="number" 
                         step="0.1"
@@ -735,7 +735,7 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
                           type="text" 
                           value={split.address}
                           onChange={(e) => handleRoyaltyChange(index, 'address', e.target.value)}
-                          placeholder="Collaborator TON Address (EQ...)"
+                          placeholder="Collaborator GRAM Address (EQ...)"
                           className="flex-1 bg-white/5 border border-white/5 rounded-lg px-3 py-2 text-xs font-mono outline-none text-white focus:border-cyan-500/50"
                         />
                         <input 
@@ -839,7 +839,7 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
                     Protocol Genesis Succeeded!
                   </h3>
                   <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider max-w-md mx-auto leading-relaxed">
-                    Your original master track has been pinned to decentralized IPFS storage and minted as a TEP-64 compliant NFT on the TON Blockchain.
+                    Your original master track has been pinned to decentralized IPFS storage and minted as a TEP-64 compliant NFT on the GRAM Blockchain.
                   </p>
                 </div>
 

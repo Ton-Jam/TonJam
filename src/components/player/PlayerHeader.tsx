@@ -16,7 +16,7 @@ export const PlayerHeader: React.FC<PlayerHeaderProps> = ({
   track
 }) => {
   return (
-    <header className="h-[44px] w-full flex items-center justify-between px-4 text-[#F2F4F8] select-none z-20 border-b border-[#16244F]/50 bg-[#050A24]/60 backdrop-blur-md">
+    <header className="h-[44px] w-full flex items-center justify-between px-4 text-[#F2F4F8] select-none z-20 bg-transparent">
       {/* Left: Minimize button */}
       <button
         onClick={onClose}

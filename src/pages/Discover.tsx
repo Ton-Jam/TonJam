@@ -64,6 +64,8 @@ import { LiveSpaces } from "@/components/search/LiveSpaces";
 import { EarnTJPreview } from "@/components/search/EarnTJPreview";
 import { SocialActivityFeed } from "@/components/SocialActivityFeed";
 import { TrendingMusicChart } from "@/components/search/TrendingMusicChart";
+import { TrendingTracksSection } from "@/components/search/TrendingTracksSection";
+import { Web3TrendsSection } from "@/components/search/Web3TrendsSection";
 import { ArtistDiscoveryAI } from '@/components/ArtistDiscoveryAI';
 import QRScanner from '@/components/QRScanner';
 import { 
@@ -551,6 +553,16 @@ export const Discover: React.FC = () => {
             {/* Real-time Community Trending Chart */}
             <section className="px-4">
               <TrendingMusicChart />
+            </section>
+
+            {/* High-performing NFT Database Tracks Horizontal Scroll */}
+            <section className="px-4">
+              <TrendingTracksSection />
+            </section>
+
+            {/* Gemini Search Grounded Web3 Music & TON Trends */}
+            <section className="px-4">
+              <Web3TrendsSection />
             </section>
 
             {/* 2. Continue Listening */}

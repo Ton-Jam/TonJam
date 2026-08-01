@@ -585,14 +585,14 @@ const Login: React.FC = () => {
                       <div className="space-y-3">
                         {/* TON CONNECT DEFAULT SDK TRIGGER */}
                         <div className="flex flex-col gap-2">
-                          <Label className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">TON Ecosystem</Label>
+                          <Label className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">GRAM Ecosystem</Label>
                           <button
                             onClick={() => tonConnectUI.openModal()}
                             className="w-full h-11 pointer-events-auto flex items-center justify-between px-4 border border-blue-500/30 hover:bg-blue-500/10 text-blue-400 rounded-[4px] transition-colors font-bold text-[10px] uppercase tracking-wider cursor-pointer"
                           >
                             <span className="flex items-center gap-2">
                               <Wallet className="h-4 w-4" />
-                              TON Wallet Connect (Standard)
+                              GRAM Wallet Connect (Standard)
                             </span>
                             <span className="text-[8px] tracking-normal font-bold lowercase opacity-75">SDK Client</span>
                           </button>
@@ -744,7 +744,7 @@ const Login: React.FC = () => {
                       {/* PROFILE DETAIL FIELDS */}
                       <div className="space-y-3 pt-3 border-t border-white/10">
                         <div className="space-y-1">
-                          <Label htmlFor="onboard_username" className="text-[9px] font-black uppercase tracking-widest text-white/70">TONJam Profile Name</Label>
+                          <Label htmlFor="onboard_username" className="text-[9px] font-black uppercase tracking-widest text-white/70">GramJam Profile Name</Label>
                           <Input
                             id="onboard_username"
                             type="text"

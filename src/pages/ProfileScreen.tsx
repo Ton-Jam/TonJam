@@ -86,12 +86,12 @@ const ProfileScreenContent: React.FC = () => {
         verificationStatus: 'verified',
         isArtistVerified: true 
       }));
-      toast.success('Verification Complete', 'Congratulations! You are now a verified TonJam artist');
+      toast.success('Verification Complete', 'Congratulations! You are now a verified GramJam artist');
     }, 4500);
   };
 
   const handleCopyProfileLink = () => {
-    navigator.clipboard.writeText(`https://tonjam.app/user/${profile.username}`);
+    navigator.clipboard.writeText(`https://gramjam.app/user/${profile.username}`);
     setCopiedLink(true);
     toast.success('Link Copied', 'Profile URL copied to clipboard');
     setTimeout(() => setCopiedLink(false), 2000);

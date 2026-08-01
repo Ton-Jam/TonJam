@@ -15,12 +15,11 @@ import { verifyFirebaseToken, AuthRequest } from './src/middleware/authMiddlewar
 dotenv.config();
 
 let aiInstance: GoogleGenAI | null = null;
-let wrappedModels: any = null;
 let lastRequestTime = 0;
 let isGeminiRateLimited = false;
 let lastRateLimitTime = 0;
-const GEMINI_QUEUE_DELAY = 120000; // 120 seconds between requests
-const CIRCUIT_BREAKER_DURATION = 300000; // 5 minutes circuit breaker
+const GEMINI_QUEUE_DELAY = 1000; // 1 second between requests
+const CIRCUIT_BREAKER_DURATION = 60000; // 1 minute circuit breaker
 
 const geminiCache = new Map<string, { response: any, timestamp: number }>();
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
@@ -29,14 +28,14 @@ async function rateLimitedGeminiCall<T>(fn: () => Promise<T>, cacheKey?: string)
     if (cacheKey && geminiCache.has(cacheKey)) {
         const cached = geminiCache.get(cacheKey)!;
         if (Date.now() - cached.timestamp < CACHE_DURATION) {
-            console.log("Returning cached Gemini response");
+            console.log("Returning cached Gemini response for key:", cacheKey);
             return cached.response as T;
         }
     }
 
     if (isGeminiRateLimited) {
         if (Date.now() - lastRateLimitTime < CIRCUIT_BREAKER_DURATION) {
-            throw new Error("Circuit breaker open: Gemini API rate limited.");
+            throw new Error("Circuit breaker open: Gemini API rate limited or quota exceeded.");
         } else {
             isGeminiRateLimited = false;
         }
@@ -47,7 +46,6 @@ async function rateLimitedGeminiCall<T>(fn: () => Promise<T>, cacheKey?: string)
     
     if (timeSinceLast < GEMINI_QUEUE_DELAY) {
         const delay = GEMINI_QUEUE_DELAY - timeSinceLast;
-        console.log(`Gemini rate limiting, delaying by ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
     }
     
@@ -59,9 +57,11 @@ async function rateLimitedGeminiCall<T>(fn: () => Promise<T>, cacheKey?: string)
         }
         return result;
     } catch (error: any) {
-        if (error.status === 429 || error.code === 429) {
+        const errStr = String(error?.message || error || '');
+        if (error?.status === 429 || error?.code === 429 || error?.error?.code === 429 || errStr.includes('429') || errStr.includes('RESOURCE_EXHAUSTED') || errStr.includes('quota')) {
             isGeminiRateLimited = true;
             lastRateLimitTime = Date.now();
+            console.log("[Gemini API Quota/RateLimit Notice]: Circuit breaker activated, serving fallbacks.");
         }
         throw error;
     }
@@ -81,25 +81,13 @@ function getGeminiClient(): GoogleGenAI {
                 }
             }
         });
-        
-        // Wrap models.generateContent once
-        const originalModels = aiInstance.models;
-        const originalGenerateContent = originalModels.generateContent.bind(originalModels);
-        wrappedModels = {
-            ...originalModels,
-            generateContent: async (...args: any[]) => {
-                const prompt = args[0]?.contents?.[0]?.parts?.[0]?.text || JSON.stringify(args);
-                return rateLimitedGeminiCall(() => originalGenerateContent(...args), prompt);
-            }
-        };
     }
     return aiInstance;
 }
 
 const ai = {
     get models() {
-        getGeminiClient();
-        return wrappedModels;
+        return getGeminiClient().models;
     },
     get chats() {
         return getGeminiClient().chats;
@@ -375,6 +363,9 @@ async function startServer() {
 
     app.get('/api/web3-music-trends', async (req, res) => {
         try {
+            const isFresh = req.query.fresh === 'true';
+            const cacheKey = isFresh ? undefined : 'web3_music_trends_search';
+
             const prompt = `
                 Search the web for the latest daily headlines and trends regarding the TON blockchain and the NFT industry, specifically focusing on Web3 Music, digital collectibles, and blockchain platforms.
                 Based on the search results, curate a list of 5 up-to-date industry headlines.
@@ -397,13 +388,13 @@ async function startServer() {
             `;
 
             const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
-                model: "gemini-3.5-flash",
+                model: "gemini-3.6-flash",
                 contents: prompt,
                 config: {
                     tools: [{ googleSearch: {} }],
                     responseMimeType: "application/json",
                 }
-            }));
+            }), cacheKey);
 
             if (response.text) {
                 const data = JSON.parse(response.text);
@@ -418,9 +409,8 @@ async function startServer() {
                 }
             }
             throw new Error("Invalid response format from Gemini");
-        } catch (error) {
-            console.error("[Web3Trends Error]:", error);
-            console.log("[Fallback] Serving static Web3 music trends.");
+        } catch (error: any) {
+            console.log("[Web3Trends Fallback]: Serving static Web3 music trends due to rate limit/quota or offline status.");
             // Fallback to beautiful static curated blockchain industry headlines
             const fallbackTrends = [
                 {
@@ -521,8 +511,8 @@ async function startServer() {
                 }
             }
             throw new Error("Invalid response format from Gemini");
-        } catch (error) {
-            console.error("[TrendingMusicAnalysis Error]:", error);
+        } catch (error: any) {
+            console.log("[TrendingMusicAnalysis Fallback]: Serving fallback music trends due to rate limit/quota or offline status.");
             // Dynamic/Static Fallback representing realistic premium data
             const fallbackTracks = [
                 {

@@ -20,7 +20,7 @@ const SponsorshipSubmissionModal: React.FC<SponsorshipSubmissionModalProps> = ({
     imageUrl: '',
     targetId: '',
     paymentAmount: '10',
-    paymentCurrency: 'TON',
+    paymentCurrency: 'GRAM',
     durationDays: 7
   });
 

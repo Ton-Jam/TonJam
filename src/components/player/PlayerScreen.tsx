@@ -168,22 +168,16 @@ export const PlayerScreen: React.FC = () => {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0.05, bottom: 0.8 }}
-        onDragEnd={handleDragEnd}
-        className="fixed inset-0 z-50 bg-[#050A24] text-[#F2F4F8] font-sans flex flex-col justify-between overflow-hidden select-none"
+        className="fixed inset-0 z-50 bg-[#050A24] text-[#F2F4F8] font-sans overflow-y-auto scrollbar-none select-none"
       >
-        {/* Top Fixed Header (44px) */}
-        <PlayerHeader
-          onClose={() => setFullPlayerOpen(false)}
-          onMoreClick={() => setOptionsTrack(currentTrack)}
-          track={currentTrack}
-        />
-
-        {/* Scrollable Core Player Body */}
-        <div className="flex-1 overflow-y-auto px-4 py-2 flex flex-col items-center justify-between max-w-lg mx-auto w-full space-y-3 scrollbar-none">
-          {/* Square Artwork with rotation and gestures */}
+        {/* Scrollable Core Player Body including Header */}
+        <div className="min-h-dvh max-w-md mx-auto w-full px-4 pt-2 pb-12 flex flex-col items-center justify-between gap-3">
+          <PlayerHeader
+            onClose={() => setFullPlayerOpen(false)}
+            onMoreClick={() => setOptionsTrack(currentTrack)}
+            track={currentTrack}
+          />
+          {/* Artwork with gestures */}
           <PlayerArtwork
             track={currentTrack}
             isPlaying={isPlaying}
@@ -207,22 +201,22 @@ export const PlayerScreen: React.FC = () => {
 
             {/* Badges & Streams Counter Row */}
             <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
-              <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] border border-[#16244F] rounded-[6px] text-[10px] font-bold text-amber-400">
+              <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] rounded-[6px] text-[10px] font-bold text-amber-400">
                 <Flame className="w-3 h-3 fill-current" /> 1.4M Streams
               </span>
 
               {currentTrack.artistVerified && (
-                <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] border border-[#16244F] rounded-[6px] text-[10px] font-bold text-[#5B6BFF]">
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] rounded-[6px] text-[10px] font-bold text-[#5B6BFF]">
                   <Check className="w-3 h-3 text-[#5B6BFF]" /> Verified
                 </span>
               )}
               {currentTrack.isNFT && (
-                <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] border border-[#16244F] rounded-[6px] text-[10px] font-bold text-emerald-400">
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] rounded-[6px] text-[10px] font-bold text-emerald-400">
                   <Gem className="w-3 h-3" /> Music NFT
                 </span>
               )}
               {currentTrack.isHighFidelity && (
-                <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] border border-[#16244F] rounded-[6px] text-[10px] font-bold text-purple-400">
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] rounded-[6px] text-[10px] font-bold text-purple-400">
                   <Award className="w-3 h-3" /> Lossless Hi-Fi
                 </span>
               )}
@@ -230,7 +224,7 @@ export const PlayerScreen: React.FC = () => {
           </div>
 
           {/* AUDIOMACK-STYLE SOCIAL ENGAGEMENT ACTION BAR */}
-          <div className="w-full flex items-center justify-between px-3 py-2 bg-[#0A113A] border border-[#16244F] rounded-[16px]">
+          <div className="w-full flex items-center justify-between px-3 py-2 bg-[#0A113A] rounded-[16px]">
             {/* Favorite / Like Button */}
             <button
               onClick={() => {
@@ -239,7 +233,7 @@ export const PlayerScreen: React.FC = () => {
               }}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-[10px] text-xs font-bold transition-all ${
                 isLiked
-                  ? "bg-[#5B6BFF]/20 text-[#5B6BFF] border border-[#5B6BFF]/40"
+                  ? "bg-[#5B6BFF]/20 text-[#5B6BFF]"
                   : "text-[#9AA0AE] hover:text-[#F2F4F8]"
               }`}
             >
@@ -247,12 +241,12 @@ export const PlayerScreen: React.FC = () => {
               <span>{(likeCount / 1000).toFixed(1)}k</span>
             </button>
 
-            {/* JamUp / Repost Button (Audiomack Signature Repost) */}
+            {/* JamUp / Repost Button */}
             <button
               onClick={handleRepostToggle}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-[10px] text-xs font-bold transition-all ${
                 isReposted
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                  ? "bg-emerald-500/20 text-emerald-400"
                   : "text-[#9AA0AE] hover:text-[#F2F4F8]"
               }`}
               title="JamUp Repost"
@@ -324,7 +318,7 @@ export const PlayerScreen: React.FC = () => {
           <PlayerControls />
 
           {/* Secondary Features Tab Row (Lyrics, Queue, Audio Info, NFT, Artist) */}
-          <div className="w-full flex items-center justify-around py-2 border-t border-[#16244F]/50 text-[#9AA0AE]">
+          <div className="w-full flex items-center justify-around py-2 text-[#9AA0AE]">
             {/* Lyrics Toggle */}
             <button
               onClick={() => setActiveTab(activeTab === "lyrics" ? "none" : "lyrics")}

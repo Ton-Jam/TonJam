@@ -87,19 +87,9 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
     }
   };
 
-  // Generate 48 pseudo-waveform bar heights for audio aesthetic
-  const waveformBars = React.useMemo(() => {
-    const bars = [];
-    for (let i = 0; i < 48; i++) {
-      const val = 20 + Math.sin(i * 0.4) * 25 + Math.cos(i * 0.8) * 35 + ((i % 5) * 8);
-      bars.push(Math.max(15, Math.min(95, val)));
-    }
-    return bars;
-  }, []);
-
   return (
-    <div className="w-full flex flex-col gap-2 font-sans select-none px-1">
-      {/* Waveform / Interactive Bar Container */}
+    <div className="w-full flex flex-col gap-1.5 font-sans select-none px-1">
+      {/* Interactive Progress Bar Container */}
       <div
         ref={progressBarRef}
         onPointerDown={handlePointerDown}
@@ -108,52 +98,42 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
         onPointerCancel={handlePointerUp}
         onPointerLeave={() => setHoverTime(null)}
         style={{ touchAction: "none" }}
-        className="relative h-12 w-full bg-[#0A113A] rounded-[12px] p-2 flex items-center cursor-pointer group overflow-hidden"
+        className="relative py-2.5 w-full flex items-center cursor-pointer group"
       >
         {/* Scrubbing Hover Time Tooltip */}
         {hoverTime && (
           <div
-            className="absolute -top-7 px-2 py-0.5 bg-[#5B6BFF] text-[#F2F4F8] text-[10px] font-bold rounded-[6px] shadow-lg pointer-events-none -translate-x-1/2 transition-opacity z-30"
+            className="absolute -top-6 px-2 py-0.5 bg-[#5B6BFF] text-[#F2F4F8] text-[10px] font-bold rounded-[6px] shadow-lg pointer-events-none -translate-x-1/2 transition-opacity z-30"
             style={{ left: `${hoverPos}%` }}
           >
             {hoverTime}
           </div>
         )}
 
-        {/* Buffered Progress Background Layer */}
-        <div
-          className="absolute left-0 top-0 bottom-0 bg-[#16244F]/60 pointer-events-none transition-all duration-300"
-          style={{ width: `${bufferedPercentage}%` }}
-        />
+        {/* Progress Bar Track */}
+        <div className="w-full h-1.5 group-hover:h-2 bg-[#16244F]/60 rounded-full overflow-hidden relative transition-all duration-150">
+          {/* Buffered Progress Background Layer */}
+          <div
+            className="absolute left-0 top-0 bottom-0 bg-[#16244F] rounded-full pointer-events-none transition-all duration-300"
+            style={{ width: `${bufferedPercentage}%` }}
+          />
 
-        {/* Dynamic Waveform Bars */}
-        <div className="w-full h-full flex items-center justify-between gap-0.5 relative z-10">
-          {waveformBars.map((heightPct, idx) => {
-            const barPosPct = (idx / waveformBars.length) * 100;
-            const isPlayed = barPosPct <= localProgress;
-            return (
-              <motion.div
-                key={idx}
-                className="flex-1 rounded-full"
-                animate={{
-                  height: `${heightPct}%`,
-                  backgroundColor: isPlayed ? "#5B6BFF" : "#16244F",
-                  opacity: isPlayed ? 1 : 0.5
-                }}
-                transition={{ duration: 0.15 }}
-              />
-            );
-          })}
+          {/* Active Played Fill Layer */}
+          <motion.div
+            className="h-full bg-gradient-to-r from-[#5B6BFF] to-[#00B4D8] rounded-full relative"
+            style={{ width: `${localProgress}%` }}
+            transition={{ duration: 0.1 }}
+          />
         </div>
 
-        {/* Scrubbing Handle Indicator Line and Thumb */}
+        {/* Thumb handle */}
         <motion.div
-          className="absolute top-0 bottom-0 w-1 bg-[#F2F4F8] z-20 shadow-[0_0_12px_#5B6BFF] pointer-events-none flex items-center justify-center"
+          className="absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none -translate-x-1/2"
           style={{ left: `${localProgress}%` }}
-          animate={{ scaleY: isSeeking ? 1.15 : 1, width: isSeeking ? "3px" : "2px" }}
+          animate={{ scale: isSeeking ? 1.25 : 1 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
-          <div className="w-3 h-3 bg-[#5B6BFF] rounded-full border-2 border-white shadow-md -translate-x-1/2 absolute" />
+          <div className="w-3.5 h-3.5 bg-white rounded-full border-2 border-[#5B6BFF] shadow-md group-hover:scale-110 transition-transform" />
         </motion.div>
       </div>
 

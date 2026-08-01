@@ -84,32 +84,24 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
         whileTap={{ scale: 0.98 }}
         animate={{ scale: isZoomed ? 1.15 : 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="relative w-[55vw] max-w-[320px] min-w-[220px] aspect-square rounded-[18px] overflow-hidden shadow-2xl bg-[#0A113A] border border-[#16244F] group cursor-pointer"
+        className="relative w-[50vw] max-w-[280px] sm:max-w-[320px] max-h-[32vh] aspect-square rounded-xl overflow-hidden shadow-2xl bg-[#0A113A] group cursor-pointer"
       >
-        {/* Continuous rotating disc effect when playing */}
-        <motion.div
-          animate={{ rotate: isPlaying ? 360 : 0 }}
-          transition={
-            isPlaying
-              ? { repeat: Infinity, duration: 18, ease: "linear" }
-              : { duration: 0.5, ease: "easeOut" }
-          }
-          className="w-full h-full relative flex items-center justify-center"
-        >
+        {/* Static artwork container (no rotation) */}
+        <div className="w-full h-full relative flex items-center justify-center">
           <img
             src={coverUrl}
             alt={track?.title || "Track Artwork"}
-            className="w-full h-full object-cover rounded-[18px]"
+            className="w-full h-full object-cover rounded-xl"
             onError={(e) => {
               (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
             }}
           />
 
           {/* Subdued vinyl center overlay for disc aesthetic */}
-          <div className="absolute w-12 h-12 rounded-full bg-[#050A24]/40 backdrop-blur-sm border border-white/20 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute w-12 h-12 rounded-full bg-[#050A24]/40 backdrop-blur-sm flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
             <Disc3 className="w-6 h-6 text-[#F2F4F8]" />
           </div>
-        </motion.div>
+        </div>
 
         {/* Double-tap burst heart overlay */}
         <AnimatePresence>
@@ -135,7 +127,7 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
             e.stopPropagation();
             setIsZoomed(!isZoomed);
           }}
-          className="absolute bottom-2.5 right-2.5 px-2 py-1 bg-[#0A113A]/80 backdrop-blur-md rounded-[8px] border border-[#16244F] text-[10px] font-bold text-[#F2F4F8] opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute bottom-2.5 right-2.5 px-2 py-1 bg-[#0A113A]/80 backdrop-blur-md rounded-[8px] text-[10px] font-bold text-[#F2F4F8] opacity-0 group-hover:opacity-100 transition-opacity"
         >
           {isZoomed ? "Reset" : "Zoom"}
         </button>

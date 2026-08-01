@@ -75,8 +75,8 @@ export interface TokenGating {
   enabled: boolean;
   tokenAddress?: string; // Address of the required token or NFT collection
   minAmount?: string; // Minimum amount required (e.g. "100" for tokens, "1" for NFT)
-  tokenSymbol?: string; // Display symbol (e.g. "JAM", "TON")
-  tokenType: 'jetton' | 'nft'; // TON specific types
+  tokenSymbol?: string; // Display symbol (e.g. "JAM", "GRAM")
+  tokenType: 'jetton' | 'nft'; // GRAM specific types
 }
 
 export class Track {
@@ -531,7 +531,7 @@ export interface User {
 
 export interface Royalty {
   artistId: string;
-  totalEarned: string; // Total lifetime earnings in TON
+  totalEarned: string; // Total lifetime earnings in GRAM
   pendingWithdrawal: string; // Earnings available for withdrawal
   lastWithdrawal?: string; // Last withdrawal timestamp
 }
@@ -539,7 +539,7 @@ export interface Royalty {
 export interface Transaction {
   id: string;
   type: 'stream' | 'nft_sale' | 'nft_mint' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards' | 'sponsorship' | 'deposit' | 'tip' | 'fan_club_join';
-  amount: number; // Total amount in TON or JAM
+  amount: number; // Total amount in GRAM or JAM
   platformFee: number; // Total platform fee
   artistShare: number; // Amount sent to artist
   recipientAddress: string;
@@ -565,8 +565,8 @@ export interface SponsoredContent {
   targetId?: string; // trackId or nftId
   link?: string;
   status: 'pending' | 'approved' | 'rejected' | 'expired';
-  paymentAmount: string; // in TON or JAM
-  paymentCurrency: 'TON' | 'JAM';
+  paymentAmount: string; // in GRAM or JAM
+  paymentCurrency: 'GRAM' | 'JAM';
   durationDays: number;
   startDate?: string;
   endDate?: string;
@@ -576,7 +576,7 @@ export interface SponsoredContent {
 export interface WithdrawalRequest {
   id: string;
   amount: string;
-  currency: 'TON' | 'JAM';
+  currency: 'GRAM' | 'JAM';
   recipientAddress: string;
   status: 'pending' | 'completed' | 'failed';
   timestamp: string;
@@ -628,7 +628,7 @@ export interface Proposal {
 }
 
 export interface TreasuryStats {
-  balance: number; // Current balance in TON
+  balance: number; // Current balance in GRAM
   totalFeesCollected: number;
   totalGrantsAllocated: number;
   updatedAt: string;

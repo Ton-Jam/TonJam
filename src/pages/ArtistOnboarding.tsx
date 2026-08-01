@@ -382,7 +382,7 @@ const ArtistOnboarding: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Listing Price (TON)</label>
+                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Listing Price (GRAM)</label>
                   <input type="number" value={mintData.price} onChange={e => setMintData({...mintData, price: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[4px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" required />
                 </div>
               <div className="space-y-4">
@@ -422,7 +422,7 @@ const ArtistOnboarding: React.FC = () => {
                 <Info className="h-4 w-4 text-blue-400 mt-4" />
                 <div>
                   <h4 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">Smart Contract Deployment</h4>
-                  <p className="text-[10px] text-muted-foreground/80 leading-relaxed"> By confirming, you will deploy a new smart contract for this asset on the TON blockchain. This action is irreversible and requires a small gas fee (simulated). </p>
+                  <p className="text-[10px] text-muted-foreground/80 leading-relaxed"> By confirming, you will deploy a new smart contract for this asset on the GRAM blockchain. This action is irreversible and requires a small gas fee (simulated). </p>
                 </div>
               </div>
               <div className="pt-4 flex flex-col md:flex-row gap-4">

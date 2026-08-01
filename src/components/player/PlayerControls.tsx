@@ -120,7 +120,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           aria-label="Toggle Shuffle"
           className={`p-2.5 rounded-[12px] transition-all duration-200 ${
             isShuffle
-              ? "text-[#5B6BFF] bg-[#5B6BFF]/15 border border-[#5B6BFF]/30"
+              ? "text-[#5B6BFF] bg-[#5B6BFF]/15"
               : "text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#0A113A]"
           }`}
         >
@@ -182,7 +182,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           aria-label="Toggle Repeat Mode"
           className={`p-2.5 rounded-[12px] transition-all duration-200 ${
             repeatMode !== "off"
-              ? "text-[#5B6BFF] bg-[#5B6BFF]/15 border border-[#5B6BFF]/30"
+              ? "text-[#5B6BFF] bg-[#5B6BFF]/15"
               : "text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#0A113A]"
           }`}
         >
@@ -195,7 +195,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       </div>
 
       {/* Auxiliary Controls Bar (Speed, Sleep Timer, EQ, Volume) */}
-      <div className="w-full flex items-center justify-between px-2 pt-2 border-t border-[#16244F]/40 text-xs text-[#9AA0AE]">
+      <div className="w-full flex items-center justify-between px-2 pt-2 text-xs text-[#9AA0AE]">
         {/* Left: Speed & Sleep Timer Buttons */}
         <div className="flex items-center gap-2 relative">
           {/* Playback Speed Menu */}
@@ -206,10 +206,10 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                 setShowSleepMenu(false);
                 setShowDeviceMenu(false);
               }}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-[12px] text-[11px] font-bold transition-all ${
                 speed !== 1.0
-                  ? "border-[#5B6BFF] text-[#5B6BFF] bg-[#5B6BFF]/10"
-                  : "border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
+                  ? "text-[#5B6BFF] bg-[#5B6BFF]/10"
+                  : "text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
               }`}
             >
               <Gauge className="w-3.5 h-3.5" />
@@ -217,7 +217,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             </button>
 
             {showSpeedMenu && (
-              <div className="absolute left-0 bottom-10 w-32 bg-[#0A113A] border border-[#16244F] rounded-[12px] p-1.5 shadow-xl z-50 flex flex-col gap-1">
+              <div className="absolute left-0 bottom-10 w-32 bg-[#0A113A] rounded-[12px] p-1.5 shadow-xl z-50 flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#9AA0AE] px-2 py-1 uppercase">Speed</span>
                 {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((s) => (
                   <button
