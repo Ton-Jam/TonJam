@@ -13,56 +13,75 @@ import { collection, getDocs, limit, query } from 'firebase/firestore';
 import { seedDatabase } from '@/services/seedService';
 import { resolveEndedAuctions } from '@/services/auctionService';
 
-// Lazy imports
-const Home = lazy(() => import('@/pages/Home'));
-const Discover = lazy(() => import('@/pages/Discover'));
-const JamSpace = lazy(() => import('@/pages/JamSpace'));
-const Marketplace = lazy(() => import('@/pages/Marketplace'));
-const Profile = lazy(() => import('@/pages/Profile'));
-const EditProfile = lazy(() => import('@/pages/EditProfile'));
-const UserProfile = lazy(() => import('@/pages/UserProfile'));
-const ArtistProfile = lazy(() => import('@/pages/ArtistProfile'));
-const ArtistDashboard = lazy(() => import('@/pages/ArtistDashboard'));
-const Library = lazy(() => import('@/pages/Library'));
-const Settings = lazy(() => import('@/pages/Settings'));
-const Tasks = lazy(() => import('@/pages/Tasks'));
-const NFTDetail = lazy(() => import('@/pages/NFTDetail'));
-const ExploreList = lazy(() => import('@/pages/ExploreList'));
-const Notifications = lazy(() => import('@/pages/Notifications'));
-const UploadTrack = lazy(() => import('@/pages/UploadTrack'));
-const MintNFT = lazy(() => import('@/pages/MintNFT'));
-const MyNFTs = lazy(() => import('@/pages/MyNFTs'));
-const FavoriteTracks = lazy(() => import('@/pages/FavoriteTracks'));
-const FavoriteArtists = lazy(() => import('@/pages/FavoriteArtists'));
-const ArtistMinting = lazy(() => import('@/pages/ArtistMinting'));
-const TrendingNFTs = lazy(() => import('@/pages/TrendingNFTs'));
-const AuctionScreen = lazy(() => import('@/pages/AuctionScreen'));
-const GenesisScreen = lazy(() => import('@/pages/GenesisScreen'));
-const LimitedNFTs = lazy(() => import('@/pages/LimitedNFTs'));
-const HorizontalCanvas = lazy(() => import('@/pages/HorizontalCanvas'));
-const StatsPreview = lazy(() => import('@/pages/StatsPreview'));
-const PlaylistDetail = lazy(() => import('@/pages/PlaylistDetail'));
-const PostDetail = lazy(() => import('@/pages/PostDetail'));
-const SocialFeedPage = lazy(() => import('@/pages/SocialFeedPage'));
-const TrackDetail = lazy(() => import('@/pages/TrackDetail'));
-const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
-const About = lazy(() => import('@/pages/About'));
-const Wallet = lazy(() => import('@/pages/Wallet'));
-const Login = lazy(() => import('@/pages/Login'));
-const Staking = lazy(() => import('@/pages/Staking'));
-const DJKrupy = lazy(() => import('@/pages/DJKrupy'));
-const FollowersFollowing = lazy(() => import('@/pages/FollowersFollowing'));
-const AlbumDetails = lazy(() => import('@/pages/AlbumDetails'));
-const Governance = lazy(() => import('@/pages/Governance'));
-const HomeFeed = lazy(() => import('@/pages/Home'));
-const UIKitShowcase = lazy(() => import('@/pages/UIKitShowcase'));
-const Dashboard = lazy(() => import('@/pages/Dashboard'));
-const ArtistOnboarding = lazy(() => import('@/pages/ArtistOnboarding'));
-const ArtistAnalytics = lazy(() => import('@/pages/ArtistAnalytics'));
-const ArtistPortfolio = lazy(() => import('@/pages/ArtistPortfolio'));
-const NFTLaunchpad = lazy(() => import('@/pages/NFTLaunchpad'));
+// Resilient lazy import helper for dynamic module loading with automatic retry & reload recovery
+const lazyWithRetry = (componentImport: () => Promise<any>) =>
+  lazy(async () => {
+    const pageHasAlreadyBeenRefreshed = JSON.parse(
+      window.sessionStorage.getItem('page_has_been_refreshed') || 'false'
+    );
+    try {
+      const component = await componentImport();
+      window.sessionStorage.setItem('page_has_been_refreshed', 'false');
+      return component;
+    } catch (error) {
+      if (!pageHasAlreadyBeenRefreshed) {
+        window.sessionStorage.setItem('page_has_been_refreshed', 'true');
+        window.location.reload();
+      }
+      throw error;
+    }
+  });
 
-const Referrals = lazy(() => import('@/pages/Referrals'));
+// Lazy imports
+const Home = lazyWithRetry(() => import('@/pages/Home'));
+const Discover = lazyWithRetry(() => import('@/pages/Discover'));
+const JamSpace = lazyWithRetry(() => import('@/pages/JamSpace'));
+const Marketplace = lazyWithRetry(() => import('@/pages/Marketplace'));
+const Profile = lazyWithRetry(() => import('@/pages/Profile'));
+const EditProfile = lazyWithRetry(() => import('@/pages/EditProfile'));
+const UserProfile = lazyWithRetry(() => import('@/pages/UserProfile'));
+const ArtistProfile = lazyWithRetry(() => import('@/pages/ArtistProfile'));
+const ArtistDashboard = lazyWithRetry(() => import('@/pages/ArtistDashboard'));
+const Library = lazyWithRetry(() => import('@/pages/Library'));
+const Settings = lazyWithRetry(() => import('@/pages/Settings'));
+const Tasks = lazyWithRetry(() => import('@/pages/Tasks'));
+const NFTDetail = lazyWithRetry(() => import('@/pages/NFTDetail'));
+const ExploreList = lazyWithRetry(() => import('@/pages/ExploreList'));
+const Notifications = lazyWithRetry(() => import('@/pages/Notifications'));
+const UploadTrack = lazyWithRetry(() => import('@/pages/UploadTrack'));
+const MintNFT = lazyWithRetry(() => import('@/pages/MintNFT'));
+const MyNFTs = lazyWithRetry(() => import('@/pages/MyNFTs'));
+const FavoriteTracks = lazyWithRetry(() => import('@/pages/FavoriteTracks'));
+const FavoriteArtists = lazyWithRetry(() => import('@/pages/FavoriteArtists'));
+const ArtistMinting = lazyWithRetry(() => import('@/pages/ArtistMinting'));
+const TrendingNFTs = lazyWithRetry(() => import('@/pages/TrendingNFTs'));
+const AuctionScreen = lazyWithRetry(() => import('@/pages/AuctionScreen'));
+const GenesisScreen = lazyWithRetry(() => import('@/pages/GenesisScreen'));
+const LimitedNFTs = lazyWithRetry(() => import('@/pages/LimitedNFTs'));
+const HorizontalCanvas = lazyWithRetry(() => import('@/pages/HorizontalCanvas'));
+const StatsPreview = lazyWithRetry(() => import('@/pages/StatsPreview'));
+const PlaylistDetail = lazyWithRetry(() => import('@/pages/PlaylistDetail'));
+const PostDetail = lazyWithRetry(() => import('@/pages/PostDetail'));
+const SocialFeedPage = lazyWithRetry(() => import('@/pages/SocialFeedPage'));
+const TrackDetail = lazyWithRetry(() => import('@/pages/TrackDetail'));
+const AdminDashboard = lazyWithRetry(() => import('@/pages/AdminDashboard'));
+const About = lazyWithRetry(() => import('@/pages/About'));
+const Wallet = lazyWithRetry(() => import('@/pages/Wallet'));
+const Login = lazyWithRetry(() => import('@/pages/Login'));
+const Staking = lazyWithRetry(() => import('@/pages/Staking'));
+const DJKrupy = lazyWithRetry(() => import('@/pages/DJKrupy'));
+const FollowersFollowing = lazyWithRetry(() => import('@/pages/FollowersFollowing'));
+const AlbumDetails = lazyWithRetry(() => import('@/pages/AlbumDetails'));
+const Governance = lazyWithRetry(() => import('@/pages/Governance'));
+const HomeFeed = lazyWithRetry(() => import('@/pages/Home'));
+const UIKitShowcase = lazyWithRetry(() => import('@/pages/UIKitShowcase'));
+const Dashboard = lazyWithRetry(() => import('@/pages/Dashboard'));
+const ArtistOnboarding = lazyWithRetry(() => import('@/pages/ArtistOnboarding'));
+const ArtistAnalytics = lazyWithRetry(() => import('@/pages/ArtistAnalytics'));
+const ArtistPortfolio = lazyWithRetry(() => import('@/pages/ArtistPortfolio'));
+const NFTLaunchpad = lazyWithRetry(() => import('@/pages/NFTLaunchpad'));
+
+const Referrals = lazyWithRetry(() => import('@/pages/Referrals'));
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div

@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   Twitter, Instagram, Globe, Send, Disc, Sparkles, MapPin, 
-  Users, Music, Gem, BadgeCheck, Check, ArrowRight, Share2 
+  Users, Music, Gem, BadgeCheck, Check, ArrowRight, Share2,
+  Play, Pause, Headphones, Clock, Radio
 } from 'lucide-react';
 import { useArtist } from '@/contexts/ArtistContext';
-import { Artist, NFTItem } from '@/types';
+import { useAudio } from '@/contexts/AudioContext';
+import { Artist, NFTItem, Track } from '@/types';
 import NFTCard from '@/components/NFTCard';
 import { toast } from 'sonner';
 import { ArtistProfileSkeleton } from '@/pages/Library/components/Skeletons';
@@ -20,12 +22,14 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
   onArtistChange 
 }) => {
   const { artists, getArtistById, getArtistNFTs } = useArtist();
+  const { allTracks = [], playTrack, togglePlay, currentTrack, isPlaying } = useAudio();
   
   // Use either the provided artistId, or default to the first artist's ID
   const activeId = artistId || (artists.length > 0 ? artists[0].uid : 'dj-krupy');
   
   const [currentArtist, setCurrentArtist] = useState<Artist | null>(null);
   const [artistNfts, setArtistNfts] = useState<NFTItem[]>([]);
+  const [discographyTracks, setDiscographyTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [followedArtists, setFollowedArtists] = useState<string[]>(() => {
@@ -68,11 +72,78 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
         setCurrentArtist(artists[0]);
         setArtistNfts(getArtistNFTs(artists[0].uid));
       }
+
+      // Filter or generate discography tracks for this artist
+      const artistName = art?.name || artists[0]?.name || '';
+      const matchedTracks = allTracks.filter(
+        t => t.artistId === activeId || 
+             (artistName && t.artist?.toLowerCase() === artistName.toLowerCase())
+      );
+
+      if (matchedTracks.length > 0) {
+        setDiscographyTracks(matchedTracks);
+      } else {
+        // High quality fallback discography items if no tracks in global context match
+        const fallbackDiscography: Track[] = [
+          {
+            id: `disc-${activeId}-1`,
+            songId: `disc-${activeId}-1`,
+            title: `${art?.name || 'Artist'} - Genesis Master Anthem`,
+            artist: art?.name || 'Verified Artist',
+            artistId: activeId,
+            coverUrl: art?.avatarUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600',
+            audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+            duration: 215,
+            genre: art?.genre || 'Electronic Synth',
+            playCount: 18450,
+            streams: 18450,
+            likes: 1240,
+            isNFT: true,
+            nftPrice: '15',
+            createdAt: Date.now()
+          },
+          {
+            id: `disc-${activeId}-2`,
+            songId: `disc-${activeId}-2`,
+            title: `${art?.name || 'Artist'} - Cyber Resonance Wave`,
+            artist: art?.name || 'Verified Artist',
+            artistId: activeId,
+            coverUrl: art?.bannerUrl || art?.avatarUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600',
+            audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+            duration: 198,
+            genre: art?.genre || 'Ambient Future',
+            playCount: 12300,
+            streams: 12300,
+            likes: 980,
+            isNFT: true,
+            nftPrice: '20',
+            createdAt: Date.now() - 86400000
+          },
+          {
+            id: `disc-${activeId}-3`,
+            songId: `disc-${activeId}-3`,
+            title: `${art?.name || 'Artist'} - TON Decentralized Pulse`,
+            artist: art?.name || 'Verified Artist',
+            artistId: activeId,
+            coverUrl: art?.avatarUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600',
+            audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+            duration: 240,
+            genre: art?.genre || 'Deep House',
+            playCount: 9600,
+            streams: 9600,
+            likes: 710,
+            isNFT: false,
+            createdAt: Date.now() - 172800000
+          }
+        ];
+        setDiscographyTracks(fallbackDiscography);
+      }
+
       setIsLoading(false);
-    }, 450); // Small realistic delay for smooth transition
+    }, 450);
 
     return () => clearTimeout(timer);
-  }, [activeId, artists, getArtistById, getArtistNFTs]);
+  }, [activeId, artists, getArtistById, getArtistNFTs, allTracks]);
 
   const getSocialIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
@@ -102,13 +173,27 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
     }
   };
 
+  const handlePlayTrack = (track: Track) => {
+    if (currentTrack?.id === track.id) {
+      togglePlay();
+    } else {
+      playTrack(track);
+    }
+  };
+
+  const formatDuration = (secs: number = 0) => {
+    const mins = Math.floor(secs / 60);
+    const remainingSecs = Math.floor(secs % 60);
+    return `${mins}:${remainingSecs < 10 ? '0' : ''}${remainingSecs}`;
+  };
+
   if (isLoading) {
     return <ArtistProfileSkeleton />;
   }
 
   if (!currentArtist) {
     return (
-      <div className="w-full py-16 text-center bg-[#0a113a]/20 rounded-2xl p-8 border border-white/5">
+      <div className="w-full py-16 text-center bg-[#0a113a]/20 rounded-2xl p-8">
         <p className="text-sm text-slate-400">No artist data found.</p>
       </div>
     );
@@ -126,17 +211,17 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#0e163d]/50">
         <div>
           <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest block">
-            AISTUDIO REUSABLE COMPONENT
+            ARTIST PROFILE HUB
           </span>
           <span className="text-xs text-slate-400 mt-0.5 block">
-            Select an active network artist to view their bio, links, and TON music NFTs.
+            Select an artist node to view their discography, biography, follower network and music NFTs.
           </span>
         </div>
         <div className="flex items-center gap-2">
           <select 
             value={activeId}
             onChange={(e) => onArtistChange?.(e.target.value)}
-            className="bg-[#050A24] border border-white/10 hover:border-white/25 text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer font-bold"
+            className="bg-[#050A24] text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer font-bold"
           >
             {artists.map(a => (
               <option key={a.uid} value={a.uid}>{a.name}</option>
@@ -145,7 +230,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
         </div>
       </div>
 
-      {/* Profile Card */}
+      {/* Main Profile Card */}
       <div className="bg-[#121833]/30 rounded-2xl overflow-hidden">
         
         {/* Banner Section */}
@@ -197,18 +282,18 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
                   </span>
                 )}
                 {currentArtist.genre && (
-                  <span className="inline-block px-2.5 py-0.5 text-[9px] font-bold bg-white/5 border border-white/10 rounded-full text-slate-300 uppercase tracking-wider">
+                  <span className="inline-block px-2.5 py-0.5 text-[9px] font-bold bg-white/5 rounded-full text-slate-300 uppercase tracking-wider">
                     {currentArtist.genre}
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Quick Metrics & Actions */}
+            {/* Quick Metrics & Follow Action */}
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 self-center md:self-end">
-              <div className="flex items-center gap-4 bg-black/20 px-4 py-2 rounded-xl">
+              <div className="flex items-center gap-4 bg-black/30 px-4 py-2 rounded-xl">
                 <div className="text-center">
-                  <span className="text-[9px] text-slate-500 uppercase font-black tracking-wider block">Followers</span>
+                  <span className="text-[9px] text-slate-400 uppercase font-black tracking-wider block">Followers</span>
                   <span className="text-sm font-mono font-bold text-white">
                     {((currentArtist.followers || 0) + (isFollowing ? 1 : 0)).toLocaleString()}
                   </span>
@@ -217,7 +302,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
                   <>
                     <div className="w-[1px] h-6 bg-white/10" />
                     <div className="text-center">
-                      <span className="text-[9px] text-slate-500 uppercase font-black tracking-wider block">Monthly</span>
+                      <span className="text-[9px] text-slate-400 uppercase font-black tracking-wider block">Monthly Listeners</span>
                       <span className="text-sm font-mono font-bold text-white">
                         {currentArtist.monthlyListeners?.toLocaleString() || '0'}
                       </span>
@@ -226,6 +311,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
                 )}
               </div>
 
+              {/* Follow Action Button */}
               <button 
                 onClick={toggleFollow}
                 className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 cursor-pointer active:scale-95 text-white ${
@@ -249,7 +335,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
 
               <button 
                 onClick={handleShare}
-                className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/10 text-slate-400 hover:text-white cursor-pointer"
+                className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-white cursor-pointer"
                 title="Copy profile link"
               >
                 <Share2 className="w-4 h-4" />
@@ -258,22 +344,22 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
 
           </div>
 
-          {/* Bio & Details Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 pt-8 border-t border-white/5">
+          {/* Biography & Details Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 pt-6 bg-white/5 p-5 rounded-2xl">
             
-            {/* Left Col: Biography */}
+            {/* Biography */}
             <div className="lg:col-span-2 space-y-3">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+              <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
                 Biography
               </h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
-                {currentArtist.bio || `${currentArtist.name} is a pioneer on the decentralized Web3 music horizon, creating high-fidelity audio artifacts and custom soundscapes minted directly on the TON Blockchain.`}
+                {currentArtist.bio || `${currentArtist.name} is a pioneer on the decentralized Web3 music horizon, creating high-fidelity audio artifacts and custom soundscapes minted directly on the GRAM Blockchain.`}
               </p>
             </div>
 
-            {/* Right Col: Social & Meta */}
+            {/* Social Links & Location */}
             <div className="space-y-4">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+              <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
                 Social Signals
               </h3>
               
@@ -287,7 +373,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
                       href={url as string}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 text-slate-300 hover:text-blue-400 text-[10px] font-bold rounded-lg uppercase tracking-wider transition-all"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-blue-500/20 text-slate-300 hover:text-blue-400 text-[10px] font-bold rounded-lg uppercase tracking-wider transition-all"
                     >
                       <Icon className="w-3.5 h-3.5" />
                       <span>{platform}</span>
@@ -315,6 +401,100 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
 
       </div>
 
+      {/* Discography Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+              <Disc className="w-4 h-4 text-cyan-400" />
+              Artist Discography
+            </h3>
+            <p className="text-[10px] text-slate-400 font-bold tracking-wider mt-0.5">
+              Official catalog, master audio releases and original soundscapes
+            </p>
+          </div>
+          <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full font-bold">
+            {discographyTracks.length} Releases
+          </span>
+        </div>
+
+        {/* Discography Track List */}
+        <div className="space-y-2">
+          {discographyTracks.map((track, idx) => {
+            const isCurrentPlaying = currentTrack?.id === track.id && isPlaying;
+
+            return (
+              <div
+                key={track.id}
+                onClick={() => handlePlayTrack(track)}
+                className={`group flex items-center justify-between p-3 rounded-xl bg-[#0e163d]/40 hover:bg-[#121c4e] transition-all cursor-pointer ${
+                  isCurrentPlaying ? 'bg-[#121c4e] ring-1 ring-cyan-500/40' : ''
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-xs font-mono font-bold text-slate-500 w-5 text-center shrink-0">
+                    {idx + 1}
+                  </span>
+
+                  <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 bg-slate-900">
+                    <img 
+                      src={track.coverUrl} 
+                      alt={track.title} 
+                      className="w-full h-full object-cover" 
+                    />
+                    <div className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${
+                      isCurrentPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                    }`}>
+                      {isCurrentPlaying ? (
+                        <Pause className="w-4 h-4 text-cyan-400 fill-current" />
+                      ) : (
+                        <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="min-w-0">
+                    <h4 className={`text-xs font-black truncate ${isCurrentPlaying ? 'text-cyan-400' : 'text-white'}`}>
+                      {track.title}
+                    </h4>
+                    <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
+                      <span>{track.genre || 'Electronic'}</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1 font-mono">
+                        <Headphones className="w-2.5 h-2.5 text-slate-500" />
+                        {(track.streams || track.playCount || 0).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 shrink-0 text-right">
+                  {track.isNFT && (
+                    <span className="hidden sm:inline-flex items-center gap-1 text-[9px] font-mono font-black text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-md">
+                      <Gem className="w-2.5 h-2.5" />
+                      NFT {track.nftPrice} GRAM
+                    </span>
+                  )}
+                  <span className="text-xs font-mono text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-slate-500 hidden sm:inline" />
+                    {formatDuration(track.duration)}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+
+          {discographyTracks.length === 0 && (
+            <div className="py-12 text-center bg-[#121833]/10 rounded-2xl">
+              <Music className="w-6 h-6 text-slate-500 mx-auto mb-2" />
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                No discography releases uploaded yet
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Listed Music NFTs Section */}
       <div className="space-y-4">
         <div>
@@ -322,8 +502,8 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
             <Gem className="w-4 h-4 text-purple-400" />
             Listed Music NFTs
           </h3>
-          <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mt-0.5">
-            Decentralized audio collectibles and exclusive master rights listed on the TON Blockchain
+          <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">
+            Decentralized audio collectibles and exclusive master rights listed on the GRAM Blockchain
           </p>
         </div>
 
@@ -336,7 +516,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
           ))}
 
           {artistNfts.length === 0 && (
-            <div className="col-span-full py-16 text-center bg-[#121833]/10 border border-white/5 rounded-2xl">
+            <div className="col-span-full py-16 text-center bg-[#121833]/10 rounded-2xl">
               <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Music className="w-5 h-5 text-slate-500" />
               </div>
@@ -354,3 +534,4 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
     </motion.div>
   );
 };
+

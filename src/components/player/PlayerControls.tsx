@@ -150,10 +150,6 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           aria-label={isPlaying ? "Pause" : "Play"}
           className="relative w-[64px] h-[64px] rounded-full bg-[#5B6BFF] text-[#F2F4F8] flex items-center justify-center shadow-lg shadow-[#5B6BFF]/30 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40"
         >
-          {/* Animated ripple ring when playing */}
-          {isPlaying && (
-            <span className="absolute inset-0 rounded-full border-2 border-[#5B6BFF] animate-ping opacity-40 pointer-events-none" />
-          )}
           {isPlaying ? (
             <Pause className="w-7 h-7 fill-current" />
           ) : (

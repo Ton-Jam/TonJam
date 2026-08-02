@@ -168,10 +168,10 @@ export const PlayerScreen: React.FC = () => {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed inset-0 z-50 bg-[#050A24] text-[#F2F4F8] font-sans overflow-y-auto scrollbar-none select-none"
+        className="fixed inset-0 z-50 bg-[#050A24] text-[#F2F4F8] font-sans overflow-y-auto overscroll-contain touch-pan-y scrollbar-thin scrollbar-thumb-[#16244F]"
       >
         {/* Scrollable Core Player Body including Header */}
-        <div className="min-h-dvh max-w-md mx-auto w-full px-4 pt-2 pb-12 flex flex-col items-center justify-between gap-3">
+        <div className="min-h-full max-w-md mx-auto w-full px-4 pt-3 pb-28 flex flex-col items-center justify-start gap-4 sm:gap-5">
           <PlayerHeader
             onClose={() => setFullPlayerOpen(false)}
             onMoreClick={() => setOptionsTrack(currentTrack)}
@@ -402,7 +402,7 @@ export const PlayerScreen: React.FC = () => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="w-full max-h-[260px] overflow-hidden"
+                className="w-full my-2 max-h-[480px] overflow-y-auto rounded-2xl scrollbar-thin scrollbar-thumb-[#16244F]"
               >
                 {activeTab === "lyrics" && (
                   <LyricsSheet

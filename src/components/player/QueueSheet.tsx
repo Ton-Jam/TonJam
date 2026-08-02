@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence, Reorder } from "motion/react";
+import { useNavigate } from "react-router-dom";
 import {
   ListMusic,
   Trash2,
@@ -12,7 +13,9 @@ import {
   GripVertical,
   ArrowRightLeft,
   Heart,
-  Plus
+  Plus,
+  Flame,
+  ArrowRight
 } from "lucide-react";
 import { Track } from "@/types";
 import { getPlaceholderImage } from "@/lib/utils";
@@ -176,10 +179,21 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
   onClearQueue,
   onClose
 }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"queue" | "favorites" | "history">("queue");
   const [autoplay, setAutoplay] = useState<boolean>(true);
 
-  const { likedTrackIds = [], allTracks = [], addToQueue, toggleLikeTrack, playAll } = useAudio();
+  const { likedTrackIds = [], allTracks = [], addToQueue, toggleLikeTrack, playAll, setFullPlayerOpen } = useAudio();
+
+  const handleReturnToTrending = () => {
+    if (setFullPlayerOpen) {
+      setFullPlayerOpen(false);
+    }
+    if (onClose) {
+      onClose();
+    }
+    navigate("/discover");
+  };
 
   const favoriteTracks = useMemo(() => {
     const pool = [...(allTracks || []), ...MOCK_TRACKS];
@@ -379,13 +393,37 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
             </div>
 
             {favoriteTracks.length === 0 ? (
-              <div className="text-center py-10 px-4 text-[#9AA0AE] text-xs bg-[#0A113A]/30 rounded-[12px] border border-[#16244F] border-dashed space-y-2">
-                <Heart className="w-8 h-8 text-[#9AA0AE]/40 mx-auto" />
-                <p className="font-semibold text-[#F2F4F8]">No favorites yet</p>
-                <p className="text-[11px] text-[#9AA0AE]">
-                  Click the heart icon on any track across the app to save it to your session favorites.
-                </p>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-10 px-5 bg-[#0A113A]/50 rounded-2xl border border-[#16244F] flex flex-col items-center justify-center space-y-3.5 my-2 shadow-inner"
+              >
+                <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500/20 to-purple-600/20 border border-rose-500/30 flex items-center justify-center shadow-lg">
+                  <Heart className="w-7 h-7 text-rose-400 fill-rose-500/20" />
+                  <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-500"></span>
+                  </span>
+                </div>
+
+                <div className="space-y-1 max-w-xs">
+                  <h4 className="text-xs font-black text-[#F2F4F8] uppercase tracking-wider">
+                    No Favorite Tracks Saved
+                  </h4>
+                  <p className="text-[11px] text-[#9AA0AE] leading-relaxed font-medium">
+                    Tap the heart icon on any track or audio release across TonJam to save your favorite music here for quick access.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleReturnToTrending}
+                  className="mt-1 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#5B6BFF] to-[#3B4BEA] hover:from-[#4C5CEE] hover:to-[#2B3BCA] text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-[#5B6BFF]/25 transition-all cursor-pointer active:scale-95"
+                >
+                  <Flame className="w-4 h-4 text-cyan-300 fill-cyan-300 animate-pulse" />
+                  <span>Return to Trending Feed</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </motion.div>
             ) : (
               <div className="space-y-2">
                 {favoriteTracks.map((track) => (
