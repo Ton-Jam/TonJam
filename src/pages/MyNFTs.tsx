@@ -5,6 +5,7 @@ import NFTCard from '@/components/NFTCard';
 import EmptyNFTState from '@/components/EmptyNFTState';
 import ManageNFTModal from '@/components/ManageNFTModal';
 import NFTFolderModal from '@/components/NFTFolderModal';
+import CollectionGallery from '@/components/CollectionGallery';
 import { Sparkles, Gavel, LayoutGrid, List } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -90,15 +91,11 @@ const MyNFTs: React.FC = () => {
         </div>
         <Tabs value={activeTab} className="mt-0">
           <TabsContent value="owned" className="mt-0 focus-visible:outline-none">
-            <div className="space-y-2">
-              {userNFTs && userNFTs.length > 0 ? (
-                userNFTs.map((nft) => (
-                  <div key={nft.id} className="w-full">
-                    <NFTCard nft={nft} variant="row" />
-                  </div>
-                ))
-              ) : renderEmptyState('owned')}
-            </div>
+            <CollectionGallery 
+              items={userNFTs && userNFTs.length > 0 ? userNFTs : undefined}
+              title="My Music NFT Collection"
+              subtitle="Hover over any card to trigger hover audio preview or click to stream"
+            />
           </TabsContent>
           
           <TabsContent value="bids" className="mt-0 focus-visible:outline-none">

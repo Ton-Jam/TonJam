@@ -17,7 +17,8 @@ import {
   Play, 
   Pause, 
   Award,
-  Lock
+  Lock,
+  Flame
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -30,6 +31,7 @@ import {
   BarChart, 
   Bar 
 } from 'recharts';
+import { ListenStreakIndicator } from './ListenStreakIndicator';
 
 export const UserProfileDashboard: React.FC = () => {
   const { 
@@ -154,6 +156,11 @@ export const UserProfileDashboard: React.FC = () => {
   return (
     <div className="space-y-6 text-white font-sans" id="user-web3-profile-dashboard">
       
+      {/* Listen Streak Indicator */}
+      <div id="listen-streak-section">
+        <ListenStreakIndicator />
+      </div>
+
       {/* 1. TON Network Status & Balance Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4" id="dashboard-web3-stats-grid">
         {/* Wallet Address & Status Card */}

@@ -33,6 +33,7 @@ import { uploadFile } from '@/services/storageService';
 import { BadgeSystem } from '@/components/BadgeSystem';
 import { DailyMissions } from '@/components/DailyMissions';
 import { AchievementList } from '@/components/profile/AchievementList';
+import { ListenStreakIndicator } from '@/components/profile/ListenStreakIndicator';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -335,6 +336,11 @@ const UserProfile: React.FC = () => {
             <div className="min-h-[400px]">
               {activeTab === 'overview' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {/* Listen Streak & NFT Badges */}
+                  <div id="listen-streak-section">
+                    <ListenStreakIndicator isOwnProfile={id === userProfile?.uid} />
+                  </div>
+
                   {/* My Activity (Recent Posts) */}
                   <div>
                     <div className="flex items-center justify-between mb-6">

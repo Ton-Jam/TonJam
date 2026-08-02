@@ -240,7 +240,13 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
   };
 
   return (
-    <div className="space-y-4 my-2">
+    <motion.div 
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="space-y-4 my-2"
+    >
       {/* Component Header */}
       <div className="flex items-end justify-between px-1">
         <div className="space-y-1">
@@ -301,14 +307,21 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
             No trending NFT tracks available right now.
           </div>
         ) : (
-          trendingTracks.map((item) => {
+          trendingTracks.map((item, idx) => {
             const isCurrentPlaying = currentTrack?.id === item.trackId && isPlaying;
 
             return (
               <motion.div
                 key={`trending-track-${item.id}`}
+                initial={{ opacity: 0, y: 18, scale: 0.98 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-20px" }}
+                transition={{ 
+                  duration: 0.45, 
+                  delay: Math.min(idx * 0.05, 0.35), 
+                  ease: [0.22, 1, 0.36, 1] 
+                }}
                 whileHover={{ y: -4 }}
-                transition={{ duration: 0.2 }}
                 onClick={() => navigate(`/nft/${item.id}`)}
                 className={`group relative min-w-[240px] max-w-[240px] bg-[#0c133a] hover:bg-[#10194a] rounded-2xl p-3.5 flex flex-col justify-between shrink-0 cursor-pointer transition-all duration-300 ${
                   isCurrentPlaying ? 'ring-2 ring-cyan-500/50 shadow-lg shadow-cyan-500/10' : ''
@@ -400,7 +413,7 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
           })
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

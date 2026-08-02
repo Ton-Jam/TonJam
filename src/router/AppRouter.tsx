@@ -82,6 +82,7 @@ const ArtistPortfolio = lazyWithRetry(() => import('@/pages/ArtistPortfolio'));
 const NFTLaunchpad = lazyWithRetry(() => import('@/pages/NFTLaunchpad'));
 
 const Referrals = lazyWithRetry(() => import('@/pages/Referrals'));
+const CollectionScreen = lazyWithRetry(() => import('@/pages/CollectionScreen'));
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
@@ -212,6 +213,9 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/genesis-forge" element={<PageWrapper><GenesisScreen /></PageWrapper>} />
                   <Route path="/limited-editions" element={<PageWrapper><LimitedNFTs /></PageWrapper>} />
                   <Route path="/trending-nfts" element={<PageWrapper><TrendingNFTs /></PageWrapper>} />
+                  <Route path="/collection" element={<PageWrapper><CollectionScreen /></PageWrapper>} />
+                  <Route path="/collection/:id" element={<PageWrapper><CollectionScreen /></PageWrapper>} />
+                  <Route path="/collections" element={<PageWrapper><CollectionScreen /></PageWrapper>} />
                   <Route path="/nft/:id" element={<PageWrapper><NFTDetail /></PageWrapper>} />
                   <Route path="/explore/:type" element={<PageWrapper><ExploreList /></PageWrapper>} />
                   <Route path="/profile" element={<PageWrapper><ProtectedRoute><Profile /></ProtectedRoute></PageWrapper>} />
@@ -247,6 +251,11 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/stats" element={<PageWrapper><StatsPreview /></PageWrapper>} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/user/:id/follows/:type" element={<PageWrapper><FollowersFollowing /></PageWrapper>} />
+                  <Route path="/user/:id/followers" element={<PageWrapper><FollowersFollowing /></PageWrapper>} />
+                  <Route path="/user/:id/following" element={<PageWrapper><FollowersFollowing /></PageWrapper>} />
+                  <Route path="/followers" element={<PageWrapper><FollowersFollowing /></PageWrapper>} />
+                  <Route path="/following" element={<PageWrapper><FollowersFollowing /></PageWrapper>} />
+                  <Route path="/followers-following" element={<PageWrapper><FollowersFollowing /></PageWrapper>} />
                   <Route path="/home" element={<PageWrapper><HomeFeed /></PageWrapper>} />
                   <Route path="/uikit" element={<PageWrapper><UIKitShowcase /></PageWrapper>} />
                   <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />

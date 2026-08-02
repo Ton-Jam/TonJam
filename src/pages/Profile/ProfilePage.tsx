@@ -48,6 +48,7 @@ import { PlaylistSection } from './shared/PlaylistSection';
 import { PostsSection } from './shared/PostsSection';
 import { AboutSection } from './shared/AboutSection';
 import { UserProfileDashboard } from '@/components/profile/UserProfileDashboard';
+import { ListenStreakIndicator } from '@/components/profile/ListenStreakIndicator';
 
 import { MOCK_PROFILE, ProfileData } from '@/components/profile/ProfileTypes';
 import { PageContainer } from '@/components/layout/PageContainer';
@@ -325,6 +326,11 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
               onShare={() => setShowSettings(true)}
               onOpenChat={() => toast.info('Direct Message', 'Loading secure end-to-end telegram chat tunnel...')}
             />
+
+            {/* Listen Streak Indicator */}
+            <div id="listen-streak-section">
+              <ListenStreakIndicator isOwnProfile={isOwnProfile} />
+            </div>
 
             {/* If unverified, offer option card */}
             {isOwnProfile && !profile.isArtistVerified && (

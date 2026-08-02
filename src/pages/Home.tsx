@@ -67,6 +67,9 @@ import { TopTrendingNFTsWidget } from "@/components/TopTrendingNFTsWidget";
 import TopArtistsSection from "@/components/TopArtistsSection";
 import CollectionSpotlight from "@/components/CollectionSpotlight";
 import { TonPriceChart } from "@/components/TonPriceChart";
+import { ListenStreakIndicator } from "@/components/profile/ListenStreakIndicator";
+import { TrendingTracksSection } from "@/components/search/TrendingTracksSection";
+import { CollectionGallery } from "@/components/CollectionGallery";
 
 // Dedicated Home Components
 import { HomeVibeTicker } from "@/components/home/HomeVibeTicker";
@@ -558,6 +561,9 @@ const Home: React.FC = () => {
         {/* Quick Access Grid */}
         <HomeQuickAccess />
 
+        {/* Daily Listen Streak Tracker */}
+        <ListenStreakIndicator isOwnProfile={true} />
+
         {/* ==========================================
             SECTION 14: COMMUNITY ACTIVITY FEED (Real-time Firestore Events)
             ========================================== */}
@@ -907,6 +913,22 @@ const Home: React.FC = () => {
             SECTION 6.1: COLLECTION SPOTLIGHT
             ========================================== */}
         <CollectionSpotlight />
+
+        {/* ==========================================
+            SECTION: TRENDING NFT TRACKS
+            ========================================== */}
+        <TrendingTracksSection 
+          title="Trending NFT Audio Artifacts" 
+          subtitle="Top performing releases synced from TON blockchain" 
+        />
+
+        {/* ==========================================
+            SECTION: MUSIC NFT COLLECTION GALLERY
+            ========================================== */}
+        <CollectionGallery 
+          title="Curated Audio NFT Gallery" 
+          subtitle="Discover verified music NFTs, master stems and digital collectibles" 
+        />
 
         {/* ==========================================
             SECTION 6: TRENDING ARTISTS (Ranked Leaderboard based on NFT Sales and Follower Growth)

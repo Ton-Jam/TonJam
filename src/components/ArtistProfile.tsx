@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { 
   Twitter, Instagram, Globe, Send, Disc, Sparkles, MapPin, 
   Users, Music, Gem, BadgeCheck, Check, ArrowRight, Share2,
-  Play, Pause, Headphones, Clock, Radio
+  Play, Pause, Headphones, Clock, Radio, ArrowUpDown
 } from 'lucide-react';
 import { useArtist } from '@/contexts/ArtistContext';
 import { useAudio } from '@/contexts/AudioContext';
@@ -30,7 +30,29 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
   const [currentArtist, setCurrentArtist] = useState<Artist | null>(null);
   const [artistNfts, setArtistNfts] = useState<NFTItem[]>([]);
   const [discographyTracks, setDiscographyTracks] = useState<Track[]>([]);
+  const [sortBy, setSortBy] = useState<'newest' | 'popularity' | 'price'>('newest');
   const [isLoading, setIsLoading] = useState(true);
+
+  const sortedDiscographyTracks = useMemo(() => {
+    return [...discographyTracks].sort((a, b) => {
+      if (sortBy === 'newest') {
+        const timeA = typeof a.createdAt === 'number' ? a.createdAt : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const timeB = typeof b.createdAt === 'number' ? b.createdAt : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return timeB - timeA;
+      }
+      if (sortBy === 'popularity') {
+        const popA = a.streams || a.playCount || 0;
+        const popB = b.streams || b.playCount || 0;
+        return popB - popA;
+      }
+      if (sortBy === 'price') {
+        const priceA = parseFloat(a.nftPrice || '0');
+        const priceB = parseFloat(b.nftPrice || '0');
+        return priceB - priceA;
+      }
+      return 0;
+    });
+  }, [discographyTracks, sortBy]);
 
   const [followedArtists, setFollowedArtists] = useState<string[]>(() => {
     try {
@@ -403,7 +425,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
 
       {/* Discography Section */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
               <Disc className="w-4 h-4 text-cyan-400" />
@@ -413,14 +435,31 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
               Official catalog, master audio releases and original soundscapes
             </p>
           </div>
-          <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full font-bold">
-            {discographyTracks.length} Releases
-          </span>
+
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5 bg-[#0e163d]/80 border border-white/10 rounded-xl px-2.5 py-1 text-slate-300 text-xs shadow-inner">
+              <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-[10px] font-bold text-slate-400 uppercase hidden sm:inline">Sort:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'newest' | 'popularity' | 'price')}
+                className="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer pr-1"
+              >
+                <option value="newest" className="bg-[#0e163d] text-white">Newest</option>
+                <option value="popularity" className="bg-[#0e163d] text-white">Popularity</option>
+                <option value="price" className="bg-[#0e163d] text-white">Price</option>
+              </select>
+            </div>
+
+            <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full font-bold shrink-0">
+              {sortedDiscographyTracks.length} Releases
+            </span>
+          </div>
         </div>
 
         {/* Discography Track List */}
         <div className="space-y-2">
-          {discographyTracks.map((track, idx) => {
+          {sortedDiscographyTracks.map((track, idx) => {
             const isCurrentPlaying = currentTrack?.id === track.id && isPlaying;
 
             return (

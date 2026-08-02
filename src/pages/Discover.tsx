@@ -133,33 +133,33 @@ const SUGGESTED_USERS = [
 ];
 
 const GENRES = [
-  { id: 'All', label: 'All Styles', emoji: '🎵' },
-  { id: 'Phonk', label: 'Phonk', emoji: '🚗' },
-  { id: 'Synthwave', label: 'Synthwave', emoji: '🌌' },
-  { id: 'Acoustic Cyber', label: 'Acoustic Cyber', emoji: '🎸' },
-  { id: 'Afro-TON', label: 'Afro-TON', emoji: '🥁' },
-  { id: 'Electronic', label: 'Electronic', emoji: '⚡' },
-  { id: 'Hip Hop', label: 'Hip Hop', emoji: '🎤' },
-  { id: 'Techno', label: 'Techno', emoji: '🌀' },
-  { id: 'Ambient', label: 'Ambient', emoji: '🍃' },
-  { id: 'Rock', label: 'Rock', emoji: '🔥' },
-  { id: 'Pop', label: 'Pop', emoji: '✨' },
-  { id: 'Lo-Fi', label: 'Lo-Fi', emoji: '☕' }
+  { id: 'All', label: 'All Styles' },
+  { id: 'Phonk', label: 'Phonk' },
+  { id: 'Synthwave', label: 'Synthwave' },
+  { id: 'Acoustic Cyber', label: 'Acoustic Cyber' },
+  { id: 'Afro-TON', label: 'Afro-TON' },
+  { id: 'Electronic', label: 'Electronic' },
+  { id: 'Hip Hop', label: 'Hip Hop' },
+  { id: 'Techno', label: 'Techno' },
+  { id: 'Ambient', label: 'Ambient' },
+  { id: 'Rock', label: 'Rock' },
+  { id: 'Pop', label: 'Pop' },
+  { id: 'Lo-Fi', label: 'Lo-Fi' }
 ];
 
 const MARKETPLACE_GENRES = [
-  { id: 'All', label: 'All Styles', emoji: '🎵', streams: '4.5M' },
-  { id: 'Phonk', label: 'Phonk', emoji: '🚗', streams: '1.2M' },
-  { id: 'Synthwave', label: 'Synthwave', emoji: '🌌', streams: '940K' },
-  { id: 'Acoustic Cyber', label: 'Acoustic Cyber', emoji: '🎸', streams: '780K' },
-  { id: 'Afro-TON', label: 'Afro-TON', emoji: '🥁', streams: '650K' },
-  { id: 'Electronic', label: 'Electronic', emoji: '⚡', streams: '1.5M' },
-  { id: 'Hip Hop', label: 'Hip Hop', emoji: '🎤', streams: '880K' },
-  { id: 'Techno', label: 'Techno', emoji: '🌀', streams: '520K' },
-  { id: 'Ambient', label: 'Ambient', emoji: '🍃', streams: '310K' },
-  { id: 'Rock', label: 'Rock', emoji: '🔥', streams: '430K' },
-  { id: 'Pop', label: 'Pop', emoji: '✨', streams: '750K' },
-  { id: 'Lo-Fi', label: 'Lo-Fi', emoji: '☕', streams: '290K' }
+  { id: 'All', label: 'All Styles', streams: '4.5M' },
+  { id: 'Phonk', label: 'Phonk', streams: '1.2M' },
+  { id: 'Synthwave', label: 'Synthwave', streams: '940K' },
+  { id: 'Acoustic Cyber', label: 'Acoustic Cyber', streams: '780K' },
+  { id: 'Afro-TON', label: 'Afro-TON', streams: '650K' },
+  { id: 'Electronic', label: 'Electronic', streams: '1.5M' },
+  { id: 'Hip Hop', label: 'Hip Hop', streams: '880K' },
+  { id: 'Techno', label: 'Techno', streams: '520K' },
+  { id: 'Ambient', label: 'Ambient', streams: '310K' },
+  { id: 'Rock', label: 'Rock', streams: '430K' },
+  { id: 'Pop', label: 'Pop', streams: '750K' },
+  { id: 'Lo-Fi', label: 'Lo-Fi', streams: '290K' }
 ];
 
 export const Discover: React.FC = () => {
@@ -500,7 +500,6 @@ export const Discover: React.FC = () => {
                 }`}
                 style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                <span>{genre.emoji}</span>
                 <span>{genre.label}</span>
               </button>
             );
@@ -679,7 +678,6 @@ export const Discover: React.FC = () => {
                       style={{ WebkitTapHighlightColor: 'transparent' }}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs">{genre.emoji}</span>
                         <span>{genre.label}</span>
                       </div>
                       <span className={`text-[7.5px] font-mono font-medium ${isSelected ? 'text-indigo-200' : 'text-slate-500'}`}>
