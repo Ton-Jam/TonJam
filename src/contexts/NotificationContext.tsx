@@ -1,10 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { Notification, NotificationPreferences } from '@/types';
+import { Notification, NotificationPreferences, PriceAlert, NFTItem } from '@/types';
 import { notificationService } from '@/services/notificationService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudio } from '@/contexts/AudioContext';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import PriceDropNotificationModal from '@/components/PriceDropNotificationModal';
+
+export interface TriggeredPriceDrop {
+  alert: PriceAlert;
+  nft: NFTItem;
+  currentPrice: string;
+  previousPrice?: string;
+}
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -15,6 +23,14 @@ interface NotificationContextType {
   refreshNotifications: () => void;
   addNotification: (notification: Omit<Notification, 'id' | 'read' | 'timestamp'>) => void;
   requestPushPermission: () => Promise<boolean>;
+  
+  // Price Alert Features
+  priceAlerts: PriceAlert[];
+  addPriceAlert: (alert: PriceAlert) => Promise<void>;
+  removePriceAlert: (alertId: string) => Promise<void>;
+  activePriceDropModal: TriggeredPriceDrop | null;
+  closePriceDropModal: () => void;
+  simulatePriceDrop: (nftId: string, newPrice: string) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -29,7 +45,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const { user } = useAuth();
   const { userBids, allTracks, followedUserIds, allNFTs, userProfile } = useAudio();
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [priceAlerts, setPriceAlerts] = useState<any[]>([]);
+  const [priceAlerts, setPriceAlerts] = useState<PriceAlert[]>([]);
+  const [activePriceDropModal, setActivePriceDropModal] = useState<TriggeredPriceDrop | null>(null);
+  
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     userId: '',
     directAlerts: true,
@@ -56,9 +74,86 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const addNotification = (n: Omit<Notification, 'id' | 'read' | 'timestamp'>) => {
-    if (!user) return;
-    notificationService.addNotification(user.uid, n);
+    const userId = user?.uid || 'guest';
+    notificationService.addNotification(userId, n);
     refreshNotifications();
+  };
+
+  // Load local price alerts on mount
+  useEffect(() => {
+    try {
+      const storedLocalAlerts = localStorage.getItem('tonjam_price_alerts');
+      if (storedLocalAlerts) {
+        const parsedAlerts: PriceAlert[] = JSON.parse(storedLocalAlerts);
+        setPriceAlerts(parsedAlerts.filter(a => a.status === 'active'));
+      }
+    } catch (err) {
+      console.warn("Error loading local price alerts:", err);
+    }
+  }, []);
+
+  // Add Price Alert handler
+  const addPriceAlert = async (newAlert: PriceAlert) => {
+    setPriceAlerts((prev) => {
+      const updated = [newAlert, ...prev.filter(a => a.id !== newAlert.id)];
+      localStorage.setItem('tonjam_price_alerts', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Remove Price Alert handler
+  const removePriceAlert = async (alertId: string) => {
+    setPriceAlerts((prev) => {
+      const updated = prev.filter(a => a.id !== alertId);
+      localStorage.setItem('tonjam_price_alerts', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Close active price drop modal
+  const closePriceDropModal = () => {
+    setActivePriceDropModal(null);
+  };
+
+  // Simulate price drop test handler
+  const simulatePriceDrop = (nftId: string, newPrice: string) => {
+    const targetNft = allNFTs.find((n) => n.id === nftId);
+    if (!targetNft) return;
+
+    let matchingAlert = priceAlerts.find((a) => a.nftId === nftId);
+    
+    if (!matchingAlert) {
+      matchingAlert = {
+        id: `sim_alert_${Date.now()}`,
+        userId: user?.uid || 'guest',
+        nftId: targetNft.id,
+        nftTitle: targetNft.title,
+        nftImageUrl: targetNft.imageUrl,
+        targetPrice: (parseFloat(targetNft.price || '10') * 0.9).toFixed(2),
+        condition: 'below',
+        status: 'active',
+        channels: ['app'],
+        createdAt: new Date().toISOString()
+      };
+    }
+
+    const previousPrice = targetNft.price || '10';
+
+    setActivePriceDropModal({
+      alert: matchingAlert,
+      nft: targetNft,
+      currentPrice: newPrice,
+      previousPrice: previousPrice
+    });
+
+    addNotification({
+      userId: user?.uid || 'guest',
+      type: 'bid_update',
+      title: 'PRICE DROP ALERT TRIGGERED!',
+      message: `Price for "${targetNft.title}" dropped to ${newPrice} TON (Target threshold: ${matchingAlert.targetPrice} TON).`,
+      link: `/nft/${targetNft.id}`,
+      metadata: { nftId: targetNft.id, type: 'price_alert', price: newPrice }
+    });
   };
 
   useEffect(() => {
@@ -103,23 +198,33 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     );
 
     const unsubscribe = onSnapshot(alertsQuery, (snapshot: any) => {
-      const alerts: any[] = [];
+      const dbAlerts: PriceAlert[] = [];
       snapshot.forEach((doc: any) => {
-        alerts.push(doc.data());
+        dbAlerts.push(doc.data());
       });
-      setPriceAlerts(alerts);
+
+      if (dbAlerts.length > 0) {
+        setPriceAlerts((prev) => {
+          const merged = [...dbAlerts];
+          prev.forEach((local) => {
+            if (!merged.some((d) => d.id === local.id)) {
+              merged.push(local);
+            }
+          });
+          return merged;
+        });
+      }
     }, (error: any) => {
-      console.warn("Error listening to price alerts:", error);
+      console.warn("Error listening to price alerts from Firestore:", error);
     });
 
     return () => unsubscribe();
   }, [user]);
 
-  // background checker context sync
+  // Background price alert monitor and context sync
   useEffect(() => {
     if (!user || !user.uid) return;
 
-    // Suppress spamming existing historically seeded tracks at initial load
     if (!isInitialized.current && allTracks && allTracks.length > 0) {
       allTracks.forEach((track) => {
         const age = Date.now() - (Number(track.createdAt) || 0);
@@ -166,7 +271,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             const now = Date.now();
             const diff = endTime - now;
 
-            // Trigger when remaining time is less than 30 minutes and still actively running
             if (diff > 0 && diff <= 30 * 60 * 1000) {
               if (!alertedSoonAuctions.current.has(nft.id)) {
                 notificationService.addNotification(user.uid, {
@@ -191,10 +295,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         allNFTs.forEach((nft) => {
           const isAuction = nft.listingType === 'auction' || nft.isAuction;
           if (isAuction && nft.offers && nft.offers.length > 0) {
-            // Find if current user has placed a bid in this auction
             const userOfferIndex = nft.offers.findIndex(o => o.offerer === userProfile.walletAddress);
             if (userOfferIndex !== -1) {
-              // User has bid. Check if they are OUTBID (index 0 is someone else)
               const highestOffer = nft.offers[0];
               if (highestOffer.offerer !== userProfile.walletAddress) {
                 const alertKey = `outbid_${nft.id}_${highestOffer.price}`;
@@ -224,7 +326,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           const isAuction = nft.listingType === 'auction' || nft.isAuction;
           if (isMyNFT && isAuction && nft.offers && nft.offers.length > 0) {
             const highestOffer = nft.offers[0];
-            // If the highest offer is placed by someone else
             if (highestOffer.offerer !== userProfile.walletAddress) {
               const alertKey = `new_bid_${nft.id}_${highestOffer.price}`;
               if (!alertedNewBids.current.has(alertKey)) {
@@ -245,7 +346,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         });
       }
 
-      // 5. Price Alerts Check
+      // 5. Price Alerts Evaluation & Modal Trigger
       if (priceAlerts && priceAlerts.length > 0 && allNFTs && allNFTs.length > 0) {
         priceAlerts.forEach(async (alert) => {
           const nft = allNFTs.find((n) => n.id === alert.nftId);
@@ -267,20 +368,28 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                     userId: user.uid,
                     type: 'bid_update',
                     title: 'PRICE ALERT TRIGGERED!',
-                    message: `Price alert triggered for "${nft.title}"! Target: ${alert.targetPrice} TON, Current: ${nft.price} TON. Condition: ${alert.condition}.`,
+                    message: `Price alert triggered for "${nft.title}"! Target: ${alert.targetPrice} TON, Current: ${nft.price} TON.`,
                     link: `/nft/${nft.id}`,
                     metadata: { nftId: nft.id, type: 'price_alert', price: nft.price }
                   });
                   alertedPriceAlerts.current.add(alertKey);
                   localStorage.setItem('tonjam_alerted_price_alerts', JSON.stringify(Array.from(alertedPriceAlerts.current)));
                   altered = true;
+
+                  // Trigger Modal Popup
+                  setActivePriceDropModal({
+                    alert,
+                    nft,
+                    currentPrice: nft.price,
+                    previousPrice: (targetPrice * 1.2).toFixed(2)
+                  });
                   
-                  // Mark as triggered in Firestore
+                  // Mark status in Firestore
                   try {
                     const alertDocRef = doc(db, 'users', user.uid, 'priceAlerts', alert.id);
                     await updateDoc(alertDocRef, { status: 'triggered' });
                   } catch (err) {
-                    console.warn("Failed to update price alert status:", err);
+                    console.warn("Failed to update price alert status in DB:", err);
                   }
                 }
               }
@@ -295,7 +404,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
 
     checkAlerts();
-    const alertInterval = setInterval(checkAlerts, 15000); // Check every 15 seconds
+    const alertInterval = setInterval(checkAlerts, 15000);
     return () => clearInterval(alertInterval);
 
   }, [user, allTracks, followedUserIds, userBids, allNFTs, userProfile, priceAlerts]);
@@ -328,9 +437,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       updatePreferences, 
       refreshNotifications, 
       addNotification,
-      requestPushPermission
+      requestPushPermission,
+      priceAlerts,
+      addPriceAlert,
+      removePriceAlert,
+      activePriceDropModal,
+      closePriceDropModal,
+      simulatePriceDrop
     }}>
       {children}
+      <PriceDropNotificationModal data={activePriceDropModal} onClose={closePriceDropModal} />
     </NotificationContext.Provider>
   );
 };
+

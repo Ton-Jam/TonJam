@@ -64,7 +64,7 @@ const LimitedNFTs: React.FC = () => {
             Limited <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Editions</span>
           </h1>
           <p className="max-w-xl mx-auto text-muted-foreground text-sm font-medium leading-relaxed">
-            Exclusive scarcity-backed audio artifacts. These editions are guaranteed to never be minted again, preserving provenance on the TON blockchain.
+            Exclusive scarcity-backed audio artifacts. These editions are guaranteed to never be minted again, preserving provenance on the GRAM blockchain.
           </p>
         </div>
       </div>
@@ -164,7 +164,7 @@ const LimitedNFTs: React.FC = () => {
                 <div className="space-y-2">
                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none">Scarcity as a <br /> Protocol</h2>
                    <p className="text-muted-foreground text-sm md:text-base font-medium leading-relaxed">
-                     On TonJam, scarcity is not just a marketing tool. It's a fundamental attribute of the minted artifact, enforced by smart contracts on the TON blockchain.
+                     On TonJam, scarcity is not just a marketing tool. It's a fundamental attribute of the minted artifact, enforced by smart contracts on the GRAM blockchain.
                    </p>
                 </div>
                 
@@ -194,11 +194,11 @@ const LimitedNFTs: React.FC = () => {
                    <div className="space-y-4">
                       <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
                          <span className="text-[10px] font-bold text-muted-foreground uppercase">Token Standard</span>
-                         <span className="text-xs font-black text-blue-400">TON NFT-v2</span>
+                         <span className="text-xs font-black text-blue-400">GRAM NFT-v2</span>
                       </div>
                       <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
                          <span className="text-[10px] font-bold text-muted-foreground uppercase">Storage Protocol</span>
-                         <span className="text-xs font-black text-purple-400">TON Storage</span>
+                         <span className="text-xs font-black text-purple-400">GRAM Storage</span>
                       </div>
                       <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
                          <span className="text-[10px] font-bold text-muted-foreground uppercase">Rights Management</span>

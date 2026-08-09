@@ -1,9 +1,10 @@
-import React from "react";
-import { CheckCircle2, Users, Radio, UserPlus, UserCheck, ArrowRight } from "lucide-react";
+import React, { useState } from "react";
+import { CheckCircle2, Users, Radio, UserPlus, UserCheck, ArrowRight, Coins } from "lucide-react";
 import { Track } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
+import TipArtistModal from "@/components/TipArtistModal";
 
 interface ArtistPreviewCardProps {
   track: Track | null;
@@ -16,6 +17,7 @@ export const ArtistPreviewCard: React.FC<ArtistPreviewCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const { followedUserIds, toggleFollowUser } = useAudio();
+  const [showTipModal, setShowTipModal] = useState(false);
 
   if (!track) return null;
 
@@ -47,13 +49,13 @@ export const ArtistPreviewCard: React.FC<ArtistPreviewCardProps> = ({
           <div className="flex items-center gap-1.5">
             <h4 className="text-sm font-bold text-[#F2F4F8] truncate">{artistName}</h4>
             {isVerified && (
-              <CheckCircle2 className="w-4 h-4 text-[#5B6BFF] fill-[#5B6BFF]/20 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-[#0098EA] fill-[#0098EA]/20 flex-shrink-0" />
             )}
           </div>
 
           <div className="flex items-center gap-3 text-[11px] text-[#9AA0AE] mt-0.5">
             <span className="flex items-center gap-1">
-              <Users className="w-3 h-3 text-[#5B6BFF]" />
+              <Users className="w-3 h-3 text-[#0098EA]" />
               128.4K Followers
             </span>
             <span className="flex items-center gap-1">
@@ -64,14 +66,23 @@ export const ArtistPreviewCard: React.FC<ArtistPreviewCardProps> = ({
         </div>
       </div>
 
-      {/* Right: Follow & View Profile Buttons */}
+      {/* Right: Follow, Tip & View Profile Buttons */}
       <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <button
+          onClick={() => setShowTipModal(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] bg-gradient-to-r from-amber-500/20 to-blue-600/30 hover:from-amber-500/30 hover:to-blue-600/40 border border-amber-500/40 text-amber-300 hover:text-white text-xs font-bold transition-all active:scale-95"
+          title="Tip Artist in TON"
+        >
+          <Coins className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
+          <span>Tip TON</span>
+        </button>
+
         <button
           onClick={() => toggleFollowUser(artistId)}
           className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-[10px] text-xs font-bold transition-all active:scale-95 ${
             isFollowed
               ? "bg-[#16244F] text-[#F2F4F8] border border-[#16244F]"
-              : "bg-[#5B6BFF] text-white hover:bg-[#5B6BFF]/90"
+              : "bg-[#0098EA] text-white hover:bg-[#0098EA]/90"
           }`}
         >
           {isFollowed ? (
@@ -95,6 +106,10 @@ export const ArtistPreviewCard: React.FC<ArtistPreviewCardProps> = ({
           <ArrowRight className="w-3.5 h-3.5 text-[#9AA0AE]" />
         </button>
       </div>
+
+      {showTipModal && (
+        <TipArtistModal track={track} onClose={() => setShowTipModal(false)} />
+      )}
     </div>
   );
 };

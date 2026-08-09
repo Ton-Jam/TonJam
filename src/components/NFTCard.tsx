@@ -18,6 +18,7 @@ import ManageNFTModal from './ManageNFTModal';
 import BidModal from './BidModal';
 import AddToNFTFolderModal from './AddToNFTFolderModal';
 import NFTFolderModal from './NFTFolderModal';
+import ShareNFTDialog from './ShareNFTDialog';
 import { AuctionCountdownTimer } from './AuctionCountdownTimer';
 import { MarqueeTitle } from './MarqueeTitle';
 import {
@@ -91,6 +92,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const [isBidModalOpen, setIsBidModalOpen] = useState(false);
   const [isAddToFolderModalOpen, setIsAddToFolderModalOpen] = useState(false);
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const [isHovered, setIsHovered] = useState(false);
   const [isEndingSoon, setIsEndingSoon] = useState(false);
@@ -333,15 +335,9 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     handlePlayClick(e);
   };
 
-  const handleShare = async (e?: React.MouseEvent) => {
+  const handleShare = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    const shareUrl = `${window.location.origin}/#/nft/${nft.id}`;
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      addNotification('Copied!', 'success');
-    } catch (err) {
-      addNotification('Failed to copy link', 'error');
-    }
+    setIsShareModalOpen(true);
   };
 
   const NFTMenuContent = () => (
@@ -986,6 +982,15 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           onList={() => setIsSellModalOpen(true)}
           onHistory={() => setIsHistoryModalOpen(true)}
           onAddToFolder={() => setIsAddToFolderModalOpen(true)}
+          onShare={() => setIsShareModalOpen(true)}
+        />
+      )}
+
+      {isShareModalOpen && (
+        <ShareNFTDialog
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          nft={nft}
         />
       )}
 

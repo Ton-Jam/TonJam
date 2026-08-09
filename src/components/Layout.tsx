@@ -31,8 +31,8 @@ import {
   SparklesIcon,
   UserGroupIcon
 } from '@heroicons/react/24/outline';
-import { Sparkles as SparklesLucide, History, X, Rocket } from 'lucide-react';
-import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
+import { Sparkles as SparklesLucide, History, X, Rocket, Heart } from 'lucide-react';
+import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, TON_LOGO, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { useAudio, useUserRole } from '@/contexts/AudioContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTonPrice } from '@/contexts/TonPriceContext';
@@ -40,6 +40,7 @@ import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { toast } from 'sonner';
 import MiniPlayer from './player/MiniPlayer';
 import PlayerScreen from './player/PlayerScreen';
 import AddToPlaylistModal from './AddToPlaylistModal';
@@ -308,14 +309,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   useEffect(() => {
     let fabTimeout: NodeJS.Timeout;
     
-    // Improved scroll handling to detect direction
+    // Scroll handling to hide bottom navigation on scroll down
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      if (currentScrollY > lastScrollY && currentScrollY > 50 && !isJamspace) {
+      if (currentScrollY > lastScrollY && currentScrollY > 40) {
          setIsMobileNavHidden(true); // Scrolling down
-      } else {
-         setIsMobileNavHidden(false); // Scrolling up
+      } else if (currentScrollY < lastScrollY || currentScrollY <= 20) {
+         setIsMobileNavHidden(false); // Scrolling up or at top
       }
       
       setLastScrollY(currentScrollY);
@@ -662,13 +663,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden sm:block" />
 
-            {/* TON Price Ticker */}
+            {/* GRAMS Price Ticker */}
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-muted/20">
               <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-black tracking-widest uppercase text-muted-foreground/70">TON</span>
+                <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5 object-contain" />
+                <span className="text-[10px] font-black tracking-widest uppercase text-muted-foreground/70">GRAMS</span>
               </div>
-              <span className="text-[11px] font-black tracking-tighter text-foreground">
+              <span className="text-[11px] font-black tracking-tighter text-foreground flex items-center gap-1">
+                <img src={TON_LOGO} alt="TON" className="w-3 h-3 object-contain inline" />
                 {tonPriceLoading ? '...' : `$${tonPriceData?.toFixed(2)}`}
               </span>
             </div>
@@ -925,7 +928,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="lg:hidden">
         {/* Mobile Navigation */}
       {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
-        <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[70] h-16 transition-all duration-300 ${isMobileNavHidden ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+        <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[70] h-16 transition-all duration-300 ${isMobileNavHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-blue-600/20 via-blue-500/50 to-blue-600/20 z-10" />
           <nav className="h-full w-full bg-black/60 backdrop-blur-xl border-t border-white/10 px-2 flex justify-around items-center shadow-[0_-8px_32px_rgba(0,0,0,0.5)] mobile-nav-opaque" aria-label="Mobile Navigation">
             <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
@@ -1009,6 +1012,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       <NavItem to="/genesis-forge" icon={TicketIcon} label={t('nav.genesis')} onClick={onNavigate} />
       <NavItem to="/library" icon={RectangleStackIcon} label={t('nav.library')} onClick={onNavigate} />
       <NavItem to="/marketplace" icon={ShoppingBagIcon} label={t('nav.marketplace')} onClick={onNavigate} />
+      <NavItem to="/fan-engagement" icon={Heart} label="Fan Engagement" onClick={onNavigate} />
       <NavItem to="/launchpad" icon={Rocket} label={t('nav.launchpad')} onClick={onNavigate} />
       <NavItem to="/referrals" icon={UserGroupIcon} label={t('nav.referrals')} onClick={onNavigate} />
       
@@ -1035,8 +1039,9 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
         <NavItem to="/settings" icon={Cog6ToothIcon} label={t('nav.settings')} onClick={onNavigate} />
         {user && (
           <button 
-            onClick={() => {
-              signOut();
+            onClick={async () => {
+              await signOut();
+              toast.success('Signed out successfully');
               onNavigate?.();
             }}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[4px] text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-all group mt-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
@@ -1114,42 +1119,46 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
 );
 };
 
-const NavItem = ({ to, icon: Icon, label, onClick, className = "" }: { to: string; icon: any; label: string; onClick?: () => void; className?: string }) => (
-  <NavLink 
-    to={to} 
-    onClick={onClick}
-    className={({ isActive }) => `
-      flex items-center gap-3 px-4 py-2.5 rounded-[4px] transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500
-      ${isActive ? 'bg-blue-600/10 text-blue-500 font-black' : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted/50'}
-      ${className}
-    `}
-  >
-    {({ isActive }) => (
-      <>
-        <Icon className={`h-4 w-4 transition-all ${isActive ? 'text-blue-500 scale-110' : 'text-muted-foreground/40'}`} strokeWidth={isActive ? 3 : 2} />
-        <span className="text-[10px] uppercase font-bold tracking-widest">{label}</span>
-      </>
-    )}
-  </NavLink>
-);
+function NavItem({ to, icon: Icon, label, onClick, className = "" }: { to: string; icon: any; label: string; onClick?: () => void; className?: string }) {
+  return (
+    <NavLink 
+      to={to} 
+      onClick={onClick}
+      className={({ isActive }) => `
+        flex items-center gap-3 px-4 py-2.5 rounded-[4px] transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500
+        ${isActive ? 'bg-blue-600/10 text-blue-500 font-black' : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted/50'}
+        ${className}
+      `}
+    >
+      {({ isActive }) => (
+        <>
+          <Icon className={`h-4 w-4 transition-all ${isActive ? 'text-blue-500 scale-110' : 'text-muted-foreground/40'}`} strokeWidth={isActive ? 3 : 2} />
+          <span className="text-[10px] uppercase font-bold tracking-widest">{label}</span>
+        </>
+      )}
+    </NavLink>
+  );
+}
 
-const MobileNavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: any; label: string; onClick?: () => void }) => (
-      <NavLink 
-        to={to} 
-        aria-label={label}
-        onClick={onClick}
-        className={({ isActive }) => `
-          flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full rounded-[4px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mobile-nav-item
-          ${isActive ? 'text-blue-500' : 'text-white hover:text-white hover:bg-white/5'}
-        `}
-      >
-          {({ isActive }) => (
-            <>
-              <Icon className={`h-6 w-6 transition-all ${isActive ? 'text-blue-500' : 'text-white'}`} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-[8px] font-bold uppercase tracking-widest transition-all ${isActive ? 'opacity-100' : 'opacity-0 scale-75'}`}>{label}</span>
-            </>
-          )}
-      </NavLink>
-);
+function MobileNavItem({ to, icon: Icon, label, onClick }: { to: string; icon: any; label: string; onClick?: () => void }) {
+  return (
+    <NavLink 
+      to={to} 
+      aria-label={label}
+      onClick={onClick}
+      className={({ isActive }) => `
+        flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full rounded-[4px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mobile-nav-item
+        ${isActive ? 'text-blue-500' : 'text-white hover:text-white hover:bg-white/5'}
+      `}
+    >
+      {({ isActive }) => (
+        <>
+          <Icon className={`h-6 w-6 transition-all ${isActive ? 'text-blue-500' : 'text-white'}`} strokeWidth={isActive ? 2.5 : 2} />
+          <span className={`text-[8px] font-bold uppercase tracking-widest transition-all ${isActive ? 'opacity-100' : 'opacity-0 scale-75'}`}>{label}</span>
+        </>
+      )}
+    </NavLink>
+  );
+}
 
 export default Layout; 

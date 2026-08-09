@@ -5,6 +5,7 @@ import {
   BarChart3, Sparkles, ShieldCheck, Star, Music, Heart 
 } from 'lucide-react';
 import { ArtistPlaceholder } from '../../placeholders/ArtistPlaceholder';
+import { useAudio } from '@/contexts/AudioContext';
 
 // --- TS INTERFACES ---
 
@@ -36,7 +37,7 @@ export const ArtistCard: React.FC<{
   className?: string;
 }> = ({ artist, isLoading, onFollow, onMessage, className = '' }) => {
   const [imgFailed, setImgFailed] = useState(false);
-  const [following, setFollowing] = useState(false);
+  const { followedUserIds = [], toggleFollowUser } = useAudio();
 
   if (isLoading || !artist) {
     return (
@@ -47,6 +48,17 @@ export const ArtistCard: React.FC<{
       </div>
     );
   }
+
+  const artistUid = artist.id;
+  const following = followedUserIds.includes(artistUid);
+
+  const handleFollowClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (artistUid) {
+      toggleFollowUser(artistUid);
+    }
+    onFollow?.(artist);
+  };
 
   return (
     <motion.div
@@ -85,7 +97,7 @@ export const ArtistCard: React.FC<{
 
       <div className="mt-3.5 flex gap-1.5 w-full">
         <button
-          onClick={(e) => { e.stopPropagation(); setFollowing(!following); onFollow?.(artist); }}
+          onClick={handleFollowClick}
           className={`flex-1 py-1.5 rounded-[6px] text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all ${
             following ? 'bg-white/10 text-white' : 'bg-blue-600 text-white hover:bg-blue-500'
           }`}
@@ -108,7 +120,18 @@ export const FeaturedArtistCard: React.FC<{
   onPlayHit?: (artist: ArtistData) => void;
   className?: string;
 }> = ({ artist, onFollow, onPlayHit, className = '' }) => {
-  const [following, setFollowing] = useState(false);
+  const { followedUserIds = [], toggleFollowUser } = useAudio();
+  const artistUid = artist.id;
+  const following = followedUserIds.includes(artistUid);
+
+  const handleFollowClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (artistUid) {
+      toggleFollowUser(artistUid);
+    }
+    onFollow?.(artist);
+  };
+
   return (
     <div className={`relative rounded-[10px] overflow-hidden bg-[#0A113A] aspect-[16/10] w-full select-none ${className}`}>
       {artist.bannerUrl && <img src={artist.bannerUrl} alt={artist.name} className="w-full h-full object-cover opacity-50" />}
@@ -138,7 +161,7 @@ export const FeaturedArtistCard: React.FC<{
             </button>
           )}
           <button
-            onClick={() => { setFollowing(!following); onFollow?.(artist); }}
+            onClick={handleFollowClick}
             className={`py-2 px-4 rounded-[6px] text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all ${
               following ? 'bg-white/10 text-white' : 'bg-white text-black hover:bg-white/90'
             }`}
@@ -211,7 +234,18 @@ export const SuggestedArtistCard: React.FC<{
   onFollow?: (artist: ArtistData) => void;
   className?: string;
 }> = ({ artist, reason = 'Popular on TonJam', onFollow, className = '' }) => {
-  const [following, setFollowing] = useState(false);
+  const { followedUserIds = [], toggleFollowUser } = useAudio();
+  const artistUid = artist.id;
+  const following = followedUserIds.includes(artistUid);
+
+  const handleFollowClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (artistUid) {
+      toggleFollowUser(artistUid);
+    }
+    onFollow?.(artist);
+  };
+
   return (
     <div className={`p-3 bg-[#0A113A] rounded-[10px] flex flex-col justify-between select-none w-44 shrink-0 snap-start ${className}`}>
       <div>
@@ -227,7 +261,7 @@ export const SuggestedArtistCard: React.FC<{
         </div>
       </div>
       <button
-        onClick={() => { setFollowing(!following); onFollow?.(artist); }}
+        onClick={handleFollowClick}
         className={`w-full mt-3 py-1.5 rounded-[6px] text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all ${
           following ? 'bg-white/10 text-white' : 'bg-blue-600 text-white hover:bg-blue-500'
         }`}

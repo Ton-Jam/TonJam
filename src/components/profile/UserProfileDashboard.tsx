@@ -32,6 +32,7 @@ import {
   Bar 
 } from 'recharts';
 import { ListenStreakIndicator } from './ListenStreakIndicator';
+import { RoyaltyTrackingSection } from './RoyaltyTrackingSection';
 
 export const UserProfileDashboard: React.FC = () => {
   const { 
@@ -324,6 +325,9 @@ export const UserProfileDashboard: React.FC = () => {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {/* Royalty Tracking Section */}
+      <RoyaltyTrackingSection />
 
       {/* 3. Main Dashboard Body - Columns Layout: Owned Music NFTs vs Recent Purchases */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" id="dashboard-split-panels">

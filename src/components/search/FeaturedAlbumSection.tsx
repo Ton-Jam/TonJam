@@ -29,9 +29,9 @@ export const FeaturedAlbumSection: React.FC<FeaturedAlbumSectionProps> = ({ albu
               key={`featured-album-${album.id}`}
               whileHover={{ y: -4 }}
               onClick={() => navigate(`/album/${album.id}`)}
-              className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
+              className="bg-[#0c133a] rounded-[12px] p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
             >
-              <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-950 border border-white/5">
+              <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-950">
                 <img
                   src={imageSrc}
                   alt={album.title}

@@ -405,7 +405,7 @@ export default function UploadTrackScreen() {
       // 3. Mint NFT on TON
       const wallet = tonConnectUI.wallet?.account.address;
       if (!wallet) {
-        addNotification("Please connect your TON wallet first", "warning");
+        addNotification("Please connect your GRAM wallet first", "warning");
         setIsUploading(false);
         return;
       }
@@ -683,7 +683,7 @@ export default function UploadTrackScreen() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-                    <Coins className="w-3 h-3" /> Mint Price (TON)
+                    <Coins className="w-3 h-3" /> Mint Price (GRAMS)
                   </label>
                   <input
                     value={price}

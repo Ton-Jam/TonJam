@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { Bell, Wallet, Search, ArrowLeft, MoreHorizontal } from 'lucide-react';
+import { Bell, Wallet, Search, ArrowLeft, MoreHorizontal, LayoutDashboard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { APP_LOGO } from '@/constants';
 import { NotificationBell } from '@/components/NotificationBell';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface GlobalHeaderProps {
   title?: string;
@@ -35,6 +37,9 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 }) => {
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
+  const { userProfile } = useAudio();
+  const isArtistVerified = userProfile?.isVerifiedArtist || userProfile?.role === 'artist';
 
   // Background opacity transitions seamlessly on scroll
   const bgOpacity = useTransform(scrollY, [0, 50], [0, 0.85]);
@@ -110,6 +115,18 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
         {showNotifications && (
           <NotificationBell onClick={onNotificationsClick} />
+        )}
+
+        {isArtistVerified && (
+          <button
+            onClick={() => navigate('/artist-dashboard')}
+            className="px-2.5 py-1.5 bg-[#0052FF] hover:bg-[#1a66ff] active:scale-95 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all shadow-md cursor-pointer ml-1"
+            title="Artist Dashboard"
+            aria-label="Artist Dashboard"
+          >
+            <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">Dashboard</span>
+          </button>
         )}
 
         {rightActionSlot}

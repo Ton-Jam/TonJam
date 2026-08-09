@@ -25,7 +25,7 @@ export const LiveSpaces: React.FC = () => {
           <motion.div
             key={space.id}
             whileHover={{ y: -2 }}
-            className="w-48 shrink-0 bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex flex-col justify-between aspect-square cursor-pointer group"
+            className="w-48 shrink-0 bg-[#0c133a] rounded-[12px] p-4 flex flex-col justify-between aspect-square cursor-pointer group"
           >
             <div className="space-y-1">
               <div className="flex items-center justify-between">

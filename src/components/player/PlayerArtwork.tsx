@@ -114,7 +114,7 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
               className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-xs z-30"
             >
               <div className="relative flex items-center justify-center">
-                <Heart className="w-20 h-20 text-[#5B6BFF] fill-[#5B6BFF] filter drop-shadow-[0_0_15px_rgba(91,107,255,0.8)]" />
+                <Heart className="w-20 h-20 text-[#0098EA] fill-[#0098EA] filter drop-shadow-[0_0_15px_rgba(0,152,234,0.8)]" />
                 <Sparkles className="w-8 h-8 text-white absolute -top-2 -right-2 animate-spin" />
               </div>
             </motion.div>

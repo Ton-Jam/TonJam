@@ -53,7 +53,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#16244F]/60">
         <div className="flex items-center gap-2">
-          <Gem className="w-4 h-4 text-[#5B6BFF]" />
+          <Gem className="w-4 h-4 text-[#0098EA]" />
           <h4 className="text-xs font-bold uppercase tracking-wider text-[#F2F4F8]">
             Web3 Music NFT Collectible
           </h4>
@@ -78,7 +78,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
         </div>
         <button
           onClick={handleOpenMarketplace}
-          className="flex items-center gap-1 px-3 py-1.5 bg-[#5B6BFF] hover:bg-[#5B6BFF]/90 text-white rounded-[10px] text-xs font-bold transition-all active:scale-95"
+          className="flex items-center gap-1 px-3 py-1.5 bg-[#0098EA] hover:bg-[#0098EA]/90 text-white rounded-[10px] text-xs font-bold transition-all active:scale-95"
         >
           <span>Marketplace</span>
           <ArrowUpRight className="w-3.5 h-3.5" />
@@ -89,7 +89,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
         <div className="bg-[#050A24] border border-[#16244F] rounded-[12px] p-2.5">
           <span className="text-[10px] text-[#9AA0AE] flex items-center gap-1 mb-1">
-            <Coins className="w-3 h-3 text-[#5B6BFF]" /> Floor Price
+            <Coins className="w-3 h-3 text-[#0098EA]" /> Floor Price
           </span>
           <span className="text-xs font-bold text-emerald-400">{floorPrice} TON</span>
         </div>
@@ -110,7 +110,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
 
         <div className="bg-[#050A24] border border-[#16244F] rounded-[12px] p-2.5">
           <span className="text-[10px] text-[#9AA0AE] flex items-center gap-1 mb-1">
-            <Percent className="w-3 h-3 text-purple-400" /> Creator Royalty
+            <Percent className="w-3 h-3 text-white" /> Creator Royalty
           </span>
           <span className="text-xs font-bold text-[#F2F4F8]">{royaltyPct}</span>
         </div>
@@ -122,9 +122,9 @@ export const NFTCard: React.FC<NFTCardProps> = ({
           <span className="text-[11px] text-[#9AA0AE]">Direct On-Chain Transfer</span>
           <button
             onClick={() => setShowTransferModal(!showTransferModal)}
-            className="flex items-center gap-1.5 px-3 py-1 bg-[#050A24] border border-[#16244F] hover:border-[#5B6BFF] text-[#F2F4F8] rounded-[10px] text-xs font-semibold transition-all"
+            className="flex items-center gap-1.5 px-3 py-1 bg-[#050A24] border border-[#16244F] hover:border-[#0098EA] text-[#F2F4F8] rounded-[10px] text-xs font-semibold transition-all"
           >
-            <Send className="w-3 h-3 text-[#5B6BFF]" />
+            <Send className="w-3 h-3 text-[#0098EA]" />
             <span>Transfer NFT</span>
           </button>
         </div>
@@ -132,7 +132,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
 
       {/* Transfer Modal Form inline */}
       {showTransferModal && (
-        <form onSubmit={handleTransfer} className="p-3 bg-[#050A24] border border-[#5B6BFF]/40 rounded-[12px] space-y-2 mt-2">
+        <form onSubmit={handleTransfer} className="p-3 bg-[#050A24] border border-[#0098EA]/40 rounded-[12px] space-y-2 mt-2">
           <label className="text-[10px] font-bold text-[#9AA0AE] uppercase tracking-wider block">
             Recipient TON Address
           </label>
@@ -141,7 +141,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
             placeholder="EQA... or user.ton"
             value={transferAddress}
             onChange={(e) => setTransferAddress(e.target.value)}
-            className="w-full bg-[#0A113A] border border-[#16244F] rounded-[10px] px-3 py-2 text-xs text-[#F2F4F8] focus:outline-none focus:border-[#5B6BFF]"
+            className="w-full bg-[#0A113A] border border-[#16244F] rounded-[10px] px-3 py-2 text-xs text-[#F2F4F8] focus:outline-none focus:border-[#0098EA]"
           />
           <div className="flex gap-2 justify-end pt-1">
             <button
@@ -153,7 +153,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
             </button>
             <button
               type="submit"
-              className="px-3 py-1 bg-[#5B6BFF] text-white rounded-[8px] text-xs font-bold"
+              className="px-3 py-1 bg-[#0098EA] text-white rounded-[8px] text-xs font-bold"
             >
               Confirm Transfer
             </button>

@@ -12,7 +12,7 @@ export const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({ classNam
       className={className || "h-16 w-full mb-2"}
       height={60}
       waveColor="rgba(255, 255, 255, 0.25)"
-      progressColor="#3b82f6"
+      progressColor="#0098EA"
       audioUrl={audioUrl}
     />
   );

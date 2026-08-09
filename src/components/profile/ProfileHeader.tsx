@@ -1,5 +1,5 @@
 import React from 'react';
-import { BadgeCheck, Globe, Calendar, Music, ShieldCheck, Settings, Sparkles, ArrowLeft } from 'lucide-react';
+import { BadgeCheck, Globe, Calendar, Music, ShieldCheck, Settings, Sparkles, ArrowLeft, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ProfileData } from './ProfileTypes';
 
@@ -43,16 +43,28 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <ArrowLeft className="w-5 h-5 text-slate-300 hover:text-white" />
         </button>
         
-        {/* Top Floating Settings Button */}
+        {/* Top Floating Settings & Dashboard Buttons */}
         {isOwnProfile && (
-          <button
-            onClick={onOpenSettings}
-            className="absolute top-4 right-4 p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer z-10"
-            title="Profile Settings"
-            aria-label="Settings"
-          >
-            <Settings className="w-5 h-5 text-slate-300 hover:text-white" />
-          </button>
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+            {profile.isArtistVerified && (
+              <button
+                onClick={() => navigate('/artist-dashboard')}
+                className="px-3 py-1.5 bg-[#0052FF] hover:bg-[#1a66ff] active:scale-95 text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1.5 transition-all cursor-pointer shadow-lg"
+                title="Artist Dashboard"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </button>
+            )}
+            <button
+              onClick={onOpenSettings}
+              className="p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer"
+              title="Profile Settings"
+              aria-label="Settings"
+            >
+              <Settings className="w-5 h-5 text-slate-300 hover:text-white" />
+            </button>
+          </div>
         )}
         
         {isOwnProfile && (

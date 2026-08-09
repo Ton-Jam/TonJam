@@ -120,7 +120,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           aria-label="Toggle Shuffle"
           className={`p-2.5 rounded-[12px] transition-all duration-200 ${
             isShuffle
-              ? "text-[#5B6BFF] bg-[#5B6BFF]/15"
+              ? "text-[#0098EA] bg-[#0098EA]/15"
               : "text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#0A113A]"
           }`}
         >
@@ -134,7 +134,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             prevTrack();
           }}
           aria-label="Previous Track"
-          className="p-3 text-[#F2F4F8] hover:text-[#5B6BFF] transition-all active:scale-90"
+          className="p-3 text-[#F2F4F8] hover:text-[#0098EA] transition-all active:scale-90"
         >
           <SkipBack className="w-6 h-6 fill-current" />
         </button>
@@ -148,7 +148,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label={isPlaying ? "Pause" : "Play"}
-          className="relative w-[64px] h-[64px] rounded-full bg-[#5B6BFF] text-[#F2F4F8] flex items-center justify-center shadow-lg shadow-[#5B6BFF]/30 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40"
+          className="relative w-[64px] h-[64px] rounded-full bg-[#0098EA] text-[#F2F4F8] flex items-center justify-center shadow-lg shadow-[#0098EA]/30 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40"
         >
           {isPlaying ? (
             <Pause className="w-7 h-7 fill-current" />
@@ -164,7 +164,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             nextTrack();
           }}
           aria-label="Next Track"
-          className="p-3 text-[#F2F4F8] hover:text-[#5B6BFF] transition-all active:scale-90"
+          className="p-3 text-[#F2F4F8] hover:text-[#0098EA] transition-all active:scale-90"
         >
           <SkipForward className="w-6 h-6 fill-current" />
         </button>
@@ -178,7 +178,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           aria-label="Toggle Repeat Mode"
           className={`p-2.5 rounded-[12px] transition-all duration-200 ${
             repeatMode !== "off"
-              ? "text-[#5B6BFF] bg-[#5B6BFF]/15"
+              ? "text-[#0098EA] bg-[#0098EA]/15"
               : "text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#0A113A]"
           }`}
         >
@@ -204,7 +204,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
               }}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-[12px] text-[11px] font-bold transition-all ${
                 speed !== 1.0
-                  ? "text-[#5B6BFF] bg-[#5B6BFF]/10"
+                  ? "text-[#0098EA] bg-[#0098EA]/10"
                   : "text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
               }`}
             >
@@ -220,7 +220,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                     key={s}
                     onClick={() => handleSpeedSelect(s)}
                     className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left ${
-                      speed === s ? "bg-[#5B6BFF] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
+                      speed === s ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
                     }`}
                   >
                     <span>{s}x</span>
@@ -241,7 +241,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
               }}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all ${
                 sleepMinutes !== null
-                  ? "border-[#5B6BFF] text-[#5B6BFF] bg-[#5B6BFF]/10"
+                  ? "border-[#0098EA] text-[#0098EA] bg-[#0098EA]/10"
                   : "border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
               }`}
             >
@@ -264,7 +264,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                     key={opt.label}
                     onClick={() => handleSleepSelect(opt.value)}
                     className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left ${
-                      sleepMinutes === opt.value ? "bg-[#5B6BFF] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
+                      sleepMinutes === opt.value ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
                     }`}
                   >
                     <span>{opt.label}</span>
@@ -315,7 +315,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                       toast.success(`Connected to ${dev}`);
                     }}
                     className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-[11px] font-medium text-left ${
-                      activeDevice === dev ? "bg-[#5B6BFF] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
+                      activeDevice === dev ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
                     }`}
                   >
                     <span className="truncate">{dev}</span>
@@ -345,7 +345,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
               step="0.01"
               value={isMuted ? 0 : volume}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
-              className="w-16 h-1 bg-[#16244F] accent-[#5B6BFF] rounded-lg cursor-pointer"
+              className="w-16 h-1 bg-[#16244F] accent-[#0098EA] rounded-lg cursor-pointer"
             />
           </div>
         </div>

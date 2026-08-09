@@ -99,24 +99,24 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <div className="space-y-3 relative z-10">
               <div className="flex justify-between items-center text-[10px]">
                 <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Signal Magnitude</span>
-                <span className="font-mono text-white font-black">{tonAmount} TON</span>
+                <span className="font-mono text-white font-black">{tonAmount} GRAM</span>
               </div>
               <div className="flex justify-between items-center text-[10px]">
                 <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Network Fee</span>
-                <span className="font-mono text-neutral-400 font-bold">~{networkFee || "0.05"} TON</span>
+                <span className="font-mono text-neutral-400 font-bold">~{networkFee || "0.05"} GRAM</span>
               </div>
 
               {floorPrice && (
                 <div className="flex justify-between items-center text-[10px]">
                   <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Floor Price</span>
-                  <span className="font-mono text-cyan-400 font-bold">{floorPrice} TON</span>
+                  <span className="font-mono text-cyan-400 font-bold">{floorPrice} GRAM</span>
                 </div>
               )}
 
               {walletBalance && (
                 <div className="flex justify-between items-center text-[10px]">
                   <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Wallet Balance</span>
-                  <span className="font-mono text-emerald-400 font-bold">{walletBalance} TON</span>
+                  <span className="font-mono text-emerald-400 font-bold">{walletBalance} GRAM</span>
                 </div>
               )}
 
@@ -131,7 +131,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 <div className="flex justify-between items-center pt-4 mt-2 border-t border-white/5">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Estimated total</span>
                   <div className="text-right">
-                    <span className="font-mono text-blue-400 font-black text-lg leading-none">{totalAmount} TON</span>
+                    <span className="font-mono text-blue-400 font-black text-lg leading-none">{totalAmount} GRAM</span>
                     <p className="text-[8px] font-bold text-blue-500/40 uppercase tracking-widest mr-1">Final Approval Required</p>
                   </div>
                 </div>

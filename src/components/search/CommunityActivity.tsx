@@ -26,7 +26,7 @@ export const CommunityActivity: React.FC = () => {
             key={activity.id}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 p-3 rounded-[12px] bg-[#0c133a]/50 border border-white/5"
+            className="flex items-center gap-3 p-3 rounded-[12px] bg-[#0c133a]/50"
           >
             <div className="w-8 h-8 rounded-full bg-[#132354] flex items-center justify-center shrink-0">
               {activity.type === 'mint' && <Repeat className="w-4 h-4 text-purple-400" />}

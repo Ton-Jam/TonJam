@@ -33,10 +33,10 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
               key={`rec-track-${track.id}`}
               whileHover={{ x: 3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
               onClick={() => onPlayTrack(track)}
-              className="p-3 rounded-[12px] bg-[#0c133a] border border-white/5 flex items-center justify-between cursor-pointer group"
+              className="p-3 rounded-[12px] bg-[#0c133a] flex items-center justify-between cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="relative w-10 h-10 rounded-[8px] overflow-hidden shrink-0 border border-white/5 bg-slate-900">
+                <div className="relative w-10 h-10 rounded-[8px] overflow-hidden shrink-0 bg-slate-900">
                   <img
                     src={track.coverUrl || getPlaceholderImage(track.title)}
                     alt={track.title}
@@ -86,10 +86,10 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
                 key={`rec-artist-${artist.uid}`}
                 whileHover={{ x: 3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
                 onClick={() => navigate(`/artist/${artist.uid}`)}
-                className="p-3 rounded-[12px] bg-[#0c133a] border border-white/5 flex items-center justify-between cursor-pointer group"
+                className="p-3 rounded-[12px] bg-[#0c133a] flex items-center justify-between cursor-pointer group"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/5 bg-slate-900">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 bg-slate-900">
                     <img
                       src={imageSrc}
                       alt={artist.name}

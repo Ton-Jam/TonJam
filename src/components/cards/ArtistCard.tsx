@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Play, CheckCircle2, UserPlus, UserCheck, Music } from 'lucide-react';
 import { ArtistPlaceholder } from '../placeholders/ArtistPlaceholder';
+import { useAudio } from '@/contexts/AudioContext';
 
 export interface ArtistData {
   id: string;
@@ -42,7 +43,7 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({
   className = '',
 }) => {
   const [imgFailed, setImgFailed] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false);
+  const { followedUserIds = [], toggleFollowUser } = useAudio();
 
   // Derive final values from direct props or structural object
   const finalName = artist?.name || name || 'Unknown Artist';
@@ -61,6 +62,9 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({
     followers: finalFollowers,
   };
 
+  const artistUid = resolvedArtist.id;
+  const isFollowing = followedUserIds.includes(artistUid);
+
   if (isLoading) {
     return (
       <div className={`flex flex-col items-center p-4 rounded-[10px] bg-[#0A113A] animate-pulse w-[140px] shrink-0 ${className}`}>
@@ -73,7 +77,9 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsFollowing(!isFollowing);
+    if (artistUid && artistUid !== 'compat') {
+      toggleFollowUser(artistUid);
+    }
     if (onFollow) onFollow(resolvedArtist);
   };
 

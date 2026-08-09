@@ -8,6 +8,15 @@ export interface MintingStatus {
   progress: number;
   message: string;
   error?: string;
+  title?: string;
+  artist?: string;
+  coverUrl?: string;
+  txHash?: string;
+  ipfsHash?: string;
+  timestamp?: number;
+  price?: string;
+  editions?: string;
+  royaltySplits?: { address: string; percentage: number }[];
 }
 
 interface NFTContextType {
@@ -17,6 +26,8 @@ interface NFTContextType {
   setIsMinting: (isMinting: boolean) => void;
   mintingStatus: Record<string, MintingStatus>;
   updateMintingStatus: (trackId: string, status: Partial<MintingStatus>) => void;
+  removeMintingStatus: (trackId: string) => void;
+  clearCompletedMints: () => void;
   addNFT: (nft: NFTItem) => void;
   getNFTByTrackId: (trackId: string) => NFTItem | undefined;
   getNFTsByOwner: (ownerAddressOrId: string) => NFTItem[];
@@ -70,6 +81,26 @@ export const NFTProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  const removeMintingStatus = (trackId: string) => {
+    setMintingStatus((prev) => {
+      const copy = { ...prev };
+      delete copy[trackId];
+      return copy;
+    });
+  };
+
+  const clearCompletedMints = () => {
+    setMintingStatus((prev) => {
+      const filtered: Record<string, MintingStatus> = {};
+      Object.entries(prev).forEach(([id, item]) => {
+        if (item.step !== 'completed') {
+          filtered[id] = item;
+        }
+      });
+      return filtered;
+    });
+  };
+
   const addNFT = (nft: NFTItem) => {
     setNfts((prev) => {
       const updated = [nft, ...prev];
@@ -106,6 +137,8 @@ export const NFTProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsMinting,
         mintingStatus,
         updateMintingStatus,
+        removeMintingStatus,
+        clearCompletedMints,
         addNFT,
         getNFTByTrackId,
         getNFTsByOwner,

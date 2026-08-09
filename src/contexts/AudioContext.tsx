@@ -4627,6 +4627,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
+const FALLBACK_USER_PROFILE = {
+  uid: "anonymous",
+  name: "TONJam Explorer",
+  username: "explorer",
+  role: "collector",
+  avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=explorer",
+  followers: 0,
+  following: 0,
+  bio: "Creating the future of sound.",
+  createdAt: "2026-01-01T00:00:00.000Z"
+};
+const FALLBACK_ARRAY: any[] = [];
+const FALLBACK_NOOP = () => {};
+
 export const useAudio = () => {
   const context = useContext(AudioContext);
   if (!context) {
@@ -4635,20 +4649,10 @@ export const useAudio = () => {
     return new Proxy({} as any, {
       get: (target, prop) => {
         if (prop === "userProfile" || prop === "MOCK_USER") {
-          return {
-            uid: "anonymous",
-            name: "TONJam Explorer",
-            username: "explorer",
-            role: "collector",
-            avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=explorer",
-            followers: 0,
-            following: 0,
-            bio: "Creating the future of sound.",
-            createdAt: new Date().toISOString()
-          };
+          return FALLBACK_USER_PROFILE;
         }
         if (prop === "queue" || prop === "playlists" || prop === "recentlyPlayed" || prop === "likedTrackIds" || prop === "followedUserIds" || prop === "posts" || prop === "tasks" || prop === "transactions" || prop === "allTracks" || prop === "allNFTs" || prop === "artists" || prop === "collections" || prop === "playlistFolders" || prop === "firestorePlaylistFolders") {
-          return [];
+          return FALLBACK_ARRAY;
         }
         if (prop === "isPlaying" || prop === "isFullPlayerOpen" || prop === "isShuffle" || prop === "isSmartShuffle" || prop === "isLoading" || prop === "isOffline") {
           return false;
@@ -4663,7 +4667,7 @@ export const useAudio = () => {
           return "mood";
         }
         // Fallback for functions: return any noop function so that calling it won't crash either
-        return () => {};
+        return FALLBACK_NOOP;
       }
     }) as AudioContextType;
   }

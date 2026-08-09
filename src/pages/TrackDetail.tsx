@@ -294,14 +294,14 @@ const TrackDetail: React.FC = () => {
         messages: [
           {
             address: artist?.walletAddress || "EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c",
-            amount: (amount * 1000000000).toString(), // Convert TON to nanoton
+            amount: (amount * 1000000000).toString(), // Convert GRAM to nanogram
           }
         ]
       };
       
       await tonConnectUI.sendTransaction(transaction);
       
-      addNotification(`Successfully tipped ${amount} TON to ${track.artist}!`, 'success');
+      addNotification(`Successfully tipped ${amount} GRAMS to ${track.artist}!`, 'success');
       confetti({
         particleCount: 150,
         spread: 100,
@@ -317,7 +317,7 @@ const TrackDetail: React.FC = () => {
       if (e.message?.includes("User rejected")) {
         addNotification("Transaction rejected by user.", "warning");
       } else {
-        addNotification("Tipping transaction failed. Ensure you have sufficient TON balance.", "error");
+        addNotification("Tipping transaction failed. Ensure you have sufficient GRAMS balance.", "error");
       }
     }
   };
@@ -535,7 +535,7 @@ const TrackDetail: React.FC = () => {
                             <img src={TJ_COIN_ICON} className="w-4 h-4 group-hover/tip:scale-110 transition-transform" alt="" />
                             {amount}
                           </div>
-                          <span className="text-[8px] text-muted-foreground/50 uppercase tracking-widest">TON</span>
+                          <span className="text-[8px] text-muted-foreground/50 uppercase tracking-widest">GRAM</span>
                         </button>
                       ))}
                     </motion.div>
@@ -554,7 +554,7 @@ const TrackDetail: React.FC = () => {
                   <div>
                     <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Current Protocol Price</p>
                     <div className="flex items-baseline gap-4">
-                      <span className="text-[20px] font-black tracking-tighter text-foreground">{track.price || '2.5'} TON</span>
+                      <span className="text-[20px] font-black tracking-tighter text-foreground">{track.price || '2.5'} GRAM</span>
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">≈ $12.50</span>
                     </div>
                   </div>
@@ -579,7 +579,7 @@ const TrackDetail: React.FC = () => {
                 </div>
                 
                 <p className="text-[8px] text-center text-muted-foreground/50 uppercase tracking-[0.2em] font-medium">
-                  Secured by TON Blockchain • Instant Settlement
+                  Secured by GRAM Blockchain • Instant Settlement
                 </p>
               </div>
             ) : (
@@ -813,7 +813,7 @@ const TrackDetail: React.FC = () => {
                             {track.isDrmProtected && (
                               <>
                                 <DetailItem label="Content Protection" value="Active (Acoustic Watermark Secured)" />
-                                <DetailItem label="Acoustic Signature" value={track.watermarkText || 'TON Signature'} />
+                                <DetailItem label="Acoustic Signature" value={track.watermarkText || 'GRAM Signature'} />
                               </>
                             )}
                           </AccordionContent>
@@ -842,7 +842,7 @@ const TrackDetail: React.FC = () => {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{event.price ? `${event.price} TON` : '--'}</p>
+                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{event.price ? `${event.price} GRAM` : '--'}</p>
                             <p className="text-[9px] text-muted-foreground/50 uppercase tracking-widest">{event.date}</p>
                           </div>
                         </div>
@@ -881,7 +881,7 @@ const TrackDetail: React.FC = () => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
                               <img src={TJ_COIN_ICON} className="w-3 h-3" alt="" />
-                              <span className="text-xs font-bold text-foreground">{nft.price} TON</span>
+                              <span className="text-xs font-bold text-foreground">{nft.price} GRAM</span>
                             </div>
                             <button className="px-4 py-4 bg-blue-600 text-foreground rounded-lg text-[8px] font-bold uppercase tracking-widest opacity-0 group-hover/nft:opacity-100 transition-opacity">
                               View NFT

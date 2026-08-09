@@ -2,6 +2,7 @@ import React from 'react';
 import { ChartLine, Gem, Wallet, Settings, Cpu, Play, Terminal, Check, ChevronDown, ChevronUp, Code, Sparkles, TrendingUp } from 'lucide-react';
 import { Artist } from '@/types';
 import { TJ_COIN_ICON, TON_LOGO } from '@/constants';
+import RoyaltyStatusCard from '@/components/RoyaltyStatusCard';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -37,7 +38,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                 {entry.name}
               </span>
               <span className="text-[10px] font-bold text-white font-mono">
-                {entry.value} TON
+                {entry.value} GRAM
               </span>
             </div>
           ))}
@@ -74,21 +75,21 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
     
     logs.push({ text: '▶ STARTING TVM TRANSACTION EXECUTION...', type: 'header' });
     logs.push({ text: '⚡ Calling contract: TonJamRoyaltyDistributor.tact', type: 'info' });
-    logs.push({ text: `📥 Incoming stream trigger (Value: 0.001 TON / Track: #${(artist.name || 'track').toUpperCase().replace(/\s+/g, '_')}_TRK)`, type: 'info' });
+    logs.push({ text: `📥 Incoming stream trigger (Value: 0.001 GRAM / Track: #${(artist.name || 'track').toUpperCase().replace(/\s+/g, '_')}_TRK)`, type: 'info' });
     
     logs.push({ text: '⚙️ Parsing context. Sender address: EQD_USER_LISTENER_481a', type: 'info' });
     logs.push({ text: '⛽ Gas consumed: 12,450 nanoton (Optimized via Tact compiler)', type: 'metric' });
     
     const platformFee = 0.001 * 0.10;
     const royaltyShare = 0.001 * 0.90;
-    logs.push({ text: `💸 Platform fee (10%): ${platformFee.toFixed(5)} TON -> fee_destination`, type: 'info' });
+    logs.push({ text: `💸 Platform fee (10%): ${platformFee.toFixed(5)} GRAM -> fee_destination`, type: 'info' });
     
     if (streamingSplits.length === 0) {
-      logs.push({ text: `✨ Distributing 100% of remaining to Main Artist: ${royaltyShare.toFixed(5)} TON -> ${artist.walletAddress || 'EQA_ARTIST_CREATOR_71f'}`, type: 'success' });
+      logs.push({ text: `✨ Distributing 100% of remaining to Main Artist: ${royaltyShare.toFixed(5)} GRAM -> ${artist.walletAddress || 'EQA_ARTIST_CREATOR_71f'}`, type: 'success' });
     } else {
       streamingSplits.forEach((split) => {
         const amt = royaltyShare * split.percentage;
-        logs.push({ text: `✨ Split (${(split.percentage * 100).toFixed(1)}%): ${amt.toFixed(5)} TON -> ${split.label || 'Collaborator'} (${split.address ? split.address.slice(0, 8) + '...' : 'EQA_COLLAB_6b2'})`, type: 'success' });
+        logs.push({ text: `✨ Split (${(split.percentage * 100).toFixed(1)}%): ${amt.toFixed(5)} GRAM -> ${split.label || 'Collaborator'} (${split.address ? split.address.slice(0, 8) + '...' : 'EQA_COLLAB_6b2'})`, type: 'success' });
       });
     }
     
@@ -118,7 +119,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
     
     logs.push({ text: '▶ STARTING TVM NFT MARKETPLACE TRANSACTION...', type: 'header' });
     logs.push({ text: `⚡ Invoking: TonJamMarketplace.tact -> ResolveNFTResaleMessage`, type: 'info' });
-    logs.push({ text: `📥 Resale event triggered. Sale Price: ${saleAmt.toFixed(2)} TON`, type: 'info' });
+    logs.push({ text: `📥 Resale event triggered. Sale Price: ${saleAmt.toFixed(2)} GRAM`, type: 'info' });
     
     logs.push({ text: '⚙️ Fetching contract states: NFTItem.tact & TonJamMarketplace.tact', type: 'info' });
     logs.push({ text: '⛽ Gas consumed: 45,820 nanoton (Custodial-bypass optimization)', type: 'metric' });
@@ -127,19 +128,19 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
     const royaltyCommission = saleAmt * 0.10;
     const sellerProceeds = saleAmt - platformFee - royaltyCommission;
 
-    logs.push({ text: `🏦 Platform fee (10%): ${platformFee.toFixed(2)} TON -> fee_destination`, type: 'info' });
-    logs.push({ text: `🎨 Original Creator Royalty (10%): ${royaltyCommission.toFixed(2)} TON`, type: 'info' });
+    logs.push({ text: `🏦 Platform fee (10%): ${platformFee.toFixed(2)} GRAM -> fee_destination`, type: 'info' });
+    logs.push({ text: `🎨 Original Creator Royalty (10%): ${royaltyCommission.toFixed(2)} GRAM`, type: 'info' });
     
     if (nftSaleSplits.length === 0) {
-      logs.push({ text: `   └─ 100% of Royalty -> Main Artist: ${royaltyCommission.toFixed(2)} TON -> ${artist.walletAddress || 'EQA_ARTIST_CREATOR_71f'}`, type: 'success' });
+      logs.push({ text: `   └─ 100% of Royalty -> Main Artist: ${royaltyCommission.toFixed(2)} GRAM -> ${artist.walletAddress || 'EQA_ARTIST_CREATOR_71f'}`, type: 'success' });
     } else {
       nftSaleSplits.forEach((split) => {
         const amt = royaltyCommission * split.percentage;
-        logs.push({ text: `   └─ Split (${(split.percentage * 100).toFixed(1)}%): ${amt.toFixed(2)} TON -> ${split.label || 'Collaborator'} (${split.address ? split.address.slice(0, 8) + '...' : 'EQA_COLLAB_6b2'})`, type: 'success' });
+        logs.push({ text: `   └─ Split (${(split.percentage * 100).toFixed(1)}%): ${amt.toFixed(2)} GRAM -> ${split.label || 'Collaborator'} (${split.address ? split.address.slice(0, 8) + '...' : 'EQA_COLLAB_6b2'})`, type: 'success' });
       });
     }
 
-    logs.push({ text: `👤 Current NFT Owner (Seller) Payout (80%): ${sellerProceeds.toFixed(2)} TON -> EQD_PREV_HOLDER_95b`, type: 'success' });
+    logs.push({ text: `👤 Current NFT Owner (Seller) Payout (80%): ${sellerProceeds.toFixed(2)} GRAM -> EQD_PREV_HOLDER_95b`, type: 'success' });
     
     logs.push({ text: '🔒 MUTATION COMMITTED TO LEDGER', type: 'header' });
     logs.push({ text: `✅ STATUS: SUCCESS | Block height: #38942103 | TX: a32b...0d9c`, type: 'success' });
@@ -187,7 +188,10 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
   }, [earnings.streaming, earnings.nftSales, artist.name]);
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-700">
+    <div className="space-y-6 animate-in fade-in duration-700">
+      {/* Royalty Status Card */}
+      <RoyaltyStatusCard artistName={artist?.name} />
+
       {/* Earnings Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         <div className="glass border border-neutral-500/10 p-2 rounded-[4px] bg-foreground/[0.02] relative overflow-hidden group">
@@ -197,7 +201,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
           <h3 className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em] mb-2">Streaming Revenue</h3>
           <div className="flex items-baseline gap-2">
             <span className="text-[26px] font-bold text-blue-400 tracking-tighter">{earnings.streaming}</span>
-            <span className="text-[10px] font-bold text-blue-500 uppercase">TON</span>
+            <span className="text-[10px] font-bold text-blue-500 uppercase">GRAM</span>
           </div>
           <p className="text-[8px] text-blue-400/70 uppercase tracking-widest mt-2">Based on {(streamingPercentage * 100).toFixed(1)}% share</p>
         </div>
@@ -209,7 +213,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
           <h3 className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em] mb-2">NFT Royalties</h3>
           <div className="flex items-baseline gap-2">
             <span className="text-[26px] font-bold text-blue-400 tracking-tighter">{earnings.nftSales}</span>
-            <span className="text-[10px] font-bold text-amber-500 uppercase">TON</span>
+            <span className="text-[10px] font-bold text-amber-500 uppercase">GRAM</span>
           </div>
           <p className="text-[8px] text-blue-400/70 uppercase tracking-widest mt-2">Based on {(nftSaleShare * 100).toFixed(1)}% share</p>
         </div>
@@ -221,7 +225,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
           <h3 className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em] mb-2">Total Earnings</h3>
           <div className="flex items-baseline gap-2">
             <span className="text-[26px] font-bold text-blue-400 tracking-tighter">{earnings.total}</span>
-            <span className="text-[10px] font-bold text-blue-400 uppercase">TON</span>
+            <span className="text-[10px] font-bold text-blue-400 uppercase">GRAM</span>
           </div>
           <button className="w-full mt-2 py-2 bg-blue-600 text-foreground rounded-[4px] text-[8px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">Withdraw to Wallet</button>
         </div>
@@ -358,7 +362,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_#22c55e]"></div>
-                  <span className="text-[9px] font-bold text-muted-foreground/80 uppercase">Verified on TON Mainnet</span>
+                  <span className="text-[9px] font-bold text-muted-foreground/80 uppercase">Verified on GRAM Mainnet</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_#22c55e]"></div>
@@ -421,7 +425,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
                       </div>
                       <div className="text-right shrink-0">
                         <span className="text-blue-400 font-black font-mono block">{(split.percentage * 100).toFixed(1)}%</span>
-                        <span className="text-[8px] font-mono text-zinc-400 block">{shareAmount} TON</span>
+                        <span className="text-[8px] font-mono text-zinc-400 block">{shareAmount} GRAM</span>
                       </div>
                     </div>
                   );
@@ -478,7 +482,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
                       </div>
                       <div className="text-right shrink-0">
                         <span className="text-amber-500 font-black font-mono block">{(split.percentage * 100).toFixed(1)}%</span>
-                        <span className="text-[8px] font-mono text-zinc-400 block">{shareAmount} TON</span>
+                        <span className="text-[8px] font-mono text-zinc-400 block">{shareAmount} GRAM</span>
                       </div>
                     </div>
                   );
@@ -617,7 +621,7 @@ contract TonJamRoyaltyDistributor with Deployable {
                     <span className="text-xs font-black text-emerald-400 font-mono">{(simStats.gasSaved / 1000).toFixed(1)}k</span>
                   </div>
                   <div className="bg-black/25 p-2 rounded">
-                    <span className="text-[7.5px] font-bold text-zinc-500 uppercase tracking-widest block">Settled TON</span>
+                    <span className="text-[7.5px] font-bold text-zinc-500 uppercase tracking-widest block">Settled GRAM</span>
                     <span className="text-xs font-black text-blue-400 font-mono">{simStats.settledTON}</span>
                   </div>
                 </div>
@@ -628,7 +632,7 @@ contract TonJamRoyaltyDistributor with Deployable {
                 <div className="p-3 bg-white/[0.01] rounded space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[8.5px] font-black text-[#2BE08C] uppercase tracking-widest">1. Track Stream Royalty</span>
-                    <span className="text-[8.5px] text-[#9AA0AE]/50 font-mono">0.001 TON</span>
+                    <span className="text-[8.5px] text-[#9AA0AE]/50 font-mono">0.001 GRAM</span>
                   </div>
                   <p className="text-[8px] text-zinc-500 leading-normal">
                     Triggers a streaming micro-payment. TVM intercepts and splits 10% to platform fee, and 90% automatically dispersed among your streaming split recipients.
@@ -652,7 +656,7 @@ contract TonJamRoyaltyDistributor with Deployable {
                         onChange={(e) => setSimPrice(e.target.value)}
                         className="w-10 h-5 px-1 bg-black/40 text-[9px] font-bold font-mono text-white text-center rounded border-none focus-visible:outline-none"
                       />
-                      <span className="text-[8.5px] text-zinc-500 font-mono">TON</span>
+                      <span className="text-[8.5px] text-zinc-500 font-mono">GRAM</span>
                     </div>
                   </div>
                   <p className="text-[8px] text-zinc-500 leading-normal">

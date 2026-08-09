@@ -97,7 +97,7 @@ export const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
   };
 
   return (
-    <div className="relative w-full flex items-center bg-[#07102e] rounded-[12px] p-0.5 border border-white/5">
+    <div className="relative w-full flex items-center bg-[#07102e] rounded-[12px] p-0.5 shadow-md">
       <div className="pl-4 text-slate-400">
         <Search className="w-4 h-4" />
       </div>

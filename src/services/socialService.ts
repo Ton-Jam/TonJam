@@ -79,6 +79,7 @@ export const createActivityPost = async (
   metadata: {
     targetId?: string;
     artistName?: string;
+    trackTitle?: string;
     paymentAmount?: string;
     paymentCurrency?: string;
   }

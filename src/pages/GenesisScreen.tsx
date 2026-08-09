@@ -64,7 +64,7 @@ const GenesisScreen: React.FC = () => {
 
           <div className="max-w-2xl mx-auto space-y-6">
             <p className="text-muted-foreground text-sm md:text-lg font-medium leading-relaxed tracking-tight">
-              The foundational block of TonJam. 1,000 unique audio artifacts forged on TON for the pioneers of decentralized music. This remains the most rare tier in existence.
+              The foundational block of TonJam. 1,000 unique audio artifacts forged on GRAM for the pioneers of decentralized music. This remains the most rare tier in existence.
             </p>
             
             <div className="flex flex-wrap items-center justify-center gap-6 pt-8">
@@ -218,7 +218,7 @@ const GenesisScreen: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-blue-500/10"></div>
         <div className="relative z-10 max-w-2xl mx-auto px-6 space-y-10">
           <div className="inline-flex flex-col items-center">
-            <img src={TON_LOGO} className="w-12 h-12 mb-6 grayscale hover:grayscale-0 transition-all cursor-pointer" alt="TON" />
+            <img src={TON_LOGO} className="w-12 h-12 mb-6 grayscale hover:grayscale-0 transition-all cursor-pointer" alt="GRAM" />
             <h2 className="text-5xl font-black uppercase tracking-tighter">Secure the Alpha</h2>
             <p className="text-muted-foreground text-lg font-medium">Genesis supply is 94% distributed. Final unique drops occurring soon.</p>
           </div>

@@ -48,6 +48,7 @@ import { PlaylistSection } from './shared/PlaylistSection';
 import { PostsSection } from './shared/PostsSection';
 import { AboutSection } from './shared/AboutSection';
 import { UserProfileDashboard } from '@/components/profile/UserProfileDashboard';
+import { RoyaltyTrackingSection } from '@/components/profile/RoyaltyTrackingSection';
 import { ListenStreakIndicator } from '@/components/profile/ListenStreakIndicator';
 
 import { MOCK_PROFILE, ProfileData } from '@/components/profile/ProfileTypes';
@@ -208,54 +209,75 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
 
   useEffect(() => {
     if (isOwnProfile && currentUserProfile) {
-      setProfile({
-        uid: currentUserProfile.uid,
-        name: currentUserProfile.name || 'TONJAM User',
-        username: currentUserProfile.username || 'tonjam_user',
-        avatar: currentUserProfile.avatar || getPlaceholderImage(`user-${currentUserProfile.uid}`),
-        bannerUrl: currentUserProfile.bannerUrl || '',
-        bio: currentUserProfile.bio || '',
-        memberSince: currentUserProfile.createdAt ? new Date(currentUserProfile.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : 'March 2026',
-        walletAddress: currentUserProfile.walletAddress || '',
-        isSpotifyVerified: true,
-        isArtistVerified: currentUserProfile.isVerifiedArtist || forceArtistDashboard,
-        verificationStatus: currentUserProfile.verificationStatus || (forceArtistDashboard ? 'verified' : 'none'),
-        followers: currentUserProfile.followers || 0,
-        following: currentUserProfile.following || 0,
-        monthlyListeners: 84300,
-        totalStreams: 245900,
-        nftsOwned: currentUserProfile.ownedNftIds?.length || 0,
-        nftsSold: 0,
-        playlistsCount: currentUserProfile.createdPlaylistIds?.length || 0,
-        tjPoints: currentUserProfile.tjBalance || 100,
-      } as ProfileData);
+      setProfile((prev) => {
+        const nextUid = currentUserProfile.uid;
+        const nextName = currentUserProfile.name || 'TONJAM User';
+        const nextAvatar = currentUserProfile.avatar || getPlaceholderImage(`user-${currentUserProfile.uid}`);
+        const nextBio = currentUserProfile.bio || '';
+        if (
+          prev.uid === nextUid &&
+          prev.name === nextName &&
+          prev.avatar === nextAvatar &&
+          prev.bio === nextBio &&
+          prev.followers === (currentUserProfile.followers || 0) &&
+          prev.following === (currentUserProfile.following || 0)
+        ) {
+          return prev;
+        }
+        return {
+          uid: nextUid,
+          name: nextName,
+          username: currentUserProfile.username || 'tonjam_user',
+          avatar: nextAvatar,
+          bannerUrl: currentUserProfile.bannerUrl || '',
+          bio: nextBio,
+          memberSince: currentUserProfile.createdAt ? new Date(currentUserProfile.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : 'March 2026',
+          walletAddress: currentUserProfile.walletAddress || '',
+          isSpotifyVerified: true,
+          isArtistVerified: currentUserProfile.isVerifiedArtist || forceArtistDashboard,
+          verificationStatus: currentUserProfile.verificationStatus || (forceArtistDashboard ? 'verified' : 'none'),
+          followers: currentUserProfile.followers || 0,
+          following: currentUserProfile.following || 0,
+          monthlyListeners: 84300,
+          totalStreams: 245900,
+          nftsOwned: currentUserProfile.ownedNftIds?.length || 0,
+          nftsSold: 0,
+          playlistsCount: currentUserProfile.createdPlaylistIds?.length || 0,
+          tjPoints: currentUserProfile.tjBalance || 100,
+        } as ProfileData;
+      });
     } else if (visitorId) {
       const foundArtist = artists.find(a => a.uid === visitorId);
       if (foundArtist) {
-        setProfile({
-          uid: foundArtist.uid,
-          name: foundArtist.name,
-          username: foundArtist.username || foundArtist.name.toLowerCase().replace(/\s+/g, ''),
-          avatar: foundArtist.avatarUrl || getPlaceholderImage(`user-${foundArtist.uid}`),
-          bannerUrl: foundArtist.bannerUrl || foundArtist.bannerImageUrl || '',
-          bio: foundArtist.bio || '',
-          memberSince: 'March 2026',
-          walletAddress: foundArtist.walletAddress || '',
-          isSpotifyVerified: true,
-          isArtistVerified: foundArtist.isVerifiedArtist || true,
-          verificationStatus: 'verified',
-          followers: foundArtist.followers || 0,
-          following: 0,
-          monthlyListeners: foundArtist.monthlyListeners || 5000,
-          totalStreams: 12500,
-          nftsOwned: 0,
-          nftsSold: 0,
-          playlistsCount: 0,
-          tjPoints: 0,
-        } as ProfileData);
+        setProfile((prev) => {
+          if (prev.uid === foundArtist.uid && prev.name === foundArtist.name) {
+            return prev;
+          }
+          return {
+            uid: foundArtist.uid,
+            name: foundArtist.name,
+            username: foundArtist.username || foundArtist.name.toLowerCase().replace(/\s+/g, ''),
+            avatar: foundArtist.avatarUrl || getPlaceholderImage(`user-${foundArtist.uid}`),
+            bannerUrl: foundArtist.bannerUrl || foundArtist.bannerImageUrl || '',
+            bio: foundArtist.bio || '',
+            memberSince: 'March 2026',
+            walletAddress: foundArtist.walletAddress || '',
+            isSpotifyVerified: true,
+            isArtistVerified: foundArtist.isVerifiedArtist || true,
+            verificationStatus: 'verified',
+            followers: foundArtist.followers || 0,
+            following: 0,
+            monthlyListeners: foundArtist.monthlyListeners || 5000,
+            totalStreams: 12500,
+            nftsOwned: 0,
+            nftsSold: 0,
+            playlistsCount: 0,
+            tjPoints: 0,
+          } as ProfileData;
+        });
       }
     }
-  }, [isOwnProfile, currentUserProfile, visitorId, artists, forceArtistDashboard]);
+  }, [isOwnProfile, currentUserProfile?.uid, currentUserProfile?.name, currentUserProfile?.avatar, visitorId, artists, forceArtistDashboard]);
 
   // Load real consistent albums & tracks from ArtistProfile mock system
   const albumsList: AlbumData[] = getMockAlbums(profile.uid);
@@ -352,6 +374,9 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
 
       case 'dashboard':
         return <UserProfileDashboard />;
+
+      case 'royalties':
+        return <RoyaltyTrackingSection />;
 
       case 'tracks':
         return (

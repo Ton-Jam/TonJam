@@ -109,7 +109,7 @@ export const UIKitShowcase: React.FC = () => {
           </div>
           <h1 className="text-2xl sm:text-3xl font-black mt-2 uppercase tracking-tight">Cards UI Component Library</h1>
           <p className="text-xs text-white/70 mt-1 max-w-xl">
-            Clean, high-fidelity components built for The Open Network (TON) creator economy. Free of borders, optimized for fast rendering.
+            Clean, high-fidelity components built for The Open Network (GRAM) creator economy. Free of borders, optimized for fast rendering.
           </p>
         </div>
         <div className="flex gap-2 shrink-0">
@@ -362,7 +362,7 @@ export const UIKitShowcase: React.FC = () => {
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Announcements & Event Tickets</h4>
                     <AnnouncementCard 
                       title="Gas-Back Royalties are officially Active!" 
-                      description="All NFT creators now earn 0.5% gas-back refunds directly into their TON connected balance on every secondary market transaction." 
+                      description="All NFT creators now earn 0.5% gas-back refunds directly into their GRAM connected balance on every secondary market transaction." 
                     />
                     <EventCard 
                       event={{
@@ -418,12 +418,12 @@ export const UIKitShowcase: React.FC = () => {
                   <div>
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest mb-3">Mystery & Leaderboards</h4>
                     <div className="space-y-4">
-                      <BonusRewardCard title="Scratchcard Claim" description="Claim your mystery promotional asset drop." rewardValue="25.0 TON Promo NFT" />
+                      <BonusRewardCard title="Scratchcard Claim" description="Claim your mystery promotional asset drop." rewardValue="25.0 GRAM Promo NFT" />
                       <ChallengeCard 
                         title="Vibe Creator Phonk Competition" 
                         description="Produce the highest streamed track in the Phonk category this month to capture the main prize pool!"
                         endsIn="3d 12h"
-                        rewardPool="1,200 TON"
+                        rewardPool="1,200 GRAM"
                         participantsCount={145}
                       />
                     </div>
@@ -451,7 +451,7 @@ export const UIKitShowcase: React.FC = () => {
                   <div className="space-y-4">
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Connected Wallet Balance</h4>
                     <WalletBalanceCard address="EQB3120X91Z85Y_A72F6D1N_83W91X_Z92V" tonBalance="1,250.45" usdBalance="8,065.40" />
-                    <RewardCard title="Gas-Back Royalty Accumulator" availableAmount="12.45 TON" />
+                    <RewardCard title="Gas-Back Royalty Accumulator" availableAmount="12.45 GRAM" />
                   </div>
                   <div className="space-y-4">
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Portfolio Net Worth</h4>
@@ -459,7 +459,7 @@ export const UIKitShowcase: React.FC = () => {
                       netWorthUsd="8,520.40" 
                       change24h={4.5} 
                       tokens={[
-                        { id: '1', name: 'The Open Network', symbol: 'TON', balance: '1,250.45', priceUsd: '6.45', change24h: 3.4 },
+                        { id: '1', name: 'Grams Network', symbol: 'GRAM', balance: '1,250.45', priceUsd: '6.45', change24h: 3.4 },
                         { id: '2', name: 'TonJam Native', symbol: 'JAM', balance: '4,500.00', priceUsd: '0.10', change24h: 12.5 },
                       ]} 
                     />
@@ -469,7 +469,7 @@ export const UIKitShowcase: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-black tracking-widest text-emerald-400 uppercase mb-4">Held Token Assets</h3>
                   <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none">
-                    <TokenCard token={{ id: '1', name: 'The Open Network', symbol: 'TON', balance: '1,250.45', priceUsd: '6.45', change24h: 3.4 }} />
+                    <TokenCard token={{ id: '1', name: 'Grams Network', symbol: 'GRAM', balance: '1,250.45', priceUsd: '6.45', change24h: 3.4 }} />
                     <TokenCard token={{ id: '2', name: 'TonJam Native', symbol: 'JAM', balance: '4,500.00', priceUsd: '0.10', change24h: 12.5 }} />
                   </div>
                 </div>
@@ -482,7 +482,7 @@ export const UIKitShowcase: React.FC = () => {
                         id: 't1',
                         type: 'receive',
                         status: 'completed',
-                        amount: '+45.0 TON',
+                        amount: '+45.0 GRAM',
                         usdAmount: '+$290.00',
                         address: 'EQA72X...92Z85Y',
                         timestamp: '5m ago',
@@ -494,7 +494,7 @@ export const UIKitShowcase: React.FC = () => {
                         id: 't2',
                         type: 'send',
                         status: 'pending',
-                        amount: '-10.0 TON',
+                        amount: '-10.0 GRAM',
                         usdAmount: '-$64.50',
                         address: 'EQZ92V...3120X9',
                         timestamp: '15m ago',
@@ -512,7 +512,7 @@ export const UIKitShowcase: React.FC = () => {
               <div className="space-y-10">
                 <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none">
                   <StreamsCard metric={{ label: 'Total Streams', value: '1.2M', changePercent: 12.4, timeRange: 'Last 30 days', chartData: [40, 55, 30, 75, 60, 85, 110] }} />
-                  <RevenueCard metric={{ label: 'Total Earnings', value: '4,250 TON', changePercent: 8.2, timeRange: 'Last 30 days', chartData: [20, 45, 35, 60, 50, 75, 95] }} />
+                  <RevenueCard metric={{ label: 'Total Earnings', value: '4,250 GRAM', changePercent: 8.2, timeRange: 'Last 30 days', chartData: [20, 45, 35, 60, 50, 75, 95] }} />
                   <FloorPriceAnalytics collectionName="Future Funk Series" currentFloor="14.5" change7d={12.4} volume24h="2,500" />
                   <MarketplaceVolume metric={{ label: 'Volume Chart', value: '42.5K', changePercent: 4.5, timeRange: '24h window' }} />
                 </div>

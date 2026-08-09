@@ -37,7 +37,7 @@ export const GasFeeDisplay: React.FC<{
     if (showInUsd && tonPrice) {
       return `$${(amount * tonPrice).toFixed(2)}`;
     }
-    return `${amount.toFixed(3)} TON`;
+    return `${amount.toFixed(3)} GRAM`;
   };
 
   const handleSimulate = async () => {

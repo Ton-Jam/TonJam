@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ToastProvider } from './ToastProvider';
 import { ModalProvider } from './ModalProvider';
@@ -37,7 +37,24 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   progress = 0.45,
 }) => {
   const [isQueueOpen, setIsQueueOpen] = useState(false);
+  const [isNavHidden, setIsNavHidden] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 40) {
+        setIsNavHidden(true);
+      } else if (currentScrollY < lastScrollY || currentScrollY <= 20) {
+        setIsNavHidden(false);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   return (
     <div className="min-h-screen w-full bg-[#050608] text-slate-100 flex flex-col relative overflow-hidden font-sans">
@@ -122,6 +139,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <BottomNavigation
             activeTab={activeTab}
             onTabChange={onTabChange}
+            isHidden={isNavHidden}
           />
     </div>
   );

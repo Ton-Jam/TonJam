@@ -774,6 +774,7 @@ export const ListNFTForm: React.FC<ListNFTFormProps> = ({
                 } rounded-xl pl-3.5 pr-20 py-2.5 text-sm font-bold text-white placeholder-slate-600 focus:outline-none`}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 bg-slate-800 px-2.5 py-1 rounded-lg text-xs font-bold text-emerald-400 border border-slate-700">
+                <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5 object-contain" />
                 <span>TON</span>
               </div>
             </div>

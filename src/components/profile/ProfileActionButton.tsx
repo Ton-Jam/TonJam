@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, Loader2, ArrowRight, LayoutDashboard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ProfileActionButtonProps {
   isArtistVerified: boolean;
@@ -15,6 +16,13 @@ export const ProfileActionButton: React.FC<ProfileActionButtonProps> = ({
   onBecomeArtist,
   onOpenDashboard
 }) => {
+  const navigate = useNavigate();
+
+  const handleDashboardPress = () => {
+    if (onOpenDashboard) onOpenDashboard();
+    navigate('/artist-dashboard');
+  };
+
   return (
     <motion.div 
       layout 
@@ -25,9 +33,9 @@ export const ProfileActionButton: React.FC<ProfileActionButtonProps> = ({
         <motion.button
           key="artist-dashboard-btn"
           layoutId="profile-primary-action-btn"
-          onClick={onOpenDashboard}
+          onClick={handleDashboardPress}
           whileTap={{ scale: 0.98 }}
-          className="w-full py-3.5 px-6 bg-[#0052FF] hover:bg-[#1a66ff] active:bg-[#0047dd] text-white font-bold text-xs uppercase tracking-wider rounded-[12px] flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          className="w-full py-3.5 px-6 bg-[#0052FF] hover:bg-[#1a66ff] active:bg-[#0047dd] text-white font-bold text-xs uppercase tracking-wider rounded-[12px] flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
         >
           <LayoutDashboard className="w-4 h-4 shrink-0" />
           <span>Go to Artist Dashboard</span>
@@ -38,7 +46,7 @@ export const ProfileActionButton: React.FC<ProfileActionButtonProps> = ({
           key="verification-pending-btn"
           layoutId="profile-primary-action-btn"
           disabled
-          className="w-full py-3.5 px-6 bg-[#101A3B] text-slate-400 font-bold text-xs uppercase tracking-wider rounded-[12px] flex items-center justify-center gap-2 border border-white/5 opacity-85 cursor-not-allowed"
+          className="w-full py-3.5 px-6 bg-[#101A3B] text-slate-400 font-bold text-xs uppercase tracking-wider rounded-[12px] flex items-center justify-center gap-2 opacity-85 cursor-not-allowed"
         >
           <Loader2 className="w-4 h-4 animate-spin shrink-0 text-[#0052FF]" />
           <span>Verification Pending...</span>

@@ -398,7 +398,7 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center py-10 px-5 bg-[#0A113A]/50 rounded-2xl border border-[#16244F] flex flex-col items-center justify-center space-y-3.5 my-2 shadow-inner"
               >
-                <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500/20 to-purple-600/20 border border-rose-500/30 flex items-center justify-center shadow-lg">
+                <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500/20 to-[#0098EA]/20 border border-rose-500/30 flex items-center justify-center shadow-lg">
                   <Heart className="w-7 h-7 text-rose-400 fill-rose-500/20" />
                   <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
@@ -417,7 +417,7 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
 
                 <button
                   onClick={handleReturnToTrending}
-                  className="mt-1 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#5B6BFF] to-[#3B4BEA] hover:from-[#4C5CEE] hover:to-[#2B3BCA] text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-[#5B6BFF]/25 transition-all cursor-pointer active:scale-95"
+                  className="mt-1 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0098EA] to-[#0077C2] hover:from-[#00A3FF] hover:to-[#0088CC] text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-[#0098EA]/25 transition-all cursor-pointer active:scale-95"
                 >
                   <Flame className="w-4 h-4 text-cyan-300 fill-cyan-300 animate-pulse" />
                   <span>Return to Trending Feed</span>
@@ -429,7 +429,7 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
                 {favoriteTracks.map((track) => (
                   <div
                     key={track.id}
-                    className="flex items-center gap-3 p-2.5 rounded-[12px] bg-[#0A113A] border border-[#16244F] hover:border-[#5B6BFF]/50 transition-all group"
+                    className="flex items-center gap-3 p-2.5 rounded-[12px] bg-[#0A113A] border border-[#16244F] hover:border-[#0098EA]/50 transition-all group"
                   >
                     <img
                       src={track.coverUrl || getPlaceholderImage("cover")}
@@ -441,7 +441,7 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
                       className="flex-1 min-w-0 cursor-pointer"
                       onClick={() => onPlayTrack(track)}
                     >
-                      <h5 className="text-xs font-bold text-[#F2F4F8] truncate group-hover:text-[#5B6BFF] transition-colors">
+                      <h5 className="text-xs font-bold text-[#F2F4F8] truncate group-hover:text-[#0098EA] transition-colors">
                         {track.title}
                       </h5>
                       <p className="text-[11px] text-[#9AA0AE] truncate">
@@ -453,7 +453,7 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
                       {/* Play Button */}
                       <button
                         onClick={() => onPlayTrack(track)}
-                        className="p-1.5 text-[#5B6BFF] hover:text-[#5B6BFF]/80 rounded-[8px] bg-[#5B6BFF]/10 hover:bg-[#5B6BFF]/20 transition-all"
+                        className="p-1.5 text-[#0098EA] hover:text-[#0098EA]/80 rounded-[8px] bg-[#0098EA]/10 hover:bg-[#0098EA]/20 transition-all"
                         title="Play track"
                       >
                         <Play className="w-3.5 h-3.5 fill-current" />
@@ -503,7 +503,7 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
                 <div
                   key={`${track.id}-${idx}`}
                   onClick={() => onPlayTrack(track)}
-                  className="flex items-center gap-3 p-2.5 rounded-[12px] bg-[#0A113A] border border-[#16244F] hover:border-[#5B6BFF] transition-all cursor-pointer mb-2 group"
+                  className="flex items-center gap-3 p-2.5 rounded-[12px] bg-[#0A113A] border border-[#16244F] hover:border-[#0098EA] transition-all cursor-pointer mb-2 group"
                 >
                   <img
                     src={track.coverUrl || getPlaceholderImage("cover")}
@@ -511,14 +511,14 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
                     className="w-10 h-10 object-cover rounded-[8px]"
                   />
                   <div className="flex-1 min-w-0">
-                    <h5 className="text-xs font-bold text-[#F2F4F8] truncate group-hover:text-[#5B6BFF] transition-colors">
+                    <h5 className="text-xs font-bold text-[#F2F4F8] truncate group-hover:text-[#0098EA] transition-colors">
                       {track.title}
                     </h5>
                     <p className="text-[11px] text-[#9AA0AE] truncate">
                       {track.artist}
                     </p>
                   </div>
-                  <Play className="w-4 h-4 text-[#5B6BFF] fill-current" />
+                  <Play className="w-4 h-4 text-[#0098EA] fill-current" />
                 </div>
               ))
             )}

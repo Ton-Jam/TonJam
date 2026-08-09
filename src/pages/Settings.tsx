@@ -72,7 +72,7 @@ const Settings: React.FC = () => {
   const { user, userProfile, signOut } = useAuth();
   const { isOffline, toggleOfflineMode, artworkStyle, setArtworkStyle } = useAudio();
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage } = useI18n();
+  const { language, setLanguage, t } = useI18n();
   const { totalSizeMB, cachedCount, clearAllCache, isPurging } = useCacheManagement();
   const tonAddress = useTonAddress();
   
@@ -713,17 +713,21 @@ const Settings: React.FC = () => {
 
                     <SettingRow 
                         icon={Globe} 
-                        title="Display Language" 
-                        description="Select the interface presentation language"
+                        title={t('settings.display_language')} 
+                        description={t('settings.language_desc')}
                     >
-                        <Select value={language} onValueChange={(val: any) => setLanguage(val as 'en' | 'ru' | 'uk')}>
-                          <SelectTrigger className="w-[120px] h-10 bg-black/30 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest px-4 shadow-none">
+                        <Select value={language} onValueChange={(val: any) => setLanguage(val)}>
+                          <SelectTrigger className="w-[140px] h-10 bg-black/30 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest px-4 shadow-none">
                               <SelectValue placeholder="Language" />
                           </SelectTrigger>
                           <SelectContent className="bg-zinc-900 border border-white/5 rounded-2xl shadow-2xl">
                               <SelectItem value="en" className="text-[10px] font-black uppercase tracking-widest">English</SelectItem>
                               <SelectItem value="ru" className="text-[10px] font-black uppercase tracking-widest">Русский</SelectItem>
                               <SelectItem value="uk" className="text-[10px] font-black uppercase tracking-widest">Українська</SelectItem>
+                              <SelectItem value="es" className="text-[10px] font-black uppercase tracking-widest">Español</SelectItem>
+                              <SelectItem value="de" className="text-[10px] font-black uppercase tracking-widest">Deutsch</SelectItem>
+                              <SelectItem value="fr" className="text-[10px] font-black uppercase tracking-widest">Français</SelectItem>
+                              <SelectItem value="zh" className="text-[10px] font-black uppercase tracking-widest">中文</SelectItem>
                           </SelectContent>
                         </Select>
                     </SettingRow>

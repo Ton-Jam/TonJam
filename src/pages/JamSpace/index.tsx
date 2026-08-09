@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bell, 
@@ -45,6 +46,7 @@ import {
 } from './components/Skeletons';
 
 const JamSpaceMain: React.FC = () => {
+  const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { addNotification } = useAudio();
   const [isOnline, setIsOnline] = useState(true);
@@ -217,7 +219,10 @@ const JamSpaceMain: React.FC = () => {
                 <LiveSpaces 
                   spaces={jamData.spaces}
                   activeSpace={jamData.activeSpace}
-                  onJoinSpace={jamData.handleJoinSpace}
+                  onJoinSpace={(spaceId) => {
+                    jamData.handleJoinSpace(spaceId);
+                    navigate(`/space/${spaceId}`);
+                  }}
                 />
 
                 {/* 5. TRENDING DISCUSSIONS */}

@@ -143,7 +143,7 @@ export const TrendingMusicChart: React.FC = () => {
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#0c133a] p-3 rounded-xl border border-white/10 shadow-2xl space-y-1.5 text-left">
+        <div className="bg-[#0c133a] p-3 rounded-xl shadow-2xl space-y-1.5 text-left">
           <p className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
             Time: {payload[0].payload.time}
           </p>

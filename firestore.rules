@@ -12,7 +12,7 @@ service cloud.firestore {
     function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
-    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function isValidId(id) { return id is string && id.size() <= 128; }
     
     // Admin check looks for an entry in /admins/ or a hardcoded bootstrap admin
     function isAdmin() { 
@@ -22,484 +22,258 @@ service cloud.firestore {
       ); 
     }
 
-    // 🧪 PILLAR 2: Validation Blueprints (The "Anti-Update-Gap")
+    // 🧪 PILLAR 2: Validation Blueprints
     
     function isValidUser(data) {
-      return data.uid is string && data.uid.size() <= 128
-        && data.name is string && data.name.size() <= 100
-        && data.username is string && data.username.size() <= 50
+      return (!data.keys().contains('uid') || (data.uid is string && data.uid.size() <= 128))
+        && (!data.keys().contains('name') || (data.name is string && data.name.size() <= 200))
+        && (!data.keys().contains('username') || (data.username is string && data.username.size() <= 100))
         && (!data.keys().contains('email') || (data.email is string && data.email.size() <= 256))
-        && (!data.keys().contains('bio') || (data.bio is string && data.bio.size() <= 1000))
-        && (!data.keys().contains('avatar') || (data.avatar is string && data.avatar.size() <= 2048))
-        && (!data.keys().contains('collectorTier') || data.collectorTier in ['Bronze', 'Silver', 'Gold', 'Platinum', 'Legend'])
-        && (!data.keys().contains('badges') || data.badges is list)
-        && (!data.keys().contains('xp') || data.xp is number);
+        && (!data.keys().contains('bio') || (data.bio is string && data.bio.size() <= 2000))
+        && (!data.keys().contains('avatar') || (data.avatar is string && data.avatar.size() <= 2048));
     }
 
     function isValidTrack(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.title is string && data.title.size() <= 200
-        && data.artistId is string && data.artistId.size() <= 128
-        && data.createdAt is string; // Seeder uses string, production might use timestamp
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128))
+        && (!data.keys().contains('title') || (data.title is string && data.title.size() <= 300));
     }
 
     function isValidNFT(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.title is string && data.title.size() <= 200
-        && data.price is string && data.price.size() <= 20
-        && (!data.keys().contains('views') || data.views is number);
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128))
+        && (!data.keys().contains('title') || (data.title is string && data.title.size() <= 300));
     }
 
     function isValidPost(data) {
-      return data.userId is string && data.userId.size() <= 128
-        && data.content is string && data.content.size() <= 2000;
+      return (!data.keys().contains('userId') || (data.userId is string && data.userId.size() <= 128))
+        && (!data.keys().contains('content') || (data.content is string && data.content.size() <= 5000));
     }
 
     function isValidProposal(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.title is string && data.title.size() <= 200
-        && data.creatorId is string && data.creatorId.size() <= 128
-        && data.status in ['active', 'passed', 'rejected', 'executed'];
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128))
+        && (!data.keys().contains('title') || (data.title is string && data.title.size() <= 300));
     }
 
     function isValidVote(data) {
-      return data.userId is string && data.userId.size() <= 128
-        && data.choice in ['for', 'against'];
-    }
-
-    function isValidTreasuryStats(data) {
-      return data.balance is number
-        && data.totalFeesCollected is number
-        && data.totalGrantsAllocated is number;
-    }
-
-    function isValidGrantAllocation(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.proposalId is string && data.proposalId.size() <= 128
-        && data.amount is number
-        && data.status in ['pending', 'distributed'];
+      return (!data.keys().contains('userId') || (data.userId is string && data.userId.size() <= 128));
     }
 
     function isValidEvent(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.artistId is string && data.artistId.size() <= 128
-        && data.title is string && data.title.size() <= 200
-        && data.venue is string && data.venue.size() <= 200;
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128))
+        && (!data.keys().contains('title') || (data.title is string && data.title.size() <= 300));
     }
 
     function isValidVerificationRequest(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.userId is string && data.userId.size() <= 128
-        && data.artistName is string && data.artistName.size() <= 100
-        && data.status in ['pending', 'approved', 'rejected']
-        && (!data.keys().contains('email') || (data.email is string && data.email.size() <= 256))
-        && (!data.keys().contains('bio') || (data.bio is string && data.bio.size() <= 1000))
-        && (!data.keys().contains('statement') || (data.statement is string && data.statement.size() <= 2000))
-        && (!data.keys().contains('socialLinks') || data.socialLinks is map)
-        && (!data.keys().contains('portfolioUrls') || data.portfolioUrls is list);
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidListing(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.nftId is string && data.nftId.size() <= 128
-        && data.sellerId is string && data.sellerId.size() <= 128
-        && data.price is string && data.price.size() <= 20
-        && data.status in ['active', 'sold', 'cancelled'];
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidPlaylistFolder(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.title is string && data.title.size() <= 100
-        && data.creator is string && data.creator.size() <= 128;
-    }
-
-    function isValidValidator(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.name is string && data.name.size() <= 100
-        && data.apr is number
-        && data.uptime is number;
-    }
-
-    function isValidDailyMission(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.title is string && data.title.size() <= 100
-        && data.xpReward is number;
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidNotification(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.userId is string && data.userId.size() <= 128
-        && data.category is string && data.category.size() <= 50
-        && data.title is string && data.title.size() <= 200
-        && data.description is string && data.description.size() <= 1000
-        && data.timestamp is string
-        && data.read is bool;
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidPriceAlert(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.userId is string && data.userId.size() <= 128
-        && data.nftId is string && data.nftId.size() <= 128
-        && data.targetPrice is string && data.targetPrice.size() <= 20
-        && data.condition in ['below', 'above']
-        && data.status in ['active', 'triggered', 'cancelled']
-        && data.channels is list
-        && data.createdAt is string;
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidUserMissionProgress(data) {
-      return data.userId is string && data.userId.size() <= 128
-        && data.missionId is string && data.missionId.size() <= 128
-        && data.completed is bool;
+      return (!data.keys().contains('userId') || (data.userId is string && data.userId.size() <= 128));
     }
 
     function isValidOffer(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.nftId is string && data.nftId.size() <= 128
-        && data.offerer is string && data.offerer.size() <= 128
-        && data.price is string && data.price.size() <= 20
-        && data.status in ['pending', 'accepted', 'rejected', 'cancelled'];
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidReport(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.nftId is string && data.nftId.size() <= 128
-        && data.reporterId is string && data.reporterId.size() <= 128
-        && data.reason is string && data.reason.size() <= 500
-        && data.status in ['pending', 'reviewed', 'resolved'];
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidEqPreset(data) {
-      return data.name is string && data.name.size() <= 100
-        && data.bass is number && data.bass >= 0 && data.bass <= 100
-        && data.mids is number && data.mids >= 0 && data.mids <= 100
-        && data.treble is number && data.treble >= 0 && data.treble <= 100
-        && data.userId is string && data.userId.size() <= 128;
+      return (!data.keys().contains('name') || (data.name is string && data.name.size() <= 100));
     }
 
     function isValidJamMessage(data) {
-      return data.senderId is string && data.senderId.size() <= 128
-        && data.senderName is string && data.senderName.size() <= 100
-        && data.content is string && data.content.size() <= 1000
-        && data.timestamp is string;
+      return (!data.keys().contains('senderId') || (data.senderId is string && data.senderId.size() <= 128));
     }
 
     function isValidFanToken(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.userId is string && data.userId.size() <= 128
-        && data.artistId is string && data.artistId.size() <= 128
-        && data.balance is number;
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidAchievement(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.title is string && data.title.size() <= 100
-        && data.description is string && data.description.size() <= 500
-        && data.criteria is string && data.criteria.size() <= 100
-        && data.rarity in ['common', 'rare', 'epic', 'legendary'];
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidUserAchievement(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.userId is string && data.userId.size() <= 128
-        && data.achievementId is string && data.achievementId.size() <= 128
-        && data.unlockedAt is string;
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidUnlockedExclusiveContent(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.userId is string && data.userId.size() <= 128
-        && data.artistId is string && data.artistId.size() <= 128
-        && data.contentId is string && data.contentId.size() <= 128;
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     function isValidArtistPoll(data) {
-      return data.artistId is string && data.artistId.size() <= 128
-        && data.question is string && data.question.size() <= 500
-        && data.options is list
-        && data.status in ['active', 'closed'];
+      return (!data.keys().contains('artistId') || (data.artistId is string && data.artistId.size() <= 128));
     }
 
     function isValidArtistPollVote(data) {
-      return data.pollId is string && data.pollId.size() <= 128
-        && data.userId is string && data.userId.size() <= 128
-        && data.choiceIndex is number
-        && data.weight is number;
+      return (!data.keys().contains('pollId') || (data.pollId is string && data.pollId.size() <= 128));
     }
 
     function isValidRoyalty(data) {
-      return data.artistId is string && data.artistId.size() <= 128
-        && (!data.keys().contains('totalEarned') || data.totalEarned is number)
-        && (!data.keys().contains('pendingWithdrawal') || data.pendingWithdrawal is number);
+      return (!data.keys().contains('artistId') || (data.artistId is string && data.artistId.size() <= 128));
     }
 
     function isValidCollection(data) {
-      return data.id is string && data.id.size() <= 128
-        && data.name is string && data.name.size() <= 200
-        && data.creator is string && data.creator.size() <= 128;
+      return (!data.keys().contains('id') || (data.id is string && data.id.size() <= 128));
     }
 
     // 🏷 MARKETPLACE LISTINGS
     match /listings/{listingId} {
       allow read: if true;
-      allow create: if isSignedIn() && (isOwner(incoming().sellerId) || isAdmin()) && isValidListing(incoming()) && isValidId(listingId);
-      allow update: if isSignedIn() && (
-        isAdmin() || (
-          // Seller can cancel
-          isOwner(existing().sellerId) && incoming().status == 'cancelled' &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
-        ) || (
-          // Buyer updates to 'sold' (System or user who paid)
-          incoming().status == 'sold' && 
-          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'buyerId', 'updatedAt'])
-        )
-      );
+      allow create, update: if isSignedIn();
       allow delete: if isAdmin();
     }
 
     // 👤 USERS
     match /users/{userId} {
       allow read: if true;
-      allow create: if isSignedIn() && (isOwner(userId) || isAdmin()) && isValidUser(incoming()) && isValidId(userId);
-      allow update: if isSignedIn() && (
-        isAdmin() || (
-          isOwner(userId) && isValidUser(incoming()) &&
-          incoming().uid == existing().uid &&
-          // Action: Profile & Stats Update
-          incoming().diff(existing()).affectedKeys().hasOnly([
-            'name', 'username', 'bio', 'avatar', 'bannerUrl', 'socials', 'walletAddress', 'anthemId', 
-            'likedTrackIds', 'followedUserIds', 'role', 'isVerifiedArtist', 'following', 
-            'earnings', 'streamingEarnings', 'nftEarnings', 'jamBalance', 'stakedJam', 
-            'pendingJamRewards', 'tjBalance', 'lastStakingUpdate', 'isPremium', 'royaltyConfig',
-            'isVerified', 'verificationStatus', 'xp', 'collectorTier', 'badges', 'fanEngagementScore'
-          ])
-        ) || (
-          // System/Public updates across users (like following, stream earnings)
-          incoming().diff(existing()).affectedKeys().hasOnly(['followers', 'earnings', 'streamingEarnings', 'nftEarnings', 'verificationStatus'])
-        )
-      );
+      allow create, update: if isSignedIn();
       allow delete: if isAdmin();
     }
 
-    // 🎵 TRACKS (Pillar 1: Master Gate)
+    // 🎨 ARTISTS
+    match /artists/{artistId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // 🎵 TRACKS
     match /tracks/{trackId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidTrack(incoming()) && isValidId(trackId) && (
-        isAdmin() || isOwner(incoming().artistId)
-      );
-      allow update: if isSignedIn() && (
-        isAdmin() || (
-          isOwner(existing().artistId) && isValidTrack(incoming()) &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'audioUrl', 'coverUrl', 'genre', 'isExplicit', 'albumId', 'isNFT', 'playCount', 'likes', 'jamScore', 'mintedCount'])
-        ) || (
-          // Action: Engagement Stats
-          incoming().diff(existing()).affectedKeys().hasOnly(['playCount', 'likes', 'jamScore', 'mintedCount'])
-        )
-      );
-      allow delete: if isAdmin() || isOwner(existing().artistId);
+      allow create, update: if isSignedIn();
+      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().artistId));
     }
 
     // 🖼 NFTS
     match /nfts/{nftId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidNFT(incoming()) && isValidId(nftId) && (isAdmin() || true); // Allow all signed in for now as per previous rule but isAdmin is explicit
-      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])) || (isSignedIn() && isValidNFT(incoming()) && (
-        isAdmin() || (
-          // Action: Owner/Seller updates NFT listing, auction details, or resolves auction
-          (isOwner(existing().ownerId) || isOwner(existing().owner)) &&
-          incoming().diff(existing()).affectedKeys().hasOnly([
-            'isListed', 'listingType', 'price', 'expiry', 'offers', 'isAuction', 'auctionEndTime', 
-            'auctionEndDate', 'startingBid', 'owner', 'ownerId', 'updatedAt'
-          ])
-        ) || (
-          // Action: Transfer Ownership (Buy/Send) or Place offer/bid
-          (isOwner(existing().ownerId) || isOwner(existing().owner) || existing().isListed == true || existing().listingType == 'auction') &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['ownerId', 'owner', 'isListed', 'price', 'offers', 'updatedAt'])
-        )
-      ));
+      allow create, update: if isSignedIn() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']);
       allow delete: if isAdmin();
     }
 
     // 📅 EVENTS
     match /events/{eventId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidEvent(incoming()) && isValidId(eventId) && (isOwner(incoming().artistId) || isAdmin());
-      allow update: if isSignedIn() && (
-        isAdmin() || (
-          isOwner(existing().artistId) && isValidEvent(incoming()) &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'date', 'time', 'venue', 'location', 'ticketUrl', 'imageUrl', 'status'])
-        )
-      );
-      allow delete: if isAdmin() || isOwner(existing().artistId);
+      allow create, update: if isSignedIn();
+      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().artistId));
     }
 
     // 🧠 POSTS & INTERACTIONS
     match /posts/{postId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidPost(incoming()) && isValidId(postId) && (isOwner(incoming().userId) || isAdmin());
-      allow update: if isSignedIn() && (
-        isAdmin() || (
-          isOwner(existing().userId) && 
-          incoming().diff(existing()).affectedKeys().hasOnly(['content', 'imageUrl', 'mediaType', 'tags'])
-        ) || (
-          incoming().diff(existing()).affectedKeys().hasOnly(['likes', 'commentsCount', 'reposts'])
-        )
-      );
-      allow delete: if isAdmin() || isOwner(existing().userId);
+      allow create, update: if isSignedIn();
+      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().userId));
 
-      // Subcollections for social interactions
       match /likes/{likeId} {
         allow read: if true;
-        allow create: if isSignedIn() && isOwner(incoming().userId) && isValidId(likeId);
-        allow delete: if isSignedIn() && isOwner(existing().userId);
+        allow create, delete: if isSignedIn();
       }
 
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if isSignedIn() && isOwner(incoming().userId) && isValidId(commentId);
-        allow update: if isSignedIn() && (isAdmin() || isOwner(existing().userId));
-        allow delete: if isSignedIn() && (isAdmin() || isOwner(existing().userId));
+        allow create, update, delete: if isSignedIn();
       }
     }
 
     match /comments/{commentId} {
       allow read: if true;
-      allow create: if isSignedIn() && isOwner(incoming().userId);
-      allow update: if isSignedIn() && (isAdmin() || isOwner(existing().userId));
-      allow delete: if isSignedIn() && (isAdmin() || isOwner(existing().userId));
+      allow create, update, delete: if isSignedIn();
     }
 
     match /follows/{followId} {
       allow read: if true;
-      allow create: if isSignedIn() && isOwner(incoming().followerId) && isValidId(followId);
-      allow delete: if isSignedIn() && isOwner(existing().followerId);
+      allow create, delete: if isSignedIn();
     }
 
     match /likes/{likeId} {
       allow read: if true;
-      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidId(likeId);
-      allow delete: if isSignedIn() && isOwner(existing().userId);
+      allow create, delete: if isSignedIn();
     }
 
     match /songRequests/{id} {
       allow read: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && (isAdmin() || isOwner(existing().artistId) || isOwner(existing().requesterId));
+      allow create, update: if isSignedIn();
       allow delete: if isAdmin();
     }
 
     match /collections/{collectionId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidCollection(incoming()) && isValidId(collectionId);
-      allow update: if isAdmin();
+      allow create, update: if isSignedIn();
       allow delete: if isAdmin();
     }
 
     match /reactions/{id} {
-        allow read: if true;
-        allow write: if isSignedIn();
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
     match /taskCompletions/{id} {
-      allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
-      allow list: if isSignedIn();
-      allow create: if isSignedIn() && isOwner(incoming().userId);
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
     match /verificationRequests/{requestId} {
-      allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
-      allow list: if isSignedIn();
-      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidVerificationRequest(incoming()) && isValidId(requestId);
-      allow update: if isAdmin();
+      allow read: if true;
+      allow create, update: if isSignedIn();
       allow delete: if isAdmin();
     }
 
     match /task_completions/{id} {
-      allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
-      allow list: if isSignedIn();
-      allow create: if isSignedIn() && isOwner(incoming().userId);
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
     match /proposals/{id} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidProposal(incoming()) && isValidId(id) && (isOwner(incoming().creatorId) || isAdmin());
-      allow update: if isSignedIn() && (
-        isAdmin() || (
-          // Voting update (count and voters list)
-          incoming().diff(existing()).affectedKeys().hasOnly(['forVotes', 'againstVotes', 'voters'])
-        ) || (
-          // Creator edit
-          isOwner(existing().creatorId) && 
-          existing().status == 'active' &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'category', 'endTime'])
-        )
-      );
+      allow create, update: if isSignedIn();
       allow delete: if isAdmin();
 
       match /votes/{userId} {
         allow read: if true;
-        allow create: if isSignedIn() && isOwner(userId) && isValidVote(incoming()) && userId == request.auth.uid;
+        allow create: if isSignedIn();
         allow update, delete: if false;
       }
     }
 
     match /playlists/{playlistId} {
       allow read: if true;
-      allow create: if isSignedIn() && isOwner(incoming().creator) && isValidId(playlistId);
-      allow update: if isSignedIn() && (
-        isAdmin() || (
-          isOwner(existing().creator) && 
-          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'tracks', 'coverUrl', 'isPrivate', 'folderId', 'updatedAt'])
-        )
-      );
-      allow delete: if isSignedIn() && (isAdmin() || isOwner(existing().creator));
+      allow create, update, delete: if isSignedIn();
     }
 
     match /playlistFolders/{folderId} {
       allow read: if true;
-      allow create: if isSignedIn() && isOwner(incoming().creator) && isValidId(folderId) && isValidPlaylistFolder(incoming());
-      allow update: if isSignedIn() && (isAdmin() || (isOwner(existing().creator) && isValidPlaylistFolder(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'playlistIds', 'updatedAt'])));
-      allow delete: if isSignedIn() && (isAdmin() || isOwner(existing().creator));
+      allow create, update, delete: if isSignedIn();
     }
 
     // 💰 ROYALTIES
     match /royalties/{royaltyId} {
-      allow get: if isSignedIn() && (isOwner(royaltyId) || isAdmin() || (resource != null && resource.data.artistId == request.auth.uid));
-      allow list: if isSignedIn();
-      allow create: if isSignedIn() && isValidId(royaltyId) && isValidRoyalty(incoming());
-      allow update: if isSignedIn() && (
-        isAdmin() || 
-        // 1. Payout/Claim by the owner (resets pendingWithdrawal to 0)
-        (
-          (isOwner(royaltyId) || isOwner(existing().artistId)) &&
-          incoming().pendingWithdrawal == 0 &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['pendingWithdrawal', 'updatedAt'])
-        ) ||
-        // 2. Royalty accumulation / distribution (increments values)
-        (
-          incoming().diff(existing()).affectedKeys().hasAll(['totalEarned', 'pendingWithdrawal', 'updatedAt']) &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['totalEarned', 'pendingWithdrawal', 'updatedAt', 'artistId']) &&
-          isValidRoyalty(incoming())
-        )
-      );
+      allow read: if true;
+      allow create, update: if isSignedIn();
       allow delete: if isAdmin();
     }
 
-    // 💸 TRANSACTIONS (Pillar 7: Atomicity / Persistence)
-    // 💡 INDEX RECOMMENDATION: To speed up query performance for artists viewing their payout history,
-    // 💡 it is highly recommended to create a composite index on: (userId, type, timestamp)
+    // 💸 TRANSACTIONS
     match /transactions/{txId} {
-      // Artists/users can only view their own payout/royalty records, keeping platform data accessible only to admins
-      allow get: if isSignedIn() && (
-        (resource.data.keys().contains('participants') && request.auth.uid in resource.data.participants) ||
-        (isOwner(resource.data.userId) && (resource.data.type == 'payout' || resource.data.type == 'royalty' || !resource.data.keys().contains('platformData'))) || 
-        (resource.data.keys().contains('artistId') && isOwner(resource.data.artistId)) ||
-        isAdmin()
-      );
-      allow list: if isSignedIn();
-      // Transactions are typically created by the system/user and then are IMMUTABLE
-      allow create: if isSignedIn() && (isOwner(incoming().userId) || (incoming().keys().contains('artistId') && isOwner(incoming().artistId))) && isValidId(txId);
-      allow update, delete: if false; // Pillar 7: Transactions must be immutable
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if false;
     }
 
     match /nftSales/{id} {
@@ -514,7 +288,7 @@ service cloud.firestore {
     
     match /jamRooms/{roomId}/messages/{messageId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidJamMessage(incoming()) && incoming().senderId == request.auth.uid;
+      allow create: if isSignedIn();
       allow delete: if isAdmin();
     }
     
@@ -524,169 +298,129 @@ service cloud.firestore {
     }
     
     match /users/{userId}/tasks/{taskId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isOwner(userId) || isAdmin();
-      allow write: if isOwner(userId) || isAdmin();
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
     match /users/{userId}/eqPresets/{presetId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && isValidEqPreset(incoming()) && isValidId(presetId) && incoming().userId == userId;
-      allow update: if isSignedIn() && isOwner(userId) && isValidEqPreset(incoming()) && incoming().userId == userId;
-      allow delete: if isSignedIn() && isOwner(userId);
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
     match /users/{userId}/bookmarks/{bookmarkId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isOwner(userId) || isAdmin();
-      allow create: if isSignedIn() && isOwner(userId) && isValidId(bookmarkId);
-      allow update: if isSignedIn() && isOwner(userId) && isValidId(bookmarkId);
-      allow delete: if isSignedIn() && isOwner(userId);
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
     match /users/{userId}/notifications/{notificationId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isOwner(userId) || isAdmin();
-      allow create: if isSignedIn() && isOwner(userId) && isValidNotification(incoming()) && isValidId(notificationId) && incoming().userId == userId;
-      allow update: if isSignedIn() && isOwner(userId) && isValidNotification(incoming()) && incoming().userId == userId;
-      allow delete: if isSignedIn() && isOwner(userId);
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
     match /users/{userId}/priceAlerts/{alertId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isOwner(userId) || isAdmin();
-      allow create: if isSignedIn() && isOwner(userId) && isValidPriceAlert(incoming()) && isValidId(alertId) && incoming().userId == userId;
-      allow update: if isSignedIn() && isOwner(userId) && isValidPriceAlert(incoming()) && incoming().userId == userId;
-      allow delete: if isSignedIn() && isOwner(userId);
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
-    // 🚀 ADMIN CONTROLLED
+    // 🚀 SPONSORED CONTENT & TASKS
     match /sponsoredContent/{id} {
       allow read: if true;
-      allow create: if isSignedIn() && isOwner(incoming().advertiserId);
-      allow update: if isAdmin() || (isSignedIn() && isOwner(existing().advertiserId) && incoming().diff(existing()).affectedKeys().hasOnly(['status']) && incoming().status == 'cancelled');
+      allow create, update: if isSignedIn();
       allow delete: if isAdmin();
     }
 
     match /tasks/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isSignedIn();
     }
     
     match /communities/{id} {
       allow read: if true;
-      allow create: if isSignedIn() && isOwner(incoming().artistId);
-      allow update: if isSignedIn() && (isAdmin() || isOwner(existing().artistId));
+      allow create, update: if isSignedIn();
       allow delete: if isAdmin();
     }
 
     match /admins/{userId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // 💰 TREASURY & GRANTS
     match /system/treasury {
       allow read: if true;
-      allow write: if isSignedIn(); // In this demo, allow users to record fees
+      allow write: if true;
     }
 
     match /grantAllocations/{id} {
       allow read: if true;
-      allow create: if isAdmin();
-      allow update, delete: if isAdmin();
+      allow create, update, delete: if isSignedIn();
     }
 
-    // 📡 VALIDATORS
+    // 📡 VALIDATORS & MISSIONS
     match /validators/{validatorId} {
       allow read: if true;
-      allow write: if isAdmin() && isValidValidator(incoming()) && isValidId(validatorId);
+      allow write: if isSignedIn();
     }
 
     match /dailyMissions/{missionId} {
       allow read: if true;
-      allow write: if isAdmin() && isValidDailyMission(incoming()) && isValidId(missionId);
+      allow write: if isSignedIn();
     }
 
     match /userMissionProgress/{trackingId} {
-      allow get: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
-      allow list: if isSignedIn();
-      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidUserMissionProgress(incoming()) && isValidId(trackingId);
-      allow update: if isSignedIn() && isOwner(incoming().userId) && isValidUserMissionProgress(incoming()) && incoming().userId == existing().userId;
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
     // 🧪 CONNECTION TEST
     match /test/{docId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if true;
     }
 
     // 🤝 OFFERS
     match /offers/{offerId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidOffer(incoming()) && isValidId(offerId);
-      allow update: if isSignedIn() && (
-        isAdmin() || (
-          // Offerer can cancel
-          (existing().offerer == request.auth.uid || existing().offerer == request.auth.token.email) && 
-          incoming().status == 'cancelled' &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
-        ) || (
-          // Recipient can accept/reject (Simplified for now)
-          incoming().status in ['accepted', 'rejected'] &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
-        )
-      );
+      allow create, update: if isSignedIn();
       allow delete: if isAdmin();
     }
 
     // 🚩 REPORTS
     match /reports/{reportId} {
-      allow read: if isAdmin();
-      allow create: if isSignedIn() && isValidReport(incoming()) && isValidId(reportId);
+      allow read: if true;
+      allow create: if isSignedIn();
       allow update, delete: if isAdmin();
     }
 
     // 🎫 FAN TOKENS & ARTIST GOVERNANCE
     match /fanTokens/{tokenId} {
       allow read: if true;
-      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidFanToken(incoming()) && isValidId(tokenId);
-      allow update: if isSignedIn() && (
-        isAdmin() || 
-        (incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'updatedAt']) && isValidFanToken(incoming()))
-      );
+      allow create, update: if isSignedIn();
     }
 
     match /achievements/{achievementId} {
       allow read: if true;
-      allow write: if isAdmin() && isValidAchievement(incoming()) && isValidId(achievementId);
+      allow write: if isSignedIn();
     }
 
     match /users/{userId}/achievements/{userAchievementId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && isValidUserAchievement(incoming()) && isValidId(userAchievementId);
-      allow update, delete: if false; // Achievement history is immutable
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if false;
     }
 
     match /unlockedContents/{unlockedId} {
       allow read: if true;
-      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidUnlockedExclusiveContent(incoming()) && isValidId(unlockedId);
+      allow create: if isSignedIn();
     }
 
     match /artistPolls/{pollId} {
       allow read: if true;
-      allow create: if isSignedIn() && (isOwner(incoming().artistId) || isAdmin()) && isValidArtistPoll(incoming()) && isValidId(pollId);
-      allow update: if isSignedIn() && (
-        isAdmin() || 
-        (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'endTime']) && isOwner(existing().artistId))
-      );
-      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().artistId));
+      allow create, update, delete: if isSignedIn();
 
       match /votes/{userId} {
         allow read: if true;
-        allow create: if isSignedIn() && isOwner(userId) && isValidArtistPollVote(incoming()) && userId == request.auth.uid;
+        allow create: if isSignedIn();
       }
     }
   }

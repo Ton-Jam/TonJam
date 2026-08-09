@@ -190,6 +190,7 @@ export interface NFTItem {
   imageUrl: string;
   coverUrl?: string; // Alias for imageUrl
   audioUrl?: string;
+  rarity?: string;
   edition: string;
   supply?: number;
   minted?: number;
@@ -445,6 +446,7 @@ export interface UserProfile {
   following: number;
   earnings: number;
   isVerifiedArtist?: boolean;
+  verified?: boolean;
   milestones?: {
     totalSales: number;
     totalListeners: number;

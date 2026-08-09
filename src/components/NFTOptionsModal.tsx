@@ -1,5 +1,5 @@
 import React from 'react';
-import { Info, Share2, Send, Tag, Coins, Star, User, ExternalLink, Copy, Verified, ChevronRight, Trash, History, List as ListIcon } from 'lucide-react';
+import { Info, Share2, Send, Tag, Coins, Star, User, ExternalLink, Copy, Verified, ChevronRight, Trash, History, List as ListIcon, ArrowUpDown } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
@@ -24,9 +24,10 @@ interface NFTOptionsModalProps {
   onBuy?: () => void;
   onHistory?: () => void;
   onAddToFolder?: () => void;
+  onShare?: () => void;
 }
 
-const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend, onList, onBuy, onHistory, onAddToFolder }) => {
+const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend, onList, onBuy, onHistory, onAddToFolder, onShare }) => {
   const navigate = useNavigate();
   const { addNotification, userProfile, setAnthem } = useAudio();
 
@@ -88,22 +89,26 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
         setIsDeleteConfirmOpen(true);
         break;
       case 'share':
-        const shareUrl = `${window.location.origin}/#/nft/${nft.id}`;
-        const shareData = {
-          title: nft.title,
-          text: `Check out this NFT: ${nft.title} by ${nft.creator} on TonJam!`,
-          url: shareUrl
-        };
-
-        if (navigator.share) {
-          navigator.share(shareData).catch((err) => {
-            if (err.name !== 'AbortError') {
-              console.error('Error sharing:', err);
-            }
-          });
+        if (onShare) {
+          onShare();
         } else {
-          navigator.clipboard.writeText(shareUrl);
-          addNotification('NFT link copied to clipboard', 'success');
+          const shareUrl = `${window.location.origin}/#/nft/${nft.id}`;
+          const shareData = {
+            title: nft.title,
+            text: `Check out this NFT: ${nft.title} by ${nft.creator} on TonJam!`,
+            url: shareUrl
+          };
+
+          if (navigator.share) {
+            navigator.share(shareData).catch((err) => {
+              if (err.name !== 'AbortError') {
+                console.error('Error sharing:', err);
+              }
+            });
+          } else {
+            navigator.clipboard.writeText(shareUrl);
+            addNotification('NFT link copied to clipboard', 'success');
+          }
         }
         onClose();
         break;
@@ -126,6 +131,7 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
     options.push({ id: 'buy', icon: Coins, label: nft.listingType === 'auction' ? 'Place Bid' : 'Buy / Make Offer', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('buy') });
   }
 
+  options.push({ id: 'swap', icon: ArrowUpDown, label: 'Swap NFT on DEX', color: 'text-blue-400 font-bold', iconColor: 'text-blue-400', action: async () => { navigate(`/swap?nftId=${nft.id}`); onClose(); } });
   options.push({ id: 'tonscan', icon: ExternalLink, label: 'View on TonScan', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('tonscan') });
   options.push({ id: 'copy-id', icon: Copy, label: 'Copy NFT ID', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('copy-id') });
   options.push({ id: 'share', icon: Share2, label: 'Share NFT', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('share') });

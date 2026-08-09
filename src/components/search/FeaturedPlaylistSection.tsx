@@ -32,9 +32,9 @@ export const FeaturedPlaylistSection: React.FC<FeaturedPlaylistSectionProps> = (
               key={`featured-playlist-${playlist.id}`}
               whileHover={{ y: -4 }}
               onClick={() => navigate(`/playlist/${playlist.id}`)}
-              className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
+              className="bg-[#0c133a] rounded-[12px] p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
             >
-              <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-950 border border-white/5">
+              <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-950">
                 <img
                   src={imageSrc}
                   alt={playlist.title}
@@ -46,7 +46,7 @@ export const FeaturedPlaylistSection: React.FC<FeaturedPlaylistSectionProps> = (
                     e.stopPropagation();
                     onPlayPlaylist(playlist);
                   }}
-                  className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#00B4D8] text-[#050A24] flex items-center justify-center scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 hover:scale-110 active:scale-95 transition-all shadow-lg border border-white/20"
+                  className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#00B4D8] text-[#050A24] flex items-center justify-center scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 hover:scale-110 active:scale-95 transition-all shadow-lg"
                 >
                   <Play className="w-4 h-4 fill-current ml-0.5" />
                 </button>

@@ -317,7 +317,7 @@ const Governance: React.FC = () => {
   const displayStats = [
     { label: 'Active Proposals', value: proposals.filter(p => p.status === 'active').length, icon: Activity },
     { label: 'Total Votes', value: proposals.reduce((acc, p) => acc + p.forVotes + p.againstVotes, 0), icon: BarChart3 },
-    { label: 'Treasury Balance', value: treasuryBalance !== null ? `${treasuryBalance.toFixed(2)} TON` : 'Loading...', icon: TrendingUp },
+    { label: 'Treasury Balance', value: treasuryBalance !== null ? `${treasuryBalance.toFixed(2)} GRAMS` : 'Loading...', icon: TrendingUp },
   ];
 
   return (

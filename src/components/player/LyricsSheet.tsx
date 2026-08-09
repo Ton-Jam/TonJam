@@ -94,7 +94,7 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = ({
       {/* Lyrics Header Controls */}
       <div className="flex items-center justify-between pb-3 border-b border-[#16244F]/60 mb-2">
         <div className="flex items-center gap-2">
-          <Mic2 className="w-4 h-4 text-[#5B6BFF]" />
+          <Mic2 className="w-4 h-4 text-[#0098EA]" />
           <span className="text-xs font-bold uppercase tracking-wider text-[#F2F4F8]">
             Synced Lyrics
           </span>
@@ -106,7 +106,7 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = ({
             <button
               onClick={() => setFontSize("sm")}
               className={`px-2 py-0.5 text-[10px] rounded-[6px] font-bold ${
-                fontSize === "sm" ? "bg-[#5B6BFF] text-white" : "text-[#9AA0AE]"
+                fontSize === "sm" ? "bg-[#0098EA] text-white" : "text-[#9AA0AE]"
               }`}
             >
               A-
@@ -114,7 +114,7 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = ({
             <button
               onClick={() => setFontSize("lg")}
               className={`px-2 py-0.5 text-[10px] rounded-[6px] font-bold ${
-                fontSize === "lg" ? "bg-[#5B6BFF] text-white" : "text-[#9AA0AE]"
+                fontSize === "lg" ? "bg-[#0098EA] text-white" : "text-[#9AA0AE]"
               }`}
             >
               A
@@ -122,7 +122,7 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = ({
             <button
               onClick={() => setFontSize("xl")}
               className={`px-2 py-0.5 text-[10px] rounded-[6px] font-bold ${
-                fontSize === "xl" ? "bg-[#5B6BFF] text-white" : "text-[#9AA0AE]"
+                fontSize === "xl" ? "bg-[#0098EA] text-white" : "text-[#9AA0AE]"
               }`}
             >
               A+
@@ -134,7 +134,7 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = ({
             onClick={() => setShowTranslation(!showTranslation)}
             className={`p-1.5 rounded-[10px] border transition-all text-xs flex items-center gap-1 font-semibold ${
               showTranslation
-                ? "bg-[#5B6BFF] text-white border-[#5B6BFF]"
+                ? "bg-[#0098EA] text-white border-[#0098EA]"
                 : "bg-[#0A113A] border-[#16244F] text-[#9AA0AE]"
             }`}
             title="Toggle Translation"
@@ -170,7 +170,7 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = ({
               whileTap={{ scale: 0.98 }}
               className={`cursor-pointer transition-all duration-300 p-2.5 rounded-[12px] group ${
                 isActive
-                  ? "bg-[#0A113A] border border-[#5B6BFF]/40 shadow-lg shadow-[#5B6BFF]/10 opacity-100"
+                  ? "bg-[#0A113A] border border-[#0098EA]/40 shadow-lg shadow-[#0098EA]/10 opacity-100"
                   : "hover:bg-[#0A113A]/50 opacity-40 hover:opacity-80"
               }`}
             >
@@ -188,7 +188,7 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = ({
                     e.stopPropagation();
                     onSeek(line.time);
                   }}
-                  className="opacity-0 group-hover:opacity-100 p-1 bg-[#5B6BFF] text-white rounded-full text-xs transition-opacity"
+                  className="opacity-0 group-hover:opacity-100 p-1 bg-[#0098EA] text-white rounded-full text-xs transition-opacity"
                   title="Seek to line"
                 >
                   <Play className="w-3 h-3 fill-current" />
@@ -196,7 +196,7 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = ({
               </div>
 
               {showTranslation && line.translation && (
-                <p className="text-xs text-[#5B6BFF] mt-1 font-medium italic">
+                <p className="text-xs text-[#0098EA] mt-1 font-medium italic">
                   {line.translation}
                 </p>
               )}

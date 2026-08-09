@@ -28,9 +28,9 @@ export const ContinueListeningSection: React.FC<ContinueListeningSectionProps> =
             key={`continue-listening-${track.id}`}
             whileHover={{ y: -2 }}
             onClick={() => onPlayTrack(track)}
-            className="p-4 rounded-[12px] bg-[#0c133a] border border-white/5 flex items-center gap-4 cursor-pointer group transition-all"
+            className="p-4 rounded-[12px] bg-[#0c133a] flex items-center gap-4 cursor-pointer group transition-all"
           >
-            <div className="relative w-14 h-14 rounded-[8px] overflow-hidden shrink-0 border border-white/5 bg-slate-900">
+            <div className="relative w-14 h-14 rounded-[8px] overflow-hidden shrink-0 bg-slate-900">
               <img
                 src={track.coverUrl || getPlaceholderImage(track.title)}
                 alt={track.title}

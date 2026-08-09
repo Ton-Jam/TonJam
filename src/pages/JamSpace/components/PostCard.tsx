@@ -13,7 +13,8 @@ import {
   ArrowUpRight, 
   ExternalLink,
   MessageCircle,
-  MoreHorizontal
+  MoreHorizontal,
+  Send
 } from 'lucide-react';
 import { Post, Reply } from '../types';
 import { Track } from '@/types';
@@ -388,9 +389,12 @@ export const PostCard: React.FC<PostCardProps> = ({
               />
               <button 
                 type="submit" 
-                className="px-4 py-2 bg-[#0052FF] text-white text-xs font-bold uppercase tracking-wider rounded-[10px] cursor-pointer"
+                disabled={!commentText.trim()}
+                title="Post comment"
+                aria-label="Post comment"
+                className="w-8 h-8 bg-[#0052FF] hover:bg-[#0046DA] disabled:opacity-40 text-white rounded-[10px] flex items-center justify-center shrink-0 cursor-pointer transition-all active:scale-95"
               >
-                Post
+                <Send className="w-3.5 h-3.5" />
               </button>
             </form>
           </motion.div>

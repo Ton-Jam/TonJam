@@ -22,7 +22,7 @@ export const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="absolute top-12 left-0 right-0 bg-[#0c133a] border border-white/10 rounded-[12px] overflow-hidden shadow-2xl z-50 p-1"
+      className="absolute top-12 left-0 right-0 bg-[#0c133a] rounded-[12px] overflow-hidden shadow-2xl z-50 p-1"
     >
       <div className="space-y-0.5">
         {isSearching && (

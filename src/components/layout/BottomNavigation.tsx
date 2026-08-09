@@ -15,6 +15,7 @@ interface BottomNavigationProps {
   activeTab: TabId;
   onTabChange: (id: TabId) => void;
   badges?: Partial<Record<TabId, string | number>>;
+  isHidden?: boolean;
 }
 
 interface Ripple {
@@ -27,6 +28,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activeTab,
   onTabChange,
   badges = {},
+  isHidden = false,
 }) => {
   const tabs: TabItem[] = [
     { id: 'jamup', label: 'Jam Up', icon: Sparkles, badge: badges.jamup },
@@ -80,7 +82,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#0A113A] pb-[calc(env(safe-area-inset-bottom,0px)+12px)] select-none">
+    <nav className={`fixed bottom-0 left-0 right-0 z-50 bg-[#0A113A] pb-[calc(env(safe-area-inset-bottom,0px)+12px)] select-none transition-all duration-300 ${isHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
       {/* Top micro gloss line for subtle alignment (NO border line) */}
       <div className="h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent w-full" />
 

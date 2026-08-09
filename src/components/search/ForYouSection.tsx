@@ -24,7 +24,7 @@ export const ForYouSection: React.FC<ForYouSectionProps> = ({
         {/* Sync Summary Card */}
         <motion.div
           whileHover={{ y: -2 }}
-          className="p-5 rounded-[12px] bg-[#0c133a] border border-white/5 flex flex-col justify-between"
+          className="p-5 rounded-[12px] bg-[#0c133a] flex flex-col justify-between"
         >
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -44,7 +44,7 @@ export const ForYouSection: React.FC<ForYouSectionProps> = ({
         {/* Streak Stats Card */}
         <motion.div
           whileHover={{ y: -2 }}
-          className="p-5 rounded-[12px] bg-[#0c133a] border border-white/5 flex flex-col justify-between"
+          className="p-5 rounded-[12px] bg-[#0c133a] flex flex-col justify-between"
         >
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -79,7 +79,7 @@ export const ForYouSection: React.FC<ForYouSectionProps> = ({
                 key={`foryou-track-${track.id}`}
                 whileHover={{ y: -3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
                 onClick={() => onPlayTrack(track)}
-                className="p-4 rounded-[12px] bg-[#090f2d] border border-white/5 flex items-center gap-4 cursor-pointer transition-all duration-200 group"
+                className="p-4 rounded-[12px] bg-[#090f2d] flex items-center gap-4 cursor-pointer transition-all duration-200 group"
               >
                 <div className="relative w-16 h-16 rounded-[8px] overflow-hidden shrink-0">
                   <img

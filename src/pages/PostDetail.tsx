@@ -481,10 +481,11 @@ const PostDetail: React.FC = () => {
                   <Button 
                     type="submit" 
                     size="icon"
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-30"
                     disabled={!commentText.trim()}
+                    aria-label="Post comment"
                   >
-                    <Send className="h-4 w-4" />
+                    <Send className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </form>

@@ -29,9 +29,9 @@ export const CollectionSection: React.FC<CollectionSectionProps> = ({ collection
               key={`collection-${col.id}`}
               whileHover={{ y: -3 }}
               onClick={() => navigate(`/marketplace`)}
-              className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex gap-4 cursor-pointer group"
+              className="bg-[#0c133a] rounded-[12px] p-4 flex gap-4 cursor-pointer group"
             >
-              <div className="relative w-16 h-16 rounded-[8px] overflow-hidden shrink-0 bg-slate-900 border border-white/5">
+              <div className="relative w-16 h-16 rounded-[8px] overflow-hidden shrink-0 bg-slate-900">
                 <img
                   src={imageSrc}
                   alt={col.name}
@@ -59,7 +59,7 @@ export const CollectionSection: React.FC<CollectionSectionProps> = ({ collection
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] font-mono font-bold border-t border-white/5 pt-1.5 mt-1">
+                <div className="flex justify-between items-center text-[10px] font-mono font-bold pt-1.5 mt-1">
                   <div>
                     <span className="text-[8px] text-slate-500 font-normal">FLOOR</span>
                     <span className="text-white block">{col.floorPrice} TON</span>

@@ -8,6 +8,7 @@ import {
   User,
   Coins, 
   Upload, 
+  Disc,
   LayoutDashboard, 
   ChevronRight,
   Plus,
@@ -39,7 +40,8 @@ import {
   Check,
   Loader2,
   ImageIcon,
-  Handshake
+  Handshake,
+  Calendar
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { BackButton } from "@/components/BackButton";
@@ -69,6 +71,8 @@ import { StreamingStatsChart } from "@/components/StreamingStatsChart";
 import { NFTChart } from "@/components/NFTChart";
 import { ArtistAnalyticsChart } from "@/components/ArtistAnalyticsChart";
 import CreatorDashboard from "@/components/CreatorDashboard";
+import MintingStatus from "@/components/MintingStatus";
+import LiveTourManager from "@/components/LiveTourManager";
 
 import {
   Carousel,
@@ -82,7 +86,7 @@ export default function ArtistDashboard() {
   const { user, isArtist, isAdmin, loading } = useAuth();
   
   // Tabs state
-  const [activeTab, setActiveTab] = useState<"overview" | "creator" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty" | "royalties" | "portfolio" | "collabs">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "creator" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty" | "royalties" | "portfolio" | "collabs" | "tours">("overview");
   const [isRoyaltyModalOpen, setIsRoyaltyModalOpen] = useState(false);
 
   const artistDataForRoyalty = useMemo(() => {
@@ -756,8 +760,14 @@ export default function ArtistDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <button
+               onClick={() => navigate("/create-album")}
+               className="h-9 px-4 bg-purple-600 text-white font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-purple-500 transition-colors flex items-center gap-2 cursor-pointer shadow-md shadow-purple-900/30"
+            >
+                <Disc className="w-3.5 h-3.5" /> Create Album
+            </button>
+            <button
                onClick={() => navigate("/upload")}
-               className="h-9 px-4 bg-cyan-500 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-cyan-400 transition-colors flex items-center gap-2"
+               className="h-9 px-4 bg-cyan-500 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-cyan-400 transition-colors flex items-center gap-2 cursor-pointer"
             >
                 <Upload className="w-3.5 h-3.5" /> Upload Track
             </button>
@@ -867,6 +877,16 @@ export default function ArtistDashboard() {
           >
             <Handshake className="w-3.5 h-3.5 text-emerald-400" /> Collabs
           </button>
+          <button
+            onClick={() => setActiveTab("tours")}
+            className={`flex-1 min-w-[120px] transition-all duration-300 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 ${
+              activeTab === "tours" 
+                ? "bg-white/[0.06] text-white shadow-lg shadow-black/30" 
+                : "text-zinc-500 hover:text-white hover:bg-white/[0.02]"
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5 text-cyan-400" /> Live Tour
+          </button>
         </div>
 
         {/* Main Tab Contents Panel */}
@@ -906,6 +926,8 @@ export default function ArtistDashboard() {
                   </div>
                 </div>
 
+                {/* Real-time Pending Minting Status */}
+                <MintingStatus />
 
                 {/* Live Streams Bar Chart */}
                 <div className="bg-white/[0.02] backdrop-blur-md p-4 rounded-xl shadow-lg">
@@ -1609,9 +1631,16 @@ export default function ArtistDashboard() {
               <CollabRequestsManager />
             )}
 
+            {/* LIVE TOUR / EVENTS TAB */}
+            {activeTab === "tours" && (
+              <LiveTourManager />
+            )}
+
             {/* NFT SALES TAB */}
             {activeTab === "nfts" && (
               <div className="space-y-6">
+                {/* Real-time Minting Status Pipeline */}
+                <MintingStatus />
                 
                 {/* Secondary sales ledger display */}
                 <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[4px] shadow-lg">

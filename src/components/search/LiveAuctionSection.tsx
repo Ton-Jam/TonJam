@@ -63,10 +63,10 @@ export const LiveAuctionSection: React.FC<LiveAuctionSectionProps> = ({ auctions
             <motion.div
               key={`auction-${auction.id}`}
               whileHover={{ y: -3 }}
-              className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex gap-4 cursor-pointer group"
+              className="bg-[#0c133a] rounded-[12px] p-4 flex gap-4 cursor-pointer group"
               onClick={() => navigate(`/nft/${auction.id}`)}
             >
-              <div className="relative w-24 h-24 rounded-[8px] overflow-hidden shrink-0 bg-slate-900 border border-white/5">
+              <div className="relative w-24 h-24 rounded-[8px] overflow-hidden shrink-0 bg-slate-900">
                 <img
                   src={imageSrc}
                   alt={auction.title}
@@ -86,7 +86,7 @@ export const LiveAuctionSection: React.FC<LiveAuctionSectionProps> = ({ auctions
                   <p className="text-[10px] text-slate-400 truncate">by {auction.artist || auction.creator}</p>
                 </div>
 
-                <div className="flex items-center gap-4 py-1.5 border-t border-b border-white/5">
+                <div className="flex items-center gap-4 py-1.5">
                   <div>
                     <p className="text-[7.5px] font-mono text-slate-500 uppercase tracking-wider">TOP BID</p>
                     <p className="text-xs font-mono font-extrabold text-white flex items-center gap-1">

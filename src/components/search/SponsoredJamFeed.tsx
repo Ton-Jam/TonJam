@@ -24,7 +24,7 @@ export const SponsoredJamFeed: React.FC = () => {
           <motion.div
             key={item.id}
             whileHover={{ y: -2 }}
-            className="w-72 shrink-0 bg-[#0c133a] rounded-[12px] border border-white/5 overflow-hidden group cursor-pointer"
+            className="w-72 shrink-0 bg-[#0c133a] rounded-[12px] overflow-hidden group cursor-pointer"
           >
             <div className="relative h-32 w-full overflow-hidden">
               <img 
@@ -33,7 +33,7 @@ export const SponsoredJamFeed: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0c133a] to-transparent opacity-60" />
-              <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-2 py-1 rounded-[6px] border border-white/10">
+              <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-2 py-1 rounded-[6px]">
                 <Play className="w-3 h-3 text-[#00B4D8] fill-[#00B4D8]" />
                 <span className="text-[8px] font-black text-white uppercase tracking-widest">Play Clip</span>
               </div>

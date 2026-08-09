@@ -11,6 +11,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onChangeTab
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'dashboard', label: 'Web3 Dashboard' },
+    { id: 'royalties', label: 'Royalty Tracking' },
     { id: 'tracks', label: 'Tracks' },
     { id: 'albums', label: 'Albums' },
     { id: 'nfts', label: 'Collection Gallery' },

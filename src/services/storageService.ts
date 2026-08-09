@@ -49,29 +49,32 @@ export const uploadToPinata = async (file: File, onProgress?: (progress: number)
     }
   });
   
-  if (!response.data.success) {
-    throw new Error('Pinata upload failed');
+  if (response.data.ipfsUrl) {
+    return response.data.ipfsUrl;
+  } else if (response.data.ipfsHash) {
+    return `https://gateway.pinata.cloud/ipfs/${response.data.ipfsHash}`;
   }
   
-  return `https://gateway.pinata.cloud/ipfs/${response.data.ipfsHash}`;
+  throw new Error(response.data.error || 'Pinata upload failed');
 };
 
 /**
  * Uploads JSON metadata to Pinata IPFS via server proxy
  */
 export const uploadJSONToPinata = async (json: any, onProgress?: (progress: number) => void): Promise<string> => {
-  // JSON uploads are usually small, so we just simulate progress if needed or handle instantly
   if (onProgress) onProgress(50);
   
   const response = await axios.post('/api/pinata/upload-json', json);
   
   if (onProgress) onProgress(100);
   
-  if (!response.data.success) {
-    throw new Error('Pinata metadata upload failed');
+  if (response.data.ipfsUrl) {
+    return response.data.ipfsUrl;
+  } else if (response.data.ipfsHash) {
+    return `https://gateway.pinata.cloud/ipfs/${response.data.ipfsHash}`;
   }
   
-  return `https://gateway.pinata.cloud/ipfs/${response.data.ipfsHash}`;
+  throw new Error(response.data.error || 'Pinata metadata upload failed');
 };
 
 /**

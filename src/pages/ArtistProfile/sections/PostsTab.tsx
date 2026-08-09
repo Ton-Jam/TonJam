@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ArtistPost } from "../types";
-import { Heart, MessageSquare, Share2, Pin, MessageCircle, MoreHorizontal } from "lucide-react";
+import { Heart, MessageSquare, Share2, Pin, MessageCircle, MoreHorizontal, Send } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -116,9 +116,12 @@ export const PostsTab: React.FC<PostsTabProps> = ({ posts, onLikePost }) => {
                     />
                     <button 
                       type="submit"
-                      className="bg-white text-black px-4 py-1.5 rounded-[10px] text-xs font-bold hover:bg-neutral-200"
+                      disabled={!(commentInput[post.id] || "").trim()}
+                      title="Post comment"
+                      aria-label="Post comment"
+                      className="bg-white hover:bg-neutral-200 text-black w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 disabled:opacity-40 transition-all active:scale-95"
                     >
-                      Post
+                      <Send className="w-3.5 h-3.5" />
                     </button>
                   </form>
 

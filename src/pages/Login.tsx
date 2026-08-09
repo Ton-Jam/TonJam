@@ -88,6 +88,9 @@ const Login: React.FC = () => {
       if (!avatarSeed) {
         setAvatarSeed(tonAddress);
       }
+      toast.success('TON Wallet Connected', {
+        description: `Linked: ${tonAddress.substring(0, 6)}...${tonAddress.substring(tonAddress.length - 4)}`
+      });
     } else if (!evmAddress) {
       setActiveAddress('');
       setActiveWalletType('');
@@ -108,12 +111,23 @@ const Login: React.FC = () => {
       if (!avatarSeed) {
         setAvatarSeed(evmAddress);
       }
+      toast.success('EVM Wallet Connected', {
+        description: `Linked: ${evmAddress.substring(0, 6)}...${evmAddress.substring(evmAddress.length - 4)}`
+      });
     } else if (!tonAddress) {
       setActiveAddress('');
       setActiveWalletType('');
       setOnboardingActive(false);
     }
   }, [evmAddress, isEvmConnected]);
+
+  useEffect(() => {
+    if (wagmiConnectError) {
+      toast.error('Wallet Connection Failed', {
+        description: wagmiConnectError.message || 'Could not connect wallet.'
+      });
+    }
+  }, [wagmiConnectError]);
 
   // Dynamically compute avatar URL when seed or style updates
   useEffect(() => {
@@ -468,6 +482,14 @@ const Login: React.FC = () => {
                         setIsLoading(true);
                         try {
                           await signInWithGoogle();
+                          toast.success('Signed in with Google', {
+                            description: 'Welcome to TON JAM protocol.'
+                          });
+                          navigate(from, { replace: true });
+                        } catch (error: any) {
+                          toast.error('Google Sign-In Failed', {
+                            description: getErrorMessage(error)
+                          });
                         } finally {
                           setIsLoading(false);
                         }

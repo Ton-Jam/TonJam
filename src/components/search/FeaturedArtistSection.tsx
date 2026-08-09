@@ -37,7 +37,7 @@ export const FeaturedArtistSection: React.FC<FeaturedArtistSectionProps> = ({
             <motion.div
               key={`featured-artist-${artist.uid}`}
               whileHover={{ y: -4, scale: 1.01 }}
-              className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex flex-col items-center justify-between space-y-4 text-center duration-300 transition-all group"
+              className="bg-[#0c133a] rounded-[12px] p-4 flex flex-col items-center justify-between space-y-4 text-center duration-300 transition-all group"
             >
               <div 
                 onClick={() => navigate(`/artist/${artist.uid}`)}
@@ -82,7 +82,7 @@ export const FeaturedArtistSection: React.FC<FeaturedArtistSectionProps> = ({
                 }}
                 className={`w-full py-1 text-[8px] font-bold uppercase tracking-widest rounded-[8px] h-8 transition-all ${
                   isFollowing
-                    ? 'bg-transparent border border-white/10 text-white hover:bg-white/5'
+                    ? 'bg-white/5 text-white hover:bg-white/10'
                     : 'bg-[#00B4D8] text-[#050A24] hover:bg-[#00B4D8]/85'
                 }`}
               >

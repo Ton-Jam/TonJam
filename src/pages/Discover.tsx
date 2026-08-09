@@ -508,7 +508,7 @@ export const Discover: React.FC = () => {
       </div>
 
       {/* Main Discover Canvas Container */}
-      <div className="w-full max-w-full px-4 md:px-8 space-y-12 mt-6">
+      <div className="w-full max-w-full px-4 sm:px-6 md:px-8 space-y-10 mt-6">
 
         {/* Loading skeleton transitions */}
         {isRefreshing ? (
@@ -542,25 +542,25 @@ export const Discover: React.FC = () => {
             }}
           />
         ) : (
-          <div className="space-y-12 pb-24">
+          <div className="space-y-10 pb-24">
             
             {/* 1. Welcome Hero */}
-            <section className="px-4 pt-4">
+            <section className="pt-2">
               <WelcomeHero />
             </section>
 
             {/* Real-time Community Trending Chart */}
-            <section className="px-4">
+            <section>
               <TrendingMusicChart />
             </section>
 
             {/* High-performing NFT Database Tracks Horizontal Scroll */}
-            <section className="px-4">
+            <section>
               <TrendingTracksSection />
             </section>
 
             {/* Gemini Search Grounded Web3 Music & TON Trends */}
-            <section className="px-4">
+            <section>
               <Web3TrendsSection />
             </section>
 
@@ -575,7 +575,7 @@ export const Discover: React.FC = () => {
             </section>
 
             {/* AI Artist Discovery */}
-            <section className="px-4">
+            <section>
               <ArtistDiscoveryAI />
             </section>
 
@@ -649,7 +649,7 @@ export const Discover: React.FC = () => {
             </section>
 
             {/* 10. Earn TJ Preview */}
-            <section className="px-4">
+            <section>
               <EarnTJPreview />
             </section>
 
@@ -775,7 +775,7 @@ export const Discover: React.FC = () => {
             </section>
 
             {/* 13. Trending Topics */}
-            <section className="px-4">
+            <section>
               <div className="space-y-4">
                 <div className="space-y-1">
                   <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
@@ -789,7 +789,7 @@ export const Discover: React.FC = () => {
                       key={hash.id}
                       whileHover={{ scale: 1.01, backgroundColor: 'rgba(255,255,255,0.03)' }}
                       onClick={() => handleSelectSearchTerm(hash.name)}
-                      className="p-4 rounded-[12px] bg-[#0c133a] border border-white/5 flex flex-col justify-between cursor-pointer group h-20"
+                      className="p-4 rounded-[12px] bg-[#0c133a] flex flex-col justify-between cursor-pointer group h-20"
                     >
                       <span className="text-xs font-bold text-[#00B4D8] tracking-wider">{hash.name}</span>
                       <span className="text-[9px] font-mono text-slate-500 uppercase font-semibold">{hash.posts}</span>
@@ -808,7 +808,7 @@ export const Discover: React.FC = () => {
             </section>
 
             {/* 15. Community Activity (Real-time Social Activity Feed) */}
-            <section className="px-4">
+            <section>
               <SocialActivityFeed />
             </section>
 

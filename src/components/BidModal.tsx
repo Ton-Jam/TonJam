@@ -52,7 +52,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
     if (isNaN(amount)) {
       setValidationError("Please enter a valid numeric magnitude.");
     } else if (amount < parseFloat(minBid)) {
-      setValidationError(`Minimum allowable bid is ${minBid} TON.`);
+      setValidationError(`Minimum allowable bid is ${minBid} GRAMS.`);
     } else if (amount > walletBalance) {
       setValidationError("Magnitude exceeds available wallet liquidity.");
     } else {
@@ -84,7 +84,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
     }
 
     if (parseFloat(bidAmount) < parseFloat(minBid)) {
-      addNotification(`Minimum bid is ${minBid} TON`, "warning");
+      addNotification(`Minimum bid is ${minBid} GRAMS`, "warning");
       return;
     }
     setIsConfirmOpen(true);
@@ -107,7 +107,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
       };
       /* Update NFT with new offer and update current price to reflect highest bid */
       updateNFT(nft.id, { price: bidAmount, offers: [newOffer, ...(nft.offers || [])] });
-      addNotification(`Bid of ${bidAmount} TON placed!`, "success", 5000, `Your offer for "${nft.title}" is now the active high watermark.`);
+      addNotification(`Bid of ${bidAmount} GRAMS placed!`, "success", 5000, `Your offer for "${nft.title}" is now the active high watermark.`);
       if (onBidPlaced) {
         onBidPlaced();
       }
@@ -159,11 +159,11 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-zinc-900/80 p-3 rounded-xl text-center">
-                <p className="text-[14px] font-black text-foreground font-mono tracking-tight">{currentBid} <span className="text-[9px] font-bold text-muted-foreground">TON</span></p>
+                <p className="text-[14px] font-black text-foreground font-mono tracking-tight">{currentBid} <span className="text-[9px] font-bold text-muted-foreground">GRAM</span></p>
                 <span className="text-[7px] font-bold text-muted-foreground/45 uppercase tracking-widest">High Offer</span>
               </div>
               <div className="bg-blue-500/5 p-3 rounded-xl text-center">
-                <p className="text-[14px] font-black text-blue-400 font-mono tracking-tight">{minBid} <span className="text-[9px] font-bold text-blue-400/70">TON</span></p>
+                <p className="text-[14px] font-black text-blue-400 font-mono tracking-tight">{minBid} <span className="text-[9px] font-bold text-blue-400/70">GRAM</span></p>
                 <span className="text-[7px] font-bold text-blue-400/50 uppercase tracking-widest">Required</span>
               </div>
             </div>
@@ -174,7 +174,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
               <label className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 block">SPECIFY BID MAGNITUDE</label>
               <div className="flex items-center gap-1.5">
                 <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Available:</span>
-                <span className="text-[8px] font-black text-foreground font-mono">{walletBalance.toFixed(2)} TON</span>
+                <span className="text-[8px] font-black text-foreground font-mono">{walletBalance.toFixed(2)} GRAM</span>
               </div>
             </div>
             <div className="relative group">
@@ -193,7 +193,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
               <span className={cn(
                 "absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-wide",
                 validationError ? "text-red-400" : "text-blue-400"
-              )}>TON</span>
+              )}>GRAM</span>
             </div>
             
             {validationError && (

@@ -13,14 +13,25 @@ import { CollectionSummaryCards } from '@/components/marketplace/CollectionSumma
 const AlbumDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, togglePlay, setHeaderTitle } = useAudio();
+  const { playTrack, currentTrack, isPlaying, togglePlay, setHeaderTitle, allTracks } = useAudio();
   const [albumTracks, setAlbumTracks] = useState<Track[]>([]);
   const [isLiked, setIsLiked] = useState(false);
   const [floorPriceHistory, setFloorPriceHistory] = useState<{ date: string; price: number }[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
-  // Mock album data since we don't have a real album collection yet
-  const album = {
+  // Check local storage for user created albums or fallback
+  const [album, setAlbum] = useState<{
+    id: string;
+    title: string;
+    artist: string;
+    coverUrl: string;
+    releaseYear: string;
+    trackCount: number;
+    totalDuration: string;
+    description: string;
+    floorPrice: string;
+    volume: string;
+  }>({
     id: id || '1',
     title: 'Cyberpunk Nights',
     artist: 'Neon Prophet',
@@ -31,7 +42,38 @@ const AlbumDetails = () => {
     description: 'A journey through the neon-lit streets of Neo-Tokyo. This album blends synthwave with modern trap beats to create a unique sonic landscape.',
     floorPrice: '12.5',
     volume: '1,240'
-  };
+  });
+
+  useEffect(() => {
+    try {
+      const storedAlbums = JSON.parse(localStorage.getItem('tonjam_user_albums') || '[]');
+      const foundAlbum = storedAlbums.find((a: any) => a.id === id);
+      if (foundAlbum) {
+        // Find matching tracks in allTracks
+        const matchingTracks = allTracks.filter(t => foundAlbum.trackIds?.includes(t.id) || t.albumId === foundAlbum.id || t.album === foundAlbum.title);
+        const resolvedTracks = matchingTracks.length > 0 ? matchingTracks : MOCK_TRACKS.slice(0, 4);
+        setAlbumTracks(resolvedTracks);
+        
+        setAlbum({
+          id: foundAlbum.id,
+          title: foundAlbum.title,
+          artist: foundAlbum.artist,
+          coverUrl: foundAlbum.coverUrl || getPlaceholderImage('album-cover'),
+          releaseYear: String(foundAlbum.releaseYear || new Date().getFullYear()),
+          trackCount: foundAlbum.trackIds?.length || resolvedTracks.length,
+          totalDuration: '18:40',
+          description: foundAlbum.description || 'Decentralized Album release on TonJam.',
+          floorPrice: '5.0',
+          volume: '350'
+        });
+      } else {
+        setAlbumTracks(MOCK_TRACKS.slice(0, 8));
+      }
+    } catch (e) {
+      console.warn("Error loading stored album:", e);
+      setAlbumTracks(MOCK_TRACKS.slice(0, 8));
+    }
+  }, [id, allTracks]);
 
   useEffect(() => {
     const loadHistory = async () => {
@@ -61,10 +103,7 @@ const AlbumDetails = () => {
     };
   }, [album.title, setHeaderTitle]);
 
-  useEffect(() => {
-    // Just use some mock tracks for the album
-    setAlbumTracks(MOCK_TRACKS.slice(0, 8));
-  }, [id]);
+  // album tracks already populated in first useEffect
 
   const handlePlayAlbum = () => {
     if (albumTracks.length > 0) {

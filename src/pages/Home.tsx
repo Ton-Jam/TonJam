@@ -75,6 +75,7 @@ import { CollectionGallery } from "@/components/CollectionGallery";
 import { HomeVibeTicker } from "@/components/home/HomeVibeTicker";
 import { HomeQuickAccess } from "@/components/home/HomeQuickAccess";
 import { TrendingNFTVolumeChart } from "@/components/home/TrendingNFTVolumeChart";
+import { TrendingMusicSection } from "@/components/home/TrendingMusicSection";
 import RecentlyMintedNFTs from "@/components/RecentlyMintedNFTs";
 
 // ==========================================
@@ -470,6 +471,25 @@ const Home: React.FC = () => {
   }, []);
 
   const listeningRef = useRef<HTMLDivElement>(null);
+  const trendingFeedRef = useRef<HTMLDivElement>(null);
+  const [isHoveringTrending, setIsHoveringTrending] = useState(false);
+
+  useEffect(() => {
+    const container = trendingFeedRef.current;
+    if (!container) return;
+
+    const scrollInterval = setInterval(() => {
+      if (isHoveringTrending) return;
+
+      if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 2) {
+        container.scrollLeft = 0;
+      } else {
+        container.scrollLeft += 1;
+      }
+    }, 35);
+
+    return () => clearInterval(scrollInterval);
+  }, [isHoveringTrending]);
 
   useEffect(() => {
     const container = listeningRef.current;
@@ -523,7 +543,7 @@ const Home: React.FC = () => {
                 Discover new sounds, collect music NFTs and earn rewards.
               </p>
             </div>
-            <div className="w-1/3">
+            <div className="shrink-0 flex justify-end">
               <TonPriceChart />
             </div>
           </div>
@@ -532,8 +552,8 @@ const Home: React.FC = () => {
         {/* ==========================================
             TRENDING FEED SECTION (Top Section)
             ========================================== */}
-        <div className="space-y-3 text-left">
-          <div className="flex items-center justify-between px-0.5">
+        <div className="-mx-4 sm:-mx-6 md:-mx-8 space-y-3 text-left">
+          <div className="flex items-center justify-between px-4 sm:px-6 md:px-8">
             <h2 className="text-section-title text-text-primary flex items-center gap-2">
               <Flame className="w-5 h-5 text-amber-400 fill-amber-400/20 animate-pulse" />
               Trending Feed
@@ -543,8 +563,16 @@ const Home: React.FC = () => {
             </button>
           </div>
 
-          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
-            {(allTracks && allTracks.length > 0 ? [...allTracks].sort((a,b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 8) : MOCK_TRACKS.slice(0, 8)).map((track) => (
+          <div 
+            ref={trendingFeedRef}
+            onMouseEnter={() => setIsHoveringTrending(true)}
+            onMouseLeave={() => setIsHoveringTrending(false)}
+            onTouchStart={() => setIsHoveringTrending(true)}
+            onTouchEnd={() => setIsHoveringTrending(false)}
+            className="flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4 sm:px-6 md:px-8 w-full"
+            style={{ scrollBehavior: 'smooth' }}
+          >
+            {(allTracks && allTracks.length > 0 ? [...allTracks].sort((a,b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 10) : MOCK_TRACKS.slice(0, 10)).map((track) => (
               <TrackCard 
                 key={track.id} 
                 track={track} 
@@ -560,6 +588,9 @@ const Home: React.FC = () => {
 
         {/* Quick Access Grid */}
         <HomeQuickAccess />
+
+        {/* Real-time Trending Music Section (NFT Marketplace Synced) */}
+        <TrendingMusicSection />
 
         {/* Daily Listen Streak Tracker */}
         <ListenStreakIndicator isOwnProfile={true} />

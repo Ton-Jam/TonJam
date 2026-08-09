@@ -11,6 +11,7 @@ import { Artist, NFTItem, Track } from '@/types';
 import NFTCard from '@/components/NFTCard';
 import { toast } from 'sonner';
 import { ArtistProfileSkeleton } from '@/pages/Library/components/Skeletons';
+import { ArtistVerificationBadge } from '@/components/ArtistVerificationBadge';
 
 interface ArtistProfileProps {
   artistId?: string;
@@ -294,9 +295,12 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
               <div className="space-y-1 pt-2 sm:pt-0">
                 <div className="flex items-center justify-center sm:justify-start gap-1.5 flex-wrap">
                   <h2 className="text-xl sm:text-2xl font-black tracking-tight">{currentArtist.name}</h2>
-                  {(currentArtist.verified || currentArtist.isVerifiedArtist) && (
-                    <BadgeCheck className="w-5 h-5 text-blue-400 fill-blue-400/10 shrink-0" />
-                  )}
+                  <ArtistVerificationBadge
+                    isVerified={Boolean(currentArtist.verified || currentArtist.isVerifiedArtist)}
+                    artistName={currentArtist.name}
+                    artistUid={currentArtist.uid}
+                    size="md"
+                  />
                 </div>
                 {currentArtist.username && (
                   <span className="text-xs text-blue-400 font-mono font-semibold block">

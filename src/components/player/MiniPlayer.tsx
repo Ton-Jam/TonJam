@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { motion, PanInfo } from "motion/react";
-import { Play, Pause, ListMusic, MoreVertical, Heart, Radio } from "lucide-react";
+import { Play, Pause, ListMusic, MoreVertical, Heart, Radio, Coins } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
+import TipArtistModal from "@/components/TipArtistModal";
 
 interface MiniPlayerProps {
   onQueueClick?: () => void;
@@ -25,6 +26,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   } = useAudio();
 
   const [localProgress, setLocalProgress] = useState(progress);
+  const [showTipModal, setShowTipModal] = useState(false);
 
   useEffect(() => {
     setLocalProgress(progress);
@@ -51,27 +53,33 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     toggleLikeTrack(currentTrack.id);
   };
 
+  const handleTipClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowTipModal(true);
+  };
+
   const coverUrl = currentTrack.coverUrl || getPlaceholderImage("cover");
 
   return (
-    <motion.div
-      layoutId="tonjam-player-container"
-      drag="y"
-      dragConstraints={{ top: 0, bottom: 0 }}
-      dragElastic={{ top: 0.8, bottom: 0.1 }}
-      onDragEnd={handleDragEnd}
-      onClick={() => setFullPlayerOpen(true)}
-      whileTap={{ scale: 0.99 }}
-      className={`fixed left-0 right-0 lg:left-64 bg-[#0A113A] text-[#F2F4F8] font-sans border-t border-[#16244F] select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 cursor-pointer ${
-        isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
-      }`}
-      style={{ touchAction: "none" }}
-      id="tonjam-mini-player"
-    >
+    <>
+      <motion.div
+        layoutId="tonjam-player-container"
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0.8, bottom: 0.1 }}
+        onDragEnd={handleDragEnd}
+        onClick={() => setFullPlayerOpen(true)}
+        whileTap={{ scale: 0.99 }}
+        className={`fixed left-0 right-0 lg:left-64 bg-[#0A113A] text-[#F2F4F8] font-sans border-t border-[#16244F] select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 cursor-pointer ${
+          isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
+        }`}
+        style={{ touchAction: "none" }}
+        id="tonjam-mini-player"
+      >
       {/* Top progress bar */}
       <div className="w-full h-1 bg-[#050A24]" id="mini-progress-track">
         <div
-          className="h-full bg-[#5B6BFF] transition-all duration-200"
+          className="h-full bg-[#0098EA] transition-all duration-200"
           style={{ width: `${localProgress}%` }}
           id="mini-progress-indicator"
         />
@@ -98,7 +106,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                 {currentTrack.title}
               </span>
               {currentTrack.isHighFidelity && (
-                <span className="px-1 py-0.2 bg-[#5B6BFF]/20 text-[#5B6BFF] text-[8px] font-black rounded-xs uppercase">
+                <span className="px-1 py-0.2 bg-[#0098EA]/20 text-[#0098EA] text-[8px] font-black rounded-xs uppercase">
                   Hi-Fi
                 </span>
               )}
@@ -114,13 +122,23 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-1 sm:gap-2">
+          {/* Tip Artist TON Button */}
+          <button
+            onClick={handleTipClick}
+            className="p-2 text-amber-400 hover:text-amber-300 transition-all hover:scale-110 active:scale-95"
+            title={`Tip ${currentTrack.artist} (TON)`}
+            aria-label="Tip Artist"
+          >
+            <Coins className="w-4 h-4 text-amber-400 fill-amber-400/30" />
+          </button>
+
           {/* Like button */}
           <button
             onClick={handleLikeClick}
-            className="p-2 text-[#9AA0AE] hover:text-[#5B6BFF] transition-colors"
+            className="p-2 text-[#9AA0AE] hover:text-[#0098EA] transition-colors"
             title="Like track"
           >
-            <Heart className={`w-4 h-4 ${isLiked ? "text-[#5B6BFF] fill-[#5B6BFF]" : ""}`} />
+            <Heart className={`w-4 h-4 ${isLiked ? "text-[#0098EA] fill-[#0098EA]" : ""}`} />
           </button>
 
           {/* Play/Pause Button */}
@@ -129,7 +147,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               e.stopPropagation();
               togglePlay();
             }}
-            className="w-9 h-9 rounded-full bg-[#5B6BFF] text-white flex items-center justify-center hover:bg-[#5B6BFF]/90 transition-transform active:scale-90 shadow-md"
+            className="w-9 h-9 rounded-full bg-[#0098EA] text-white flex items-center justify-center hover:bg-[#0098EA]/90 transition-transform active:scale-90 shadow-md"
             title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
@@ -164,6 +182,11 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         </div>
       </div>
     </motion.div>
+
+    {showTipModal && (
+      <TipArtistModal track={currentTrack} onClose={() => setShowTipModal(false)} />
+    )}
+  </>
   );
 };
 

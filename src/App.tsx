@@ -1,3 +1,4 @@
+import { HashRouter as Router } from "react-router-dom";
 import { KeyboardShortcutListener } from "@/components/layout/KeyboardShortcutListener";
 import { ToastProvider } from "@/components/layout/ToastProvider";
 import { ModalProvider } from "@/components/layout/ModalProvider";
@@ -36,50 +37,52 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TonConnectUIProvider manifestUrl={manifestUrl}>
-        <ToastProvider>
-          <ModalProvider>
-            <ThemeProvider>
-              <I18nProvider>
-                <TooltipProvider>
-                  <AuthProvider>
-                    <UserProvider>
-                      <WalletProvider>
-                        <TonPriceProvider>
-                          <AudioProvider>
-                            <KeyboardShortcutListener />
-                            <LibraryProvider>
-                              <ArtistProvider>
-                                <NFTProvider>
-                                  <FeedProvider>
-                                    <FollowProvider>
-                                      <NotificationProvider>
-                                        <TaskProvider>
-                                          <TJProvider>
-                                            <AppRouter />
+        <Router>
+          <ToastProvider>
+            <ModalProvider>
+              <ThemeProvider>
+                <I18nProvider>
+                  <TooltipProvider>
+                    <AuthProvider>
+                      <UserProvider>
+                        <WalletProvider>
+                          <TonPriceProvider>
+                            <AudioProvider>
+                              <KeyboardShortcutListener />
+                              <LibraryProvider>
+                                <ArtistProvider>
+                                  <NFTProvider>
+                                    <FeedProvider>
+                                      <FollowProvider>
+                                        <NotificationProvider>
+                                          <TaskProvider>
+                                            <TJProvider>
+                                              <AppRouter />
 
-                                            <Toaster
-                                              richColors
-                                              position="top-center"
-                                              closeButton
-                                            />
-                                          </TJProvider>
-                                        </TaskProvider>
-                                      </NotificationProvider>
-                                    </FollowProvider>
-                                  </FeedProvider>
-                                </NFTProvider>
-                              </ArtistProvider>
-                            </LibraryProvider>
-                          </AudioProvider>
-                        </TonPriceProvider>
-                      </WalletProvider>
-                    </UserProvider>
-                  </AuthProvider>
-                </TooltipProvider>
-              </I18nProvider>
-            </ThemeProvider>
-          </ModalProvider>
-        </ToastProvider>
+                                              <Toaster
+                                                richColors
+                                                position="top-center"
+                                                closeButton
+                                              />
+                                            </TJProvider>
+                                          </TaskProvider>
+                                        </NotificationProvider>
+                                      </FollowProvider>
+                                    </FeedProvider>
+                                  </NFTProvider>
+                                </ArtistProvider>
+                              </LibraryProvider>
+                            </AudioProvider>
+                          </TonPriceProvider>
+                        </WalletProvider>
+                      </UserProvider>
+                    </AuthProvider>
+                  </TooltipProvider>
+                </I18nProvider>
+              </ThemeProvider>
+            </ModalProvider>
+          </ToastProvider>
+        </Router>
       </TonConnectUIProvider>
     </QueryClientProvider>
   );

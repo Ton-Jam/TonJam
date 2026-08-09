@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn, getPlaceholderImage } from '@/lib/utils';
 import AddToPlaylistModal from './AddToPlaylistModal';
 import TrackMonetizationModal from './TrackMonetizationModal';
+import TipArtistModal from './TipArtistModal';
 import { Button } from "@/components/ui/button"
 import { motion } from 'motion/react';
 import {
@@ -28,6 +29,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
   const { addNotification, addToQueue, likedTrackIds, toggleLikeTrack, userProfile } = useAudio();
   const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
   const [showMonetizationModal, setShowMonetizationModal] = useState(false);
+  const [showTipModal, setShowTipModal] = useState(false);
 
   const isLiked = likedTrackIds.includes(track.id);
   const isArtist = userProfile?.uid === track.artistId;
@@ -59,8 +61,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
         onClose();
         break;
       case 'tip':
-        addNotification(`Tip protocol initiated for ${track.artist}`, 'success');
-        onClose();
+        setShowTipModal(true);
         break;
       case 'mint':
         navigate('/mint', { state: { track } });
@@ -95,6 +96,10 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
 
   if (showMonetizationModal) {
     return <TrackMonetizationModal track={track} isOpen={true} onClose={() => { setShowMonetizationModal(false); onClose(); }} />;
+  }
+
+  if (showTipModal) {
+    return <TipArtistModal track={track} onClose={() => { setShowTipModal(false); onClose(); }} />;
   }
 
   const options = [

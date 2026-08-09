@@ -111,10 +111,10 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
               key={`trending-card-${card.id}`}
               whileHover={{ y: -4, scale: 1.01 }}
               onClick={card.action}
-              className="w-[280px] shrink-0 bg-[#0c133a] rounded-[12px] border border-white/5 overflow-hidden flex flex-col justify-between aspect-[16/10] cursor-pointer group"
+              className="w-[280px] shrink-0 bg-[#0c133a] rounded-[12px] overflow-hidden flex flex-col justify-between aspect-[16/10] cursor-pointer group"
             >
               <div className="p-4 flex items-start gap-3 flex-1 min-w-0">
-                <div className="relative w-16 h-16 rounded-[8px] overflow-hidden shrink-0 border border-white/5 bg-slate-900">
+                <div className="relative w-16 h-16 rounded-[8px] overflow-hidden shrink-0 bg-slate-900">
                   <img
                     src={imageSrc}
                     alt={card.name}

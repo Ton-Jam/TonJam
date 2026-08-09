@@ -38,7 +38,7 @@ export const AlbumCard: React.FC<AlbumCardProps> = ({ track, onClosePlayer }) =>
         />
 
         <div className="flex flex-col min-w-0">
-          <span className="text-[10px] uppercase tracking-wider font-bold text-[#5B6BFF]">
+          <span className="text-[10px] uppercase tracking-wider font-bold text-[#0098EA]">
             Album / Single
           </span>
           <h4 className="text-sm font-bold text-[#F2F4F8] truncate">{albumTitle}</h4>
@@ -57,10 +57,10 @@ export const AlbumCard: React.FC<AlbumCardProps> = ({ track, onClosePlayer }) =>
 
       <button
         onClick={handleGoToAlbum}
-        className="flex items-center gap-1.5 px-3.5 py-2 bg-[#050A24] border border-[#16244F] hover:border-[#5B6BFF] text-[#F2F4F8] rounded-[10px] text-xs font-bold transition-all active:scale-95 flex-shrink-0"
+        className="flex items-center gap-1.5 px-3.5 py-2 bg-[#050A24] border border-[#16244F] hover:border-[#0098EA] text-[#F2F4F8] rounded-[10px] text-xs font-bold transition-all active:scale-95 flex-shrink-0"
       >
         <span>Go To Album</span>
-        <ArrowRight className="w-3.5 h-3.5 text-[#5B6BFF]" />
+        <ArrowRight className="w-3.5 h-3.5 text-[#0098EA]" />
       </button>
     </div>
   );

@@ -4,7 +4,7 @@ import { Coins, ChevronRight, Gift, Trophy } from "lucide-react";
 
 export const EarnTJPreview: React.FC = () => {
   return (
-    <div className="p-6 rounded-[12px] bg-[#0c133a] border border-white/5 relative overflow-hidden group cursor-pointer">
+    <div className="p-6 rounded-[12px] bg-[#0c133a] relative overflow-hidden group cursor-pointer">
       <div className="relative z-10 space-y-4">
         <div className="flex items-center justify-between">
           <div className="bg-[#00B4D8]/10 p-2 rounded-[8px]">

@@ -515,7 +515,7 @@ export const WelcomeHero: React.FC = () => {
               transition={{ duration: 0.25 }}
               className="relative bg-[#070d2b]/80 rounded-2xl p-4 sm:p-5 space-y-4"
             >
-              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <div className="flex items-center justify-between pb-3">
                 <div>
                   <h3 className="text-sm font-black uppercase tracking-wider text-white">
                     Your Sound Frequency Analytics

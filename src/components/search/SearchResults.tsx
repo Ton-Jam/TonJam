@@ -36,7 +36,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   const navigate = useNavigate();
 
   const renderSectionHeader = (title: string, icon: React.ReactNode) => (
-    <div className="flex items-center gap-2 pb-2 border-b border-white/5 mb-4">
+    <div className="flex items-center gap-2 pb-2 mb-4">
       {icon}
       <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">{title}</h3>
     </div>
@@ -79,10 +79,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           <motion.div
             whileHover={{ y: -3 }}
             onClick={() => navigate(`/artist/${results.artists[0].uid}`)}
-            className="p-5 rounded-[12px] bg-[#0c133a] border border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 cursor-pointer group"
+            className="p-5 rounded-[12px] bg-[#0c133a] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 cursor-pointer group"
           >
             <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border border-white/10 bg-slate-900">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 bg-slate-900">
                 <img
                   src={results.artists[0].avatarUrl || getPlaceholderImage(results.artists[0].name)}
                   alt={results.artists[0].name}
@@ -131,10 +131,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-track-${track.id}`}
                 whileHover={{ x: 2, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
                 onClick={() => onPlayTrack(track)}
-                className="p-3 rounded-[12px] bg-[#0c133a] border border-white/5 flex items-center justify-between cursor-pointer group transition-all"
+                className="p-3 rounded-[12px] bg-[#0c133a] flex items-center justify-between cursor-pointer group transition-all"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative w-10 h-10 rounded-[8px] overflow-hidden shrink-0 border border-white/5 bg-slate-900">
+                  <div className="relative w-10 h-10 rounded-[8px] overflow-hidden shrink-0 bg-slate-900">
                     <img
                       src={track.coverUrl || getPlaceholderImage(track.title)}
                       alt={track.title}
@@ -173,9 +173,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-nft-${nft.id}`}
                 whileHover={{ y: -4 }}
                 onClick={() => navigate(`/nft/${nft.id}`)}
-                className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
+                className="bg-[#0c133a] rounded-[12px] p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
               >
-                <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-950 border border-white/5">
+                <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-950">
                   <img
                     src={nft.imageUrl || nft.coverUrl || getPlaceholderImage(nft.title)}
                     alt={nft.title}
@@ -204,9 +204,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-artist-${artist.uid}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/artist/${artist.uid}`)}
-                className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
+                className="bg-[#0c133a] rounded-[12px] p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
               >
-                <div className="relative h-16 w-16 rounded-full overflow-hidden border border-white/5">
+                <div className="relative h-16 w-16 rounded-full overflow-hidden bg-slate-900">
                   <img
                     src={artist.avatarUrl || getPlaceholderImage(artist.name)}
                     alt={artist.name}
@@ -235,9 +235,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-album-${album.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/album/${album.id}`)}
-                className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 cursor-pointer group transition-all"
+                className="bg-[#0c133a] rounded-[12px] p-4 cursor-pointer group transition-all"
               >
-                <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-900 border border-white/5">
+                <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-900">
                   <img
                     src={album.coverUrl || getPlaceholderImage(album.title)}
                     alt={album.title}
@@ -264,9 +264,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-playlist-${playlist.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/playlist/${playlist.id}`)}
-                className="bg-[#0c133a] rounded-[12px] border border-white/5 p-4 cursor-pointer group transition-all"
+                className="bg-[#0c133a] rounded-[12px] p-4 cursor-pointer group transition-all"
               >
-                <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-900 border border-white/5">
+                <div className="relative aspect-square rounded-[8px] overflow-hidden bg-slate-900">
                   <img
                     src={playlist.coverUrl || getPlaceholderImage(playlist.title)}
                     alt={playlist.title}
@@ -293,10 +293,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-user-${usr.uid}`}
                 whileHover={{ y: -2 }}
                 onClick={() => navigate(`/user/${usr.uid}`)}
-                className="p-4 rounded-[12px] bg-[#0c133a] border border-white/5 flex items-center justify-between cursor-pointer group transition-all"
+                className="p-4 rounded-[12px] bg-[#0c133a] flex items-center justify-between cursor-pointer group transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/5 bg-slate-900">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-900">
                     <img
                       src={usr.avatar || getPlaceholderImage(usr.name)}
                       alt={usr.name}
@@ -317,7 +317,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     e.stopPropagation();
                     onToggleFollow(usr.uid);
                   }}
-                  className="text-[8px] font-bold uppercase tracking-widest bg-transparent border border-white/10 text-white hover:bg-white/5 rounded-[8px] h-7"
+                  className="text-[8px] font-bold uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 rounded-[8px] h-7"
                 >
                   {followedUserIds.includes(usr.uid) ? 'FOLLOWING' : '+ FOLLOW'}
                 </Button>

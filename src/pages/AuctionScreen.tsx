@@ -170,8 +170,8 @@ const ActiveAuctionLeaderboard: React.FC<{ auctions: NFTItem[] }> = ({ auctions 
             <p className="text-[10px] font-bold text-muted-foreground uppercase mt-0.5">By @{selectedAuction.creator}</p>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 rounded-full">
-            <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-black text-blue-400 font-mono">CURRENT HIGH: {selectedAuction.price} TON</span>
+            <img src={TON_LOGO} alt="GRAM" className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-black text-blue-400 font-mono">CURRENT HIGH: {selectedAuction.price} GRAM</span>
           </div>
         </div>
 
@@ -240,9 +240,9 @@ const ActiveAuctionLeaderboard: React.FC<{ auctions: NFTItem[] }> = ({ auctions 
                       AMOUNT
                     </span>
                     <div className="flex items-center gap-1.5 justify-end mt-0.5">
-                      <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5" />
+                      <img src={TON_LOGO} alt="GRAM" className="w-3.5 h-3.5" />
                       <span className="text-xs font-black text-white font-mono">
-                        {bid.price} TON
+                        {bid.price} GRAM
                       </span>
                     </div>
                   </div>
@@ -373,14 +373,14 @@ const AuctionScreen: React.FC = () => {
           >
             <div className="flex items-center gap-2 text-blue-500 font-bold uppercase tracking-[0.2em] text-xs">
               <Zap className="w-4 h-4 fill-blue-500" />
-              <span>Live Auctions on TON</span>
+              <span>Live Auctions on GRAM</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none">
               Genesis <br/> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">Forge</span>
             </h1>
             <p className="text-muted-foreground/80 text-sm md:text-base max-w-md font-medium leading-relaxed">
-              Propel the decentralized music economy. Bid on rare genesis editions and back your favorite artists directly on the TON blockchain.
+              Propel the decentralized music economy. Bid on rare genesis editions and back your favorite artists directly on the GRAM blockchain.
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
               <Button 
@@ -426,7 +426,7 @@ const AuctionScreen: React.FC = () => {
                       <div className="text-right">
                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Current Bid</p>
                         <div className="flex items-center gap-1 justify-end">
-                          <img src={TON_LOGO} alt="TON" className="w-4 h-4" />
+                          <img src={TON_LOGO} alt="GRAM" className="w-4 h-4" />
                           <span className="text-lg font-black">{featuredAuction.price}</span>
                         </div>
                       </div>
@@ -542,9 +542,9 @@ const AuctionScreen: React.FC = () => {
         {/* Statistics Bar */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Total Volume', value: '1.2M TON', icon: ArrowUpRight, color: 'text-blue-500' },
+            { label: 'Total Volume', value: '1.2M GRAM', icon: ArrowUpRight, color: 'text-blue-500' },
             { label: 'Active Bidders', value: '4.2k', icon: Users, color: 'text-purple-500' },
-            { label: 'Royalties Paid', value: '85.4k TON', icon: Gem, color: 'text-amber-500' },
+            { label: 'Royalties Paid', value: '85.4k GRAM', icon: Gem, color: 'text-amber-500' },
             { label: 'NFTs Minted', value: '12.8k', icon: Sparkles, color: 'text-emerald-500' },
           ].map((stat, i) => (
             <motion.div 
@@ -604,7 +604,7 @@ const AuctionScreen: React.FC = () => {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-[8px] text-muted-foreground font-black uppercase">Bid</p>
-                          <p className="text-xs font-black">{nft.price} TON</p>
+                          <p className="text-xs font-black">{nft.price} GRAM</p>
                         </div>
                         <Button 
                           onClick={() => navigate(`/nft/${nft.id}`)}
@@ -665,7 +665,7 @@ const AuctionScreen: React.FC = () => {
           {[
             { 
               title: "Instant Settlements", 
-              desc: "Auction proceeds are settled instantly on the TON blockchain after completion.",
+              desc: "Auction proceeds are settled instantly on the GRAM blockchain after completion.",
               icon: Zap 
             },
             { 
@@ -675,7 +675,7 @@ const AuctionScreen: React.FC = () => {
             },
             { 
               title: "Low Network Fees", 
-              desc: "TON's hyper-scalability ensures you keep more of your money during fierce bidding wars.",
+              desc: "GRAM's hyper-scalability ensures you keep more of your money during fierce bidding wars.",
               icon: TrendingUp 
             }
           ].map((item, i) => (

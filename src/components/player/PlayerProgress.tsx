@@ -103,7 +103,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
         {/* Scrubbing Hover Time Tooltip */}
         {hoverTime && (
           <div
-            className="absolute -top-6 px-2 py-0.5 bg-[#5B6BFF] text-[#F2F4F8] text-[10px] font-bold rounded-[6px] shadow-lg pointer-events-none -translate-x-1/2 transition-opacity z-30"
+            className="absolute -top-6 px-2 py-0.5 bg-[#0098EA] text-[#F2F4F8] text-[10px] font-bold rounded-[6px] shadow-lg pointer-events-none -translate-x-1/2 transition-opacity z-30"
             style={{ left: `${hoverPos}%` }}
           >
             {hoverTime}
@@ -120,7 +120,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
 
           {/* Active Played Fill Layer */}
           <motion.div
-            className="h-full bg-gradient-to-r from-[#5B6BFF] to-[#00B4D8] rounded-full relative"
+            className="h-full bg-gradient-to-r from-[#0098EA] to-[#00D2FF] rounded-full relative"
             style={{ width: `${localProgress}%` }}
             transition={{ duration: 0.1 }}
           />
@@ -133,7 +133,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
           animate={{ scale: isSeeking ? 1.25 : 1 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
-          <div className="w-3.5 h-3.5 bg-white rounded-full border-2 border-[#5B6BFF] shadow-md group-hover:scale-110 transition-transform" />
+          <div className="w-3.5 h-3.5 bg-white rounded-full border-2 border-[#0098EA] shadow-md group-hover:scale-110 transition-transform" />
         </motion.div>
       </div>
 

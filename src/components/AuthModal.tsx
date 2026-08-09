@@ -278,13 +278,32 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => signInWithGoogle()}
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await signInWithGoogle();
+                      toast.success('Signed in with Google', {
+                        description: 'Access granted via Google account.'
+                      });
+                      onClose();
+                    } catch (error: any) {
+                      toast.error('Google Sign-In Failed', {
+                        description: getErrorMessage(error)
+                      });
+                    }
+                  }}
                   className="flex items-center justify-center gap-3 py-3.5 bg-muted/50 border border-border rounded-[4px] hover:bg-muted transition-all group"
                 >
                   <Chrome className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   <span className="text-[10px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">Google</span>
                 </button>
                 <button
+                  type="button"
+                  onClick={() => {
+                    toast.info('GitHub Sign-In', {
+                      description: 'GitHub authentication is available via email integration.'
+                    });
+                  }}
                   className="flex items-center justify-center gap-3 py-3.5 bg-muted/50 border border-border rounded-[4px] hover:bg-muted transition-all group"
                 >
                   <Github className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />

@@ -79,12 +79,21 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
       <div className="flex flex-wrap items-center justify-end gap-3 mt-4 md:mt-0">
         
         {isOwnProfile && (
-           <Button
-             onClick={() => navigate('/mint')}
-             className="bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold uppercase tracking-widest text-[10px] px-4 py-2 h-9"
-           >
-              <Hammer className="w-3.5 h-3.5 mr-2" /> Mint Artifact
-           </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => navigate('/artist-dashboard')}
+              className="bg-[#0052FF] hover:bg-[#1a66ff] text-white rounded-full font-bold uppercase tracking-widest text-[10px] px-4 py-2 h-9 flex items-center gap-1.5"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>Artist Dashboard</span>
+            </Button>
+            <Button
+              onClick={() => navigate('/mint')}
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold uppercase tracking-widest text-[10px] px-4 py-2 h-9"
+            >
+              <Hammer className="w-3.5 h-3.5 mr-1.5" /> Mint Artifact
+            </Button>
+          </div>
         )}
 
         {artist.socials && Object.values(artist.socials).some(v => !!v) && (

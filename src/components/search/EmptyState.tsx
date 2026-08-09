@@ -78,7 +78,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             size="sm"
             variant="outline"
             onClick={onNavigateArtists}
-            className="text-[8px] font-mono font-bold uppercase tracking-widest bg-transparent text-white hover:bg-white/5 border border-white/10 rounded-[8px] h-8 px-3"
+            className="text-[8px] font-mono font-bold uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 rounded-[8px] h-8 px-3"
           >
             <User className="w-3.5 h-3.5 mr-1.5 text-[#00B4D8]" />
             Browse Artists
@@ -90,7 +90,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             size="sm"
             variant="outline"
             onClick={onNavigateNFTs}
-            className="text-[8px] font-mono font-bold uppercase tracking-widest bg-transparent text-white hover:bg-white/5 border border-white/10 rounded-[8px] h-8 px-3"
+            className="text-[8px] font-mono font-bold uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 rounded-[8px] h-8 px-3"
           >
             <Gem className="w-3.5 h-3.5 mr-1.5 text-[#00B4D8]" />
             Browse NFTs

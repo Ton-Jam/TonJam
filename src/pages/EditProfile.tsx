@@ -6,6 +6,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { uploadFile } from '@/services/storageService';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
+import { toast } from 'sonner';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 import { cleanUpdateData } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
@@ -105,9 +106,11 @@ const EditProfile: React.FC = () => {
               const { downloadUrl } = await uploadFile(file, storagePath);
               setAvatarUrl(downloadUrl);
               addNotification("Profile snapshot captured successfully.", "success");
+              toast.success("Portrait Captured", { description: "Photo updated on your profile." });
               stopCamera();
             } catch (error: any) {
               addNotification("Failed to save captured photo.", "error");
+              toast.error("Capture Failed", { description: "Failed to save captured photo." });
             } finally {
               setIsUploading(false);
             }
@@ -133,6 +136,7 @@ const EditProfile: React.FC = () => {
       const validation = validateFile(file, 'image', 2);
       if (!validation.isValid) {
         addNotification(validation.error || "Invalid file", "error");
+        toast.error("Invalid File", { description: validation.error || "Please select a valid image file." });
         e.target.value = '';
         return;
       }
@@ -143,8 +147,10 @@ const EditProfile: React.FC = () => {
         const { downloadUrl } = await uploadFile(file, storagePath);
         setAvatarUrl(downloadUrl);
         addNotification("Profile image updated successfully.", "success");
+        toast.success("Avatar Uploaded", { description: "Profile picture updated successfully." });
       } catch (error: any) {
         addNotification("Failed to upload avatar.", "error");
+        toast.error("Upload Failed", { description: "Could not upload profile picture." });
       } finally {
         setIsUploading(false);
       }
@@ -157,6 +163,7 @@ const EditProfile: React.FC = () => {
       const validation = validateFile(file, 'image', 3);
       if (!validation.isValid) {
         addNotification(validation.error || "Invalid files. Please upload an image under 3MB.", "error");
+        toast.error("Invalid File", { description: validation.error || "Please upload an image under 3MB." });
         e.target.value = '';
         return;
       }
@@ -167,8 +174,10 @@ const EditProfile: React.FC = () => {
         const { downloadUrl } = await uploadFile(file, storagePath);
         setBannerUrl(downloadUrl);
         addNotification("Profile banner updated successfully.", "success");
+        toast.success("Banner Uploaded", { description: "Profile banner updated successfully." });
       } catch (error: any) {
         addNotification("Failed to upload banner.", "error");
+        toast.error("Upload Failed", { description: "Could not upload banner image." });
       } finally {
         setIsUploadingBanner(false);
       }
@@ -195,8 +204,10 @@ const EditProfile: React.FC = () => {
       }
 
       addNotification("Profile updated successfully.", "success");
+      toast.success("Profile Saved", { description: "Your changes have been saved." });
       navigate('/profile');
     } catch (error) {
+      toast.error("Update Failed", { description: "Could not save profile changes." });
       handleFirestoreError(error, OperationType.UPDATE, `users/${userProfile.uid}`);
     }
   };

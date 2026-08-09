@@ -49,6 +49,7 @@ const NFTDetail = lazyWithRetry(() => import('@/pages/NFTDetail'));
 const ExploreList = lazyWithRetry(() => import('@/pages/ExploreList'));
 const Notifications = lazyWithRetry(() => import('@/pages/Notifications'));
 const UploadTrack = lazyWithRetry(() => import('@/pages/UploadTrack'));
+const CreateAlbum = lazyWithRetry(() => import('@/pages/CreateAlbum').then(m => ({ default: m.CreateAlbum })));
 const MintNFT = lazyWithRetry(() => import('@/pages/MintNFT'));
 const MyNFTs = lazyWithRetry(() => import('@/pages/MyNFTs'));
 const FavoriteTracks = lazyWithRetry(() => import('@/pages/FavoriteTracks'));
@@ -80,9 +81,11 @@ const ArtistOnboarding = lazyWithRetry(() => import('@/pages/ArtistOnboarding'))
 const ArtistAnalytics = lazyWithRetry(() => import('@/pages/ArtistAnalytics'));
 const ArtistPortfolio = lazyWithRetry(() => import('@/pages/ArtistPortfolio'));
 const NFTLaunchpad = lazyWithRetry(() => import('@/pages/NFTLaunchpad'));
+const FanEngagement = lazyWithRetry(() => import('@/pages/FanEngagement'));
 
 const Referrals = lazyWithRetry(() => import('@/pages/Referrals'));
 const CollectionScreen = lazyWithRetry(() => import('@/pages/CollectionScreen'));
+const SpaceRoom = lazyWithRetry(() => import('@/pages/SpaceRoom'));
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
@@ -101,11 +104,7 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const AppRouter: React.FC = () => {
-  return (
-    <Router>
-      <AppRouterContent />
-    </Router>
-  );
+  return <AppRouterContent />;
 };
 
 const AppRouterContent: React.FC = () => {
@@ -207,7 +206,10 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
                   <Route path="/discover" element={<PageWrapper><Discover /></PageWrapper>} />
                   <Route path="/jamspace" element={<PageWrapper><JamSpace /></PageWrapper>} />
+                  <Route path="/space-room" element={<PageWrapper><SpaceRoom /></PageWrapper>} />
+                  <Route path="/space/:id" element={<PageWrapper><SpaceRoom /></PageWrapper>} />
                   <Route path="/marketplace" element={<PageWrapper><Marketplace /></PageWrapper>} />
+                  <Route path="/fan-engagement" element={<PageWrapper><FanEngagement /></PageWrapper>} />
                   <Route path="/launchpad" element={<PageWrapper><NFTLaunchpad /></PageWrapper>} />
                   <Route path="/auctions" element={<PageWrapper><AuctionScreen /></PageWrapper>} />
                   <Route path="/genesis-forge" element={<PageWrapper><GenesisScreen /></PageWrapper>} />
@@ -227,6 +229,8 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/artist-portfolio" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistPortfolio /></ProtectedRoute></PageWrapper>} />
                   <Route path="/artist-onboarding" element={<PageWrapper><ProtectedRoute><ArtistOnboarding /></ProtectedRoute></PageWrapper>} />
                   <Route path="/upload" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><UploadTrack /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/create-album" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><CreateAlbum /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/album/create" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><CreateAlbum /></ProtectedRoute></PageWrapper>} />
                   <Route path="/mint" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><MintNFT /></ProtectedRoute></PageWrapper>} />
                   <Route path="/my-nfts" element={<PageWrapper><ProtectedRoute><MyNFTs /></ProtectedRoute></PageWrapper>} />
                   <Route path="/favorite-tracks" element={<PageWrapper><ProtectedRoute><FavoriteTracks /></ProtectedRoute></PageWrapper>} />

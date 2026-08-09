@@ -1,7 +1,8 @@
 import React from 'react';
-import { BadgeCheck, Globe, Calendar, Music, ShieldCheck, Settings, Sparkles, ArrowLeft, Camera } from 'lucide-react';
+import { BadgeCheck, Globe, Calendar, Music, ShieldCheck, Settings, Sparkles, ArrowLeft, Camera, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ProfileData } from '../../components/profile/ProfileTypes';
+import { ArtistVerificationBadge } from '../../components/ArtistVerificationBadge';
 
 interface ProfileHeaderProps {
   profile: ProfileData;
@@ -43,16 +44,28 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <ArrowLeft className="w-5 h-5 text-slate-300 hover:text-white" />
         </button>
         
-        {/* Top Floating Settings Button */}
+        {/* Top Floating Settings & Dashboard Buttons */}
         {isOwnProfile && (
-          <button
-            onClick={onOpenSettings}
-            className="absolute top-4 right-4 p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer z-10"
-            title="Profile Settings"
-            aria-label="Settings"
-          >
-            <Settings className="w-5 h-5 text-slate-300 hover:text-white" />
-          </button>
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+            {profile.isArtistVerified && (
+              <button
+                onClick={() => navigate('/artist-dashboard')}
+                className="px-3 py-1.5 bg-[#0052FF] hover:bg-[#1a66ff] active:scale-95 text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1.5 transition-all cursor-pointer shadow-lg"
+                title="Artist Dashboard"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </button>
+            )}
+            <button
+              onClick={onOpenSettings}
+              className="p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer"
+              title="Profile Settings"
+              aria-label="Settings"
+            >
+              <Settings className="w-5 h-5 text-slate-300 hover:text-white" />
+            </button>
+          </div>
         )}
         
         {isOwnProfile && (
@@ -128,7 +141,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase font-sans">
               {profile.name}
             </h1>
-            <BadgeCheck className="w-5.5 h-5.5 text-[#0052FF] fill-current" />
+            <ArtistVerificationBadge 
+              isVerified={Boolean(profile.isArtistVerified || profile.isSpotifyVerified)}
+              artistName={profile.name}
+              size="md"
+            />
           </div>
           
           <div className="text-xs sm:text-sm font-mono text-slate-400">

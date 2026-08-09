@@ -25,6 +25,7 @@ import RewardPreviewCard from "./RewardPreviewCard";
 import MarketplaceCard from "./MarketplaceCard";
 import TopicPill from "./TopicPill";
 import CommunityFeedCard from "./CommunityFeedCard";
+import LatestMarketActivity from "./LatestMarketActivity";
 
 // Detailed interface for collections & listings 
 interface NFTCollection {
@@ -331,7 +332,7 @@ const HomeScreen: React.FC = () => {
                 key={idx}
                 onClick={() => setPromoIndex(idx)}
                 className={`w-1.5 h-1.5 rounded-full transition-all border-none p-0 ${
-                  idx === promoIndex ? "bg-[#5B6BFF] w-4" : "bg-white/20"
+                  idx === promoIndex ? "bg-[#0098EA] w-4" : "bg-white/20"
                 }`}
               />
             ))}
@@ -339,11 +340,14 @@ const HomeScreen: React.FC = () => {
         </div>
       </div>
 
+      {/* LATEST MARKET ACTIVITY SECTION */}
+      <LatestMarketActivity />
+
       {/* SECTION 2: TRENDING NFT COLLECTIONS */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-white">Trending NFT Collections</h2>
-          <button onClick={() => navigate("/marketplace")} className="text-xs font-bold text-[#5B6BFF] border-none bg-transparent">
+          <button onClick={() => navigate("/marketplace")} className="text-xs font-bold text-[#0098EA] border-none bg-transparent">
             All <ChevronRight className="w-3.5 h-3.5 inline" />
           </button>
         </div>
