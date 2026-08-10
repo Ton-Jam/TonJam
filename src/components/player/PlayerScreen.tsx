@@ -166,11 +166,10 @@ export const PlayerScreen: React.FC = () => {
   return (
     <AnimatePresence>
       <motion.div
-        layoutId="tonjam-player-container"
         initial={{ y: "100%", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        transition={{ duration: 0.25, ease: "easeInOut" }}
         className="fixed inset-0 z-50 bg-[#050A24] text-[#F2F4F8] font-sans overflow-y-auto overscroll-contain touch-pan-y scrollbar-thin scrollbar-thumb-[#16244F]"
       >
         {/* Scrollable Core Player Body including Header */}

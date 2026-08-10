@@ -16,8 +16,10 @@ import {
   Send,
   Globe,
   SlidersHorizontal,
-  X
+  X,
+  QrCode
 } from 'lucide-react';
+import { ProfileQRCodeModal } from '@/components/profile/ProfileQRCodeModal';
 
 import { FilterSection } from '@/components/FilterSection';
 import TrackCard from '@/components/TrackCard';
@@ -48,6 +50,7 @@ const UserProfile: React.FC = () => {
   const [sortOption, setSortOption] = useState<'newest' | 'popular' | 'price-low' | 'price-high'>('newest');
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -164,7 +167,7 @@ const UserProfile: React.FC = () => {
   return (
     <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
       {/* 1. CINEMATIC BANNER (Audiomack Style) */}
-      <div className="relative h-[240px] md:h-[320px] overflow-hidden group bg-blue-950">
+      <div className="relative h-[130px] md:h-[180px] overflow-hidden group bg-blue-950">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105 opacity-80"
           style={{ backgroundImage: `url(${user.bannerUrl || getPlaceholderImage(`user-banner-${user.uid}`, 1200, 400)})` }}
@@ -202,14 +205,17 @@ const UserProfile: React.FC = () => {
             {isFollowing ? 'Following' : 'Follow'}
           </button>
           <button 
-            onClick={() => {
-              navigator.share?.({ title: user.name, url: window.location.href })
-                .catch(() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  addNotification("Link copied", "success");
-                });
-            }}
+            onClick={() => setIsQRModalOpen(true)}
+            className="p-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg transition-all border border-blue-500/20 backdrop-blur-md shadow-lg flex items-center gap-1.5 px-3"
+            title="Share Profile QR Code"
+          >
+            <QrCode className="h-4 w-4" />
+            <span className="text-[10px] font-bold uppercase tracking-wider hidden sm:inline">QR Code</span>
+          </button>
+          <button 
+            onClick={() => setIsQRModalOpen(true)}
             className="p-2 bg-black/40 text-white rounded-lg hover:bg-black/60 transition-all border border-white/10 backdrop-blur-md shadow-lg"
+            title="Share Profile"
           >
             <Share2 className="h-4 w-4" />
           </button>
@@ -553,6 +559,22 @@ const UserProfile: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {user && (
+        <ProfileQRCodeModal 
+          isOpen={isQRModalOpen}
+          onClose={() => setIsQRModalOpen(false)}
+          profile={{
+            name: user.name,
+            username: user.username || user.name.toLowerCase().replace(/\s+/g, ''),
+            avatar: user.avatar,
+            role: user.isVerified ? 'Verified Creator' : 'Fan / Collector',
+            bio: user.bio,
+            isVerified: Boolean(user.isVerified),
+            uid: user.uid
+          }}
+        />
+      )}
     </div>
   );
 };

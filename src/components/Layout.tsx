@@ -848,7 +848,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Audio Player Container */}
       <div className="relative">
         {currentTrack && !isDJKrupy && !isPostDetail && (
-          <MiniPlayer isMobileNavHidden={isMobileNavHidden} />
+          <MiniPlayer isMobileNavHidden={isMobileNavHidden || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist)} />
         )}
         
         <AnimatePresence>
@@ -928,7 +928,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="lg:hidden">
         {/* Mobile Navigation */}
       {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
-        <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[70] h-16 transition-all duration-300 ${isMobileNavHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+        <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[70] h-16 transition-all duration-300 ease-in-out ${isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-blue-600/20 via-blue-500/50 to-blue-600/20 z-10" />
           <nav className="h-full w-full bg-black/60 backdrop-blur-xl border-t border-white/10 px-2 flex justify-around items-center shadow-[0_-8px_32px_rgba(0,0,0,0.5)] mobile-nav-opaque" aria-label="Mobile Navigation">
             <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
@@ -1126,7 +1126,7 @@ function NavItem({ to, icon: Icon, label, onClick, className = "" }: { to: strin
       onClick={onClick}
       className={({ isActive }) => `
         flex items-center gap-3 px-4 py-2.5 rounded-[4px] transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500
-        ${isActive ? 'bg-blue-600/10 text-blue-500 font-black' : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted/50'}
+        ${isActive ? 'text-blue-500 font-black' : 'text-muted-foreground/60 hover:text-foreground'}
         ${className}
       `}
     >
@@ -1148,13 +1148,13 @@ function MobileNavItem({ to, icon: Icon, label, onClick }: { to: string; icon: a
       onClick={onClick}
       className={({ isActive }) => `
         flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full rounded-[4px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mobile-nav-item
-        ${isActive ? 'text-blue-500' : 'text-white hover:text-white hover:bg-white/5'}
+        ${isActive ? 'text-blue-500 font-bold' : 'text-white/80'}
       `}
     >
       {({ isActive }) => (
         <>
-          <Icon className={`h-6 w-6 transition-all ${isActive ? 'text-blue-500' : 'text-white'}`} strokeWidth={isActive ? 2.5 : 2} />
-          <span className={`text-[8px] font-bold uppercase tracking-widest transition-all ${isActive ? 'opacity-100' : 'opacity-0 scale-75'}`}>{label}</span>
+          <Icon className={`h-6 w-6 transition-all ${isActive ? 'text-blue-500' : 'text-white/80'}`} strokeWidth={isActive ? 2.5 : 2} />
+          <span className={`text-[8px] font-bold uppercase tracking-widest transition-all ${isActive ? 'opacity-100 text-blue-500' : 'opacity-70 text-white/80'}`}>{label}</span>
         </>
       )}
     </NavLink>

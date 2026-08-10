@@ -31,10 +31,11 @@ export const ArtistMinting: React.FC = () => {
   const [loadingMessage, setLoadingMessage] = useState('Processing...');
   
   const [mintingSteps, setMintingSteps] = useState<MintingStep[]>([
-    { id: 'upload', label: 'IPFS Storage Deployment', status: 'pending', description: 'Pinata Gateway', icon: Cloud },
-    { id: 'metadata', label: 'Decentralized Metadata', status: 'pending', description: 'TEP-64 standard encoding', icon: Sparkles },
-    { id: 'transaction', label: 'Blockchain Transaction', status: 'pending', description: 'TON Smart Contract', icon: Zap },
-    { id: 'registry', label: 'Platform Synchronization', status: 'pending', description: 'Registry indexing', icon: Database },
+    { id: 'upload_audio', label: 'Audio Master IPFS Pin', status: 'pending', description: 'Pinata Gateway lossless audio upload', icon: FileAudio },
+    { id: 'upload_cover', label: 'Cover Art IPFS Pin', status: 'pending', description: 'Pinata Gateway artwork deployment', icon: ImageIcon },
+    { id: 'metadata', label: 'Decentralized Metadata', status: 'pending', description: 'TEP-64 standard encoding & JSON pin', icon: Sparkles },
+    { id: 'transaction', label: 'Blockchain Transaction', status: 'pending', description: 'TON Smart Contract deployment', icon: Zap },
+    { id: 'registry', label: 'Platform Synchronization', status: 'pending', description: 'Registry indexing & database sync', icon: Database },
   ]);
   const [overallProgress, setOverallProgress] = useState(0);
 
@@ -263,28 +264,29 @@ export const ArtistMinting: React.FC = () => {
     };
 
     try {
-      updateStepStatus('upload', 'processing', 15);
+      updateStepStatus('upload_audio', 'processing', 10);
       let finalAudioUrl = selectedTrack?.audioUrl || trackData.audioPreview;
       let finalCoverUrl = selectedTrack?.coverUrl || trackData.coverPreview;
 
       // 1. Upload audio to Pinata IPFS
       if (trackData.audioFile) {
-        setLoadingMessage('Broadcasting lossless audio to IPFS network...');
+        setLoadingMessage('Broadcasting lossless audio master to IPFS network...');
         finalAudioUrl = await uploadToPinata(trackData.audioFile);
       }
-      setOverallProgress(30);
+      updateStepStatus('upload_audio', 'completed', 25);
       
       // 2. Upload cover art to Pinata IPFS
+      updateStepStatus('upload_cover', 'processing', 30);
       if (trackData.coverFile) {
-        setLoadingMessage('Transmitting cover art vision to Pinata...');
+        setLoadingMessage('Transmitting artwork image to IPFS Pinata cluster...');
         finalCoverUrl = await uploadToPinata(trackData.coverFile);
       }
+      updateStepStatus('upload_cover', 'completed', 45);
       
-      updateStepStatus('upload', 'completed', 40);
+      // 3. Metadata
       updateStepStatus('metadata', 'processing', 50);
-
       setLoadingType('mint');
-      setLoadingMessage('Encoding TEP-64 compliant NFT metadata...');
+      setLoadingMessage('Encoding TEP-64 compliant JSON NFT metadata...');
 
       const royaltySplitsDecimals = royaltySplits.map(s => ({
         ...s,

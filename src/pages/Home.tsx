@@ -474,38 +474,6 @@ const Home: React.FC = () => {
   const trendingFeedRef = useRef<HTMLDivElement>(null);
   const [isHoveringTrending, setIsHoveringTrending] = useState(false);
 
-  useEffect(() => {
-    const container = trendingFeedRef.current;
-    if (!container) return;
-
-    const scrollInterval = setInterval(() => {
-      if (isHoveringTrending) return;
-
-      if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 2) {
-        container.scrollLeft = 0;
-      } else {
-        container.scrollLeft += 1;
-      }
-    }, 35);
-
-    return () => clearInterval(scrollInterval);
-  }, [isHoveringTrending]);
-
-  useEffect(() => {
-    const container = listeningRef.current;
-    if (!container) return;
-
-    const scrollInterval = setInterval(() => {
-      if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
-        container.scrollLeft = 0;
-      } else {
-        container.scrollLeft += 1;
-      }
-    }, 50);
-
-    return () => clearInterval(scrollInterval);
-  }, []);
-
   return (
     <motion.div 
       initial="initial"

@@ -1,8 +1,9 @@
-import React from 'react';
-import { BadgeCheck, Globe, Calendar, Music, ShieldCheck, Settings, Sparkles, ArrowLeft, Camera, LayoutDashboard } from 'lucide-react';
+import React, { useState } from 'react';
+import { BadgeCheck, Globe, Calendar, Music, ShieldCheck, Settings, Sparkles, ArrowLeft, Camera, LayoutDashboard, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ProfileData } from '../../components/profile/ProfileTypes';
 import { ArtistVerificationBadge } from '../../components/ArtistVerificationBadge';
+import { ProfileQRCodeModal } from '../../components/profile/ProfileQRCodeModal';
 
 interface ProfileHeaderProps {
   profile: ProfileData;
@@ -20,11 +21,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   isOwnProfile = true
 }) => {
   const navigate = useNavigate();
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   return (
     <div className="relative w-full bg-[#050A24] text-white">
       {/* Cover Image Container */}
-      <div className="relative w-full h-44 sm:h-56 md:h-64 overflow-hidden bg-slate-950">
+      <div className="relative w-full h-32 sm:h-40 md:h-48 overflow-hidden bg-slate-950">
         <img 
           src={profile.coverPhoto || profile.bannerUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&h=400&q=80'} 
           alt="Profile cover" 
@@ -44,29 +46,39 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <ArrowLeft className="w-5 h-5 text-slate-300 hover:text-white" />
         </button>
         
-        {/* Top Floating Settings & Dashboard Buttons */}
-        {isOwnProfile && (
-          <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
-            {profile.isArtistVerified && (
+        {/* Top Floating Settings, Dashboard & Share QR Buttons */}
+        <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+          <button
+            onClick={() => setIsQRModalOpen(true)}
+            className="p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer flex items-center justify-center"
+            title="Share Profile QR Code"
+            aria-label="Share Profile QR Code"
+          >
+            <QrCode className="w-5 h-5 text-blue-400 hover:text-blue-300" />
+          </button>
+          {isOwnProfile && (
+            <>
+              {profile.isArtistVerified && (
+                <button
+                  onClick={() => navigate('/artist-dashboard')}
+                  className="px-3 py-1.5 bg-[#0052FF] hover:bg-[#1a66ff] active:scale-95 text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1.5 transition-all cursor-pointer shadow-lg"
+                  title="Artist Dashboard"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </button>
+              )}
               <button
-                onClick={() => navigate('/artist-dashboard')}
-                className="px-3 py-1.5 bg-[#0052FF] hover:bg-[#1a66ff] active:scale-95 text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1.5 transition-all cursor-pointer shadow-lg"
-                title="Artist Dashboard"
+                onClick={onOpenSettings}
+                className="p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer"
+                title="Profile Settings"
+                aria-label="Settings"
               >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Dashboard</span>
+                <Settings className="w-5 h-5 text-slate-300 hover:text-white" />
               </button>
-            )}
-            <button
-              onClick={onOpenSettings}
-              className="p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer"
-              title="Profile Settings"
-              aria-label="Settings"
-            >
-              <Settings className="w-5 h-5 text-slate-300 hover:text-white" />
-            </button>
-          </div>
-        )}
+            </>
+          )}
+        </div>
         
         {isOwnProfile && (
           <button
@@ -83,9 +95,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       <div className="px-4 sm:px-6 relative pb-6">
         
         {/* Avatar Overlap */}
-        <div className="relative -mt-16 sm:-mt-20 mb-4 flex items-end justify-between">
+        <div className="relative -mt-12 sm:-mt-16 mb-4 flex items-end justify-between">
           <div className="relative group">
-            <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden border-[4px] border-[#050A24] bg-slate-900 shadow-none">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-[3px] border-[#050A24] bg-slate-900 shadow-none">
               <img 
                 src={profile.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=500&h=500&q=80'} 
                 alt={profile.name} 
@@ -183,6 +195,21 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Share QR Code Modal */}
+      <ProfileQRCodeModal 
+        isOpen={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        profile={{
+          name: profile.name,
+          username: profile.username,
+          avatar: profile.avatar,
+          role: profile.isArtistVerified ? 'Artist' : profile.isSpotifyVerified ? 'Spotify Artist' : 'Fan / Listener',
+          bio: profile.bio,
+          isVerified: Boolean(profile.isArtistVerified || profile.isSpotifyVerified),
+          uid: profile.uid
+        }}
+      />
     </div>
   );
 };

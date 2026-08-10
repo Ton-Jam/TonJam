@@ -4,12 +4,13 @@ import { motion, AnimatePresence } from "motion/react";
 import { 
   Play, Shuffle, Heart, UserPlus, UserCheck, Zap, Gem, 
   Share2, MoreVertical, ExternalLink, ArrowLeft, Verified, 
-  MapPin, Award, Send, MessageCircle 
+  MapPin, Award, Send, MessageCircle, QrCode 
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAudio } from "@/contexts/AudioContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn, getPlaceholderImage } from "@/lib/utils";
+import { ProfileQRCodeModal } from "@/components/profile/ProfileQRCodeModal";
 
 // Custom Modals from existing codebase
 import EditArtistProfileModal from "@/components/EditArtistProfileModal";
@@ -85,6 +86,7 @@ const ArtistProfile: React.FC = () => {
   const [showTipModal, setShowTipModal] = React.useState(false);
   const [showArtistOptions, setShowArtistOptions] = React.useState(false);
   const [showCollabModal, setShowCollabModal] = React.useState(false);
+  const [showQRModal, setShowQRModal] = React.useState(false);
 
   // Set header title on scroll
   React.useEffect(() => {
@@ -105,8 +107,7 @@ const ArtistProfile: React.FC = () => {
   }, [artist?.name, setHeaderTitle]);
 
   const handleShareProfile = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success("Profile URL copied to clipboard!");
+    setShowQRModal(true);
   };
 
   const handlePlayAlbum = (albumId: string) => {
@@ -164,7 +165,7 @@ const ArtistProfile: React.FC = () => {
     <div className="w-full bg-black min-h-screen text-white pb-32">
       
       {/* 1. HERO PARALLAX BANNER */}
-      <div className="relative w-full h-[280px] md:h-[360px] overflow-hidden">
+      <div className="relative w-full h-[150px] md:h-[190px] overflow-hidden">
         {/* Navigation Overlays */}
         <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
           <button 
@@ -175,6 +176,13 @@ const ArtistProfile: React.FC = () => {
           </button>
 
           <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowQRModal(true)}
+              className="p-2.5 bg-black/45 hover:bg-black/70 backdrop-blur-md rounded-full text-blue-400 transition-all cursor-pointer border-none flex items-center justify-center"
+              title="Share QR Code"
+            >
+              <QrCode className="w-4 h-4" />
+            </button>
             <button 
               onClick={handleShareProfile}
               className="p-2.5 bg-black/45 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-all cursor-pointer border-none flex items-center justify-center"
@@ -525,6 +533,20 @@ const ArtistProfile: React.FC = () => {
           <CollabRequestModal targetArtist={artist} isOpen={showCollabModal} onClose={() => setShowCollabModal(false)} />
         )}
       </AnimatePresence>
+
+      <ProfileQRCodeModal 
+        isOpen={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        profile={{
+          name: artist.name,
+          username: artist.username?.replace("@", "") || "artist",
+          avatar: artist.avatarUrl,
+          role: artist.genre ? `${artist.genre} Artist` : 'Artist',
+          bio: artist.bio,
+          isVerified: Boolean(artist.verified),
+          uid: artist.uid
+        }}
+      />
     </div>
   );
 };

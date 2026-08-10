@@ -42,7 +42,11 @@ import {
   ShieldCheck,
   Headphones,
   Trophy,
-  Music
+  Music,
+  Bell,
+  X,
+  ChevronRight,
+  Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -58,7 +62,59 @@ import LiveTourManager from './LiveTourManager';
 
 import { DateRangePicker, DateRangeState } from './DateRangePicker';
 
+export interface TrackMilestone {
+  id: string;
+  trackTitle: string;
+  type: 'plays' | 'revenue' | 'rank' | 'sales';
+  title: string;
+  description: string;
+  metric: string;
+  timeAgo: string;
+  isNew?: boolean;
+}
 
+const INITIAL_MILESTONES: TrackMilestone[] = [
+  {
+    id: 'm1',
+    trackTitle: 'Solar Pulse Genesis',
+    type: 'plays',
+    title: '50,000 Streams Milestone Hit!',
+    description: 'Solar Pulse Genesis crossed 52,400 plays on TonJam decentralized node network.',
+    metric: '52,400 Total Streams',
+    timeAgo: '2m ago',
+    isNew: true,
+  },
+  {
+    id: 'm2',
+    trackTitle: 'Metropolis Midnight',
+    type: 'revenue',
+    title: 'New All-Time High Royalty Revenue!',
+    description: 'Secondary trading generated 342.85 TON in automated smart contract splits.',
+    metric: '342.85 TON (~$2,330)',
+    timeAgo: '15m ago',
+    isNew: true,
+  },
+  {
+    id: 'm3',
+    trackTitle: 'Neon Drift Horizon',
+    type: 'rank',
+    title: 'Top #1 Trending Electronic Track!',
+    description: 'Reached #1 on TonJam Weekly Chart with 18,900 plays this week.',
+    metric: '#1 Chart Rank',
+    timeAgo: '1h ago',
+    isNew: true,
+  },
+  {
+    id: 'm4',
+    trackTitle: 'Cyber Groove Master',
+    type: 'plays',
+    title: '1,000 Streams Milestone Hit!',
+    description: 'Cyber Groove Master surpassed 1,000 streams on the GRAM network.',
+    metric: '1,250 Streams',
+    timeAgo: '3h ago',
+    isNew: false,
+  },
+];
 
 export const CreatorDashboard: React.FC = () => {
   const { userProfile } = useAuth();
@@ -69,6 +125,93 @@ export const CreatorDashboard: React.FC = () => {
   const [liveStreamCounter, setLiveStreamCounter] = useState(148290);
   const [liveRoyaltyPool, setLiveRoyaltyPool] = useState(342.85);
   const [activeTab, setActiveTab] = useState<'overview' | 'nfts' | 'royalties' | 'fans'>('overview');
+
+  const [milestones, setMilestones] = useState<TrackMilestone[]>(INITIAL_MILESTONES);
+  const [isMilestoneMenuOpen, setIsMilestoneMenuOpen] = useState(false);
+
+  const unreadMilestonesCount = useMemo(() => {
+    return milestones.filter(m => m.isNew).length;
+  }, [milestones]);
+
+  const triggerMilestoneToast = (milestone: TrackMilestone) => {
+    toast.custom((id) => (
+      <div className="flex items-start gap-3 w-full max-w-md bg-[#0D1527] border border-amber-500/40 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl">
+        <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+          <Trophy className="w-5 h-5 text-amber-400 animate-bounce" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono font-black uppercase text-amber-400 tracking-wider flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Milestone Unlocked
+            </span>
+            <span className="text-[9px] font-mono text-zinc-400">{milestone.timeAgo}</span>
+          </div>
+          <h4 className="text-xs font-black text-white mt-1 truncate">{milestone.title}</h4>
+          <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">{milestone.description}</p>
+          <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-white/10">
+            <span className="text-[10px] font-mono font-bold text-cyan-400">{milestone.metric}</span>
+            <button 
+              onClick={() => toast.dismiss(id)}
+              className="text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer border-none bg-transparent"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      </div>
+    ), {
+      duration: 6000,
+    });
+  };
+
+  const handleSimulateMilestone = () => {
+    const sampleTrack = topPerformingTracks[0] || { title: 'Solar Pulse Genesis' };
+    const milestonesList = [
+      {
+        title: '1,000 Streams Milestone Hit!',
+        type: 'plays' as const,
+        description: `"${sampleTrack.title}" just crossed 1,000 streams on TonJam!`,
+        metric: '1,000 Streams',
+      },
+      {
+        title: 'New All-Time High Royalty Revenue!',
+        type: 'revenue' as const,
+        description: `Secondary sales on "${sampleTrack.title}" reached a record 250 TON in royalties!`,
+        metric: '250 TON Royalty ATH',
+      },
+      {
+        title: '10,000 Streams Hit!',
+        type: 'plays' as const,
+        description: `"${sampleTrack.title}" reached 10,000 streams milestone!`,
+        metric: '10,000 Streams',
+      },
+      {
+        title: 'Top 3 Trending Track!',
+        type: 'rank' as const,
+        description: `"${sampleTrack.title}" entered the Top 3 Trending Tracks on TonJam!`,
+        metric: '#3 Chart Rank',
+      }
+    ];
+
+    const chosen = milestonesList[Math.floor(Math.random() * milestonesList.length)];
+    const newMilestone: TrackMilestone = {
+      id: `m-${Date.now()}`,
+      trackTitle: sampleTrack.title,
+      type: chosen.type,
+      title: chosen.title,
+      description: chosen.description,
+      metric: chosen.metric,
+      timeAgo: 'Just now',
+      isNew: true,
+    };
+
+    setMilestones(prev => [newMilestone, ...prev]);
+    triggerMilestoneToast(newMilestone);
+  };
+
+  const handleMarkAllRead = () => {
+    setMilestones(prev => prev.map(m => ({ ...m, isNew: false })));
+  };
 
   // Real-time live play tick simulation
   useEffect(() => {
@@ -266,7 +409,109 @@ export const CreatorDashboard: React.FC = () => {
         </div>
 
         {/* Action Controls & Filters */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 relative">
+          {/* Milestone Alerts Popover Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setIsMilestoneMenuOpen(!isMilestoneMenuOpen)}
+              className={cn(
+                "px-3 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5 cursor-pointer border-none outline-none relative",
+                unreadMilestonesCount > 0
+                  ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+                  : "bg-white/5 hover:bg-white/10 text-zinc-300"
+              )}
+            >
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <span>Milestones</span>
+              {unreadMilestonesCount > 0 && (
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+              )}
+            </button>
+
+            {/* Milestones Dropdown Menu */}
+            <AnimatePresence>
+              {isMilestoneMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#0D1527] rounded-3xl p-4 shadow-2xl z-50 text-white border border-white/10"
+                >
+                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="w-4 h-4 text-amber-400" />
+                      <span className="text-xs font-black uppercase tracking-wider text-white">Track Milestones & Alerts</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {unreadMilestonesCount > 0 && (
+                        <button
+                          onClick={handleMarkAllRead}
+                          className="text-[9px] font-bold text-amber-400 hover:underline px-2 py-1 rounded bg-amber-500/10 border-none outline-none cursor-pointer"
+                        >
+                          Mark read
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setIsMilestoneMenuOpen(false)}
+                        className="p-1 text-zinc-400 hover:text-white rounded-full hover:bg-white/10 transition-colors border-none outline-none cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Milestones List */}
+                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                    {milestones.map((m) => (
+                      <div
+                        key={m.id}
+                        className={cn(
+                          "p-2.5 rounded-2xl transition-all border border-white/5 space-y-1 relative group",
+                          m.isNew ? "bg-amber-500/10 border-amber-500/30" : "bg-white/5 hover:bg-white/10"
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                            <Sparkles className="w-3 h-3" /> {m.title}
+                          </span>
+                          <span className="text-[9px] font-mono text-zinc-400">{m.timeAgo}</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-200 font-medium leading-snug">{m.description}</p>
+                        <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                          <span className="text-[10px] font-mono font-bold text-cyan-400">{m.metric}</span>
+                          <button
+                            onClick={() => triggerMilestoneToast(m)}
+                            className="text-[9px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-0.5 bg-amber-500/10 hover:bg-amber-500/20 px-2 py-0.5 rounded-lg transition-all cursor-pointer border-none outline-none"
+                          >
+                            Trigger Toast Alert
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Action to simulate fresh milestone alert */}
+                  <div className="pt-3 mt-3 border-t border-white/10">
+                    <button
+                      onClick={() => {
+                        handleSimulateMilestone();
+                        setIsMilestoneMenuOpen(false);
+                      }}
+                      className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none outline-none shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5"
+                    >
+                      <Zap className="w-3.5 h-3.5 fill-black" />
+                      Simulate Milestone Alert Toast
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Interactive Date Range Picker */}
           <DateRangePicker value={dateRange} onChange={setDateRange} />
 

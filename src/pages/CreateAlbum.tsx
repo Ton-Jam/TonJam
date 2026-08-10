@@ -48,10 +48,11 @@ export const CreateAlbum: React.FC = () => {
   const [overallProgress, setOverallProgress] = useState(0);
 
   const [mintingSteps, setMintingSteps] = useState<MintingStep[]>([
-    { id: 'upload', label: 'IPFS Storage Deployment', status: 'pending', description: 'Pinata Gateway', icon: Cloud },
-    { id: 'metadata', label: 'Decentralized Metadata', status: 'pending', description: 'TEP-64 standard encoding', icon: Sparkles },
-    { id: 'transaction', label: 'Blockchain Transaction', status: 'pending', description: 'TON Smart Contract', icon: Zap },
-    { id: 'registry', label: 'Platform Synchronization', status: 'pending', description: 'Registry indexing', icon: Database },
+    { id: 'upload_cover', label: 'Album Artwork IPFS Pin', status: 'pending', description: 'Pinata Gateway cover art upload', icon: ImageIcon },
+    { id: 'upload_audio', label: 'Track Audio Masters IPFS Pin', status: 'pending', description: 'Batch track audio file deployment', icon: FileAudio },
+    { id: 'metadata', label: 'Album Metadata Encoding', status: 'pending', description: 'TEP-64 standard album JSON pin', icon: Sparkles },
+    { id: 'transaction', label: 'Blockchain Smart Contract', status: 'pending', description: 'TON Collection contract deployment', icon: Zap },
+    { id: 'registry', label: 'Platform Synchronization', status: 'pending', description: 'Catalog indexing & database sync', icon: Database },
   ]);
 
   // Form State - Album Info
@@ -306,7 +307,7 @@ export const CreateAlbum: React.FC = () => {
     };
 
     try {
-      updateStepStatus('upload', 'processing', 20);
+      updateStepStatus('upload_cover', 'processing', 15);
 
       // 1. Upload Album Cover to Pinata IPFS
       let finalCoverUrl = albumData.coverPreview;
@@ -314,6 +315,8 @@ export const CreateAlbum: React.FC = () => {
         setLoadingMessage('Uploading album cover art to IPFS gateway...');
         finalCoverUrl = await uploadToPinata(albumData.coverFile);
       }
+      updateStepStatus('upload_cover', 'completed', 30);
+      updateStepStatus('upload_audio', 'processing', 35);
 
       // 2. Upload audio files for new tracks
       setLoadingMessage(`Deploying ${tracklist.length} track audio files to IPFS...`);
@@ -358,8 +361,8 @@ export const CreateAlbum: React.FC = () => {
         trackIds.push(trackId);
       }
 
-      updateStepStatus('upload', 'completed', 50);
-      updateStepStatus('metadata', 'processing', 60);
+      updateStepStatus('upload_audio', 'completed', 55);
+      updateStepStatus('metadata', 'processing', 65);
 
       // 3. Metadata encoding
       setLoadingMessage('Generating TEP-64 compliant Album Metadata...');

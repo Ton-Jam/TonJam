@@ -3,163 +3,64 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, 
-  RefreshCw, 
+  X, 
+  Play, 
   TrendingUp, 
-  Hash, 
-  UserPlus, 
+  Heart, 
+  BadgeCheck, 
+  MoreVertical, 
+  Clock, 
+  Sparkles, 
   Compass, 
-  Tag, 
-  SlidersHorizontal,
-  LayoutGrid,
+  QrCode, 
+  Mic, 
+  MicOff,
+  UserPlus,
+  UserCheck,
+  Disc,
+  ListMusic,
   Radio,
-  Play,
-  Activity,
-  Zap,
-  ShieldCheck,
-  Sparkles,
-  ChevronRight,
-  Coins,
   Gem,
-  Megaphone,
-  Radio as RadioIcon,
-  Users
+  Flame,
+  ArrowRight
 } from 'lucide-react';
-import { 
-  collection, 
-  query as firestoreQuery, 
-  where, 
-  getDocs, 
-  limit, 
-  orderBy, 
-  startAt, 
-  endAt,
-  DocumentData
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { useAudio } from '@/contexts/AudioContext';
-import { auth } from '@/lib/firebase';
 import { getPlaceholderImage } from '@/lib/utils';
-import { toast } from 'sonner';
-
-// Import our world-class search sub-components
-import { AnimatedSearchBar } from '@/components/search/AnimatedSearchBar';
-import { QuickFilters } from '@/components/search/QuickFilters';
-import { ForYouSection } from '@/components/search/ForYouSection';
-import { TrendingSection } from '@/components/search/TrendingSection';
-import { FeaturedArtistSection } from '@/components/search/FeaturedArtistSection';
-import { FeaturedAlbumSection } from '@/components/search/FeaturedAlbumSection';
-import { FeaturedPlaylistSection } from '@/components/search/FeaturedPlaylistSection';
-import { TrendingNFTSection } from '@/components/search/TrendingNFTSection';
-import { LiveAuctionSection } from '@/components/search/LiveAuctionSection';
-import { CollectionSection } from '@/components/search/CollectionSection';
-import { RecommendedSection } from '@/components/search/RecommendedSection';
-import { RecentSearchSection } from '@/components/search/RecentSearchSection';
-import { ContinueListeningSection } from '@/components/search/ContinueListeningSection';
-import { RecentlyPlayedSection } from '@/components/search/RecentlyPlayedSection';
-import { SearchResults } from '@/components/search/SearchResults';
-import { SearchSuggestionList } from '@/components/search/SearchSuggestionList';
-import { WelcomeHero } from "@/components/search/WelcomeHero";
-import { SponsoredJamFeed } from "@/components/search/SponsoredJamFeed";
-import { LiveSpaces } from "@/components/search/LiveSpaces";
-import { EarnTJPreview } from "@/components/search/EarnTJPreview";
-import { SocialActivityFeed } from "@/components/SocialActivityFeed";
-import { TrendingMusicChart } from "@/components/search/TrendingMusicChart";
-import { TrendingTracksSection } from "@/components/search/TrendingTracksSection";
-import { Web3TrendsSection } from "@/components/search/Web3TrendsSection";
-import { ArtistDiscoveryAI } from '@/components/ArtistDiscoveryAI';
-import QRScanner from '@/components/QRScanner';
-import { 
-  FullDiscoverSkeleton, 
-  TracksSkeleton, 
-  CardsSkeleton, 
-  ArtistsSkeleton 
-} from '@/components/search/Skeletons';
-import { CollectionItem } from '@/components/search/search-types';
+import { Button } from '@/components/ui/button';
 import useDebounce from '@/hooks/use-debounce';
-import { Button } from "@/components/ui/button";
+import { SearchResults } from '@/components/search/SearchResults';
+import QRScanner from '@/components/QRScanner';
 
-// High-fidelity Mock/Fallback Data to populate un-seeded firebase fields elegantly
-const POPULAR_COLLECTIONS: CollectionItem[] = [
-  {
-    id: 'col-1',
-    name: 'TON Diamond Jams',
-    creator: 'DJ Krupy',
-    coverUrl: 'https://picsum.photos/seed/diamond/200/200',
-    itemsCount: 120,
-    ownersCount: 45,
-    floorPrice: '2.5',
-    totalVolume: '450.8'
-  },
-  {
-    id: 'col-2',
-    name: 'Vibe Alchemist Collective',
-    creator: 'Alchemist Wave',
-    coverUrl: 'https://picsum.photos/seed/alchemist/200/200',
-    itemsCount: 88,
-    ownersCount: 32,
-    floorPrice: '1.8',
-    totalVolume: '210.4'
-  },
-  {
-    id: 'col-3',
-    name: 'Genesis Alpha Signals',
-    creator: 'TonJam Official',
-    coverUrl: 'https://picsum.photos/seed/genesis/200/200',
-    itemsCount: 50,
-    ownersCount: 50,
-    floorPrice: '5.0',
-    totalVolume: '920.0'
-  }
+interface SpotifyCategory {
+  id: string;
+  title: string;
+  query: string;
+  gradient: string;
+  imgUrl: string;
+}
+
+const SPOTIFY_CATEGORIES: SpotifyCategory[] = [
+  { id: 'cat-1', title: 'Phonk & Drift', query: 'Phonk', gradient: 'bg-gradient-to-br from-emerald-600 to-teal-900', imgUrl: 'https://picsum.photos/seed/phonk/300/300' },
+  { id: 'cat-2', title: 'Synthwave & Cyber', query: 'Synthwave', gradient: 'bg-gradient-to-br from-purple-600 to-indigo-900', imgUrl: 'https://picsum.photos/seed/synthwave/300/300' },
+  { id: 'cat-3', title: 'Afro-TON Beats', query: 'Afro-TON', gradient: 'bg-gradient-to-br from-amber-500 to-rose-800', imgUrl: 'https://picsum.photos/seed/afro/300/300' },
+  { id: 'cat-4', title: 'Electronic & House', query: 'Electronic', gradient: 'bg-gradient-to-br from-blue-600 to-cyan-900', imgUrl: 'https://picsum.photos/seed/electronic/300/300' },
+  { id: 'cat-5', title: 'Hip Hop & Rap', query: 'Hip Hop', gradient: 'bg-gradient-to-br from-rose-600 to-pink-900', imgUrl: 'https://picsum.photos/seed/hiphop/300/300' },
+  { id: 'cat-6', title: 'Pop & Chart Hits', query: 'Pop', gradient: 'bg-gradient-to-br from-fuchsia-600 to-pink-800', imgUrl: 'https://picsum.photos/seed/pophits/300/300' },
+  { id: 'cat-7', title: 'Rock & Metal', query: 'Rock', gradient: 'bg-gradient-to-br from-red-700 to-slate-900', imgUrl: 'https://picsum.photos/seed/rock/300/300' },
+  { id: 'cat-8', title: 'Chill & Lo-Fi', query: 'Ambient', gradient: 'bg-gradient-to-br from-teal-600 to-emerald-900', imgUrl: 'https://picsum.photos/seed/lofi/300/300' },
+  { id: 'cat-9', title: 'New Drops', query: 'New', gradient: 'bg-gradient-to-br from-cyan-600 to-blue-900', imgUrl: 'https://picsum.photos/seed/newdrops/300/300' },
+  { id: 'cat-10', title: 'Music NFTs', query: 'NFT', gradient: 'bg-gradient-to-br from-purple-600 to-indigo-950', imgUrl: 'https://picsum.photos/seed/musicnft/300/300' },
+  { id: 'cat-11', title: 'Live Spaces', query: 'Live', gradient: 'bg-gradient-to-br from-orange-600 to-red-900', imgUrl: 'https://picsum.photos/seed/livespaces/300/300' },
+  { id: 'cat-12', title: 'Top Charts 50', query: 'Top', gradient: 'bg-gradient-to-br from-yellow-600 to-amber-900', imgUrl: 'https://picsum.photos/seed/topcharts/300/300' }
 ];
 
-const TRENDING_GENRES = [
-  { id: 'genre-1', name: 'Phonk', count: '1.2M streams', color: 'bg-emerald-600' },
-  { id: 'genre-2', name: 'Synthwave', count: '940K streams', color: 'bg-purple-600' },
-  { id: 'genre-3', name: 'Acoustic Cyber', count: '780K streams', color: 'bg-pink-600' },
-  { id: 'genre-4', name: 'Afro-TON', count: '650K streams', color: 'bg-amber-600' }
-];
-
-const TRENDING_HASHTAGS = [
-  { id: 'hash-1', name: '#TONAlphaSignal', posts: '12.4K broadcasts' },
-  { id: 'hash-2', name: '#GenesisDrop', posts: '9.2K broadcasts' },
-  { id: 'hash-3', name: '#SonicVelocity', posts: '8.1K broadcasts' },
-  { id: 'hash-4', name: '#NFTJam', posts: '5.5K broadcasts' }
-];
-
-const SUGGESTED_USERS = [
-  { uid: 'sug-1', name: 'KrupyVibe Master', username: 'krupy_vibe', avatar: 'https://picsum.photos/seed/vibe/100/100', followers: 2340 },
-  { uid: 'sug-2', name: 'Aura Sync', username: 'aurasync', avatar: 'https://picsum.photos/seed/aura/100/100', followers: 1560 },
-  { uid: 'sug-3', name: 'Quantum Beatmaker', username: 'quantum_beats', avatar: 'https://picsum.photos/seed/quantum/100/100', followers: 4890 }
-];
-
-const GENRES = [
-  { id: 'All', label: 'All Styles' },
-  { id: 'Phonk', label: 'Phonk' },
-  { id: 'Synthwave', label: 'Synthwave' },
-  { id: 'Acoustic Cyber', label: 'Acoustic Cyber' },
-  { id: 'Afro-TON', label: 'Afro-TON' },
-  { id: 'Electronic', label: 'Electronic' },
-  { id: 'Hip Hop', label: 'Hip Hop' },
-  { id: 'Techno', label: 'Techno' },
-  { id: 'Ambient', label: 'Ambient' },
-  { id: 'Rock', label: 'Rock' },
-  { id: 'Pop', label: 'Pop' },
-  { id: 'Lo-Fi', label: 'Lo-Fi' }
-];
-
-const MARKETPLACE_GENRES = [
-  { id: 'All', label: 'All Styles', streams: '4.5M' },
-  { id: 'Phonk', label: 'Phonk', streams: '1.2M' },
-  { id: 'Synthwave', label: 'Synthwave', streams: '940K' },
-  { id: 'Acoustic Cyber', label: 'Acoustic Cyber', streams: '780K' },
-  { id: 'Afro-TON', label: 'Afro-TON', streams: '650K' },
-  { id: 'Electronic', label: 'Electronic', streams: '1.5M' },
-  { id: 'Hip Hop', label: 'Hip Hop', streams: '880K' },
-  { id: 'Techno', label: 'Techno', streams: '520K' },
-  { id: 'Ambient', label: 'Ambient', streams: '310K' },
-  { id: 'Rock', label: 'Rock', streams: '430K' },
-  { id: 'Pop', label: 'Pop', streams: '750K' },
-  { id: 'Lo-Fi', label: 'Lo-Fi', streams: '290K' }
+const FILTER_PILLS = [
+  { id: 'all', label: 'All' },
+  { id: 'tracks', label: 'Songs' },
+  { id: 'artists', label: 'Artists' },
+  { id: 'playlists', label: 'Playlists' },
+  { id: 'albums', label: 'Albums' },
+  { id: 'nfts', label: 'NFTs' }
 ];
 
 export const Discover: React.FC = () => {
@@ -169,156 +70,89 @@ export const Discover: React.FC = () => {
     allNFTs = [],
     artists = [],
     firestoreUsers = [],
+    playlists: allUserPlaylists = [],
     playTrack,
     playAll,
     followedUserIds = [],
     likedTrackIds = [],
-    recentlyPlayed = [],
-    playlists: allUserPlaylists = [],
-    toggleFollowUser
+    toggleLikeTrack,
+    toggleFollowUser,
+    setOptionsTrack
   } = useAudio();
 
-  // Internal states
   const [query, setQuery] = useState('');
-  const debouncedQuery = useDebounce(query, 400);
+  const debouncedQuery = useDebounce(query, 300);
   const [activeFilter, setActiveFilter] = useState('all');
   const [isFocused, setIsFocused] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
-  const [visibleItemsCount, setVisibleItemsCount] = useState(6);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [selectedGenre, setSelectedGenre] = useState<string>('All');
-  const [selectedMarketplaceGenre, setSelectedMarketplaceGenre] = useState<string>('All');
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
 
-  const filteredMarketplaceNFTs = useMemo(() => {
-    if (selectedMarketplaceGenre === 'All') {
-      return allNFTs;
-    }
-    return allNFTs.filter((nft: any) => {
-      const track = allTracks.find((t: any) => t.id === nft.trackId);
-      const nftGenre = nft.genre || nft.style || track?.genre || '';
-      return nftGenre.toLowerCase() === selectedMarketplaceGenre.toLowerCase();
-    });
-  }, [allNFTs, allTracks, selectedMarketplaceGenre]);
-
-  // Recently Viewed NFTs Tracking
-  const [recentlyViewedNfts, setRecentlyViewedNfts] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('tonjam_recently_viewed_nfts');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  // Recent Search History Tracking
+  // Recent Searches
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
-      return saved ? JSON.parse(saved) : ['Phonk Waves', 'Genesis NFT', 'Krupy Vibes', 'TON Alpha'];
+      return saved ? JSON.parse(saved) : ['Phonk', 'Krupy Vibes', 'Synthwave', 'TON NFT'];
     } catch {
-      return ['Phonk Waves', 'Genesis NFT', 'Krupy Vibes', 'TON Alpha'];
+      return ['Phonk', 'Krupy Vibes', 'Synthwave', 'TON NFT'];
     }
   });
 
-  // Real-time Firestore Search Suggestions
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      if (!debouncedQuery.trim() || debouncedQuery.length < 2) {
-        setSuggestions([]);
-        return;
-      }
+  const handleSelectSearchTerm = (term: string) => {
+    setQuery(term);
+    const updated = [term, ...searchHistory.filter((h) => h !== term)].slice(0, 8);
+    setSearchHistory(updated);
+    localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
+  };
 
-      setIsSearching(true);
-      try {
-        const q = debouncedQuery.trim();
-        const capitalizedQ = q.charAt(0).toUpperCase() + q.slice(1);
-        const matchesSet = new Set<string>();
+  const handleRemoveSearchTerm = (term: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = searchHistory.filter((h) => h !== term);
+    setSearchHistory(updated);
+    localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
+  };
 
-        // We run queries for both the exact query and the capitalized version 
-        // to handle standard naming conventions in Firestore
-        const fetchBatch = async (searchTerm: string) => {
-          const endTerm = searchTerm + '\uf8ff';
-          
-          const tQuery = firestoreQuery(collection(db, 'tracks'), where('title', '>=', searchTerm), where('title', '<=', endTerm), limit(3));
-          const aQuery = firestoreQuery(collection(db, 'users'), where('role', '==', 'artist'), where('name', '>=', searchTerm), where('name', '<=', endTerm), limit(3));
-          const cQuery = firestoreQuery(collection(db, 'collections'), where('name', '>=', searchTerm), where('name', '<=', endTerm), limit(3));
+  const handleClearAllHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem('tonjam_search_history');
+  };
 
-          const [tSnap, aSnap, cSnap] = await Promise.all([getDocs(tQuery), getDocs(aQuery), getDocs(cQuery)]);
-          
-          tSnap.forEach(doc => matchesSet.add(doc.data().title));
-          aSnap.forEach(doc => matchesSet.add(doc.data().name));
-          cSnap.forEach(doc => matchesSet.add(doc.data().name));
-        };
+  // Voice Search Toggle
+  const toggleVoiceSearch = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      return;
+    }
 
-        await fetchBatch(q);
-        if (capitalizedQ !== q) {
-          await fetchBatch(capitalizedQ);
-        }
+    if (isVoiceListening) {
+      setIsVoiceListening(false);
+      return;
+    }
 
-        // Merge with local data for fuzzy matching (case-insensitive)
-        const lowerQ = q.toLowerCase();
-        allTracks.forEach(t => {
-          if (t.title.toLowerCase().includes(lowerQ)) matchesSet.add(t.title);
-        });
-        artists.forEach(a => {
-          if (a.name.toLowerCase().includes(lowerQ)) matchesSet.add(a.name);
-        });
+    try {
+      const rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = 'en-US';
 
-        setSuggestions(Array.from(matchesSet).slice(0, 8));
-      } catch (error) {
-        console.error('Error fetching suggestions:', error);
-      } finally {
-        setIsSearching(false);
-      }
-    };
+      rec.onstart = () => setIsVoiceListening(true);
+      rec.onresult = (event: any) => {
+        const text = event.results[0][0].transcript;
+        setQuery(text);
+        setIsVoiceListening(false);
+      };
+      rec.onerror = () => setIsVoiceListening(false);
+      rec.onend = () => setIsVoiceListening(false);
+      rec.start();
+    } catch {
+      setIsVoiceListening(false);
+    }
+  };
 
-    fetchSuggestions();
-  }, [debouncedQuery, allTracks]);
-
-  // Calculate listener profile metrics
-  const favoriteGenre = useMemo(() => {
-    const genres: Record<string, number> = {};
-    recentlyPlayed.forEach((t) => {
-      if (t.genre) genres[t.genre] = (genres[t.genre] || 0) + 1;
-    });
-    let topGenre = 'Electronic';
-    let max = 0;
-    Object.entries(genres).forEach(([g, count]) => {
-      if (count > max) {
-        max = count;
-        topGenre = g;
-      }
-    });
-    return topGenre;
-  }, [recentlyPlayed]);
-
-  // Personalized Tracks Filtered
-  const recommendedTracks = useMemo(() => {
-    return allTracks
-      .filter((t) => t.genre === favoriteGenre || t.likes && t.likes > 2)
-      .slice(0, 4);
-  }, [allTracks, favoriteGenre]);
-
-  // Extract Live Auctions from real NFT listings
-  const liveAuctions = useMemo(() => {
-    const realAuctions = allNFTs.filter((n) => n.listingType === 'auction' || n.isAuction);
-    if (realAuctions.length > 0) return realAuctions.slice(0, 4);
-    // fallback if none seeded
-    return allNFTs.slice(0, 2);
-  }, [allNFTs]);
-
-  // Search Results Calculations
+  // Search Results Calculation
   const filteredResults = useMemo(() => {
     const q = debouncedQuery.toLowerCase().trim();
-    const matchesGenre = (genre: string | undefined | null) => {
-      if (selectedGenre === 'All') return true;
-      if (!genre) return false;
-      return genre.toLowerCase() === selectedGenre.toLowerCase();
-    };
 
-    if (!q && selectedGenre === 'All') {
+    if (!q) {
       return {
         tracks: [],
         artists: [],
@@ -329,507 +163,435 @@ export const Discover: React.FC = () => {
       };
     }
 
-    // Filter bases first by selectedGenre
-    const baseTracks = allTracks.filter(t => matchesGenre(t.genre));
-    const baseArtists = artists.filter(a => matchesGenre(a.genre));
-    const baseNFTs = allNFTs.filter(n => matchesGenre((n as any).genre) || matchesGenre((n as any).style));
-    const basePlaylists = allUserPlaylists.filter(p => matchesGenre((p as any).genre));
-
-    if (!q) {
-      // Return everything matching the style if no search text is typed
-      return {
-        tracks: baseTracks,
-        artists: baseArtists,
-        albums: (baseTracks
-          .map((t) => ({ id: t.albumId || '', title: t.title + ' Album', artist: t.artist, coverUrl: t.coverUrl }))
-          .filter((a) => a.id) as any[]),
-        playlists: basePlaylists,
-        nfts: baseNFTs,
-        users: []
-      };
-    }
-
     return {
-      tracks: baseTracks.filter(
+      tracks: allTracks.filter(
         (t) =>
           t.title?.toLowerCase().includes(q) ||
           t.artist?.toLowerCase().includes(q) ||
           t.genre?.toLowerCase().includes(q)
       ),
-      artists: baseArtists.filter(
+      artists: artists.filter(
         (a) =>
           a.name?.toLowerCase().includes(q) ||
           a.genre?.toLowerCase().includes(q)
       ),
-      albums: (baseTracks
+      albums: (allTracks
         .map((t) => ({ id: t.albumId || '', title: t.title + ' Album', artist: t.artist, coverUrl: t.coverUrl }))
         .filter((a) => a.id && a.title.toLowerCase().includes(q)) as any[]),
-      playlists: basePlaylists.filter(
+      playlists: allUserPlaylists.filter(
         (p) =>
           p.title?.toLowerCase().includes(q) ||
           p.description?.toLowerCase().includes(q)
       ),
-      nfts: baseNFTs.filter((n) => n.title?.toLowerCase().includes(q)),
+      nfts: allNFTs.filter((n) => n.title?.toLowerCase().includes(q)),
       users: firestoreUsers.filter(
         (u) =>
           u.name?.toLowerCase().includes(q) ||
           u.username?.toLowerCase().includes(q)
       ) as any[]
     };
-  }, [debouncedQuery, allTracks, artists, allUserPlaylists, allNFTs, firestoreUsers, selectedGenre]);
+  }, [debouncedQuery, allTracks, artists, allUserPlaylists, allNFTs, firestoreUsers]);
 
-  // Simulate Pull-To-Refresh Interaction
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    toast.info('Refreshing your music synapses...');
-    setTimeout(() => {
-      setIsRefreshing(false);
-      toast.success('Frequencies updated perfectly!');
-    }, 1200);
-  };
+  // Recommended tracks
+  const recommendedTracks = useMemo(() => {
+    return allTracks.slice(0, 6);
+  }, [allTracks]);
 
-  // Add search term to history
-  const handleSelectSearchTerm = (term: string) => {
-    setQuery(term);
-    const updated = [term, ...searchHistory.filter((h) => h !== term)].slice(0, 10);
-    setSearchHistory(updated);
-    localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
-    localStorage.setItem('recentSearches', JSON.stringify(updated));
-  };
+  // Trending top 5
+  const topTrendingTracks = useMemo(() => {
+    return allTracks.slice(0, 5);
+  }, [allTracks]);
 
-  const handleRemoveSearchTerm = (term: string) => {
-    const updated = searchHistory.filter((h) => h !== term);
-    setSearchHistory(updated);
-    localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
-    localStorage.setItem('recentSearches', JSON.stringify(updated));
-  };
-
-  const handleClearAllHistory = () => {
-    setSearchHistory([]);
-    localStorage.removeItem('tonjam_search_history');
-    localStorage.removeItem('recentSearches');
-  };
-
-  // QR scan completion handler
-  const handleQrScanComplete = (data: string | null) => {
-    if (data) {
-      toast.success(`Scanned frequency: ${data}`);
-      setQuery(data);
-    }
-    setShowScanner(false);
-  };
-
-  // Infinite Scroll Trigger Sentinel
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && visibleItemsCount < 20) {
-          setVisibleItemsCount((prev) => prev + 4);
-        }
-      },
-      { threshold: 1.0 }
-    );
-
-    if (sentinelRef.current) {
-      observer.observe(sentinelRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [visibleItemsCount]);
+  // Popular artists
+  const popularArtists = useMemo(() => {
+    return artists.slice(0, 5);
+  }, [artists]);
 
   return (
     <div className="min-h-screen bg-[#050A24] text-white pb-32 relative select-none w-full max-w-full overflow-x-hidden">
       
-      {/* Sticky Collapsing Search Header - SOLID Navy; NO Borders */}
-      <div className="sticky top-0 z-40 bg-[#050A24] py-4 w-full shadow-2xl transition-colors duration-300">
-        <div className="w-full flex items-center gap-3 px-4 md:px-8">
-          
-          <div className="flex-1 relative">
-            <AnimatedSearchBar
+      {/* Sticky Spotify-Style Search Header */}
+      <div className="sticky top-0 z-40 bg-[#050A24]/95 backdrop-blur-xl pt-4 pb-3 px-4 md:px-8 space-y-3">
+        
+        {/* Main Search Input Bar */}
+        <div className="flex items-center gap-3 w-full">
+          <div className="relative flex-1 flex items-center bg-[#0d1645] hover:bg-[#111c57] focus-within:bg-[#111c57] rounded-full px-4 py-3 transition-colors shadow-md">
+            <Search className="w-5 h-5 text-slate-400 shrink-0 mr-3" />
+            <input
+              type="text"
               value={query}
-              onChange={setQuery}
-              onClear={() => setQuery('')}
+              onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-              onQrScan={() => setShowScanner(true)}
-              isFocused={isFocused}
+              placeholder="What do you want to listen to?"
+              className="w-full bg-transparent border-none outline-none text-white text-sm font-medium placeholder-slate-400"
             />
-
-            <AnimatePresence>
-              {isFocused && (query.length >= 2 || isSearching) && (
-                <SearchSuggestionList
-                  suggestions={suggestions}
-                  query={query}
-                  onSelect={handleSelectSearchTerm}
-                  isSearching={isSearching}
-                />
+            
+            <div className="flex items-center gap-2 shrink-0">
+              {query && (
+                <button
+                  onClick={() => setQuery('')}
+                  className="p-1 text-slate-400 hover:text-white rounded-full transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               )}
-            </AnimatePresence>
-          </div>
 
-          <button
-            onClick={handleRefresh}
-            className={`p-2.5 rounded-full bg-[#0c133a] text-white hover:bg-[#00B4D8] transition-all shrink-0 active:scale-95 ${
-              isRefreshing ? 'animate-spin text-[#00B4D8]' : ''
-            }`}
-            title="Refresh frequencies"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Dynamic Quick filters directly under the search bar */}
-        <div className="w-full px-4 md:px-8 pt-3 pb-1 overflow-hidden">
-          <QuickFilters activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-        </div>
-
-        {/* Horizontal scrollable list of music genres */}
-        <div className="w-full px-4 md:px-8 pt-1.5 pb-2 overflow-x-auto no-scrollbar flex gap-2 select-none">
-          {GENRES.map((genre) => {
-            const isSelected = selectedGenre === genre.id;
-            return (
               <button
-                key={genre.id}
-                onClick={() => setSelectedGenre(genre.id)}
-                className={`relative px-3.5 py-1.5 shrink-0 rounded-[12px] text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-colors duration-200 overflow-hidden flex items-center gap-1.5 ${
-                  isSelected 
-                    ? 'bg-[#00B4D8]/15 text-[#00B4D8]' 
-                    : 'bg-[#0c133a] text-slate-400 hover:text-white hover:bg-[#121c4e]'
-                }`}
-                style={{ WebkitTapHighlightColor: 'transparent' }}
+                onClick={toggleVoiceSearch}
+                className={`p-1 transition-colors ${isVoiceListening ? 'text-[#00B4D8] animate-pulse' : 'text-slate-400 hover:text-white'}`}
+                title="Voice search"
               >
-                <span>{genre.label}</span>
+                {isVoiceListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Main Discover Canvas Container */}
-      <div className="w-full max-w-full px-4 sm:px-6 md:px-8 space-y-10 mt-6">
-
-        {/* Loading skeleton transitions */}
-        {isRefreshing ? (
-          <FullDiscoverSkeleton />
-        ) : query.trim() !== '' && query !== debouncedQuery ? (
-          <div className="space-y-8 animate-pulse">
-            <div className="space-y-4">
-              <span className="text-[9px] font-mono font-bold text-[#00B4D8] uppercase tracking-widest">Aura Sync Scanning...</span>
-              {activeFilter === 'tracks' && <TracksSkeleton count={6} />}
-              {activeFilter === 'artists' && <ArtistsSkeleton count={4} />}
-              {activeFilter === 'nfts' && <CardsSkeleton count={4} />}
-              {activeFilter === 'all' && (
-                <div className="space-y-8">
-                  <TracksSkeleton count={4} />
-                  <CardsSkeleton count={4} />
-                </div>
-              )}
+              <button
+                onClick={() => setShowScanner(true)}
+                className="p-1 text-slate-400 hover:text-white rounded-full transition-colors"
+                title="Scan QR code"
+              >
+                <QrCode className="w-4 h-4" />
+              </button>
             </div>
           </div>
-        ) : (debouncedQuery.trim() || selectedGenre !== 'All') ? (
+        </div>
+
+        {/* Filter Pills (Always accessible when searching or filtered) */}
+        {(query.trim() || activeFilter !== 'all') && (
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-1">
+            {FILTER_PILLS.map((pill) => {
+              const isActive = activeFilter === pill.id;
+              return (
+                <button
+                  key={pill.id}
+                  onClick={() => setActiveFilter(pill.id)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all ${
+                    isActive
+                      ? 'bg-white text-black font-bold shadow-md'
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Main Canvas Body */}
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-8 pt-4 space-y-10">
+
+        {/* CONDITIONAL CONTENT: Search Results VS Spotify Search Home */}
+        {debouncedQuery.trim() !== '' ? (
           <SearchResults
-            query={debouncedQuery || selectedGenre}
+            query={debouncedQuery}
             activeFilter={activeFilter}
             results={filteredResults}
             onPlayTrack={playTrack}
             followedUserIds={followedUserIds}
             onToggleFollow={toggleFollowUser}
-            onClearQuery={() => {
-              setQuery('');
-              setSelectedGenre('All');
-            }}
+            onClearQuery={() => setQuery('')}
           />
         ) : (
-          <div className="space-y-10 pb-24">
-            
-            {/* 1. Welcome Hero */}
-            <section className="pt-2">
-              <WelcomeHero />
-            </section>
+          <div className="space-y-10">
 
-            {/* Real-time Community Trending Chart */}
-            <section>
-              <TrendingMusicChart />
-            </section>
-
-            {/* High-performing NFT Database Tracks Horizontal Scroll */}
-            <section>
-              <TrendingTracksSection />
-            </section>
-
-            {/* Gemini Search Grounded Web3 Music & TON Trends */}
-            <section>
-              <Web3TrendsSection />
-            </section>
-
-            {/* 2. Continue Listening */}
-            <section>
-              {recentlyPlayed.length > 0 && (
-                <ContinueListeningSection 
-                  tracks={recentlyPlayed} 
-                  onPlayTrack={playTrack} 
-                />
-              )}
-            </section>
-
-            {/* AI Artist Discovery */}
-            <section>
-              <ArtistDiscoveryAI />
-            </section>
-
-            {/* 3. Trending NFT Collections */}
-            <section>
-              <CollectionSection 
-                collections={POPULAR_COLLECTIONS} 
-                title="Trending NFT Collections"
-              />
-            </section>
-
-            {/* 4. Sponsored Jam Feed */}
-            <section>
-              <SponsoredJamFeed />
-            </section>
-
-            {/* 5. New Drops (Featured Albums) */}
-            <section>
-              <FeaturedAlbumSection
-                title="New Drops"
-                albums={allTracks.slice(0, 4).map(t => ({
-                  id: t.albumId || 'alb-1',
-                  title: t.title,
-                  artist: t.artist,
-                  artistId: t.artistId || 'art-1',
-                  coverUrl: t.coverUrl,
-                  releaseYear: 2026,
-                  trackIds: [t.id],
-                  genre: t.genre
-                }))}
-              />
-            </section>
-
-            {/* 6. Trending Songs */}
-            <section>
-              <TrendingSection
-                title="Trending Songs"
-                trendingSong={allTracks[0]}
-                trendingArtist={null}
-                trendingAlbum={null}
-                trendingPlaylist={null}
-                trendingNft={null}
-                trendingCollection={null}
-                onPlaySong={playTrack}
-              />
-            </section>
-
-            {/* 7. Trending Artists */}
-            <section>
-              <FeaturedArtistSection
-                title="Trending Artists"
-                artists={artists.slice(0, 4)}
-                followedIds={followedUserIds}
-                onToggleFollow={toggleFollowUser}
-              />
-            </section>
-
-            {/* 8. Live Spaces */}
-            <section>
-              <LiveSpaces />
-            </section>
-
-            {/* 9. Recommended For You */}
-            <section>
-              <ForYouSection
-                recommendedTracks={recommendedTracks}
-                onPlayTrack={playTrack}
-                listeningStreak={4}
-                favoriteGenre={favoriteGenre}
-              />
-            </section>
-
-            {/* 10. Earn TJ Preview */}
-            <section>
-              <EarnTJPreview />
-            </section>
-
-            {/* 11. Trending Genres & Marketplace Picks */}
-            <section className="space-y-6">
-              <div className="space-y-1">
-                <span className="text-[9px] font-mono font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <TrendingUp className="w-3 h-3 text-indigo-400" /> ON-CHAIN SOUNDSCAPES
-                </span>
-                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Trending Genres</h3>
-              </div>
-
-              {/* Horizontal scrollable pills with subtexts */}
-              <div className="w-full overflow-x-auto no-scrollbar flex gap-3 select-none pb-2">
-                {MARKETPLACE_GENRES.map((genre) => {
-                  const isSelected = selectedMarketplaceGenre === genre.id;
-                  return (
-                    <button
-                      key={`marketplace-genre-${genre.id}`}
-                      onClick={() => setSelectedMarketplaceGenre(genre.id)}
-                      className={`relative px-4 py-3 shrink-0 rounded-2xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all duration-200 overflow-hidden flex flex-col items-start gap-1 ${
-                        isSelected 
-                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' 
-                          : 'bg-[#0c133a] text-slate-400 hover:text-white hover:bg-[#121c4e]'
-                      }`}
-                      style={{ WebkitTapHighlightColor: 'transparent' }}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span>{genre.label}</span>
-                      </div>
-                      <span className={`text-[7.5px] font-mono font-medium ${isSelected ? 'text-indigo-200' : 'text-slate-500'}`}>
-                        {genre.streams} Streams
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Underneath: The Marketplace Picks matching this category */}
-              <div className="space-y-4">
+            {/* 1. Recent Searches (Spotify Style) */}
+            {searchHistory.length > 0 && (
+              <section className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-                    Marketplace Picks: <span className="text-indigo-400 font-bold">{selectedMarketplaceGenre}</span> ({filteredMarketplaceNFTs.length} items)
-                  </span>
+                  <h3 className="text-base font-bold text-white tracking-tight">Recent Searches</h3>
+                  <button
+                    onClick={handleClearAllHistory}
+                    className="text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                  >
+                    Clear all
+                  </button>
                 </div>
 
-                <AnimatePresence mode="popLayout">
-                  {filteredMarketplaceNFTs.length > 0 ? (
-                    <motion.div 
-                      layout
-                      className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+                <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar pb-1">
+                  {searchHistory.map((term) => (
+                    <div
+                      key={`recent-${term}`}
+                      onClick={() => handleSelectSearchTerm(term)}
+                      className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#0c143d] hover:bg-[#121d57] cursor-pointer transition-colors shrink-0 group"
                     >
-                      {filteredMarketplaceNFTs.slice(0, 8).map((nft) => {
-                        const imageSrc = nft.imageUrl || nft.coverUrl || getPlaceholderImage(nft.title);
-                        return (
-                          <motion.div
-                            layout
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.2 }}
-                            key={`marketplace-genre-nft-${nft.id}`}
-                            whileHover={{ y: -4 }}
-                            onClick={() => navigate(`/nft/${nft.id}`)}
-                            className="bg-[#0c133a] rounded-2xl p-4 flex flex-col justify-between aspect-[4/5] cursor-pointer group transition-all"
-                          >
-                            <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-950">
-                              <img
-                                src={imageSrc}
-                                alt={nft.title}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                onError={(e) => { e.currentTarget.src = getPlaceholderImage(nft.title); }}
-                              />
-                              <div className="absolute top-2 left-2 bg-[#050A24]/95 text-[7px] font-mono font-bold text-[#00B4D8] px-1.5 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
-                                <Gem className="w-2.5 h-2.5 text-[#00B4D8]" />
-                                <span>MINTED</span>
-                              </div>
-                            </div>
+                      <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" />
+                      <span className="text-xs font-medium text-slate-200 group-hover:text-white">{term}</span>
+                      <button
+                        onClick={(e) => handleRemoveSearchTerm(term, e)}
+                        className="p-0.5 text-slate-400 hover:text-white rounded-full transition-colors ml-1"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-                            <div className="mt-3 space-y-1 truncate">
-                              <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
-                                {nft.title}
-                              </h4>
-                              <p className="text-[10px] text-slate-400 truncate">{nft.artist || nft.creator}</p>
-                              
-                              <div className="flex justify-between items-center pt-2 mt-2">
-                                <div className="space-y-0.5">
-                                  <p className="text-[7.5px] font-mono text-slate-500 uppercase tracking-wider">VALUE</p>
-                                  <p className="text-[10px] font-mono font-extrabold text-white">{nft.price} TON</p>
-                                </div>
-                                <div className="text-right space-y-0.5">
-                                  <p className="text-[7.5px] font-mono text-slate-500 uppercase tracking-wider">SUPPLY</p>
-                                  <p className="text-[9px] font-mono font-bold text-slate-300">{nft.edition || '1/1'}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </motion.div>
-                  ) : (
-                    <motion.div 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="py-12 flex flex-col items-center justify-center text-center bg-[#0c133a]/30 rounded-2xl p-6"
-                    >
-                      <span className="text-xl mb-2">💎</span>
-                      <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">No items listed in {selectedMarketplaceGenre}</p>
-                      <p className="text-[10px] text-slate-500 max-w-xs">Be the first to mint a premium Web3 music collectible under this category!</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+            {/* 2. Browse All Categories (Spotify Famous Colored Tile Grid) */}
+            <section className="space-y-4">
+              <h3 className="text-lg font-bold text-white tracking-tight">Browse All</h3>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
+                {SPOTIFY_CATEGORIES.map((category) => (
+                  <motion.div
+                    key={category.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleSelectSearchTerm(category.query)}
+                    className={`relative ${category.gradient} rounded-2xl p-4 overflow-hidden aspect-[16/10] cursor-pointer shadow-lg group transition-all`}
+                  >
+                    <h4 className="text-base sm:text-lg font-black text-white tracking-tight uppercase max-w-[65%] leading-tight z-10 relative">
+                      {category.title}
+                    </h4>
+
+                    {/* Rotated angled artwork preview on bottom right corner */}
+                    <img
+                      src={category.imgUrl}
+                      alt={category.title}
+                      className="absolute bottom-0 right-0 w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-lg shadow-2xl translate-x-3 translate-y-3 rotate-[20deg] group-hover:scale-105 group-hover:rotate-[15deg] transition-all duration-300 pointer-events-none"
+                    />
+                  </motion.div>
+                ))}
               </div>
             </section>
 
-            {/* 12. Favorite Artists */}
-            <section>
-              <RecommendedSection
-                recommendedTracks={[]}
-                recommendedArtists={artists.slice(1, 5)}
-                onPlayTrack={playTrack}
-              />
-            </section>
-
-            {/* 13. Trending Topics */}
-            <section>
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                    <Hash className="w-3 h-3" /> Broadcast Signals
-                  </span>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Trending Topics</h3>
+            {/* 3. Recommended For You ("Made For You") */}
+            {recommendedTracks.length > 0 && (
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-white tracking-tight">Recommended for You</h3>
+                    <p className="text-xs text-slate-400">Based on your listening activity & top genres</p>
+                  </div>
+                  <button
+                    onClick={() => playAll(recommendedTracks)}
+                    className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors"
+                  >
+                    Play All
+                  </button>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {TRENDING_HASHTAGS.map((hash) => (
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                  {recommendedTracks.map((track) => (
                     <motion.div
-                      key={hash.id}
-                      whileHover={{ scale: 1.01, backgroundColor: 'rgba(255,255,255,0.03)' }}
-                      onClick={() => handleSelectSearchTerm(hash.name)}
-                      className="p-4 rounded-[12px] bg-[#0c133a] flex flex-col justify-between cursor-pointer group h-20"
+                      key={`rec-track-${track.id}`}
+                      whileHover={{ y: -4 }}
+                      onClick={() => playTrack(track)}
+                      className="bg-[#0c143d] rounded-2xl p-3 flex flex-col justify-between cursor-pointer group transition-all"
                     >
-                      <span className="text-xs font-bold text-[#00B4D8] tracking-wider">{hash.name}</span>
-                      <span className="text-[9px] font-mono text-slate-500 uppercase font-semibold">{hash.posts}</span>
+                      <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-950 mb-3">
+                        <img
+                          src={track.coverUrl || getPlaceholderImage(track.title)}
+                          alt={track.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                          <div className="w-10 h-10 rounded-full bg-[#00B4D8] text-black flex items-center justify-center pl-0.5 shadow-xl transform scale-90 group-hover:scale-100 transition-all">
+                            <Play className="w-5 h-5 fill-current" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="truncate">
+                        <h4 className="text-xs font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
+                          {track.title}
+                        </h4>
+                        <p className="text-[10px] text-slate-400 truncate mt-0.5">{track.artist}</p>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
 
-            {/* 14. Recently Minted */}
-            <section>
-              <TrendingNFTSection 
-                title="Recently Minted"
-                nfts={allNFTs.slice().reverse().slice(0, 4)} 
-              />
-            </section>
+            {/* 4. Top Charts / Trending Tracks (Spotify Numbered List) */}
+            {topTrendingTracks.length > 0 && (
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-rose-400" />
+                    <h3 className="text-lg font-bold text-white tracking-tight">Top Charts</h3>
+                  </div>
+                  <button
+                    onClick={() => playAll(topTrendingTracks)}
+                    className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors"
+                  >
+                    Listen
+                  </button>
+                </div>
 
-            {/* 15. Community Activity (Real-time Social Activity Feed) */}
-            <section>
-              <SocialActivityFeed />
-            </section>
+                <div className="space-y-2">
+                  {topTrendingTracks.map((track, idx) => {
+                    const isLiked = likedTrackIds.includes(track.id);
+                    return (
+                      <motion.div
+                        key={`top-chart-${track.id}`}
+                        whileHover={{ x: 4, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+                        onClick={() => playTrack(track)}
+                        className="p-3 rounded-2xl bg-[#0c143d] flex items-center justify-between cursor-pointer group transition-all"
+                      >
+                        <div className="flex items-center gap-4 min-w-0">
+                          <span className={`text-sm font-extrabold w-5 text-center shrink-0 ${
+                            idx === 0 ? 'text-amber-400 text-base' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-amber-600' : 'text-slate-500'
+                          }`}>
+                            #{idx + 1}
+                          </span>
 
-            {/* 16. Recently Played */}
-            <section>
-              {recentlyPlayed.length > 0 && (
-                <RecentlyPlayedSection tracks={recentlyPlayed.slice(0, 8)} onPlayTrack={playTrack} />
-              )}
-            </section>
+                          <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-950">
+                            <img
+                              src={track.coverUrl || getPlaceholderImage(track.title)}
+                              alt={track.title}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                              <Play className="w-5 h-5 text-white fill-current" />
+                            </div>
+                          </div>
 
-            {/* Sentinel element for infinite scroll tracking */}
-            <div ref={sentinelRef} className="h-4 w-full" />
+                          <div className="truncate">
+                            <h4 className="text-sm font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
+                              {track.title}
+                            </h4>
+                            <p className="text-xs text-slate-400 truncate">{track.artist}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 shrink-0 pr-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleLikeTrack(track.id);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
+                          >
+                            <Heart className={`w-4 h-4 ${isLiked ? 'text-rose-500 fill-current' : ''}`} />
+                          </button>
+
+                          <span className="text-xs font-mono text-slate-400 hidden sm:inline">
+                            {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
+                          </span>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (setOptionsTrack) setOptionsTrack(track);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-white transition-colors"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* 5. Popular Artists */}
+            {popularArtists.length > 0 && (
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-white tracking-tight">Popular Artists</h3>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  {popularArtists.map((artist) => {
+                    const isFollowing = followedUserIds.includes(artist.uid);
+                    return (
+                      <motion.div
+                        key={`pop-artist-${artist.uid}`}
+                        whileHover={{ y: -4 }}
+                        onClick={() => navigate(`/artist/${artist.uid}`)}
+                        className="bg-[#0c143d] rounded-2xl p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
+                      >
+                        <div className="relative h-24 w-24 rounded-full overflow-hidden shadow-lg bg-slate-950">
+                          <img
+                            src={artist.avatarUrl || getPlaceholderImage(artist.name)}
+                            alt={artist.name}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+
+                        <div className="w-full truncate">
+                          <h4 className="text-xs font-bold text-white group-hover:text-[#00B4D8] transition-colors truncate">
+                            {artist.name}
+                          </h4>
+                          <p className="text-[10px] text-slate-400 capitalize truncate mt-0.5">
+                            {artist.genre || 'Artist'}
+                          </p>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFollowUser(artist.uid);
+                          }}
+                          className="w-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white hover:bg-white/20 rounded-full h-8"
+                        >
+                          {isFollowing ? 'Following' : 'Follow'}
+                        </Button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* 6. Featured Playlists */}
+            {allUserPlaylists.length > 0 && (
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-white tracking-tight">Featured Playlists</h3>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {allUserPlaylists.slice(0, 4).map((playlist) => (
+                    <motion.div
+                      key={`feat-playlist-${playlist.id}`}
+                      whileHover={{ y: -4 }}
+                      onClick={() => navigate(`/playlist/${playlist.id}`)}
+                      className="bg-[#0c143d] rounded-2xl p-3.5 cursor-pointer group transition-all"
+                    >
+                      <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-950 mb-3">
+                        <img
+                          src={playlist.coverUrl || getPlaceholderImage(playlist.title)}
+                          alt={playlist.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                          <div className="w-10 h-10 rounded-full bg-[#00B4D8] text-black flex items-center justify-center pl-0.5 shadow-xl transform scale-90 group-hover:scale-100 transition-all">
+                            <Play className="w-5 h-5 fill-current" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <h4 className="text-xs font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
+                        {playlist.title}
+                      </h4>
+                      <p className="text-[10px] text-slate-400 truncate mt-0.5">by {playlist.creator}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </section>
+            )}
+
           </div>
         )}
       </div>
 
-      {/* QR Scanner Modal Overlay */}
+      {/* QR Scanner Modal */}
       {showScanner && (
         <QRScanner
           onClose={() => setShowScanner(false)}
-          onScan={handleQrScanComplete}
+          onScan={(scanned) => {
+            if (scanned) setQuery(scanned);
+            setShowScanner(false);
+          }}
         />
       )}
     </div>

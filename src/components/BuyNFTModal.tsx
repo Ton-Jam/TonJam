@@ -162,7 +162,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
 
   return (
     <Dialog open={true} onOpenChange={() => { if (!isProcessing) onClose(); }}>
-      <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden rounded-2xl bg-background border border-border shadow-xl">
+      <DialogContent className="sm:max-w-[380px] p-0 overflow-hidden rounded-xl bg-background shadow-xl">
         <DialogTitle className="sr-only">Asset Acquisition</DialogTitle>
         <LoadingOverlay isVisible={isProcessing} type="transaction" message="Recalibrating..." />
         
@@ -170,26 +170,26 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
           {!isSuccess ? (
             <motion.div 
               key="checkout"
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05 }}
-              transition={{ duration: 0.4 }}
-              className="p-5 space-y-4"
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+              className="p-4 space-y-3"
             >
               <DialogHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-black uppercase tracking-tighter text-foreground">
+                    <h2 className="text-base font-bold uppercase tracking-tight text-foreground">
                       Acquisition
                     </h2>
                   </div>
                 </div>
               </DialogHeader>
 
-              <div className="bg-muted/50 p-3 rounded-xl flex items-center gap-3">
+              <div className="bg-muted/40 p-2.5 rounded-lg flex items-center gap-2.5">
                   <img 
                     src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
-                    className="w-12 h-12 rounded-lg object-cover" 
+                    className="w-10 h-10 rounded-md object-cover" 
                     alt={nft.title} 
                   />
                   <div className="flex-1 min-w-0">

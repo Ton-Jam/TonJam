@@ -13,8 +13,10 @@ import {
   Play,
   LayoutGrid,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  QrCode
 } from 'lucide-react';
+import { ProfileQRCodeModal } from '@/components/profile/ProfileQRCodeModal';
 import { 
   AreaChart, 
   Area, 
@@ -38,6 +40,7 @@ export default function ArtistPortfolio() {
   const navigate = useNavigate();
   const [nfts, setNfts] = useState<NFTItem[]>([]);
   const [isLoadingNFTs, setIsLoadingNFTs] = useState(true);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchArtistNFTs() {
@@ -91,9 +94,7 @@ export default function ArtistPortfolio() {
   }
 
   const handleShare = () => {
-    const url = `${window.location.origin}/#/artist/${userProfile.uid}`;
-    navigator.clipboard.writeText(url);
-    toast.success("Public portfolio link copied to clipboard!");
+    setIsQRModalOpen(true);
   };
 
   const activityData = [
@@ -133,7 +134,7 @@ export default function ArtistPortfolio() {
   return (
     <div className="min-h-screen bg-black text-white pb-20">
       {/* Cover Photo Banner */}
-      <div className="relative h-[200px] md:h-[300px] w-full overflow-hidden">
+      <div className="relative h-[130px] md:h-[170px] w-full overflow-hidden">
         {userProfile.coverPhoto ? (
           <img 
             src={userProfile.coverPhoto} 
@@ -197,6 +198,13 @@ export default function ArtistPortfolio() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setIsQRModalOpen(true)}
+              className="h-10 px-3.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-xl border border-blue-500/20 flex items-center gap-2 text-xs font-bold transition-all"
+              title="Share Profile QR Code"
+            >
+              <QrCode className="w-4 h-4 text-blue-400" /> Share QR
+            </button>
             <button 
               onClick={handleShare}
               className="h-10 px-4 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl border border-white/10 flex items-center gap-2 text-xs font-bold transition-all"
@@ -554,6 +562,23 @@ export default function ArtistPortfolio() {
           </div>
         </div>
       </div>
+
+      {userProfile && (
+        <ProfileQRCodeModal 
+          isOpen={isQRModalOpen}
+          onClose={() => setIsQRModalOpen(false)}
+          profile={{
+            name: userProfile.name,
+            username: userProfile.username,
+            avatar: userProfile.avatar,
+            role: userProfile.isVerifiedArtist ? 'Verified Artist' : 'Artist / Creator',
+            bio: userProfile.bio,
+            isVerified: Boolean(userProfile.isVerifiedArtist),
+            uid: userProfile.uid,
+            profileUrl: `${window.location.origin}/#/artist/${userProfile.uid}`
+          }}
+        />
+      )}
     </div>
   );
 }

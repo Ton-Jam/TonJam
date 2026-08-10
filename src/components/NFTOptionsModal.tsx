@@ -142,13 +142,13 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
     <>
       <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
         <DrawerContent className="bg-background shadow-[0_-12px_40px_rgba(0,0,0,0.8)] border-none">
-          <div className="mx-auto w-full max-w-md relative z-10 px-4 pb-12">
+          <div className="mx-auto w-full max-w-md relative z-10 px-3 pb-5">
             <div className="flex justify-center pt-2 pb-1">
-              <div className="w-12 h-1 rounded-full bg-white/10" />
+              <div className="w-10 h-1 rounded-full bg-white/10" />
             </div>
 
-            <DrawerHeader className="pb-6 pt-4 flex flex-row items-center gap-4 text-left">
-              <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted flex-shrink-0">
+            <DrawerHeader className="pb-3 pt-2 flex flex-row items-center gap-3 text-left">
+              <div className="relative w-11 h-11 rounded-md overflow-hidden bg-muted flex-shrink-0">
                 <img 
                   src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
                   className="w-full h-full object-cover" 
@@ -156,26 +156,26 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <DrawerTitle className="text-xl font-semibold text-foreground truncate">
+                <DrawerTitle className="text-base font-bold text-foreground truncate">
                   {nft.title}
                 </DrawerTitle>
-                <DrawerDescription className="text-sm font-medium text-muted-foreground mt-1 flex items-center gap-1 truncate">
+                <DrawerDescription className="text-xs font-medium text-muted-foreground flex items-center gap-1 truncate">
                   {nft.creator}
                   {isVerified && (
-                    <Verified className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <Verified className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
                   )}
                 </DrawerDescription>
-                <div className="flex flex-wrap items-center gap-2 mt-2">
-                  <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-xs font-medium text-purple-500">
+                <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                  <span className="px-1.5 py-0.25 rounded-full bg-purple-500/10 text-[10px] font-medium text-purple-500">
                     {nft.edition || 'NFT'}
                   </span>
                   {rarity && (
-                    <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-xs font-medium text-amber-500">
+                    <span className="px-1.5 py-0.25 rounded-full bg-amber-500/10 text-[10px] font-medium text-amber-500">
                       {rarity}
                     </span>
                   )}
                   {isOwner && (
-                    <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-xs font-medium text-blue-500">
+                    <span className="px-1.5 py-0.25 rounded-full bg-blue-500/10 text-[10px] font-medium text-blue-500">
                       Owner
                     </span>
                   )}
@@ -183,29 +183,29 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
               </div>
             </DrawerHeader>
             
-            <div className="space-y-1 max-h-[50vh] overflow-y-auto no-scrollbar py-2">
+            <div className="space-y-0.5 max-h-[45vh] overflow-y-auto no-scrollbar py-1">
               {options.map((option, index) => (
                 <button
                   key={option.id}
                   onClick={option.action} 
-                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 active:bg-white/10 transition-colors text-left group focus-visible:outline-none"
+                  className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/5 active:bg-white/10 transition-colors text-left group focus-visible:outline-none"
                 >
-                  <div className="flex items-center gap-3">
-                    <option.icon className={`h-5 w-5 ${option.iconColor} transition-transform group-hover:scale-110`} />
-                    <span className={`text-base font-medium ${option.color}`}>
+                  <div className="flex items-center gap-2.5">
+                    <option.icon className={`h-4 w-4 ${option.iconColor} transition-transform group-hover:scale-105`} />
+                    <span className={`text-xs font-medium ${option.color}`}>
                       {option.label}
                     </span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
               ))}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-border">
+            <div className="mt-2 pt-2 border-t border-border">
               <DrawerClose asChild>
                 <Button 
                   variant="outline" 
-                  className="w-full rounded-full h-12 text-base font-medium transition-all active:scale-[0.98]"
+                  className="w-full rounded-full h-9 text-xs font-medium transition-all active:scale-[0.98]"
                 >
                   Cancel
                 </Button>
