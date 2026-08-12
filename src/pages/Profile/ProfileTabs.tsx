@@ -10,6 +10,7 @@ interface ProfileTabsProps {
 export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onChangeTab, isArtist = false }) => {
   const tabs = [
     { id: 'overview', label: 'Overview' },
+    { id: 'analytics', label: 'Artist Analytics' },
     { id: 'dashboard', label: 'Web3 Dashboard' },
     { id: 'royalties', label: 'Royalty Tracking' },
     { id: 'tracks', label: 'Tracks' },

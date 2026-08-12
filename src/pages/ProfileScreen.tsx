@@ -32,6 +32,7 @@ import { NFTTab } from '@/components/profile/NFTTab';
 import { PlaylistTab } from '@/components/profile/PlaylistTab';
 import { ActivityTab } from '@/components/profile/ActivityTab';
 import { AboutTab } from '@/components/profile/AboutTab';
+import { ArtistAnalyticsSection } from '@/components/profile/ArtistAnalyticsSection';
 import { ArtistDashboardCard } from '@/components/profile/ArtistDashboardCard';
 import { TonWalletVerification } from '@/components/profile/TonWalletVerification';
 import { MOCK_PROFILE, ProfileData } from '@/components/profile/ProfileTypes';
@@ -117,6 +118,8 @@ const ProfileScreenContent: React.FC = () => {
             onSelectArtist={(uid) => toast.info('Opening Artist', `Navigating to artist ${uid}`)}
           />
         );
+      case 'analytics':
+        return <ArtistAnalyticsSection profile={profile} />;
       case 'tracks':
         return <TracksTab onPlayTrack={(id) => toast.info('Playing Track', `Frequency sequence ${id} loaded`)} />;
       case 'nfts':

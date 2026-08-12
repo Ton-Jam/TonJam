@@ -10,23 +10,17 @@ import {
   Repeat1,
   Volume2,
   VolumeX,
-  Sliders,
   Tv,
   Clock,
   Gauge,
   Laptop,
-  Check
+  Check,
+  Radio,
 } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import { toast } from "sonner";
 
-interface PlayerControlsProps {
-  onEqualizerClick?: () => void;
-}
-
-export const PlayerControls: React.FC<PlayerControlsProps> = ({
-  onEqualizerClick,
-}) => {
+export const PlayerControls: React.FC = () => {
   const {
     isPlaying,
     togglePlay,
@@ -41,7 +35,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
     isMuted,
     toggleMute,
     audioElement,
-    currentTrack
+    currentTrack,
+    isSmartRadio,
+    toggleSmartRadio,
   } = useAudio();
 
   const [speed, setSpeed] = useState<number>(1.0);
@@ -190,164 +186,165 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
         </button>
       </div>
 
-      {/* Auxiliary Controls Bar (Speed, Sleep Timer, EQ, Volume) */}
-      <div className="w-full flex items-center justify-between px-2 pt-2 text-xs text-[#9AA0AE]">
-        {/* Left: Speed & Sleep Timer Buttons */}
-        <div className="flex items-center gap-2 relative">
-          {/* Playback Speed Menu */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setShowSpeedMenu(!showSpeedMenu);
-                setShowSleepMenu(false);
-                setShowDeviceMenu(false);
-              }}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-[12px] text-[11px] font-bold transition-all ${
-                speed !== 1.0
-                  ? "text-[#0098EA] bg-[#0098EA]/10"
-                  : "text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
-              }`}
-            >
-              <Gauge className="w-3.5 h-3.5" />
-              <span>{speed}x</span>
-            </button>
+      {/* Auxiliary Controls Bar (Radio, Speed, Sleep Timer, Output Device, Volume) - Horizontal Scroll */}
+      <div className="w-full flex items-center gap-2 overflow-x-auto scrollbar-none snap-x touch-pan-x px-2 py-2 text-xs text-[#9AA0AE]">
+        {/* Smart Radio Quick Toggle */}
+        <button
+          onClick={() => {
+            triggerHaptic();
+            toggleSmartRadio();
+          }}
+          className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all ${
+            isSmartRadio
+              ? "border-[#5B6BFF] text-[#5B6BFF] bg-[#5B6BFF]/15 shadow-[0_0_10px_rgba(91,107,255,0.3)]"
+              : "border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
+          }`}
+          title="Toggle Smart Radio Autoplay"
+        >
+          <Radio className={`w-3.5 h-3.5 ${isSmartRadio ? "animate-pulse text-emerald-400" : ""}`} />
+          <span>Radio</span>
+        </button>
 
-            {showSpeedMenu && (
-              <div className="absolute left-0 bottom-10 w-32 bg-[#0A113A] rounded-[12px] p-1.5 shadow-xl z-50 flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#9AA0AE] px-2 py-1 uppercase">Speed</span>
-                {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => handleSpeedSelect(s)}
-                    className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left ${
-                      speed === s ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
-                    }`}
-                  >
-                    <span>{s}x</span>
-                    {speed === s && <Check className="w-3.5 h-3.5" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+        {/* Playback Speed Menu */}
+        <div className="relative shrink-0 snap-start">
+          <button
+            onClick={() => {
+              setShowSpeedMenu(!showSpeedMenu);
+              setShowSleepMenu(false);
+              setShowDeviceMenu(false);
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border border-[#16244F] text-[11px] font-bold transition-all ${
+              speed !== 1.0
+                ? "border-[#0098EA] text-[#0098EA] bg-[#0098EA]/10"
+                : "text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
+            }`}
+          >
+            <Gauge className="w-3.5 h-3.5" />
+            <span>{speed}x</span>
+          </button>
 
-          {/* Sleep Timer Menu */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setShowSleepMenu(!showSleepMenu);
-                setShowSpeedMenu(false);
-                setShowDeviceMenu(false);
-              }}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all ${
-                sleepMinutes !== null
-                  ? "border-[#0098EA] text-[#0098EA] bg-[#0098EA]/10"
-                  : "border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5" />
-              <span>{sleepMinutes !== null ? `${sleepMinutes}m` : "Timer"}</span>
-            </button>
-
-            {showSleepMenu && (
-              <div className="absolute left-0 bottom-10 w-36 bg-[#0A113A] border border-[#16244F] rounded-[12px] p-1.5 shadow-xl z-50 flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#9AA0AE] px-2 py-1 uppercase">Sleep Timer</span>
-                {[
-                  { label: "Off", value: null },
-                  { label: "5 minutes", value: 5 },
-                  { label: "15 minutes", value: 15 },
-                  { label: "30 minutes", value: 30 },
-                  { label: "45 minutes", value: 45 },
-                  { label: "1 hour", value: 60 }
-                ].map((opt) => (
-                  <button
-                    key={opt.label}
-                    onClick={() => handleSleepSelect(opt.value)}
-                    className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left ${
-                      sleepMinutes === opt.value ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
-                    }`}
-                  >
-                    <span>{opt.label}</span>
-                    {sleepMinutes === opt.value && <Check className="w-3.5 h-3.5" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Equalizer */}
-          {onEqualizerClick && (
-            <button
-              onClick={onEqualizerClick}
-              className="p-2 rounded-[12px] border border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A] transition-all"
-              title="Equalizer & FX"
-            >
-              <Sliders className="w-3.5 h-3.5" />
-            </button>
+          {showSpeedMenu && (
+            <div className="absolute left-0 bottom-10 w-32 bg-[#0A113A] border border-[#16244F] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-[#9AA0AE] px-2 py-1 uppercase">Speed</span>
+              {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleSpeedSelect(s)}
+                  className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left ${
+                    speed === s ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
+                  }`}
+                >
+                  <span>{s}x</span>
+                  {speed === s && <Check className="w-3.5 h-3.5" />}
+                </button>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Right: Output Devices & Volume slider */}
-        <div className="flex items-center gap-3">
-          {/* Device Selector */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setShowDeviceMenu(!showDeviceMenu);
-                setShowSpeedMenu(false);
-                setShowSleepMenu(false);
-              }}
-              className="p-2 rounded-[12px] border border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A] transition-all flex items-center gap-1"
-              title="Audio Output Device"
-            >
-              <Laptop className="w-3.5 h-3.5" />
-            </button>
+        {/* Sleep Timer Menu */}
+        <div className="relative shrink-0 snap-start">
+          <button
+            onClick={() => {
+              setShowSleepMenu(!showSleepMenu);
+              setShowSpeedMenu(false);
+              setShowDeviceMenu(false);
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all ${
+              sleepMinutes !== null
+                ? "border-[#0098EA] text-[#0098EA] bg-[#0098EA]/10"
+                : "border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <span>{sleepMinutes !== null ? `${sleepMinutes}m` : "Timer"}</span>
+          </button>
 
-            {showDeviceMenu && (
-              <div className="absolute right-0 bottom-10 w-40 bg-[#0A113A] border border-[#16244F] rounded-[12px] p-1.5 shadow-xl z-50 flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#9AA0AE] px-2 py-1 uppercase">Audio Device</span>
-                {["Local Speaker", "AirPlay / WebCast", "Bluetooth Headphones", "TonJam Hi-Fi DAC"].map((dev) => (
-                  <button
-                    key={dev}
-                    onClick={() => {
-                      setActiveDevice(dev);
-                      setShowDeviceMenu(false);
-                      toast.success(`Connected to ${dev}`);
-                    }}
-                    className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-[11px] font-medium text-left ${
-                      activeDevice === dev ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
-                    }`}
-                  >
-                    <span className="truncate">{dev}</span>
-                    {activeDevice === dev && <Check className="w-3 h-3 flex-shrink-0" />}
-                  </button>
-                ))}
-              </div>
+          {showSleepMenu && (
+            <div className="absolute left-0 bottom-10 w-36 bg-[#0A113A] border border-[#16244F] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-[#9AA0AE] px-2 py-1 uppercase">Sleep Timer</span>
+              {[
+                { label: "Off", value: null },
+                { label: "5 minutes", value: 5 },
+                { label: "15 minutes", value: 15 },
+                { label: "30 minutes", value: 30 },
+                { label: "45 minutes", value: 45 },
+                { label: "1 hour", value: 60 }
+              ].map((opt) => (
+                <button
+                  key={opt.label}
+                  onClick={() => handleSleepSelect(opt.value)}
+                  className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left ${
+                    sleepMinutes === opt.value ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
+                  }`}
+                >
+                  <span>{opt.label}</span>
+                  {sleepMinutes === opt.value && <Check className="w-3.5 h-3.5" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Device Selector */}
+        <div className="relative shrink-0 snap-start">
+          <button
+            onClick={() => {
+              setShowDeviceMenu(!showDeviceMenu);
+              setShowSpeedMenu(false);
+              setShowSleepMenu(false);
+            }}
+            className="px-3 py-1.5 rounded-[12px] border border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A] transition-all flex items-center gap-1.5 text-[11px] font-bold"
+            title="Audio Output Device"
+          >
+            <Laptop className="w-3.5 h-3.5 text-blue-400" />
+            <span className="truncate max-w-[90px]">{activeDevice}</span>
+          </button>
+
+          {showDeviceMenu && (
+            <div className="absolute right-0 bottom-10 w-44 bg-[#0A113A] border border-[#16244F] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-[#9AA0AE] px-2 py-1 uppercase">Audio Device</span>
+              {["Local Speaker", "AirPlay / WebCast", "Bluetooth Headphones", "TonJam Hi-Fi DAC"].map((dev) => (
+                <button
+                  key={dev}
+                  onClick={() => {
+                    setActiveDevice(dev);
+                    setShowDeviceMenu(false);
+                    toast.success(`Connected to ${dev}`);
+                  }}
+                  className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-[11px] font-medium text-left ${
+                    activeDevice === dev ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
+                  }`}
+                >
+                  <span className="truncate">{dev}</span>
+                  {activeDevice === dev && <Check className="w-3 h-3 flex-shrink-0" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Volume Control */}
+        <div className="shrink-0 snap-start flex items-center gap-2 px-3 py-1.5 rounded-[12px] border border-[#16244F] bg-[#0A113A]">
+          <button
+            onClick={toggleMute}
+            className="text-[#9AA0AE] hover:text-[#F2F4F8] transition-colors"
+          >
+            {isMuted || volume === 0 ? (
+              <VolumeX className="w-3.5 h-3.5 text-red-400" />
+            ) : (
+              <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
             )}
-          </div>
-
-          {/* Volume Control */}
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={toggleMute}
-              className="text-[#9AA0AE] hover:text-[#F2F4F8] transition-colors"
-            >
-              {isMuted || volume === 0 ? (
-                <VolumeX className="w-4 h-4 text-red-400" />
-              ) : (
-                <Volume2 className="w-4 h-4" />
-              )}
-            </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={isMuted ? 0 : volume}
-              onChange={(e) => setVolume(parseFloat(e.target.value))}
-              className="w-16 h-1 bg-[#16244F] accent-[#0098EA] rounded-lg cursor-pointer"
-            />
-          </div>
+          </button>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={isMuted ? 0 : volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="w-16 h-1 bg-[#16244F] accent-[#0098EA] rounded-lg cursor-pointer"
+          />
         </div>
       </div>
     </div>

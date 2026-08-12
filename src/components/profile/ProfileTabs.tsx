@@ -9,6 +9,7 @@ interface ProfileTabsProps {
 export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onChangeTab }) => {
   const tabs = [
     { id: 'overview', label: 'Overview' },
+    { id: 'analytics', label: 'Artist Analytics' },
     { id: 'tracks', label: 'Tracks' },
     { id: 'nfts', label: 'NFTs' },
     { id: 'playlists', label: 'Playlists' },

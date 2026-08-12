@@ -84,7 +84,7 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
         whileTap={{ scale: 0.98 }}
         animate={{ scale: isZoomed ? 1.15 : 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="relative w-[50vw] max-w-[280px] sm:max-w-[320px] max-h-[32vh] aspect-square rounded-xl overflow-hidden shadow-2xl bg-[#0A113A] group cursor-pointer"
+        className="relative w-[68vw] max-w-[350px] sm:max-w-[390px] max-h-[38vh] aspect-square rounded-2xl overflow-hidden shadow-2xl bg-[#0A113A] group cursor-pointer"
       >
         {/* Static artwork container (no rotation) */}
         <div className="w-full h-full relative flex items-center justify-center">

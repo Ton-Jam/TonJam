@@ -93,10 +93,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                   navigate(`/artist/${results.artists[0].uid}`);
                 }
               }}
-              className="relative p-6 rounded-2xl bg-[#0c143d] hover:bg-[#101b52] transition-colors cursor-pointer group flex flex-col justify-between min-h-[220px]"
+              className="relative p-6 rounded-[14px] bg-[#0c143d] hover:bg-[#101b52] transition-colors cursor-pointer group flex flex-col justify-between min-h-[220px]"
             >
               <div>
-                <div className="relative w-20 h-20 rounded-xl overflow-hidden mb-4 shadow-lg bg-slate-950">
+                <div className="relative w-20 h-20 rounded-[10px] overflow-hidden mb-4 shadow-lg bg-slate-950">
                   <img
                     src={
                       isTopResultTrack
@@ -144,14 +144,14 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     key={`top-song-${track.id}`}
                     whileHover={{ x: 3, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
                     onClick={() => onPlayTrack(track)}
-                    className="p-2.5 rounded-xl bg-[#0c143d] flex items-center justify-between cursor-pointer group transition-all"
+                    className="p-2.5 rounded-[10px] bg-[#0c143d] flex items-center justify-between cursor-pointer group transition-all"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <span className="text-xs font-bold text-slate-500 w-4 text-center shrink-0">
                         {idx + 1}
                       </span>
                       
-                      <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-slate-950">
+                      <div className="relative w-10 h-10 rounded-[6px] overflow-hidden shrink-0 bg-slate-950">
                         <img
                           src={track.coverUrl || getPlaceholderImage(track.title)}
                           alt={track.title}
@@ -193,10 +193,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-track-full-${track.id}`}
                 whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
                 onClick={() => onPlayTrack(track)}
-                className="p-3 rounded-xl bg-[#0c143d] flex items-center justify-between cursor-pointer group transition-all"
+                className="p-3 rounded-[10px] bg-[#0c143d] flex items-center justify-between cursor-pointer group transition-all"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 bg-slate-950">
+                  <div className="relative w-11 h-11 rounded-[6px] overflow-hidden shrink-0 bg-slate-950">
                     <img
                       src={track.coverUrl || getPlaceholderImage(track.title)}
                       alt={track.title}
@@ -235,7 +235,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-artist-${artist.uid}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/artist/${artist.uid}`)}
-                className="bg-[#0c143d] rounded-2xl p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
+                className="bg-[#0c143d] rounded-[14px] p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
               >
                 <div className="relative h-20 w-20 rounded-full overflow-hidden shadow-md bg-slate-950">
                   <img
@@ -279,9 +279,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-album-${album.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/album/${album.id}`)}
-                className="bg-[#0c143d] rounded-2xl p-3.5 cursor-pointer group transition-all"
+                className="bg-[#0c143d] rounded-[14px] p-3.5 cursor-pointer group transition-all"
               >
-                <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-950">
+                <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950">
                   <img
                     src={album.coverUrl || getPlaceholderImage(album.title)}
                     alt={album.title}
@@ -308,9 +308,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-playlist-${playlist.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/playlist/${playlist.id}`)}
-                className="bg-[#0c143d] rounded-2xl p-3.5 cursor-pointer group transition-all"
+                className="bg-[#0c143d] rounded-[14px] p-3.5 cursor-pointer group transition-all"
               >
-                <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-950">
+                <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950">
                   <img
                     src={playlist.coverUrl || getPlaceholderImage(playlist.title)}
                     alt={playlist.title}
@@ -337,9 +337,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 key={`search-nft-${nft.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/nft/${nft.id}`)}
-                className="bg-[#0c143d] rounded-2xl p-3.5 flex flex-col justify-between cursor-pointer group transition-all"
+                className="bg-[#0c143d] rounded-[14px] p-3.5 flex flex-col justify-between cursor-pointer group transition-all"
               >
-                <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-950">
+                <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950">
                   <img
                     src={nft.imageUrl || nft.coverUrl || getPlaceholderImage(nft.title)}
                     alt={nft.title}

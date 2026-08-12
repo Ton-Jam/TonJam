@@ -49,6 +49,7 @@ import { PostsSection } from './shared/PostsSection';
 import { AboutSection } from './shared/AboutSection';
 import { UserProfileDashboard } from '@/components/profile/UserProfileDashboard';
 import { RoyaltyTrackingSection } from '@/components/profile/RoyaltyTrackingSection';
+import { ArtistAnalyticsSection } from '@/components/profile/ArtistAnalyticsSection';
 import { ListenStreakIndicator } from '@/components/profile/ListenStreakIndicator';
 
 import { MOCK_PROFILE, ProfileData } from '@/components/profile/ProfileTypes';
@@ -354,6 +355,9 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
               <ListenStreakIndicator isOwnProfile={isOwnProfile} />
             </div>
 
+            {/* Artist Analytics Section Preview */}
+            <ArtistAnalyticsSection profile={profile} />
+
             {/* If unverified, offer option card */}
             {isOwnProfile && !profile.isArtistVerified && (
               <BecomeArtistCard 
@@ -371,6 +375,9 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
             <ActivityCard />
           </div>
         );
+
+      case 'analytics':
+        return <ArtistAnalyticsSection profile={profile} />;
 
       case 'dashboard':
         return <UserProfileDashboard />;

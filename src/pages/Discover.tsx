@@ -215,8 +215,8 @@ export const Discover: React.FC = () => {
         
         {/* Main Search Input Bar */}
         <div className="flex items-center gap-3 w-full">
-          <div className="relative flex-1 flex items-center bg-[#0d1645] hover:bg-[#111c57] focus-within:bg-[#111c57] rounded-full px-4 py-3 transition-colors shadow-md">
-            <Search className="w-5 h-5 text-slate-400 shrink-0 mr-3" />
+          <div className="relative flex-1 flex items-center bg-[#F5F5F7] hover:bg-white focus-within:bg-white border border-slate-300/80 rounded-full px-4 py-3 transition-colors shadow-md">
+            <Search className="w-5 h-5 text-slate-500 shrink-0 mr-3" />
             <input
               type="text"
               value={query}
@@ -224,14 +224,14 @@ export const Discover: React.FC = () => {
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
               placeholder="What do you want to listen to?"
-              className="w-full bg-transparent border-none outline-none text-white text-sm font-medium placeholder-slate-400"
+              className="w-full bg-transparent border-none outline-none text-slate-900 text-sm font-semibold placeholder-slate-500"
             />
             
             <div className="flex items-center gap-2 shrink-0">
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className="p-1 text-slate-400 hover:text-white rounded-full transition-colors"
+                  className="p-1 text-slate-500 hover:text-slate-900 rounded-full transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -239,7 +239,7 @@ export const Discover: React.FC = () => {
 
               <button
                 onClick={toggleVoiceSearch}
-                className={`p-1 transition-colors ${isVoiceListening ? 'text-[#00B4D8] animate-pulse' : 'text-slate-400 hover:text-white'}`}
+                className={`p-1 transition-colors ${isVoiceListening ? 'text-[#00B4D8] animate-pulse' : 'text-slate-500 hover:text-slate-900'}`}
                 title="Voice search"
               >
                 {isVoiceListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -247,7 +247,7 @@ export const Discover: React.FC = () => {
 
               <button
                 onClick={() => setShowScanner(true)}
-                className="p-1 text-slate-400 hover:text-white rounded-full transition-colors"
+                className="p-1 text-slate-500 hover:text-slate-900 rounded-full transition-colors"
                 title="Scan QR code"
               >
                 <QrCode className="w-4 h-4" />
@@ -341,7 +341,7 @@ export const Discover: React.FC = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleSelectSearchTerm(category.query)}
-                    className={`relative ${category.gradient} rounded-2xl p-4 overflow-hidden aspect-[16/10] cursor-pointer shadow-lg group transition-all`}
+                    className={`relative ${category.gradient} rounded-[14px] p-4 overflow-hidden aspect-[16/10] cursor-pointer shadow-lg group transition-all`}
                   >
                     <h4 className="text-base sm:text-lg font-black text-white tracking-tight uppercase max-w-[65%] leading-tight z-10 relative">
                       {category.title}
@@ -351,7 +351,7 @@ export const Discover: React.FC = () => {
                     <img
                       src={category.imgUrl}
                       alt={category.title}
-                      className="absolute bottom-0 right-0 w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-lg shadow-2xl translate-x-3 translate-y-3 rotate-[20deg] group-hover:scale-105 group-hover:rotate-[15deg] transition-all duration-300 pointer-events-none"
+                      className="absolute bottom-0 right-0 w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-[6px] shadow-2xl translate-x-3 translate-y-3 rotate-[20deg] group-hover:scale-105 group-hover:rotate-[15deg] transition-all duration-300 pointer-events-none"
                     />
                   </motion.div>
                 ))}
@@ -380,9 +380,9 @@ export const Discover: React.FC = () => {
                       key={`rec-track-${track.id}`}
                       whileHover={{ y: -4 }}
                       onClick={() => playTrack(track)}
-                      className="bg-[#0c143d] rounded-2xl p-3 flex flex-col justify-between cursor-pointer group transition-all"
+                      className="bg-[#0c143d] rounded-[14px] p-3 flex flex-col justify-between cursor-pointer group transition-all"
                     >
-                      <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-950 mb-3">
+                      <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950 mb-3">
                         <img
                           src={track.coverUrl || getPlaceholderImage(track.title)}
                           alt={track.title}
@@ -431,7 +431,7 @@ export const Discover: React.FC = () => {
                         key={`top-chart-${track.id}`}
                         whileHover={{ x: 4, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
                         onClick={() => playTrack(track)}
-                        className="p-3 rounded-2xl bg-[#0c143d] flex items-center justify-between cursor-pointer group transition-all"
+                        className="p-3 rounded-[14px] bg-[#0c143d] flex items-center justify-between cursor-pointer group transition-all"
                       >
                         <div className="flex items-center gap-4 min-w-0">
                           <span className={`text-sm font-extrabold w-5 text-center shrink-0 ${
@@ -440,7 +440,7 @@ export const Discover: React.FC = () => {
                             #{idx + 1}
                           </span>
 
-                          <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-950">
+                          <div className="relative w-12 h-12 rounded-[10px] overflow-hidden shrink-0 bg-slate-950">
                             <img
                               src={track.coverUrl || getPlaceholderImage(track.title)}
                               alt={track.title}
@@ -506,7 +506,7 @@ export const Discover: React.FC = () => {
                         key={`pop-artist-${artist.uid}`}
                         whileHover={{ y: -4 }}
                         onClick={() => navigate(`/artist/${artist.uid}`)}
-                        className="bg-[#0c143d] rounded-2xl p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
+                        className="bg-[#0c143d] rounded-[14px] p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
                       >
                         <div className="relative h-24 w-24 rounded-full overflow-hidden shadow-lg bg-slate-950">
                           <img
@@ -555,9 +555,9 @@ export const Discover: React.FC = () => {
                       key={`feat-playlist-${playlist.id}`}
                       whileHover={{ y: -4 }}
                       onClick={() => navigate(`/playlist/${playlist.id}`)}
-                      className="bg-[#0c143d] rounded-2xl p-3.5 cursor-pointer group transition-all"
+                      className="bg-[#0c143d] rounded-[14px] p-3.5 cursor-pointer group transition-all"
                     >
-                      <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-950 mb-3">
+                      <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950 mb-3">
                         <img
                           src={playlist.coverUrl || getPlaceholderImage(playlist.title)}
                           alt={playlist.title}

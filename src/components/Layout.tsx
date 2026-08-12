@@ -848,7 +848,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Audio Player Container */}
       <div className="relative">
         {currentTrack && !isDJKrupy && !isPostDetail && (
-          <MiniPlayer isMobileNavHidden={isMobileNavHidden || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist)} />
+          <MiniPlayer isMobileNavHidden={isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin} />
         )}
         
         <AnimatePresence>

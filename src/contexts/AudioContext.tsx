@@ -98,6 +98,14 @@ interface AudioContextType {
   isShuffle: boolean;
   isSmartShuffle: boolean;
   smartShuffleMode: 'mood' | 'genre';
+  isSmartRadio: boolean;
+  toggleSmartRadio: () => void;
+  startSmartRadio: (seedTrack: Track) => void;
+  getSmartRadioTracks: (
+    seedTrack?: Track | null,
+    excludeIds?: Set<string>,
+    count?: number
+  ) => Track[];
   repeatMode: RepeatMode;
   notifications: Notification[];
   playlists: Playlist[];
@@ -493,6 +501,26 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     listeners: number;
     currentTrack: Track | null;
   } | null>(null);
+
+  const [isSmartRadio, setIsSmartRadio] = useState<boolean>(() => {
+    const stored = localStorage.getItem("tonjam_smart_radio");
+    return stored !== null ? stored === "true" : true;
+  });
+
+  const toggleSmartRadio = useCallback(() => {
+    setIsSmartRadio((prev) => {
+      const nextVal = !prev;
+      localStorage.setItem("tonjam_smart_radio", String(nextVal));
+      toastUI(
+        nextVal ? "success" : "info",
+        nextVal ? "Smart Radio Autoplay Enabled" : "Smart Radio Autoplay Disabled",
+        nextVal
+          ? "Continuous playback will auto-queue similar tracks based on genres and user preferences."
+          : "Radio auto-queuing disabled when queue ends."
+      );
+      return nextVal;
+    });
+  }, [toastUI]);
 
   const [artworkStyle, setArtworkStyle] = useState<'spotify' | 'vinyl' | 'visualizer'>('spotify');
   const [isSeeking, setIsSeeking] = useState(false);
@@ -3374,22 +3402,157 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsPlaying(!isPlaying);
   };
 
-  const nextTrack = () => {
-    if (queue.length === 0 || !currentTrack) return;
+  const getSmartRadioTracks = useCallback(
+    (seedTrack?: Track | null, excludeIds: Set<string> = new Set(), count: number = 4): Track[] => {
+      if (!allTracks || allTracks.length === 0) return [];
 
-    if (repeatMode === "one") {
+      const refTrack = seedTrack || currentTrack || recentlyPlayed[0] || allTracks[0];
+      if (!refTrack) return [];
+
+      const excluded = new Set(excludeIds);
+      excluded.add(refTrack.id);
+      queue.forEach((t) => excluded.add(t.id));
+
+      const likedSet = new Set(likedTrackIds || []);
+      const followedSet = new Set(followedUserIds || []);
+      const userFavGenres = (userProfile?.favoriteGenres || []).map((g) => g.toLowerCase());
+      const recentGenres = recentlyPlayed.map((t) => t.genre?.toLowerCase()).filter(Boolean);
+
+      const candidates = allTracks.filter((t) => t && t.id && !excluded.has(t.id));
+
+      const scored = candidates.map((track) => {
+        let score = 0;
+        const reasons: string[] = [];
+
+        const trGenre = track.genre?.toLowerCase() || "";
+        const refGenre = refTrack.genre?.toLowerCase() || "";
+        const trMood = track.mood?.toLowerCase() || "";
+        const refMood = refTrack.mood?.toLowerCase() || "";
+
+        // Same Genre as refTrack
+        if (trGenre && refGenre && trGenre === refGenre) {
+          score += 10;
+          reasons.push(`Genre: ${track.genre}`);
+        } else if (trGenre && (userFavGenres.includes(trGenre) || recentGenres.includes(trGenre))) {
+          score += 5;
+          reasons.push(`Preferred Genre: ${track.genre}`);
+        }
+
+        // Same Mood as refTrack
+        if (trMood && refMood && trMood === refMood) {
+          score += 8;
+          reasons.push(`Mood: ${track.mood}`);
+        }
+
+        // Same Artist or Followed Artist
+        if (
+          (track.artistId && refTrack.artistId && track.artistId === refTrack.artistId) ||
+          (track.artist && refTrack.artist && track.artist.toLowerCase() === refTrack.artist.toLowerCase())
+        ) {
+          score += 7;
+          reasons.push(`Artist: ${track.artist}`);
+        } else if (track.artistId && followedSet.has(track.artistId)) {
+          score += 4;
+          reasons.push(`Followed Artist`);
+        }
+
+        // Liked track bonus
+        if (likedSet.has(track.id)) {
+          score += 3;
+          reasons.push(`Liked Track`);
+        }
+
+        // BPM similarity
+        if (track.bpm && refTrack.bpm) {
+          const bpmDiff = Math.abs(track.bpm - refTrack.bpm);
+          if (bpmDiff <= 12) {
+            score += 4;
+            reasons.push(`Tempo match (${track.bpm} BPM)`);
+          }
+        }
+
+        // Random jitter for variety
+        score += Math.random() * 3;
+
+        return {
+          track: {
+            ...track,
+            recommendationReason: reasons.length > 0 ? reasons.join(" • ") : `Smart Radio match for ${refTrack.title}`,
+          },
+          score,
+        };
+      });
+
+      scored.sort((a, b) => b.score - a.score);
+
+      let results: Track[] = scored.slice(0, count).map((s) => s.track);
+
+      if (results.length < count) {
+        const fallbackPool = allTracks.filter(
+          (t) => t && t.id && !excluded.has(t.id) && !results.some((r) => r.id === t.id)
+        );
+        results = [...results, ...fallbackPool.slice(0, count - results.length)];
+      }
+
+      return results;
+    },
+    [allTracks, currentTrack, queue, likedTrackIds, followedUserIds, recentlyPlayed, userProfile]
+  );
+
+  const startSmartRadio = useCallback(
+    (seedTrack: Track) => {
+      if (!seedTrack) return;
+      const radioTracks = getSmartRadioTracks(seedTrack, new Set([seedTrack.id]), 5);
+      const newQueue = [seedTrack, ...radioTracks];
+      setQueue(newQueue);
+      setIsSmartRadio(true);
+      playTrack(seedTrack);
+      toastUI(
+        "success",
+        `Smart Radio Started`,
+        `Queued similar tracks based on "${seedTrack.title}" (${seedTrack.genre || "Style match"})`
+      );
+    },
+    [getSmartRadioTracks, setQueue, playTrack, toastUI]
+  );
+
+  const nextTrack = () => {
+    if (!currentTrack && queue.length === 0) return;
+
+    if (repeatMode === "one" && currentTrack) {
       playTrack(currentTrack);
       return;
     }
 
-    const index = queue.findIndex((t) => t.id === currentTrack.id);
+    const index = currentTrack ? queue.findIndex((t) => t.id === currentTrack.id) : -1;
+
     if (isShuffle && !isSmartShuffle) {
-      const nextIndex = Math.floor(Math.random() * queue.length);
-      playTrack(queue[nextIndex]);
+      if (queue.length > 0) {
+        const nextIndex = Math.floor(Math.random() * queue.length);
+        playTrack(queue[nextIndex]);
+      }
     } else if (index !== -1 && index < queue.length - 1) {
       playTrack(queue[index + 1]);
-    } else if (repeatMode === "all") {
-      playTrack(queue[0]);
+    } else {
+      // Reached end of current queue (or index === -1)
+      if (isSmartRadio && currentTrack) {
+        const smartTracks = getSmartRadioTracks(currentTrack, new Set([currentTrack.id]), 4);
+        if (smartTracks.length > 0) {
+          setQueue((prev) => [...prev, ...smartTracks]);
+          const nextSmartTrack = smartTracks[0];
+          playTrack(nextSmartTrack);
+          toastUI(
+            "info",
+            "Smart Radio",
+            `Auto-queued similar track "${nextSmartTrack.title}" based on your preferences`
+          );
+          return;
+        }
+      }
+
+      if (repeatMode === "all" && queue.length > 0) {
+        playTrack(queue[0]);
+      }
     }
   };
 
@@ -4456,6 +4619,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         isShuffle,
         isSmartShuffle,
         smartShuffleMode,
+        isSmartRadio,
+        toggleSmartRadio,
+        startSmartRadio,
+        getSmartRadioTracks,
         repeatMode,
         notifications,
         playlists,
@@ -4656,6 +4823,9 @@ export const useAudio = () => {
         }
         if (prop === "isPlaying" || prop === "isFullPlayerOpen" || prop === "isShuffle" || prop === "isSmartShuffle" || prop === "isLoading" || prop === "isOffline") {
           return false;
+        }
+        if (prop === "isSmartRadio") {
+          return true;
         }
         if (prop === "progress" || prop === "volume") {
           return 0;

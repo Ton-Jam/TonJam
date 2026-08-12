@@ -9,42 +9,28 @@ interface NotificationBadgeProps {
 export const NotificationBadge: React.FC<NotificationBadgeProps> = ({ count, className = '' }) => {
   if (count <= 0) return null;
 
-  const displayCount = count > 99 ? '99+' : count.toString();
-
   return (
     <AnimatePresence>
       <motion.span
         initial={{ scale: 0, opacity: 0 }}
-        animate={{ 
-          scale: 1, 
-          opacity: 1,
-          y: [0, -3, 0],
-        }}
+        animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         transition={{ 
           type: 'spring', 
           stiffness: 500, 
-          damping: 25,
-          y: {
-            repeat: Infinity,
-            repeatType: 'reverse',
-            duration: 1.5,
-            ease: 'easeInOut'
-          }
+          damping: 25
         }}
         className={`
-          absolute -top-1 -right-1 
-          flex items-center justify-center 
-          bg-[#00B4D8] text-[#050A24] font-black 
-          text-[8px] px-1 h-3.5 min-w-3.5 rounded-full 
-          shadow-lg shadow-[#00B4D8]/30 
-          select-none leading-none
+          absolute -top-0.5 -right-0.5 
+          w-2.5 h-2.5 rounded-full 
+          bg-red-500 ring-2 ring-[#080D2D]
+          shadow-[0_0_8px_rgba(239,68,68,0.8)]
+          select-none pointer-events-none
           ${className}
         `}
-      >
-        {displayCount}
-      </motion.span>
+      />
     </AnimatePresence>
   );
 };
 export default NotificationBadge;
+

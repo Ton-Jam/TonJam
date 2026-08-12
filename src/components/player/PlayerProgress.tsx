@@ -89,7 +89,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
 
   return (
     <div className="w-full flex flex-col gap-1.5 font-sans select-none px-1">
-      {/* Interactive Progress Bar Container */}
+      {/* Interactive Progress Container */}
       <div
         ref={progressBarRef}
         onPointerDown={handlePointerDown}
@@ -98,7 +98,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
         onPointerCancel={handlePointerUp}
         onPointerLeave={() => setHoverTime(null)}
         style={{ touchAction: "none" }}
-        className="relative py-2.5 w-full flex items-center cursor-pointer group"
+        className="relative py-2 w-full flex flex-col justify-center cursor-pointer group"
       >
         {/* Scrubbing Hover Time Tooltip */}
         {hoverTime && (
@@ -110,8 +110,8 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
           </div>
         )}
 
-        {/* Progress Bar Track */}
-        <div className="w-full h-1.5 group-hover:h-2 bg-[#16244F]/60 rounded-full overflow-hidden relative transition-all duration-150">
+        {/* Clean Progress Bar Track */}
+        <div className="w-full h-1.5 group-hover:h-2 bg-[#16244F]/50 rounded-full overflow-hidden relative transition-all duration-150">
           {/* Buffered Progress Background Layer */}
           <div
             className="absolute left-0 top-0 bottom-0 bg-[#16244F] rounded-full pointer-events-none transition-all duration-300"
@@ -120,20 +120,20 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
 
           {/* Active Played Fill Layer */}
           <motion.div
-            className="h-full bg-gradient-to-r from-[#0098EA] to-[#00D2FF] rounded-full relative"
+            className="h-full bg-gradient-to-r from-[#0098EA] to-[#00D2FF] rounded-full relative shadow-[0_0_8px_rgba(0,152,234,0.8)]"
             style={{ width: `${localProgress}%` }}
             transition={{ duration: 0.1 }}
           />
         </div>
 
-        {/* Thumb handle */}
+        {/* Sleek Thumb handle */}
         <motion.div
           className="absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none -translate-x-1/2"
           style={{ left: `${localProgress}%` }}
           animate={{ scale: isSeeking ? 1.25 : 1 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
-          <div className="w-3.5 h-3.5 bg-white rounded-full border-2 border-[#0098EA] shadow-md group-hover:scale-110 transition-transform" />
+          <div className="w-3.5 h-3.5 bg-white rounded-full border border-[#0098EA] shadow-[0_0_8px_rgba(0,152,234,0.8)] group-hover:scale-125 transition-transform" />
         </motion.div>
       </div>
 
@@ -147,3 +147,4 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
 };
 
 export default PlayerProgress;
+

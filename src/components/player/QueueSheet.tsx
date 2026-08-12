@@ -183,7 +183,17 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
   const [activeTab, setActiveTab] = useState<"queue" | "favorites" | "history">("queue");
   const [autoplay, setAutoplay] = useState<boolean>(true);
 
-  const { likedTrackIds = [], allTracks = [], addToQueue, toggleLikeTrack, playAll, setFullPlayerOpen } = useAudio();
+  const {
+    likedTrackIds = [],
+    allTracks = [],
+    addToQueue,
+    toggleLikeTrack,
+    playAll,
+    setFullPlayerOpen,
+    isSmartRadio,
+    toggleSmartRadio,
+    getSmartRadioTracks,
+  } = useAudio();
 
   const handleReturnToTrending = () => {
     if (setFullPlayerOpen) {
@@ -268,16 +278,16 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
           {/* Autoplay Toggle */}
           {activeTab === "queue" && (
             <button
-              onClick={() => setAutoplay(!autoplay)}
+              onClick={toggleSmartRadio}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-[10px] text-[10px] font-bold border transition-all ${
-                autoplay
-                  ? "border-[#5B6BFF] text-[#5B6BFF] bg-[#5B6BFF]/10"
+                isSmartRadio
+                  ? "border-[#5B6BFF] text-[#5B6BFF] bg-[#5B6BFF]/10 shadow-[0_0_10px_rgba(91,107,255,0.2)]"
                   : "border-[#16244F] text-[#9AA0AE] bg-[#0A113A]"
               }`}
-              title="Autoplay recommended tracks when queue ends"
+              title="Smart Radio: Auto-queues similar tracks when selection finishes"
             >
-              <Sparkles className="w-3 h-3" />
-              Autoplay: {autoplay ? "ON" : "OFF"}
+              <Sparkles className="w-3 h-3 text-emerald-400" />
+              Smart Radio: {isSmartRadio ? "ON" : "OFF"}
             </button>
           )}
 
