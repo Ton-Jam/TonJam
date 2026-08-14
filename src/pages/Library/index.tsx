@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLibrary } from '@/contexts/LibraryContext';
+import { useToast } from '@/components/layout/ToastProvider';
 import { useLibraryData } from './hooks/useLibraryData';
 import { LibraryHero } from './components/LibraryHero';
 import { QuickActions } from './components/QuickActions';
@@ -28,6 +30,8 @@ import { motion, AnimatePresence } from 'motion/react';
 const LibraryPage: React.FC = () => {
   const { userProfile } = useAuth();
   const data = useLibraryData();
+  const toast = useToast();
+  const { testingTracks, injectTestingTracks, clearTestingTracks, isTestingTracksInjected } = useLibrary();
   const [viewLayout, setViewLayout] = useState<'grid' | 'list'>('list');
   const [showImporter, setShowImporter] = useState(false);
   const [selectedArtistProfileId, setSelectedArtistProfileId] = useState<string>('dj-krupy');
@@ -45,7 +49,7 @@ const LibraryPage: React.FC = () => {
   // Expanded and comprehensive filter chips
   const filterChips = [
     'All', 'Tracks', 'Playlists', 'Albums', 'Artists', 'Downloads', 
-    'NFT Music', 'Royalties', 'Recently Played', 'History', 'Analytics', 'Import'
+    'NFT Music', 'Royalties', 'Recently Played', 'History', 'Analytics', 'Import', 'Testing'
   ];
 
   // Map quick action clicks to direct active chip filters
@@ -213,6 +217,108 @@ const LibraryPage: React.FC = () => {
                       importTracks={data.importTracks}
                       importPlaylistWithTracks={data.importPlaylistWithTracks}
                     />
+                  </div>
+                )}
+
+                {/* 15. DEVELOPER TESTING PANEL (NO BORDER LINES) */}
+                {data.activeChip === 'Testing' && (
+                  <div className="bg-slate-900/30 rounded-2xl p-6 space-y-6">
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                      <div>
+                        <h3 className="text-base font-extrabold text-white flex items-center gap-2 tracking-wide">
+                          <Database className="w-5 h-5 text-[#0052FF]" /> Mock State Injector
+                        </h3>
+                        <p className="text-xs text-slate-400 mt-1 font-medium">
+                          Dynamically inject high-fidelity testing tracks into local state storage to diagnose audio stream performance.
+                        </p>
+                      </div>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => {
+                            const res = injectTestingTracks();
+                            if (res.success) {
+                              toast.success('State Injected', res.message);
+                            } else {
+                              toast.error('Injection Failed', res.message);
+                            }
+                          }}
+                          className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                            isTestingTracksInjected
+                              ? 'bg-emerald-500/10 text-emerald-400'
+                              : 'bg-[#0052FF] hover:bg-[#0040D9] text-white shadow-md'
+                          }`}
+                        >
+                          {isTestingTracksInjected ? 'Tracks Loaded' : 'Inject Mock Tracks'}
+                        </button>
+                        {isTestingTracksInjected && (
+                          <button
+                            onClick={() => {
+                              const res = clearTestingTracks();
+                              if (res.success) {
+                                toast.success('State Cleared', res.message);
+                              } else {
+                                toast.error('Purge Failed', res.message);
+                              }
+                            }}
+                            className="px-4 py-2.5 bg-slate-800 hover:bg-rose-500/10 hover:text-rose-400 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                          >
+                            Purge State
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-950/20 rounded-xl p-5 space-y-4">
+                      <div className="flex items-center justify-between text-slate-500 text-[10px] uppercase font-bold tracking-widest">
+                        <span>Target testing tracks ({testingTracks.length})</span>
+                        <span className={isTestingTracksInjected ? 'text-emerald-400' : 'text-slate-500'}>
+                          Status: {isTestingTracksInjected ? 'INJECTED' : 'NOT INJECTED'}
+                        </span>
+                      </div>
+                      <div className="divide-y divide-white/[0.02]">
+                        {testingTracks.map((track) => (
+                          <div key={track.id} className="py-3.5 flex items-center justify-between first:pt-0 last:pb-0">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={track.coverArtUrl}
+                                alt={track.title}
+                                className="w-10 h-10 rounded-lg object-cover"
+                              />
+                              <div>
+                                <h4 className="text-xs font-bold text-white">{track.title}</h4>
+                                <p className="text-[10px] text-slate-400 mt-0.5">{track.artist} • <span className="text-slate-500">{track.album || 'Single'}</span></p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className="text-[10px] text-slate-500 font-mono">
+                                {Math.floor(track.duration / 60)}:{(track.duration % 60).toString().padStart(2, '0')}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  // Map MockTrack to expected LibraryTrack structure for play context
+                                  const libraryFormat = {
+                                    id: track.id,
+                                    title: track.title,
+                                    artist: track.artist,
+                                    album: track.album || 'Single',
+                                    coverUrl: track.coverArtUrl,
+                                    duration: track.duration,
+                                    plays: 100,
+                                    isLiked: true,
+                                    isDownloaded: true,
+                                    isOfflineAvailable: true
+                                  };
+                                  data.handlePlayTrack(libraryFormat as any);
+                                }}
+                                className="px-3 py-1.5 bg-slate-800/60 hover:bg-[#0052FF] text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer"
+                              >
+                                Test Play
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
 
