@@ -68,7 +68,7 @@ export const HomeQuickAccess: React.FC = () => {
           whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.1)' }}
           whileTap={{ scale: 0.98 }}
           onClick={() => navigate(item.link)}
-          className="flex items-center gap-3 bg-white/5 backdrop-blur-md border border-white/5 rounded-[12px] p-2 pr-4 text-left transition-all group h-14 overflow-hidden relative"
+          className="flex items-center gap-3 bg-white/5 backdrop-blur-md rounded-[12px] p-2 pr-4 text-left transition-all group h-14 overflow-hidden relative"
         >
           <div className={`${item.color} w-10 h-10 rounded-[8px] flex items-center justify-center shrink-0 shadow-lg`}>
             {item.icon}

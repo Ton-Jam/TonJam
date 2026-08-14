@@ -357,6 +357,7 @@ interface AudioContextType {
       sortBy: string;
     }>
   >;
+  audioConnectionState: 'idle' | 'connecting' | 'connected' | 'error';
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -607,6 +608,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
 
+  const [audioConnectionState, setAudioConnectionState] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [isLoading, setIsLoading] = useState(false);
   const [headerTitle, setHeaderTitle] = useState("");
   const [isHighFidelity, setIsHighFidelity] = useState(false);
@@ -2221,11 +2223,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
           // NOTE: Disabling Web Audio API connection for now to prevent CORS-related muting issues.
           // This ensures playback works reliably even if the mock audio servers don't send correct CORS headers.
+          /*
           const source = audioContextRef.current.createMediaElementSource(
             audioRef.current,
           );
           source.connect(analyserRef.current);
           analyserRef.current.connect(audioContextRef.current.destination);
+          */
         }
       } catch (err) {
         console.error("Failed to initialize Web Audio API:", err);
@@ -2261,11 +2265,36 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
 
+    const handlePlaying = () => {
+      setAudioConnectionState("connected");
+    };
+
+    const handleWaiting = () => {
+      setAudioConnectionState("connecting");
+    };
+
+    const handleCanPlay = () => {
+      setAudioConnectionState("connected");
+    };
+
+    const handlePause = () => {
+      if (audio.paused) {
+        setAudioConnectionState("idle");
+      }
+    };
+
+    const handleStreamError = (e: any) => {
+      console.warn("Audio connection blocked or failed:", e);
+      setAudioConnectionState("error");
+    };
+
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("ended", handleEnded);
-    audio.addEventListener("error", (e) => {
-      // Silencing audio errors
-    });
+    audio.addEventListener("playing", handlePlaying);
+    audio.addEventListener("waiting", handleWaiting);
+    audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("error", handleStreamError);
 
     /* Sync volume and mute state */
     audio.volume = isMuted ? 0 : volume;
@@ -2273,6 +2302,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("playing", handlePlaying);
+      audio.removeEventListener("waiting", handleWaiting);
+      audio.removeEventListener("canplay", handleCanPlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("error", handleStreamError);
     };
   }, [queue, currentTrack, repeatMode, isShuffle, isSeeking]);
 
@@ -3208,6 +3242,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         const playWithFallback = (url: string, useCrossOrigin: boolean) => {
           if (!audioRef.current) return;
           try {
+            setAudioConnectionState("connecting");
             audioRef.current.pause();
             if (useCrossOrigin && url.startsWith("http")) {
               audioRef.current.crossOrigin = "anonymous";
@@ -3238,6 +3273,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
                     playWithFallback(next.url, next.crossOrigin);
                   } else {
                     console.error("[Audio] All fallbacks failed:", error);
+                    setAudioConnectionState("error");
                     addNotification(
                       "Playback protocol failed. Signal lost.",
                       "error"
@@ -3249,6 +3285,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
             }
           } catch (err) {
             console.error("[Audio] Error setting up audio source:", err);
+            setAudioConnectionState("error");
           }
         };
 
@@ -4779,6 +4816,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         addCollabRequest,
         updateCollabRequest,
         addCollabMessage,
+        audioConnectionState,
       }}
     >
       {children}

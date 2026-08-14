@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { HashRouter as Router } from "react-router-dom";
 import { KeyboardShortcutListener } from "@/components/layout/KeyboardShortcutListener";
 import { ToastProvider } from "@/components/layout/ToastProvider";
@@ -16,6 +17,7 @@ import { ArtistProvider } from "@/contexts/ArtistContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { TaskProvider } from "@/contexts/TaskContext";
 import { TonPriceProvider } from "@/contexts/TonPriceContext";
+import { GramPriceProvider } from "@/contexts/GramPriceContext";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
@@ -34,6 +36,23 @@ const manifestUrl = typeof window !== 'undefined'
   : 'https://ais-dev-mfbg5o2augtyymzecgehh7-9697536059.europe-west2.run.app/tonconnect-manifest.json';
 
 export default function App() {
+  useEffect(() => {
+    const applyFontSize = () => {
+      const stored = localStorage.getItem('tonjam_font_size') || 'standard';
+      const sizes: Record<string, string> = {
+        compact: '15px',
+        standard: '16px',
+        large: '17px',
+        accessible: '19px',
+      };
+      const sizePx = sizes[stored] || '16px';
+      document.documentElement.style.fontSize = sizePx;
+    };
+    applyFontSize();
+    window.addEventListener('tonjam_font_size_changed', applyFontSize);
+    return () => window.removeEventListener('tonjam_font_size_changed', applyFontSize);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TonConnectUIProvider manifestUrl={manifestUrl}>
@@ -47,7 +66,8 @@ export default function App() {
                       <UserProvider>
                         <WalletProvider>
                           <TonPriceProvider>
-                            <AudioProvider>
+                            <GramPriceProvider>
+                              <AudioProvider>
                               <KeyboardShortcutListener />
                               <LibraryProvider>
                                 <ArtistProvider>
@@ -73,6 +93,7 @@ export default function App() {
                                 </ArtistProvider>
                               </LibraryProvider>
                             </AudioProvider>
+                            </GramPriceProvider>
                           </TonPriceProvider>
                         </WalletProvider>
                       </UserProvider>

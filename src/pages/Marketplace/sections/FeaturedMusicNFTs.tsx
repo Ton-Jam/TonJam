@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Sparkles, Flame, Sliders } from "lucide-react";
 import NFTCard from "@/components/NFTCard";
 import { NFTItem } from "@/types";
@@ -14,6 +15,7 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
   title = "Featured Music NFTs",
   subtitle = "Premium master recording digital collectibles on TON"
 }) => {
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -39,22 +41,30 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
           </p>
         </div>
 
-        {/* Carousel buttons */}
-        <div className="flex gap-1.5">
+        {/* Action Controls */}
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => scroll("left")}
-            className="w-8 h-8 rounded-[10px] bg-zinc-900 border border-zinc-800/40 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
-            aria-label="Previous tracks"
+            onClick={() => navigate(`/explore/nfts?title=${encodeURIComponent(title)}&filter=top_nfts`)}
+            className="text-xs font-bold text-[#0098EA] hover:text-[#0098EA]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
           >
-            <ChevronLeft className="w-4 h-4" />
+            More <ChevronRight className="w-3.5 h-3.5" />
           </button>
-          <button
-            onClick={() => scroll("right")}
-            className="w-8 h-8 rounded-[10px] bg-zinc-900 border border-zinc-800/40 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
-            aria-label="Next tracks"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={() => scroll("left")}
+              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none"
+              aria-label="Previous tracks"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => scroll("right")}
+              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none"
+              aria-label="Next tracks"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -67,7 +77,7 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
           <NFTCard
             key={nft.id}
             nft={{ ...nft, owner: 'marketplace' } as any}
-            className="w-48 flex-shrink-0 snap-start"
+            className="w-[155px] flex-shrink-0 snap-start"
           />
         ))}
       </div>

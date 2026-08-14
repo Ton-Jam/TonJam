@@ -373,11 +373,11 @@ export const CollectionGallery: React.FC<CollectionGalleryProps> = ({
                 if (onNftClick) onNftClick(nft);
                 else setSelectedNft(nft);
               }}
-              className={`group bg-[#0e163d]/60 hover:bg-[#121c4e] rounded-2xl overflow-hidden border transition-all cursor-pointer flex flex-col justify-between relative shadow-lg ${rarityMeta.glowClass}`}
+              className="group bg-transparent rounded-[16px] overflow-hidden transition-all cursor-pointer flex flex-col justify-between relative"
             >
               <div>
                 {/* Artwork + Hover Audio Indicator */}
-                <div className="relative aspect-square overflow-hidden bg-slate-900">
+                <div className="relative aspect-square rounded-[16px] overflow-hidden bg-slate-900/40">
                   <img 
                     src={nft.imageUrl} 
                     alt={nft.title} 
@@ -388,21 +388,6 @@ export const CollectionGallery: React.FC<CollectionGalleryProps> = ({
                   <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-opacity duration-300 ${
                     isHovered || isFullTrackPlaying ? 'opacity-100' : 'opacity-0'
                   }`} />
-
-                  {/* Top Badges */}
-                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-                    <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border backdrop-blur-md flex items-center gap-1 ${rarityMeta.badgeClass}`}>
-                      {rarityMeta.rarity === 'Legendary' && <Flame className="w-2.5 h-2.5 text-amber-400" />}
-                      {rarityMeta.rarity === 'Epic' && <Sparkles className="w-2.5 h-2.5 text-purple-300" />}
-                      {rarityMeta.rarity === 'Rare' && <Disc className="w-2.5 h-2.5 text-cyan-300" />}
-                      {rarityMeta.rarity === 'Common' && <Music className="w-2.5 h-2.5 text-slate-300" />}
-                      {rarityMeta.rarity}
-                    </span>
-
-                    <span className="text-[10px] font-mono font-black text-cyan-300 bg-black/70 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/10">
-                      {nft.edition}
-                    </span>
-                  </div>
 
                   {/* Center Hover-to-Play Indicator Button */}
                   <div className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-300 ${
@@ -420,70 +405,32 @@ export const CollectionGallery: React.FC<CollectionGalleryProps> = ({
                         <Play className="w-6 h-6 fill-current ml-0.5" />
                       )}
                     </button>
-
-                    {/* Hover Audio Preview Status Bar */}
-                    {isAudioPreviewing && !isFullTrackPlaying && (
-                      <div className="mt-3 flex items-center gap-2 px-3 py-1 rounded-full bg-black/80 backdrop-blur-md border border-cyan-500/30 text-[10px] font-mono text-cyan-300 animate-pulse">
-                        <Volume2 className="w-3 h-3 text-cyan-400" />
-                        <span>Playing Audio Preview</span>
-                      </div>
-                    )}
                   </div>
                 </div>
 
                 {/* Card Info Details */}
-                <div className="p-4 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-black text-white truncate group-hover:text-blue-400 transition-colors">
-                      {nft.title}
-                    </h3>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 text-xs text-slate-300">
-                    <span className="font-semibold">{nft.artist || nft.creator}</span>
-                    {nft.artistVerified && (
-                      <BadgeCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                    )}
-                  </div>
-
-                  {/* Ownership & Minted Supply metadata */}
-                  <div className="flex items-center gap-1.5 flex-wrap text-[9px] font-bold pt-0.5">
-                    <span className="px-2 py-0.5 rounded-md bg-white/5 text-slate-300 border border-white/5 truncate max-w-[140px]">
-                      {rarityMeta.ownershipText}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-mono">
-                      {rarityMeta.supplyText}
-                    </span>
-                  </div>
-
-                  {nft.traits && nft.traits.length > 0 && (
-                    <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                      {nft.traits.slice(0, 2).map((trait, idx) => (
-                        <span key={idx} className="text-[9px] font-bold text-slate-300 bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
-                          {trait.trait_type}: {trait.value}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                <div className="pt-3 pb-1 space-y-1 text-center flex flex-col items-center">
+                  <h3 className="text-[13px] font-bold text-white tracking-normal leading-normal truncate w-full px-1 text-center">
+                    {nft.title}
+                  </h3>
                 </div>
               </div>
 
-              {/* Price & Action Footer */}
-              <div className="px-4 pb-4 pt-1 flex items-center justify-between gap-2 border-t border-white/5 mt-2">
-                <div>
-                  <span className="text-[9px] font-black uppercase text-slate-400 block tracking-wider">Est. Value</span>
-                  <span className="text-sm font-mono font-black text-cyan-400">
-                    {nft.price} GRAM
-                  </span>
-                </div>
-
-                <button
-                  onClick={(e) => handlePlayFullTrack(nft, e)}
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-blue-600 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+              {/* Price Tag & Outline Triangle Icon */}
+              <div className="pb-2 pt-0.5 flex items-center justify-center gap-1.5 text-[#9AA0AE]">
+                {/* Minimalist Downward Triangle Outline Icon (▽) to exactly match the uploaded user image */}
+                <svg 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  className="w-3.5 h-3.5 opacity-70 text-[#9AA0AE] select-none shrink-0"
                 >
-                  <Music className="w-3.5 h-3.5" />
-                  <span>Full Audio</span>
-                </button>
+                  <polygon points="12,21 3,5 21,5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className="text-[11px] font-bold text-[#9AA0AE] font-mono tracking-tight">
+                  {nft.price} GRAM
+                </span>
               </div>
             </motion.div>
           );

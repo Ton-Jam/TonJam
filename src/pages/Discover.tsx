@@ -22,7 +22,8 @@ import {
   Radio,
   Gem,
   Flame,
-  ArrowRight
+  ArrowRight,
+  ChevronRight
 } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
@@ -86,6 +87,64 @@ export const Discover: React.FC = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [isVoiceListening, setIsVoiceListening] = useState(false);
+
+  // AI Discovery Feed State
+  const [aiFeed, setAiFeed] = useState<{
+    discoveryTheme: string;
+    recommendations: { trackId: string; reason: string }[];
+  } | null>(null);
+  const [isLoadingAi, setIsLoadingAi] = useState(false);
+
+  const fetchAiDiscovery = async () => {
+    if (allTracks.length === 0) return;
+    setIsLoadingAi(true);
+    try {
+      const localTracks = (() => {
+        try {
+          const val = localStorage.getItem('tonjam_library_tracks');
+          return val ? JSON.parse(val) : [];
+        } catch {
+          return [];
+        }
+      })();
+      const localNfts = (() => {
+        try {
+          const val = localStorage.getItem('tonjam_library_nfts');
+          return val ? JSON.parse(val) : [];
+        } catch {
+          return [];
+        }
+      })();
+
+      const response = await fetch('/api/gemini/discover-feed', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userContext: {
+            libraryTracks: localTracks,
+            likedNfts: localNfts
+          },
+          availableTracks: allTracks
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to generate AI feed');
+      const data = await response.json();
+      setAiFeed(data);
+    } catch (err) {
+      console.error('[AI Feed Error]:', err);
+    } finally {
+      setIsLoadingAi(false);
+    }
+  };
+
+  useEffect(() => {
+    if (allTracks.length > 0 && !aiFeed) {
+      fetchAiDiscovery();
+    }
+  }, [allTracks]);
 
   // Recent Searches
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
@@ -197,6 +256,21 @@ export const Discover: React.FC = () => {
     return allTracks.slice(0, 6);
   }, [allTracks]);
 
+  // AI-Powered Discovery Mapped Tracks
+  const recommendedTracksWithAi = useMemo(() => {
+    if (!aiFeed || !aiFeed.recommendations) return [];
+    return aiFeed.recommendations
+      .map((rec) => {
+        const track = allTracks.find((t) => t.id === rec.trackId);
+        if (!track) return null;
+        return {
+          ...track,
+          aiReason: rec.reason
+        };
+      })
+      .filter(Boolean) as any[];
+  }, [aiFeed, allTracks]);
+
   // Trending top 5
   const topTrendingTracks = useMemo(() => {
     return allTracks.slice(0, 5);
@@ -215,8 +289,8 @@ export const Discover: React.FC = () => {
         
         {/* Main Search Input Bar */}
         <div className="flex items-center gap-3 w-full">
-          <div className="relative flex-1 flex items-center bg-[#F5F5F7] hover:bg-white focus-within:bg-white border border-slate-300/80 rounded-full px-4 py-3 transition-colors shadow-md">
-            <Search className="w-5 h-5 text-slate-500 shrink-0 mr-3" />
+          <div className={`relative flex-1 flex items-center border rounded-full px-4 py-3 transition-colors shadow-md ${query ? 'bg-transparent border-white/20' : 'bg-[#F5F5F7] hover:bg-white focus-within:bg-white border-slate-300/80'}`}>
+            <Search className={`w-5 h-5 shrink-0 mr-3 ${query ? 'text-slate-400' : 'text-slate-500'}`} />
             <input
               type="text"
               value={query}
@@ -224,14 +298,18 @@ export const Discover: React.FC = () => {
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
               placeholder="What do you want to listen to?"
-              className="w-full bg-transparent border-none outline-none text-slate-900 text-sm font-semibold placeholder-slate-500"
+              className={`w-full bg-transparent border-none outline-none text-sm font-semibold placeholder-slate-500 ${query ? 'text-white' : 'text-slate-900'}`}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
             />
             
             <div className="flex items-center gap-2 shrink-0">
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className="p-1 text-slate-500 hover:text-slate-900 rounded-full transition-colors"
+                  className={`p-1 rounded-full transition-colors ${query ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -239,7 +317,7 @@ export const Discover: React.FC = () => {
 
               <button
                 onClick={toggleVoiceSearch}
-                className={`p-1 transition-colors ${isVoiceListening ? 'text-[#00B4D8] animate-pulse' : 'text-slate-500 hover:text-slate-900'}`}
+                className={`p-1 transition-colors ${isVoiceListening ? 'text-[#00B4D8] animate-pulse' : query ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
                 title="Voice search"
               >
                 {isVoiceListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -247,7 +325,7 @@ export const Discover: React.FC = () => {
 
               <button
                 onClick={() => setShowScanner(true)}
-                className="p-1 text-slate-500 hover:text-slate-900 rounded-full transition-colors"
+                className={`p-1 rounded-full transition-colors ${query ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
                 title="Scan QR code"
               >
                 <QrCode className="w-4 h-4" />
@@ -265,10 +343,10 @@ export const Discover: React.FC = () => {
                 <button
                   key={pill.id}
                   onClick={() => setActiveFilter(pill.id)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all border-[2px] ${
                     isActive
-                      ? 'bg-white text-black font-bold shadow-md'
-                      : 'bg-white/10 text-white hover:bg-white/20'
+                      ? 'bg-[#0088CC] text-white border-[#0088CC] font-bold shadow-md shadow-[#0088CC]/30'
+                      : 'bg-white/10 text-white border-white/10 hover:bg-[#0088CC]/20'
                   }`}
                 >
                   {pill.label}
@@ -367,20 +445,20 @@ export const Discover: React.FC = () => {
                     <p className="text-xs text-slate-400">Based on your listening activity & top genres</p>
                   </div>
                   <button
-                    onClick={() => playAll(recommendedTracks)}
-                    className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors"
+                    onClick={() => navigate('/explore/tracks?title=Recommended+for+You&filter=recommended')}
+                    className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors flex items-center gap-1 cursor-pointer"
                   >
-                    Play All
+                    More <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4 sm:mx-0 sm:px-0 scroll-smooth">
                   {recommendedTracks.map((track) => (
                     <motion.div
                       key={`rec-track-${track.id}`}
                       whileHover={{ y: -4 }}
                       onClick={() => playTrack(track)}
-                      className="bg-[#0c143d] rounded-[14px] p-3 flex flex-col justify-between cursor-pointer group transition-all"
+                      className="w-[155px] shrink-0 bg-[#0c143d] rounded-[14px] p-3 flex flex-col justify-between cursor-pointer group transition-all"
                     >
                       <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950 mb-3">
                         <img
@@ -407,6 +485,87 @@ export const Discover: React.FC = () => {
               </section>
             )}
 
+            {/* AI-Powered Discovery Feed Section */}
+            {(isLoadingAi || (aiFeed && recommendedTracksWithAi.length > 0)) && (
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-[#00B4D8]" />
+                      <h3 className="text-lg font-bold text-white tracking-tight">AI Discovery</h3>
+                    </div>
+                    {aiFeed?.discoveryTheme && (
+                      <p className="text-xs text-[#00B4D8] font-bold mt-1">
+                        Oracle Vibe: <span className="uppercase tracking-wider">{aiFeed.discoveryTheme}</span>
+                      </p>
+                    )}
+                    <p className="text-xs text-slate-400 mt-0.5">Synthesized from your unique library and collected NFTs</p>
+                  </div>
+                  
+                  <button
+                    onClick={fetchAiDiscovery}
+                    disabled={isLoadingAi}
+                    className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {isLoadingAi ? 'Synthesizing...' : 'Re-align Frequencies'}
+                  </button>
+                </div>
+
+                {isLoadingAi ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="animate-pulse bg-[#0c143d] rounded-[14px] p-4 h-24 flex gap-4">
+                        <div className="w-16 h-16 bg-white/5 rounded-[10px]" />
+                        <div className="flex-1 space-y-2 py-1">
+                          <div className="h-4 bg-white/5 rounded w-1/3" />
+                          <div className="h-3 bg-white/5 rounded w-1/4" />
+                          <div className="h-3 bg-white/5 rounded w-5/6" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {recommendedTracksWithAi.map((track) => (
+                      <motion.div
+                        key={`ai-rec-${track.id}`}
+                        whileHover={{ y: -2, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+                        onClick={() => playTrack(track)}
+                        className="bg-[#0c143d] rounded-[14px] p-4 flex gap-4 cursor-pointer group transition-all"
+                      >
+                        <div className="relative w-16 h-16 rounded-[10px] overflow-hidden bg-slate-950 shrink-0">
+                          <img
+                            src={track.coverUrl || getPlaceholderImage(track.title)}
+                            alt={track.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                            <div className="w-8 h-8 rounded-full bg-[#00B4D8] text-black flex items-center justify-center pl-0.5 shadow-md">
+                              <Play className="w-4 h-4 fill-current" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          <div>
+                            <h4 className="text-sm font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
+                              {track.title}
+                            </h4>
+                            <p className="text-xs text-slate-400 truncate">{track.artist}</p>
+                          </div>
+                          {track.aiReason && (
+                            <p className="text-[11px] text-slate-300 font-medium line-clamp-2 mt-1 italic leading-snug">
+                              "{track.aiReason}"
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
             {/* 4. Top Charts / Trending Tracks (Spotify Numbered List) */}
             {topTrendingTracks.length > 0 && (
               <section className="space-y-4">
@@ -416,10 +575,10 @@ export const Discover: React.FC = () => {
                     <h3 className="text-lg font-bold text-white tracking-tight">Top Charts</h3>
                   </div>
                   <button
-                    onClick={() => playAll(topTrendingTracks)}
-                    className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors"
+                    onClick={() => navigate('/explore/tracks?title=Top+Charts&filter=trending')}
+                    className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors flex items-center gap-1 cursor-pointer"
                   >
-                    Listen
+                    More <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
@@ -460,16 +619,6 @@ export const Discover: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-4 shrink-0 pr-1">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleLikeTrack(track.id);
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
-                          >
-                            <Heart className={`w-4 h-4 ${isLiked ? 'text-rose-500 fill-current' : ''}`} />
-                          </button>
-
                           <span className="text-xs font-mono text-slate-400 hidden sm:inline">
                             {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
                           </span>
@@ -496,6 +645,12 @@ export const Discover: React.FC = () => {
               <section className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold text-white tracking-tight">Popular Artists</h3>
+                  <button
+                    onClick={() => navigate('/explore/artists?title=Popular+Artists')}
+                    className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    More <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
@@ -547,6 +702,12 @@ export const Discover: React.FC = () => {
               <section className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold text-white tracking-tight">Featured Playlists</h3>
+                  <button
+                    onClick={() => navigate('/explore/playlists?title=Featured+Playlists&filter=curated')}
+                    className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    More <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

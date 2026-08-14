@@ -42,7 +42,7 @@ import { db } from '@/lib/firebase';
 const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { userProfile, toggleFollowUser, followedUserIds, addNotification, posts, allTracks, allNFTs, playlists, artists } = useAudio();
+  const { userProfile, toggleFollowUser, followedUserIds, addNotification, posts, allTracks, allNFTs, playlists, artists, setHeaderTitle } = useAudio();
   
   const [user, setUser] = useState<UserProfileType | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'activity' | 'network'>('overview');

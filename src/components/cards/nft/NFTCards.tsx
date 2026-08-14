@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { NFTPlaceholder } from '../../placeholders/NFTPlaceholder';
 import { CollectionPlaceholder } from '../../placeholders/CollectionPlaceholder';
+import { cardTokens } from '@/design';
 
 // --- TS INTERFACES ---
 
@@ -60,8 +61,11 @@ export const NFTCard: React.FC<{
 
   if (isLoading || !nft) {
     return (
-      <div className={`flex flex-col p-3 rounded-[10px] bg-[#0A113A]/60 animate-pulse w-[190px] shrink-0 ${className}`}>
-        <div className="w-full h-[150px] bg-white/10 rounded-lg mb-3" />
+      <div 
+        style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
+        className={`flex flex-col bg-[#0A113A]/60 animate-pulse shrink-0 ${className}`}
+      >
+        <div className="w-full aspect-square bg-white/10 rounded-lg mb-3" />
         <div className="space-y-2">
           <div className="h-4 bg-white/10 rounded w-2/3" />
           <div className="h-3 bg-white/10 rounded w-1/2" />
@@ -74,9 +78,10 @@ export const NFTCard: React.FC<{
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`flex flex-col p-3 rounded-[10px] bg-[#0A113A] hover:bg-[#101A3B] transition-colors cursor-pointer w-[190px] shrink-0 snap-start select-none group relative ${className}`}
+      style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
+      className={`flex flex-col bg-[#0A113A] hover:bg-[#101A3B] transition-colors cursor-pointer shrink-0 snap-start select-none group relative ${className}`}
     >
-      <div className="relative w-full h-[150px] rounded-lg overflow-hidden mb-3 bg-slate-950">
+      <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-3 bg-slate-950">
         {imgFailed ? (
           <NFTPlaceholder size={28} />
         ) : (

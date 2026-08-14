@@ -87,6 +87,7 @@ import BidModal from "@/components/BidModal";
 import PlaceOfferModal from "@/components/PlaceOfferModal";
 import BidAcceptanceModal from "@/components/BidAcceptanceModal";
 import ManageNFTModal from "@/components/ManageNFTModal";
+import StakeNFTModal from "@/components/StakeNFTModal";
 import ShareNFTDialog from "@/components/ShareNFTDialog";
 import NFTCard from "@/components/NFTCard";
 import SendNFTModal from "@/components/SendNFTModal";
@@ -208,6 +209,7 @@ const NFTDetail: React.FC = () => {
   const [showBidModal, setShowBidModal] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
+  const [showStakeModal, setShowStakeModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showPriceAlertModal, setShowPriceAlertModal] = useState(false);
@@ -1311,6 +1313,17 @@ const NFTDetail: React.FC = () => {
                     >
                       <Send className="h-3 w-3" /> Send
                     </button>
+                    <button
+                      onClick={() => setShowStakeModal(true)}
+                      className={`py-2 px-3 rounded-[4px] font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        localNft.isStaked
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.2)] hover:bg-emerald-500/30"
+                          : "bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white border border-purple-400/30 shadow-lg shadow-purple-500/20"
+                      }`}
+                    >
+                      <Lock className="h-3.5 w-3.5 text-amber-300 animate-pulse" />
+                      {localNft.isStaked ? "Staked" : "Stake"}
+                    </button>
                     {localNft.listingType && (
                       <button
                         onClick={handleCancelListing}
@@ -1362,6 +1375,16 @@ const NFTDetail: React.FC = () => {
                     )}
                   </>
                 )}
+                <button
+                  onClick={() => setShowStakeModal(true)}
+                  className={`flex-1 py-3 rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-2 border cursor-pointer ${
+                    localNft.isStaked
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                      : "bg-purple-600/20 text-purple-300 border-purple-500/30 hover:bg-purple-600/30"
+                  }`}
+                >
+                  <Lock className="h-3.5 w-3.5 text-amber-400" /> {localNft.isStaked ? "Staked Yield" : "Stake"}
+                </button>
                 <button
                   onClick={() => setIsTipping(true)}
                   className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
@@ -2087,7 +2110,12 @@ const NFTDetail: React.FC = () => {
                     exit={{ opacity: 0, y: -10 }}
                     className="space-y-4"
                   >
-                    <CommentsSection targetId={localNft.id} targetType="nft" />
+                    <CommentsSection 
+                      targetId={localNft.id} 
+                      targetType="nft" 
+                      itemOwnerAddress={localNft.owner}
+                      creatorAddress={localNft.creator}
+                    />
                   </motion.div>
                 )}
 
@@ -2329,6 +2357,12 @@ const NFTDetail: React.FC = () => {
           nft={localNft}
           isOpen={showSendModal}
           onClose={() => setShowSendModal(false)}
+        />
+      )}
+      {showStakeModal && localNft && (
+        <StakeNFTModal
+          nft={localNft}
+          onClose={() => setShowStakeModal(false)}
         />
       )}
       {showManageModal && (

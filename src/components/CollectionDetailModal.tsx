@@ -28,7 +28,8 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
   const audioContext = React.useRef<AudioContext | null>(null);
 
   useEffect(() => {
-    // Setup Web Audio API for normalization
+    // Setup Web Audio API disabled to prevent CORS-related muting issues of external audio assets
+    /*
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
     audioContext.current = ctx;
 
@@ -46,6 +47,7 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
     return () => {
       ctx.close();
     };
+    */
   }, [audio]);
 
   useEffect(() => {

@@ -23,10 +23,10 @@ export const CategoryChips: React.FC<CategoryChipsProps> = ({
             <button
               key={cat}
               onClick={() => onSelectCategory(cat)}
-              className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-[10px] cursor-pointer transition-all border ${
+              className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-[10px] cursor-pointer transition-all border-[2px] ${
                 isActive
-                  ? 'bg-[#0052FF] text-white border-transparent shadow-md'
-                  : 'bg-slate-900 text-slate-400 border-white/[0.03] hover:text-white hover:bg-slate-800'
+                  ? 'bg-[#0088CC] border-[#0088CC] text-white shadow-[0_0_15px_rgba(0,136,204,0.4)]'
+                  : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white hover:bg-[#0088CC]/20'
               }`}
             >
               {cat}

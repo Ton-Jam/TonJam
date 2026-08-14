@@ -73,13 +73,13 @@ export const ForYouSection: React.FC<ForYouSectionProps> = ({
             Loading your wave recommendations...
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4 sm:mx-0 sm:px-0 scroll-smooth">
             {recommendedTracks.map((track) => (
               <motion.div
                 key={`foryou-track-${track.id}`}
                 whileHover={{ y: -3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
                 onClick={() => onPlayTrack(track)}
-                className="p-4 rounded-[12px] bg-[#090f2d] flex items-center gap-4 cursor-pointer transition-all duration-200 group"
+                className="w-[240px] shrink-0 p-3.5 rounded-[12px] bg-[#090f2d] flex items-center gap-3 cursor-pointer transition-all duration-200 group"
               >
                 <div className="relative w-16 h-16 rounded-[8px] overflow-hidden shrink-0">
                   <img

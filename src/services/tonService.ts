@@ -623,3 +623,109 @@ export const getTonPrice = async (): Promise<number> => {
   // Simulate fetching live price from an API (e.g., CoinGecko)
   return 5.12; 
 };
+
+/**
+ * Stakes a Music NFT to earn governance tokens ($JAM / $GOV)
+ */
+export const stakeMusicNFT = async (
+  tonConnectUI: TonConnectUI,
+  nftAddress: string,
+  lockPeriodDays: number = 30
+): Promise<boolean> => {
+  try {
+    const lockPeriodSeconds = lockPeriodDays * 86400;
+    
+    // Construct StakeNFT message body (opcode: 0x5a2d67ef)
+    const body = beginCell()
+      .storeUint(0x5a2d67ef, 32)
+      .storeUint(0, 64) // query_id
+      .storeUint(lockPeriodSeconds, 32)
+      .endCell();
+
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: nftAddress || "EQAA_MOCK_NFT_ADDRESS_FOR_STAKING_123456",
+          amount: toNano("0.05").toString(),
+          payload: body.toBoc().toString('base64'),
+        },
+      ],
+    };
+
+    const result = await tonConnectUI.sendTransaction(transaction);
+    console.log("NFT Staking Transaction sent:", result);
+    return true;
+  } catch (error) {
+    console.error("Error staking Music NFT:", error);
+    throw error;
+  }
+};
+
+/**
+ * Unstakes a Music NFT
+ */
+export const unstakeMusicNFT = async (
+  tonConnectUI: TonConnectUI,
+  nftAddress: string
+): Promise<boolean> => {
+  try {
+    // Construct UnstakeNFT message body (opcode: 0x738d22ef)
+    const body = beginCell()
+      .storeUint(0x738d22ef, 32)
+      .storeUint(0, 64)
+      .endCell();
+
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: nftAddress || "EQAA_MOCK_NFT_ADDRESS_FOR_STAKING_123456",
+          amount: toNano("0.05").toString(),
+          payload: body.toBoc().toString('base64'),
+        },
+      ],
+    };
+
+    const result = await tonConnectUI.sendTransaction(transaction);
+    console.log("NFT Unstaking Transaction sent:", result);
+    return true;
+  } catch (error) {
+    console.error("Error unstaking Music NFT:", error);
+    throw error;
+  }
+};
+
+/**
+ * Claims accumulated governance token rewards ($JAM / $GOV) from staked NFT
+ */
+export const claimNFTStakingRewards = async (
+  tonConnectUI: TonConnectUI,
+  nftAddress: string
+): Promise<boolean> => {
+  try {
+    // Construct ClaimStakingRewards message body (opcode: 0x3a19e8fc)
+    const body = beginCell()
+      .storeUint(0x3a19e8fc, 32)
+      .storeUint(0, 64)
+      .endCell();
+
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: nftAddress || "EQAA_MOCK_NFT_ADDRESS_FOR_STAKING_123456",
+          amount: toNano("0.05").toString(),
+          payload: body.toBoc().toString('base64'),
+        },
+      ],
+    };
+
+    const result = await tonConnectUI.sendTransaction(transaction);
+    console.log("NFT Staking Rewards Claim Transaction sent:", result);
+    return true;
+  } catch (error) {
+    console.error("Error claiming NFT staking rewards:", error);
+    throw error;
+  }
+};

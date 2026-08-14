@@ -1,5 +1,6 @@
 import React from 'react';
-import { Play, Disc } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Play, Disc, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { LibraryTrack } from '../types';
 
@@ -9,6 +10,7 @@ interface ContinueListeningProps {
 }
 
 export const ContinueListening: React.FC<ContinueListeningProps> = ({ tracks, onPlay }) => {
+  const navigate = useNavigate();
   // Generate mock progresses for continue listening demo
   const getMockProgress = (id: string) => {
     const hashes = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -22,7 +24,12 @@ export const ContinueListening: React.FC<ContinueListeningProps> = ({ tracks, on
           <Disc className="w-4 h-4 text-[#0052FF] animate-spin-slow" />
           Continue Listening
         </h3>
-        <span className="text-[10px] text-muted-foreground font-mono font-medium">Auto-saved state</span>
+        <button
+          onClick={() => navigate('/explore/tracks?title=Continue+Listening&filter=recent')}
+          className="text-xs font-bold text-[#0052FF] hover:text-[#0052FF]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
+        >
+          More <ChevronRight className="w-3.5 h-3.5" />
+        </button>
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">

@@ -31,7 +31,9 @@ import {
   ExternalLink,
   MapPin,
   Settings2,
-  LayoutGrid
+  LayoutGrid,
+  Coins,
+  Type
 } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,6 +42,7 @@ import { useNotification } from '@/contexts/NotificationContext';
 import { useTheme } from '@/components/theme-provider';
 import { useCacheManagement } from '@/hooks/useCacheManagement';
 import { useI18n } from '@/contexts/I18nContext';
+import { useGramPrice } from '@/contexts/GramPriceContext';
 import StorageManagementModal from '@/components/StorageManagementModal';
 import { cn, validateFile } from '@/lib/utils';
 import { NotificationPreferences, RoyaltySplit, Collaborator } from '@/types';
@@ -73,6 +76,19 @@ const Settings: React.FC = () => {
   const { isOffline, toggleOfflineMode, artworkStyle, setArtworkStyle } = useAudio();
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
+  const { localCurrencyEnabled, setLocalCurrencyEnabled, fiatCurrency, setFiatCurrency } = useGramPrice();
+
+  const [fontSize, setFontSizeState] = useState(() => {
+    return localStorage.getItem('tonjam_font_size') || 'standard';
+  });
+
+  const handleFontSizeChange = (newSize: string) => {
+    localStorage.setItem('tonjam_font_size', newSize);
+    setFontSizeState(newSize);
+    window.dispatchEvent(new Event('tonjam_font_size_changed'));
+    toast.success('Font proportions modified successfully');
+  };
+
   const { totalSizeMB, cachedCount, clearAllCache, isPurging } = useCacheManagement();
   const tonAddress = useTonAddress();
   
@@ -708,6 +724,52 @@ const Settings: React.FC = () => {
                             <SelectItem value="dark" className="text-[10px] font-black uppercase tracking-widest">Dark</SelectItem>
                             <SelectItem value="system" className="text-[10px] font-black uppercase tracking-widest">System</SelectItem>
                         </SelectContent>
+                        </Select>
+                    </SettingRow>
+
+                    <SettingRow 
+                        icon={Coins} 
+                        title="Local Currency Display" 
+                        description="Convert TON/GRAM prices into equivalent fiat currency globally"
+                    >
+                      <Switch checked={localCurrencyEnabled} onCheckedChange={setLocalCurrencyEnabled} className="data-[state=checked]:bg-blue-600" />
+                    </SettingRow>
+
+                    {localCurrencyEnabled && (
+                      <SettingRow 
+                          icon={Globe} 
+                          title="Preferred Fiat Currency" 
+                          description="Select the fiat currency to display prices in"
+                      >
+                          <Select value={fiatCurrency} onValueChange={setFiatCurrency}>
+                            <SelectTrigger className="w-[120px] h-10 bg-black/30 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest px-4 shadow-none">
+                                <SelectValue placeholder="Currency" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border border-white/5 rounded-2xl shadow-2xl">
+                                <SelectItem value="USD" className="text-[10px] font-black uppercase tracking-widest">USD ($)</SelectItem>
+                                <SelectItem value="EUR" className="text-[10px] font-black uppercase tracking-widest">EUR (€)</SelectItem>
+                                <SelectItem value="GBP" className="text-[10px] font-black uppercase tracking-widest">GBP (£)</SelectItem>
+                                <SelectItem value="RUB" className="text-[10px] font-black uppercase tracking-widest">RUB (₽)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                      </SettingRow>
+                    )}
+
+                    <SettingRow 
+                        icon={Type} 
+                        title="Text Readability Scale" 
+                        description="Increase or adjust the baseline typography proportions"
+                    >
+                        <Select value={fontSize} onValueChange={handleFontSizeChange}>
+                          <SelectTrigger className="w-[140px] h-10 bg-black/30 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest px-4 shadow-none">
+                              <SelectValue placeholder="Font Size" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-zinc-900 border border-white/5 rounded-2xl shadow-2xl">
+                              <SelectItem value="compact" className="text-[10px] font-black uppercase tracking-widest">Compact (15px)</SelectItem>
+                              <SelectItem value="standard" className="text-[10px] font-black uppercase tracking-widest">Standard (16px)</SelectItem>
+                              <SelectItem value="large" className="text-[10px] font-black uppercase tracking-widest">Enhanced (17px)</SelectItem>
+                              <SelectItem value="accessible" className="text-[10px] font-black uppercase tracking-widest">Accessible (19px)</SelectItem>
+                          </SelectContent>
                         </Select>
                     </SettingRow>
 

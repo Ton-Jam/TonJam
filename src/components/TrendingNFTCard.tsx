@@ -6,6 +6,7 @@ import { MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { NFTItem } from '@/types';
 import { ShoppingCart, BadgeCheck, Layers } from 'lucide-react';
 import { MarqueeTitle } from './MarqueeTitle';
+import { cardTokens } from '@/design';
 
 interface TrendingNFTCardProps {
   nft: NFTItem;
@@ -60,7 +61,8 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={handleCardClick}
-      className="w-[160px] h-[240px] rounded-[4px] bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center p-3 border border-white/5 hover:border-blue-500/50 transition-all duration-300 cursor-pointer"
+      style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
+      className="bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center border border-white/5 hover:border-blue-500/50 transition-all duration-300 cursor-pointer shrink-0"
     >
       {/* Premium Badge */}
       <div className="absolute top-[-8px] left-[-8px] w-[100px] h-[100px] overflow-hidden flex items-center justify-center pointer-events-none">

@@ -44,12 +44,12 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onChangeTab
             key={tab.id}
             id={`tab-trigger-${tab.id}`}
             onClick={() => onChangeTab(tab.id)}
-            className="relative px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052FF] cursor-pointer whitespace-nowrap shrink-0 z-10"
+            className="relative px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0088CC] cursor-pointer whitespace-nowrap shrink-0 z-10"
           >
             {isActive && (
               <motion.div
                 layoutId="activeProfileTabPill"
-                className="absolute inset-0 bg-[#0052FF] rounded-full -z-10"
+                className="absolute inset-0 bg-[#0088CC] shadow-[0_0_15px_rgba(0,136,204,0.4)] rounded-full -z-10"
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
               />
             )}

@@ -28,7 +28,7 @@ export const ArtistPortfolio: React.FC<ArtistPortfolioProps> = ({ artist, tracks
       {pinnedNFTs.length > 0 && (
          <section>
            <h3 className="text-2xl font-bold tracking-tight mb-6">Pinned NFTs</h3>
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-items-center">
              {pinnedNFTs.map(nft => <NFTCard key={nft.id} nft={nft} />)}
            </div>
          </section>
@@ -37,7 +37,7 @@ export const ArtistPortfolio: React.FC<ArtistPortfolioProps> = ({ artist, tracks
       {/* Discography Section */}
       <section>
         <h3 className="text-2xl font-bold tracking-tight mb-6">Discography</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-items-center">
           {tracks.map(track => <TrackCard key={track.id} track={track} />)}
         </div>
       </section>

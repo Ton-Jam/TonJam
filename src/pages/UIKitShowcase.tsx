@@ -24,6 +24,7 @@ import {
   AuctionCard, FloorPriceCard, BidCard, CollectionCard, MintCard, 
   MarketplaceAnalyticsCard 
 } from '../components/cards/nft/NFTCards';
+import FeaturedAuctionCard from '../components/FeaturedAuctionCard';
 
 import { 
   ArtistCard, FeaturedArtistCard, VerifiedArtistCard, TopArtistCard, 
@@ -248,12 +249,15 @@ export const UIKitShowcase: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest mb-3">Live Auction</h4>
-                    <AuctionCard 
+                    <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest mb-3">Live Auction (Featured Audio NFT)</h4>
+                    <FeaturedAuctionCard 
                       nft={{
-                        ...mapTrackToNFT(nftTracks[1]),
-                        auctionEndsAt: new Date(Date.now() + 1000 * 60 * 60 * 3).toISOString(),
-                        highestBid: '45.0'
+                        id: nftTracks[1]?.id || 'nft-2',
+                        title: nftTracks[1]?.title || 'Neon Genesis Synth #08',
+                        creator: nftTracks[1]?.artist || 'Satoshi Beats',
+                        imageUrl: nftTracks[1]?.coverUrl || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&q=80',
+                        currentBid: '42 Grams',
+                        floorPrice: '35 Grams',
                       }} 
                     />
                   </div>

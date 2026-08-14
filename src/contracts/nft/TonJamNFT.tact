@@ -55,6 +55,26 @@ message Mint {
     content: Cell;
 }
 
+message(0x5a2d67ef) StakeNFT {
+    query_id: Int as uint64;
+    lock_period: Int as uint32;
+}
+
+message(0x738d22ef) UnstakeNFT {
+    query_id: Int as uint64;
+}
+
+message(0x3a19e8fc) ClaimStakingRewards {
+    query_id: Int as uint64;
+}
+
+struct StakingInfo {
+    is_staked: Bool;
+    staked_at: Int;
+    lock_period: Int;
+    staked_owner: Address?;
+}
+
 struct CollectionData {
     next_item_index: Int;
     collection_content: Cell;
@@ -153,6 +173,10 @@ contract TonJamNFTItem {
     item_index: Int as uint64;
     content: Cell;
     is_initialized: Bool;
+    is_staked: Bool;
+    staked_at: Int as uint64;
+    lock_period: Int as uint32;
+    staked_owner: Address?;
 
     init(owner: Address, collection_address: Address, item_index: Int, content: Cell) {
         self.owner = owner;
@@ -162,6 +186,10 @@ contract TonJamNFTItem {
         self.item_index = item_index;
         self.content = content;
         self.is_initialized = false;
+        self.is_staked = false;
+        self.staked_at = 0;
+        self.lock_period = 0;
+        self.staked_owner = null;
     }
 
     receive(msg: Transfer) {
@@ -223,5 +251,36 @@ contract TonJamNFTItem {
                 collection: self.collection_address
             }.toCell()
         });
+    }
+
+    receive(msg: StakeNFT) {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Only owner can stake NFT");
+        require(!self.is_staked, "NFT is already staked");
+        
+        self.is_staked = true;
+        self.staked_at = now();
+        self.lock_period = msg.lock_period;
+        self.staked_owner = ctx.sender;
+    }
+
+    receive(msg: UnstakeNFT) {
+        let ctx: Context = context();
+        require(self.is_staked, "NFT is not staked");
+        require(ctx.sender == self.owner || (self.staked_owner != null && ctx.sender == self.staked_owner!!), "Only staker can unstake");
+
+        self.is_staked = false;
+        self.staked_at = 0;
+        self.lock_period = 0;
+        self.staked_owner = null;
+    }
+
+    get fun get_staking_info(): StakingInfo {
+        return StakingInfo{
+            is_staked: self.is_staked,
+            staked_at: self.staked_at,
+            lock_period: self.lock_period,
+            staked_owner: self.staked_owner
+        };
     }
 }

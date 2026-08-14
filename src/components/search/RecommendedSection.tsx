@@ -27,13 +27,13 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
           <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Recommended Tracks</h3>
         </div>
 
-        <div className="space-y-2">
-          {recommendedTracks.slice(0, 4).map((track) => (
+        <div className="-mx-4 flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:mx-0 sm:px-0">
+          {recommendedTracks.slice(0, 6).map((track) => (
             <motion.div
               key={`rec-track-${track.id}`}
-              whileHover={{ x: 3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
+              whileHover={{ y: -3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
               onClick={() => onPlayTrack(track)}
-              className="p-3 rounded-[12px] bg-[#0c133a] flex items-center justify-between cursor-pointer group"
+              className="w-[220px] shrink-0 p-3 rounded-[12px] bg-[#0c133a] flex items-center justify-between cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative w-10 h-10 rounded-[8px] overflow-hidden shrink-0 bg-slate-900">
@@ -77,16 +77,16 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
           <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Recommended Artists</h3>
         </div>
 
-        <div className="space-y-2">
-          {recommendedArtists.slice(0, 4).map((artist) => {
+        <div className="-mx-4 flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:mx-0 sm:px-0">
+          {recommendedArtists.slice(0, 6).map((artist) => {
             const imageSrc = artist.avatarUrl || getPlaceholderImage(artist.name);
 
             return (
               <motion.div
                 key={`rec-artist-${artist.uid}`}
-                whileHover={{ x: 3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
+                whileHover={{ y: -3, backgroundColor: 'rgba(255, 255, 255, 0.02)' }}
                 onClick={() => navigate(`/artist/${artist.uid}`)}
-                className="p-3 rounded-[12px] bg-[#0c133a] flex items-center justify-between cursor-pointer group"
+                className="w-[200px] shrink-0 p-3 rounded-[12px] bg-[#0c133a] flex items-center justify-between cursor-pointer group"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 bg-slate-900">

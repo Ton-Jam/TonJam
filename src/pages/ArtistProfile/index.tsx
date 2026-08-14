@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { 
   Play, Shuffle, Heart, UserPlus, UserCheck, Zap, Gem, 
   Share2, MoreVertical, ExternalLink, ArrowLeft, Verified, 
-  MapPin, Award, Send, MessageCircle, QrCode 
+  MapPin, Award, Send, MessageCircle, QrCode, Disc, Layers
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAudio } from "@/contexts/AudioContext";
@@ -164,10 +164,16 @@ const ArtistProfile: React.FC = () => {
   return (
     <div className="w-full bg-black min-h-screen text-white pb-32">
       
-      {/* 1. HERO PARALLAX BANNER */}
-      <div className="relative w-full h-[150px] md:h-[190px] overflow-hidden">
+      {/* 1. CINEMATIC BANNER (Audiomack Style) */}
+      <div className="relative h-[130px] md:h-[180px] overflow-hidden group bg-blue-950">
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105 opacity-80"
+          style={{ backgroundImage: `url(${artist.coverPhoto || artist.bannerImageUrl || artist.bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1200, 400)})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
+        
         {/* Navigation Overlays */}
-        <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
+        <div className="absolute top-4 left-4 right-4 z-40 flex items-center justify-between">
           <button 
             onClick={() => navigate(-1)} 
             className="p-2.5 bg-black/45 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-all cursor-pointer border-none flex items-center justify-center"
@@ -176,21 +182,6 @@ const ArtistProfile: React.FC = () => {
           </button>
 
           <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setShowQRModal(true)}
-              className="p-2.5 bg-black/45 hover:bg-black/70 backdrop-blur-md rounded-full text-blue-400 transition-all cursor-pointer border-none flex items-center justify-center"
-              title="Share QR Code"
-            >
-              <QrCode className="w-4 h-4" />
-            </button>
-            <button 
-              onClick={handleShareProfile}
-              className="p-2.5 bg-black/45 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-all cursor-pointer border-none flex items-center justify-center"
-              title="Share Profile"
-            >
-              <Share2 className="w-4 h-4" />
-            </button>
-
             {!isOwnProfile ? (
               <button 
                 onClick={() => setShowArtistOptions(true)}
@@ -202,43 +193,129 @@ const ArtistProfile: React.FC = () => {
               <button 
                 onClick={() => setShowEditModal(true)}
                 className="p-2.5 bg-black/45 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-all cursor-pointer border-none flex items-center justify-center"
+                title="Edit Profile"
               >
                 <Gem className="w-4 h-4" />
               </button>
             )}
           </div>
         </div>
+      </div>
 
-        {/* Cover Image */}
-        <img 
-          src={artist.coverPhoto || artist.bannerImageUrl || artist.bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1600, 600)} 
-          className="w-full h-full object-cover select-none" 
-          alt="" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/10" />
+      {/* 2. IDENTITY & ACTIONS (Audiomack User Profile Style) */}
+      <div className="w-full px-6 md:px-12 lg:px-16 relative z-30 bg-black">
+        {/* Extreme Left Actions Below Cover */}
+        <div className="flex items-center gap-2 mb-4 pt-4 flex-wrap">
+          {!isOwnProfile ? (
+            <>
+              <button 
+                onClick={handleFollowToggle} 
+                className={cn(
+                  "cursor-pointer transition-all px-6 py-2 rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider",
+                  isFollowing 
+                    ? "bg-white/20 text-white border-white/40 backdrop-blur-md" 
+                    : "bg-blue-500 text-white border-blue-600 shadow-white/20"
+                )}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </button>
+              <button 
+                onClick={() => setShowTipModal(true)}
+                className="cursor-pointer transition-all px-6 py-2 rounded-lg border-b-[4px] bg-gradient-to-r from-amber-500 to-yellow-500 text-black border-amber-600 hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider"
+              >
+                <Zap className="h-3.5 w-3.5 inline mr-1" /> Support Node
+              </button>
+              <button 
+                onClick={() => setShowCollabModal(true)}
+                className="cursor-pointer transition-all px-6 py-2 rounded-lg border-b-[4px] bg-neutral-900 text-amber-400 border-neutral-800 hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider"
+              >
+                <Gem className="h-3.5 w-3.5 inline mr-1 text-amber-400" /> Collab
+              </button>
+            </>
+          ) : (
+            <>
+              <button 
+                onClick={() => setShowEditModal(true)}
+                className="cursor-pointer transition-all px-6 py-2 bg-blue-500 text-white border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider"
+              >
+                Edit Artist Node
+              </button>
+              <button 
+                onClick={() => navigate("/mint")}
+                className="cursor-pointer transition-all px-6 py-2 bg-neutral-900 text-cyan-400 border-neutral-800 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider"
+              >
+                Mint NFT
+              </button>
+            </>
+          )}
 
-        {/* Floating Avatar & Details */}
-        <div className="absolute left-6 md:left-12 bottom-6 z-20 flex items-end gap-5">
-          <div className="relative">
-            <img 
-              src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
-              alt={artist.name} 
-              className="w-20 h-20 md:w-28 md:h-28 rounded-full border-4 border-black object-cover bg-neutral-900" 
-            />
+          <button 
+            onClick={() => setShowQRModal(true)}
+            className="p-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg transition-all border border-blue-500/20 backdrop-blur-md shadow-lg flex items-center gap-1.5 px-3 cursor-pointer"
+            title="Share Profile QR Code"
+          >
+            <QrCode className="h-4 w-4" />
+            <span className="text-[10px] font-bold uppercase tracking-wider hidden sm:inline">QR Code</span>
+          </button>
+          
+          <button 
+            onClick={handleShareProfile}
+            className="p-2 bg-black/40 text-white rounded-lg hover:bg-black/60 transition-all border border-white/10 backdrop-blur-md shadow-lg cursor-pointer"
+            title="Share Profile"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-end gap-4 sm:gap-8 -mt-6 sm:-mt-8 pb-6">
+          {/* Profile Avatar (Refined Overlap) */}
+          <div className="relative flex-shrink-0">
+            <div 
+              className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 overflow-hidden border-4 border-background shadow-2xl bg-muted rounded-full"
+            >
+              <img 
+                src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
+                className="w-full h-full object-cover rounded-full" 
+                alt={artist.name} 
+              />
+            </div>
           </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl md:text-3xl font-extrabold tracking-tight text-white">{artist.name}</h1>
-              {artist.verified && (
-                <Verified className="w-5 h-5 text-blue-500 fill-white shrink-0" />
+          
+          <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-2">
+            <div className="flex flex-col gap-0.5 mb-4">
+              <div className="flex items-center gap-2 justify-center md:justify-start">
+                <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white">
+                  {artist.name}
+                </h1>
+                {artist.verified && (
+                  <div className="text-blue-500">
+                    <Verified className="h-4 w-4 md:h-6 md:w-6 fill-white" />
+                  </div>
+                )}
+              </div>
+              <span className="text-muted-foreground font-medium text-xs md:text-sm">
+                @{artist.username?.replace("@", "") || "artist"}
+              </span>
+            </div>
+            
+            {/* Activity Statistics */}
+            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2">
+              <span className="flex items-center gap-1.5"><Disc className="h-3 w-3" /> {tracks.length} Tracks Created</span>
+              <span className="flex items-center gap-1.5"><Layers className="h-3 w-3" /> {nfts.length} NFTs Created</span>
+              {artist.genre && (
+                <span className="flex items-center gap-1.5 text-cyan-400">• {artist.genre}</span>
               )}
             </div>
-            <p className="text-xs text-neutral-400">@{artist.username?.replace("@", "") || "artist"}</p>
-            <div className="flex items-center gap-2 text-[10px] text-neutral-400 font-semibold uppercase tracking-wider pt-0.5">
-              <span>{artist.location || "Distributed Node"}</span>
-              <span>•</span>
-              <span className="text-cyan-400">{artist.genre || "Electronic"}</span>
+          </div>
+
+          <div className="flex items-center gap-4 pb-2">
+            <div className="flex flex-col items-center">
+              <span className="text-lg font-black text-white">{(stats?.followers || 0).toLocaleString()}</span>
+              <span className="text-[9px] uppercase font-bold text-muted-foreground mt-0.5">Followers</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-lg font-black text-white">{(stats?.monthlyListeners || 0).toLocaleString()}</span>
+              <span className="text-[9px] uppercase font-bold text-muted-foreground mt-0.5">Listeners</span>
             </div>
           </div>
         </div>
@@ -296,51 +373,6 @@ const ArtistProfile: React.FC = () => {
             className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white transition-colors rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-neutral-800"
           >
             <Shuffle className="w-3.5 h-3.5" /> Shuffle
-          </button>
-
-          {!isOwnProfile ? (
-            <button 
-              onClick={handleFollowToggle}
-              className={cn(
-                "px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer",
-                isFollowing 
-                  ? "bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300" 
-                  : "bg-cyan-500 text-black hover:bg-cyan-400 border-none"
-              )}
-            >
-              {isFollowing ? <UserCheck className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
-              {isFollowing ? "Following" : "Follow"}
-            </button>
-          ) : (
-            <button 
-              onClick={() => setShowEditModal(true)}
-              className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full text-xs font-bold cursor-pointer border border-neutral-800"
-            >
-              Modify Ledger Profile
-            </button>
-          )}
-
-          <button 
-            onClick={() => setShowTipModal(true)}
-            className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-cyan-400 border border-cyan-500/25 transition-all rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-          >
-            <Zap className="w-3.5 h-3.5 fill-current text-cyan-400 animate-pulse" /> Support Artist
-          </button>
-
-          {!isOwnProfile && (
-            <button 
-              onClick={() => setShowCollabModal(true)}
-              className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-amber-400 border border-amber-500/25 transition-all rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-            >
-              <Gem className="w-3.5 h-3.5" /> Request Collab
-            </button>
-          )}
-
-          <button 
-            onClick={() => navigate("/mint")}
-            className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-purple-400 border border-purple-500/25 transition-all rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-          >
-            <Gem className="w-3.5 h-3.5" /> Mint Music NFT
           </button>
         </div>
 

@@ -135,7 +135,7 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
   const navigate = useNavigate();
   const toast = useToast();
   const { openModal } = useModal();
-  const { userProfile: currentUserProfile, artists } = useAudio();
+  const { userProfile: currentUserProfile, artists, setHeaderTitle, allTracks } = useAudio();
   const { nfts: contextNfts, getNFTsByArtist } = useNFT();
   const isOwnProfile = !visitorId;
   
@@ -280,9 +280,26 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
     }
   }, [isOwnProfile, currentUserProfile?.uid, currentUserProfile?.name, currentUserProfile?.avatar, visitorId, artists, forceArtistDashboard]);
 
-  // Load real consistent albums & tracks from ArtistProfile mock system
+  // Load real consistent albums & tracks from ArtistProfile mock system and user uploads
   const albumsList: AlbumData[] = getMockAlbums(profile.uid);
-  const tracksList: Track[] = getMockSingles(profile.uid);
+  const userUploadedTracks = React.useMemo(() => {
+    return allTracks.filter(t => t.artistId === profile.uid || (isOwnProfile && currentUserProfile && t.artistId === currentUserProfile.uid));
+  }, [allTracks, profile.uid, isOwnProfile, currentUserProfile]);
+  const mockSingles = getMockSingles(profile.uid);
+  const tracksList: Track[] = React.useMemo(() => {
+    const combined = [...userUploadedTracks, ...mockSingles];
+    return Array.from(new Map(combined.map(t => [t.id, t])).values());
+  }, [userUploadedTracks, mockSingles]);
+
+  // Set header title to user name
+  useEffect(() => {
+    if (profile.name) {
+      setHeaderTitle(profile.name);
+    }
+    return () => {
+      setHeaderTitle('');
+    };
+  }, [profile.name, setHeaderTitle]);
 
   // Apply Theme Toggle Class
   useEffect(() => {

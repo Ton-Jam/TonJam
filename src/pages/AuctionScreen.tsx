@@ -34,6 +34,7 @@ import NFTCard from '@/components/NFTCard';
 import SectionHeader from '@/components/SectionHeader';
 import { AuctionAnalyticsSection } from '@/components/AuctionAnalyticsSection';
 import { BidDashboard } from '@/components/BidDashboard';
+import FeaturedAuctionCard from '@/components/FeaturedAuctionCard';
 import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem } from '@/types';
 import { cn } from '@/lib/utils';
@@ -571,6 +572,37 @@ const AuctionScreen: React.FC = () => {
 
         {/* Real-time Bid Dashboard */}
         <BidDashboard />
+
+        {/* Featured Audio NFTs Up for Auction Grid Section */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-black uppercase tracking-tighter text-white flex items-center gap-2">
+                Featured Audio NFTs
+                <span className="px-2.5 py-0.5 text-xs font-bold bg-blue-500/20 text-blue-400 rounded-full">
+                  Live Auctions
+                </span>
+              </h2>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">
+                Exclusive tracks currently live for bidding on TonJam Marketplace
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {auctionNFTs.slice(0, 3).map((nft) => (
+              <FeaturedAuctionCard
+                key={nft.id}
+                nft={{
+                  ...nft,
+                  currentBid: `${nft.price || '42'} Grams`,
+                  floorPrice: `${Math.max(10, Math.floor(parseFloat(nft.price || '42') * 0.8))} Grams`,
+                }}
+                onPlaceBid={(bidNft) => navigate(`/nft/${bidNft.id}`)}
+              />
+            ))}
+          </div>
+        </section>
 
         {/* Live Grid */}
         <section className="space-y-8">

@@ -1,7 +1,9 @@
 import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Award, Layers, Users, TrendingUp } from "lucide-react";
 import { NFTCollection } from "../types";
+import { useGramPrice } from "@/contexts/GramPriceContext";
 
 interface TrendingCollectionsProps {
   collections: NFTCollection[];
@@ -12,7 +14,9 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
   collections,
   onSelectCollection
 }) => {
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { convertPrice } = useGramPrice();
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -37,22 +41,30 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
           </p>
         </div>
 
-        {/* Carousel buttons */}
-        <div className="flex gap-1.5">
+        {/* Action Controls */}
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => scroll("left")}
-            className="w-8 h-8 rounded-[10px] bg-zinc-900 border border-zinc-800/40 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
-            aria-label="Previous collections"
+            onClick={() => navigate('/explore/playlists?title=Trending+Collections&filter=curated')}
+            className="text-xs font-bold text-[#0098EA] hover:text-[#0098EA]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
           >
-            <ChevronLeft className="w-4 h-4" />
+            More <ChevronRight className="w-3.5 h-3.5" />
           </button>
-          <button
-            onClick={() => scroll("right")}
-            className="w-8 h-8 rounded-[10px] bg-zinc-900 border border-zinc-800/40 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
-            aria-label="Next collections"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={() => scroll("left")}
+              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none"
+              aria-label="Previous collections"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => scroll("right")}
+              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none"
+              aria-label="Next collections"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -101,11 +113,11 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
             <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-zinc-900/60">
               <div>
                 <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block mb-0.5">Floor Price</span>
-                <span className="text-[11px] font-black text-white font-mono">{col.floorPrice} TON</span>
+                <span className="text-[11px] font-black text-white font-mono">{convertPrice(col.floorPrice)}</span>
               </div>
               <div className="text-right">
                 <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block mb-0.5">Vol. Volume</span>
-                <span className="text-[11px] font-black text-[#00B4D8] font-mono">{col.volume} TON</span>
+                <span className="text-[11px] font-black text-[#00B4D8] font-mono">{convertPrice(col.volume)}</span>
               </div>
             </div>
           </motion.div>

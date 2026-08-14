@@ -712,6 +712,97 @@ async function startServer() {
         }
     });
 
+    app.post('/api/gemini/discover-feed', async (req, res) => {
+        try {
+            const { userContext, availableTracks } = req.body;
+            const prompt = `
+                You are TonJam's expert "Discovery Oracle" AI curator.
+                Your task is to analyze a user's digital music taste based on their library of tracks and previously liked NFTs (digital music collectibles), and then suggest up to 5 tracks from our available tracks library.
+
+                USER CONTEXT:
+                - User's Library Tracks: ${JSON.stringify(userContext?.libraryTracks || [])}
+                - Previously Liked NFTs: ${JSON.stringify(userContext?.likedNfts || [])}
+
+                AVAILABLE TRACKS LIBRARY:
+                ${JSON.stringify(availableTracks || [], null, 2)}
+
+                TASK:
+                1. Select up to 5 recommended tracks from the AVAILABLE TRACKS LIBRARY that align best with the user's taste and style. Do not suggest tracks they already have in their library.
+                2. For each recommended track, write a personalized, engaging reason (1-2 sentences) explaining why they would love it, mentioning similarity in genre, tempo, mood, or NFT aesthetic.
+                3. Create a unique, cool themed name for this discovery stream (e.g. "Sonic Neon Drift", "Chrysalis Phonk Shift").
+
+                OUTPUT FORMAT:
+                You must return a JSON object with this schema exactly:
+                {
+                  "discoveryTheme": "string",
+                  "recommendations": [
+                    {
+                      "trackId": "string",
+                      "reason": "string"
+                    }
+                  ]
+                }
+            `;
+
+            const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: [{ parts: [{ text: prompt }] }],
+                config: {
+                    responseMimeType: "application/json",
+                }
+            }));
+
+            if (response.text) {
+                const data = JSON.parse(response.text);
+                return res.json(data);
+            }
+            throw new Error("Empty response from AI");
+        } catch (error: any) {
+            console.log("[Fallback] Serving local heuristic recommendations for discovery feed.");
+            try {
+                const { userContext, availableTracks } = req.body;
+                const tracks = Array.isArray(availableTracks) ? availableTracks : [];
+                const libTracks = Array.isArray(userContext?.libraryTracks) ? userContext.libraryTracks : [];
+                const likedNfts = Array.isArray(userContext?.likedNfts) ? userContext.likedNfts : [];
+
+                const favoriteGenres = new Set<string>();
+                libTracks.forEach((t: any) => { if (t.genre) favoriteGenres.add(t.genre.toLowerCase()); });
+                likedNfts.forEach((nft: any) => { if (nft.genre) favoriteGenres.add(nft.genre.toLowerCase()); });
+
+                const recommended = tracks
+                    .filter((track: any) => !libTracks.some((lt: any) => lt.id === track.id))
+                    .map((track: any) => {
+                        let score = 0;
+                        const trackGenre = (track.genre || '').toLowerCase();
+                        if (favoriteGenres.has(trackGenre)) {
+                            score += 10;
+                        }
+                        return { track, score };
+                    })
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 5);
+
+                const recommendations = recommended.map(item => {
+                    const track = item.track;
+                    return {
+                        trackId: track.id,
+                        reason: `Matched with your taste in ${track.genre || 'Web3 soundscapes'} and your curated digital art collection.`
+                    };
+                });
+
+                return res.json({
+                    discoveryTheme: "On-Chain Resonance Mix",
+                    recommendations
+                });
+            } catch (fallbackError) {
+                return res.json({
+                    discoveryTheme: "Trending Discovery",
+                    recommendations: []
+                });
+            }
+        }
+    });
+
     app.post('/api/gemini/generate-bio', async (req, res) => {
         try {
             const { name, username } = req.body;
@@ -1455,7 +1546,7 @@ async function startServer() {
 
     app.post('/api/gemini/similar-tracks', async (req, res) => {
         try {
-            const { recentlyPlayed = [], likedTracks = [], availableTracks = [] } = req.body;
+            const { recentlyPlayed = [], likedTracks = [], purchasedNFTs = [], availableTracks = [] } = req.body;
             const model = "gemini-2.5-flash";
             
             if (!availableTracks || availableTracks.length === 0) {
@@ -1463,27 +1554,28 @@ async function startServer() {
             }
 
             const prompt = `
-                You are TonJam's AI music recommendation assistant.
-                Based on the user's recent listening activity and likes, generate a list of exactly 4 similar tracks they might love from our available catalog.
+                You are TonJam's AI music recommendation assistant powered by Gemini.
+                Based on the user's library, recent listening activity, likes, and previously purchased NFTs, generate a list of exactly 4 similar tracks they might love from our available catalog.
                 
-                USER ACTIVITY LOGS:
+                USER PROFILE & ACTIVITY:
                 - Recently Played Tracks: ${recentlyPlayed.slice(0, 10).map((t: any) => `"${t.title}" by ${t.artist} [Genre: ${t.genre}, Mood: ${t.mood || 'N/A'}]`).join(', ')}
                 - Liked Track IDs: ${JSON.stringify(likedTracks)}
+                - Previously Purchased NFTs: ${purchasedNFTs.slice(0, 10).map((n: any) => `"${n.title}" by ${n.creator} [Price: ${n.price}]`).join(', ')}
 
                 AVAILABLE CATALOG:
                 ${JSON.stringify(availableTracks.map((t: any) => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre, mood: t.mood })))}
 
                 INSTRUCTIONS:
-                1. Select EXACTLY 4 track IDs from the AVAILABLE CATALOG that are highly similar in genre, style, or mood, but are NOT the same as the user's recently played or liked tracks if possible.
-                2. If there are not enough distinct tracks, fallback to selecting the closest matching active tracks in the catalog.
+                1. Select EXACTLY 4 track IDs from the AVAILABLE CATALOG that strongly resonate with the user's taste as reflected in their recently played tracks, liked items, and previously purchased NFT audio collectibles.
+                2. Avoid repeating tracks the user already recently played or liked if possible.
                 3. Keep the selected IDs strictly from the IDs present in the AVAILABLE CATALOG.
-                4. Provide a warm, personalized 1-2 sentence explanation of your recommendations.
+                4. Provide a warm, personalized 1-2 sentence explanation of your recommendations referencing their library and NFT collection.
 
                 OUTPUT FORMAT:
                 Return a JSON object with:
                 {
                   "recommendedTrackIds": ["id1", "id2", "id3", "id4"],
-                  "explanation": "Brief explanation of similarities..."
+                  "explanation": "Brief explanation..."
                 }
             `;
 
@@ -1521,16 +1613,17 @@ async function startServer() {
             console.log("[Fallback] Using fallback similar tracks recommendations.");
             
             // HEURISTIC FALLBACK
-            const { recentlyPlayed = [], likedTracks = [], availableTracks = [] } = req.body;
+            const { recentlyPlayed = [], likedTracks = [], purchasedNFTs = [], availableTracks = [] } = req.body;
             
-            // Collect favorite genres/moods
+            // Collect favorite genres/moods from recently played and purchased NFTs
             const preferredGenres = new Set<string>();
             recentlyPlayed.forEach((t: any) => { if (t?.genre) preferredGenres.add(t.genre); });
+            purchasedNFTs.forEach((n: any) => { if (n?.genre) preferredGenres.add(n.genre); });
             
             // Exclude already played/liked tracks
             const excludeIds = new Set([...recentlyPlayed.map((t: any) => t.id), ...likedTracks]);
             
-            let candidates = availableTracks.filter((t: any) => !excludeIds.has(t.id) && preferredGenres.has(t.genre));
+            let candidates = availableTracks.filter((t: any) => !excludeIds.has(t.id) && (preferredGenres.size === 0 || preferredGenres.has(t.genre)));
             if (candidates.length < 4) {
                 candidates = availableTracks.filter((t: any) => !excludeIds.has(t.id));
             }
@@ -1543,7 +1636,7 @@ async function startServer() {
             
             res.json({
                 recommendedTrackIds,
-                explanation: "These tracks are matched from your preferred genres and sonic signature automatically."
+                explanation: "Curated from your active listening profile and previously collected audio NFTs on the TON blockchain."
             });
         }
     });
@@ -2081,14 +2174,16 @@ async function startServer() {
         const origin = `${protocol}://${host}`;
         
         const manifest = {
+            manifestVersion: 2,
             url: origin,
-            name: "TonJam",
+            name: "GramJam",
             iconUrl: "https://i.postimg.cc/63GsZHzq/TonJam-icon.png",
             termsOfUseUrl: origin,
             privacyPolicyUrl: origin
         };
         
-        res.header('Access-Control-Allow-Origin', '*');
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Access-Control-Allow-Origin', '*');
         res.json(manifest);
     });
 

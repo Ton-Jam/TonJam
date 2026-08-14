@@ -355,10 +355,10 @@ export const FollowersFollowing: React.FC = () => {
             <button
               key={filter}
               onClick={() => setRoleFilter(filter)}
-              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all cursor-pointer shrink-0 border ${
+              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all cursor-pointer shrink-0 border-none ${
                 roleFilter === filter
-                  ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                  : 'bg-[#050a24] text-slate-400 hover:text-white border-white/5'
+                  ? 'bg-[#0088CC] text-white shadow-[0_0_12px_rgba(0,136,204,0.4)]'
+                  : 'bg-[#050a24] text-slate-400 hover:text-white hover:bg-[#0088CC]/20'
               }`}
             >
               {filter}

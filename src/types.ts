@@ -212,6 +212,13 @@ export interface NFTItem {
   cid?: string; // Content Identifier
   createdAt?: string;
   views?: number;
+  // Staking specific fields
+  isStaked?: boolean;
+  stakedAt?: string;
+  stakedLockPeriodDays?: number;
+  stakedRewardsEarned?: number;
+  stakedApy?: number;
+  stakedOwnerAddress?: string;
   // Auction specific fields
   listingType?: 'fixed' | 'auction';
   auctionStartTime?: string; // ISO string or timestamp

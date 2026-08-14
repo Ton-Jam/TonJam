@@ -54,13 +54,17 @@ export function SearchBar({
             setIsSearchOpen(true);
           }}
           onFocus={() => setIsSearchOpen(true)}
-          className={`w-full bg-zinc-900/60 text-white pl-4 pr-10 py-1.5 rounded-md text-xs placeholder:text-zinc-500 focus:outline-none whitespace-nowrap overflow-hidden text-ellipsis ${inputClassName}`}
+          className={`w-full ${searchQuery ? 'bg-transparent border-white/20' : 'bg-zinc-900/60'} text-white pl-4 pr-10 py-1.5 rounded-md text-xs placeholder:text-zinc-500 focus:outline-none whitespace-nowrap overflow-hidden text-ellipsis ${inputClassName}`}
           autoFocus={autoFocus}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
         />
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
       </form>
       {isSearchOpen && children && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-950/95 border border-zinc-800/80 rounded-lg shadow-2xl z-55 backdrop-blur-xl overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-950 border border-zinc-800/80 rounded-lg shadow-2xl z-55 overflow-hidden">
           {children}
         </div>
       )}

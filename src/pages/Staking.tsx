@@ -1,12 +1,22 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Lock, Unlock, Zap, TrendingUp, Coins, Info, ArrowUpRight, History, Sparkles, Filter, ArrowDownUp, Clock, AlertTriangle } from 'lucide-react';
+import { Lock, Unlock, Zap, TrendingUp, Coins, Info, ArrowUpRight, History, Sparkles, Filter, ArrowDownUp, Clock, AlertTriangle, Music, Gift, ChevronRight } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
+import { useNFT } from '@/contexts/NFTContext';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { JAM_PRICE_USD } from '@/constants';
 import ConfirmationModal from '@/components/ConfirmationModal';
+import StakeNFTModal from '@/components/StakeNFTModal';
+import { useNavigate } from 'react-router-dom';
 
 const Staking: React.FC = () => {
+  const navigate = useNavigate();
   const { userProfile, stakeJam, unstakeJam, claimJamRewards, toggleAutoCompound, transactions } = useAudio();
+  const { nfts } = useNFT();
+  const [selectedNftForModal, setSelectedNftForModal] = useState<any | null>(null);
+
+  const stakedNFTs = useMemo(() => {
+    return nfts.filter((n) => n.isStaked);
+  }, [nfts]);
   const safeTransactions = transactions || [];
   const userAddress = useTonAddress();
   const [stakeAmount, setStakeAmount] = useState('');
@@ -372,6 +382,89 @@ const Staking: React.FC = () => {
         </div>
       </div>
 
+      {/* Staked Music NFTs Section */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400">
+              <Lock className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold uppercase tracking-tighter text-foreground flex items-center gap-2">
+                Staked Music NFTs
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30">
+                  {stakedNFTs.length} Staked
+                </span>
+              </h2>
+              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                Music NFTs vault locked for governance tokens ($JAM / $GOV) and APY yield
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/explore')}
+            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            Explore Music NFTs <ChevronRight className="w-3.5 h-3.5 text-purple-400" />
+          </button>
+        </div>
+
+        {stakedNFTs.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {stakedNFTs.map((nft) => (
+              <div 
+                key={nft.id}
+                className="p-4 bg-zinc-900/80 border border-purple-500/30 rounded-2xl space-y-3 relative overflow-hidden group hover:border-purple-500/60 transition-all shadow-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={nft.imageUrl || nft.coverUrl} 
+                    alt={nft.title} 
+                    className="w-14 h-14 rounded-xl object-cover border border-zinc-700 shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-purple-400 block">
+                      {nft.stakedLockPeriodDays || 90} Days Lock @ {nft.stakedApy || 25}% APY
+                    </span>
+                    <h4 className="text-sm font-bold text-white truncate">{nft.title}</h4>
+                    <p className="text-xs text-zinc-400 truncate">{nft.creator || nft.artist}</p>
+                  </div>
+                </div>
+
+                <div className="p-2.5 bg-black/40 rounded-xl border border-white/5 flex items-center justify-between text-xs">
+                  <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Estimated Yield</span>
+                  <span className="font-black text-amber-400 flex items-center gap-1">
+                    <Coins className="w-3.5 h-3.5" /> +25.5 $JAM
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => setSelectedNftForModal(nft)}
+                  className="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Lock className="w-3.5 h-3.5" /> Manage NFT Stake
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-6 bg-zinc-900/40 border border-zinc-800/80 rounded-2xl text-center space-y-3">
+            <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+              No Music NFTs currently staked in your vault
+            </p>
+            <p className="text-[11px] text-zinc-500 max-w-md mx-auto">
+              Stake your Music NFTs from any NFT detail page to unlock up to 80% APY in governance tokens and up to 3.0x voting power!
+            </p>
+            <button
+              onClick={() => navigate('/explore')}
+              className="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer inline-flex items-center gap-2"
+            >
+              <Music className="w-4 h-4" /> Browse Music NFTs
+            </button>
+          </div>
+        )}
+      </section>
+
       {/* Staking History */}
       <section className="space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -479,6 +572,13 @@ const Staking: React.FC = () => {
         unbondingPeriod="36 Hours"
         penalty="Forfeit of pending rewards and future staking yield"
       />
+
+      {selectedNftForModal && (
+        <StakeNFTModal
+          nft={selectedNftForModal}
+          onClose={() => setSelectedNftForModal(null)}
+        />
+      )}
     </div>
   );
 };

@@ -91,7 +91,8 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     setFullPlayerOpen,
     setOptionsTrack,
     likedTrackIds,
-    toggleLikeTrack
+    toggleLikeTrack,
+    audioConnectionState
   } = useAudio();
 
   const [localProgress, setLocalProgress] = useState(progress);
@@ -195,17 +196,34 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               />
             </div>
             {/* Animated artwork thumbnail */}
-            <div className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-[#0098EA]/50 shadow-inner">
-              <img 
-                src={coverUrl} 
-                alt={currentTrack.title}
-                className={`w-full h-full object-cover ${isPlaying ? "animate-spin-slow" : ""}`}
+            <div className="relative flex-shrink-0">
+              <div className="w-9 h-9 rounded-full overflow-hidden border border-[#0098EA]/50 shadow-inner">
+                <img 
+                  src={coverUrl} 
+                  alt={currentTrack.title}
+                  className={`w-full h-full object-cover ${isPlaying ? "animate-spin-slow" : ""}`}
+                />
+                {isPlaying && (
+                  <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-ping" />
+                  </div>
+                )}
+              </div>
+              {/* Overlay Status Dot */}
+              <div 
+                className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-[#080d2d] shadow-sm transition-all duration-300 ${
+                  audioConnectionState === 'connected' ? 'bg-emerald-400' :
+                  audioConnectionState === 'connecting' ? 'bg-amber-400 animate-pulse' :
+                  audioConnectionState === 'error' ? 'bg-rose-500' :
+                  'bg-slate-500'
+                }`}
+                title={
+                  audioConnectionState === 'connected' ? 'Audio stream playing successfully' :
+                  audioConnectionState === 'connecting' ? 'Establishing stream secure connection...' :
+                  audioConnectionState === 'error' ? 'Stream blocked or failed to load' :
+                  'Audio stream idle'
+                }
               />
-              {isPlaying && (
-                <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-ping" />
-                </div>
-              )}
             </div>
 
             {/* Track Info */}
@@ -304,6 +322,21 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                     Hi-Fi
                   </span>
                 )}
+                {/* Visual Audio Stream Connection Status Dot */}
+                <span 
+                  className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
+                    audioConnectionState === 'connected' ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' :
+                    audioConnectionState === 'connecting' ? 'bg-amber-400 animate-pulse' :
+                    audioConnectionState === 'error' ? 'bg-rose-500 animate-bounce shadow-[0_0_8px_#f43f5e]' :
+                    'bg-slate-500'
+                  }`}
+                  title={
+                    audioConnectionState === 'connected' ? 'Audio stream playing successfully' :
+                    audioConnectionState === 'connecting' ? 'Establishing stream secure connection...' :
+                    audioConnectionState === 'error' ? 'Stream blocked or failed to load' :
+                    'Audio stream idle'
+                  }
+                />
               </div>
               <ScrollingText
                 text={currentTrack.artist}

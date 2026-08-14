@@ -23,6 +23,7 @@ import {
   Coins,
   Sliders,
   Radio,
+  Activity,
 } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import { MarqueeTitle } from "@/components/MarqueeTitle";
@@ -31,6 +32,7 @@ import { PlayerHeader } from "./PlayerHeader";
 import { PlayerArtwork } from "./PlayerArtwork";
 import { PlayerProgress } from "./PlayerProgress";
 import { PlayerControls } from "./PlayerControls";
+import { CanvasAudioAnalyzer } from "./CanvasAudioAnalyzer";
 import { LyricsSheet } from "./LyricsSheet";
 import { QueueSheet } from "./QueueSheet";
 import { AudioInfoCard } from "./AudioInfoCard";
@@ -47,6 +49,7 @@ export const PlayerScreen: React.FC = () => {
   const {
     currentTrack,
     isPlaying,
+    analyser,
     togglePlay,
     progress,
     seek,
@@ -71,7 +74,7 @@ export const PlayerScreen: React.FC = () => {
   } = useAudio();
 
   const [activeTab, setActiveTab] = useState<
-    "none" | "lyrics" | "queue" | "comments" | "audio_info" | "nft" | "artist" | "album" | "equalizer" | "radio"
+    "none" | "visualizer" | "lyrics" | "queue" | "comments" | "audio_info" | "nft" | "artist" | "album" | "equalizer" | "radio"
   >("none");
 
   const [isCached, setIsCached] = useState(false);
@@ -346,8 +349,22 @@ export const PlayerScreen: React.FC = () => {
           {/* Primary Controls (Play, Shuffle, Prev, Next, Repeat, Speed, Sleep) */}
           <PlayerControls />
 
-          {/* Secondary Features Tab Row (EQ, Lyrics, Queue, Audio Info, NFT, Artist) - Horizontal Scroll */}
+          {/* Secondary Features Tab Row (Live Visualizer, EQ, Lyrics, Queue, Audio Info, NFT, Artist) - Horizontal Scroll */}
           <div className="w-full flex items-center gap-2 overflow-x-auto py-2.5 px-1 text-[#9AA0AE] scrollbar-none snap-x touch-pan-x">
+            {/* Live Visualizer Canvas */}
+            <button
+              onClick={() => setActiveTab(activeTab === "visualizer" ? "none" : "visualizer")}
+              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start ${
+                activeTab === "visualizer"
+                  ? "bg-gradient-to-r from-[#0098EA] to-blue-600 text-white shadow-[0_0_15px_rgba(0,152,234,0.5)] scale-105"
+                  : "bg-[#0A113A]/80 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+              }`}
+              title="Live Frequency Visualizer"
+            >
+              <Activity className="w-4 h-4 text-cyan-400 animate-pulse" />
+              <span>Live Visualizer</span>
+            </button>
+
             {/* Equalizer FX */}
             <button
               onClick={() => setActiveTab(activeTab === "equalizer" ? "none" : "equalizer")}
@@ -464,6 +481,19 @@ export const PlayerScreen: React.FC = () => {
                 exit={{ opacity: 0, height: 0 }}
                 className="w-full my-2 max-h-[480px] overflow-y-auto rounded-2xl scrollbar-thin scrollbar-thumb-[#16244F]"
               >
+                {activeTab === "visualizer" && (
+                  <div className="w-full">
+                    <CanvasAudioAnalyzer
+                      analyser={analyser}
+                      isPlaying={isPlaying}
+                      track={currentTrack}
+                      height={200}
+                      showControls={true}
+                      showMetrics={true}
+                    />
+                  </div>
+                )}
+
                 {activeTab === "equalizer" && (
                   <EqualizerSettings onClose={() => setActiveTab("none")} />
                 )}

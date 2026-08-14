@@ -16,7 +16,7 @@ const ArtistNFTsSection: React.FC<ArtistNFTsSectionProps> = ({
   return (
     <div className="scroll-row animate-in slide-in-from-right-4 duration-500">
       {artistNFTs.map(n => (
-        <div key={n.id} className="min-w-[280px] sm:min-w-[320px]">
+        <div key={n.id} className="w-[155px] shrink-0">
           <NFTCard 
             nft={n} 
             onAction={isOwnProfile ? onNFTAction : undefined}

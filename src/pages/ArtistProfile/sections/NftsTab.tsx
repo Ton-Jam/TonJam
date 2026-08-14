@@ -28,7 +28,7 @@ export const NftsTab: React.FC<NftsTabProps> = ({ nfts }) => {
         </div>
 
         {activeListings.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-items-center">
             {activeListings.map(nft => (
               <NFTCard key={`active-${nft.id}`} nft={nft} />
             ))}
@@ -52,7 +52,7 @@ export const NftsTab: React.FC<NftsTabProps> = ({ nfts }) => {
         </div>
 
         {allCreated.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-items-center">
             {allCreated.map(nft => (
               <NFTCard key={`registry-${nft.id}`} nft={nft} />
             ))}

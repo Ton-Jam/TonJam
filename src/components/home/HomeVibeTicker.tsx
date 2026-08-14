@@ -12,8 +12,8 @@ const ACTIVITIES = [
 
 export const HomeVibeTicker: React.FC = () => {
   return (
-    <div className="w-full bg-[#0c133a] border-y border-white/5 py-2.5 overflow-hidden flex items-center mb-8">
-      <div className="shrink-0 px-4 flex items-center gap-2 border-r border-white/10 mr-4">
+    <div className="w-full bg-[#0c133a] py-2.5 overflow-hidden flex items-center mb-8">
+      <div className="shrink-0 px-4 flex items-center gap-2 mr-4">
         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-400 animate-pulse">Live</span>
         <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping" />
       </div>

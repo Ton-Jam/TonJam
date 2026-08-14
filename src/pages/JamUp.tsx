@@ -376,7 +376,7 @@ export default function JamUp() {
                 {isActive && (
                   <motion.div
                     layoutId="activeFilterBg"
-                    className="absolute inset-0 bg-blue-600 rounded-xl -z-10 shadow-lg shadow-blue-600/20"
+                    className="absolute inset-0 bg-[#0088CC] rounded-xl -z-10 shadow-lg shadow-[#0088CC]/30"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}

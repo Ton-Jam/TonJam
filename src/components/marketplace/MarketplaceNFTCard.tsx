@@ -8,6 +8,7 @@ import { cn, shareContent } from "@/lib/utils";
 import { MarqueeTitle } from "../MarqueeTitle";
 import { AuctionCountdownTimer } from "../AuctionCountdownTimer";
 import { NFT3DViewerModal } from "../NFT3DViewerModal";
+import { useGramPrice } from "@/contexts/GramPriceContext";
 
 interface MarketplaceNFTCardProps {
   nft: {
@@ -35,6 +36,7 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
   const navigate = useNavigate();
   const [is3DModalOpen, setIs3DModalOpen] = useState(false);
   const { playTrack, currentTrack, isPlaying, togglePlay, addNotification } = useAudio();
+  const { convertPrice } = useGramPrice();
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [previewSeconds, setPreviewSeconds] = useState(30);
@@ -304,8 +306,7 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
               Floor Price
             </span>
             <span className="text-xs font-black text-[#00B4D8] flex items-center gap-0.5">
-              {nft.price}
-              <span className="text-[8px] font-bold text-[#9AA0AE]">TON</span>
+              {convertPrice(nft.price)}
             </span>
           </div>
 

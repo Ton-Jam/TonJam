@@ -161,10 +161,10 @@ const DiscoveryFeed: React.FC = () => {
           {filteredTracks.map((track, idx) => (
             <div 
               key={`trending-${track.id}-${idx}`} 
-              className="w-[165px] shrink-0 animate-in fade-in slide-in-from-bottom-4 duration-500"
+              className="w-[155px] shrink-0 animate-in fade-in slide-in-from-bottom-4 duration-500"
               style={{ animationDelay: `${idx * 50}ms` }}
             >
-              <TrackCard track={track} variant="default" className="w-[165px]" />
+              <TrackCard track={track} variant="default" className="w-[155px]" />
             </div>
           ))}
         </div>
@@ -196,10 +196,10 @@ const DiscoveryFeed: React.FC = () => {
             {recommendedTracks.slice(0, 6).map((track, idx) => (
               <div 
                 key={`rec-track-${track.id}-${idx}`} 
-                className="w-[165px] shrink-0 animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className="w-[155px] shrink-0 animate-in fade-in slide-in-from-bottom-4 duration-500"
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
-                <TrackCard track={track} variant="default" className="w-[165px]" />
+                <TrackCard track={track} variant="default" className="w-[155px]" />
               </div>
             ))}
           </div>
@@ -229,10 +229,10 @@ const DiscoveryFeed: React.FC = () => {
             {recommendedNFTs.slice(0, 5).map((nft, idx) => (
               <div 
                 key={`rec-nft-${nft.id}-${idx}`} 
-                className="w-[165px] shrink-0 animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className="w-[155px] shrink-0 animate-in fade-in slide-in-from-bottom-4 duration-500"
                 style={{ animationDelay: `${idx * 100 + 300}ms` }}
               >
-                <NFTCard nft={nft} className="w-[165px]" />
+                <NFTCard nft={nft} className="w-[155px]" />
               </div>
             ))}
           </div>

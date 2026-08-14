@@ -109,15 +109,6 @@ export const TracksSection: React.FC<TracksSectionProps> = ({
                   
                   <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button 
-                      onClick={() => {
-                        onSaveTrack?.(track.id);
-                        toast.success('Track Saved', `"${track.title}" added to saved node.`);
-                      }}
-                      className="p-1.5 hover:bg-white/5 rounded-full transition-colors cursor-pointer text-slate-400 hover:text-red-400"
-                    >
-                      <Heart className="w-4 h-4" />
-                    </button>
-                    <button 
                       onClick={() => toast.success('Link Copied', 'Track sharing url copied to clipboard.')}
                       className="p-1.5 hover:bg-white/5 rounded-full transition-colors cursor-pointer text-slate-400 hover:text-white"
                     >

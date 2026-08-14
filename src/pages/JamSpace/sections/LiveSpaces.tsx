@@ -1,6 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Radio, Users, Calendar, ArrowUpRight, Check } from 'lucide-react';
+import { Radio, Users, Calendar, ArrowUpRight, Check, ChevronRight } from 'lucide-react';
 import { Space } from '../types';
 
 interface LiveSpacesProps {
@@ -14,6 +15,7 @@ export const LiveSpaces: React.FC<LiveSpacesProps> = ({
   activeSpace,
   onJoinSpace
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -21,7 +23,12 @@ export const LiveSpaces: React.FC<LiveSpacesProps> = ({
           <Radio className="w-4 h-4 text-emerald-500 animate-pulse" />
           <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Live Audio Nodes</h3>
         </div>
-        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Direct P2P Stream</span>
+        <button
+          onClick={() => navigate('/jamspace')}
+          className="text-xs font-bold text-[#0098EA] hover:text-[#0098EA]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
+        >
+          More <ChevronRight className="w-3.5 h-3.5" />
+        </button>
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0">

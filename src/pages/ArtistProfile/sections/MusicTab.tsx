@@ -120,17 +120,6 @@ export const MusicTab: React.FC<MusicTabProps> = ({
                 {/* Quick Interactive Actions */}
                 <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
-                    onClick={(e) => toggleFavorite(track.id, e)}
-                    className={cn(
-                      "p-1.5 rounded-full hover:bg-white/5 transition-colors",
-                      favorites[track.id] ? "text-red-500" : "text-muted-foreground hover:text-white"
-                    )}
-                    title="Like Song"
-                  >
-                    <Heart className="w-3.5 h-3.5" fill={favorites[track.id] ? "currentColor" : "none"} />
-                  </button>
-                  
-                  <button 
                     onClick={(e) => handleDownload(track, e)}
                     className="p-1.5 rounded-full hover:bg-white/5 text-muted-foreground hover:text-white transition-colors"
                     title="Download offline"

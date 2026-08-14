@@ -59,7 +59,7 @@ const RecentlyMintedNFTs: React.FC = () => {
       
       <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory">
         {nfts.map((nft) => (
-          <div key={nft.id} className="min-w-[220px] max-w-[260px] snap-center shrink-0">
+          <div key={nft.id} className="w-[155px] snap-center shrink-0">
             <NFTCard nft={nft} />
           </div>
         ))}

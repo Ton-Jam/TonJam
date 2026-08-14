@@ -237,8 +237,8 @@ const Wallet: React.FC = () => {
   };
 
   return (
-    <div className="p-4 lg:p-4 space-y-6 animate-in fade-in duration-700 pb-4">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="w-full max-w-full px-0 sm:px-4 md:px-6 space-y-6 animate-in fade-in duration-700 pb-12">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-4 sm:px-0">
         <div>
           <div className="flex items-center gap-4 mb-4">
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
@@ -275,7 +275,7 @@ const Wallet: React.FC = () => {
       </header>
 
       {/* Multi-Chain Connections Panel */}
-      <section className="bg-muted/35 p-4 rounded-[4px] space-y-4">
+      <section className="bg-muted/35 px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] space-y-4">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-blue-400" />
           <h2 className="text-xs font-bold uppercase tracking-widest text-white">Active Web3 Network Nodes</h2>
@@ -427,7 +427,7 @@ const Wallet: React.FC = () => {
       </section>
 
       {/* Un unclaimed Royalties module */}
-      <section className="bg-gradient-to-r from-blue-950/20 to-purple-950/20 p-4 rounded-[4px] space-y-4">
+      <section className="bg-gradient-to-r from-blue-950/20 to-purple-950/20 px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
@@ -500,7 +500,7 @@ const Wallet: React.FC = () => {
 
       {/* Balance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-600/20 to-black p-4 rounded-[4px] relative overflow-hidden group flex flex-col justify-between">
+        <div className="bg-gradient-to-br from-blue-600/20 to-black px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] relative overflow-hidden group flex flex-col justify-between">
           <div>
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <img src={TON_LOGO} className="w-32 h-32" alt="" />
@@ -540,7 +540,7 @@ const Wallet: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-600/20 to-black p-4 rounded-[4px] relative overflow-hidden group flex flex-col justify-between">
+        <div className="bg-gradient-to-br from-purple-600/20 to-black px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] relative overflow-hidden group flex flex-col justify-between">
           <div>
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <img src={TJ_COIN_ICON} className="w-32 h-32" />
@@ -581,7 +581,7 @@ const Wallet: React.FC = () => {
           </div>
         </div>
 
-        <div className={`p-4 rounded-[4px] relative overflow-hidden group transition-all flex flex-col justify-between ${userProfile.isPremium ? 'bg-gradient-to-br from-amber-600/20 to-black' : 'bg-muted/50'}`}>
+        <div className={`px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] relative overflow-hidden group transition-all flex flex-col justify-between ${userProfile.isPremium ? 'bg-gradient-to-br from-amber-600/20 to-black' : 'bg-muted/50'}`}>
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <ShieldCheck className={`w-32 h-32 ${userProfile.isPremium ? 'text-amber-500' : 'text-foreground'}`} />
           </div>
@@ -600,14 +600,14 @@ const Wallet: React.FC = () => {
 
       {/* JAM Purchase Section */}
       <section className="space-y-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 px-4 sm:px-0">
           <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
           <h2 className="text-[20px] font-bold uppercase tracking-tighter">Purchase JAM Tokens</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {jamPackages.map(pkg => (
-            <div key={pkg.id} className={`relative p-4 rounded-[4px] transition-all hover:scale-[1.02] cursor-pointer group ${pkg.popular ? 'bg-blue-600/5' : 'bg-muted/50'}`}>
+            <div key={pkg.id} className={`relative px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] transition-all hover:scale-[1.02] cursor-pointer group ${pkg.popular ? 'bg-blue-600/5' : 'bg-muted/50'}`}>
               {pkg.popular && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 py-1 bg-blue-600 text-[6px] font-bold uppercase tracking-widest rounded-full">Most Popular</div>
               )}
@@ -639,7 +639,7 @@ const Wallet: React.FC = () => {
 
       {/* Premium Upgrade Section */}
       {!userProfile.isPremium && (
-        <section className="relative rounded-[4px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black p-4 lg:p-4">
+        <section className="relative rounded-none sm:rounded-[4px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black px-4 py-6 sm:p-6 lg:p-6">
           <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
             <Zap className="w-full h-full text-amber-500" />
           </div>
@@ -685,7 +685,7 @@ const Wallet: React.FC = () => {
       )}
 
       {/* Refer-a-Fan Banner */}
-      <section className="relative rounded-[4px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black p-4 lg:p-6 flex flex-col md:flex-row items-center justify-between gap-6 border border-amber-500/20">
+      <section className="relative rounded-none sm:rounded-[4px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black px-4 py-6 sm:p-6 lg:p-6 flex flex-col md:flex-row items-center justify-between gap-6 border border-amber-500/20">
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-5 pointer-events-none">
           <Users className="w-full h-full text-amber-500" />
         </div>
@@ -714,13 +714,13 @@ const Wallet: React.FC = () => {
 
       {/* Wallet Recommendations & Guidelines */}
       <section className="space-y-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 px-4 sm:px-0">
           <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
           <h2 className="text-[20px] font-bold uppercase tracking-tighter">Standard Security & Trading Recommendations</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-foreground/[0.02] p-4 rounded-[4px] flex flex-col justify-between">
+          <div className="bg-foreground/[0.02] px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <ShieldCheck className="h-5 w-5 text-green-400" />
@@ -733,7 +733,7 @@ const Wallet: React.FC = () => {
             <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Security Level: Maximum</div>
           </div>
 
-          <div className="bg-foreground/[0.02] p-4 rounded-[4px] flex flex-col justify-between">
+          <div className="bg-foreground/[0.02] px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="h-5 w-5 text-blue-400" />
@@ -746,7 +746,7 @@ const Wallet: React.FC = () => {
             <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Efficiency Margin: Optimal</div>
           </div>
 
-          <div className="bg-foreground/[0.02] p-4 rounded-[4px] flex flex-col justify-between">
+          <div className="bg-foreground/[0.02] px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="h-5 w-5 text-amber-400" />
@@ -759,7 +759,7 @@ const Wallet: React.FC = () => {
             <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Yield Standard: 15% APY</div>
           </div>
 
-          <div className="bg-foreground/[0.02] p-4 rounded-[4px] flex flex-col justify-between">
+          <div className="bg-foreground/[0.02] px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="h-5 w-5 text-purple-400" />
@@ -776,7 +776,7 @@ const Wallet: React.FC = () => {
 
       {/* Transaction History */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-4 sm:px-0">
           <div className="flex items-center gap-4">
             <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
             <h2 className="text-[20px] font-bold uppercase tracking-tighter">Transaction Ledger</h2>
@@ -784,7 +784,7 @@ const Wallet: React.FC = () => {
           <button className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-foreground transition-colors cursor-pointer">Export CSV</button>
         </div>
         
-        <div className="bg-muted/20 rounded-[4px] overflow-hidden">
+        <div className="bg-muted/20 rounded-none sm:rounded-[4px] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>

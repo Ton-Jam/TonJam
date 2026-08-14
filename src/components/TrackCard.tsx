@@ -649,9 +649,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
           whileTap={{ scale: 0.97 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
           className={cn(
-            "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded-card p-2 bg-transparent border border-transparent w-full",
+            "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 bg-[#0A113A]/60 hover:bg-[#101A3B] transition-all duration-300 flex flex-col overflow-hidden w-[155px] shrink-0",
             className
           )}
+          style={{ width: cardTokens.track.width, minHeight: cardTokens.track.cardHeight, padding: cardTokens.track.padding, borderRadius: cardTokens.global.borderRadius }}
           onClick={handleCardClickInner}
           onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
           role="button"

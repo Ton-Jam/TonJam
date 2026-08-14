@@ -526,8 +526,8 @@ const Home: React.FC = () => {
               <Flame className="w-5 h-5 text-amber-400 fill-amber-400/20 animate-pulse" />
               Trending Feed
             </h2>
-            <button onClick={() => navigate("/marketplace")} className="text-xs font-bold text-primary flex items-center outline-none cursor-pointer border-none bg-transparent">
-              All <ChevronRight className="w-3.5 h-3.5" />
+            <button onClick={() => navigate("/explore/tracks?title=Trending+Feed&filter=trending")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
+              More <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -545,7 +545,7 @@ const Home: React.FC = () => {
                 key={track.id} 
                 track={track} 
                 variant="default"
-                className="w-[165px] shrink-0"
+                className="w-[155px] shrink-0"
               />
             ))}
           </div>
@@ -569,9 +569,14 @@ const Home: React.FC = () => {
         <SocialActivityFeed />
 
         <div className="space-y-3 text-left">
-          <h2 className="text-xs font-black tracking-widest text-text-muted uppercase px-4">
-            Continue Listening
-          </h2>
+          <div className="flex items-center justify-between px-4">
+            <h2 className="text-xs font-black tracking-widest text-text-muted uppercase">
+              Continue Listening
+            </h2>
+            <button onClick={() => navigate("/explore/tracks?title=Continue+Listening&filter=recent")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
+              More <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
           <div ref={listeningRef} className="flex gap-4 overflow-x-auto no-scrollbar pb-3 pl-4" style={{ scrollBehavior: 'smooth' }}>
             {(allTracks && allTracks.length > 0 ? allTracks.slice(0, 6) : MOCK_TRACKS.slice(0, 6)).map((track) => (
               <div key={track.id} className="w-[300px] shrink-0">
@@ -756,7 +761,7 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-divider flex items-center justify-between gap-3">
+          <div className="mt-4 pt-3 flex items-center justify-between gap-3">
             <span className="text-caption truncate max-w-[200px]">
               Next: {nextUpTask.title} ({nextUpTask.reward})
             </span>
@@ -865,7 +870,9 @@ const Home: React.FC = () => {
             <h2 className="text-lg font-black tracking-tight text-white">
               New Drops
             </h2>
-            <span className="text-[10px] text-[#9AA0AE] font-medium">12 Fresh Releases</span>
+            <button onClick={() => navigate("/explore/tracks?title=New+Drops&filter=new")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
+              More <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
@@ -874,7 +881,7 @@ const Home: React.FC = () => {
                 key={track.id} 
                 track={track} 
                 variant="default" 
-                className="w-[165px] shrink-0"
+                className="w-[155px] shrink-0"
               />
             ))}
           </div>
@@ -885,9 +892,14 @@ const Home: React.FC = () => {
             SECTION 5: TOP TRENDING SONGS (Rank #1 - #5)
             ========================================== */}
         <div className="space-y-3 text-left">
-          <h2 className="text-lg font-black tracking-tight text-white px-0.5">
-            Top Trending Songs
-          </h2>
+          <div className="flex items-center justify-between px-4">
+            <h2 className="text-lg font-black tracking-tight text-white">
+              Top Trending Songs
+            </h2>
+            <button onClick={() => navigate("/explore/tracks?title=Top+Trending+Songs&filter=trending")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
+              More <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
           <div className="rounded-2xl bg-[#0A113A]/50 backdrop-blur-md p-2 space-y-1.5 shadow-md border-none">
             {topTrendingSongs.map((track, idx) => (
@@ -939,9 +951,9 @@ const Home: React.FC = () => {
                 <Sparkles className="w-5 h-5 text-primary animate-pulse" />
                 Trending Artists
               </h2>
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                Dynamic Momentum Index
-              </span>
+              <button onClick={() => navigate("/explore/artists?title=Trending+Artists&filter=rising")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
+                More <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
             
             {/* Filter Toggle Buttons with zero border lines */}
@@ -1078,9 +1090,14 @@ const Home: React.FC = () => {
             <h2 className="text-lg font-black tracking-tight text-white">
               Live Spaces
             </h2>
-            <span className="text-[9px] text-[#FF3A5C] bg-[#FF3A5C]/10 px-2 py-0.5 rounded-full font-black uppercase tracking-widest animate-pulse">
-              On Air
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] text-[#FF3A5C] bg-[#FF3A5C]/10 px-2 py-0.5 rounded-full font-black uppercase tracking-widest animate-pulse">
+                On Air
+              </span>
+              <button onClick={() => navigate("/jamspace")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
+                More <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2.5">
@@ -1127,7 +1144,9 @@ const Home: React.FC = () => {
             <h2 className="text-lg font-black tracking-tight text-white">
               Recommended For Your Vibe
             </h2>
-            <Sparkles className="w-4 h-4 text-[#F5D547]" />
+            <button onClick={() => navigate("/explore/tracks?title=Recommended+For+You&filter=recommended")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
+              More <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
@@ -1137,7 +1156,7 @@ const Home: React.FC = () => {
                 key={rec.id} 
                 track={rec} 
                 variant="default" 
-                className="w-[165px] shrink-0" 
+                className="w-[155px] shrink-0" 
               />
             ))}
 
@@ -1147,7 +1166,7 @@ const Home: React.FC = () => {
                 key={nft.id} 
                 nft={nft} 
                 variant="default" 
-                className="w-[165px] shrink-0 border border-white/10 rounded-lg" 
+                className="w-[155px] shrink-0" 
               />
             ))}
           </div>
@@ -1162,7 +1181,9 @@ const Home: React.FC = () => {
             <h2 className="text-lg font-black tracking-tight text-white">
               Top Marketplace Picks
             </h2>
-            <ShoppingBag className="w-4 h-4 text-[#00B4D8]" />
+            <button onClick={() => navigate("/explore/nfts?title=Top+Marketplace+Picks&filter=top_nfts")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
+              More <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
@@ -1182,7 +1203,7 @@ const Home: React.FC = () => {
                   description: '',
                   isAuction: false
                 } as any}
-                className="w-[165px] shrink-0 border border-white/10 rounded-lg"
+                className="w-[155px] shrink-0"
               />
             ))}
           </div>
@@ -1197,9 +1218,9 @@ const Home: React.FC = () => {
             <h2 className="text-lg font-black tracking-tight text-white font-sans">
               Favorite Artists Updates
             </h2>
-            <span className="text-[9px] uppercase tracking-widest font-black text-[#2BE08C] bg-[#2BE08C]/15 px-2 py-0.5 rounded-full leading-none">
-              Live Updates
-            </span>
+            <button onClick={() => navigate("/explore/artists?title=Favorite+Artists&filter=followed")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
+              More <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-2 px-4 animate-fade-in">
@@ -1229,9 +1250,14 @@ const Home: React.FC = () => {
             SECTION 13: RECENTLY MINTED MUSIC NFTs (Horizontal Scroll)
             ========================================= */}
         <div className="space-y-3 text-left">
-          <h2 className="text-lg font-black tracking-tight text-white px-0.5">
-            Recently Minted Music NFTs
-          </h2>
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-lg font-black tracking-tight text-white">
+              Recently Minted Music NFTs
+            </h2>
+            <button onClick={() => navigate("/explore/nfts?title=Recently+Minted+NFTs&filter=new_nfts")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
+              More <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
           <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4 animate-fade-in">
             {mappedRecentlyMintedNFTs.map((nft) => (
@@ -1239,7 +1265,7 @@ const Home: React.FC = () => {
                 key={nft.id} 
                 nft={nft} 
                 variant="default"
-                className="w-[165px] shrink-0 border border-white/10 rounded-lg"
+                className="w-[155px] shrink-0"
                 onAction={(nftItem) => {
                   if (nftItem.owner !== userProfile?.walletAddress) {
                     handleMintNFT(nftItem.id);

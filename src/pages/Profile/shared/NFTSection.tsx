@@ -116,8 +116,8 @@ export const NFTSection: React.FC<NFTSectionProps> = ({
               onClick={() => setActiveFilter(filter)}
               className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activeFilter === filter 
-                  ? 'bg-gradient-to-r from-[#00B4D8] to-[#009CC0] text-white shadow-[0_0_12px_rgba(0,180,216,0.3)]' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#0088CC] text-white shadow-[0_0_15px_rgba(0,136,204,0.4)]' 
+                  : 'text-slate-400 hover:text-white hover:bg-[#0088CC]/20'
               }`}
             >
               {filter}

@@ -145,12 +145,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                 <span className="text-xs text-muted-foreground font-mono">
                   {Math.floor((track.duration || 200) / 60)}:{(String((track.duration || 200) % 60)).padStart(2, '0')}
                 </span>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); }}
-                  className="p-1.5 hover:text-red-500 text-muted-foreground transition-colors"
-                >
-                  <Heart className="w-3.5 h-3.5" />
-                </button>
+                {/* Heart removed */}
               </div>
             </div>
           ))}

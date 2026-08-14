@@ -6,6 +6,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import PriceDropNotificationModal from '@/components/PriceDropNotificationModal';
+import { toast } from 'sonner';
 
 export interface TriggeredPriceDrop {
   alert: PriceAlert;
@@ -309,6 +310,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                     link: `/nft/${nft.id}`,
                     metadata: { nftId: nft.id, type: 'outbid', bidAmount: parseFloat(highestOffer.price) }
                   });
+
+                  toast.error("You've been outbid!", {
+                    description: `Your bid on "${nft.title}" was surpassed by ${highestOffer.price} TON. Re-bid now to secure it!`,
+                  });
+
                   alertedOutbids.current.add(alertKey);
                   localStorage.setItem('tonjam_alerted_outbids', JSON.stringify(Array.from(alertedOutbids.current)));
                   altered = true;

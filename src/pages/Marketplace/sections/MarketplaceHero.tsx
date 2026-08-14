@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { NFTItem } from "@/types";
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
+import { useGramPrice } from "@/contexts/GramPriceContext";
 
 interface MarketplaceHeroProps {
   featuredNFT: NFTItem;
@@ -18,6 +19,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
   onMintSuccess
 }) => {
   const { playTrack, currentTrack, isPlaying, addNotification } = useAudio();
+  const { convertPrice, localCurrencyEnabled } = useGramPrice();
   const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 24, seconds: 45 });
   const [isMinted, setIsMinted] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
@@ -114,8 +116,10 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
         <div className="grid grid-cols-2 gap-4 max-w-sm py-4 border-y border-zinc-800/40">
           <div>
             <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest block mb-1">Floor Price</span>
-            <span className="text-lg font-black text-white font-mono">{featuredNFT.price || "15.0 TON"}</span>
-            <span className="text-[10px] text-zinc-400 font-bold block">≈ ${(15.0 * 5.30).toFixed(2)} USD</span>
+            <span className="text-lg font-black text-white font-mono">{convertPrice(featuredNFT.price || "15.0 TON")}</span>
+            {!localCurrencyEnabled && (
+              <span className="text-[10px] text-zinc-400 font-bold block">≈ ${(15.0 * 5.30).toFixed(2)} USD</span>
+            )}
           </div>
 
           <div>
@@ -153,7 +157,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
             }`}
           >
             <Disc className={`w-4 h-4 ${isMinting ? "animate-spin" : ""}`} />
-            {isMinting ? "Minting on TON..." : isMinted ? "Owned in Wallet ✓" : `Mint NFT (${featuredNFT.price || "15.0 TON"})`}
+            {isMinting ? "Minting on TON..." : isMinted ? "Owned in Wallet ✓" : `Mint NFT (${convertPrice(featuredNFT.price || "15.0 TON")})`}
           </Button>
 
           <Button

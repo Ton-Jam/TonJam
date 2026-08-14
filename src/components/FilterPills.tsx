@@ -96,7 +96,7 @@ const FilterPills: React.FC<FilterPillsProps> = ({
               {isSelected && (
                 <motion.span
                   layoutId="activePillBackground"
-                  className="absolute inset-0 bg-[#5B6BFF] -z-10 rounded-full"
+                  className="absolute inset-0 bg-[#0088CC] shadow-[0_0_15px_rgba(0,136,204,0.4)] -z-10 rounded-full"
                   style={{ originY: '0px' }}
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 />

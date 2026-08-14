@@ -433,7 +433,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     "font-bold uppercase tracking-widest truncate transition-all duration-300",
                     headerTitle ? "text-sm" : "text-[12px] tracking-tighter max-w-[120px]"
                   )}>
-                    {headerTitle || (isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : isPostDetail ? 'Post' : isWallet ? 'Wallet' : isSearch ? 'Search' : isSettings ? 'Settings' : isProfile ? 'Profile' : isDiscover ? 'Discover' : isTasks ? 'Tasks' : isGovernance ? 'Governance' : isAdmin ? 'Admin' : (location.pathname.split('/')[1] || '').replace('-', ' ')))}
+                    {headerTitle || (isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : isPostDetail ? 'Post' : isWallet ? 'Wallet' : isSearch ? 'Search' : isSettings ? 'Settings' : isProfile ? (userProfile?.name || userProfile?.username || 'User') : isDiscover ? 'Discover' : isTasks ? 'Tasks' : isGovernance ? 'Governance' : isAdmin ? 'Admin' : (location.pathname.split('/')[1] || '').replace('-', ' ')))}
                   </span>
                 </div>
                 {headerTitle && !isHome && (
@@ -1053,12 +1053,22 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
         )}
       </div>
 
-      {(isArtist || isAdmin || userProfile.isVerifiedArtist) ? (
+      {(isArtist || isAdmin || userProfile?.isVerifiedArtist || userProfile?.role === 'artist') ? (
         <div className="pt-2 space-y-2">
+          <Link 
+            to="/artist-dashboard"
+            onClick={onNavigate}
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+            aria-label="Creator Dashboard"
+          >
+            <Squares2X2Icon className="h-4 w-4" />
+            <span className="text-[10px] uppercase font-bold tracking-widest">Creator Dashboard</span>
+          </Link>
+
           <Link 
             to="/upload"
             onClick={onNavigate}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-left"
             aria-label="Upload new track"
           >
             <ArrowUpTrayIcon className="h-4 w-4" />
@@ -1081,10 +1091,10 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             to="/artist-onboarding"
             onClick={onNavigate}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white font-bold transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
-            aria-label="Become an Artist"
+            aria-label="Become a Creator"
           >
             <StarIcon className="h-4 w-4" />
-            <span className="text-[10px] uppercase font-bold tracking-widest">{t('nav.become_artist')}</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest">Become a Creator</span>
           </Link>
         </div>
       )}

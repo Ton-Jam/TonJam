@@ -48,10 +48,10 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
               key={cat}
               whileTap={{ scale: 0.95 }}
               onClick={() => onSelectCategory(cat)}
-              className={`px-4 py-2 rounded-[10px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 shrink-0 select-none border ${
+              className={`px-4 py-2 rounded-[10px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 shrink-0 select-none border-[2px] ${
                 isActive
-                  ? "bg-white text-zinc-950 border-white font-black"
-                  : "bg-zinc-900/60 text-zinc-400 hover:text-white border-zinc-800/40 hover:border-zinc-700/60"
+                  ? "bg-[#0088CC] text-white border-[#0088CC] shadow-[0_0_15px_rgba(0,136,204,0.4)] font-black"
+                  : "bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-[#0088CC]/20 border-white/10"
               }`}
             >
               {cat}

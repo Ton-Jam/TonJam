@@ -1090,8 +1090,13 @@ const TrackDetail: React.FC = () => {
             </div>
 
             {/* Comments Section */}
-            <div className="pt-4 border-t border-border/50">
-              <CommentsSection targetId={track.id} targetType="track" />
+            <div className="pt-4">
+              <CommentsSection 
+                targetId={track.id} 
+                targetType="track" 
+                itemOwnerAddress={track.artist}
+                creatorAddress={track.artistId}
+              />
             </div>
 
           </div>

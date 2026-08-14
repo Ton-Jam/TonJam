@@ -80,7 +80,8 @@ const HomeScreen: React.FC = () => {
     userProfile, 
     allTracks,
     recentlyPlayed,
-    likedTrackIds
+    likedTrackIds,
+    userNFTs
   } = useAudio();
 
   // 10 mock Collections
@@ -212,6 +213,7 @@ const HomeScreen: React.FC = () => {
         body: JSON.stringify({
           recentlyPlayed: recentlyPlayed || [],
           likedTracks: likedTrackIds || [],
+          purchasedNFTs: userNFTs || [],
           availableTracks: allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS
         })
       });
@@ -232,7 +234,7 @@ const HomeScreen: React.FC = () => {
         if (data.explanation) {
           setRecommendationReason(data.explanation);
         } else {
-          setRecommendationReason("A custom blend of premium audio tracks chosen based on your recent activity on the TON network.");
+          setRecommendationReason("A custom blend of premium audio tracks chosen based on your library and previously purchased NFTs on the TON network.");
         }
       } else {
         throw new Error("Failed recommendation response");
@@ -248,7 +250,7 @@ const HomeScreen: React.FC = () => {
 
   useEffect(() => {
     fetchRecommendations();
-  }, [likedTrackIds?.length, recentlyPlayed?.length, allTracks?.length]);
+  }, [likedTrackIds?.length, recentlyPlayed?.length, userNFTs?.length, allTracks?.length]);
 
   return (
     <div className="space-y-8 select-none">

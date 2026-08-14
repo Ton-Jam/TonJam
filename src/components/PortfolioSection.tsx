@@ -28,11 +28,11 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({ artist, trac
         <div className="flex items-center justify-between">
             <h3 className="text-2xl font-bold tracking-tight">Discography</h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-items-center">
           {tracks.map(track => (
             <TrackCard key={`port-track-${track.id}`} track={track} />
           ))}
-          {tracks.length === 0 && <p className="text-sm text-muted-foreground">No tracks yet.</p>}
+          {tracks.length === 0 && <p className="text-sm text-muted-foreground col-span-full">No tracks yet.</p>}
         </div>
       </section>
 
@@ -41,11 +41,11 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({ artist, trac
         <div className="flex items-center justify-between">
             <h3 className="text-2xl font-bold tracking-tight">Pinned NFT Creations</h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-items-center">
           {nfts.slice(0, 4).map(nft => (
             <NFTCard key={`port-nft-${nft.id}`} nft={nft} />
           ))}
-          {nfts.length === 0 && <p className="text-sm text-muted-foreground">No NFTs created yet.</p>}
+          {nfts.length === 0 && <p className="text-sm text-muted-foreground col-span-full">No NFTs created yet.</p>}
         </div>
       </section>
     </div>

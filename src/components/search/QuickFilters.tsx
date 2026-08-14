@@ -40,11 +40,11 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({
             {isActive && (
               <motion.div
                 layoutId="activeFilterPill"
-                className="absolute inset-0 bg-[#00B4D8] z-0"
+                className="absolute inset-0 bg-[#0088CC] shadow-[0_0_15px_rgba(0,136,204,0.4)] z-0"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
-            <span className={`relative z-10 transition-colors ${isActive ? 'text-[#050A24]' : 'text-slate-400 hover:text-white'}`}>
+            <span className={`relative z-10 transition-colors ${isActive ? 'text-white' : 'text-slate-400 hover:text-white'}`}>
               {filter.label}
             </span>
           </button>
