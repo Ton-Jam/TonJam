@@ -184,9 +184,6 @@ export const TrendingMusicSection: React.FC = () => {
             <Flame className="w-5 h-5 text-amber-400 fill-amber-400/20" />
             Trending Music
           </h2>
-          <p className="text-[11px] text-zinc-400 font-medium mt-0.5">
-            Top popular audio artifacts & top-selling collections on TON Protocol
-          </p>
         </div>
 
         {/* Tab Selector Buttons without border lines */}

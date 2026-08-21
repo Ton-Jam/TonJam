@@ -176,6 +176,7 @@ export const PriceSparkline: React.FC<PriceSparklineProps> = ({ basePrice, histo
               strokeWidth={1}
               fill="url(#sparklineGrad)"
               dot={false}
+              isAnimationActive={false}
               activeDot={{
                 r: 2,
                 stroke: "#ffffff",

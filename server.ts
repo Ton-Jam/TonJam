@@ -136,7 +136,8 @@ async function startServer() {
 
     app.use(cors());
     app.use(cookieParser());
-    app.use(express.json());
+    app.use(express.json({ limit: '50mb' }));
+    app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
     // Socket.io Logic
     io.on('connection', (socket) => {
@@ -152,14 +153,55 @@ async function startServer() {
             console.log(`User ${socket.id} left room ${roomId}`);
         });
 
-        socket.on('send-message', ({ roomId, message, user }) => {
+        socket.on('send-message', (payload: any) => {
+            const { roomId, message, user, type, tipAmount, replyTo, isArtist, isVip, isQuestion, questionId, reaction } = payload || {};
             const chatMessage = {
                 id: Math.random().toString(36).substring(7),
                 text: message,
                 user: user,
+                type: type || 'chat',
+                tipAmount: tipAmount || null,
+                replyTo: replyTo || null,
+                isArtist: !!isArtist,
+                isVip: !!isVip,
+                isQuestion: !!isQuestion,
+                questionId: questionId || null,
+                reaction: reaction || null,
                 timestamp: new Date().toISOString()
             };
             io.to(roomId).emit('new-message', chatMessage);
+        });
+
+        socket.on('send-reaction', ({ roomId, reaction, messageId, user }) => {
+            io.to(roomId).emit('new-reaction', {
+                id: Math.random().toString(36).substring(7),
+                reaction,
+                messageId: messageId || null,
+                user,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        socket.on('pin-message', ({ roomId, message }) => {
+            io.to(roomId).emit('message-pinned', message);
+        });
+
+        socket.on('report-message', (payload: any) => {
+            const { roomId, messageId, reportedUserId, reason, details, reporter } = payload || {};
+            console.log(`[Moderation] Message reported in ${roomId}: ${messageId} for ${reason}`);
+            io.to(roomId).emit('message-reported', {
+                messageId,
+                reportedUserId,
+                reason,
+                details,
+                reporter,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        socket.on('delete-message', ({ roomId, messageId }) => {
+            console.log(`[Moderation] Message deleted in ${roomId}: ${messageId}`);
+            io.to(roomId).emit('message-deleted', { messageId });
         });
 
         socket.on('disconnect', () => {
@@ -364,31 +406,38 @@ async function startServer() {
     app.get('/api/web3-music-trends', async (req, res) => {
         try {
             const isFresh = req.query.fresh === 'true';
-            const cacheKey = isFresh ? undefined : 'web3_music_trends_search';
+            const cacheKey = isFresh ? undefined : 'web3_music_trends_search_v2';
 
             const prompt = `
-                Search the web for the latest daily headlines and trends regarding the TON blockchain and the NFT industry, specifically focusing on Web3 Music, digital collectibles, and blockchain platforms.
-                Based on the search results, curate a list of 5 up-to-date industry headlines.
-                Include realistic timestamps (e.g. from the search results), the reputable source names, and detailed descriptions.
+                Search Google for the latest and most recent breaking news, industry headlines, announcements, and trends regarding Web3 Music, Music NFTs, Decentralized Audio Streaming, TON Blockchain Music, and blockchain platforms for indie musicians.
                 
-                You must return a JSON object with a single key "trends" containing an array of objects matching this schema exactly:
+                Based on real, verified Google Search findings, curate 5 distinct, high-impact news stories and industry trends.
+                Ensure each story includes:
+                1. A compelling, factual news headline.
+                2. A clear source name (e.g., Decrypt, CoinDesk, Billboard, Water & Music, TON Community, etc.).
+                3. A relative publication timeframe (e.g., '2 hours ago', 'Today', 'Yesterday', or '3 days ago').
+                4. A concise 2-sentence summary explaining the development and its significance for artists or collectors.
+                5. A relevant category (e.g., 'NFT', 'TON', 'Streaming', 'Royalty', 'Licensing', 'Community').
+                6. An impact rating ('High', 'Medium', 'Low').
+                
+                You must return a valid JSON object matching this schema:
                 {
                   "trends": [
                     {
-                      "id": "string (sequential unique id)",
-                      "title": "string (engaging headline based on real search data)",
-                      "source": "string (source of the news)",
-                      "timestamp": "string (e.g., '2 hours ago', 'Today')",
-                      "summary": "string (1-2 sentences with details about the trend)",
-                      "category": "string (e.g. 'NFT', 'TON', 'Platform')",
-                      "impact": "string ('High', 'Medium', 'Low')"
+                      "id": "string",
+                      "title": "string",
+                      "source": "string",
+                      "timestamp": "string",
+                      "summary": "string",
+                      "category": "string",
+                      "impact": "string"
                     }
                   ]
                 }
             `;
 
             const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
-                model: "gemini-3.6-flash",
+                model: "gemini-3.7-flash",
                 contents: prompt,
                 config: {
                     tools: [{ googleSearch: {} }],
@@ -399,11 +448,13 @@ async function startServer() {
             if (response.text) {
                 const data = JSON.parse(response.text);
                 if (data && Array.isArray(data.trends)) {
-                    // Extract URLs from grounding metadata
-                    let sources = [];
+                    // Extract URLs from Google Search Grounding metadata
+                    let sources: string[] = [];
                     const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
                     if (chunks) {
-                        sources = chunks.map(chunk => chunk.web?.uri).filter(Boolean);
+                        sources = chunks
+                            .map((chunk: any) => chunk.web?.uri)
+                            .filter(Boolean);
                     }
                     return res.json({ trends: data.trends, groundingSources: sources });
                 }
@@ -411,7 +462,7 @@ async function startServer() {
             throw new Error("Invalid response format from Gemini");
         } catch (error: any) {
             console.log("[Web3Trends Fallback]: Serving static Web3 music trends due to rate limit/quota or offline status.");
-            // Fallback to beautiful static curated blockchain industry headlines
+            // Fallback to high quality static curated blockchain music industry headlines
             const fallbackTrends = [
                 {
                     id: "fb-1",
@@ -424,6 +475,15 @@ async function startServer() {
                 },
                 {
                     id: "fb-2",
+                    title: "TON Ecosystem Expands Telegram Audio Streaming & Micro-Tipping Integrations",
+                    source: "TON Foundation",
+                    timestamp: "7 hours ago",
+                    summary: "Decentralized audio mini-apps on TON report unprecedented daily engagement with instant in-chat NFT collectible drops and creator royalties.",
+                    category: "TON",
+                    impact: "High"
+                },
+                {
+                    id: "fb-3",
                     title: "Gala Music Enhances Streaming Architecture for Real-Time Audits",
                     source: "Water & Music",
                     timestamp: "12 hours ago",
@@ -432,7 +492,7 @@ async function startServer() {
                     impact: "High"
                 },
                 {
-                    id: "fb-3",
+                    id: "fb-4",
                     title: "Audius Proposes Decentralized Licensing Framework for AI Remix Projects",
                     source: "Billboard",
                     timestamp: "1 day ago",
@@ -441,25 +501,16 @@ async function startServer() {
                     impact: "Medium"
                 },
                 {
-                    id: "fb-4",
-                    title: "Catalog Partners with Premium Collectibles for Vinyl-Backed Digital Audio",
-                    source: "TonJam Pulse",
-                    timestamp: "2 days ago",
-                    summary: "Collectors will receive an on-chain digital twin of limited-edition vinyl records, bridging physical pressings with Web3 playback.",
-                    category: "NFT",
-                    impact: "Medium"
-                },
-                {
                     id: "fb-5",
-                    title: "Indie Web3 Collectives Raise Over $2M in On-Chain Streaming Pools",
-                    source: "Cointelegraph",
-                    timestamp: "3 days ago",
-                    summary: "Crowdfunded streaming smart contracts are proving to be a viable alternative to traditional record advance options for emerging artists.",
+                    title: "Indie Web3 Collectives Pool $2.4M in On-Chain Streaming Liquidity Vaults",
+                    source: "CoinDesk",
+                    timestamp: "2 days ago",
+                    summary: "Crowdfunded streaming smart contracts are proving to be a viable alternative to traditional record advance options for emerging independent artists.",
                     category: "Community",
                     impact: "High"
                 }
             ];
-            return res.json({ trends: fallbackTrends });
+            return res.json({ trends: fallbackTrends, groundingSources: [] });
         }
     });
 

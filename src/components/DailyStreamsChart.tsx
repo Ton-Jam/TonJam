@@ -198,6 +198,7 @@ export default function DailyStreamsChart({ tracks }: DailyStreamsChartProps) {
                 fill="url(#cyanPurpleGrad)"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={24}
+                isAnimationActive={false}
               >
                 {chartData.map((entry: any, index: number) => (
                   <CellRC 

@@ -1010,6 +1010,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                       outerRadius={80}
                       paddingAngle={5}
                       dataKey="value"
+                      isAnimationActive={false}
                     >
                       {genreData.map((entry, index) => (
                         <CellRC key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -1035,9 +1036,9 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                     <XAxisRC dataKey="day" stroke="#666" fontSize={10} />
                     <YAxisRC stroke="#666" fontSize={10} />
                     <TooltipRC contentStyle={{ backgroundColor: '#111', border: 'none' }} />
-                    <LineRC type="monotone" dataKey="revenue" data={revenueTrendData.filter(d => !d.projected)} stroke="#3b82f6" strokeWidth={2} dot={false} />
+                    <LineRC type="monotone" dataKey="revenue" data={revenueTrendData.filter(d => !d.projected)} stroke="#3b82f6" strokeWidth={2} dot={false} isAnimationActive={false} />
                     {revenueTimeFrame === 'Daily' && (
-                      <LineRC type="monotone" dataKey="revenue" data={revenueTrendData.filter(d => d.projected)} stroke="#3b82f6" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                      <LineRC type="monotone" dataKey="revenue" data={revenueTrendData.filter(d => d.projected)} stroke="#3b82f6" strokeWidth={2} strokeDasharray="5 5" dot={false} isAnimationActive={false} />
                     )}
                   </LineChartRC>
                 </ResponsiveContainerRC>
@@ -1136,7 +1137,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                     <XAxisRC dataKey="hour" stroke="#666" fontSize={10} />
                     <YAxisRC stroke="#666" fontSize={10} />
                     <TooltipRC contentStyle={{ backgroundColor: '#111', border: 'none' }} />
-                    <BarRC dataKey="streams" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                    <BarRC dataKey="streams" fill="#8b5cf6" radius={[4, 4, 0, 0]} isAnimationActive={false} />
                   </BarChartRC>
                 </ResponsiveContainerRC>
               </div>
@@ -1155,7 +1156,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                     <XAxisRC dataKey="day" stroke="#666" fontSize={10} />
                     <YAxisRC stroke="#666" fontSize={10} />
                     <TooltipRC contentStyle={{ backgroundColor: '#111', border: 'none' }} />
-                    <LineRC type="monotone" dataKey="streams" stroke="#ec4899" strokeWidth={2} />
+                    <LineRC type="monotone" dataKey="streams" stroke="#ec4899" strokeWidth={2} isAnimationActive={false} />
                   </LineChartRC>
                 </ResponsiveContainerRC>
               </div>
@@ -1182,7 +1183,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                   <div className="h-48">
                     <ResponsiveContainerRC width="100%" height="100%">
                       <PieChartRC>
-                          <PieRC data={splits} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} fill="#8884d8">
+                          <PieRC data={splits} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} fill="#8884d8" isAnimationActive={false}>
                               {splits.map((entry, index) => (
                                   <CellRC key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                               ))}
@@ -1416,7 +1417,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                       <XAxisRC dataKey="month" stroke="#666" fontSize={9} tickLine={false} />
                                       <YAxisRC stroke="#666" fontSize={9} tickLine={false} tickFormatter={(val: number) => `${val}T`} />
                                       <TooltipRC contentStyle={{ backgroundColor: '#111', border: '12px', padding: '10px' }} />
-                                      <LineRC type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={3} dot={{ r: 4, stroke: "#10b981", strokeWidth: 2, fill: "#030712" }} activeDot={{ r: 6 }} />
+                                      <LineRC type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={3} dot={{ r: 4, stroke: "#10b981", strokeWidth: 2, fill: "#030712" }} activeDot={{ r: 6 }} isAnimationActive={false} />
                                   </LineChartRC>
                               </ResponsiveContainerRC>
                           )}

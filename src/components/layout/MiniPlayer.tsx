@@ -13,6 +13,7 @@ interface MiniPlayerProps {
   onPlayPause?: () => void;
   onQueueClick?: () => void;
   onExpand?: () => void;
+  onSeek?: (percentage: number) => void;
   progress?: number; // float between 0 and 1
 }
 
@@ -22,10 +23,61 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   onPlayPause,
   onQueueClick,
   onExpand,
+  onSeek,
   progress = 0.35,
 }) => {
   const dragY = useMotionValue(0);
   const opacity = useTransform(dragY, [0, -100], [1, 0]);
+  const [localProgress, setLocalProgress] = useState(progress * 100);
+  const [isScrubbing, setIsScrubbing] = useState(false);
+  const progressBarRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!isScrubbing) {
+      setLocalProgress(progress * 100);
+    }
+  }, [progress, isScrubbing]);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    setIsScrubbing(true);
+    const rect = progressBarRef.current?.getBoundingClientRect();
+    if (rect && rect.width > 0) {
+      const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      setLocalProgress(pct);
+    }
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isScrubbing) {
+      e.stopPropagation();
+      const rect = progressBarRef.current?.getBoundingClientRect();
+      if (rect && rect.width > 0) {
+        const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+        setLocalProgress(pct);
+      }
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isScrubbing) return;
+    e.stopPropagation();
+    setIsScrubbing(false);
+    try {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {}
+    const rect = progressBarRef.current?.getBoundingClientRect();
+    if (rect && rect.width > 0) {
+      const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      setLocalProgress(pct);
+      if (onSeek) onSeek(pct);
+    }
+  };
 
   if (!track) return null;
 
@@ -104,11 +156,22 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       </div>
 
       {/* Embedded Progress Bar */}
-      <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-blue-500 rounded-full transition-all duration-300"
-          style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }}
-        />
+      <div 
+        ref={progressBarRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full h-3 -my-1 flex items-center cursor-pointer group/seek select-none touch-none"
+        title="Click or drag to scrub"
+      >
+        <div className="w-full h-1 group-hover/seek:h-1.5 bg-white/10 rounded-full overflow-hidden transition-all">
+          <div
+            className="h-full bg-blue-500 rounded-full transition-all duration-150"
+            style={{ width: `${Math.min(100, Math.max(0, localProgress))}%` }}
+          />
+        </div>
       </div>
     </motion.div>
   );

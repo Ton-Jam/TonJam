@@ -112,7 +112,7 @@ export function FloorPriceChart({ data, title = "Floor Price History", collectio
               fill="url(#fillPrice)"
               stroke="var(--color-price)"
               strokeWidth={2.5}
-              animationDuration={1000}
+              isAnimationActive={false}
               dot={false}
               activeDot={{ r: 4, strokeWidth: 0, fill: "var(--color-price)" }}
             />

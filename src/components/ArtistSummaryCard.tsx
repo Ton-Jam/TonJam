@@ -53,7 +53,7 @@ export const ArtistSummaryCard: React.FC<ArtistSummaryCardProps> = ({ artist }) 
         <div className="h-[60px] w-full">
             <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data}>
-                    <Area type="monotone" dataKey="followers" stroke="#34d399" fillOpacity={0.3} fill="#34d399" strokeWidth={2} />
+                    <Area type="monotone" dataKey="followers" stroke="#34d399" fillOpacity={0.3} fill="#34d399" strokeWidth={2} isAnimationActive={false} />
                 </AreaChart>
             </ResponsiveContainer>
         </div>

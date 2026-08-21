@@ -407,6 +407,7 @@ export const FanPowerTracker: React.FC<FanPowerTrackerProps> = ({ artist }) => {
                   stroke="#3b82f6"
                   fill="#3b82f6"
                   fillOpacity={0.15}
+                  isAnimationActive={false}
                 />
                 <Tooltip 
                   content={({ payload }) => {
@@ -458,7 +459,7 @@ export const FanPowerTracker: React.FC<FanPowerTrackerProps> = ({ artist }) => {
                     return null;
                   }}
                 />
-                <Bar dataKey="points" radius={[6, 6, 0, 0]}>
+                <Bar dataKey="points" radius={[6, 6, 0, 0]} isAnimationActive={false}>
                   {barData.map((entry, index) => (
                     <circle key={`bar-${index}`} fill={entry.fill} />
                   ))}

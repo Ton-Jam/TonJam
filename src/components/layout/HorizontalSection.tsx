@@ -15,15 +15,12 @@ interface HorizontalSectionProps {
   className?: string;
 }
 
-export const HorizontalSection = ({ title, subtitle, onViewAll, children, className }: HorizontalSectionProps) => {
+export const HorizontalSection = ({ title, onViewAll, children, className }: HorizontalSectionProps) => {
   return (
     <section className={cn("my-[24px]", className)}>
       <div className="px-4 mb-[12px] flex items-end justify-between">
         <div className="flex flex-col">
           <SectionTitle>{title}</SectionTitle>
-          {subtitle && (
-            <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{subtitle}</p>
-          )}
         </div>
         {onViewAll && (
           <button 

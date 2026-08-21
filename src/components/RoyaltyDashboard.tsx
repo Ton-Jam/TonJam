@@ -294,6 +294,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
                 strokeWidth={2}
                 fillOpacity={1} 
                 fill="url(#colorStreaming)" 
+                isAnimationActive={false}
               />
               <AreaRC 
                 type="monotone" 
@@ -303,6 +304,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist, onConfigure
                 strokeWidth={2}
                 fillOpacity={1} 
                 fill="url(#colorNFTs)" 
+                isAnimationActive={false}
               />
             </AreaChartRC>
           </ResponsiveContainerRC>

@@ -162,12 +162,14 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
   return (
     <>
       <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         whileHover={{ 
           y: -6, 
           scale: 1.03,
           boxShadow: "0 0 25px rgba(91, 107, 255, 0.35), 0 0 12px rgba(0, 180, 216, 0.15)"
         }}
-        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         onClick={handleCardClick}
         className={cn(
           "cursor-pointer group relative flex flex-col bg-[#0A113A] rounded-2xl overflow-hidden border border-white/[0.04] hover:border-[#5B6BFF]/50 transition-all duration-300",

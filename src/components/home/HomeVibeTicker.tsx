@@ -10,9 +10,9 @@ const ACTIVITIES = [
   { id: 5, text: 'New Marketplace Collection: "Neon Dreams"', icon: <Zap className="w-3 h-3 text-purple-400" /> },
 ];
 
-export const HomeVibeTicker: React.FC = () => {
+export const HomeVibeTicker: React.FC = React.memo(() => {
   return (
-    <div className="w-full bg-[#0c133a] py-2.5 overflow-hidden flex items-center mb-8">
+    <div className="w-full bg-[#0c133a] py-2.5 overflow-hidden flex items-center mb-6 rounded-xl">
       <div className="shrink-0 px-4 flex items-center gap-2 mr-4">
         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-400 animate-pulse">Live</span>
         <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping" />
@@ -20,9 +20,10 @@ export const HomeVibeTicker: React.FC = () => {
       
       <motion.div 
         className="flex gap-12 whitespace-nowrap"
+        style={{ willChange: 'transform', transform: 'translateZ(0)' }}
         animate={{ x: [0, -1000] }}
         transition={{ 
-          duration: 30, 
+          duration: 35, 
           repeat: Infinity, 
           ease: "linear" 
         }}
@@ -40,4 +41,7 @@ export const HomeVibeTicker: React.FC = () => {
       </motion.div>
     </div>
   );
-};
+});
+
+HomeVibeTicker.displayName = 'HomeVibeTicker';
+

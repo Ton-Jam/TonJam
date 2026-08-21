@@ -50,6 +50,7 @@ export function ArtistAnalyticsChart({ data }: Props) {
               stroke="var(--color-score)"
               fill="var(--color-score)"
               fillOpacity={0.4}
+              isAnimationActive={false}
             />
           </RadarChart>
         </ChartContainer>

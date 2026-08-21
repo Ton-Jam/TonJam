@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { indexedDbService } from '@/services/indexedDbService';
 import { audioCacheService } from '@/services/audioCacheService';
 
@@ -9,9 +9,10 @@ export const useCacheManagement = () => {
   const [totalSize, setTotalSize] = useState<number>(0);
   const [cachedCount, setCachedCount] = useState<number>(0);
   const [isPurging, setIsPurging] = useState<boolean>(false);
+  const isPurgingRef = useRef<boolean>(false);
 
   const checkAndPurgeCache = useCallback(async () => {
-    if (isPurging) return { totalSize, cachedCount };
+    if (isPurgingRef.current) return;
 
     try {
       // 1. Fetch metadata list of all cached audio
@@ -23,6 +24,7 @@ export const useCacheManagement = () => {
 
       // 2. Read limit and check if we are exceeding 500MB
       if (currentTotal > CACHE_LIMIT_BYTES) {
+        isPurgingRef.current = true;
         setIsPurging(true);
         console.info(`Cache limit exceeded. Size: ${(currentTotal / (1024 * 1024)).toFixed(2)}MB / 500MB. Purging oldest tracks...`);
 
@@ -48,6 +50,7 @@ export const useCacheManagement = () => {
         
         setCachedCount(updatedList.length);
         setTotalSize(updatedTotal);
+        isPurgingRef.current = false;
         setIsPurging(false);
 
         console.info(`Purge complete. New Size: ${(updatedTotal / (1024 * 1024)).toFixed(2)}MB. Purged ${purgedIds.length} tracks.`);
@@ -57,12 +60,13 @@ export const useCacheManagement = () => {
       return { totalSize: currentTotal, cachedCount: audioList.length };
     } catch (err) {
       console.error('Error during cache cleanup execution:', err);
+      isPurgingRef.current = false;
       setIsPurging(false);
-      return { totalSize, cachedCount };
     }
-  }, [isPurging, totalSize, cachedCount]);
+  }, []);
 
   const clearAllCache = useCallback(async () => {
+    isPurgingRef.current = true;
     setIsPurging(true);
     try {
       const audioList = await indexedDbService.getAudioMetadataList();
@@ -75,6 +79,7 @@ export const useCacheManagement = () => {
     } catch (err) {
       console.error('Error clearing cache:', err);
     } finally {
+      isPurgingRef.current = false;
       setIsPurging(false);
     }
   }, []);

@@ -45,6 +45,7 @@ export const ClippedAreaChart: React.FC = () => {
             fillOpacity={1} 
             fill="url(#colorValue)" 
             strokeWidth={3}
+            isAnimationActive={false}
           />
         </AreaChart>
       </ResponsiveContainer>

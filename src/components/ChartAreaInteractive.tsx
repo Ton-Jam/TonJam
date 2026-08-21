@@ -252,6 +252,7 @@ export function ChartAreaInteractive() {
               fill="url(#fillMobile)"
               stroke="var(--color-mobile)"
               stackId="a"
+              isAnimationActive={false}
             />
             <Area
               dataKey="desktop"
@@ -259,6 +260,7 @@ export function ChartAreaInteractive() {
               fill="url(#fillDesktop)"
               stroke="var(--color-desktop)"
               stackId="a"
+              isAnimationActive={false}
             />
             {/* @ts-ignore */}
             <ChartLegend content={<ChartLegendContent className="text-muted-foreground/80" />} />

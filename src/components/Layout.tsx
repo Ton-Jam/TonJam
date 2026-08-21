@@ -98,7 +98,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isExplore = location.pathname.startsWith('/explore');
   const isDiscover = location.pathname === '/discover';
   const isSearch = location.pathname === '/search';
-  const isArtistProfile = location.pathname.startsWith('/artist/');
+  const isArtistProfile = location.pathname.startsWith('/artist/') || location.pathname === '/artist';
   const isUserProfile = location.pathname.startsWith('/user/') || location.pathname === '/profile';
   const isPostDetail = location.pathname.startsWith('/post/');
   const isTrendingNFTs = location.pathname === '/trending-nfts';
@@ -222,26 +222,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { scrollY } = useScroll();
   
   useEffect(() => {
-    // Only hide if not on artist profile, or change compact mode based on scroll
-    setIsHeaderHidden(false); // Make visible
-  }, [isArtistProfile]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (isArtistProfile) {
-        setIsCompact(window.scrollY > 200);
-      } else {
-        setIsCompact(false);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isArtistProfile]);
+    setIsHeaderHidden(false);
+    setIsMobileNavHidden(false);
+  }, [location.pathname]);
   const headerOpacity = useTransform(scrollY, [0, 50], [0, 1]);
   const [isMobileNavHidden, setIsMobileNavHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollYRef = useRef(0);
   const [isFabActive, setIsFabActive] = useState(true);
+  const isFabActiveRef = useRef(true);
   const [activeFilterSubMenu, setActiveFilterSubMenu] = useState<string | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
@@ -309,22 +298,35 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   useEffect(() => {
     let fabTimeout: NodeJS.Timeout;
     
-    // Scroll handling to hide bottom navigation on scroll down
+    // Scroll handling to roll up header and hide bottom navigation on scroll down
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const prevScrollY = lastScrollYRef.current;
       
-      if (currentScrollY > lastScrollY && currentScrollY > 40) {
-         setIsMobileNavHidden(true); // Scrolling down
-      } else if (currentScrollY < lastScrollY || currentScrollY <= 20) {
-         setIsMobileNavHidden(false); // Scrolling up or at top
+      if (currentScrollY > prevScrollY && currentScrollY > 40) {
+        setIsHeaderHidden(true); // Roll up header on scroll down
+        setIsMobileNavHidden(true); // Hide bottom nav on scroll down
+      } else if (currentScrollY < prevScrollY || currentScrollY <= 20) {
+        setIsHeaderHidden(false); // Roll down header on scroll up or top
+        setIsMobileNavHidden(false); // Reveal bottom nav on scroll up or top
       }
       
-      setLastScrollY(currentScrollY);
+      if (isArtistProfile) {
+        setIsCompact(currentScrollY > 200);
+      } else {
+        setIsCompact(false);
+      }
       
-      if (!isFabActive) setIsFabActive(true);
+      lastScrollYRef.current = currentScrollY;
+      
+      if (!isFabActiveRef.current) {
+        isFabActiveRef.current = true;
+        setIsFabActive(true);
+      }
       
       clearTimeout(fabTimeout);
       fabTimeout = setTimeout(() => {
+        isFabActiveRef.current = false;
         setIsFabActive(false);
       }, 2000);
     };
@@ -333,6 +335,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     
     // Initial timeout
     fabTimeout = setTimeout(() => {
+      isFabActiveRef.current = false;
       setIsFabActive(false);
     }, 3000);
     
@@ -340,7 +343,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(fabTimeout);
     };
-  }, [lastScrollY, isFabActive, isJamspace]);
+  }, [isArtistProfile]);
 
   const optionsNFT = useMemo(() => {
     if (!optionsTrack || !optionsTrack.isNFT) return null;
@@ -377,15 +380,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </a>
 
       {/* Header */}
-      {!isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isLoginPage && !isDiscover && (
+      {!isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isLoginPage && !isDiscover && !isArtistProfile && (
         <motion.header 
           className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md' : 'bg-transparent'}`}
         >
-          {/* Background with higher blur and subtle silver boundary */}
+          {/* Background with blur and seamless backdrop */}
           <motion.div 
             className={`absolute inset-0 bg-background -z-10 transition-opacity duration-300 ${isArtistProfile && !isCompact ? 'opacity-0' : 'opacity-100'}`}
           />
-          <div className="absolute -bottom-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-zinc-400/20 via-zinc-200/50 to-zinc-400/20" />
           
           <div className={`flex items-center ${headerTitle ? 'justify-center flex-1' : 'gap-4 flex-1'}`}>
             {isHome ? (

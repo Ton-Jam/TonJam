@@ -1,6 +1,6 @@
 import * as React from "react";
 import { PlaylistData } from "../types";
-import { ListMusic, Play, Users, Disc } from "lucide-react";
+import { ListMusic, Play } from "lucide-react";
 import { toast } from "sonner";
 
 interface PlaylistsTabProps {
@@ -9,58 +9,57 @@ interface PlaylistsTabProps {
 
 export const PlaylistsTab: React.FC<PlaylistsTabProps> = ({ playlists }) => {
   const handlePlayPlaylist = (name: string) => {
-    toast.success(`Playing playlist compilation: ${name}`);
+    toast.success(`Playing playlist: ${name}`);
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in" id="playlists-tab-root">
+    <div className="space-y-6 animate-in fade-in" id="spotify-playlists-tab">
       <div className="flex flex-col gap-1">
-        <h3 className="text-xl font-bold tracking-tight text-white">Curated Playlists</h3>
-        <p className="text-xs text-muted-foreground">Compilations crafted by the artist, including cooperative folders open to community tuning.</p>
+        <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white">Playlists</h3>
+        <p className="text-xs text-neutral-400">Curated playlists and guest selections featuring this artist.</p>
       </div>
 
       {playlists.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
           {playlists.map((play) => (
             <div 
               key={play.id}
               onClick={() => handlePlayPlaylist(play.name)}
-              className="bg-neutral-900/25 border border-neutral-900 hover:border-neutral-800 p-4 rounded-[10px] flex items-center gap-4 cursor-pointer group transition-all"
+              className="bg-neutral-900/40 hover:bg-neutral-900/80 p-3.5 rounded-xl space-y-3 cursor-pointer group transition-all"
             >
-              <div className="relative w-16 h-16 rounded-[10px] overflow-hidden bg-neutral-950 shrink-0">
+              <div className="relative aspect-square rounded-lg overflow-hidden bg-neutral-950 shadow-md">
                 <img 
                   src={play.coverUrl} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
-                  alt="" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                  alt={play.name} 
                 />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Play className="w-5 h-5 text-white fill-current" />
+                
+                {/* Floating Spotify Play Button */}
+                <div className="absolute right-2 bottom-2 translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 shadow-2xl">
+                  <button 
+                    className="w-11 h-11 rounded-full bg-[#1DB954] text-black flex items-center justify-center shadow-xl hover:scale-105 transition-transform cursor-pointer"
+                  >
+                    <Play className="w-5 h-5 fill-current ml-0.5" />
+                  </button>
                 </div>
               </div>
 
-              <div className="flex-1 min-w-0 space-y-1">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-bold text-white truncate group-hover:text-cyan-400 transition-colors">{play.name}</h4>
-                </div>
-                <p className="text-xs text-muted-foreground">{play.trackCount} Songs • {(play.plays / 1000).toFixed(0)}K plays</p>
-                <span className={`inline-block text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-[4px] ${
-                  play.type === 'Official' 
-                    ? "bg-cyan-500/10 text-cyan-400" 
-                    : play.type === 'Collaborative' 
-                      ? "bg-purple-500/10 text-purple-400" 
-                      : "bg-neutral-800 text-neutral-300"
-                }`}>
-                  {play.type}
-                </span>
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-white group-hover:text-[#1DB954] transition-colors truncate">
+                  {play.name}
+                </h4>
+                <p className="text-xs text-neutral-400 line-clamp-1">
+                  {play.trackCount} tracks • {(play.plays / 1000).toFixed(0)}K plays
+                </p>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center p-12 border border-dashed border-neutral-800 rounded-[10px] text-center space-y-3">
-          <ListMusic className="w-8 h-8 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center p-16 rounded-2xl bg-neutral-900/30 text-center space-y-3">
+          <ListMusic className="w-8 h-8 text-neutral-500" />
           <h4 className="text-base font-semibold text-white">No Playlists Found</h4>
-          <p className="text-xs text-muted-foreground max-w-xs">This artist hasn't published any official song compilations yet.</p>
+          <p className="text-xs text-neutral-400 max-w-xs">This artist hasn't published playlists yet.</p>
         </div>
       )}
     </div>

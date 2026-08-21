@@ -328,7 +328,7 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
                   <PieRC data={[
                     { name: 'Staked', value: stakedBalance },
                     { name: 'Rewards', value: rewards }
-                  ]} innerRadius={25} outerRadius={40} dataKey="value">
+                  ]} innerRadius={25} outerRadius={40} dataKey="value" isAnimationActive={false}>
                     <CellRC fill="#3b82f6" />
                     <CellRC fill="#f59e0b" />
                   </PieRC>
@@ -347,8 +347,8 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
                     <YAxisRC dataKey="name" type="category" hide />
                     <TooltipRC cursor={{fill: 'transparent'}} />
                     <LegendRC />
-                    <BarRC dataKey="baseYield" stackId="a" fill="#3b82f6" name="Base Yield" />
-                    <BarRC dataKey="communityBonus" stackId="a" fill="#f59e0b" name="Community Bonus" />
+                    <BarRC dataKey="baseYield" stackId="a" fill="#3b82f6" name="Base Yield" isAnimationActive={false} />
+                    <BarRC dataKey="communityBonus" stackId="a" fill="#f59e0b" name="Community Bonus" isAnimationActive={false} />
                  </BarChartRC>
                </ResponsiveContainerRC>
               </div>

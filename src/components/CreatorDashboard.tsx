@@ -673,6 +673,7 @@ export const CreatorDashboard: React.FC = () => {
                   strokeWidth={3}
                   fillOpacity={1} 
                   fill="url(#playsGradient)" 
+                  isAnimationActive={false}
                 />
                 <Area 
                   type="monotone" 
@@ -682,6 +683,7 @@ export const CreatorDashboard: React.FC = () => {
                   strokeWidth={3}
                   fillOpacity={1} 
                   fill="url(#volumeGradient)" 
+                  isAnimationActive={false}
                 />
               </AreaChart>
             </ResponsiveContainer>

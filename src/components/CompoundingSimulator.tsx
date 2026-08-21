@@ -228,7 +228,7 @@ const CompoundingSimulator: React.FC<CompoundingSimulatorProps> = ({ currentVali
                     labelStyle={{ color: '#a1a1aa' }}
                     itemStyle={{ color: '#3b82f6' }}
                   />
-                  <AreaRC type="monotone" dataKey="Total" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorTotal)" />
+                  <AreaRC type="monotone" dataKey="Total" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorTotal)" isAnimationActive={false} />
                 </AreaChartRC>
               </ResponsiveContainerRC>
             </div>

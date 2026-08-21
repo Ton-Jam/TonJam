@@ -92,6 +92,7 @@ const StorageManagementModal: React.FC<StorageManagementModalProps> = ({ isOpen,
                 outerRadius={80}
                 paddingAngle={5}
                 dataKey="value"
+                isAnimationActive={false}
               >
                 {data.map((entry, index) => (
                   <CellRC key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

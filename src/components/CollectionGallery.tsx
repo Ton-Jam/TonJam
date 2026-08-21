@@ -288,14 +288,11 @@ export const CollectionGallery: React.FC<CollectionGalleryProps> = ({
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
             {title}
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5 max-w-2xl">
-            {subtitle}
-          </p>
         </div>
 
         <button
           onClick={() => navigate('/collections')}
-          className="self-start md:self-end inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer border border-white/5"
+          className="self-start md:self-end inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer"
         >
           <Disc className="w-3.5 h-3.5 text-cyan-400" />
           <span>Browse All Collections</span>

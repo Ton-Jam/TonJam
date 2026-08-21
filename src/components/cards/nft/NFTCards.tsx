@@ -76,6 +76,9 @@ export const NFTCard: React.FC<{
 
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}

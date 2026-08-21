@@ -258,6 +258,7 @@ export const TrendingNFTVolumeChart: React.FC = () => {
                   strokeWidth={3} 
                   fillOpacity={1} 
                   fill="url(#volumeGradient)" 
+                  isAnimationActive={false}
                 />
               </AreaChart>
             </ResponsiveContainer>

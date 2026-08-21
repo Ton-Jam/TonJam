@@ -56,6 +56,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudio } from '@/contexts/AudioContext';
 import { toast } from 'sonner';
+import LivestreamChat from '@/components/LivestreamChat';
 
 // Floating Reaction Emoji interface
 interface FloatingReaction {
@@ -1339,79 +1340,33 @@ export const SpaceRoom: React.FC = () => {
           activeTab === 'chat' || activeTab === 'listeners' ? 'block' : 'hidden lg:block'
         }`}>
           
-          {/* LIVE CHAT WINDOW */}
-          <div className="bg-[#090F2E] border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col h-[520px] shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/5">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-blue-400" />
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-200">
-                  Live Stream Chat
-                </h3>
-              </div>
-              <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-wider flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Connected
-              </span>
-            </div>
-
-            {/* Messages Scroll View */}
-            <div className="flex-1 overflow-y-auto space-y-3 py-3 pr-1 scrollbar-none">
-              {chatMessages.map((msg) => {
-                if (msg.isSystem) {
-                  return (
-                    <div
-                      key={msg.id}
-                      className={`p-2.5 rounded-xl text-center text-xs font-medium border ${
-                        msg.isTip
-                          ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 font-bold'
-                          : 'bg-white/5 border-white/5 text-slate-400'
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
-                  );
-                }
-
-                return (
-                  <div key={msg.id} className="flex gap-2.5 items-start">
-                    <img
-                      src={msg.userAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=User'}
-                      alt={msg.userName}
-                      className="w-7 h-7 rounded-full object-cover shrink-0 mt-0.5 border border-white/10"
-                    />
-                    <div className="min-w-0 flex-1 bg-white/[0.03] p-2.5 rounded-xl border border-white/5 space-y-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-black text-blue-400 truncate">{msg.userName}</span>
-                        <span className="text-[8px] font-mono text-slate-500">{msg.timestamp}</span>
-                      </div>
-                      <p className="text-xs text-slate-200 leading-snug break-words">{msg.text}</p>
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={chatBottomRef} />
-            </div>
-
-            {/* Chat Input Box */}
-            <form onSubmit={handleSendChatMessage} className="pt-3 border-t border-white/5 flex gap-2">
-              <input
-                type="text"
-                placeholder="Say something in room..."
-                value={newChatMessage}
-                onChange={(e) => setNewChatMessage(e.target.value)}
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-              />
-              <button
-                type="submit"
-                className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all cursor-pointer flex items-center justify-center"
-              >
-                <Send className="w-3.5 h-3.5" />
-              </button>
-            </form>
+          {/* REAL-TIME LIVESTREAM CHAT */}
+          <div className="h-[520px] rounded-2xl overflow-hidden shadow-2xl">
+            <LivestreamChat
+              roomId={id || 'genesis-live-room'}
+              roomTitle={roomData.title}
+              hostName={roomData.host.name}
+              hostId={roomData.host.id}
+              currentUser={{
+                uid: userProfile?.uid,
+                name: userProfile?.name,
+                username: userProfile?.username,
+                avatar: userProfile?.avatar,
+                isArtist: userProfile?.role === 'artist' || userProfile?.name === roomData.host.name,
+                isVip: true
+              }}
+              onOpenTipModal={(amount) => {
+                if (amount) setCustomTipAmount(amount.toString());
+                setShowTipModal(true);
+              }}
+              onOpenNFTDropModal={() => {
+                toast.info('NFT Drop Launchpad opened for this live session');
+              }}
+            />
           </div>
 
           {/* QUICK SOUNDBOARD / DJ EFFECTS */}
-          <div className="bg-[#090F2E]/60 border border-white/5 rounded-2xl p-4 space-y-3">
+          <div className="bg-[#090F2E]/60 rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-amber-400" />
               <h3 className="text-xs font-black uppercase tracking-widest text-slate-300">
@@ -1429,7 +1384,7 @@ export const SpaceRoom: React.FC = () => {
                 <button
                   key={fx.name}
                   onClick={() => handlePlaySoundboardEffect(fx.name)}
-                  className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2 transition-all cursor-pointer hover:scale-102"
+                  className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2 transition-all cursor-pointer hover:scale-102"
                 >
                   <span className="text-base">{fx.emoji}</span>
                   <span>{fx.name}</span>

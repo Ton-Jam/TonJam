@@ -5,6 +5,7 @@ import {
   Search, 
   X, 
   Play, 
+  Pause,
   TrendingUp, 
   Heart, 
   BadgeCheck, 
@@ -72,6 +73,10 @@ export const Discover: React.FC = () => {
     artists = [],
     firestoreUsers = [],
     playlists: allUserPlaylists = [],
+    recentlyPlayed = [],
+    clearRecentlyPlayed,
+    currentTrack,
+    isPlaying,
     playTrack,
     playAll,
     followedUserIds = [],
@@ -116,6 +121,14 @@ export const Discover: React.FC = () => {
         }
       })();
 
+      const lightweightTracks = allTracks.map((t) => ({
+        id: t.id,
+        title: t.title,
+        artist: t.artist,
+        genre: t.genre,
+        tags: (t as any).tags || []
+      }));
+
       const response = await fetch('/api/gemini/discover-feed', {
         method: 'POST',
         headers: {
@@ -126,15 +139,42 @@ export const Discover: React.FC = () => {
             libraryTracks: localTracks,
             likedNfts: localNfts
           },
-          availableTracks: allTracks
+          availableTracks: lightweightTracks
         })
       });
 
-      if (!response.ok) throw new Error('Failed to generate AI feed');
-      const data = await response.json();
-      setAiFeed(data);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && Array.isArray(data.recommendations) && data.recommendations.length > 0) {
+          setAiFeed(data);
+          return;
+        }
+      }
+      throw new Error('AI feed returned empty or invalid response');
     } catch (err) {
-      console.error('[AI Feed Error]:', err);
+      // Graceful local heuristic fallback
+      const favoriteGenres = new Set<string>();
+      try {
+        const val = localStorage.getItem('tonjam_library_tracks');
+        if (val) {
+          const parsed = JSON.parse(val);
+          parsed.forEach((t: any) => { if (t.genre) favoriteGenres.add(t.genre.toLowerCase()); });
+        }
+      } catch {}
+
+      const recs = allTracks
+        .slice(0, 5)
+        .map((t, idx) => ({
+          trackId: t.id,
+          reason: favoriteGenres.has((t.genre || '').toLowerCase())
+            ? `Matched with your taste in ${t.genre || 'Web3 soundscapes'}.`
+            : `Trending standout track curated by the TonJam Oracle.`
+        }));
+
+      setAiFeed({
+        discoveryTheme: "On-Chain Resonance Mix",
+        recommendations: recs
+      });
     } finally {
       setIsLoadingAi(false);
     }
@@ -255,6 +295,11 @@ export const Discover: React.FC = () => {
   const recommendedTracks = useMemo(() => {
     return allTracks.slice(0, 6);
   }, [allTracks]);
+
+  // Last 5 recently played tracks from AudioProvider state
+  const last5RecentlyPlayed = useMemo(() => {
+    return recentlyPlayed.slice(0, 5);
+  }, [recentlyPlayed]);
 
   // AI-Powered Discovery Mapped Tracks
   const recommendedTracksWithAi = useMemo(() => {
@@ -408,7 +453,102 @@ export const Discover: React.FC = () => {
               </section>
             )}
 
-            {/* 2. Browse All Categories (Spotify Famous Colored Tile Grid) */}
+            {/* 2. Recently Played Section (Last 5 tracks from AudioProvider listening history) */}
+            {last5RecentlyPlayed.length > 0 && (
+              <section className="space-y-4" id="recently-played-feed-section">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-[#00B4D8]" />
+                      <h3 className="text-lg font-bold text-white tracking-tight">Recently Played</h3>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {typeof clearRecentlyPlayed === 'function' && (
+                      <button
+                        onClick={clearRecentlyPlayed}
+                        className="text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                        title="Clear recent playback history"
+                      >
+                        Clear
+                      </button>
+                    )}
+                    <button
+                      onClick={() => navigate('/library')}
+                      className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      Library <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4 sm:mx-0 sm:px-0 scroll-smooth">
+                  {last5RecentlyPlayed.map((track) => {
+                    const isCurrentPlaying = currentTrack?.id === track.id && isPlaying;
+                    const isLiked = likedTrackIds.includes(track.id);
+
+                    return (
+                      <motion.div
+                        key={`recent-played-${track.id}`}
+                        whileHover={{ y: -4 }}
+                        onClick={() => playTrack(track)}
+                        className="w-[160px] shrink-0 bg-[#0c143d] rounded-[14px] p-3 flex flex-col justify-between cursor-pointer group transition-all"
+                      >
+                        <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950 mb-3">
+                          <img
+                            src={track.coverUrl || getPlaceholderImage(track.title)}
+                            alt={track.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-all ${
+                            isCurrentPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                          }`}>
+                            <div className="w-10 h-10 rounded-full bg-[#00B4D8] text-black flex items-center justify-center pl-0.5 shadow-xl transform scale-90 group-hover:scale-100 transition-all">
+                              {isCurrentPlaying ? (
+                                <Pause className="w-5 h-5 fill-current" />
+                              ) : (
+                                <Play className="w-5 h-5 fill-current" />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Sound wave / live indicator when active */}
+                          {isCurrentPlaying && (
+                            <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-[#00B4D8]/90 text-black text-[9px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md">
+                              <span className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
+                              Playing
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between gap-1">
+                            <h4 className="text-xs font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors flex-1">
+                              {track.title}
+                            </h4>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleLikeTrack(track.id);
+                              }}
+                              className={`p-0.5 transition-colors shrink-0 ${
+                                isLiked ? 'text-rose-500' : 'text-slate-500 hover:text-white opacity-0 group-hover:opacity-100'
+                              }`}
+                              title={isLiked ? "Unlike" : "Like"}
+                            >
+                              <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
+                            </button>
+                          </div>
+                          <p className="text-[10px] text-slate-400 truncate">{track.artist}</p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* 3. Browse All Categories (Spotify Famous Colored Tile Grid) */}
             <section className="space-y-4">
               <h3 className="text-lg font-bold text-white tracking-tight">Browse All</h3>
 
@@ -442,7 +582,6 @@ export const Discover: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-bold text-white tracking-tight">Recommended for You</h3>
-                    <p className="text-xs text-slate-400">Based on your listening activity & top genres</p>
                   </div>
                   <button
                     onClick={() => navigate('/explore/tracks?title=Recommended+for+You&filter=recommended')}
@@ -494,12 +633,6 @@ export const Discover: React.FC = () => {
                       <Sparkles className="w-5 h-5 text-[#00B4D8]" />
                       <h3 className="text-lg font-bold text-white tracking-tight">AI Discovery</h3>
                     </div>
-                    {aiFeed?.discoveryTheme && (
-                      <p className="text-xs text-[#00B4D8] font-bold mt-1">
-                        Oracle Vibe: <span className="uppercase tracking-wider">{aiFeed.discoveryTheme}</span>
-                      </p>
-                    )}
-                    <p className="text-xs text-slate-400 mt-0.5">Synthesized from your unique library and collected NFTs</p>
                   </div>
                   
                   <button

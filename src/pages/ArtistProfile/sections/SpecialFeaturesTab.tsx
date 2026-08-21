@@ -52,7 +52,7 @@ export const SpecialFeaturesTab: React.FC<SpecialFeaturesTabProps> = ({
     <div className="space-y-12 animate-in fade-in" id="special-features-tab-root">
       
       {/* Support & Tip Preset Box */}
-      <section className="bg-gradient-to-r from-neutral-900 to-neutral-950 p-6 rounded-[10px] border border-neutral-800 space-y-6">
+      <section className="bg-gradient-to-r from-neutral-900 to-neutral-950 p-6 rounded-[14px] shadow-lg space-y-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-cyan-400">
             <Zap className="w-4 h-4 fill-current text-cyan-400" />
@@ -69,10 +69,10 @@ export const SpecialFeaturesTab: React.FC<SpecialFeaturesTabProps> = ({
                 key={val}
                 onClick={() => handleSupportPreset(val)}
                 className={cn(
-                  "px-4 py-2 text-xs font-bold rounded-[10px] transition-colors border",
+                  "px-4 py-2 text-xs font-bold rounded-[10px] transition-colors border-none",
                   supportAmount === val 
-                    ? "bg-cyan-500 text-black border-cyan-500" 
-                    : "bg-neutral-950 text-white border-neutral-800 hover:border-neutral-700"
+                    ? "bg-cyan-500 text-black shadow-md" 
+                    : "bg-white/[0.06] text-white hover:bg-white/[0.12]"
                 )}
               >
                 {val} TJ
@@ -87,7 +87,7 @@ export const SpecialFeaturesTab: React.FC<SpecialFeaturesTabProps> = ({
               placeholder="Custom"
               value={supportAmount}
               onChange={(e) => onSupportAmountChange(e.target.value)}
-              className="flex-1 bg-neutral-950 border border-neutral-800 rounded-[10px] px-3 text-xs text-white focus:outline-none focus:border-cyan-500"
+              className="flex-1 bg-neutral-950/80 border-none rounded-[10px] px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
             />
             
             <button 
@@ -108,7 +108,7 @@ export const SpecialFeaturesTab: React.FC<SpecialFeaturesTabProps> = ({
           <h3 className="text-sm font-bold uppercase tracking-widest text-[11px] text-muted-foreground">NFT Royalty Splits Dashboard</h3>
         </div>
 
-        <div className="bg-neutral-900/20 p-5 rounded-[10px] border border-neutral-900 space-y-4">
+        <div className="bg-white/[0.03] p-5 rounded-[14px] shadow-md space-y-4">
           <div className="flex items-center justify-between text-xs">
             <span className="text-white font-bold">Smart Contract Address:</span>
             <span className="font-mono text-muted-foreground text-[10px] select-all truncate max-w-[200px]">
@@ -147,7 +147,7 @@ export const SpecialFeaturesTab: React.FC<SpecialFeaturesTabProps> = ({
           <h3 className="text-sm font-bold uppercase tracking-widest text-[11px] text-muted-foreground">Community Fan Leaderboard</h3>
         </div>
 
-        <div className="bg-neutral-900/10 border border-neutral-900 rounded-[10px] divide-y divide-neutral-900">
+        <div className="bg-white/[0.03] rounded-[14px] shadow-md divide-y divide-white/[0.04] overflow-hidden">
           {topSupporters.map((sup, index) => (
             <div key={sup.id} className="flex items-center justify-between p-4">
               <div className="flex items-center gap-3">
@@ -194,7 +194,7 @@ export const SpecialFeaturesTab: React.FC<SpecialFeaturesTabProps> = ({
           {missionsState.map((mis) => (
             <div 
               key={mis.id}
-              className="bg-neutral-900/20 border border-neutral-900 rounded-[10px] p-4 flex flex-col justify-between space-y-4"
+              className="bg-white/[0.03] rounded-[14px] shadow-md p-4 flex flex-col justify-between space-y-4"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">

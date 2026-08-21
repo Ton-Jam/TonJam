@@ -68,6 +68,7 @@ export const TopTrendingNFTsWidget: React.FC = () => {
               <Bar 
                 dataKey="volume" 
                 radius={[4, 4, 0, 0]}
+                isAnimationActive={false}
               >
                 {chartData.map((entry, index) => (
                   <Cell 

@@ -96,6 +96,9 @@ export const TrackCard: React.FC<TrackCardProps> = ({
 
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       whileHover={{ scale: 1.01, backgroundColor: '#101A3B' }}
       whileTap={{ scale: 0.98 }}
       className={`flex items-center p-3 rounded-[10px] bg-[#0A113A] transition-colors cursor-pointer w-full group relative select-none ${className}`}

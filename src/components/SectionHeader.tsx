@@ -11,9 +11,9 @@ interface SectionHeaderProps {
   className?: string;
 }
 
-const SectionHeader: React.FC<SectionHeaderProps> = ({ title, subtitle, viewAllLink, onAction, actionLabel, className = "" }) => {
+const SectionHeader: React.FC<SectionHeaderProps> = ({ title, viewAllLink, onAction, actionLabel, className = "" }) => {
   return (
-    <div className={`flex items-end justify-between mb-4 sm:mb-10 pb-3 sm:pb-4 relative ${className}`}>
+    <div className={`flex items-end justify-between mb-4 sm:mb-8 pb-2 relative ${className}`}>
       <div className="space-y-2">
         <div className="flex items-center gap-3">
           <div className="flex gap-1">
@@ -23,7 +23,6 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ title, subtitle, viewAllL
           </div>
         </div>
         <h2 className="text-base sm:text-xl font-black uppercase tracking-tight text-foreground leading-none truncate font-display">{title}</h2>
-        {subtitle && <p className="text-[10px] font-bold text-muted-foreground dark:text-white/85 uppercase tracking-[0.2em] max-w-md mt-1.5">{subtitle}</p>}
       </div>
       
       <div className="flex items-center gap-4">

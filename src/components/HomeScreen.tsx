@@ -26,6 +26,7 @@ import MarketplaceCard from "./MarketplaceCard";
 import TopicPill from "./TopicPill";
 import CommunityFeedCard from "./CommunityFeedCard";
 import LatestMarketActivity from "./LatestMarketActivity";
+import TrendingTracks from "./TrendingTracks";
 
 // Detailed interface for collections & listings 
 interface NFTCollection {
@@ -115,17 +116,28 @@ const HomeScreen: React.FC = () => {
     return repeated.slice(0, 12);
   }, [allTracks]);
 
-  const topTrendingSongs = useMemo(() => {
-    return (allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(0, 5);
-  }, [allTracks]);
+
+
+  const genres = [
+    "All",
+    "Afrobeats",
+    "Hip-Hop",
+    "Electronic",
+    "R&B",
+    "Pop",
+    "Amapiano",
+    "Reggae",
+    "Dancehall"
+  ];
+  const [selectedGenre, setSelectedGenre] = useState<string>("All");
 
   const trendingArtists = [
-    { id: "art-1", name: "DJ Krupy", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=krupy", followers: "142.5k", verified: true, followed: true },
-    { id: "art-2", name: "Byte Beat", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=byte", followers: "84.2k", verified: true, followed: false },
-    { id: "art-3", name: "Echo Phase", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=echo", followers: "13.9k", verified: false, followed: false },
-    { id: "art-4", name: "Luna Ray", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=luna", followers: "92.0k", verified: true, followed: true },
-    { id: "art-5", name: "City Ghost", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=ghost", followers: "128.1k", verified: true, followed: false },
-    { id: "art-10", name: "Cosmic Key", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=key", followers: "1.9k", verified: false, followed: false }
+    { id: "art-1", name: "DJ Krupy", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=krupy", followers: "142.5k", verified: true, isVerified: true, followed: true },
+    { id: "art-2", name: "Drakee", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=drake", followers: "1.2M", verified: true, isVerified: true, followed: false },
+    { id: "art-3", name: "Ayra Starr", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=ayra", followers: "840k", verified: true, isVerified: true, followed: false },
+    { id: "art-4", name: "Wizkiid", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=wizkid", followers: "2.1M", verified: true, isVerified: true, followed: true },
+    { id: "art-5", name: "Jayzzz", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=jayz", followers: "3.4M", verified: true, isVerified: true, followed: false },
+    { id: "art-6", name: "Luna Ray", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=luna", followers: "92.0k", verified: true, isVerified: true, followed: true }
   ];
 
   const [artistFollowStates, setArtistFollowStates] = useState<Record<string, boolean>>({
@@ -280,6 +292,33 @@ const HomeScreen: React.FC = () => {
         />
       </div>
 
+      {/* GENRE FILTER */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+        {genres.map((genre) => (
+          <TopicPill
+            key={genre}
+            label={genre}
+            isActive={selectedGenre === genre}
+            onClick={() => setSelectedGenre(genre)}
+          />
+        ))}
+      </div>
+
+      {/* TRENDING SPACE TOPICS TICKER */}
+      <div className="bg-[#0A113A]/50 px-3.5 py-2.5 rounded-2xl flex items-center gap-2.5 overflow-hidden">
+        <div className="flex items-center gap-1 shrink-0 text-[#00B4D8] text-[10px] font-black uppercase tracking-wider">
+          <Sparkles className="w-3 h-3" />
+          <span>Space:</span>
+        </div>
+        <div className="text-[11px] font-semibold text-slate-300 truncate flex items-center gap-3 overflow-x-auto no-scrollbar">
+          <span>🔥 Wizkiid just minted a new exclusive NFT!</span>
+          <span className="text-white/20">•</span>
+          <span>🚀 Drakee hits 1M streams!</span>
+          <span className="text-white/20">•</span>
+          <span>💎 Ayra drops her latest Jam!</span>
+        </div>
+      </div>
+
       {/* SECTION 12: TRENDING TOPICS */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
         {trendingTopics.map(topic => (
@@ -397,34 +436,8 @@ const HomeScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* SECTION 5: TOP TRENDING SONGS */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-black text-white">Top Trending Songs</h2>
-        <div className="rounded-2xl bg-[#0A113A]/50 p-2 space-y-1.5">
-          {topTrendingSongs.map((track, idx) => (
-            <div
-              key={track.id}
-              onClick={() => playTrack(track)}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#101A3B]/60 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-3.5 min-w-0">
-                <span className="w-5 font-mono font-black text-base text-[#00B4D8]">#{idx + 1}</span>
-                <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-white/10">
-                  <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-xs font-extrabold text-white truncate">{track.title}</h4>
-                  <p className="text-[10px] text-[#9AA0AE] truncate">{track.artist}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Volume2 className="w-3.5 h-3.5 text-[#2BE08C]" />
-                <span className="text-[10px] font-mono text-[#9AA0AE]">{(45 - idx * 5)}k plays</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* SECTION 5: TRENDING TRACKS */}
+      <TrendingTracks />
 
       {/* SECTION 6: TRENDING ARTISTS */}
       <div className="space-y-3">
@@ -440,8 +453,11 @@ const HomeScreen: React.FC = () => {
                 <div className="w-14 h-14 rounded-full bg-[#050A24] flex items-center justify-center overflow-hidden">
                   <img src={art.avatar} alt="" className="w-12 h-12" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-black text-white truncate max-w-[90px]">{art.name}</h4>
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center gap-1">
+                    <h4 className="text-xs font-black text-white truncate max-w-[90px]">{art.name}</h4>
+                    {(art.verified || art.isVerified) && <CheckCircle className="w-3 h-3 text-blue-400 fill-current" />}
+                  </div>
                   <span className="text-[9px] text-[#9AA0AE]">{art.followers} fans</span>
                 </div>
                 <button
@@ -515,11 +531,14 @@ const HomeScreen: React.FC = () => {
             [1, 2, 3, 4].map(i => (
               <div
                 key={i}
-                className="w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/30 p-3 flex flex-col justify-between space-y-2.5 animate-pulse"
+                className="relative overflow-hidden w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/30 p-3 flex flex-col justify-between space-y-2.5"
               >
-                <div className="relative aspect-square rounded-xl bg-white/5 overflow-hidden" />
-                <div className="h-3 bg-white/10 rounded w-3/4" />
-                <div className="h-6 bg-white/5 rounded-xl w-full" />
+                <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+                <div className="relative">
+                  <div className="relative aspect-square rounded-xl bg-white/5 overflow-hidden mb-2.5" />
+                  <div className="h-3 bg-white/10 rounded w-3/4 mb-2.5" />
+                  <div className="h-6 bg-white/5 rounded-xl w-full" />
+                </div>
               </div>
             ))
           ) : (

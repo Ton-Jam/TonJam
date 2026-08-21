@@ -18,12 +18,14 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
 
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       whileHover={{ 
         y: -4, 
         scale: 1.01,
         boxShadow: "0 0 20px rgba(59, 130, 246, 0.2)"
       }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       onClick={() => navigate(`/nft/${nft.id}`)}
       className="flex items-center gap-2 p-2 rounded-[4px] border border-transparent hover:border-blue-500/40 hover:bg-muted/50 transition-all duration-300 cursor-pointer group w-full"
     >

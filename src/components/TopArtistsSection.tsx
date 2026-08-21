@@ -261,15 +261,12 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
               {title}
             </h2>
             {isLiveSynced && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-widest">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                 Live Sync
               </span>
             )}
           </div>
-          <p className="text-caption text-text-muted hidden sm:block truncate max-w-lg">
-            {subtitle}
-          </p>
         </div>
 
         {/* Filter Pills & Navigation Actions */}

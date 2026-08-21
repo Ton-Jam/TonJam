@@ -312,6 +312,7 @@ export const UserProfileDashboard: React.FC = () => {
                 strokeWidth={2}
                 fillOpacity={1} 
                 fill="url(#colorGas)" 
+                isAnimationActive={false}
               />
               <Area 
                 type="monotone" 
@@ -320,6 +321,7 @@ export const UserProfileDashboard: React.FC = () => {
                 strokeWidth={2}
                 fillOpacity={1} 
                 fill="url(#colorPoints)" 
+                isAnimationActive={false}
               />
             </AreaChart>
           </ResponsiveContainer>

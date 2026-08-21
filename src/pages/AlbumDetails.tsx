@@ -87,12 +87,13 @@ const AlbumDetails = () => {
   }, [id]);
 
   useEffect(() => {
+    let currentTitle = '';
     const handleScroll = () => {
       const scrollThreshold = 300;
-      if (window.scrollY > scrollThreshold) {
-        setHeaderTitle(album.title);
-      } else {
-        setHeaderTitle('');
+      const nextTitle = window.scrollY > scrollThreshold ? album.title : '';
+      if (nextTitle !== currentTitle) {
+        currentTitle = nextTitle;
+        setHeaderTitle(nextTitle);
       }
     };
 

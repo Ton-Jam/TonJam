@@ -601,7 +601,7 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#050A24] border border-white/5 rounded-[24px] p-6 max-w-xs w-full text-center relative text-white"
+              className="bg-[#050A24] rounded-[24px] p-6 max-w-xs w-full text-center relative text-white shadow-2xl"
             >
               <button 
                 onClick={() => setShowQRCode(false)}
@@ -615,7 +615,7 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
               </h3>
               
               <div className="w-48 h-48 bg-white p-3 rounded-2xl mx-auto flex items-center justify-center">
-                <div className="w-full h-full border-[6px] border-[#050A24] bg-white flex flex-col items-center justify-center relative">
+                <div className="w-full h-full bg-white flex flex-col items-center justify-center relative rounded-xl">
                   <QrCode className="w-36 h-36 text-[#050A24]" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-10 h-10 bg-[#0052FF] text-white flex items-center justify-center rounded-lg font-bold text-xs shadow-md">

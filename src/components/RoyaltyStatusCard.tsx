@@ -633,6 +633,7 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
                 fillOpacity={1} 
                 fill="url(#dailyGramsGrad)" 
                 name="Daily Earnings"
+                isAnimationActive={false}
               />
               <Area 
                 type="monotone" 
@@ -643,6 +644,7 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
                 fillOpacity={1} 
                 fill="url(#cumGramsGrad)" 
                 name="Cumulative Total"
+                isAnimationActive={false}
               />
             </AreaChart>
           </ResponsiveContainer>

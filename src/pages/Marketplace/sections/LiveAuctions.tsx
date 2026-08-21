@@ -37,9 +37,6 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
             <Zap className="w-5 h-5 text-[#FF3A5C] fill-current animate-pulse" />
             Live Auctions
           </h2>
-          <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-            Active real-time bidding on premium audio assets
-          </p>
         </div>
       </div>
 

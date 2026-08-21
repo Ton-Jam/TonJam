@@ -280,6 +280,7 @@ export const FloorPriceHistoryTracker: React.FC<FloorPriceHistoryTrackerProps> =
                   strokeWidth={2.5}
                   fillOpacity={1} 
                   fill="url(#floorPriceColor)" 
+                  isAnimationActive={false}
                 />
               </AreaChart>
             </ResponsiveContainer>

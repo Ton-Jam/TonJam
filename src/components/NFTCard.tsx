@@ -14,6 +14,7 @@ import { PriceSparkline } from './PriceSparkline';
 import SendNFTModal from './SendNFTModal';
 import SellNFTModal from './SellNFTModal';
 import SkeletonCard from './SkeletonCard';
+import ConfirmationModal from './ConfirmationModal';
 import NFTOptionsModal from './NFTOptionsModal';
 import ManageNFTModal from './ManageNFTModal';
 import BidModal from './BidModal';
@@ -98,6 +99,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const [isAddToFolderModalOpen, setIsAddToFolderModalOpen] = useState(false);
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isConfirmPurchaseOpen, setIsConfirmPurchaseOpen] = useState(false);
 
   const [isHovered, setIsHovered] = useState(false);
   const [isEndingSoon, setIsEndingSoon] = useState(false);
@@ -297,7 +299,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     navigate(`/nft/${nft.id}`);
   };
 
-  const handleActionClick = async (e: React.MouseEvent) => {
+  const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isOwner) {
       if (nft.listingType) {
@@ -308,30 +310,36 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     } else if (nft.listingType === 'auction') {
       setIsBidModalOpen(true);
     } else if (!isAuctionEnded) {
-      // BUY / COLLECT flow
+      // BUY / COLLECT flow - trigger confirmation modal first to prevent accidental purchase
       if (!tonConnectUI.connected) {
         addNotification('Please connect your wallet first', 'error');
+        tonConnectUI.openModal();
         return;
       }
-      try {
-        setIsPurchasing(true);
-        addNotification('Initiating purchase...', 'info');
-        
-        await buyNFT(
-          tonConnectUI,
-          nft.owner,
-          nft.price,
-          nft.title,
-          nft.royaltySplits || []
-        );
-        
-        addNotification('Purchase successful!', 'success');
-      } catch (err) {
-        console.error('Purchase failed', err);
-        addNotification('Purchase failed or rejected', 'error');
-      } finally {
-        setIsPurchasing(false);
-      }
+      setIsConfirmPurchaseOpen(true);
+    }
+  };
+
+  const executeDirectPurchase = async () => {
+    setIsConfirmPurchaseOpen(false);
+    try {
+      setIsPurchasing(true);
+      addNotification('Initiating purchase...', 'info');
+      
+      await buyNFT(
+        tonConnectUI,
+        nft.owner,
+        nft.price,
+        nft.title,
+        nft.royaltySplits || []
+      );
+      
+      addNotification('Purchase successful!', 'success');
+    } catch (err) {
+      console.error('Purchase failed', err);
+      addNotification('Purchase failed or rejected', 'error');
+    } finally {
+      setIsPurchasing(false);
     }
   };
 
@@ -513,13 +521,15 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         <ContextMenuTrigger>
         <motion.div 
           layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           whileHover={{ 
             y: -6, 
             scale: 1.03, 
             boxShadow: "0 0 25px 2px rgba(91, 107, 255, 0.25), 0 0 10px rgba(0, 180, 216, 0.15)" 
           }}
           whileTap={{ scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className={`group flex items-center gap-4 p-3 rounded-[4px] bg-muted/10 border border-transparent hover:border-blue-500/40 hover:bg-muted/20 transition-all duration-300 cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${className}`}
           onClick={handleCardClick}
           onKeyDown={(e) => {
@@ -973,6 +983,23 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           onClose={() => setIsBidModalOpen(false)}
         />
       )}
+
+      <ConfirmationModal
+        isOpen={isConfirmPurchaseOpen}
+        onClose={() => setIsConfirmPurchaseOpen(false)}
+        onConfirm={executeDirectPurchase}
+        title="Confirm NFT Purchase"
+        description="Verify transaction parameters before broadcasting payment to the TON blockchain relay."
+        confirmText="Confirm & Purchase"
+        assetName={nft.title}
+        assetImage={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
+        tonAmount={nft.price}
+        networkFee="0.05"
+        totalAmount={(parseFloat(nft.price?.replace(' TON', '') || "0") + 0.05).toFixed(2)}
+        fromAddress={userProfile.walletAddress}
+        recipient={nft.owner}
+        transactionType="NFT Acquisition"
+      />
     </>
   );
 };

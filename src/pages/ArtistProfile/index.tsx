@@ -2,39 +2,40 @@ import * as React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { 
-  Play, Shuffle, Heart, UserPlus, UserCheck, Zap, Gem, 
-  Share2, MoreVertical, ExternalLink, ArrowLeft, Verified, 
-  MapPin, Award, Send, MessageCircle, QrCode, Disc, Layers
+  Play, Pause, Shuffle, Heart, UserPlus, UserCheck, Zap, Gem, 
+  Share2, MoreHorizontal, ExternalLink, ArrowLeft, BadgeCheck, 
+  MapPin, Award, Send, MessageCircle, QrCode, Disc, Layers, 
+  Radio, Sparkles, Wallet, Globe, CheckCircle2, Trophy, Flame, Users, Music
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAudio } from "@/contexts/AudioContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn, getPlaceholderImage } from "@/lib/utils";
 import { ProfileQRCodeModal } from "@/components/profile/ProfileQRCodeModal";
+import { PageContainer } from "@/components/layout/PageContainer";
 
-// Custom Modals from existing codebase
+// Custom Modals
 import EditArtistProfileModal from "@/components/EditArtistProfileModal";
-import TipArtistModal from "@/components/TipArtistModal";
+import { TipArtistModal } from "@/components/TipArtistModal";
 import ArtistOptionsModal from "@/components/ArtistOptionsModal";
-import { FanTokenHub } from "@/components/FanTokenHub";
-import { FanPowerTracker } from "@/components/FanPowerTracker";
 import { CollabRequestModal } from "./components/CollabRequestModal";
+import { ArtistWalletQRModal } from "@/components/ArtistWalletQRModal";
 
 // Hook & Subsections
 import { useArtistProfile } from "./hooks/useArtistProfile";
 import { 
   ProfileHeaderSkeleton, 
   StatsRowSkeleton, 
-  TrackListSkeleton, 
-  CardGridSkeleton 
+  TrackListSkeleton 
 } from "./components/Skeletons";
 
 import { OverviewTab } from "./sections/OverviewTab";
+import { DiscographyTab } from "./sections/DiscographyTab";
+import { WalletPayoutsTab } from "./sections/WalletPayoutsTab";
 import { MusicTab } from "./sections/MusicTab";
 import { AlbumsTab } from "./sections/AlbumsTab";
 import { SinglesTab } from "./sections/SinglesTab";
 import { NftsTab } from "./sections/NftsTab";
-import { CollectionsTab } from "./sections/CollectionsTab";
 import { PlaylistsTab } from "./sections/PlaylistsTab";
 import { PostsTab } from "./sections/PostsTab";
 import { EventsTab } from "./sections/EventsTab";
@@ -45,7 +46,7 @@ import { AnalyticsSection } from "./components/AnalyticsSection";
 const ArtistProfile: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { setHeaderTitle } = useAudio();
+  const { setHeaderTitle, currentTrack, isPlaying, togglePlay } = useAudio();
 
   // Hook details
   const {
@@ -87,15 +88,17 @@ const ArtistProfile: React.FC = () => {
   const [showArtistOptions, setShowArtistOptions] = React.useState(false);
   const [showCollabModal, setShowCollabModal] = React.useState(false);
   const [showQRModal, setShowQRModal] = React.useState(false);
+  const [showWalletQRModal, setShowWalletQRModal] = React.useState(false);
 
   // Set header title on scroll
   React.useEffect(() => {
+    let currentTitle = "";
     const handleScroll = () => {
-      const scrollThreshold = 250;
-      if (window.scrollY > scrollThreshold) {
-        setHeaderTitle(artist?.name || "");
-      } else {
-        setHeaderTitle("");
+      const scrollThreshold = 320;
+      const nextTitle = window.scrollY > scrollThreshold ? (artist?.name || "") : "";
+      if (nextTitle !== currentTitle) {
+        currentTitle = nextTitle;
+        setHeaderTitle(nextTitle);
       }
     };
 
@@ -117,28 +120,43 @@ const ArtistProfile: React.FC = () => {
     }
   };
 
+  // Check if currently playing a song by this artist
+  const isPlayingCurrentArtist = React.useMemo(() => {
+    if (!currentTrack || !artist || !isPlaying) return false;
+    return currentTrack.artistId === artist.uid || 
+           currentTrack.artist?.toLowerCase() === artist.name?.toLowerCase();
+  }, [currentTrack, artist, isPlaying]);
+
+  const handleMainPlayToggle = () => {
+    if (isPlayingCurrentArtist) {
+      togglePlay();
+    } else {
+      handlePlayAll();
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="w-full bg-black min-h-screen text-white px-4 md:px-12 py-8 space-y-8 pb-28">
+      <PageContainer animate={false} className="w-full bg-[#050A24] min-h-screen text-white px-4 md:px-12 py-8 space-y-8 pb-28">
         <ProfileHeaderSkeleton />
         <StatsRowSkeleton />
         <TrackListSkeleton />
-      </div>
+      </PageContainer>
     );
   }
 
   if (!artist) {
     return (
-      <div className="flex flex-col items-center justify-center p-20 text-center space-y-6 bg-black min-h-screen text-white">
+      <PageContainer animate={false} className="flex flex-col items-center justify-center p-20 text-center space-y-6 bg-[#050A24] min-h-screen text-white">
         <h2 className="text-2xl font-bold tracking-tight">Artist Profile Not Available</h2>
-        <p className="text-muted-foreground text-xs">Verify your connection or try again.</p>
+        <p className="text-slate-400 text-xs">Verify your connection or try again.</p>
         <button 
           onClick={() => navigate("/discover")}
-          className="px-6 py-2 bg-white text-black rounded-full font-bold text-xs"
+          className="px-6 py-2.5 bg-[#0052FF] text-white rounded-full font-bold text-xs uppercase tracking-wider hover:bg-[#1a66ff] transition-colors cursor-pointer shadow-lg"
         >
           Discover Music
         </button>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -146,440 +164,499 @@ const ArtistProfile: React.FC = () => {
 
   const tabOptions = [
     { id: "overview", label: "Overview" },
-    { id: "music", label: "Music" },
+    { id: "discography", label: "Discography" },
+    { id: "music", label: "Tracks" },
     { id: "albums", label: "Albums" },
     { id: "singles", label: "Singles" },
-    { id: "nfts", label: "NFTs" },
-    { id: "collections", label: "Collections" },
+    { id: "nfts", label: `NFTs (${nfts.length})` },
+    { id: "payouts", label: "Royalties & Payouts" },
     { id: "playlists", label: "Playlists" },
-    { id: "posts", label: "Posts" },
+    { id: "posts", label: "Community Feed" },
     { id: "events", label: "Events" },
-    { id: "fan_tokens", label: "Fan Tokens" },
-    { id: "fan_power", label: "Fan Power" },
+    { id: "about", label: "About" },
     { id: "special", label: "TonJam Hub" },
-    { id: "analytics", label: "Analytics" },
-    { id: "about", label: "About" }
+    { id: "analytics", label: "Artist Analytics" }
   ];
 
+  const headerImageUrl = artist.bannerUrl || artist.bannerImageUrl || artist.coverPhoto || artist.avatarUrl || getPlaceholderImage(`banner-${artist.uid}`, 1600, 600);
+
   return (
-    <div className="w-full bg-black min-h-screen text-white pb-32">
+    <PageContainer animate={true} hasPlayerSpacing={true} className="w-full bg-[#050A24] min-h-screen text-white pb-36 font-sans">
       
-      {/* 1. CINEMATIC BANNER (Audiomack Style) */}
-      <div className="relative h-[130px] md:h-[180px] overflow-hidden group bg-blue-950">
-        <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105 opacity-80"
-          style={{ backgroundImage: `url(${artist.coverPhoto || artist.bannerImageUrl || artist.bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1200, 400)})` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
+      {/* 1. ARTIST SIGNATURE HERO HEADER */}
+      <div className="relative w-full h-[360px] sm:h-[420px] md:h-[480px] overflow-hidden flex flex-col justify-between">
         
-        {/* Navigation Overlays */}
-        <div className="absolute top-4 left-4 right-4 z-40 flex items-center justify-between">
+        {/* Full-bleed photography background */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-105 opacity-80"
+          style={{ backgroundImage: `url(${headerImageUrl})` }}
+        />
+        
+        {/* Gradient overlays matching Profile Hub palette */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-[#050A24]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050A24] via-[#050A24]/85 to-transparent" />
+
+        {/* Top Floating Navigation Bar */}
+        <div className="relative z-30 px-4 sm:px-8 pt-6 flex items-center justify-between">
           <button 
             onClick={() => navigate(-1)} 
-            className="p-2.5 bg-black/45 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-all cursor-pointer border-none flex items-center justify-center"
+            className="w-10 h-10 bg-[#050A24]/80 hover:bg-[#050A24] backdrop-blur-md rounded-full text-white transition-all cursor-pointer flex items-center justify-center shadow-lg hover:scale-105 active:scale-95"
+            title="Back"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            {/* Quick Socials in Hero Top Bar */}
+            {artist.socials?.x && (
+              <a
+                href={artist.socials.x}
+                target="_blank"
+                rel="noreferrer"
+                className="w-9 h-9 bg-[#050A24]/80 hover:bg-[#050A24] backdrop-blur-md rounded-full text-slate-300 hover:text-white transition-all flex items-center justify-center hover:scale-105 shadow-md"
+                title="X / Twitter"
+              >
+                <Globe className="w-4 h-4" />
+              </a>
+            )}
+
+            {artist.socials?.telegram && (
+              <a
+                href={artist.socials.telegram}
+                target="_blank"
+                rel="noreferrer"
+                className="w-9 h-9 bg-[#050A24]/80 hover:bg-[#050A24] backdrop-blur-md rounded-full text-slate-300 hover:text-[#0098EA] transition-all flex items-center justify-center hover:scale-105 shadow-md"
+                title="Telegram"
+              >
+                <Send className="w-4 h-4" />
+              </a>
+            )}
+
+            <button 
+              onClick={() => setShowWalletQRModal(true)}
+              className="p-2.5 bg-[#0098EA]/20 hover:bg-[#0098EA]/40 text-[#0098EA] backdrop-blur-md rounded-full transition-all cursor-pointer flex items-center justify-center shadow-md hover:scale-105"
+              title="Artist Wallet QR Code"
+            >
+              <QrCode className="w-4 h-4" />
+            </button>
+
+            <button 
+              onClick={handleShareProfile}
+              className="p-2.5 bg-[#050A24]/80 hover:bg-[#050A24] backdrop-blur-md rounded-full text-white transition-all cursor-pointer flex items-center justify-center shadow-md hover:scale-105"
+              title="Share Artist Card"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+
             {!isOwnProfile ? (
               <button 
                 onClick={() => setShowArtistOptions(true)}
-                className="p-2.5 bg-black/45 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-all cursor-pointer border-none flex items-center justify-center"
+                className="p-2.5 bg-[#050A24]/80 hover:bg-[#050A24] backdrop-blur-md rounded-full text-white transition-all cursor-pointer flex items-center justify-center shadow-md hover:scale-105"
+                title="More Options"
               >
-                <MoreVertical className="w-4 h-4" />
+                <MoreHorizontal className="w-5 h-5" />
               </button>
             ) : (
               <button 
                 onClick={() => setShowEditModal(true)}
-                className="p-2.5 bg-black/45 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-all cursor-pointer border-none flex items-center justify-center"
-                title="Edit Profile"
+                className="px-4 py-2 bg-white text-black hover:bg-neutral-200 rounded-full text-xs font-extrabold uppercase tracking-wider transition-all shadow-md cursor-pointer hover:scale-105"
               >
-                <Gem className="w-4 h-4" />
+                Edit Profile
               </button>
             )}
           </div>
         </div>
+
+        {/* Hero Metadata: Verified Badge, Huge Artist Name, Monthly Listeners, Payout Wallet */}
+        <div className="relative z-20 px-6 sm:px-10 md:px-12 pb-6 flex flex-col justify-end space-y-2">
+          
+          <div className="flex items-center gap-3 flex-wrap">
+            {artist.verified !== false && (
+              <div className="flex items-center gap-1.5 bg-[#0052FF]/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold shadow-md">
+                <BadgeCheck className="w-4 h-4 text-[#0098EA] fill-[#0098EA]" />
+                <span>Verified Creator</span>
+              </div>
+            )}
+
+            {artist.walletAddress && (
+              <div 
+                onClick={() => setActiveTab("payouts")}
+                className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-slate-200 text-xs font-mono font-medium cursor-pointer transition-colors"
+                title="View on-chain payout status"
+              >
+                <Wallet className="w-3.5 h-3.5 text-[#0098EA]" />
+                <span>{artist.walletAddress.slice(0, 6)}...{artist.walletAddress.slice(-4)}</span>
+                <span className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider ml-1">● Auto-Payout</span>
+              </div>
+            )}
+          </div>
+
+          {/* Huge Artist Name */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-white drop-shadow-2xl">
+            {artist.name}
+          </h1>
+
+          {/* Monthly Listeners Counter */}
+          <div className="flex items-center gap-2 pt-1 text-sm sm:text-base font-medium text-slate-200 flex-wrap">
+            <span>{(stats?.monthlyListeners || 184500).toLocaleString()} monthly on-chain listeners</span>
+            {artist.genre && (
+              <>
+                <span className="text-slate-500">•</span>
+                <span className="text-slate-300">{artist.genre}</span>
+              </>
+            )}
+            <span className="text-slate-500">•</span>
+            <span className="text-slate-300">{(artist.followers || 85400).toLocaleString()} followers</span>
+          </div>
+        </div>
       </div>
 
-      {/* 2. IDENTITY & ACTIONS (Audiomack User Profile Style) */}
-      <div className="w-full px-6 md:px-12 lg:px-16 relative z-30 bg-black">
-        {/* Extreme Left Actions Below Cover */}
-        <div className="flex items-center gap-2 mb-4 pt-4 flex-wrap">
-          {!isOwnProfile ? (
-            <>
-              <button 
-                onClick={handleFollowToggle} 
-                className={cn(
-                  "cursor-pointer transition-all px-6 py-2 rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider",
-                  isFollowing 
-                    ? "bg-white/20 text-white border-white/40 backdrop-blur-md" 
-                    : "bg-blue-500 text-white border-blue-600 shadow-white/20"
-                )}
-              >
-                {isFollowing ? 'Following' : 'Follow'}
-              </button>
-              <button 
-                onClick={() => setShowTipModal(true)}
-                className="cursor-pointer transition-all px-6 py-2 rounded-lg border-b-[4px] bg-gradient-to-r from-amber-500 to-yellow-500 text-black border-amber-600 hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider"
-              >
-                <Zap className="h-3.5 w-3.5 inline mr-1" /> Support Node
-              </button>
-              <button 
-                onClick={() => setShowCollabModal(true)}
-                className="cursor-pointer transition-all px-6 py-2 rounded-lg border-b-[4px] bg-neutral-900 text-amber-400 border-neutral-800 hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider"
-              >
-                <Gem className="h-3.5 w-3.5 inline mr-1 text-amber-400" /> Collab
-              </button>
-            </>
+      {/* 2. ACTION CONTROLS BAR */}
+      <div className="px-6 sm:px-10 md:px-12 py-4 flex items-center gap-4 sm:gap-6 flex-wrap">
+        
+        {/* Large Play Button */}
+        <button 
+          onClick={handleMainPlayToggle}
+          className="w-14 h-14 bg-[#0088CC] hover:bg-[#0098EA] text-white shadow-[0_0_25px_rgba(0,136,204,0.5)] flex items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95 cursor-pointer shrink-0"
+          title={isPlayingCurrentArtist ? "Pause" : "Play"}
+        >
+          {isPlayingCurrentArtist ? (
+            <Pause className="w-6 h-6 fill-current text-white" />
           ) : (
-            <>
-              <button 
-                onClick={() => setShowEditModal(true)}
-                className="cursor-pointer transition-all px-6 py-2 bg-blue-500 text-white border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider"
-              >
-                Edit Artist Node
-              </button>
-              <button 
-                onClick={() => navigate("/mint")}
-                className="cursor-pointer transition-all px-6 py-2 bg-neutral-900 text-cyan-400 border-neutral-800 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider"
-              >
-                Mint NFT
-              </button>
-            </>
+            <Play className="w-6 h-6 fill-current text-white ml-1" />
           )}
+        </button>
 
-          <button 
-            onClick={() => setShowQRModal(true)}
-            className="p-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg transition-all border border-blue-500/20 backdrop-blur-md shadow-lg flex items-center gap-1.5 px-3 cursor-pointer"
-            title="Share Profile QR Code"
-          >
-            <QrCode className="h-4 w-4" />
-            <span className="text-[10px] font-bold uppercase tracking-wider hidden sm:inline">QR Code</span>
-          </button>
-          
-          <button 
-            onClick={handleShareProfile}
-            className="p-2 bg-black/40 text-white rounded-lg hover:bg-black/60 transition-all border border-white/10 backdrop-blur-md shadow-lg cursor-pointer"
-            title="Share Profile"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
-        </div>
+        {/* Shuffle Play */}
+        <button 
+          onClick={handleShufflePlay}
+          className="p-3 text-slate-400 hover:text-white transition-colors cursor-pointer rounded-full hover:bg-white/[0.06]"
+          title="Shuffle Play"
+        >
+          <Shuffle className="w-6 h-6" />
+        </button>
 
-        <div className="flex flex-col md:flex-row items-end gap-4 sm:gap-8 -mt-6 sm:-mt-8 pb-6">
-          {/* Profile Avatar (Refined Overlap) */}
-          <div className="relative flex-shrink-0">
-            <div 
-              className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 overflow-hidden border-4 border-background shadow-2xl bg-muted rounded-full"
+        {/* Follow / Following Pill */}
+        {!isOwnProfile && (
+          <button 
+            onClick={handleFollowToggle} 
+            className={`px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 ${
+              isFollowing 
+                ? "bg-white/10 text-white hover:bg-white/20" 
+                : "bg-[#0052FF] text-white hover:bg-[#1a66ff] shadow-[0_4px_16px_rgba(0,82,255,0.4)]"
+            }`}
+          >
+            {isFollowing ? "Following" : "Follow Artist"}
+          </button>
+        )}
+
+        {/* Action Pills */}
+        {!isOwnProfile ? (
+          <>
+            <button 
+              onClick={() => setShowTipModal(true)}
+              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
             >
-              <img 
-                src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
-                className="w-full h-full object-cover rounded-full" 
-                alt={artist.name} 
-              />
-            </div>
-          </div>
-          
-          <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-2">
-            <div className="flex flex-col gap-0.5 mb-4">
-              <div className="flex items-center gap-2 justify-center md:justify-start">
-                <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white">
-                  {artist.name}
-                </h1>
-                {artist.verified && (
-                  <div className="text-blue-500">
-                    <Verified className="h-4 w-4 md:h-6 md:w-6 fill-white" />
-                  </div>
-                )}
+              <Zap className="w-3.5 h-3.5 fill-current" /> Tip TON
+            </button>
+
+            <button 
+              onClick={() => setShowWalletQRModal(true)}
+              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-[#0098EA]/15 hover:bg-[#0098EA]/25 text-[#0098EA] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
+              title="Generate TON Wallet Tip QR Code"
+            >
+              <QrCode className="w-3.5 h-3.5" /> Tip QR
+            </button>
+
+            <button 
+              onClick={() => setShowCollabModal(true)}
+              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-white/[0.08] hover:bg-white/[0.15] text-cyan-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
+            >
+              <Gem className="w-3.5 h-3.5 text-cyan-300" /> Collab
+            </button>
+          </>
+        ) : (
+          <>
+            <button 
+              onClick={() => setShowWalletQRModal(true)}
+              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-[#0098EA]/15 hover:bg-[#0098EA]/25 text-[#0098EA] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
+              title="Generate My TON Wallet Tip QR Code"
+            >
+              <QrCode className="w-3.5 h-3.5" /> My Wallet QR
+            </button>
+
+            <button 
+              onClick={() => navigate("/mint")}
+              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> Mint Music NFT
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* 3. PROFILE STATS ROW (Matching Profile Hub) */}
+      <div className="px-6 sm:px-10 md:px-12 py-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-[#101A3B] rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
+            <div className="flex items-center justify-between gap-1.5 mb-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider leading-none text-slate-400">
+                Monthly Listeners
+              </span>
+              <div className="shrink-0 p-1 rounded-md bg-white/5">
+                <Music className="w-4 h-4 text-[#0098EA]" />
               </div>
-              <span className="text-muted-foreground font-medium text-xs md:text-sm">
-                @{artist.username?.replace("@", "") || "artist"}
+            </div>
+            <div className="mt-1">
+              <span className="text-lg sm:text-xl font-bold font-mono tracking-tight text-white">
+                {(stats?.monthlyListeners || 184500).toLocaleString()}
               </span>
             </div>
-            
-            {/* Activity Statistics */}
-            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2">
-              <span className="flex items-center gap-1.5"><Disc className="h-3 w-3" /> {tracks.length} Tracks Created</span>
-              <span className="flex items-center gap-1.5"><Layers className="h-3 w-3" /> {nfts.length} NFTs Created</span>
-              {artist.genre && (
-                <span className="flex items-center gap-1.5 text-cyan-400">• {artist.genre}</span>
-              )}
+          </div>
+
+          <div className="bg-[#101A3B] rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
+            <div className="flex items-center justify-between gap-1.5 mb-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider leading-none text-slate-400">
+                Total Streams
+              </span>
+              <div className="shrink-0 p-1 rounded-md bg-white/5">
+                <Flame className="w-4 h-4 text-orange-400" />
+              </div>
+            </div>
+            <div className="mt-1">
+              <span className="text-lg sm:text-xl font-bold font-mono tracking-tight text-white">
+                {(stats?.streams || 520000).toLocaleString()}
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 pb-2">
-            <div className="flex flex-col items-center">
-              <span className="text-lg font-black text-white">{(stats?.followers || 0).toLocaleString()}</span>
-              <span className="text-[9px] uppercase font-bold text-muted-foreground mt-0.5">Followers</span>
+          <div className="bg-[#101A3B] rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
+            <div className="flex items-center justify-between gap-1.5 mb-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider leading-none text-slate-400">
+                NFT Music Drops
+              </span>
+              <div className="shrink-0 p-1 rounded-md bg-white/5">
+                <Gem className="w-4 h-4 text-purple-400" />
+              </div>
             </div>
-            <div className="flex flex-col items-center">
-              <span className="text-lg font-black text-white">{(stats?.monthlyListeners || 0).toLocaleString()}</span>
-              <span className="text-[9px] uppercase font-bold text-muted-foreground mt-0.5">Listeners</span>
+            <div className="mt-1">
+              <span className="text-lg sm:text-xl font-bold font-mono tracking-tight text-white">
+                {nfts.length}
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-[#101A3B] rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
+            <div className="flex items-center justify-between gap-1.5 mb-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider leading-none text-slate-400">
+                Fan Power & TJ
+              </span>
+              <div className="shrink-0 p-1 rounded-md bg-white/5">
+                <Trophy className="w-4 h-4 text-amber-400" />
+              </div>
+            </div>
+            <div className="mt-1">
+              <span className="text-lg sm:text-xl font-bold font-mono tracking-tight text-amber-300">
+                9,450 XP
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Column Body */}
-      <div className="px-4 md:px-12 mt-6 space-y-10">
-
-        {/* 2. STATS ROW */}
-        {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 p-4 bg-neutral-900/10 border border-neutral-900 rounded-[10px]">
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest block">Monthly Listeners</span>
-              <span className="text-sm font-black text-white font-mono">{stats.monthlyListeners.toLocaleString()}</span>
-            </div>
-            
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest block">Followers</span>
-              <span className="text-sm font-black text-white font-mono">{stats.followers.toLocaleString()}</span>
-            </div>
-
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest block">Decentralized Plays</span>
-              <span className="text-sm font-black text-cyan-400 font-mono">{stats.streams.toLocaleString()}</span>
-            </div>
-
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest block">Total Mints</span>
-              <span className="text-sm font-black text-white font-mono">{stats.nftCollectionsCount} Collections</span>
-            </div>
-
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest block">Ledger Volume</span>
-              <span className="text-sm font-black text-purple-400 font-mono">{stats.totalSales}</span>
-            </div>
-
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest block">Collectors</span>
-              <span className="text-sm font-black text-white font-mono">{stats.nftOwnersCount} Wallets</span>
-            </div>
-          </div>
-        )}
-
-        {/* 3. QUICK ACTIONS GRID */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button 
-            onClick={handlePlayAll}
-            className="px-5 py-2.5 bg-white text-black hover:bg-neutral-200 transition-colors rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer border-none shadow-lg shadow-white/5"
-          >
-            <Play className="w-3.5 h-3.5 fill-current text-black" /> Play All
-          </button>
-
-          <button 
-            onClick={handleShufflePlay}
-            className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white transition-colors rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-neutral-800"
-          >
-            <Shuffle className="w-3.5 h-3.5" /> Shuffle
-          </button>
+      {/* 4. TABS NAVIGATION (Matching Profile Hub) */}
+      <div className="px-6 sm:px-10 md:px-12 mt-4 mb-6 overflow-x-auto no-scrollbar">
+        <div className="w-full flex gap-1.5 overflow-x-auto no-scrollbar py-2 px-1 select-none scroll-smooth">
+          {tabOptions.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="relative px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors duration-200 focus:outline-none cursor-pointer whitespace-nowrap shrink-0 z-10"
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeArtistTabPill"
+                    className="absolute inset-0 bg-[#0088CC] shadow-[0_0_15px_rgba(0,136,204,0.4)] rounded-full -z-10"
+                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                  />
+                )}
+                <span className={isActive ? "text-white font-black" : "text-slate-400 hover:text-slate-200"}>
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
+      </div>
 
-        {/* 4. SPLIT GRID CONTENT */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* LEFT COLUMN PANEL: Profile mini statistics, mutual friends, community bio */}
-          <div className="lg:col-span-4 space-y-6">
-            
-            {/* Expanded expandable story block */}
-            <div className="bg-neutral-900/20 border border-neutral-900 rounded-[10px] p-5 space-y-4">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan-400">Ledger Narrative</h3>
-              <p className="text-xs text-neutral-300 leading-relaxed">
-                {artist.bio || "No custom biography signed to the TON ledger yet. Support this artist to request updates!"}
-              </p>
-              
-              <div className="pt-3 border-t border-neutral-900 space-y-2">
-                <div className="flex justify-between text-[11px] font-semibold text-neutral-400">
-                  <span>Record Label:</span>
-                  <span className="text-white">TJ Independent Node</span>
-                </div>
-                <div className="flex justify-between text-[11px] font-semibold text-neutral-400">
-                  <span>Contract Registry:</span>
-                  <span className="text-white">TON Mainnet</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Social / Mutual connections badge block */}
-            {mutualFollowers.length > 0 && (
-              <div className="bg-neutral-900/15 p-4 rounded-[10px] space-y-3">
-                <h3 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Mutual Listeners</h3>
-                <div className="flex items-center -space-x-2">
-                  {mutualFollowers.map((m) => (
-                    <img 
-                      key={m.id} 
-                      src={m.avatarUrl} 
-                      className="w-7 h-7 rounded-full border-2 border-black object-cover" 
-                      alt="" 
-                      title={m.name}
-                    />
-                  ))}
-                  <span className="text-[10px] text-muted-foreground pl-3 font-semibold">
-                    Followed by Julia & {mutualFollowers.length} others
-                  </span>
-                </div>
-              </div>
+      {/* 5. TAB CONTENT RENDERER */}
+      <div className="px-6 sm:px-10 md:px-12">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
+          >
+            {activeTab === "overview" && (
+              <OverviewTab 
+                artist={artist}
+                tracks={tracks}
+                nfts={nfts}
+                albums={albums}
+                playlists={playlists}
+                posts={posts}
+                events={events}
+                onPlayTrack={playTrack}
+                onNavigateToTab={(tab: string) => setActiveTab(tab)}
+              />
             )}
-          </div>
 
-          {/* RIGHT COLUMN PANEL: Content Tabs */}
-          <div className="lg:col-span-8 space-y-6">
-            
-            {/* Scrollable Tabs Toolbar */}
-            <div className="border-b border-neutral-900 overflow-x-auto no-scrollbar scroll-smooth">
-              <div className="flex gap-6 pb-2 min-w-max">
-                {tabOptions.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={cn(
-                      "text-xs font-bold uppercase tracking-wider pb-2 border-b-2 transition-all cursor-pointer bg-transparent",
-                      activeTab === tab.id 
-                        ? "text-white border-white" 
-                        : "text-muted-foreground border-transparent hover:text-white"
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {activeTab === "discography" && (
+              <DiscographyTab 
+                artist={artist}
+                albums={albums}
+                singles={singles}
+                tracks={tracks}
+                nfts={nfts}
+                onPlayTrack={playTrack}
+                onPlayAlbum={handlePlayAlbum}
+              />
+            )}
 
-            {/* Render selected content tab with state management */}
-            <div className="min-h-[300px]">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  {activeTab === "overview" && (
-                    <OverviewTab 
-                      tracks={tracks}
-                      nfts={nfts}
-                      albums={albums}
-                      playlists={playlists}
-                      posts={posts}
-                      events={events}
-                      onPlayTrack={playTrack}
-                      onNavigateToTab={setActiveTab}
-                    />
-                  )}
+            {activeTab === "payouts" && (
+              <WalletPayoutsTab 
+                artist={artist}
+              />
+            )}
 
-                  {activeTab === "music" && (
-                    <MusicTab 
-                      tracks={tracks}
-                      onPlayTrack={playTrack}
-                      trackSort={trackSort}
-                      onSortChange={setTrackSort}
-                    />
-                  )}
+            {activeTab === "music" && (
+              <MusicTab 
+                tracks={tracks}
+                trackSort={trackSort}
+                onSortChange={(sort) => setTrackSort(sort)}
+                onPlayTrack={playTrack}
+              />
+            )}
 
-                  {activeTab === "albums" && (
-                    <AlbumsTab 
-                      albums={albums}
-                      onPlayAlbum={handlePlayAlbum}
-                    />
-                  )}
+            {activeTab === "albums" && (
+              <AlbumsTab 
+                albums={albums}
+                onPlayAlbum={handlePlayAlbum}
+              />
+            )}
 
-                  {activeTab === "singles" && (
-                    <SinglesTab 
-                      singles={singles}
-                      onPlayTrack={playTrack}
-                    />
-                  )}
+            {activeTab === "singles" && (
+              <SinglesTab 
+                singles={singles}
+                onPlayTrack={playTrack}
+              />
+            )}
 
-                  {activeTab === "nfts" && (
-                    <NftsTab nfts={nfts} />
-                  )}
+            {activeTab === "nfts" && (
+              <NftsTab 
+                nfts={nfts}
+              />
+            )}
 
-                  {activeTab === "collections" && (
-                    <CollectionsTab collections={collections} />
-                  )}
+            {activeTab === "playlists" && (
+              <PlaylistsTab 
+                playlists={playlists}
+              />
+            )}
 
-                  {activeTab === "playlists" && (
-                    <PlaylistsTab playlists={playlists} />
-                  )}
+            {activeTab === "posts" && (
+              <PostsTab 
+                posts={posts}
+                onLikePost={handleLikePost}
+              />
+            )}
 
-                  {activeTab === "posts" && (
-                    <PostsTab posts={posts} onLikePost={handleLikePost} />
-                  )}
+            {activeTab === "events" && (
+              <EventsTab 
+                events={events}
+              />
+            )}
 
-                  {activeTab === "events" && (
-                    <EventsTab events={events} />
-                  )}
+            {activeTab === "about" && (
+              <AboutTab 
+                artist={artist}
+              />
+            )}
 
-                  {activeTab === "fan_tokens" && (
-                    <div className="p-1">
-                      <FanTokenHub artist={artist} />
-                    </div>
-                  )}
+            {activeTab === "special" && (
+              <SpecialFeaturesTab 
+                artist={artist}
+                supportAmount={supportAmount}
+                onSupportAmountChange={setSupportAmount}
+                onSupportSubmit={handleSupportArtist}
+                isSupporting={isSupporting}
+                topSupporters={topSupporters}
+                missions={missions}
+              />
+            )}
 
-                  {activeTab === "fan_power" && (
-                    <div className="p-1">
-                      <FanPowerTracker artist={artist} />
-                    </div>
-                  )}
-
-                  {activeTab === "special" && (
-                    <SpecialFeaturesTab 
-                      artist={artist}
-                      topSupporters={topSupporters}
-                      missions={missions}
-                      supportAmount={supportAmount}
-                      onSupportAmountChange={setSupportAmount}
-                      onSupportSubmit={handleSupportArtist}
-                      isSupporting={isSupporting}
-                    />
-                  )}
-
-                  {activeTab === "analytics" && analytics && (
-                    <AnalyticsSection artist={artist} analytics={analytics} />
-                  )}
-
-                  {activeTab === "about" && (
-                    <AboutTab artist={artist} />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
+            {activeTab === "analytics" && (
+              <AnalyticsSection 
+                artist={artist}
+                analytics={analytics}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* 5. FLOATING MODALS COMPLIANCE */}
-      <AnimatePresence>
-        {showTipModal && (
-          <TipArtistModal artist={artist} onClose={() => setShowTipModal(false)} />
-        )}
-        {showEditModal && (
-          <EditArtistProfileModal artist={artist} onClose={() => setShowEditModal(false)} />
-        )}
-        {showArtistOptions && (
-          <ArtistOptionsModal artist={artist} onClose={() => setShowArtistOptions(false)} />
-        )}
-        {showCollabModal && (
-          <CollabRequestModal targetArtist={artist} isOpen={showCollabModal} onClose={() => setShowCollabModal(false)} />
-        )}
-      </AnimatePresence>
+      {/* 6. MODALS */}
+      {showEditModal && (
+        <EditArtistProfileModal
+          artist={artist}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
 
-      <ProfileQRCodeModal 
+      {showTipModal && (
+        <TipArtistModal
+          artist={artist}
+          onClose={() => setShowTipModal(false)}
+        />
+      )}
+
+      {showArtistOptions && (
+        <ArtistOptionsModal
+          artist={artist}
+          onClose={() => setShowArtistOptions(false)}
+        />
+      )}
+
+      <CollabRequestModal
+        isOpen={showCollabModal}
+        onClose={() => setShowCollabModal(false)}
+        targetArtist={artist}
+      />
+
+      <ProfileQRCodeModal
         isOpen={showQRModal}
         onClose={() => setShowQRModal(false)}
         profile={{
           name: artist.name,
-          username: artist.username?.replace("@", "") || "artist",
+          username: artist.username || artist.name.toLowerCase().replace(/\s+/g, ""),
           avatar: artist.avatarUrl,
-          role: artist.genre ? `${artist.genre} Artist` : 'Artist',
+          role: "Verified Artist",
           bio: artist.bio,
-          isVerified: Boolean(artist.verified),
+          isVerified: true,
           uid: artist.uid
         }}
       />
-    </div>
+
+      <ArtistWalletQRModal
+        isOpen={showWalletQRModal}
+        onClose={() => setShowWalletQRModal(false)}
+        artist={artist}
+      />
+    </PageContainer>
   );
 };
 

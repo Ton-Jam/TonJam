@@ -455,7 +455,6 @@ export default function JamUp() {
           <SectionWrapper>
             <HorizontalSection 
               title="Trending Tracks" 
-              subtitle="The most popular sounds on TonJam right now"
               onViewAll={() => navigate('/discover')}
             >
               {trendingTracks.map((track) => (
@@ -475,7 +474,7 @@ export default function JamUp() {
         {/* Live Spaces */}
         {showSpaces && (
           <SectionWrapper>
-            <HorizontalSection title="Live Now" subtitle="Join real-time audio rooms and jam together">
+            <HorizontalSection title="Live Now">
               {MOCK_SPACES.map((space) => (
                 <FeedCard key={space.id} space={space} />
               ))}
@@ -488,7 +487,6 @@ export default function JamUp() {
           <SectionWrapper>
             <HorizontalSection 
               title="Top Artists" 
-              subtitle="Creators defining the future of music on TON"
             >
               {trendingArtists.map((artist) => (
                 <ArtistCard 
@@ -507,7 +505,6 @@ export default function JamUp() {
           <SectionWrapper>
             <HorizontalSection 
               title="Fresh Releases" 
-              subtitle="Latest tracks delivered straight to your ears"
             >
               {newDrops.map((track) => (
                 <MusicCard 
@@ -535,7 +532,6 @@ export default function JamUp() {
           <SectionWrapper>
             <HorizontalSection 
               title="Digital Collectibles" 
-              subtitle="Exclusive audio NFTs and digital assets"
               onViewAll={() => navigate('/marketplace')}
             >
               {allNFTs.slice(0, 8).map((nft) => (
@@ -566,7 +562,6 @@ export default function JamUp() {
           <SectionWrapper>
             <HorizontalSection 
               title="Picked For You" 
-              subtitle="Personalized recommendations based on your taste"
             >
               {recommendedTracks.map((track) => (
                 <MusicCard 

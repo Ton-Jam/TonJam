@@ -529,8 +529,8 @@ const StakingRewardsCalculator: React.FC<CalculatorProps> = ({
                   }}
                   cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
                 />
-                <BarRC dataKey="APR" name="APR %" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                <BarRC dataKey="Uptime" name="Uptime %" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <BarRC dataKey="APR" name="APR %" fill="#3b82f6" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                <BarRC dataKey="Uptime" name="Uptime %" fill="#10b981" radius={[4, 4, 0, 0]} isAnimationActive={false} />
               </BarChartRC>
             </ResponsiveContainerRC>
           </div>

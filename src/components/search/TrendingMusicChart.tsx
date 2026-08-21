@@ -52,6 +52,10 @@ export const TrendingMusicChart: React.FC = () => {
     return SEED_TRACKS as Track[];
   }, [allTracks]);
 
+  const trackIdsKey = useMemo(() => {
+    return tracksToTrack.map((t) => t.id).join(',');
+  }, [tracksToTrack]);
+
   // Track colors for chart lines
   const colors = ['#00B4D8', '#9D4EDD', '#F72585'];
 
@@ -90,7 +94,7 @@ export const TrendingMusicChart: React.FC = () => {
     }
 
     setChartData(initialPoints);
-  }, [tracksToTrack]);
+  }, [trackIdsKey]);
 
   // Periodic 30-second data-fetching mechanism
   useEffect(() => {
@@ -103,23 +107,22 @@ export const TrendingMusicChart: React.FC = () => {
           setTimeout(() => {
             const now = new Date();
             const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const nextPoint: ChartDataPoint = { time: timeStr };
+
+            setCurrentRates((prevRates) => {
+              const updatedRates = { ...prevRates };
+              tracksToTrack.forEach((track) => {
+                const currentVal = prevRates[track.id] || 80;
+                // Introduce steady live growth trend (random +1 to +10 streams/min increment)
+                const growth = Math.floor(Math.random() * 10) + 1;
+                const newVal = Math.min(500, currentVal + growth);
+                updatedRates[track.id] = newVal;
+                nextPoint[track.id] = newVal;
+              });
+              return updatedRates;
+            });
 
             setChartData((prevData) => {
-              const nextPoint: ChartDataPoint = { time: timeStr };
-              
-              setCurrentRates((prevRates) => {
-                const updatedRates = { ...prevRates };
-                tracksToTrack.forEach((track) => {
-                  const currentVal = prevRates[track.id] || 80;
-                  // Introduce steady live growth trend (random +1 to +10 streams/min increment)
-                  const growth = Math.floor(Math.random() * 10) + 1;
-                  const newVal = Math.min(500, currentVal + growth);
-                  updatedRates[track.id] = newVal;
-                  nextPoint[track.id] = newVal;
-                });
-                return updatedRates;
-              });
-
               const updatedData = [...prevData, nextPoint];
               if (updatedData.length > 8) {
                 updatedData.shift();
@@ -137,7 +140,7 @@ export const TrendingMusicChart: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [tracksToTrack]);
+  }, [trackIdsKey, tracksToTrack]);
 
   // Custom Chart Tooltip
   const CustomTooltip = ({ active, payload }: any) => {
@@ -250,7 +253,7 @@ export const TrendingMusicChart: React.FC = () => {
                     strokeWidth={2.5}
                     dot={false}
                     activeDot={{ r: 4, strokeWidth: 0 }}
-                    animationDuration={400}
+                    isAnimationActive={false}
                   />
                 ))}
               </LineChart>

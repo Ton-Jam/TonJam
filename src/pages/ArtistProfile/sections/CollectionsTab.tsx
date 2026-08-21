@@ -15,8 +15,8 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ collections }) =
   return (
     <div className="space-y-6 animate-in fade-in" id="collections-tab-root">
       <div className="flex flex-col gap-1">
-        <h3 className="text-xl font-bold tracking-tight text-white font-sans">Minted NFT Collections</h3>
-        <p className="text-xs text-muted-foreground">Decentralized catalogs organizing the artist's digital outputs on the TON blockchain.</p>
+        <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white">Minted NFT Collections</h3>
+        <p className="text-xs text-neutral-400">Decentralized catalogs organizing the artist's digital outputs on TON.</p>
       </div>
 
       {collections.length > 0 ? (
@@ -25,9 +25,9 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ collections }) =
             <div 
               key={col.id}
               onClick={() => handleViewCollection(col.name)}
-              className="bg-neutral-900/25 border border-neutral-900 hover:border-neutral-800 p-4 rounded-[10px] space-y-4 cursor-pointer group transition-all"
+              className="bg-neutral-900/40 hover:bg-neutral-900/80 p-4 rounded-2xl space-y-4 cursor-pointer group transition-all shadow-md"
             >
-              <div className="relative aspect-[16/9] rounded-[10px] overflow-hidden bg-neutral-950">
+              <div className="relative aspect-[16/9] rounded-xl overflow-hidden bg-neutral-950">
                 <img 
                   src={col.coverUrl} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
@@ -39,30 +39,30 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ collections }) =
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="bg-neutral-900/40 p-2.5 rounded-[10px] space-y-0.5">
-                  <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider block">Volume Traded</span>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <div className="bg-neutral-950/60 p-2.5 rounded-xl space-y-0.5">
+                  <span className="text-[9px] text-neutral-400 font-semibold uppercase tracking-wider block">Volume</span>
                   <span className="text-xs font-bold text-white font-mono flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3 text-emerald-400" /> {col.volume}
+                    <TrendingUp className="w-3 h-3 text-[#1DB954]" /> {col.volume}
                   </span>
                 </div>
                 
-                <div className="bg-neutral-900/40 p-2.5 rounded-[10px] space-y-0.5">
-                  <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider block">Floor Price</span>
+                <div className="bg-neutral-950/60 p-2.5 rounded-xl space-y-0.5">
+                  <span className="text-[9px] text-neutral-400 font-semibold uppercase tracking-wider block">Floor</span>
                   <span className="text-xs font-bold text-purple-400 font-mono">{col.floorPrice}</span>
                 </div>
 
-                <div className="bg-neutral-900/40 p-2.5 rounded-[10px] space-y-0.5">
-                  <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider block">Unique Owners</span>
+                <div className="bg-neutral-950/60 p-2.5 rounded-xl space-y-0.5">
+                  <span className="text-[9px] text-neutral-400 font-semibold uppercase tracking-wider block">Owners</span>
                   <span className="text-xs font-bold text-white font-mono flex items-center gap-1">
                     <Users className="w-3 h-3 text-cyan-400" /> {col.owners.toLocaleString()}
                   </span>
                 </div>
 
-                <div className="bg-neutral-900/40 p-2.5 rounded-[10px] space-y-0.5">
-                  <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider block">Mints Count</span>
+                <div className="bg-neutral-950/60 p-2.5 rounded-xl space-y-0.5">
+                  <span className="text-[9px] text-neutral-400 font-semibold uppercase tracking-wider block">Items</span>
                   <span className="text-xs font-bold text-white font-mono flex items-center gap-1">
-                    <Layers className="w-3 h-3 text-yellow-400" /> {col.items} items
+                    <Layers className="w-3 h-3 text-amber-400" /> {col.items}
                   </span>
                 </div>
               </div>
@@ -70,10 +70,10 @@ export const CollectionsTab: React.FC<CollectionsTabProps> = ({ collections }) =
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center p-12 border border-dashed border-neutral-800 rounded-[10px] text-center space-y-3">
-          <Compass className="w-8 h-8 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center p-16 bg-neutral-900/30 rounded-2xl text-center space-y-3">
+          <Compass className="w-8 h-8 text-neutral-500" />
           <h4 className="text-base font-semibold text-white">No Collections Found</h4>
-          <p className="text-xs text-muted-foreground max-w-xs">This artist hasn't indexed their NFTs into formal collections yet.</p>
+          <p className="text-xs text-neutral-400 max-w-xs">This artist hasn't indexed their NFTs into formal collections yet.</p>
         </div>
       )}
     </div>

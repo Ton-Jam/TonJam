@@ -441,7 +441,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
           </div>
 
           <div className="flex items-center gap-2.5">
-            <div className="flex items-center gap-1.5 bg-[#0e163d]/80 border border-white/10 rounded-xl px-2.5 py-1 text-slate-300 text-xs shadow-inner">
+            <div className="flex items-center gap-1.5 bg-[#0e163d]/80 rounded-xl px-2.5 py-1 text-slate-300 text-xs shadow-inner">
               <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
               <span className="text-[10px] font-bold text-slate-400 uppercase hidden sm:inline">Sort:</span>
               <select

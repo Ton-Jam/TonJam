@@ -610,7 +610,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [audioConnectionState, setAudioConnectionState] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [isLoading, setIsLoading] = useState(false);
-  const [headerTitle, setHeaderTitle] = useState("");
+  const [headerTitle, _setHeaderTitle] = useState("");
+  const setHeaderTitle = useCallback((title: string) => {
+    _setHeaderTitle((prev) => (prev === title ? prev : title));
+  }, []);
   const [isHighFidelity, setIsHighFidelity] = useState(false);
   const [exclusiveContent, setExclusiveContent] = useState<
     ExclusiveContent[] | null
@@ -1059,12 +1062,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [isPlaying, currentTrack?.id]);
 
   useEffect(() => {
-    setUserProfile((prev) => ({
-      ...prev,
-      followedUserIds,
-      followedArtists: followedUserIds, // Assuming all followed users are artists for now or we just sync them
-      following: followedUserIds.length,
-    }));
+    setUserProfile((prev) => {
+      if (
+        prev.followedUserIds === followedUserIds &&
+        prev.following === followedUserIds.length
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        followedUserIds,
+        followedArtists: followedUserIds,
+        following: followedUserIds.length,
+      };
+    });
   }, [followedUserIds, setUserProfile]);
 
   const [userTracks, setUserTracks] = useState<Track[]>([]);
@@ -1754,7 +1765,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         ),
       );
     }
-  }, [firestoreTracks, firestoreNFTs, userProfile]);
+  }, [firestoreTracks, firestoreNFTs, userProfile.uid, userProfile.walletAddress]);
 
   const updateNFT = async (
     nftId: string,
@@ -2071,23 +2082,29 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => clearInterval(interval);
   }, [userProfile.walletAddress]);
 
+  const userProfileRef = useRef(userProfile);
+  useEffect(() => {
+    userProfileRef.current = userProfile;
+  }, [userProfile]);
+
   const syncStakingRewards = useCallback(async () => {
+    const profile = userProfileRef.current;
     if (
       !auth.currentUser ||
-      !userProfile.stakedJam ||
-      userProfile.stakedJam <= 0
+      !profile.stakedJam ||
+      profile.stakedJam <= 0
     )
       return;
 
-    const lastUpdate = userProfile.lastStakingUpdate
-      ? new Date(userProfile.lastStakingUpdate).getTime()
+    const lastUpdate = profile.lastStakingUpdate
+      ? new Date(profile.lastStakingUpdate).getTime()
       : Date.now();
     const now = Date.now();
     const secondsPassed = (now - lastUpdate) / 1000;
 
     if (secondsPassed < 5) return; // Only sync if at least 5 seconds passed
 
-    const staked = Number(userProfile.stakedJam);
+    const staked = Number(profile.stakedJam);
     const apr = 0.15; // 15%
     const rewardRatePerSecond = apr / (365 * 24 * 60 * 60);
     const reward = staked * rewardRatePerSecond * secondsPassed;
@@ -2095,7 +2112,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     if (reward > 0.000001) {
       // Only sync if reward is meaningful
       try {
-        const isAuto = userProfile.autoCompound || false;
+        const isAuto = profile.autoCompound || false;
         await updateDoc(doc(db, "users", auth.currentUser.uid), {
           [isAuto ? "stakedJam" : "pendingJamRewards"]: increment(reward),
           lastStakingUpdate: new Date().toISOString(),
@@ -2104,14 +2121,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         console.error("Error syncing staking rewards:", error);
       }
     }
-  }, [userProfile.stakedJam, userProfile.lastStakingUpdate, userProfile.autoCompound]);
+  }, []);
 
   // Staking Reward Accumulation (Local UI updates)
   useEffect(() => {
     if (!userProfile.stakedJam || userProfile.stakedJam <= 0) return;
 
     const interval = setInterval(() => {
-      const staked = Number(userProfile.stakedJam || 0);
+      const staked = Number(userProfileRef.current.stakedJam || 0);
       if (staked > 0) {
         const rewardRate = 0.15 / (365 * 24 * 60 * 6);
         const reward = staked * rewardRate;
@@ -2140,7 +2157,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       clearInterval(interval);
       clearInterval(syncInterval);
     };
-  }, [userProfile.stakedJam, syncStakingRewards]);
+  }, [Boolean(userProfile.stakedJam && userProfile.stakedJam > 0), syncStakingRewards]);
 
   // Handle expired auctions without bids
   useEffect(() => {

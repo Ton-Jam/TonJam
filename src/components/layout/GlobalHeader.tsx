@@ -37,6 +37,8 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 }) => {
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
   const { userProfile } = useAudio();
   const isArtistVerified = userProfile?.isVerifiedArtist || userProfile?.role === 'artist';
@@ -46,20 +48,30 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const blurValue = useTransform(scrollY, [0, 50], [0, 16]);
 
   useEffect(() => {
-    const unsubscribe = scrollY.on('change', (latest) => {
-      setIsScrolled(latest > 20);
-    });
-    return () => unsubscribe();
-  }, [scrollY]);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 40) {
+        setIsHidden(true);
+      } else if (currentScrollY < lastScrollY || currentScrollY <= 20) {
+        setIsHidden(false);
+      }
+      setLastScrollY(currentScrollY);
+      setIsScrolled(currentScrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   return (
     <motion.header
       className={`
-        w-full h-16 px-4 flex items-center justify-between z-40
+        w-full h-16 px-4 flex items-center justify-between z-40 transition-transform duration-300 ease-in-out
         ${isSticky ? 'sticky top-0' : 'relative'}
+        ${isHidden ? '-translate-y-full' : 'translate-y-0'}
       `}
       style={{
-        backgroundColor: `rgba(0, 0, 0, ${isScrolled ? 0.75 : 0})`,
+        backgroundColor: `rgba(5, 6, 8, ${isScrolled ? 0.85 : 0})`,
         backdropFilter: isScrolled ? 'blur(16px)' : 'blur(0px)',
         WebkitBackdropFilter: isScrolled ? 'blur(16px)' : 'blur(0px)',
       }}

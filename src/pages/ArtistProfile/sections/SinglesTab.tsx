@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Track } from "@/types";
-import { Play, Heart, Download, Gem, ArrowUpDown } from "lucide-react";
+import { Play, Pause, Heart, Download, Gem } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { useAudio } from "@/contexts/AudioContext";
 
 interface SinglesTabProps {
   singles: Track[];
@@ -10,87 +10,90 @@ interface SinglesTabProps {
 }
 
 export const SinglesTab: React.FC<SinglesTabProps> = ({ singles, onPlayTrack }) => {
-  const [favorites, setFavorites] = React.useState<Record<string, boolean>>({});
+  const { currentTrack, isPlaying } = useAudio();
+  const [likedTracks, setLikedTracks] = React.useState<Record<string, boolean>>({});
 
-  const toggleFavorite = (id: string, e: React.MouseEvent) => {
+  const toggleLike = (trackId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setFavorites(prev => {
-      const updated = !prev[id];
-      toast(updated ? "Added to Liked Songs" : "Removed from Liked Songs");
-      return { ...prev, [id]: updated };
+    setLikedTracks(prev => {
+      const next = !prev[trackId];
+      toast(next ? "Added to Liked Songs" : "Removed from Liked Songs");
+      return { ...prev, [trackId]: next };
     });
   };
 
   const handleDownload = (track: Track, e: React.MouseEvent) => {
     e.stopPropagation();
-    toast.success(`Downloading single: ${track.title}`);
+    toast.success(`Downloading: ${track.title}`);
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in" id="singles-tab-root">
+    <div className="space-y-6 animate-in fade-in" id="spotify-singles-tab">
       <div className="flex flex-col gap-1">
-        <h3 className="text-xl font-bold tracking-tight text-white">Standalone Singles</h3>
-        <p className="text-xs text-muted-foreground">Individual audio releases and decentralized sound experiments.</p>
+        <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white">Singles & EPs</h3>
+        <p className="text-xs text-neutral-400">Standalone tracks, remixes, and extended releases.</p>
       </div>
 
       {singles.length > 0 ? (
-        <div className="space-y-1">
-          {singles.map((track, idx) => (
-            <div 
-              key={track.id}
-              onClick={() => onPlayTrack(track)}
-              className="group flex items-center justify-between p-3 rounded-[10px] hover:bg-neutral-900/40 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="w-6 text-center text-xs font-bold text-muted-foreground flex items-center justify-center">
-                  <span className="group-hover:hidden">{idx + 1}</span>
-                  <Play className="w-3 h-3 fill-current text-white hidden group-hover:block" />
-                </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+          {singles.map((single) => {
+            const isThisTrack = currentTrack?.id === single.id;
+            const isCurrentPlaying = isThisTrack && isPlaying;
 
-                <img 
-                  src={track.coverUrl || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop"} 
-                  className="w-10 h-10 object-cover rounded-[6px]" 
-                  alt="" 
-                />
-
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-semibold text-white truncate group-hover:text-cyan-400 transition-colors">{track.title}</h4>
-                    {track.isNFT && (
-                      <span className="flex items-center gap-0.5 text-[8px] font-black text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest">
-                        <Gem className="w-2.5 h-2.5" /> NFT
-                      </span>
-                    )}
+            return (
+              <div 
+                key={single.id}
+                onClick={() => onPlayTrack(single)}
+                className="bg-neutral-900/40 hover:bg-neutral-900/80 p-3.5 rounded-xl space-y-3 cursor-pointer group transition-all"
+              >
+                <div className="relative aspect-square bg-neutral-950 rounded-lg overflow-hidden shadow-md">
+                  <img 
+                    src={single.coverUrl || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop"} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                    alt={single.title} 
+                  />
+                  
+                  {/* Floating Spotify Play Button */}
+                  <div className="absolute right-2 bottom-2 translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 shadow-2xl">
+                    <button 
+                      className="w-11 h-11 rounded-full bg-[#1DB954] text-black flex items-center justify-center shadow-xl hover:scale-105 transition-transform cursor-pointer"
+                    >
+                      {isCurrentPlaying ? (
+                        <Pause className="w-5 h-5 fill-current text-black" />
+                      ) : (
+                        <Play className="w-5 h-5 fill-current text-black ml-0.5" />
+                      )}
+                    </button>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{track.genre}</p>
+
+                  {single.isNFT && (
+                    <div className="absolute top-2 right-2 bg-purple-500/90 text-white text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded shadow-md flex items-center gap-1 backdrop-blur-sm">
+                      <Gem className="w-2.5 h-2.5" /> NFT
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <h4 className={`text-sm font-bold truncate transition-colors ${
+                    isThisTrack ? "text-[#1DB954]" : "text-white group-hover:text-[#1DB954]"
+                  }`}>
+                    {single.title}
+                  </h4>
+                  <div className="flex items-center justify-between text-xs text-neutral-400">
+                    <span>2026 • Single</span>
+                    <span className="font-mono text-[10px]">
+                      {Math.floor((single.duration || 210) / 60)}:{(String((single.duration || 210) % 60)).padStart(2, "0")}
+                    </span>
+                  </div>
                 </div>
               </div>
-
-              <div className="flex items-center gap-4 md:gap-8">
-                <span className="text-xs font-mono text-muted-foreground hidden sm:block">
-                  {(track.playCount || 0).toLocaleString()} plays
-                </span>
-
-                <span className="text-xs text-muted-foreground font-mono">
-                  {Math.floor((track.duration || 220) / 60)}:{(String((track.duration || 220) % 60)).padStart(2, '0')}
-                </span>
-
-                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button 
-                    onClick={(e) => handleDownload(track, e)}
-                    className="p-1.5 rounded-full hover:bg-white/5 text-muted-foreground hover:text-white transition-colors"
-                    title="Download offline"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center p-12 border border-dashed border-neutral-800 rounded-[10px] text-center space-y-3">
-          <p className="text-sm text-muted-foreground">No standalone singles available.</p>
+        <div className="flex flex-col items-center justify-center p-16 rounded-2xl bg-neutral-900/30 text-center space-y-3">
+          <h4 className="text-base font-semibold text-white">No Singles Found</h4>
+          <p className="text-xs text-neutral-400 max-w-xs">No standalone singles available for this artist.</p>
         </div>
       )}
     </div>

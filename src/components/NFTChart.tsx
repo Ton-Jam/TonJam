@@ -50,6 +50,7 @@ export function NFTChart({ data }: Props) {
               stroke="var(--color-value)"
               strokeWidth={3}
               dot={false}
+              isAnimationActive={false}
             />
           </LineChart>
         </ChartContainer>

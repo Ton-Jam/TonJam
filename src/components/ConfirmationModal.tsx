@@ -34,6 +34,7 @@ interface ConfirmationModalProps {
   transactionType?: string;
   floorPrice?: string;
   walletBalance?: string;
+  currencySymbol?: string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -57,82 +58,83 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   transactionType,
   floorPrice,
   walletBalance,
+  currencySymbol = "TON",
 }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-[4px] bg-neutral-900/95 backdrop-blur-xl p-6 border-none">
+      <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-[16px] bg-[#0A0F29]/95 backdrop-blur-2xl p-6 border-none shadow-2xl">
         <AlertDialogHeader className="space-y-3">
           <div className="flex items-center gap-2 mb-1">
              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
-             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-blue-500">{transactionType || "Signal Confirmation"}</span>
+             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-blue-400">{transactionType || "Transaction Confirmation"}</span>
           </div>
           <AlertDialogTitle className="text-xl font-black text-white tracking-tighter uppercase leading-none">
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-neutral-400 text-[11px] leading-relaxed uppercase tracking-widest font-bold">
+          <AlertDialogDescription className="text-slate-300 text-[11px] leading-relaxed tracking-wide font-medium">
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         {tonAmount && (
-          <div className="mt-4 p-5 bg-white/[0.04] rounded-xl space-y-5 relative overflow-hidden group">
+          <div className="mt-4 p-4 bg-white/[0.04] rounded-xl space-y-4 relative overflow-hidden group">
             {/* Asset Background Glow */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-blue-500/10 transition-colors" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none transition-colors" />
 
-            <div className="flex items-center gap-4 relative z-10 border-b border-white/5 pb-4">
+            <div className="flex items-center gap-3 relative z-10 pb-3">
               {assetImage && (
                 <img
                   src={assetImage}
                   alt={assetName}
-                  className="w-14 h-14 rounded-lg object-cover bg-neutral-800 shadow-2xl border border-white/10"
+                  className="w-13 h-13 rounded-lg object-cover bg-neutral-800 shadow-lg shrink-0"
                 />
               )}
               <div className="flex-1 min-w-0">
-                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-blue-400 block mb-0.5">TARGET FREQUENCY</span>
-                <h4 className="text-[13px] font-black text-white truncate uppercase tracking-tight">{assetName || "Unspecified Asset"}</h4>
+                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-blue-400 block mb-0.5">MUSIC NFT ASSET</span>
+                <h4 className="text-[13px] font-black text-white truncate uppercase tracking-tight">{assetName || "Music NFT"}</h4>
                 {recipient && (
-                   <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 truncate">To: {recipient.slice(0, 10)}...{recipient.slice(-6)}</p>
+                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 truncate">To: {recipient.slice(0, 10)}...{recipient.slice(-6)}</p>
                 )}
               </div>
             </div>
 
-            <div className="space-y-3 relative z-10">
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Signal Magnitude</span>
-                <span className="font-mono text-white font-black">{tonAmount} GRAM</span>
+            <div className="space-y-2.5 relative z-10 pt-1">
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-slate-400 font-semibold uppercase tracking-wider">Asset Price</span>
+                <span className="font-mono text-white font-black">{tonAmount} {currencySymbol}</span>
               </div>
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Network Fee</span>
-                <span className="font-mono text-neutral-400 font-bold">~{networkFee || "0.05"} GRAM</span>
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-slate-400 font-semibold uppercase tracking-wider">Network Fee</span>
+                <span className="font-mono text-slate-300 font-bold">~{networkFee || "0.05"} {currencySymbol}</span>
               </div>
 
               {floorPrice && (
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Floor Price</span>
-                  <span className="font-mono text-cyan-400 font-bold">{floorPrice} GRAM</span>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-slate-400 font-semibold uppercase tracking-wider">Floor Price</span>
+                  <span className="font-mono text-cyan-400 font-bold">{floorPrice} {currencySymbol}</span>
                 </div>
               )}
 
               {walletBalance && (
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Wallet Balance</span>
-                  <span className="font-mono text-emerald-400 font-bold">{walletBalance} GRAM</span>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-slate-400 font-semibold uppercase tracking-wider">Wallet Balance</span>
+                  <span className="font-mono text-emerald-400 font-bold">{walletBalance} {currencySymbol}</span>
                 </div>
               )}
 
               {fromAddress && (
-                <div className="flex justify-between items-center text-[10px] pt-1">
-                  <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">From Node</span>
-                  <span className="font-mono text-zinc-500 font-bold">{fromAddress.slice(0, 4)}...{fromAddress.slice(-4)}</span>
+                <div className="flex justify-between items-center text-[11px] pt-0.5">
+                  <span className="text-slate-400 font-semibold uppercase tracking-wider">From Wallet</span>
+                  <span className="font-mono text-slate-400 font-bold">{fromAddress.slice(0, 6)}...{fromAddress.slice(-4)}</span>
                 </div>
               )}
 
               {totalAmount && (
-                <div className="flex justify-between items-center pt-4 mt-2 border-t border-white/5">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Estimated total</span>
+                <div className="flex justify-between items-center pt-3 mt-1">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-white">Estimated Total</span>
                   <div className="text-right">
-                    <span className="font-mono text-blue-400 font-black text-lg leading-none">{totalAmount} GRAM</span>
-                    <p className="text-[8px] font-bold text-blue-500/40 uppercase tracking-widest mr-1">Final Approval Required</p>
+                    <span className="font-mono text-blue-400 font-black text-lg leading-none">{totalAmount} {currencySymbol}</span>
+                    <p className="text-[8px] font-bold text-blue-400/60 uppercase tracking-widest mr-0.5">Final Confirmation Required</p>
                   </div>
                 </div>
               )}

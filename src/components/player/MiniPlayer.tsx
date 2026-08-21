@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, PanInfo, AnimatePresence } from "motion/react";
-import { Play, Pause, ListMusic, MoreVertical, Heart, Coins, ChevronUp, Music2 } from "lucide-react";
+import { Play, Pause, ListMusic, MoreVertical, Heart, ChevronUp, Music2 } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
-import TipArtistModal from "@/components/TipArtistModal";
 
 interface MiniPlayerProps {
   onQueueClick?: () => void;
@@ -88,6 +87,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     togglePlay,
     progress,
     seek,
+    setIsSeeking,
     setFullPlayerOpen,
     setOptionsTrack,
     likedTrackIds,
@@ -96,7 +96,18 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   } = useAudio();
 
   const [localProgress, setLocalProgress] = useState(progress);
-  const [showTipModal, setShowTipModal] = useState(false);
+  const [isScrubbing, setIsScrubbing] = useState(false);
+  const [hoverPos, setHoverPos] = useState<number | null>(null);
+  const progressBarRef = React.useRef<HTMLDivElement>(null);
+
+  const duration = currentTrack?.duration || 0;
+
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds) || seconds === Infinity || seconds < 0) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
 
   // Auto drop-down on pages like settings, notifications, profile, tasks, wallet
   const isDropdownPage = 
@@ -114,8 +125,10 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   const [lastPath, setLastPath] = useState(location.pathname);
 
   useEffect(() => {
-    setLocalProgress(progress);
-  }, [progress]);
+    if (!isScrubbing) {
+      setLocalProgress(progress);
+    }
+  }, [progress, isScrubbing]);
 
   // When location changes to/from a dropdown page, update state
   useEffect(() => {
@@ -125,17 +138,53 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     }
   }, [location.pathname, isDropdownPage, lastPath]);
 
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+  const getPercentageFromEvent = (clientX: number) => {
+    const rect = progressBarRef.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0) return 0;
+    return Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    if (width > 0) {
-      const newPercent = Math.max(0, Math.min(100, (clickX / width) * 100));
-      setLocalProgress(newPercent);
-      if (typeof seek === 'function') {
-        seek(newPercent);
+    if (e.button !== undefined && e.button !== 0 && e.pointerType === "mouse") return;
+    setIsScrubbing(true);
+    if (typeof setIsSeeking === 'function') setIsSeeking(true);
+    const pct = getPercentageFromEvent(e.clientX);
+    setLocalProgress(pct);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const pct = getPercentageFromEvent(e.clientX);
+    setHoverPos(pct);
+    if (isScrubbing) {
+      e.stopPropagation();
+      setLocalProgress(pct);
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isScrubbing) return;
+    e.stopPropagation();
+    setIsScrubbing(false);
+    if (typeof setIsSeeking === 'function') setIsSeeking(false);
+    try {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
       }
+    } catch {}
+    const pct = getPercentageFromEvent(e.clientX);
+    setLocalProgress(pct);
+    if (typeof seek === 'function') {
+      seek(pct);
+    }
+  };
+
+  const handlePointerLeave = () => {
+    if (!isScrubbing) {
+      setHoverPos(null);
     }
   };
 
@@ -162,266 +211,298 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     toggleLikeTrack(currentTrack.id);
   };
 
-  const handleTipClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowTipModal(true);
-  };
-
   const coverUrl = currentTrack.coverUrl || getPlaceholderImage("cover");
 
   // RENDER DROPPED-DOWN (COLLAPSED) FLOATING PILL
   if (isDroppedDown) {
     return (
-      <>
-        <motion.div
-          initial={{ y: 40, opacity: 0, scale: 0.9 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: 40, opacity: 0, scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 350, damping: 25 }}
-          className={`fixed right-3 sm:right-6 z-40 transition-all duration-300 ease-in-out ${
-            isMobileNavHidden ? "bottom-3 sm:bottom-6" : "bottom-20 lg:bottom-6"
-          }`}
-          id="tonjam-dropped-down-player"
+      <motion.div
+        initial={{ y: 40, opacity: 0, scale: 0.9 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 40, opacity: 0, scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 350, damping: 25 }}
+        className={`fixed right-3 sm:right-6 z-40 transition-all duration-300 ease-in-out ${
+          isMobileNavHidden ? "bottom-3 sm:bottom-6" : "bottom-20 lg:bottom-6"
+        }`}
+        id="tonjam-dropped-down-player"
+      >
+        <div 
+          onClick={() => setIsDroppedDown(false)}
+          className="group relative flex items-center gap-2.5 p-1.5 pr-3 bg-[#080d2d]/95 hover:bg-[#0c1445] text-white rounded-full border border-[#0098EA]/40 shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden"
+          title="Click to expand Mini Player"
         >
-          <div 
-            onClick={() => setIsDroppedDown(false)}
-            className="group relative flex items-center gap-2.5 p-1.5 pr-3 bg-[#080d2d]/95 hover:bg-[#0c1445] text-white rounded-full border border-[#0098EA]/40 shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden"
-            title="Click to expand Mini Player"
-          >
-            {/* Sleek top progress indicator on collapsed pill */}
-            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-slate-800/80">
-              <div 
-                className="h-full bg-gradient-to-r from-blue-500 via-[#0098EA] to-cyan-400" 
-                style={{ width: `${localProgress}%` }} 
-              />
-            </div>
-            {/* Animated artwork thumbnail */}
-            <div className="relative flex-shrink-0">
-              <div className="w-9 h-9 rounded-full overflow-hidden border border-[#0098EA]/50 shadow-inner">
-                <img 
-                  src={coverUrl} 
-                  alt={currentTrack.title}
-                  className={`w-full h-full object-cover ${isPlaying ? "animate-spin-slow" : ""}`}
-                />
-                {isPlaying && (
-                  <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-ping" />
-                  </div>
-                )}
-              </div>
-              {/* Overlay Status Dot */}
-              <div 
-                className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-[#080d2d] shadow-sm transition-all duration-300 ${
-                  audioConnectionState === 'connected' ? 'bg-emerald-400' :
-                  audioConnectionState === 'connecting' ? 'bg-amber-400 animate-pulse' :
-                  audioConnectionState === 'error' ? 'bg-rose-500' :
-                  'bg-slate-500'
-                }`}
-                title={
-                  audioConnectionState === 'connected' ? 'Audio stream playing successfully' :
-                  audioConnectionState === 'connecting' ? 'Establishing stream secure connection...' :
-                  audioConnectionState === 'error' ? 'Stream blocked or failed to load' :
-                  'Audio stream idle'
-                }
-              />
-            </div>
-
-            {/* Track Info */}
-            <div className="flex flex-col min-w-0 pr-1 max-w-[100px] sm:max-w-[130px]">
-              <div className="flex items-center gap-1 min-w-0">
-                <Music2 className="w-3 h-3 text-[#0098EA] shrink-0" />
-                <ScrollingText
-                  text={currentTrack.title}
-                  className="text-[11px] font-bold text-white"
-                  containerClassName="w-full"
-                />
-              </div>
-              <ScrollingText
-                text={currentTrack.artist}
-                className="text-[9.5px] font-medium text-slate-400"
-                containerClassName="w-full pl-4"
-              />
-            </div>
-
-            {/* Play/Pause button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                togglePlay();
-              }}
-              className="w-7 h-7 rounded-full bg-[#0098EA] hover:bg-blue-400 text-white flex items-center justify-center shadow-md transition-transform active:scale-90 shrink-0"
-              title={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? (
-                <Pause className="w-3.5 h-3.5 fill-current" />
-              ) : (
-                <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-              )}
-            </button>
-
-            {/* Expand / Drop-up icon button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsDroppedDown(false);
-              }}
-              className="p-1 text-slate-400 hover:text-white transition-colors shrink-0"
-              title="Expand Mini Player"
-            >
-              <ChevronUp className="w-4 h-4 text-[#0098EA]" />
-            </button>
+          {/* Sleek top progress indicator on collapsed pill */}
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-slate-800/80">
+            <div 
+              className="h-full bg-gradient-to-r from-blue-500 via-[#0098EA] to-cyan-400" 
+              style={{ width: `${localProgress}%` }} 
+            />
           </div>
-        </motion.div>
+          {/* Animated artwork thumbnail */}
+          <div className="relative flex-shrink-0">
+            <div className="w-9 h-9 rounded-full overflow-hidden border border-[#0098EA]/50 shadow-inner">
+              <img 
+                src={coverUrl} 
+                alt={currentTrack.title}
+                className={`w-full h-full object-cover ${isPlaying ? "animate-spin-slow" : ""}`}
+              />
+              {isPlaying && (
+                <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-ping" />
+                </div>
+              )}
+            </div>
+          </div>
 
-        {showTipModal && (
-          <TipArtistModal track={currentTrack} onClose={() => setShowTipModal(false)} />
-        )}
-      </>
+          {/* Track Info */}
+          <div className="flex flex-col min-w-0 pr-1 max-w-[100px] sm:max-w-[130px]">
+            <div className="flex items-center gap-1 min-w-0">
+              <Music2 className="w-3 h-3 text-[#0098EA] shrink-0" />
+              <ScrollingText
+                text={currentTrack.title}
+                className="text-[11px] font-bold text-white"
+                containerClassName="w-full"
+              />
+            </div>
+            <ScrollingText
+              text={currentTrack.artist}
+              className="text-[9.5px] font-medium text-slate-400"
+              containerClassName="w-full pl-4"
+            />
+          </div>
+
+          {/* Play/Pause button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlay();
+            }}
+            className="w-7 h-7 rounded-full bg-[#0098EA] hover:bg-blue-400 text-white flex items-center justify-center shadow-md transition-transform active:scale-90 shrink-0"
+            title={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? (
+              <Pause className="w-3.5 h-3.5 fill-current" />
+            ) : (
+              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+            )}
+          </button>
+
+          {/* Expand / Drop-up icon button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsDroppedDown(false);
+            }}
+            className="p-1 text-slate-400 hover:text-white transition-colors shrink-0"
+            title="Expand Mini Player"
+          >
+            <ChevronUp className="w-4 h-4 text-[#0098EA]" />
+          </button>
+        </div>
+
+        {/* Streaming Health Indicator - Upward in the top-right angle */}
+        <div 
+          className="absolute top-1.5 right-2 z-30 flex items-center justify-center pointer-events-auto" 
+          id="mini-pill-streaming-health-indicator"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span 
+            className={`w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-300 ${
+              audioConnectionState === 'connected' ? 'bg-emerald-400 shadow-[0_0_5px_#34d399]' :
+              audioConnectionState === 'connecting' ? 'bg-amber-400 animate-pulse' :
+              audioConnectionState === 'error' ? 'bg-rose-500' :
+              'bg-slate-500'
+            }`}
+            title={
+              audioConnectionState === 'connected' ? 'Streaming Health: Optimal' :
+              audioConnectionState === 'connecting' ? 'Streaming Health: Connecting...' :
+              audioConnectionState === 'error' ? 'Streaming Health: Error' :
+              'Streaming Health: Idle'
+            }
+          />
+        </div>
+      </motion.div>
     );
   }
 
   // RENDER FULL MINI PLAYER BAR
   return (
-    <>
-      <motion.div
-        layoutId="tonjam-player-container"
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0.8, bottom: 0.2 }}
-        onDragEnd={handleDragEnd}
-        onClick={() => setFullPlayerOpen(true)}
-        whileTap={{ scale: 0.99 }}
-        className={`fixed left-0 right-0 lg:left-64 bg-[#0A113A] text-[#F2F4F8] font-sans border-t border-[#16244F] select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-in-out cursor-pointer ${
-          isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
-        }`}
-        style={{ touchAction: "none" }}
-        id="tonjam-mini-player"
+    <motion.div
+      layoutId="tonjam-player-container"
+      drag="y"
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={{ top: 0.8, bottom: 0.2 }}
+      onDragEnd={handleDragEnd}
+      onClick={() => setFullPlayerOpen(true)}
+      whileTap={{ scale: 0.99 }}
+      className={`fixed left-0 right-0 lg:left-64 bg-[#0A113A] text-[#F2F4F8] font-sans border-t border-[#16244F] select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-in-out cursor-pointer ${
+        isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
+      }`}
+      style={{ touchAction: "none" }}
+      id="tonjam-mini-player"
+    >
+      {/* Streaming Health Indicator - Shifted upward towards the top-right angle */}
+      <div 
+        className="absolute top-1.5 right-2 z-30 flex items-center justify-center p-0.5 pointer-events-auto" 
+        id="mini-streaming-health-indicator"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-3.5 py-2.5">
-          {/* Artwork + Title + Artist */}
-          <div className="flex items-center gap-3 flex-1 min-w-0" id="mini-metadata-area">
-            <img
-              src={coverUrl}
-              alt={currentTrack.title}
-              className="w-10 h-10 object-cover rounded-[10px] flex-shrink-0 border border-[#16244F]"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
-              }}
-              id="mini-artwork"
-            />
-            <div className="flex flex-col min-w-0 leading-tight flex-1 max-w-[180px] sm:max-w-xs md:max-w-md lg:max-w-lg">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <ScrollingText
-                  text={currentTrack.title}
-                  className="text-xs font-bold text-[#F2F4F8]"
-                  containerClassName="min-w-0 flex-1"
-                  id="mini-track-title"
-                />
-                {currentTrack.isHighFidelity && (
-                  <span className="px-1 py-0.2 bg-[#0098EA]/20 text-[#0098EA] text-[8px] font-black rounded-xs uppercase shrink-0">
-                    Hi-Fi
-                  </span>
-                )}
-                {/* Visual Audio Stream Connection Status Dot */}
-                <span 
-                  className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${
-                    audioConnectionState === 'connected' ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' :
-                    audioConnectionState === 'connecting' ? 'bg-amber-400 animate-pulse' :
-                    audioConnectionState === 'error' ? 'bg-rose-500 animate-bounce shadow-[0_0_8px_#f43f5e]' :
-                    'bg-slate-500'
-                  }`}
-                  title={
-                    audioConnectionState === 'connected' ? 'Audio stream playing successfully' :
-                    audioConnectionState === 'connecting' ? 'Establishing stream secure connection...' :
-                    audioConnectionState === 'error' ? 'Stream blocked or failed to load' :
-                    'Audio stream idle'
-                  }
-                />
-              </div>
+        <span 
+          className={`w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-300 cursor-pointer ${
+            audioConnectionState === 'connected' ? 'bg-emerald-400 shadow-[0_0_5px_#34d399]' :
+            audioConnectionState === 'connecting' ? 'bg-amber-400 animate-pulse' :
+            audioConnectionState === 'error' ? 'bg-rose-500 animate-bounce shadow-[0_0_5px_#f43f5e]' :
+            'bg-slate-500'
+          }`}
+          title={
+            audioConnectionState === 'connected' ? 'Streaming Health: Optimal (Connected)' :
+            audioConnectionState === 'connecting' ? 'Streaming Health: Connecting...' :
+            audioConnectionState === 'error' ? 'Streaming Health: Error / Stream Blocked' :
+            'Streaming Health: Idle'
+          }
+        />
+      </div>
+
+      <div className="flex items-center justify-between px-3.5 py-2.5">
+        {/* Artwork + Title + Artist */}
+        <div className="flex items-center gap-3 flex-1 min-w-0" id="mini-metadata-area">
+          <img
+            src={coverUrl}
+            alt={currentTrack.title}
+            className="w-10 h-10 object-cover rounded-[10px] flex-shrink-0 border border-[#16244F]"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
+            }}
+            id="mini-artwork"
+          />
+          <div className="flex flex-col min-w-0 leading-tight flex-1 max-w-[180px] sm:max-w-xs md:max-w-md lg:max-w-lg">
+            <div className="flex items-center gap-1.5 min-w-0">
               <ScrollingText
-                text={currentTrack.artist}
-                className="text-[11px] font-medium text-[#9AA0AE]"
+                text={currentTrack.title}
+                className="text-xs font-bold text-[#F2F4F8]"
                 containerClassName="min-w-0 flex-1"
-                id="mini-track-artist"
+                id="mini-track-title"
               />
+              {currentTrack.isHighFidelity && (
+                <span className="px-1 py-0.2 bg-[#0098EA]/20 text-[#0098EA] text-[8px] font-black rounded-xs uppercase shrink-0">
+                  Hi-Fi
+                </span>
+              )}
             </div>
+            <ScrollingText
+              text={currentTrack.artist}
+              className="text-[11px] font-medium text-[#9AA0AE]"
+              containerClassName="min-w-0 flex-1"
+              id="mini-track-artist"
+            />
           </div>
+        </div>
 
-          {/* Action Controls */}
-          <div className="flex items-center gap-1 sm:gap-1.5">
-            {/* Tip Artist TON Button */}
-            <button
-              onClick={handleTipClick}
-              className="p-1.5 text-amber-400 hover:text-amber-300 transition-all hover:scale-110 active:scale-95"
-              title={`Tip ${currentTrack.artist} (TON)`}
-              aria-label="Tip Artist"
-            >
-              <Coins className="w-4 h-4 text-amber-400 fill-amber-400/30" />
-            </button>
+        {/* Action Controls */}
+        <div className="flex items-center gap-1 sm:gap-1.5 pr-2">
+          {/* Play/Pause Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlay();
+            }}
+            className="w-9 h-9 rounded-full bg-[#0098EA] text-white flex items-center justify-center hover:bg-[#0098EA]/90 transition-transform active:scale-90 shadow-md"
+            title={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? (
+              <Pause className="w-4 h-4 fill-current" />
+            ) : (
+              <Play className="w-4 h-4 fill-current ml-0.5" />
+            )}
+          </button>
 
-            {/* Play/Pause Button */}
+          {/* Queue Button */}
+          {onQueueClick && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                togglePlay();
+                onQueueClick();
               }}
-              className="w-9 h-9 rounded-full bg-[#0098EA] text-white flex items-center justify-center hover:bg-[#0098EA]/90 transition-transform active:scale-90 shadow-md"
-              title={isPlaying ? "Pause" : "Play"}
+              className="p-1.5 text-[#9AA0AE] hover:text-[#F2F4F8] transition-colors hidden sm:block"
+              title="Queue"
             >
-              {isPlaying ? (
-                <Pause className="w-4 h-4 fill-current" />
-              ) : (
-                <Play className="w-4 h-4 fill-current ml-0.5" />
-              )}
+              <ListMusic className="w-4 h-4" />
             </button>
+          )}
 
-            {/* Queue Button */}
-            {onQueueClick && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onQueueClick();
-                }}
-                className="p-1.5 text-[#9AA0AE] hover:text-[#F2F4F8] transition-colors hidden sm:block"
-                title="Queue"
-              >
-                <ListMusic className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* More options */}
-            <button
-              onClick={handleOptionsClick}
-              className="p-1.5 text-[#9AA0AE] hover:text-[#F2F4F8] transition-colors"
-              title="Options"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
-          </div>
+          {/* More options */}
+          <button
+            onClick={handleOptionsClick}
+            className="p-1.5 text-[#9AA0AE] hover:text-[#F2F4F8] transition-colors"
+            title="Options"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
         </div>
+      </div>
 
-        {/* Ultra-thin, sleek progress bar sitting directly at bottom edge */}
-        <div 
-          onClick={handleSeek}
-          className="relative w-full h-[1.5px] hover:h-[3.5px] bg-[#050A24] cursor-pointer group transition-all duration-150 z-20" 
-          id="mini-progress-track"
-          title="Click to seek playback position"
-        >
+      {/* Interactive scrubbing progress bar sitting directly at bottom edge */}
+      <div 
+        ref={progressBarRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onPointerLeave={handlePointerLeave}
+        onClick={(e) => e.stopPropagation()}
+        role="slider"
+        aria-label="Seek track progress"
+        aria-valuenow={Math.round(localProgress)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            e.stopPropagation();
+            const next = Math.max(0, localProgress - 5);
+            setLocalProgress(next);
+            if (typeof seek === 'function') seek(next);
+          } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            e.stopPropagation();
+            const next = Math.min(100, localProgress + 5);
+            setLocalProgress(next);
+            if (typeof seek === 'function') seek(next);
+          }
+        }}
+        className="relative w-full h-3.5 -mt-1 flex items-end cursor-pointer group/seek select-none z-30 touch-none outline-none" 
+        id="mini-progress-track"
+        title="Click or drag to scrub playback position"
+      >
+        {/* Hover/Scrub Time Tooltip */}
+        {(isScrubbing || hoverPos !== null) && duration > 0 && (
+          <div 
+            className="absolute -top-7 -translate-x-1/2 px-1.5 py-0.5 bg-[#050A24]/95 text-white text-[10px] font-mono font-bold rounded shadow-lg pointer-events-none z-40 transition-opacity"
+            style={{ left: `${Math.max(5, Math.min(95, isScrubbing ? localProgress : (hoverPos ?? localProgress)))}%` }}
+          >
+            {formatTime(((isScrubbing ? localProgress : (hoverPos ?? localProgress)) / 100) * duration)}
+          </div>
+        )}
+
+        {/* Background Track */}
+        <div className="w-full h-[2px] group-hover/seek:h-[4px] group-active/seek:h-[4px] bg-[#050A24] transition-all relative overflow-visible">
+          {/* Progress Fill */}
           <div
-            className="h-full bg-gradient-to-r from-blue-600 via-[#0098EA] to-cyan-400 transition-all duration-150 shadow-[0_0_10px_rgba(0,152,234,0.8)] relative"
+            className="h-full bg-gradient-to-r from-blue-600 via-[#0098EA] to-cyan-400 relative transition-[height] shadow-[0_0_10px_rgba(0,152,234,0.8)]"
             style={{ width: `${localProgress}%` }}
             id="mini-progress-indicator"
           >
-            {/* Glowing seek knob on hover */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2.5 h-2.5 bg-white rounded-full shadow-[0_0_8px_rgba(0,152,234,1)] opacity-0 group-hover:opacity-100 transition-opacity" />
+            {/* Glowing Seek Knob / Thumb (shown on hover and active scrub) */}
+            <div 
+              className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-3 h-3 bg-white rounded-full shadow-[0_0_10px_rgba(0,152,234,1)] transition-transform duration-100 ${
+                isScrubbing ? 'scale-100' : 'scale-0 group-hover/seek:scale-100'
+              }`} 
+            />
           </div>
         </div>
-      </motion.div>
-
-      {showTipModal && (
-        <TipArtistModal track={currentTrack} onClose={() => setShowTipModal(false)} />
-      )}
-    </>
+      </div>
+    </motion.div>
   );
 };
 

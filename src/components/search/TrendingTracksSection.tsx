@@ -259,9 +259,6 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
           <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
             {title}
           </h2>
-          <p className="text-[10px] text-slate-400 font-medium max-w-xl">
-            {subtitle}
-          </p>
         </div>
 
         {/* Scroll Control Arrows */}

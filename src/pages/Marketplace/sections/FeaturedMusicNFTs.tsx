@@ -36,9 +36,6 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
             <Sparkles className="w-5 h-5 text-[#2BE08C]" />
             {title}
           </h2>
-          <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-            {subtitle}
-          </p>
         </div>
 
         {/* Action Controls */}

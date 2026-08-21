@@ -29,9 +29,6 @@ export const TopSellers: React.FC<TopSellersProps> = ({
           <TrendingUp className="w-5 h-5 text-[#2BE08C]" />
           Top Sellers Leaderboard
         </h2>
-        <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-          Highest commercial volume generated this week
-        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

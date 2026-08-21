@@ -202,6 +202,7 @@ export const AuctionAnalyticsSection: React.FC<AuctionAnalyticsSectionProps> = (
               fill="url(#colorBidBar)" 
               radius={[4, 4, 0, 0]}
               barSize={24}
+              isAnimationActive={false}
             />
 
             <Area 
@@ -213,6 +214,7 @@ export const AuctionAnalyticsSection: React.FC<AuctionAnalyticsSectionProps> = (
               fillOpacity={1} 
               fill="url(#colorAuctionPrice)" 
               activeDot={{ r: 5, strokeWidth: 0, fill: '#2563eb' }}
+              isAnimationActive={false}
             />
           </ComposedChart>
         </ResponsiveContainer>

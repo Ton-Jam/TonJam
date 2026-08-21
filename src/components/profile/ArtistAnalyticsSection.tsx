@@ -321,6 +321,7 @@ export const ArtistAnalyticsSection: React.FC<ArtistAnalyticsSectionProps> = ({ 
                   strokeWidth={2.5} 
                   fillOpacity={1} 
                   fill="url(#streamsAreaGrad)" 
+                  isAnimationActive={false}
                 />
               )}
 
@@ -332,6 +333,7 @@ export const ArtistAnalyticsSection: React.FC<ArtistAnalyticsSectionProps> = ({ 
                   fill="#10B981" 
                   radius={[4, 4, 0, 0]} 
                   barSize={16} 
+                  isAnimationActive={false}
                 />
               )}
 
@@ -344,6 +346,7 @@ export const ArtistAnalyticsSection: React.FC<ArtistAnalyticsSectionProps> = ({ 
                   stroke="#A855F7" 
                   strokeWidth={2} 
                   dot={{ fill: '#A855F7', r: 3 }} 
+                  isAnimationActive={false}
                 />
               )}
             </ComposedChart>

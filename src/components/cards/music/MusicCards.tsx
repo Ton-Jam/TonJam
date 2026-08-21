@@ -77,19 +77,25 @@ export const TrackCard: React.FC<{
 
   if (isLoading || !track) {
     return (
-      <div className={`flex items-center p-3 rounded-[10px] bg-[#0A113A]/60 animate-pulse w-full ${className}`}>
-        <div className="w-12 h-12 bg-white/10 rounded-lg shrink-0" />
-        <div className="ml-3 flex-1 space-y-2">
-          <div className="h-4 bg-white/10 rounded w-1/3" />
-          <div className="h-3 bg-white/10 rounded w-1/4" />
+      <div className={`relative overflow-hidden flex items-center p-3 rounded-[10px] bg-[#0A113A]/60 w-full ${className}`}>
+        <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+        <div className="relative flex items-center w-full">
+          <div className="w-12 h-12 bg-white/10 rounded-lg shrink-0" />
+          <div className="ml-3 flex-1 space-y-2">
+            <div className="h-4 bg-white/10 rounded w-1/3" />
+            <div className="h-3 bg-white/10 rounded w-1/4" />
+          </div>
+          <div className="w-12 h-4 bg-white/10 rounded shrink-0" />
         </div>
-        <div className="w-12 h-4 bg-white/10 rounded shrink-0" />
       </div>
     );
   }
 
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       whileHover={{ scale: 1.01, backgroundColor: '#101A3B' }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onPlay?.(track)}
@@ -185,16 +191,22 @@ export const CompactTrackCard: React.FC<{
 
   if (isLoading || !track) {
     return (
-      <div className={`w-[170px] shrink-0 p-3 rounded-[10px] bg-[#0A113A]/60 animate-pulse ${className}`}>
-        <div className="w-full aspect-square bg-white/10 rounded-lg mb-2" />
-        <div className="h-3.5 bg-white/10 rounded w-3/4 mb-1" />
-        <div className="h-3 bg-white/10 rounded w-1/2" />
+      <div className={`relative overflow-hidden w-[170px] shrink-0 p-3 rounded-[10px] bg-[#0A113A]/60 ${className}`}>
+        <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+        <div className="relative">
+          <div className="w-full aspect-square bg-white/10 rounded-lg mb-2" />
+          <div className="h-3.5 bg-white/10 rounded w-3/4 mb-1" />
+          <div className="h-3 bg-white/10 rounded w-1/2" />
+        </div>
       </div>
     );
   }
 
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onPlay?.(track)}
@@ -267,10 +279,13 @@ export const NowPlayingCard: React.FC<{
 
   if (isLoading || !track) {
     return (
-      <div className={`p-5 rounded-[10px] bg-gradient-to-b from-[#0E1B4B] to-[#0A113A] animate-pulse w-full max-w-[360px] aspect-[3/4] ${className}`}>
-        <div className="w-full aspect-square bg-white/10 rounded-xl mb-4" />
-        <div className="h-5 bg-white/10 rounded w-2/3 mb-2" />
-        <div className="h-4 bg-white/10 rounded w-1/3" />
+      <div className={`relative overflow-hidden p-5 rounded-[10px] bg-gradient-to-b from-[#0E1B4B] to-[#0A113A] w-full max-w-[360px] aspect-[3/4] ${className}`}>
+        <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+        <div className="relative">
+          <div className="w-full aspect-square bg-white/10 rounded-xl mb-4" />
+          <div className="h-5 bg-white/10 rounded w-2/3 mb-2" />
+          <div className="h-4 bg-white/10 rounded w-1/3" />
+        </div>
       </div>
     );
   }
@@ -494,16 +509,22 @@ export const AlbumCard: React.FC<{
 
   if (isLoading || !album) {
     return (
-      <div className={`flex flex-col p-3 rounded-[10px] bg-[#0A113A]/60 animate-pulse w-[170px] shrink-0 ${className}`}>
-        <div className="w-full aspect-square bg-white/10 rounded-lg mb-3" />
-        <div className="h-4 bg-white/10 rounded w-3/4 mb-1" />
-        <div className="h-3 bg-white/10 rounded w-1/2" />
+      <div className={`relative overflow-hidden flex flex-col p-3 rounded-[10px] bg-[#0A113A]/60 w-[170px] shrink-0 ${className}`}>
+        <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+        <div className="relative w-full">
+          <div className="w-full aspect-square bg-white/10 rounded-lg mb-3" />
+          <div className="h-4 bg-white/10 rounded w-3/4 mb-1" />
+          <div className="h-3 bg-white/10 rounded w-1/2" />
+        </div>
       </div>
     );
   }
 
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onClick?.(album)}
@@ -570,16 +591,22 @@ export const PlaylistCard: React.FC<{
 
   if (isLoading || !playlist) {
     return (
-      <div className={`flex flex-col p-3 rounded-[10px] bg-[#0A113A]/60 animate-pulse w-[170px] shrink-0 ${className}`}>
-        <div className="w-full aspect-square bg-white/10 rounded-lg mb-3" />
-        <div className="h-4 bg-white/10 rounded w-3/4 mb-1" />
-        <div className="h-3 bg-white/10 rounded w-1/2" />
+      <div className={`relative overflow-hidden flex flex-col p-3 rounded-[10px] bg-[#0A113A]/60 w-[170px] shrink-0 ${className}`}>
+        <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+        <div className="relative w-full">
+          <div className="w-full aspect-square bg-white/10 rounded-lg mb-3" />
+          <div className="h-4 bg-white/10 rounded w-3/4 mb-1" />
+          <div className="h-3 bg-white/10 rounded w-1/2" />
+        </div>
       </div>
     );
   }
 
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onClick?.(playlist)}

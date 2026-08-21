@@ -15,7 +15,6 @@ interface SectionProps {
 
 export const Section: React.FC<SectionProps> = ({
   title,
-  subtitle,
   actionButton,
   onSeeAll,
   children,
@@ -41,11 +40,6 @@ export const Section: React.FC<SectionProps> = ({
           <h2 className="text-base font-black uppercase tracking-wider text-white">
             {title}
           </h2>
-          {subtitle && (
-            <p className="text-xs font-medium text-[#9AA0AE]">
-              {subtitle}
-            </p>
-          )}
         </div>
         
         {/* Actions side */}

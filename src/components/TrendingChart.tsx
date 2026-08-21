@@ -112,7 +112,7 @@ export const TrendingChart: React.FC = () => {
             <Bar 
               dataKey={metric} 
               radius={[6, 6, 0, 0]}
-              animationDuration={1500}
+              isAnimationActive={false}
             >
               {chartData.map((entry, index) => (
                 <Cell 

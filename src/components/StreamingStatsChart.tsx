@@ -47,6 +47,7 @@ export function StreamingStatsChart({ data }: Props) {
               dataKey="plays"
               fill="var(--color-plays)"
               radius={[4, 4, 0, 0]}
+              isAnimationActive={false}
             />
           </BarChart>
         </ChartContainer>

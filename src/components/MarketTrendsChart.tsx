@@ -100,7 +100,7 @@ export const MarketTrendsChart = ({ className }: { className?: string }) => {
                     return null;
                   }}
                 />
-                <Bar dataKey="volume" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="volume" radius={[4, 4, 0, 0]} isAnimationActive={false}>
                   {volumeData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={index === volumeData.length - 1 ? '#3b82f6' : '#1e3a8a'} />
                   ))}
@@ -152,6 +152,7 @@ export const MarketTrendsChart = ({ className }: { className?: string }) => {
                   fillOpacity={1} 
                   fill="url(#colorFloor)" 
                   strokeWidth={2}
+                  isAnimationActive={false}
                 />
               </AreaChart>
             )}

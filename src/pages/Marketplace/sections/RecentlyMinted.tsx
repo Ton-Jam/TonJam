@@ -16,9 +16,6 @@ export const RecentlyMinted: React.FC<RecentlyMintedProps> = ({ nfts }) => {
             <Sparkles className="w-5 h-5 text-amber-500" />
             Recently Minted Tracks
           </h2>
-          <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-            Brand new master recordings verified on-chain this minute
-          </p>
         </div>
       </div>
 

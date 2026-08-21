@@ -34,12 +34,13 @@ const PlaylistDetail: React.FC = () => {
   }, [playlists, id, likedTrackIds, userProfile]);
 
   React.useEffect(() => {
+    let currentTitle = '';
     const handleScroll = () => {
       const scrollThreshold = 300;
-      if (window.scrollY > scrollThreshold) {
-        setHeaderTitle(playlist?.title || '');
-      } else {
-        setHeaderTitle('');
+      const nextTitle = window.scrollY > scrollThreshold ? (playlist?.title || '') : '';
+      if (nextTitle !== currentTitle) {
+        currentTitle = nextTitle;
+        setHeaderTitle(nextTitle);
       }
     };
 

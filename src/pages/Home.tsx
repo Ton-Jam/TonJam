@@ -61,7 +61,7 @@ import FeaturedArtists from "@/components/FeaturedArtists";
 import { SocialActivityFeed } from "@/components/SocialActivityFeed";
 import { Artist, Track, NFTItem } from "@/types";
 import NFTExplorer from "@/components/NFTExplorer";
-import Web3MusicTrends from "@/components/Web3MusicTrends";
+import { Web3MusicNews } from "@/components/home/Web3MusicNews";
 import TrendingChart from "@/components/TrendingChart";
 import { TopTrendingNFTsWidget } from "@/components/TopTrendingNFTsWidget";
 import TopArtistsSection from "@/components/TopArtistsSection";
@@ -128,6 +128,150 @@ interface CommunityActivity {
   createdAt?: number;
 }
 
+// ------------------------------------------
+// STATIC DATA DEFINITIONS (MODULE LEVEL)
+// ------------------------------------------
+const STATIC_COLLECTIONS: NFTCollection[] = [
+  { id: "col-1", name: "Genesis Beats Vol. 1", artist: "DJ Krupy", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20genesis%20beats%20neon%20orange?width=300&height=300&nologo=true", floorPrice: "12.5", mintedCount: 420, totalLimit: 500 },
+  { id: "col-2", name: "Neon Nights Dubstep", artist: "Byte Beat", coverUrl: "https://image.pollinations.ai/prompt/dubstep%20music%20album%20cover%20neon%20green%20laser%20retro?width=300&height=300&nologo=true", floorPrice: "4.8", mintedCount: 180, totalLimit: 300 },
+  { id: "col-3", name: "Deep Abyssal Audio", artist: "Echo Phase", coverUrl: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true", floorPrice: "8.0", mintedCount: 95, totalLimit: 120 },
+  { id: "col-4", name: "Dreamweaver Velvet", artist: "Luna Ray", coverUrl: "https://image.pollinations.ai/prompt/dreamy%20pink%20clouds%20golden%20moon%20synthesizer%20art?width=300&height=300&nologo=true", floorPrice: "15.0", mintedCount: 220, totalLimit: 250 },
+  { id: "col-5", name: "Ghost City Records", artist: "City Ghost", coverUrl: "https://image.pollinations.ai/prompt/futuristic%20rainy%20alley%20lofi%20synthwave%20album%20cover?width=300&height=300&nologo=true", floorPrice: "3.2", mintedCount: 390, totalLimit: 400 },
+  { id: "col-6", name: "Golden Horizon Lofi", artist: "Retro Vibes", coverUrl: "https://image.pollinations.ai/prompt/golden%20hour%20sunrise%20retro%20car%20lofi%20beats%20cover?width=300&height=300&nologo=true", floorPrice: "2.9", mintedCount: 140, totalLimit: 200 },
+  { id: "col-7", name: "Decentralized Amapiano", artist: "Major Sound", coverUrl: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=300&height=300&nologo=true", floorPrice: "9.5", mintedCount: 75, totalLimit: 100 },
+  { id: "col-8", name: "Cyber Punk Rap Vault", artist: "Lil Crypto", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20rapper%20gold%20teeth%20hologram%20neon%20art?width=300&height=300&nologo=true", floorPrice: "24.0", mintedCount: 11, totalLimit: 50 },
+  { id: "col-9", name: "Web3 Bass Boosters", artist: "Dr. Osc", coverUrl: "https://image.pollinations.ai/prompt/subwoofer%20exploding%20with%20cosmic%20purple%20nebula%20cover?width=300&height=300&nologo=true", floorPrice: "6.0", mintedCount: 190, totalLimit: 250 },
+  { id: "col-10", name: "Interstellar Anthem", artist: "Cosmic Key", coverUrl: "https://image.pollinations.ai/prompt/galaxy%20retro%20organ%20scifi%20music%20album%20art?width=300&height=300&nologo=true", floorPrice: "18.5", mintedCount: 45, totalLimit: 80 }
+];
+
+const SPONSORED_PROMOS: SponsoredPromo[] = [
+  { id: "promo-1", title: "Solar Pulse Reloaded", description: "Collect the exclusive diamond release NFT drop by DJ Krupy.", artwork: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=600&height=400&nologo=true", badge: "NFT DROP", ctaText: "Mint Now" },
+  { id: "promo-2", title: "TON Producers Summit", description: "Tune in live tomorrow at 18:00 UTC with top music artists.", artwork: "https://image.pollinations.ai/prompt/futuristic%20audio%20synthesizer%20control%20deck%20concert%20neon?width=600&height=400&nologo=true", badge: "LIVE", ctaText: "Join Room" },
+  { id: "promo-3", title: "Amapiano Wave 2026", description: "Discover high volume soundscapes straight from Lagos to Miami.", artwork: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=600&height=400&nologo=true", badge: "LAUNCH", ctaText: "Listen First" },
+  { id: "promo-4", title: "Retro Sound Lab Sponsor", description: "Promoting next-gen digital instruments on TON Blockchain.", artwork: "https://image.pollinations.ai/prompt/retro%20lofi%20cassette%20player%20floating%20in%20purple%20space?width=600&height=400&nologo=true", badge: "SPONSORED", ctaText: "Claim Free Box" }
+];
+
+const STATIC_TRENDING_ARTISTS = [
+  { id: "art-1", name: "DJ Krupy", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=krupy", followers: "142.5k", verified: true },
+  { id: "art-2", name: "Byte Beat", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=byte", followers: "84.2k", verified: true },
+  { id: "art-3", name: "Echo Phase", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=echo", followers: "13.9k", verified: false },
+  { id: "art-4", name: "Luna Ray", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=luna", followers: "92.0k", verified: true },
+  { id: "art-5", name: "City Ghost", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=ghost", followers: "128.1k", verified: true },
+  { id: "art-6", name: "Major Sound", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=major", followers: "44.9k", verified: false },
+  { id: "art-7", name: "Retro Vibes", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=vibes", followers: "52.3k", verified: true },
+  { id: "art-8", name: "Dr. Osc", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=osc", followers: "8.4k", verified: false },
+  { id: "art-9", name: "Lil Crypto", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=crypto", followers: "205.0k", verified: true },
+  { id: "art-10", name: "Cosmic Key", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=key", followers: "1.9k", verified: false }
+];
+
+const STATIC_LIVE_SPACES = [
+  { id: "space-1", title: "Afrobeats Producers Lounge 🌍", host: "Ayra Starr", listeners: "1.4k", status: "LIVE" },
+  { id: "space-2", title: "TON Creators Hub - Minting Future 🚀", host: "DJ Krupy", listeners: "920", status: "LIVE" },
+  { id: "space-3", title: "Music NFT Masterclass v2 💎", host: "Cyber Lord", listeners: "410", status: "LIVE" }
+];
+
+const STATIC_RECOMMENDED_NFTS = [
+  { id: "nft-r1", title: "Deep Oceans #04", price: "4.5 TON", owner: "Echo Phase", cover: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true" },
+  { id: "nft-r2", title: "Solar Drift Signature", price: "12.0 TON", owner: "DJ Krupy", cover: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true" },
+  { id: "nft-r3", title: "Cosmic Gate Keyframe", price: "2.8 TON", owner: "Luna Ray", cover: "https://image.pollinations.ai/prompt/galaxy%20retro%20organ%20scifi%20music%20album%20art?width=300&height=300&nologo=true" }
+];
+
+const STATIC_MARKETPLACE_PICKS: MarketplacePick[] = [
+  { id: "pick-1", title: "Aura Beat Legendary #02", artist: "Luna Ray", price: "25.0 TON", likes: 340, image: "https://image.pollinations.ai/prompt/glowing%20aesthetic%20crystal%20sound%20waves%20artwork?width=300&height=300&nologo=true", badge: "Trending" },
+  { id: "pick-2", title: "Cybernetic Echo Synth", artist: "Dr. Osc", price: "9.0 TON", likes: 112, image: "https://image.pollinations.ai/prompt/cybernetic%20abstract%20holographic%20music%20key?width=300&height=300&nologo=true", badge: "Highest Volume" },
+  { id: "pick-3", title: "Amapiano Golden Sceptre #01", artist: "Major Sound", price: "45.0 TON", likes: 780, image: "https://image.pollinations.ai/prompt/gold%20african%20tribal%20future%20crown%20shield?width=300&height=300&nologo=true", badge: "Live Auction" }
+];
+
+const SponsoredPromoCarousel: React.FC = React.memo(() => {
+  const navigate = useNavigate();
+  const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPromoIndex((prev) => (prev + 1) % SPONSORED_PROMOS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="space-y-3 text-left">
+      <h2 className="text-section-title text-text-primary px-0.5">
+        Featured Launches & Updates
+      </h2>
+
+      <div className="relative rounded-card overflow-hidden bg-surface h-[170px]">
+        <AnimatePresence mode="wait">
+          {SPONSORED_PROMOS.map((item, idx) => {
+            if (idx !== currentPromoIndex) return null;
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 flex flex-col justify-end p-5"
+              >
+                <img 
+                  src={item.artwork} 
+                  alt="" 
+                  className="absolute inset-0 w-full h-full object-cover opacity-35" 
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050A24] via-[#050A24]/70 to-transparent" />
+                
+                <div className="relative z-10 space-y-1">
+                  <Badge variant="default" className="text-[8px] uppercase tracking-widest">
+                    {item.badge}
+                  </Badge>
+                  <h3 className="text-card-title text-text-primary mt-1.5">
+                    {item.title}
+                  </h3>
+                  <p className="text-caption leading-normal max-w-[280px]">
+                    {item.description}
+                  </p>
+                  
+                  <div className="pt-2">
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      onClick={() => {
+                        if (item.badge === "LIVE") {
+                          confetti({ particleCount: 50 });
+                        } else {
+                          navigate("/marketplace");
+                        }
+                      }}
+                      className="h-7 text-[9px] uppercase tracking-widest px-3.5 rounded-full"
+                    >
+                      {item.ctaText}
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+
+        {/* Pagination Indicators */}
+        <div className="absolute bottom-3 right-5 z-10 flex gap-1">
+          {SPONSORED_PROMOS.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentPromoIndex(idx)}
+              className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer border-none p-0 outline-none ${
+                idx === currentPromoIndex ? "bg-[#5B6BFF] w-4" : "bg-white/20"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+SponsoredPromoCarousel.displayName = 'SponsoredPromoCarousel';
+
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { 
@@ -140,7 +284,8 @@ const Home: React.FC = () => {
     followedUserIds,
     toggleFollowUser,
     tasks,
-    playAll
+    playAll,
+    recentlyPlayed
   } = useAudio();
 
   // Real active tasks and follow status calculations
@@ -149,7 +294,6 @@ const Home: React.FC = () => {
   const totalCount = realTasks.length || 11;
   const nextUpTask = realTasks.find(t => !t.completed) || { title: "Complete all missions", reward: "Bonus TJ" };
   const dailyEarnable = realTasks.filter(t => !t.completed).reduce((acc, current) => {
-    // extract points number or use default
     const pts = current.points || 50; 
     return acc + pts;
   }, 0);
@@ -210,31 +354,8 @@ const Home: React.FC = () => {
     });
   }, [selectedMood, allTracks, MOOD_GENRES_MAP]);
 
-  // ------------------------------------------
-  // 10 MOCK TRENDING NFT COLLECTIONS
-  // ------------------------------------------
-  const mockCollections: NFTCollection[] = [
-    { id: "col-1", name: "Genesis Beats Vol. 1", artist: "DJ Krupy", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20genesis%20beats%20neon%20orange?width=300&height=300&nologo=true", floorPrice: "12.5", mintedCount: 420, totalLimit: 500 },
-    { id: "col-2", name: "Neon Nights Dubstep", artist: "Byte Beat", coverUrl: "https://image.pollinations.ai/prompt/dubstep%20music%20album%20cover%20neon%20green%20laser%20retro?width=300&height=300&nologo=true", floorPrice: "4.8", mintedCount: 180, totalLimit: 300 },
-    { id: "col-3", name: "Deep Abyssal Audio", artist: "Echo Phase", coverUrl: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true", floorPrice: "8.0", mintedCount: 95, totalLimit: 120 },
-    { id: "col-4", name: "Dreamweaver Velvet", artist: "Luna Ray", coverUrl: "https://image.pollinations.ai/prompt/dreamy%20pink%20clouds%20golden%20moon%20synthesizer%20art?width=300&height=300&nologo=true", floorPrice: "15.0", mintedCount: 220, totalLimit: 250 },
-    { id: "col-5", name: "Ghost City Records", artist: "City Ghost", coverUrl: "https://image.pollinations.ai/prompt/futuristic%20rainy%20alley%20lofi%20synthwave%20album%20cover?width=300&height=300&nologo=true", floorPrice: "3.2", mintedCount: 390, totalLimit: 400 },
-    { id: "col-6", name: "Golden Horizon Lofi", artist: "Retro Vibes", coverUrl: "https://image.pollinations.ai/prompt/golden%20hour%20sunrise%20retro%20car%20lofi%20beats%20cover?width=300&height=300&nologo=true", floorPrice: "2.9", mintedCount: 140, totalLimit: 200 },
-    { id: "col-7", name: "Decentralized Amapiano", artist: "Major Sound", coverUrl: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=300&height=300&nologo=true", floorPrice: "9.5", mintedCount: 75, totalLimit: 100 },
-    { id: "col-8", name: "Cyber Punk Rap Vault", artist: "Lil Crypto", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20rapper%20gold%20teeth%20hologram%20neon%20art?width=300&height=300&nologo=true", floorPrice: "24.0", mintedCount: 11, totalLimit: 50 },
-    { id: "col-9", name: "Web3 Bass Boosters", artist: "Dr. Osc", coverUrl: "https://image.pollinations.ai/prompt/subwoofer%20exploding%20with%20cosmic%20purple%20nebula%20cover?width=300&height=300&nologo=true", floorPrice: "6.0", mintedCount: 190, totalLimit: 250 },
-    { id: "col-10", name: "Interstellar Anthem", artist: "Cosmic Key", coverUrl: "https://image.pollinations.ai/prompt/galaxy%20retro%20organ%20scifi%20music%20album%20art?width=300&height=300&nologo=true", floorPrice: "18.5", mintedCount: 45, totalLimit: 80 }
-  ];
-
-  // ------------------------------------------
-  // SECTION 3: MOCK SPONSORED SLIDER PROMOS
-  // ------------------------------------------
-  const sponsoredPromos: SponsoredPromo[] = [
-    { id: "promo-1", title: "Solar Pulse Reloaded", description: "Collect the exclusive diamond release NFT drop by DJ Krupy.", artwork: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=600&height=400&nologo=true", badge: "NFT DROP", ctaText: "Mint Now" },
-    { id: "promo-2", title: "TON Producers Summit", description: "Tune in live tomorrow at 18:00 UTC with top music artists.", artwork: "https://image.pollinations.ai/prompt/futuristic%20audio%20synthesizer%20control%20deck%20concert%20neon?width=600&height=400&nologo=true", badge: "LIVE", ctaText: "Join Room" },
-    { id: "promo-3", title: "Amapiano Wave 2026", description: "Discover high volume soundscapes straight from Lagos to Miami.", artwork: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=600&height=400&nologo=true", badge: "LAUNCH", ctaText: "Listen First" },
-    { id: "promo-4", title: "Retro Sound Lab Sponsor", description: "Promoting next-gen digital instruments on TON Blockchain.", artwork: "https://image.pollinations.ai/prompt/retro%20lofi%20cassette%20player%20floating%20in%20purple%20space?width=600&height=400&nologo=true", badge: "SPONSORED", ctaText: "Claim Free Box" }
-  ];
+  const mockCollections = STATIC_COLLECTIONS;
+  const sponsoredPromos = SPONSORED_PROMOS;
 
   // ------------------------------------------
   // 12 NEW DROPS TRACKS
@@ -259,18 +380,7 @@ const Home: React.FC = () => {
   // ------------------------------------------
   // 10 TRENDING ARTISTS
   // ------------------------------------------
-  const trendingArtists = [
-    { id: "art-1", name: "DJ Krupy", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=krupy", followers: "142.5k", verified: true },
-    { id: "art-2", name: "Byte Beat", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=byte", followers: "84.2k", verified: true },
-    { id: "art-3", name: "Echo Phase", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=echo", followers: "13.9k", verified: false },
-    { id: "art-4", name: "Luna Ray", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=luna", followers: "92.0k", verified: true },
-    { id: "art-5", name: "City Ghost", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=ghost", followers: "128.1k", verified: true },
-    { id: "art-6", name: "Major Sound", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=major", followers: "44.9k", verified: false },
-    { id: "art-7", name: "Retro Vibes", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=vibes", followers: "52.3k", verified: true },
-    { id: "art-8", name: "Dr. Osc", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=osc", followers: "8.4k", verified: false },
-    { id: "art-9", name: "Lil Crypto", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=crypto", followers: "205.0k", verified: true },
-    { id: "art-10", name: "Cosmic Key", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=key", followers: "1.9k", verified: false }
-  ];
+  const trendingArtists = STATIC_TRENDING_ARTISTS;
 
   const mappedTrendingArtists: Artist[] = useMemo(() => {
     return trendingArtists.map((art) => ({
@@ -319,11 +429,7 @@ const Home: React.FC = () => {
   // ------------------------------------------
   // LIVE SPACES
   // ------------------------------------------
-  const liveSpaces = [
-    { id: "space-1", title: "Afrobeats Producers Lounge 🌍", host: "Ayra Starr", listeners: "1.4k", status: "LIVE" },
-    { id: "space-2", title: "TON Creators Hub - Minting Future 🚀", host: "DJ Krupy", listeners: "920", status: "LIVE" },
-    { id: "space-3", title: "Music NFT Masterclass v2 💎", host: "Cyber Lord", listeners: "410", status: "LIVE" }
-  ];
+  const liveSpaces = STATIC_LIVE_SPACES;
 
   // ------------------------------------------
   // RECOMMENDATIONS
@@ -332,11 +438,7 @@ const Home: React.FC = () => {
     return (allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 6);
   }, [allTracks]);
 
-  const recommendedNFTs = [
-    { id: "nft-r1", title: "Deep Oceans #04", price: "4.5 TON", owner: "Echo Phase", cover: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true" },
-    { id: "nft-r2", title: "Solar Drift Signature", price: "12.0 TON", owner: "DJ Krupy", cover: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true" },
-    { id: "nft-r3", title: "Cosmic Gate Keyframe", price: "2.8 TON", owner: "Luna Ray", cover: "https://image.pollinations.ai/prompt/galaxy%20retro%20organ%20scifi%20music%20album%20art?width=300&height=300&nologo=true" }
-  ];
+  const recommendedNFTs = STATIC_RECOMMENDED_NFTS;
 
   const mappedRecommendedNFTs: NFTItem[] = useMemo(() => {
     return recommendedNFTs.map(nft => ({
@@ -363,69 +465,11 @@ const Home: React.FC = () => {
   // ------------------------------------------
   // TOP MARKETPLACE PICKS
   // ------------------------------------------
-  const marketplacePicks: MarketplacePick[] = [
-    { id: "pick-1", title: "Aura Beat Legendary #02", artist: "Luna Ray", price: "25.0 TON", likes: 340, image: "https://image.pollinations.ai/prompt/glowing%20aesthetic%20crystal%20sound%20waves%20artwork?width=300&height=300&nologo=true", badge: "Trending" },
-    { id: "pick-2", title: "Cybernetic Echo Synth", artist: "Dr. Osc", price: "9.0 TON", likes: 112, image: "https://image.pollinations.ai/prompt/cybernetic%20abstract%20holographic%20music%20key?width=300&height=300&nologo=true", badge: "Highest Volume" },
-    { id: "pick-3", title: "Amapiano Golden Sceptre #01", artist: "Major Sound", price: "45.0 TON", likes: 780, image: "https://image.pollinations.ai/prompt/gold%20african%20tribal%20future%20crown%20shield?width=300&height=300&nologo=true", badge: "Live Auction" }
-  ];
-
-
-
-
-  // ------------------------------------------
-  // RECENTLY MINTED MUSIC NFTs
-  // ------------------------------------------
-  const [recentlyMintedNFTs, setRecentlyMintedNFTs] = useState([
-    { id: "mint-1", name: "Pulse Beat Core", artist: "DJ Krupy", price: "2.5 TON", cover: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true", minted: false },
-    { id: "mint-2", name: "Retro Sunset Drifter", artist: "Retro Vibes", price: "1.8 TON", cover: "https://image.pollinations.ai/prompt/golden%20hour%20sunrise%20retro%20car%20lofi%20beats%20cover?width=300&height=300&nologo=true", minted: false },
-    { id: "mint-3", name: "Cyber City Alley Lofi", artist: "City Ghost", price: "3.2 TON", cover: "https://image.pollinations.ai/prompt/futuristic%20rainy%20alley%20lofi%20synthwave%20album%20cover?width=300&height=300&nologo=true", minted: true },
-    { id: "mint-4", name: "Abyssal Aquatic Beats", artist: "Echo Phase", price: "5.0 TON", cover: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true", minted: false }
-  ]);
-
-  const handleMintNFT = (nftId: string) => {
-    setRecentlyMintedNFTs(prev =>
-      prev.map(item =>
-        item.id === nftId ? { ...item, minted: true } : item
-      )
-    );
-    confetti({
-      particleCount: 160,
-      spread: 80,
-      origin: { y: 0.6 },
-      colors: ["#2BE08C", "#00B4D8", "#5B6BFF"]
-    });
-  };
-
-  const mappedRecentlyMintedNFTs: NFTItem[] = useMemo(() => {
-    return recentlyMintedNFTs.map(nft => ({
-      id: nft.id,
-      trackId: "",
-      title: nft.name,
-      owner: nft.minted ? (userProfile?.walletAddress || "EQ...user") : "EQ...creator",
-      creator: nft.artist,
-      artist: nft.artist,
-      price: nft.price,
-      imageUrl: nft.cover,
-      coverUrl: nft.cover,
-      edition: nft.minted ? "1 of 1" : "Limited Edition",
-      type: "track",
-      url: "",
-      listingType: nft.minted ? undefined : 'sale',
-    } as any));
-  }, [recentlyMintedNFTs, userProfile]);
+  const marketplacePicks = STATIC_MARKETPLACE_PICKS;
 
   // ------------------------------------------
   // COMMUNITY ACTIVITY SOCIAL STREAM (MOCK DATA)
   // ------------------------------------------
-  const [tick, setTick] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTick((t) => t + 1);
-    }, 10000); // refresh every 10 seconds for real-time fidelity
-    return () => clearInterval(timer);
-  }, []);
-
   const [communityActivities, setCommunityActivities] = useState<CommunityActivity[]>([
     { id: "act-1", username: "Davido", action: "minted a new NFT", target: "OBO Genesis Edition #01", time: "now", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=davido", accentColor: "#2BE08C", createdAt: Date.now() - 4000 },
     { id: "act-2", username: "Ayra Starr", action: "released a track", target: "Bloody Samaritan (Vibe Edition)", time: "3m ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=ayra", accentColor: "#5B6BFF", createdAt: Date.now() - 3 * 60 * 1000 },
@@ -458,18 +502,6 @@ const Home: React.FC = () => {
     return `${diffDays}d ago`;
   };
 
-  // ------------------------------------------
-  // AUTO CAROUSEL LOGIC (SECTION 3)
-  // ------------------------------------------
-  const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentPromoIndex((prev) => (prev + 1) % sponsoredPromos.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
   const listeningRef = useRef<HTMLDivElement>(null);
   const trendingFeedRef = useRef<HTMLDivElement>(null);
   const [isHoveringTrending, setIsHoveringTrending] = useState(false);
@@ -481,11 +513,15 @@ const Home: React.FC = () => {
       variants={fadeIn}
       className="min-h-screen bg-background text-text-primary pb-32 overflow-x-hidden selection:bg-primary/30"
     >
-      
-      {/* DESIGN SYSTEM BACKGROUND ACCENTS */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[160px] pointer-events-none -z-10" />
-      <div className="absolute top-[800px] right-0 w-[400px] h-[400px] bg-verified/5 rounded-full blur-[140px] pointer-events-none -z-10" />
-      <div className="absolute top-[1800px] left-[-100px] w-[500px] h-[500px] bg-[#2BE08C]/5 rounded-full blur-[180px] pointer-events-none -z-10" />
+      {/* Ambient background glows optimized for GPU compositor */}
+      <div 
+        className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-primary/10 rounded-full pointer-events-none -z-10" 
+        style={{ filter: 'blur(100px)', transform: 'translateZ(0)' }} 
+      />
+      <div 
+        className="absolute top-[800px] right-0 w-[350px] h-[350px] bg-verified/5 rounded-full pointer-events-none -z-10" 
+        style={{ filter: 'blur(100px)', transform: 'translateZ(0)' }} 
+      />
 
       {/* Main Container expanded edge-to-edge for global TonJam */}
       <div className="w-full max-w-full px-4 sm:px-6 md:px-8 pt-6 space-y-8 pb-12">
@@ -578,7 +614,10 @@ const Home: React.FC = () => {
             </button>
           </div>
           <div ref={listeningRef} className="flex gap-4 overflow-x-auto no-scrollbar pb-3 pl-4" style={{ scrollBehavior: 'smooth' }}>
-            {(allTracks && allTracks.length > 0 ? allTracks.slice(0, 6) : MOCK_TRACKS.slice(0, 6)).map((track) => (
+            {(recentlyPlayed && recentlyPlayed.length > 0
+              ? recentlyPlayed.slice(0, 5)
+              : (allTracks && allTracks.length > 0 ? allTracks.slice(0, 5) : MOCK_TRACKS.slice(0, 5))
+            ).map((track) => (
               <div key={track.id} className="w-[300px] shrink-0">
                 <ContinueListeningCard
                   title={track.title}
@@ -619,9 +658,6 @@ const Home: React.FC = () => {
               <h2 className="text-section-title text-text-primary">
                 Mood Alignment
               </h2>
-              <p className="text-caption mt-0.5">
-                Select a frequency to dynamically forge a genre-curated mix
-              </p>
             </div>
             <Sparkles className="w-4 h-4 text-reward shrink-0 animate-pulse" />
           </div>
@@ -779,79 +815,7 @@ const Home: React.FC = () => {
         {/* ==========================================
             SECTION 3: SPONSORED JAM FEED
             ========================================== */}
-        <div className="space-y-3 text-left">
-          <h2 className="text-section-title text-text-primary px-0.5">
-            Featured Launches & Updates
-          </h2>
-
-          <div className="relative rounded-card overflow-hidden bg-surface h-[170px]">
-            <AnimatePresence mode="wait">
-              {sponsoredPromos.map((item, idx) => {
-                if (idx !== currentPromoIndex) return null;
-                return (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="absolute inset-0 flex flex-col justify-end p-5"
-                  >
-                    {/* Background Artwork Cover Image directly rendered inline */}
-                    <img 
-                      src={item.artwork} 
-                      alt="" 
-                      className="absolute inset-0 w-full h-full object-cover opacity-35" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050A24] via-[#050A24]/70 to-transparent" />
-                    
-                    <div className="relative z-10 space-y-1">
-                      <Badge variant="default" className="text-[8px] uppercase tracking-widest">
-                        {item.badge}
-                      </Badge>
-                      <h3 className="text-card-title text-text-primary mt-1.5">
-                        {item.title}
-                      </h3>
-                      <p className="text-caption leading-normal max-w-[280px]">
-                        {item.description}
-                      </p>
-                      
-                      <div className="pt-2">
-                        <Button
-                          size="sm"
-                          variant="primary"
-                          onClick={() => {
-                            if (item.badge === "LIVE") {
-                              confetti({ particleCount: 50 });
-                            } else {
-                              navigate("/marketplace");
-                            }
-                          }}
-                          className="h-7 text-[9px] uppercase tracking-widest px-3.5 rounded-full"
-                        >
-                          {item.ctaText}
-                        </Button>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-
-            {/* Pagination Indicators */}
-            <div className="absolute bottom-3 right-5 z-10 flex gap-1">
-              {sponsoredPromos.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentPromoIndex(idx)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer border-none p-0 outline-none ${
-                    idx === currentPromoIndex ? "bg-[#5B6BFF] w-4" : "bg-white/20"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+        <SponsoredPromoCarousel />
 
 
         {/* ==========================================
@@ -930,7 +894,6 @@ const Home: React.FC = () => {
             ========================================== */}
         <TrendingTracksSection 
           title="Trending NFT Audio Artifacts" 
-          subtitle="Top performing releases synced from TON blockchain" 
         />
 
         {/* ==========================================
@@ -938,7 +901,6 @@ const Home: React.FC = () => {
             ========================================== */}
         <CollectionGallery 
           title="Curated Audio NFT Gallery" 
-          subtitle="Discover verified music NFTs, master stems and digital collectibles" 
         />
 
         {/* ==========================================
@@ -1236,46 +1198,14 @@ const Home: React.FC = () => {
         </div>
 
 
-        {/* Web3 Music Trends */}
-        <Web3MusicTrends />
+        {/* Web3 Music News Section (Search Grounded) */}
+        <Web3MusicNews />
 
         {/* Trending NFT Volume Chart */}
         <TrendingNFTVolumeChart />
 
         {/* Recently Minted NFTs Component */}
         <RecentlyMintedNFTs />
-
-
-        {/* ==========================================
-            SECTION 13: RECENTLY MINTED MUSIC NFTs (Horizontal Scroll)
-            ========================================= */}
-        <div className="space-y-3 text-left">
-          <div className="flex items-center justify-between px-0.5">
-            <h2 className="text-lg font-black tracking-tight text-white">
-              Recently Minted Music NFTs
-            </h2>
-            <button onClick={() => navigate("/explore/nfts?title=Recently+Minted+NFTs&filter=new_nfts")} className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors">
-              More <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4 animate-fade-in">
-            {mappedRecentlyMintedNFTs.map((nft) => (
-              <NFTCard 
-                key={nft.id} 
-                nft={nft} 
-                variant="default"
-                className="w-[155px] shrink-0"
-                onAction={(nftItem) => {
-                  if (nftItem.owner !== userProfile?.walletAddress) {
-                    handleMintNFT(nftItem.id);
-                  }
-                }}
-              />
-            ))}
-          </div>
-        </div>
-
 
         {/* DESIGN FOOTER & ORACLE PROTOCOL NOTE */}
         <div className="pt-6 text-center space-y-1.5 pb-10">

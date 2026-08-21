@@ -68,9 +68,9 @@ export function ChartArtifacts() {
               {/* @ts-ignore */}
               <Legend wrapperStyle={{ paddingTop: '20px', opacity: 0.8 }} />
               {/* @ts-ignore */}
-              <Bar dataKey="streams" name="Streams" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="streams" name="Streams" fill="#10b981" radius={[4, 4, 0, 0]} isAnimationActive={false} />
               {/* @ts-ignore */}
-              <Bar dataKey="sales" name="Sales" fill="#a855f7" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="sales" name="Sales" fill="#a855f7" radius={[4, 4, 0, 0]} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -543,8 +543,8 @@ export const RoyaltyTrackingSection: React.FC = () => {
                   labelStyle={{ color: '#94A3B8', fontWeight: 'bold', fontSize: '12px' }}
                   formatter={(value: any) => [`${value} ${currency === 'JAM' ? 'JAM' : currency === 'USD' ? 'USD' : 'TON'}`, '']}
                 />
-                <Area type="monotone" dataKey="primary" name="Primary Sales" stroke="#0052FF" strokeWidth={3} fillOpacity={1} fill="url(#colorPrimary)" />
-                <Area type="monotone" dataKey="secondary" name="Secondary Royalties" stroke="#A855F7" strokeWidth={3} fillOpacity={1} fill="url(#colorSecondary)" />
+                <Area type="monotone" dataKey="primary" name="Primary Sales" stroke="#0052FF" strokeWidth={3} fillOpacity={1} fill="url(#colorPrimary)" isAnimationActive={false} />
+                <Area type="monotone" dataKey="secondary" name="Secondary Royalties" stroke="#A855F7" strokeWidth={3} fillOpacity={1} fill="url(#colorSecondary)" isAnimationActive={false} />
               </AreaChart>
             ) : (
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -554,8 +554,8 @@ export const RoyaltyTrackingSection: React.FC = () => {
                   contentStyle={{ backgroundColor: '#050A24', borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}
                   labelStyle={{ color: '#94A3B8', fontWeight: 'bold', fontSize: '12px' }}
                 />
-                <Bar dataKey="primary" name="Primary Sales" fill="#0052FF" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="secondary" name="Secondary Royalties" fill="#A855F7" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="primary" name="Primary Sales" fill="#0052FF" radius={[6, 6, 0, 0]} isAnimationActive={false} />
+                <Bar dataKey="secondary" name="Secondary Royalties" fill="#A855F7" radius={[6, 6, 0, 0]} isAnimationActive={false} />
               </BarChart>
             )}
           </ResponsiveContainer>

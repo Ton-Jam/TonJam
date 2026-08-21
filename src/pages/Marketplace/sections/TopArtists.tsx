@@ -12,7 +12,6 @@ export const TopArtists: React.FC<TopArtistsProps> = () => {
     <div className="w-full text-left" id="marketplace-top-artists">
       <TopArtistsSection 
         title="Top Marketplace Artists"
-        subtitle="Most active creators & highest-volume audio NFT architects on Tonjam"
         limit={10}
         showFilters={true}
       />

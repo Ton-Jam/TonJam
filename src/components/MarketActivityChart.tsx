@@ -279,25 +279,21 @@ export const MarketActivityChart: React.FC<MarketActivityChartProps> = ({
               fillOpacity={1} 
               fill="url(#colorPriceActivity)" 
               activeDot={{ r: 4, strokeWidth: 0, fill: '#3b82f6' }}
-              isAnimationActive={true}
-              animationDuration={2000}
-              animationBegin={400}
+              isAnimationActive={false}
             />
             
             <Scatter 
               data={filteredData.filter(d => d.type === 'bid')} 
               fill="#22c55e" 
               shape="circle"
-              isAnimationActive={true}
+              isAnimationActive={false}
             />
             
             <Line 
               type="monotone" 
               dataKey="price" 
               stroke="transparent" 
-              isAnimationActive={true}
-              animationDuration={2000}
-              animationBegin={400}
+              isAnimationActive={false}
               dot={(props: any) => {
                 const { cx, cy, payload } = props;
                 if (payload.type === 'sale') {

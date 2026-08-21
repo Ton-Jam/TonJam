@@ -53,13 +53,15 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
 
   return (
     <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       whileHover={{ 
         y: -6, 
         scale: 1.05,
         boxShadow: "0 0 25px rgba(59, 130, 246, 0.35)"
       }}
       whileTap={{ scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       onClick={handleCardClick}
       style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
       className="bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center border border-white/5 hover:border-blue-500/50 transition-all duration-300 cursor-pointer shrink-0"

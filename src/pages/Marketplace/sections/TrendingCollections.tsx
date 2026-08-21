@@ -36,9 +36,6 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
             <Layers className="w-5 h-5 text-[#5B6BFF]" />
             Trending Collections
           </h2>
-          <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-            Top music collections compiled on TON
-          </p>
         </div>
 
         {/* Action Controls */}

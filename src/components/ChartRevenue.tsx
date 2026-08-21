@@ -94,12 +94,14 @@ export function ChartRevenue() {
               stackId="a"
               fill="var(--color-streaming)"
               radius={[0, 0, 4, 4]}
+              isAnimationActive={false}
             />
             <Bar
               dataKey="nft"
               stackId="a"
               fill="var(--color-nft)"
               radius={[4, 4, 0, 0]}
+              isAnimationActive={false}
             />
           </BarChart>
         </ChartContainer>

@@ -347,6 +347,9 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <ContextMenu>
         <ContextMenuTrigger>
         <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           whileHover={{ scale: cardTokens.animation.hoverScale }}
           whileTap={{ scale: cardTokens.animation.tapScale }}
           style={{ height: cardTokens.track.height, padding: cardTokens.track.padding, borderRadius: cardTokens.global.borderRadius }}
@@ -446,6 +449,9 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <ContextMenu>
         <ContextMenuTrigger>
           <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           whileHover={{ opacity: 1, backgroundColor: "var(--color-hover)" }}
           style={{ borderRadius: cardTokens.global.borderRadius }}
           className={`flex flex-col w-full group/row border-b border-divider last:border-0 transition-colors ${className}`}

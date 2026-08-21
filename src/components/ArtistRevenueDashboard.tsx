@@ -288,7 +288,7 @@ const ArtistRevenueDashboard: React.FC = () => {
                   strokeWidth={3}
                   fillOpacity={1} 
                   fill="url(#colorMetric)" 
-                  animationDuration={1500}
+                  isAnimationActive={false}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -314,8 +314,7 @@ const ArtistRevenueDashboard: React.FC = () => {
                   outerRadius={80}
                   paddingAngle={8}
                   dataKey="value"
-                  animationBegin={200}
-                  animationDuration={1500}
+                  isAnimationActive={false}
                 >
                   {royaltyDistribution.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />

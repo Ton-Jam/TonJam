@@ -65,7 +65,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           {/* Continue Listening Section */}
           <Section 
             title="Continue Listening" 
-            subtitle="Pick up where you left off"
             lazy={true}
             className="!px-0 !my-0"
           >
@@ -104,7 +103,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           {/* Recently Played Section */}
           <Section 
             title="Recently Played" 
-            subtitle="Your recent sonic history"
             lazy={true}
             className="!px-0 !my-0"
           >
@@ -170,7 +168,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           {/* Favorite NFT Collection Banner */}
           <Section 
             title="Featured NFT" 
-            subtitle="Active Web3 asset"
             lazy={true}
             className="!px-0 !my-0 bg-[#101A3B] rounded-[12px] p-4 flex flex-col justify-between"
           >
@@ -244,7 +241,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       {/* Reusable Horizontal Carousel for Favorite Artists */}
       <Section 
         title="Favorite Artists" 
-        subtitle="Ecosystem creators you love"
         onSeeAll={() => alert('View all artists')}
         className="!px-0 pt-4"
       >
