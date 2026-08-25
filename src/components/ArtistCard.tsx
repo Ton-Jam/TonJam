@@ -58,7 +58,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
           whileTap={{ scale: 0.99 }}
           className="w-full artist-card-custom-style"
         >
-          <Card onClick={handleCardClick} className={cn("group p-4 flex items-center gap-4 cursor-pointer hover:border-primary/50 transition-all", className)}>
+          <Card onClick={handleCardClick} className={cn("group p-2 flex items-center gap-4 cursor-pointer bg-transparent border-none shadow-none transition-all", className)}>
             <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="w-12 h-12 rounded-full object-cover" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }} />
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-[12px] truncate uppercase">{artist.name}</h3>
@@ -68,7 +68,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
               className={cn(
                   "rounded-full transition-all",
                   isFollowing 
-                    ? "bg-muted/50 text-muted-foreground border border-border hover:bg-muted/80" 
+                    ? "bg-muted/50 text-muted-foreground hover:bg-muted/80" 
                     : "bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]"
                 )}
                 onClick={handleFollowClick} size="sm">
@@ -88,13 +88,13 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
     <motion.div
       whileHover={{ y: -4, scale: cardTokens.animation.hoverScale }}
       whileTap={{ scale: cardTokens.animation.tapScale }}
-      style={{ width: cardTokens.artist.width, padding: cardTokens.global.padding, borderRadius: cardTokens.global.borderRadius }}
-      className={cn("group flex flex-col items-center text-center relative cursor-pointer transition-all duration-300 bg-[#0A113A]/50 hover:bg-white/[0.05]", className)}
+      style={{ width: cardTokens.artist.width, borderRadius: cardTokens.global.borderRadius }}
+      className={cn("group flex flex-col items-center text-center relative cursor-pointer transition-all duration-300 bg-transparent p-0", className)}
       onClick={handleCardClick}
     >
       <div 
         style={{ width: cardTokens.artist.avatarSize, height: cardTokens.artist.avatarSize }}
-        className="relative rounded-full overflow-hidden bg-background transition-all mb-2 border border-white/5 flex-shrink-0"
+        className="relative rounded-full overflow-hidden bg-background transition-all mb-2 flex-shrink-0"
       >
         <img 
           src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
@@ -104,7 +104,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
         />
         {onMoreClick && (
           <button
-             className="absolute top-1.5 right-1.5 p-1 bg-black/60 backdrop-blur-md rounded-full border border-white/10 text-white/80 hover:text-white transition-all"
+             className="absolute top-1.5 right-1.5 p-1 bg-black/60 rounded-full text-white/80 hover:text-white transition-all"
              onClick={(e) => { e.stopPropagation(); onMoreClick(artist); }}
           >
             <MoreHorizontal className="h-3 w-3" />

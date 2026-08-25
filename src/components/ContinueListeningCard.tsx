@@ -18,39 +18,40 @@ const ContinueListeningCard: React.FC<ContinueListeningCardProps> = ({
   return (
     <motion.div
       whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      className="bg-[#0A113A]/60 backdrop-blur-xl rounded-2xl p-4 relative overflow-hidden flex items-center justify-between gap-3 shadow-xl border-none text-left"
+      whileTap={{ scale: 0.98 }}
+      onClick={onPlay}
+      className="bg-transparent rounded-xl p-0 relative overflow-hidden flex items-center justify-between gap-3 select-none text-left cursor-pointer transition-colors"
     >
-      {/* Holographic background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#5B6BFF]/10 to-[#00B4D8]/10 pointer-events-none" />
-      
-      <div className="flex items-center gap-3.5 min-w-0 z-10">
-        <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
+      <div className="flex items-center gap-3 min-w-0 z-10">
+        <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-neutral-900 shadow-md">
           <img
             src={coverUrl}
             alt={title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-black/10" />
         </div>
         <div className="min-w-0 text-left">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-[#00B4D8] block">
-            CONTINUE LISTENING
+          <span className="text-[9px] uppercase font-bold tracking-widest text-blue-400 block">
+            CONTINUE
           </span>
-          <h4 className="text-sm font-extrabold text-white truncate mt-0.5 leading-none">
+          <h4 className="text-[13px] font-semibold text-white/95 truncate leading-tight mt-0.5">
             {title}
           </h4>
-          <p className="text-xs text-[#9AA0AE] truncate mt-1">
+          <p className="text-[11px] text-zinc-400 truncate mt-0.5">
             {artist}
           </p>
         </div>
       </div>
 
       <button
-        onClick={onPlay}
-        className="w-11 h-11 rounded-full bg-[#5B6BFF] hover:bg-[#4856ea] text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-md shrink-0 cursor-pointer border-none z-10"
+        onClick={(e) => {
+          e.stopPropagation();
+          onPlay();
+        }}
+        aria-label="Play track"
+        className="w-10 h-10 rounded-full bg-[#0179f4] hover:bg-[#0179f4]/90 text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-md shadow-[#0179f4]/30 shrink-0 cursor-pointer border-none z-10"
       >
-        <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+        <Play className="w-4 h-4 fill-white text-white ml-0.5" />
       </button>
     </motion.div>
   );

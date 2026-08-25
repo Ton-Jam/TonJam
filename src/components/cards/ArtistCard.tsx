@@ -67,7 +67,7 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({
 
   if (isLoading) {
     return (
-      <div className={`flex flex-col items-center p-4 rounded-[10px] bg-[#0A113A] animate-pulse w-[140px] shrink-0 ${className}`}>
+      <div className={`flex flex-col items-center p-0 bg-transparent animate-pulse w-[140px] shrink-0 ${className}`}>
         <div className="w-20 h-20 rounded-full bg-white/10 mb-3" />
         <div className="h-4 bg-white/10 rounded w-3/4 mb-1" />
         <div className="h-3 bg-white/10 rounded w-1/2" />
@@ -103,7 +103,7 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({
       whileHover={{ scale: 1.03, y: -4 }}
       whileTap={{ scale: 0.97 }}
       onClick={handleCardClick}
-      className={`flex flex-col items-center p-4 rounded-[10px] bg-[#0A113A] hover:bg-[#101A3B] transition-colors cursor-pointer w-[150px] shrink-0 snap-start select-none group relative ${className}`}
+      className={`flex flex-col items-center p-0 bg-transparent transition-colors cursor-pointer w-[150px] shrink-0 snap-start select-none group relative ${className}`}
     >
       {/* Circular Profile Photo Wrapper */}
       <div className="relative w-24 h-24 mb-3 rounded-full shrink-0 bg-slate-950">

@@ -20,7 +20,7 @@ export const MusicCard = React.forwardRef<HTMLDivElement, MusicCardProps>(
         ref={ref}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className={cn("flex flex-col p-3 rounded-xl bg-[#0A113A] hover:bg-[#101A3B] transition-colors cursor-pointer w-[170px] h-[250px] shrink-0 snap-start", className)}
+        className={cn("flex flex-col p-0 bg-transparent transition-colors cursor-pointer w-[170px] shrink-0 snap-start", className)}
         {...props}
       >
         <div className="relative w-full h-[180px] rounded-lg overflow-hidden mb-3">

@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import { useToast } from "@/components/layout/ToastProvider";
 import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
-import { useAccount } from "wagmi";
 import {
   Track,
   Playlist,
@@ -436,7 +435,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const { toast: toastUI } = useToast();
   const [tonConnectUI] = useTonConnectUI();
   const tonAddress = useTonAddress();
-  const { address: evmAddress } = useAccount();
+  const evmAddress = typeof window !== 'undefined' ? localStorage.getItem('tonjam_simulated_evm_address') : null;
 
   // Zustand State Integration
   const {

@@ -24,9 +24,9 @@ const NFTCollectionCard: React.FC<NFTCollectionCardProps> = ({
   return (
     <motion.div
       whileHover={{ y: -3 }}
-      className="w-[155px] shrink-0 rounded-2xl bg-[#0A113A]/50 p-3 flex flex-col justify-between space-y-3 shadow-md border-none text-left"
+      className="w-[155px] shrink-0 bg-transparent p-0 flex flex-col justify-between space-y-3 border-none text-left"
     >
-      <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-[#050A24]">
+      <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-neutral-900 shadow-md">
         <img src={coverUrl} alt={name} className="w-full h-full object-cover" />
         <div className="absolute bottom-1.5 right-1.5">
           <span className="text-[7px] font-black uppercase tracking-wider bg-black/70 text-white px-2 py-0.5 rounded-sm">
@@ -44,7 +44,7 @@ const NFTCollectionCard: React.FC<NFTCollectionCardProps> = ({
         </p>
       </div>
 
-      <div className="flex items-center justify-between pt-1.5 border-t border-white/[0.03]">
+      <div className="flex items-center justify-between pt-1">
         <div className="text-align-left">
           <span className="text-[8px] uppercase tracking-wider text-[#9AA0AE] block leading-none">Floor</span>
           <p className="text-xs font-black text-[#00B4D8] font-mono leading-none flex items-center gap-0.5 mt-1">

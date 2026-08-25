@@ -27,6 +27,7 @@ import TopicPill from "./TopicPill";
 import CommunityFeedCard from "./CommunityFeedCard";
 import LatestMarketActivity from "./LatestMarketActivity";
 import TrendingTracks from "./TrendingTracks";
+import RecentlyMintedNFTs from "./RecentlyMintedNFTs";
 
 // Detailed interface for collections & listings 
 interface NFTCollection {
@@ -623,41 +624,8 @@ const HomeScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* SECTION 13: RECENTLY MINTED MUSIC NFTs */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-black text-white">Recently Minted NFTs</h2>
-        <div className="grid grid-cols-2 gap-3.5">
-          {recentlyMintedNFTs.map(nft => (
-            <div
-              key={nft.id}
-              className="bg-[#0A113A]/50 p-3 rounded-2xl flex flex-col justify-between space-y-3"
-            >
-              <div className="relative aspect-square rounded-xl overflow-hidden">
-                <img src={nft.cover} className="w-full h-full object-cover" alt="" />
-                <span className="absolute bottom-2 left-2 text-[8px] font-black bg-black/60 px-2 py-0.5 rounded-sm">
-                  {nft.price}
-                </span>
-              </div>
-              <div>
-                <h4 className="text-xs font-black text-white truncate">{nft.name}</h4>
-                <p className="text-[10px] text-[#9AA0AE] truncate">{nft.artist}</p>
-              </div>
-              {nft.minted ? (
-                <Button disabled className="w-full h-7 text-[8px] bg-emerald-500/10 text-emerald-400 border-none">
-                  ✓ Minted
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => handleMintNFTClick(nft.id)}
-                  className="w-full h-7 text-[8px] bg-[#5B6BFF] hover:bg-[#4856ea] text-white border-none"
-                >
-                  Mint NFT
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* SECTION 13: RECENTLY ADDED MUSIC NFTs */}
+      <RecentlyMintedNFTs title="Recently Added" />
 
       {/* SECTION 14: COMMUNITY ACTIVITY FEED */}
       <div className="space-y-3">
@@ -697,5 +665,6 @@ export {
   RewardPreviewCard,
   MarketplaceCard,
   TopicPill,
-  CommunityFeedCard
+  CommunityFeedCard,
+  RecentlyMintedNFTs
 };

@@ -25,10 +25,10 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index, className = '' }) =
       whileTap={{ scale: cardTokens.animation.tapScale }}
       transition={{ delay: index * 0.05 }}
       onClick={() => navigate(`/album/${album.id}`)}
-      style={{ width: cardTokens.album.width, padding: cardTokens.global.padding, borderRadius: cardTokens.global.borderRadius }}
-      className={`group relative cursor-pointer bg-[#0A113A]/50 hover:bg-white/[0.05] transition-all duration-300 flex flex-col justify-between overflow-hidden ${className}`}
+      style={{ width: cardTokens.album.width, borderRadius: cardTokens.global.borderRadius }}
+      className={`group relative cursor-pointer bg-transparent p-0 transition-all duration-300 flex flex-col justify-between ${className}`}
     >
-      <div className="relative aspect-square rounded-[6px] overflow-hidden mb-3 bg-white/[0.05] border border-white/5 group-hover:border-blue-500/30 transition-all shadow-md flex-shrink-0">
+      <div className="relative aspect-square rounded-[6px] overflow-hidden mb-3 bg-neutral-900 shadow-md flex-shrink-0">
         {album.coverUrl ? (
           <img
             src={album.coverUrl}

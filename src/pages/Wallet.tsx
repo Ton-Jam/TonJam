@@ -22,7 +22,6 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useAudio } from '@/contexts/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { doc, getDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { TON_LOGO, JAM_PRICE_USD, TJ_COIN_ICON } from '@/constants';
@@ -46,18 +45,13 @@ const Wallet: React.FC = () => {
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   
-  // WAGMI/EVM wallet hooks
-  const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
-  const { connect, connectors } = useConnect();
-  const { disconnect: disconnectEvm } = useDisconnect();
-  
-  // Local state for EVM Simulation in sandboxed preview environment
+  // EVM wallet state
   const [simulatedEvmAddress, setSimulatedEvmAddress] = useState<string | null>(() => {
     return localStorage.getItem('tonjam_simulated_evm_address');
   });
 
-  const activeEvmAddress = evmAddress || simulatedEvmAddress;
-  const isAnyEvmConnected = isEvmConnected || !!simulatedEvmAddress;
+  const activeEvmAddress = simulatedEvmAddress;
+  const isAnyEvmConnected = !!simulatedEvmAddress;
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isClaimingRoyalty, setIsClaimingRoyalty] = useState(false);
@@ -228,9 +222,6 @@ const Wallet: React.FC = () => {
   };
 
   const handleDisconnectMetaMask = () => {
-    if (isEvmConnected) {
-      disconnectEvm();
-    }
     setSimulatedEvmAddress(null);
     localStorage.removeItem('tonjam_simulated_evm_address');
     toast.success("MetaMask disconnected successfully.");
@@ -389,20 +380,11 @@ const Wallet: React.FC = () => {
                 </button>
               ) : (
                 <div className="flex items-center gap-2">
-                  {/* WAGMI connector option */}
-                  {connectors && connectors.length > 0 ? (
-                    <button
-                      onClick={() => connect({ connector: connectors[0] })}
-                      className="px-3 py-2 text-[9px] font-bold text-white bg-purple-600 hover:bg-purple-700 uppercase tracking-widest transition-all rounded-[4px]"
-                    >
-                      Connect MetaMask
-                    </button>
-                  ) : null}
                   <button
                     onClick={handleSimulateMetaMask}
-                    className="px-3 py-2 text-[9px] font-bold text-purple-400 hover:bg-purple-500/10 uppercase tracking-widest transition-all rounded-[4px]"
+                    className="px-3 py-2 text-[9px] font-bold text-white bg-purple-600 hover:bg-purple-700 uppercase tracking-widest transition-all rounded-[4px]"
                   >
-                    Demo Link
+                    Connect MetaMask
                   </button>
                 </div>
               )}

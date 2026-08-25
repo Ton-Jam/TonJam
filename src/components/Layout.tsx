@@ -36,8 +36,7 @@ import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, TON_LOGO, JAM_PRICE_USD, MOCK_TRACKS
 import { useAudio, useUserRole } from '@/contexts/AudioContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTonPrice } from '@/contexts/TonPriceContext';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { injected } from 'wagmi/connectors';
+import { useWallet } from '@/contexts/WalletContext';
 import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { toast } from 'sonner';
@@ -150,9 +149,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const { user, signInWithGoogle, signOut } = useAuth();
   const { price: tonPriceData, loading: tonPriceLoading } = useTonPrice();
-  const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
-  const { connect } = useConnect();
-  const { disconnect: disconnectEvm } = useDisconnect();
+  const { evmAddress, isEvmConnected, disconnectWallet: disconnectWalletContext } = useWallet();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -368,12 +365,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </main>
       ) : (
-        <div className="flex min-h-screen bg-background text-foreground transition-colors duration-300 relative">
+        <div className="flex min-h-screen bg-black text-foreground transition-colors duration-300 relative">
           {/* Ambient Background Effects */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-blue-600/5 rounded-full blur-[120px]" />
-        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] bg-blue-400/5 rounded-full blur-[120px]" />
-      </div>
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-black" />
 
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-2 focus:py-2 focus:rounded-md focus:font-bold">
         Skip to content
@@ -382,11 +376,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Header */}
       {!isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isLoginPage && !isDiscover && !isArtistProfile && (
         <motion.header 
-          className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md' : 'bg-transparent'}`}
+          className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} bg-black border-none`}
         >
           {/* Background with blur and seamless backdrop */}
           <motion.div 
-            className={`absolute inset-0 bg-background -z-10 transition-opacity duration-300 ${isArtistProfile && !isCompact ? 'opacity-0' : 'opacity-100'}`}
+            className="absolute inset-0 bg-black -z-10"
           />
           
           <div className={`flex items-center ${headerTitle ? 'justify-center flex-1' : 'gap-4 flex-1'}`}>
@@ -725,9 +719,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
-                      onClick={() => {
-                        if (userAddress) tonConnectUI.disconnect();
-                        if (isEvmConnected) disconnectEvm();
+                      onClick={async () => {
+                        await disconnectWalletContext();
                         navigate('/wallet');
                       }}
                       className={`p-2.5 rounded-[4px] hover:bg-destructive/10 hover:text-destructive transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
@@ -748,8 +741,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <button 
                       onClick={() => {
-                        // Simple toggle to choose EVM
-                        connect({ connector: injected() });
                         navigate('/wallet');
                       }}
                       className={`p-2.5 rounded-[4px] hover:bg-muted transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
@@ -931,8 +922,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Mobile Navigation */}
       {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
         <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[70] h-16 transition-all duration-300 ease-in-out ${isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-blue-600/20 via-blue-500/50 to-blue-600/20 z-10" />
-          <nav className="h-full w-full bg-black/60 backdrop-blur-xl border-t border-white/10 px-2 flex justify-around items-center shadow-[0_-8px_32px_rgba(0,0,0,0.5)] mobile-nav-opaque" aria-label="Mobile Navigation">
+          <nav className="h-full w-full bg-black/95 backdrop-blur-xl border-t border-[#C0C0C0]/25 px-2 flex justify-around items-center" aria-label="Mobile Navigation">
             <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
             <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
             <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jamspace" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
@@ -1159,14 +1149,14 @@ function MobileNavItem({ to, icon: Icon, label, onClick }: { to: string; icon: a
       aria-label={label}
       onClick={onClick}
       className={({ isActive }) => `
-        flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full rounded-[4px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mobile-nav-item
-        ${isActive ? 'text-blue-500 font-bold' : 'text-white/80'}
+        flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full min-h-[48px] py-1 select-none active:scale-95
+        ${isActive ? 'text-blue-500 font-bold' : 'text-zinc-400 hover:text-zinc-200'}
       `}
     >
       {({ isActive }) => (
         <>
-          <Icon className={`h-6 w-6 transition-all ${isActive ? 'text-blue-500' : 'text-white/80'}`} strokeWidth={isActive ? 2.5 : 2} />
-          <span className={`text-[8px] font-bold uppercase tracking-widest transition-all ${isActive ? 'opacity-100 text-blue-500' : 'opacity-70 text-white/80'}`}>{label}</span>
+          <Icon className={`h-5 w-5 transition-transform ${isActive ? 'text-blue-500 scale-110' : 'text-zinc-400'}`} strokeWidth={isActive ? 2.5 : 2} />
+          <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isActive ? 'text-blue-500' : 'text-zinc-400'}`}>{label}</span>
         </>
       )}
     </NavLink>

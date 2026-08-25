@@ -29,13 +29,13 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #050A24;
+  --background: #000000;
   --foreground: #FFFFFF;
   --primary: #00B4D8;
   --primary-foreground: #FFFFFF;
-  --surface: #0A113A;
-  --elevated: #101A3B;
-  --border-subtle: rgba(255, 255, 255, 0.06);
+  --surface: #000000;
+  --elevated: #000000;
+  --border-subtle: transparent;
   --radius: 10px;
 }
 
@@ -102,7 +102,13 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: transparent;
+    outline-color: transparent;
+  }
+
+  /* Specific mini player silver border line */
+  #tonjam-mini-player {
+    border-top: 1px solid rgba(192, 192, 192, 0.28) !important;
   }
 
   /* Remove shadow effects from components for a clean flat aesthetic */
@@ -112,13 +118,17 @@
   
   html {
     @apply font-sans;
+    background-color: #000000 !important;
+    background: #000000 !important;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: none;
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: #000000 !important;
+    background: #000000 !important;
+    color: #FFFFFF;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -133,10 +143,10 @@
     width: 100% !important;
   }
 
-  /* Dark Glass UI Theme with Global Navy Blue Background and Neon Accents */
+  /* Solid Black UI Theme for entire App including all sections, headers, bottom nav */
   .dark {
-    background: radial-gradient(circle at 50% 0%, #0A1647 0%, #050A24 100%) !important;
-    background-color: #050A24 !important;
+    background: #000000 !important;
+    background-color: #000000 !important;
   }
   .dark body,
   .dark .bg-background,
@@ -146,36 +156,36 @@
   .dark [class*="bg-[#0B0F14]"],
   .dark [class*="bg-[#050505]"],
   .dark [class*="bg-[#0a0a0a]"],
+  .dark [class*="bg-[#080d2d]"],
   .dark .bg-zinc-950,
   .dark .bg-zinc-900,
   .dark .bg-black,
   .dark .bg-zinc-950\/60,
   .dark .bg-zinc-950\/80,
   .dark .bg-zinc-900\/50 {
-    background: radial-gradient(circle at 50% 0%, #0A1647 0%, #050A24 100%) !important;
-    background-color: #050A24 !important;
+    background: #000000 !important;
+    background-color: #000000 !important;
   }
 
-  /* Frosted semi-transparent glass surfaces for panels, cards, containers */
+  /* Black surfaces for all panels, cards, containers, sections, headers, bottom navigation */
   .dark .bg-card,
   .dark .bg-secondary,
   .dark .bg-zinc-800,
   .dark .bg-accent,
   .dark .bg-slate-900,
   .dark section,
+  .dark main,
   .dark main section,
+  .dark header,
+  .dark aside,
+  .dark nav,
   .dark .section-container,
   .dark .bg-zinc-900\/40,
   .dark .bg-zinc-900\/60,
-  .dark [class*="bg-[#0A113A]/50"],
-  .dark [class*="bg-[#0A113A]/60"],
-  .dark [class*="bg-[#0A113A]/40"],
-  .dark [class*="bg-[#0A113A]/30"],
-  .dark [class*="bg-[#0A113A]/25"],
-  .dark [class*="bg-[#0A113A]/20"],
-  .dark [class*="bg-[#0a113a]/50"],
-  .dark [class*="bg-[#0a113a]/60"],
-  .dark [class*="bg-[#0a113a]/40"],
+  .dark [class*="bg-[#0A113A]"],
+  .dark [class*="bg-[#0a113a]"],
+  .dark [class*="bg-[#101A3B]"],
+  .dark [class*="bg-[#101a3b]"],
   .dark [class*="bg-white/0.01"],
   .dark [class*="bg-white/0.02"],
   .dark [class*="bg-white/0.03"],
@@ -193,29 +203,29 @@
   .dark [class*="bg-zinc-900/60"],
   .dark [class*="bg-zinc-950/60"],
   .dark [class*="bg-zinc-950/80"] {
-    background-color: rgba(10, 17, 58, 0.65) !important;
-    background: rgba(10, 17, 58, 0.65) !important;
+    background-color: #000000 !important;
+    background: #000000 !important;
     transform: translateZ(0);
-    border-color: rgba(255, 255, 255, 0.06) !important;
+    border-color: transparent !important;
+    border: none !important;
   }
 
-  /* Interactive state for glass elements */
+  /* Interactive state for elements */
   .dark .bg-card:hover,
   .dark [class*="bg-white/0.05"]:hover,
   .dark [class*="bg-white/[0.05]"]:hover,
   .dark [class*="bg-white/[0.06]"]:hover,
   .dark [class*="bg-white/[0.08]"]:hover {
-    background-color: rgba(10, 17, 58, 0.6) !important;
-    background: rgba(10, 17, 58, 0.6) !important;
-    box-shadow: 0 0 15px rgba(0, 180, 216, 0.15) !important;
-    border-color: rgba(0, 180, 216, 0.2) !important;
+    background-color: #050505 !important;
+    background: #050505 !important;
+    border-color: transparent !important;
   }
 
   /* Neon Primary and accents for active interactives */
   .dark .btn-primary,
   .dark .bg-primary {
     background: linear-gradient(135deg, #00B4D8 0%, #009CC0 100%) !important;
-    box-shadow: 0 0 12px rgba(0, 180, 216, 0.4) !important;
+    box-shadow: none !important;
     border: none !important;
     text-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
     transition: all 0.2s ease-in-out;
@@ -223,27 +233,28 @@
   .dark .btn-primary:hover,
   .dark .bg-primary:hover {
     background: linear-gradient(135deg, #33C7E5 0%, #00B4D8 100%) !important;
-    box-shadow: 0 0 20px rgba(0, 180, 216, 0.65) !important;
   }
 
   /* Neon focus styling for inputs */
   .dark input:focus,
   .dark textarea:focus,
   .dark select:focus {
-    border-color: #00B4D8 !important;
-    box-shadow: 0 0 10px rgba(0, 180, 216, 0.3) !important;
-    background-color: rgba(5, 10, 36, 0.75) !important;
+    border-color: transparent !important;
+    background-color: #000000 !important;
   }
 
-  /* Ensure the mobile navigation bar and mini player have frosted glass */
+  /* Solid Black Mobile Navigation bar, headers, and mini player */
   .dark .mini-player-opaque,
-  .dark .mobile-nav-opaque {
-    background-color: rgba(5, 10, 36, 0.75) !important;
-    background: rgba(5, 10, 36, 0.75) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5) !important;
+  .dark .mobile-nav-opaque,
+  .mobile-nav-opaque,
+  .mini-player-opaque {
+    background-color: #000000 !important;
+    background: #000000 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-top: none !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   .dark .mobile-nav-no-backdrop {
@@ -251,13 +262,7 @@
     -webkit-backdrop-filter: none !important;
   }
 
-  /* Force premium subtle silver outlines for target task card components */
-  .task-card-silver-outline {
-    border: 1px solid rgba(192, 192, 192, 0.35) !important;
-    border-radius: 12px !important;
-  }
-
-  /* Flat, subtle borders, matching Halo spec */
+  /* Flat borders with no border lines */
   .dark .border,
   .dark .border-t,
   .dark .border-b,
@@ -266,7 +271,7 @@
   .dark .border-border,
   .dark .border-white\/10,
   .dark .border-white\/5 {
-    border-color: #16244f !important;
+    border-color: transparent !important;
   }
 
   .page-container,
@@ -826,7 +831,7 @@ body {
   }
 }
 
-/* Global Modals and Toasts Navy Blue Background Override */
+/* Global Modals and Toasts Black Background Override */
 [data-slot="dialog-content"],
 [data-slot="alert-dialog-content"],
 [role="dialog"],
@@ -834,11 +839,13 @@ body {
 .cn-toast,
 [data-sonner-toast],
 .toast {
-  background-color: #0A113A !important;
-  background: #0A113A !important;
+  background-color: #000000 !important;
+  background: #000000 !important;
+  border-color: transparent !important;
+  border: none !important;
 }
 
-/* Ensure inner container panels in modals match the navy blue theme */
+/* Ensure inner container panels in modals match the black theme */
 [role="dialog"] .bg-zinc-950,
 [role="dialog"].bg-zinc-950,
 [role="dialog"] .bg-neutral-900,
@@ -873,8 +880,10 @@ body {
 [role="alertdialog"].bg-card,
 [role="alertdialog"] .bg-background,
 [role="alertdialog"].bg-background {
-  background-color: #0A113A !important;
-  background: #0A113A !important;
+  background-color: #000000 !important;
+  background: #000000 !important;
+  border-color: transparent !important;
+  border: none !important;
 }
 
 [data-sonner-toast],

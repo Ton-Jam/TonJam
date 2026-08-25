@@ -137,8 +137,8 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       whileHover={{ y: -4, scale: cardTokens.animation.hoverScale }}
       whileTap={{ scale: cardTokens.animation.tapScale }}
       onClick={onClick} 
-      style={{ width: cardTokens.playlist.width, padding: cardTokens.global.padding, borderRadius: cardTokens.global.borderRadius }}
-      className={cn("group relative cursor-pointer bg-[#0A113A]/50 hover:bg-white/[0.05] transition-all duration-300 flex flex-col justify-between overflow-hidden", className)}
+      style={{ width: cardTokens.playlist.width, borderRadius: cardTokens.global.borderRadius }}
+      className={cn("group relative cursor-pointer bg-transparent p-0 transition-all duration-300 flex flex-col justify-between", className)}
     >
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[6px] overflow-hidden bg-neutral-900 shadow-md mb-2 flex-shrink-0">

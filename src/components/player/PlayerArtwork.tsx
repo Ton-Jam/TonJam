@@ -56,7 +56,7 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
   };
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-center my-3 select-none">
+    <div className="relative w-full flex flex-col items-center justify-center my-2 select-none">
       {/* Blurred background image behind the artwork */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none rounded-3xl opacity-35 filter blur-3xl scale-125">
         <img
@@ -80,18 +80,18 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onClick={handleClick}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        animate={{ scale: isZoomed ? 1.15 : 1 }}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        animate={{ scale: isZoomed ? 1.1 : 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="relative w-[68vw] max-w-[350px] sm:max-w-[390px] max-h-[38vh] aspect-square rounded-2xl overflow-hidden shadow-2xl bg-[#0A113A] group cursor-pointer"
+        className="relative w-[84vw] max-w-[380px] sm:max-w-[420px] max-h-[46vh] aspect-square rounded-lg overflow-hidden shadow-2xl bg-[#0A113A] group cursor-pointer"
       >
         {/* Static artwork container (no rotation) */}
         <div className="w-full h-full relative flex items-center justify-center">
           <img
             src={coverUrl}
             alt={track?.title || "Track Artwork"}
-            className="w-full h-full object-cover rounded-xl"
+            className="w-full h-full object-cover rounded-lg"
             onError={(e) => {
               (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
             }}

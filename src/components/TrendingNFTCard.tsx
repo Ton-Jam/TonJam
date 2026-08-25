@@ -53,66 +53,47 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
 
   return (
     <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      whileHover={{ 
-        y: -6, 
-        scale: 1.05,
-        boxShadow: "0 0 25px rgba(59, 130, 246, 0.35)"
-      }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -3 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
       onClick={handleCardClick}
-      style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
-      className="bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center border border-white/5 hover:border-blue-500/50 transition-all duration-300 cursor-pointer shrink-0"
+      className="group relative cursor-pointer p-0 bg-transparent transition-all duration-200 flex flex-col w-[155px] shrink-0 select-none"
     >
-      {/* Premium Badge */}
-      <div className="absolute top-[-8px] left-[-8px] w-[100px] h-[100px] overflow-hidden flex items-center justify-center pointer-events-none">
-        <div className="absolute w-[150%] h-[30px] bg-gradient-to-br from-[#ff6547] via-[#ffb144] to-[#ff7053] rotate-[-45deg] translate-y-[-15px] flex items-center justify-center text-white font-semibold text-[8px] tracking-[0.1em] uppercase shadow-md">
-            Premium
+      {/* Artwork */}
+      <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-neutral-900/60 shadow-md">
+        <img 
+          src={nft.imageUrl || 'https://via.placeholder.com/150'} 
+          alt={nft.title} 
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+        />
+        
+        {/* Floating Quick Buy / View Action */}
+        <div className="absolute bottom-2 right-2 opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
+          <button 
+            onClick={handleBuyClick}
+            className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 hover:scale-105 active:scale-95 transition-all"
+            aria-label="Buy NFT"
+          >
+            <ShoppingCart className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
       
       {/* Content */}
-      <img 
-        src={nft.imageUrl || 'https://via.placeholder.com/150'} 
-        alt={nft.title} 
-        className="w-24 h-24 object-cover rounded-[4px] mt-4 mb-2 shadow-lg" 
-      />
-      
-      <div className="text-center px-1 flex-grow w-full min-w-0">
-        <h4 className="text-white font-semibold text-[10px] truncate max-w-[120px] mx-auto">{nft.title}</h4>
-        <div className="flex items-center justify-center gap-1 min-w-0 max-w-[130px] mx-auto mt-0.5">
-          <div className="flex-1 min-w-0">
-            <MarqueeTitle text={nft.creator || nft.artist || ''} className="text-gray-400 text-[9px] font-medium uppercase" />
-          </div>
-          {isVerified && <BadgeCheck className="w-2.5 h-2.5 text-blue-400 fill-current inline-block flex-shrink-0" />}
-        </div>
-        {collectionName && (
-          <p className="text-indigo-400 text-[8px] font-bold uppercase tracking-wider truncate max-w-[130px] mx-auto flex items-center justify-center gap-0.5 mt-0.5">
-            <Layers className="w-2 h-2 inline-block flex-shrink-0" /> {collectionName}
-          </p>
-        )}
-        <p className="text-blue-400 font-bold text-[11px] tracking-tight mt-1">
-          <motion.span
-            key={nft.price}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="inline-block"
-          >
-            {nft.price}
-          </motion.span> TON
+      <div className="flex flex-col w-full min-w-0 mt-2.5">
+        <h4 className="text-[13px] font-semibold tracking-tight text-white/95 truncate w-full group-hover:text-blue-400 transition-colors">
+          {nft.title}
+        </h4>
+        <p className="text-[11px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors">
+          {nft.creator || nft.artist}
         </p>
+        <div className="flex items-center gap-1 mt-1 text-[11px] font-medium text-white/70 font-mono">
+          <span className="text-blue-400 font-bold">{nft.price}</span>
+          <span className="text-white/40">TON</span>
+        </div>
       </div>
-
-      <button 
-        onClick={handleBuyClick}
-        className="cursor-pointer transition-all bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-4 py-1.5 rounded-[4px] border border-[#C0C0C0]/50 shadow-[0_0_8px_rgba(59,130,246,0.15)] text-[9px] font-black uppercase tracking-widest flex items-center gap-1 mt-1 w-full justify-center active:scale-95"
-      >
-        <ShoppingCart className="w-3 h-3" /> Buy
-      </button>
-
     </motion.div>
   );
 };

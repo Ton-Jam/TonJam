@@ -67,7 +67,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
   if (isLoading || (!track && !title)) {
     // Elegant Skeleton State
     return (
-      <div className={`flex items-center p-3 rounded-[10px] bg-[#0A113A] animate-pulse w-full max-w-full ${className}`}>
+      <div className={`flex items-center p-1.5 rounded-[10px] bg-transparent animate-pulse w-full max-w-full ${className}`}>
         <div className="w-12 h-12 bg-white/10 rounded-lg shrink-0" />
         <div className="ml-3 flex-1 space-y-2 min-w-0">
           <div className="h-4 bg-white/10 rounded w-1/3" />
@@ -99,9 +99,9 @@ export const TrackCard: React.FC<TrackCardProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      whileHover={{ scale: 1.01, backgroundColor: '#101A3B' }}
+      whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.98 }}
-      className={`flex items-center p-3 rounded-[10px] bg-[#0A113A] transition-colors cursor-pointer w-full group relative select-none ${className}`}
+      className={`flex items-center p-1.5 rounded-[10px] bg-transparent transition-colors cursor-pointer w-full group relative select-none ${className}`}
       onClick={() => onPlay?.(finalTrack)}
     >
       {/* Artwork Container */}

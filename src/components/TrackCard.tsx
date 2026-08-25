@@ -346,93 +346,49 @@ const TrackCard: React.FC<TrackCardProps> = ({
     return (
       <ContextMenu>
         <ContextMenuTrigger>
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          whileHover={{ scale: cardTokens.animation.hoverScale }}
-          whileTap={{ scale: cardTokens.animation.tapScale }}
-          style={{ height: cardTokens.track.height, padding: cardTokens.track.padding, borderRadius: cardTokens.global.borderRadius }}
-          className={`group flex items-center gap-4 hover:bg-hover transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-primary/50 ${className}`}
-          onClick={handleCardClickInner}
-          onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
-          role="button"
-          tabIndex={0}
-        >
-            <div 
-              style={{ width: cardTokens.track.artworkSize, height: cardTokens.track.artworkSize }}
-              className="relative rounded-[4px] overflow-hidden flex-shrink-0 shadow-sm border border-white/5 group-hover:border-blue-500/30 transition-colors"
-            >
-              <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
-              
-              {/* Play Count Badge on Corner */}
-              {((track.streams !== undefined ? track.streams : track.playCount) || 0) > 0 && (
-                <div className="absolute top-0.5 right-0.5 bg-black/70 backdrop-blur-[2px] text-[7px] font-bold text-white px-1 py-0.2 rounded flex items-center gap-0.5 z-10 select-none">
-                  <Headphones className="w-2 h-2 text-blue-400" />
-                  <span>{formatNumber(track.streams !== undefined ? track.streams : (track.playCount || 0))}</span>
-                </div>
-              )}
-
-              <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
-                <button onClick={handlePlay} className="text-white">
-                  {track.tokenGating?.enabled && !hasAccess ? (
-                    <Lock className="h-4 w-4" />
-                  ) : (isActive && isAudioLoading) ? (
-                    <img src={TJ_COIN_ICON} className="h-5 w-5 animate-spin" alt="Loading" />
-                  ) : isActive && isPlaying ? (
-                    <Pause className="h-5 w-5 fill-current animate-pulse" />
-                  ) : (
-                    <Play className="h-5 w-5 fill-current" />
-                  )}
-                </button>
-              </div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            className={`group flex items-center gap-3 p-1.5 rounded-lg bg-transparent transition-all cursor-pointer w-full outline-none select-none ${className}`}
+            onClick={handleCardClickInner}
+            onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
+            role="button"
+            tabIndex={0}
+          >
+            <div className="relative w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm">
+              <img 
+                src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
+                alt={track.title} 
+                className="w-full h-full object-cover" 
+                onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} 
+              />
+              <button 
+                onClick={handlePlay} 
+                className={`absolute inset-0 flex items-center justify-center bg-black/40 text-white transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                aria-label={isActive && isPlaying ? "Pause" : "Play"}
+              >
+                {isActive && isAudioLoading ? (
+                  <img src={TJ_COIN_ICON} className="h-4 w-4 animate-spin" alt="Loading" />
+                ) : isActive && isPlaying ? (
+                  <Pause className="h-4 w-4 fill-current text-blue-400" />
+                ) : (
+                  <Play className="h-4 w-4 fill-current ml-0.5" />
+                )}
+              </button>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 
-                  style={{ fontSize: cardTokens.track.titleSize }}
-                  className={`font-semibold uppercase tracking-tighter line-clamp-1 whitespace-nowrap overflow-hidden text-ellipsis ${isActive ? 'text-primary' : 'text-text-primary'}`}
-                >
-                  {track.title}
-                </h4>
-                {isComingSoon && (
-                  <span className="text-[6.5px] font-black tracking-widest text-[#050A24] bg-amber-500 px-1 py-0.2 rounded-[2px] uppercase animate-pulse">
-                    SOON
-                  </span>
-                )}
-              </div>
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <p 
-                    style={{ fontSize: cardTokens.track.artistSize }}
-                    className="font-medium text-text-muted uppercase tracking-[0.2em] mt-0.5 group-hover:text-primary transition-colors hover:underline cursor-pointer inline-block"
-                    onClick={handleArtistClick}
-                  >
-                    {track.artist}
-                  </p>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-64 bg-zinc-950/90 backdrop-blur-xl border-white/10 p-4">
-                  <div className="flex justify-between space-x-4">
-                    <Avatar 
-                      className="h-10 w-10 ring-2 ring-blue-500/20 cursor-pointer hover:opacity-80 transition-all animate-none"
-                      onClick={handleArtistClick}
-                    >
-                      <AvatarImage src={artist?.avatarUrl} />
-                      <AvatarFallback className="text-[10px] bg-blue-500/10 text-blue-400">{track.artist?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="space-y-1 flex-1">
-                      <h4 className="text-[11px] font-black uppercase tracking-tighter text-white">{track.artist}</h4>
-                      <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
-                        {artist?.followers?.toLocaleString() || '0'} Followers
-                      </p>
-                      <div className="flex items-center pt-2 gap-2">
-                        <Activity className="h-3 w-3 text-emerald-500" />
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">Artist Active</span>
-                      </div>
-                    </div>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
+              <h4 className={`text-[13px] font-medium leading-tight truncate ${isActive ? 'text-blue-400 font-semibold' : 'text-white/90'}`}>
+                {track.title}
+              </h4>
+              <p 
+                className="text-[11px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
+                onClick={handleArtistClick}
+              >
+                {track.artist}
+              </p>
             </div>
             <MoreOptionsButton />
           </motion.div>
@@ -442,200 +398,65 @@ const TrackCard: React.FC<TrackCardProps> = ({
     );
   }
 
-  // Removed handleToggleExpand
-
   if (variant === 'row') {
     return (
       <ContextMenu>
         <ContextMenuTrigger>
           <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          whileHover={{ opacity: 1, backgroundColor: "var(--color-hover)" }}
-          style={{ borderRadius: cardTokens.global.borderRadius }}
-          className={`flex flex-col w-full group/row border-b border-divider last:border-0 transition-colors ${className}`}
-        >
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            className={`flex items-center gap-3.5 p-1.5 rounded-lg group/row bg-transparent transition-colors cursor-pointer w-full select-none ${className}`}
+            onClick={handleCardClickInner}
+            onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
+            role="button"
+            tabIndex={0}
+            aria-label={`View track: ${track.title} by ${track.artist}`}
+          >
+            {index !== undefined && (
+              <div className="hidden sm:flex items-center justify-center w-6 text-[12px] font-medium text-white/30 group-hover/row:text-white/80 transition-colors">
+                {index + 1}
+              </div>
+            )}
+
             <div 
-              style={{ height: cardTokens.track.height, padding: cardTokens.track.padding }}
-              className="flex items-center gap-4 cursor-pointer w-full outline-none focus-visible:bg-white/5"
-              onClick={handleCardClickInner}
-              onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
-              role="button"
-              tabIndex={0}
-              aria-label={`View track: ${track.title} by ${track.artist}`}
+              className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm"
+              onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
             >
-              {index !== undefined && (
-                <div className="hidden sm:flex items-center justify-center w-8 text-[11px] font-bold text-muted-foreground/20 group-hover/row:text-blue-500 transition-colors">
-                  {String(index + 1).padStart(2, '0')}
-                </div>
-              )}
+              <img 
+                src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
+                alt={track.title} 
+                className="w-full h-full object-cover transition-transform duration-300 group-hover/row:scale-105" 
+                onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} 
+              />
+              <div className={`absolute inset-0 flex items-center justify-center bg-black/45 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100'}`}>
+                {isActive && isAudioLoading ? (
+                  <img src={TJ_COIN_ICON} className="h-5 w-5 animate-spin" alt="Loading" />
+                ) : isActive && isPlaying ? (
+                  <Pause className="h-4 w-4 fill-current text-blue-400" />
+                ) : (
+                  <Play className="h-4 w-4 text-white fill-current ml-0.5" />
+                )}
+              </div>
+            </div>
 
-              <div 
-                style={{ width: cardTokens.track.artworkSize, height: cardTokens.track.artworkSize }}
-                className="relative rounded-[4px] overflow-hidden flex-shrink-0 cursor-pointer shadow-sm group/thumb border border-white/5 group-hover/row:border-blue-500/20 transition-colors" 
-                onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
+            <div className="flex-1 min-w-0">
+              <h4 className={`text-[13px] font-medium leading-tight truncate ${isActive ? 'text-blue-400 font-semibold' : 'text-white/95'}`}>
+                {track.title}
+              </h4>
+              <p 
+                className="text-[11px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
+                onClick={handleArtistClick}
               >
-                <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-700" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
-                
-                {isCached && (
-                    <div className="absolute top-1 left-1 bg-emerald-600/90 p-0.5 rounded-full">
-                        <CheckCircle2 className="w-2 h-2 text-white" />
-                    </div>
-                )}
+                {track.artist}
+              </p>
+            </div>
 
-                {/* Play Count Badge on Corner */}
-                {((track.streams !== undefined ? track.streams : track.playCount) || 0) > 0 && (
-                  <div className="absolute top-0.5 right-0.5 bg-black/70 backdrop-blur-[2px] text-[7px] font-bold text-white px-1 py-0.2 rounded flex items-center gap-0.5 z-10 select-none">
-                    <Headphones className="w-2 h-2 text-blue-400" />
-                    <span>{formatNumber(track.streams !== undefined ? track.streams : (track.playCount || 0))}</span>
-                  </div>
-                )}
-                
-                <div className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100'}`}>
-                  {track.tokenGating?.enabled && !hasAccess ? (
-                      <Lock className="h-4 w-4 text-white" />
-                  ) : (isActive && isAudioLoading) ? (
-                      <img src={TJ_COIN_ICON} className="h-6 w-6 animate-spin" alt="Loading" />
-                  ) : isActive && isPlaying ? (
-                      <div className="flex items-end justify-center gap-1 h-4" aria-hidden="true">
-                        <div className="w-0.5 bg-blue-400 h-2 animate-[bounce_1s_infinite_0ms]"></div>
-                        <div className="w-0.5 bg-blue-400 h-4 animate-[bounce_1s_infinite_200ms]"></div>
-                        <div className="w-0.5 bg-blue-400 h-3 animate-[bounce_1s_infinite_400ms]"></div>
-                      </div>
-                  ) : (
-                      <Play className="h-6 w-6 text-white fill-current animate-in zoom-in-50 duration-300" aria-hidden="true" />
-                  )}
-                </div>
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h4 
-                    style={{ fontSize: cardTokens.track.titleSize }}
-                    className={`font-semibold uppercase tracking-tight line-clamp-1 whitespace-nowrap overflow-hidden text-ellipsis ${isActive ? 'text-primary' : 'text-text-primary'}`}
-                  >
-                    {track.title}
-                  </h4>
-                  {isComingSoon && (
-                    <span className="text-[7px] font-black tracking-widest text-[#050A24] bg-amber-500 px-1.5 py-0.5 rounded-[4px] uppercase animate-pulse">
-                      COMING SOON
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <HoverCard>
-                    <HoverCardTrigger asChild>
-                      <p 
-                        style={{ fontSize: cardTokens.track.artistSize }}
-                        className="font-medium text-text-muted uppercase tracking-[0.2em] truncate hover:text-primary transition-colors cursor-pointer hover:underline"
-                        onClick={handleArtistClick}
-                      >
-                        {track.artist}
-                      </p>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-64 bg-zinc-950/90 backdrop-blur-xl border-white/10 p-4">
-                      <div className="flex justify-between space-x-4">
-                        <Avatar 
-                          className="h-10 w-10 ring-2 ring-blue-500/20 cursor-pointer hover:opacity-80 transition-all animate-none"
-                          onClick={handleArtistClick}
-                        >
-                          <AvatarImage src={artist?.avatarUrl} />
-                          <AvatarFallback className="text-[10px] bg-blue-500/10 text-blue-400">{track.artist?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div className="space-y-1 flex-1">
-                          <h4 className="text-[11px] font-black uppercase tracking-tighter text-white">{track.artist}</h4>
-                          <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
-                            {artist?.followers?.toLocaleString() || '0'} Listeners Monthly
-                          </p>
-                          <div className="flex items-center pt-2 gap-2 text-blue-400">
-                             <TrendingUp className="h-3 w-3" />
-                             <span className="text-[8px] font-black uppercase tracking-[0.2em]">Trending</span>
-                          </div>
-                        </div>
-                      </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                </div>
-                {isComingSoon && (
-                  <div className="md:hidden mt-2 flex items-center gap-2">
-                    <CountdownTimer targetDate={track.releaseDate!} />
-                    <button
-                      onClick={handleHypeClick}
-                      className={`cursor-pointer transition-all rounded-[4px] h-5 px-2.5 text-[8px] font-black uppercase tracking-widest flex items-center gap-1 leading-none ${isHyped ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-[#050A24]'}`}
-                    >
-                      {isHyped ? 'SYNCED' : 'HYPE'}
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-4 sm:gap-6 pr-1">
-                <div className="hidden md:flex items-center gap-8">
-                  {isComingSoon ? (
-                    <div className="flex items-center gap-3">
-                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">RELEASING IN</span>
-                      <CountdownTimer targetDate={track.releaseDate!} />
-                      <button
-                        onClick={handleHypeClick}
-                        className={`cursor-pointer transition-all rounded-[4px] h-6 px-3 text-[8px] font-black uppercase tracking-widest flex items-center gap-1 leading-none ${isHyped ? 'bg-emerald-600 text-white' : 'bg-amber-500 hover:bg-amber-400 text-[#050A24]'}`}
-                      >
-                        {isHyped ? (
-                          <>
-                            <CheckCircle2 className="w-2.5 h-2.5 text-white" />
-                            HYPED & SYNCED
-                          </>
-                        ) : (
-                          <>
-                            <Zap className="w-2.5 h-2.5 text-[#050A24] fill-current" />
-                            HYPE TRACK
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Popularity</span>
-                        <span className="text-[9px] font-medium text-foreground uppercase group-hover/row:text-red-500">{(track.likes || 0).toLocaleString()}</span>
-                      </div>
-                      <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Frequency</span>
-                        <span className="text-[9px] font-medium text-foreground uppercase group-hover/row:text-blue-400">{formatNumber(track.playCount || 0)}</span>
-                      </div>
-                      <div className="flex flex-col items-end min-w-[60px] opacity-40 group-hover/row:opacity-100 transition-opacity">
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Length</span>
-                        <span className="text-[9px] font-medium text-foreground">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
-                      </div>
-                      {track.isNFT && track.price && (
-                        <div className="flex flex-col items-end min-w-[70px] group-hover/row:opacity-100 transition-opacity">
-                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Floor Price</span>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[9px] font-bold text-emerald-400 font-mono">{track.price} TON</span>
-                            {track.floorPriceChange !== undefined && (
-                              <div className={cn(
-                                "flex items-center gap-0.5 px-1 rounded-[2px]",
-                                track.floorPriceChange >= 0 ? "text-emerald-400 bg-emerald-400/10" : "text-rose-500 bg-rose-500/10"
-                              )}>
-                                {track.floorPriceChange >= 0 ? (
-                                  <ArrowUp className="w-1.5 h-1.5 fill-current" />
-                                ) : (
-                                  <ArrowDown className="w-1.5 h-1.5 fill-current" />
-                                )}
-                                <span className="text-[6px] font-black">{Math.abs(track.floorPriceChange).toFixed(1)}%</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1">
-                    <MoreOptionsButton />
-                </div>
-              </div>
+            <div className="flex items-center gap-4 text-[12px] text-zinc-400">
+              <span className="hidden sm:inline font-mono text-[11px]">
+                {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
+              </span>
+              <MoreOptionsButton />
             </div>
           </motion.div>
         </ContextMenuTrigger>
@@ -649,173 +470,68 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <ContextMenuTrigger>
         <motion.div 
           layout
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.015 }}
-          whileTap={{ scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          whileHover={{ y: -3 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.2 }}
           className={cn(
-            "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 bg-[#0A113A]/60 hover:bg-[#101A3B] transition-all duration-300 flex flex-col overflow-hidden w-[155px] shrink-0",
+            "group relative cursor-pointer p-0 bg-transparent transition-all duration-200 flex flex-col w-[155px] shrink-0 select-none",
             className
           )}
-          style={{ width: cardTokens.track.width, minHeight: cardTokens.track.cardHeight, padding: cardTokens.track.padding, borderRadius: cardTokens.global.borderRadius }}
           onClick={handleCardClickInner}
           onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
           role="button"
           tabIndex={0}
           aria-label={`View track: ${track.title} by ${track.artist}`}
         >
-          {/* Image Container - 1:1 Aspect Ratio */}
-          <div className="relative aspect-square rounded-[4px] overflow-hidden bg-neutral-900 mb-2 transition-all border border-white/5">
+          {/* Artwork - 1:1 Square with Floating Play Button */}
+          <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-neutral-900/60 shadow-md">
             <img 
               src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
-              alt="" 
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+              alt={track.title} 
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }}
             />
-
-            {/* Play Count Badge on Corner */}
-            {((track.streams !== undefined ? track.streams : track.playCount) || 0) > 0 && (
-              <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-[2px] text-[8px] font-bold text-white px-1.5 py-0.5 rounded flex items-center gap-0.5 z-10 select-none shadow-md">
-                <Headphones className="w-2.5 h-2.5 text-blue-400" />
-                <span>{formatNumber(track.streams !== undefined ? track.streams : (track.playCount || 0))}</span>
-              </div>
-            )}
             
-            <div className={`absolute inset-0 bg-black/40 transition-all duration-300 opacity-0 group-hover:opacity-100 ${isActive ? 'opacity-100' : ''}`}>
+            {/* Spotify-style Floating Action Button */}
+            <div className={cn(
+              "absolute bottom-2 right-2 transition-all duration-200",
+              isActive 
+                ? "opacity-100 translate-y-0" 
+                : "opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0"
+            )}>
               <button 
-                className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl shadow-blue-600/30 border border-white/20"
+                className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 hover:scale-105 active:scale-95 transition-all"
                 onClick={handlePlay}
                 aria-label={isActive && isPlaying ? "Pause track" : "Play track"}
               >
-                {track.tokenGating?.enabled && !hasAccess ? (
-                  <Lock className="h-4 w-4" />
-                ) : (isActive && isAudioLoading) ? (
+                {isActive && isAudioLoading ? (
                   <img src={TJ_COIN_ICON} className="h-4 w-4 animate-spin" alt="Loading" />
                 ) : isActive && isPlaying ? (
-                  <Pause className="h-4 w-4 fill-current animate-pulse" />
+                  <Pause className="h-4 w-4 fill-current" />
                 ) : (
                   <Play className="h-4 w-4 fill-current ml-0.5" />
                 )}
               </button>
             </div>
-            
-            {/* Status indicators */}
-            <div className="absolute top-2 left-2 flex flex-col gap-1">
-              {isComingSoon && (
-                <div className="bg-amber-500 text-[8px] font-black text-[#050A24] px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest animate-pulse shadow-md shadow-amber-500/20">
-                  COMING SOON
-                </div>
-              )}
-              {track.isNFT && (
-                <div className="bg-purple-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest border border-purple-400/30">
-                  NFT
-                </div>
-              )}
-              {associatedNft && !track.isNFT && (
-                <div className="bg-purple-600/90 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest">
-                  NFT AVAILABLE
-                </div>
-              )}
-              {track.tokenGating?.enabled && (
-                <div className="bg-amber-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest border border-amber-400/30 flex items-center gap-1">
-                  <Key className="w-2.5 h-2.5" /> GATED
-                </div>
-              )}
-              {isCached && (
-                <div className="bg-emerald-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest border border-emerald-400/30 flex items-center gap-1">
-                  <CheckCircle2 className="w-2.5 h-2.5" /> CACHED
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* Content Below Card */}
-          <div className="px-0.5 flex flex-col items-start w-full gap-1 mt-2">
-            <div className="flex justify-between items-start gap-1 w-full">
-              <h3 className={`text-[10px] font-black leading-tight line-clamp-2 whitespace-normal break-words uppercase tracking-tighter ${isActive ? 'text-primary' : 'text-foreground'}`}>
-                {track.title}
-              </h3>
-              <div className="scale-75">
-                <MoreOptionsButton />
-              </div>
-            </div>
+          {/* Clean Track Meta */}
+          <div className="flex flex-col w-full min-w-0 mt-2.5">
+            <h3 className={cn(
+              "text-[13px] font-semibold tracking-tight truncate w-full transition-colors",
+              isActive ? 'text-blue-400' : 'text-white/95 group-hover:text-white'
+            )}>
+              {track.title}
+            </h3>
             
             <p 
-              className="text-[9px] font-black text-foreground/60 uppercase tracking-[0.2em] truncate hover:text-primary transition-colors cursor-pointer hover:underline"
+              className="text-[11px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors cursor-pointer"
               onClick={handleArtistClick}
             >
               {track.artist}
             </p>
-
-            {isComingSoon ? (
-              <div className="w-full mt-2 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[7.5px] font-bold text-muted-foreground uppercase tracking-widest leading-none">RELEASE TIME</span>
-                  <CountdownTimer targetDate={track.releaseDate!} />
-                </div>
-                <button
-                  onClick={handleHypeClick}
-                  className={cn(
-                      "w-full cursor-pointer transition-all rounded-[4px] h-7 text-[8px] font-black uppercase tracking-widest flex items-center justify-center gap-1 text-white shadow-md leading-none",
-                      isHyped 
-                        ? 'bg-emerald-600 shadow-emerald-500/10' 
-                        : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-amber-500/10'
-                  )}
-                >
-                  {isHyped ? (
-                    <>
-                      <CheckCircle2 className="w-3 h-3 text-white" />
-                      SYNCED
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="w-3 h-3 text-white fill-current animate-pulse" />
-                      PRE-SAVE / HYPE
-                    </>
-                  )}
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between w-full mt-2">
-                <div className="flex flex-col items-start gap-1">
-                  <div className="flex items-center gap-1 text-[9px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
-                      <Headphones className="w-3 h-3" />
-                      {formatNumber(track.playCount || 0)}
-                  </div>
-                  {track.isNFT && track.price && (
-                    <div className="flex items-center gap-1">
-                      <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/5 px-1 py-0.5 rounded border border-emerald-400/10">
-                        {track.price} TON
-                      </span>
-                      {track.floorPriceChange !== undefined && (
-                        <div className={cn(
-                          "flex items-center gap-0.5 px-1 rounded-[2px]",
-                          track.floorPriceChange >= 0 ? "text-emerald-400 bg-emerald-400/10" : "text-rose-500 bg-rose-500/10"
-                        )}>
-                          {track.floorPriceChange >= 0 ? (
-                            <ArrowUp className="w-2 h-2 fill-current" />
-                          ) : (
-                            <ArrowDown className="w-2 h-2 fill-current" />
-                          )}
-                          <span className="text-[6.5px] font-black">{Math.abs(track.floorPriceChange).toFixed(1)}%</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  onClick={handlePlay}
-                  className={cn(
-                      "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 h-6 px-3 text-[9px] font-black uppercase tracking-[0.1em] text-white",
-                      'bg-gradient-to-r from-blue-600 to-blue-400 shadow-md shadow-blue-500/20'
-                  )}
-                >
-                  Play
-                </button>
-              </div>
-            )}
           </div>
         </motion.div>
       </ContextMenuTrigger>

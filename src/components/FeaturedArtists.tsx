@@ -34,7 +34,7 @@ const FeaturedArtists: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-6 px-0.5 -mx-1">
+      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-3 px-0.5 w-full snap-x snap-mandatory">
         {featuredArtists.map((artist) => {
           // Find artist's top tracks from allTracks
           const artistTracks = allTracks
@@ -45,26 +45,24 @@ const FeaturedArtists: React.FC = () => {
           return (
             <motion.div
               key={artist.uid}
-              whileHover={{ y: -4, backgroundColor: 'rgba(255, 255, 255, 0.04)' }}
-              className="w-[280px] shrink-0 bg-[#101A3B]/60 rounded-3xl p-5 border border-white/5 hover:border-blue-500/30 transition-all group relative overflow-hidden cursor-pointer flex flex-col justify-between"
+              whileHover={{ y: -3 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-[240px] sm:w-[260px] shrink-0 snap-start bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-4 transition-all group relative overflow-hidden cursor-pointer flex flex-col justify-between select-none"
               onClick={() => navigate(`/artist/${artist.uid}`)}
             >
-              {/* Background gradient hint */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-blue-600/10 transition-colors" />
-
-              <div className="flex items-center justify-between gap-3 mb-5 relative z-10">
-                <div className="flex items-center gap-3 min-w-0">
-                  <Avatar className="w-12 h-12 border-2 border-white/10 group-hover:border-blue-500/50 transition-colors shadow-xl shrink-0">
+              <div className="flex items-center justify-between gap-3 mb-3.5 relative z-10">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Avatar className="w-11 h-11 shadow-lg shrink-0">
                     <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="object-cover w-full h-full" />
                   </Avatar>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1">
-                      <h3 className="text-sm font-black uppercase tracking-tight truncate text-white">{artist.name}</h3>
-                      {artist.verified && <Verified className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
+                      <h3 className="text-xs font-black uppercase tracking-tight truncate text-white">{artist.name}</h3>
+                      {artist.verified && <Verified className="w-3 h-3 text-blue-400 shrink-0 fill-current" />}
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">
+                    <div className="flex items-center gap-1 text-[9px] text-zinc-400 font-semibold uppercase tracking-wider mt-0.5">
                       <Users className="w-2.5 h-2.5" />
-                      {(artist.followers || 0).toLocaleString()} <span className="text-[8px] opacity-60 lowercase">fans</span>
+                      {(artist.followers || 0).toLocaleString()} <span className="text-[8px] opacity-70 lowercase">fans</span>
                     </div>
                   </div>
                 </div>
@@ -74,9 +72,9 @@ const FeaturedArtists: React.FC = () => {
                     e.stopPropagation();
                     toggleFollowUser(artist.uid);
                   }}
-                  className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all shrink-0 ${
+                  className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all shrink-0 cursor-pointer border-none ${
                     followedUserIds.includes(artist.uid)
-                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      ? 'bg-blue-500/20 text-blue-400'
                       : 'bg-white/10 hover:bg-white hover:text-black text-white'
                   }`}
                 >
@@ -94,12 +92,7 @@ const FeaturedArtists: React.FC = () => {
                 </button>
               </div>
 
-              <div className="space-y-2.5 relative z-10">
-                <div className="flex items-center justify-between mb-1.5 px-1">
-                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Popular Releases</span>
-                  <div className="h-[1px] flex-1 bg-white/5 mx-3" />
-                </div>
-                
+              <div className="space-y-1.5 relative z-10">
                 {artistTracks.length > 0 ? (
                   artistTracks.map((track) => (
                     <div 
@@ -108,28 +101,25 @@ const FeaturedArtists: React.FC = () => {
                         e.stopPropagation();
                         playTrack(track);
                       }}
-                      className="flex items-center justify-between p-2.5 rounded-2xl bg-black/30 hover:bg-black/50 border border-white/5 transition-all group/track cursor-pointer"
+                      className="flex items-center justify-between p-2 rounded-xl bg-black/40 hover:bg-black/60 transition-all group/track cursor-pointer"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="relative w-9 h-9 shrink-0">
-                          <img src={track.coverUrl} className="w-full h-full rounded-lg object-cover shadow-md" />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/track:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
-                            <Play className="w-3 h-3 text-white fill-current" />
-                          </div>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="relative w-8 h-8 shrink-0">
+                          <img src={track.coverUrl} className="w-full h-full rounded-lg object-cover shadow-sm" />
                         </div>
                         <div className="min-w-0">
-                          <div className="text-[10px] font-black uppercase tracking-tight truncate text-white/90 leading-tight">{track.title}</div>
-                          <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">{(track.playCount || 0).toLocaleString()} PLAYS</div>
+                          <div className="text-[10px] font-bold uppercase tracking-tight truncate text-white/90 leading-tight">{track.title}</div>
+                          <div className="text-[8px] text-zinc-400 font-medium uppercase tracking-wider">{(track.playCount || 0).toLocaleString()} plays</div>
                         </div>
                       </div>
                       <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center group-hover/track:bg-blue-500 transition-colors">
-                        <Play className="w-2.5 h-2.5 text-zinc-400 group-hover/track:text-white" />
+                        <Play className="w-2.5 h-2.5 text-zinc-300 group-hover/track:text-white ml-0.5" />
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-4 bg-black/10 rounded-2xl border border-dashed border-white/5">
-                    <div className="text-[8px] text-zinc-600 font-bold uppercase tracking-[0.2em]">No tracks discovered</div>
+                  <div className="flex flex-col items-center justify-center py-2 bg-black/20 rounded-xl">
+                    <div className="text-[8px] text-zinc-500 font-semibold uppercase tracking-wider">No tracks yet</div>
                   </div>
                 )}
               </div>

@@ -144,7 +144,7 @@ export const PlayerControls: React.FC = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label={isPlaying ? "Pause" : "Play"}
-          className="relative w-[64px] h-[64px] rounded-full bg-[#0098EA] text-[#F2F4F8] flex items-center justify-center shadow-lg shadow-[#0098EA]/30 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40"
+          className="relative w-[64px] h-[64px] rounded-full bg-[#0179f4] hover:bg-[#0179f4]/90 text-[#F2F4F8] flex items-center justify-center shadow-lg shadow-[#0179f4]/35 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40"
         >
           {isPlaying ? (
             <Pause className="w-7 h-7 fill-current" />

@@ -327,10 +327,10 @@ export const Discover: React.FC = () => {
   }, [artists]);
 
   return (
-    <div className="min-h-screen bg-[#050A24] text-white pb-32 relative select-none w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white pb-32 relative select-none w-full max-w-full overflow-x-hidden">
       
       {/* Sticky Spotify-Style Search Header */}
-      <div className="sticky top-0 z-40 bg-[#050A24]/95 backdrop-blur-xl pt-4 pb-3 px-4 md:px-8 space-y-3">
+      <div className="sticky top-0 z-40 bg-black pt-4 pb-3 px-4 md:px-8 space-y-3">
         
         {/* Main Search Input Bar */}
         <div className="flex items-center gap-3 w-full">

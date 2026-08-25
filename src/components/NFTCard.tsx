@@ -519,178 +519,76 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     return (
       <ContextMenu>
         <ContextMenuTrigger>
-        <motion.div 
-          layout
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          whileHover={{ 
-            y: -6, 
-            scale: 1.03, 
-            boxShadow: "0 0 25px 2px rgba(91, 107, 255, 0.25), 0 0 10px rgba(0, 180, 216, 0.15)" 
-          }}
-          whileTap={{ scale: 0.97 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className={`group flex items-center gap-4 p-3 rounded-[4px] bg-muted/10 border border-transparent hover:border-blue-500/40 hover:bg-muted/20 transition-all duration-300 cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${className}`}
-          onClick={handleCardClick}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              navigate(`/nft/${nft.id}`);
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label={`View NFT ${nft.title}`}
-        >
-            <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm border border-white/5">
-              <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} alt={nft.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-              {rarity && (
-                <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-r ${getRarityColor(rarity)} h-1`}></div>
-              )}
+          <motion.div 
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            className={`flex items-center gap-3.5 p-1.5 rounded-lg group bg-transparent transition-colors cursor-pointer w-full select-none ${className}`}
+            onClick={handleCardClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigate(`/nft/${nft.id}`);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label={`View NFT ${nft.title}`}
+          >
+            <div 
+              className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm"
+              onClick={(e) => { e.stopPropagation(); handlePreviewToggle(e); }}
+            >
+              <img 
+                src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
+                alt={nft.title} 
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                onError={(e) => { e.currentTarget.src = getPlaceholderImage(`nft-${nft.id}`); }}
+              />
+              <div className={`absolute inset-0 flex items-center justify-center bg-black/45 transition-opacity ${isActive || isPlayingPreview ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                {isPlayingPreview || (isActive && isPlaying) ? (
+                  <Pause className="h-4 w-4 fill-current text-blue-400" />
+                ) : (
+                  <Play className="h-4 w-4 text-white fill-current ml-0.5" />
+                )}
+              </div>
             </div>
+
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h4 className={`text-[7px] font-medium uppercase tracking-tight line-clamp-2 whitespace-normal break-words ${isActive ? 'text-blue-500' : 'text-foreground'}`}>{nft.title}</h4>
-                {rarity && (
-                   <div className={`hidden sm:block w-1 h-1 rounded-full bg-gradient-to-r ${getRarityColor(rarity)}`}></div>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mt-0.5 min-w-0 w-full flex-wrap">
-                <div 
-                  className="flex items-center gap-1 min-w-0 max-w-[120px] cursor-pointer hover:text-blue-500 transition-all"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
-                    if (artist) navigate(`/artist/${artist.uid}`);
-                  }}
-                >
-                  <div className="flex-1 min-w-0">
-                    <MarqueeTitle text={nft.creator} className="text-[7px] font-semibold text-foreground/80 uppercase tracking-widest" />
-                  </div>
-                  {isVerified && (
-                    <span title="Verified Creator" className="shrink-0">
-                      <BadgeCheck className="w-2.5 h-2.5 text-blue-400 fill-current inline-block" />
-                    </span>
-                  )}
-                </div>
-                {collectionName && (
-                  <span className="text-[6.5px] text-indigo-400 font-bold uppercase tracking-widest flex items-center gap-0.5 shrink-0">
-                    • <Layers className="w-1.5 h-1.5 inline" /> {collectionName}
-                  </span>
-                )}
-                <span className={cn("text-[6px] px-1 py-0.5 rounded font-extrabold uppercase tracking-widest shrink-0 ml-1.5", supplyIndicator.className)}>
-                  {supplyIndicator.label}
-                </span>
-              </div>
+              <h4 className={`text-[13px] font-medium leading-tight truncate ${isActive ? 'text-blue-400 font-semibold' : 'text-white/95'}`}>
+                {nft.title}
+              </h4>
+              <p 
+                className="text-[11px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                  if (artist) navigate(`/artist/${artist.uid}`);
+                }}
+              >
+                {nft.creator}
+              </p>
             </div>
-            <div className="flex items-center gap-4">
-               {/* Mini Sparkline for Row layout */}
-               <div className="hidden lg:block w-[100px] shrink-0 selection:bg-transparent">
-                  <PriceSparkline basePrice={basePriceNum} history={nft.history} />
-               </div>
 
-               <div className="hidden md:flex flex-col items-end opacity-40 group-hover:opacity-100 transition-opacity">
-                  <span className="text-[6px] font-bold text-muted-foreground uppercase tracking-widest">Price</span>
-                  <div className="flex items-center gap-1">
-                    {localCurrencyEnabled ? (
-                      <span className="text-[12px] font-bold text-foreground tracking-tighter inline-block">
-                        {convertPrice(nft.price)}
-                      </span>
-                    ) : (
-                      <>
-                        {currencyMode === 'USD' ? (
-                          <span className="text-[12px] font-extrabold text-[#2BE08C]">$</span>
-                        ) : (
-                          <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
-                        )}
-                        <motion.span 
-                          key={`${nft.price}-${currencyMode}`}
-                          initial={{ opacity: 0, y: -2 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, ease: "easeOut" }}
-                          className="text-[12px] font-bold text-foreground tracking-tighter inline-block"
-                        >
-                          {formattedPrice}
-                        </motion.span>
-                      </>
-                    )}
-
-                    {/* Price Change Indicator */}
-                    {nft.floorPriceChange !== undefined && (
-                      <div className={cn(
-                        "flex items-center gap-0.5 px-1 rounded-[2px]",
-                        nft.floorPriceChange >= 0 ? "text-emerald-400 bg-emerald-400/10" : "text-rose-500 bg-rose-500/10"
-                      )}>
-                        {nft.floorPriceChange >= 0 ? (
-                          <ArrowUp className="w-1.5 h-1.5 fill-current" />
-                        ) : (
-                          <ArrowDown className="w-1.5 h-1.5 fill-current" />
-                        )}
-                        <span className="text-[6px] font-black">{Math.abs(nft.floorPriceChange).toFixed(1)}%</span>
-                      </div>
-                    )}
-                  </div>
-               </div>
-               
-               <div className="flex items-center gap-2">
-                    <motion.button 
-                      onClick={handleActionClick}
-                      disabled={!isOwner && isAuctionEnded}
-                      animate={(!isOwner && !isAuctionEnded && isEndingSoon) ? {
-                        scale: [1, 1.06, 1],
-                        boxShadow: [
-                          "0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 0 0 0px rgba(239, 68, 68, 0.4)",
-                          "0 10px 15px -3px rgba(239, 68, 68, 0.5), 0 0 0 6px rgba(239, 68, 68, 0)",
-                          "0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 0 0 0px rgba(239, 68, 68, 0.4)"
-                        ]
-                      } : {}}
-                      transition={(!isOwner && !isAuctionEnded && isEndingSoon) ? {
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      } : {}}
-                      className={cn(
-                        "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 px-4 py-1 flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.1em]",
-                        isOwner 
-                          ? 'bg-muted text-foreground' 
-                          : (isAuctionEnded 
-                              ? 'bg-white/5 text-white/20 cursor-not-allowed' 
-                              : (isEndingSoon 
-                                  ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white' 
-                                  : 'bg-gradient-to-r from-blue-600 to-blue-400 text-white shadow-lg shadow-blue-500/20'))
-                      )}
-                    >
-                      {isOwner ? (nft.listingType ? <Settings className="w-3 h-3" /> : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : 'BUY')}
-                    </motion.button>
-                    <button
-                      onClick={handleShare}
-                      className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/5 transition-all active:scale-95"
-                      title="Share NFT"
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={handlePreviewToggle}
-                      className={cn(
-                        "p-2 rounded-full transition-all active:scale-95 select-none",
-                        isPlayingPreview 
-                          ? "bg-[#2BE08C]/20 text-[#2BE08C]" 
-                          : "text-[#5B6BFF] hover:text-[#5B6BFF] hover:bg-[#5B6BFF]/10"
-                      )}
-                      title={isPlayingPreview ? `Previewing: ${previewSeconds}s` : "Play 30s Audio Preview"}
-                    >
-                      {isPlayingPreview ? (
-                        <span className="flex gap-[1.5px] items-end h-3.5 pt-0.5 w-4 justify-center">
-                          <span className="w-[1.5px] bg-[#2BE08C] animate-bounce h-3" style={{ animationDelay: '0.1s' }} />
-                          <span className="w-[1.5px] bg-[#2BE08C] animate-bounce h-2" style={{ animationDelay: '0.3s' }} />
-                          <span className="w-[1.5px] bg-[#2BE08C] animate-bounce h-2.5" style={{ animationDelay: '0.2s' }} />
-                        </span>
-                      ) : (
-                        <Play className="h-4 w-4 fill-current text-blue-400" />
-                      )}
-                    </button>
-                  <MoreOptionsButton />
-               </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 text-[12px] font-medium text-white/80 font-mono">
+                <img src={TON_LOGO} className="w-3 h-3 opacity-80" alt="TON" />
+                <span>{formattedPrice} TON</span>
+              </div>
+              <motion.button 
+                onClick={handleActionClick}
+                disabled={!isOwner && isAuctionEnded}
+                className={cn(
+                  "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white",
+                  isOwner 
+                    ? 'bg-white/10 text-white' 
+                    : (isAuctionEnded ? 'bg-white/5 text-white/20' : 'bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/20')
+                )}
+              >
+                {isOwner ? (nft.listingType ? 'Manage' : 'Sell') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Ended' : 'Bid') : 'Buy')}
+              </motion.button>
+              <MoreOptionsButton />
             </div>
           </motion.div>
         </ContextMenuTrigger>
@@ -705,19 +603,13 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         <ContextMenuTrigger>
           <motion.div
             layout
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ 
-              y: -4, 
-              scale: 1.02, 
-            }}
+            whileHover={{ y: -3 }}
             whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            style={{ width: cardTokens.nftTrack.width }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            transition={{ duration: 0.2 }}
             className={cn(
-              "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 bg-transparent transition-all duration-300 flex flex-col overflow-hidden w-[155px] shrink-0",
+              "group relative cursor-pointer p-0 bg-transparent transition-all duration-200 flex flex-col w-[155px] shrink-0 select-none",
               className
             )}
             onClick={handleCardClick}
@@ -731,169 +623,62 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             tabIndex={0}
             aria-label={`View NFT ${nft.title}`}
           >
-            {/* Image Container - 1:1 Aspect Ratio with NFT Gradient Border */}
-            <div 
-              className="relative w-full aspect-square rounded-[16px] overflow-hidden bg-neutral-950/40 transition-all flex-shrink-0"
-            >
+            {/* Artwork - 1:1 Square with Spotify-style Floating Action Button */}
+            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-neutral-900/60 shadow-md">
               <img
                 src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
                 loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 alt={nft.title}
                 onError={(e) => { e.currentTarget.src = getPlaceholderImage(`nft-${nft.id}`); }}
               />
 
-              {/* Rarity Glow Border */}
-              <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${getRarityColor(rarity)}`} />
-              
-              {/* Top Overlays */}
-              <div className="absolute top-1.5 left-1.5 right-1.5 flex justify-between items-start z-10 pointer-events-none">
-                 <div className="flex flex-col gap-1">
-                    <span className={cn("px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded text-[7px] font-bold uppercase tracking-[0.1em] text-white shadow-lg flex items-center gap-0.5", supplyIndicator.className)}>
-                      {supplyIndicator.icon === 'Star' && <Star className="w-2 h-2 fill-current text-yellow-400 animate-spin-slow" />}
-                      {supplyIndicator.icon === 'Gem' && <Gem className="w-2 h-2" />}
-                      {supplyIndicator.label}
-                    </span>
-                    {nft.listingType === 'auction' && (
-                      <AuctionCountdownTimer nft={nft} variant="badge" />
-                    )}
-                 </div>
-                 
-                 <div className="flex gap-1 pointer-events-auto items-center">
-                    <button
-                      onClick={handleShare}
-                      className="p-1.5 rounded-full bg-black/60 hover:bg-black/85 text-white/80 hover:text-white transition-all active:scale-95"
-                      title="Share NFT"
-                    >
-                      <Share2 className="h-3.5 w-3.5" />
-                    </button>
-                    <MoreOptionsButton />
-                  </div>
-              </div>
-
-              {/* Action Overlay */}
-              <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300 ${isActive || isPlayingPreview ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} flex flex-col justify-center items-center gap-2`}>
-                 {/* Dedicated 30s Preview Toggle in the overlay center */}
-                 <button
-                   onClick={handlePreviewToggle}
-                   className={cn(
-                     "py-1 px-2.5 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all duration-200 select-none cursor-pointer border-none",
-                     isPlayingPreview 
-                       ? "bg-[#2BE08C] text-black shadow-lg shadow-[#2BE08C]/30 animate-pulse" 
-                       : "bg-[#5B6BFF] text-white hover:bg-[#5B6BFF]/90 shadow-lg shadow-[#5B6BFF]/20"
-                   )}
-                 >
-                   {isPlayingPreview ? (
-                     <>
-                       <span className="flex gap-[1px] items-end h-2 pt-0.5">
-                         <span className="w-[1px] bg-black animate-bounce h-2" style={{ animationDelay: '0.1s' }} />
-                         <span className="w-[1px] bg-black animate-bounce h-1" style={{ animationDelay: '0.3s' }} />
-                         <span className="w-[1px] bg-black animate-bounce h-1.5" style={{ animationDelay: '0.2s' }} />
-                       </span>
-                       <span>{previewSeconds}s</span>
-                     </>
-                   ) : (
-                     <>
-                       <Play className="w-2.5 h-2.5 fill-current" />
-                       <span>30s Preview</span>
-                     </>
-                   )}
-                 </button>
-
-                 <div className="flex gap-3 mt-1">
-                    <button 
-                      onClick={handlePlayClick} 
-                      className="w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg border-none"
-                      title="Play Full Track"
-                    >
-                      {isActive && isPlaying ? <Pause className="h-3.5 w-3.5 fill-current animate-pulse" /> : <Play className="h-3.5 w-3.5 fill-current ml-0.5" />}
-                    </button>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIs3DModalOpen(true);
-                      }} 
-                      className="w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg border-none"
-                      title="View 3D Artwork"
-                    >
-                      <RotateCw className="h-3.5 w-3.5" />
-                    </button>
-                 </div>
-              </div>
-
-              {/* Interactive Waveform Visualizer for preview scrubbing */}
-              {associatedTrack && (
-                <motion.div
-                  initial={{ y: 32, opacity: 0 }}
-                  animate={{ y: (isActive || isHovered) ? 0 : 32, opacity: (isActive || isHovered) ? 1 : 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                  className="absolute bottom-1 left-1 right-1 h-8 bg-zinc-950/90 backdrop-blur-md rounded-lg flex items-center px-2 py-1 gap-1.5 z-20 pointer-events-auto"
-                  onClick={(e) => e.stopPropagation()}
+              {/* Floating Play / Preview Action Button */}
+              <div className={cn(
+                "absolute bottom-2 right-2 transition-all duration-200",
+                (isActive || isPlayingPreview)
+                  ? "opacity-100 translate-y-0" 
+                  : "opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0"
+              )}>
+                <button 
+                  className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 hover:scale-105 active:scale-95 transition-all"
+                  onClick={handlePreviewToggle}
+                  aria-label={isPlayingPreview || (isActive && isPlaying) ? "Pause" : "Play preview"}
                 >
-                  <button 
-                    onClick={handlePlayClick} 
-                    className="w-5 h-5 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow shrink-0"
-                  >
-                    {isActive && isPlaying ? <Pause className="w-2.5 h-2.5 fill-current" /> : <Play className="w-2.5 h-2.5 fill-current ml-0.5" />}
-                  </button>
-                  <div 
-                    className="flex-1 h-5 flex items-end gap-[1.5px] cursor-pointer group/wave pt-1"
-                    onClick={handleWaveformClick}
-                  >
-                    {bars.map((barHeight, idx) => {
-                      const barPercent = (idx / bars.length) * 100;
-                      const isPlayed = isActive && progress >= barPercent;
-                      return (
-                        <div 
-                          key={idx}
-                          style={{ height: `${barHeight}%` }}
-                          className={cn(
-                            "flex-1 rounded-t-[1px] transition-all duration-200",
-                            isPlayed 
-                              ? "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" 
-                              : "bg-zinc-600/60 group-hover/wave:bg-zinc-500/80"
-                          )}
-                        />
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
+                  {isPlayingPreview || (isActive && isPlaying) ? (
+                    <Pause className="h-4 w-4 fill-current" />
+                  ) : (
+                    <Play className="h-4 w-4 fill-current ml-0.5" />
+                  )}
+                </button>
+              </div>
             </div>
-      
-            {/* Artifact Data Details Section Under Cover Photo */}
-            <div className="flex-1 flex flex-col pt-3 pb-1 select-none items-center text-center">
-               {/* Title */}
-               <h3 className={cn(
-                 "text-[13px] font-bold tracking-normal leading-normal text-center text-white/95 truncate w-full max-w-full px-1 mb-1 transition-colors",
-                 isActive ? 'text-blue-400' : 'text-white'
-               )}>
-                 {nft.title}
-               </h3>
 
-               {/* Price with centered triangle token icon */}
-               <div className="flex items-center justify-center gap-1.5 text-[#9AA0AE]">
-                  {/* Minimalist Downward Triangle Outline Icon (▽) to exactly match the uploaded user image */}
-                  <svg 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2.5" 
-                    className="w-3.5 h-3.5 opacity-70 text-[#9AA0AE] select-none shrink-0"
-                  >
-                    <polygon points="12,21 3,5 21,5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+            {/* Clean NFT Meta */}
+            <div className="flex flex-col w-full min-w-0 mt-2.5">
+              <h3 className={cn(
+                "text-[13px] font-semibold tracking-tight truncate w-full transition-colors",
+                isActive ? 'text-blue-400' : 'text-white/95 group-hover:text-white'
+              )}>
+                {nft.title}
+              </h3>
+              
+              <p 
+                className="text-[11px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                  if (artist) navigate(`/artist/${artist.uid}`);
+                }}
+              >
+                {nft.creator}
+              </p>
 
-                  <motion.span 
-                    key={`${nft.price}-${currencyMode}`}
-                    initial={{ opacity: 0, y: -2 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="text-[11px] font-bold text-[#9AA0AE] font-mono tracking-tight"
-                  >
-                    {formattedPrice}
-                  </motion.span>
-               </div>
+              {/* Price Row */}
+              <div className="flex items-center gap-1 mt-1 text-[11px] font-medium text-white/70 font-mono">
+                <img src={TON_LOGO} className="w-3 h-3 opacity-75 shrink-0" alt="TON" />
+                <span>{formattedPrice} TON</span>
+              </div>
             </div>
           </motion.div>
         </ContextMenuTrigger>

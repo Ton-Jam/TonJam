@@ -18,7 +18,7 @@ const LiveSpaceCard: React.FC<LiveSpaceCardProps> = ({
   return (
     <motion.div
       whileHover={{ y: -2 }}
-      className="p-4 rounded-2xl bg-[#0A113A]/60 backdrop-blur-md flex items-center justify-between gap-3 shadow-md border-none text-left"
+      className="p-1 rounded-2xl bg-transparent flex items-center justify-between gap-3 border-none text-left"
     >
       <div className="space-y-1.5 text-left min-w-0">
         <div className="flex items-center gap-2">

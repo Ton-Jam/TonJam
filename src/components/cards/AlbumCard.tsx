@@ -42,7 +42,7 @@ export const AlbumCard: React.FC<AlbumCardProps> = ({
 
   if (isLoading || !album) {
     return (
-      <div className={`flex flex-col p-3 rounded-[10px] bg-[#0A113A] animate-pulse w-[170px] shrink-0 ${className}`}>
+      <div className={`flex flex-col p-0 bg-transparent animate-pulse w-[170px] shrink-0 ${className}`}>
         <div className="w-full aspect-square bg-white/10 rounded-lg mb-3" />
         <div className="space-y-2">
           <div className="h-4 bg-white/10 rounded w-3/4" />
@@ -72,7 +72,7 @@ export const AlbumCard: React.FC<AlbumCardProps> = ({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={handleCardClick}
-      className={`flex flex-col p-3 rounded-[10px] bg-[#0A113A] hover:bg-[#101A3B] transition-colors cursor-pointer w-[170px] shrink-0 snap-start select-none group relative ${className}`}
+      className={`flex flex-col p-0 bg-transparent transition-colors cursor-pointer w-[170px] shrink-0 snap-start select-none group relative ${className}`}
     >
       {/* Cover Artwork Container */}
       <div className="relative aspect-square w-full rounded-lg overflow-hidden mb-3 bg-slate-950">

@@ -11,7 +11,6 @@ import { doc, setDoc } from 'firebase/firestore';
 import { uploadFile } from '@/services/storageService';
 import { toast } from 'sonner';
 import { TonConnectButton, useTonAddress, useTonWallet, useTonConnectUI } from '@tonconnect/ui-react';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { APP_LOGO } from '@/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,11 +39,6 @@ const Login: React.FC = () => {
   const tonAddress = useTonAddress();
   const tonWallet = useTonWallet();
   const [tonConnectUI] = useTonConnectUI();
-
-  // EVM / Wagmi Wallet state
-  const { connectors, connect, error: wagmiConnectError } = useConnect();
-  const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
-  const { disconnect: disconnectEvm } = useDisconnect();
 
   // Unified Web3 States
   const [activeAddress, setActiveAddress] = useState<string>('');
@@ -91,43 +85,12 @@ const Login: React.FC = () => {
       toast.success('TON Wallet Connected', {
         description: `Linked: ${tonAddress.substring(0, 6)}...${tonAddress.substring(tonAddress.length - 4)}`
       });
-    } else if (!evmAddress) {
+    } else {
       setActiveAddress('');
       setActiveWalletType('');
       setOnboardingActive(false);
     }
   }, [tonAddress]);
-
-  // Hook EVM / Wagmi connection changes
-  useEffect(() => {
-    if (evmAddress && isEvmConnected) {
-      setActiveAddress(evmAddress);
-      setActiveWalletType('EVM Wallet');
-      setTabMode('wallet');
-      setOnboardingActive(true);
-      if (!onboardUsername) {
-        setOnboardUsername(`eth_user_${evmAddress.substring(0, 6)}`);
-      }
-      if (!avatarSeed) {
-        setAvatarSeed(evmAddress);
-      }
-      toast.success('EVM Wallet Connected', {
-        description: `Linked: ${evmAddress.substring(0, 6)}...${evmAddress.substring(evmAddress.length - 4)}`
-      });
-    } else if (!tonAddress) {
-      setActiveAddress('');
-      setActiveWalletType('');
-      setOnboardingActive(false);
-    }
-  }, [evmAddress, isEvmConnected]);
-
-  useEffect(() => {
-    if (wagmiConnectError) {
-      toast.error('Wallet Connection Failed', {
-        description: wagmiConnectError.message || 'Could not connect wallet.'
-      });
-    }
-  }, [wagmiConnectError]);
 
   // Dynamically compute avatar URL when seed or style updates
   useEffect(() => {
@@ -323,9 +286,6 @@ const Login: React.FC = () => {
     
     if (tonAddress) {
       await tonConnectUI.disconnect();
-    }
-    if (isEvmConnected) {
-      disconnectEvm();
     }
     toast.info("Wallet Disconnected");
   };
@@ -620,24 +580,28 @@ const Login: React.FC = () => {
                           </button>
                         </div>
 
-                        {/* EVM / WALLETCONNECT / WAGMI */}
+                        {/* EVM / WALLETCONNECT */}
                         <div className="flex flex-col gap-2 pt-2">
                           <Label className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">Multi-Chain standard (WalletConnect / EVM)</Label>
                           
-                          {/* Inject Standard EVM connectors dynamically */}
-                          {connectors.map((connector) => (
-                            <button
-                              key={connector.id}
-                              onClick={() => connect({ connector })}
-                              className="w-full h-11 flex items-center justify-between px-4 border border-purple-500/30 hover:bg-purple-500/10 text-purple-400 rounded-[4px] transition-colors font-bold text-[10px] uppercase tracking-wider cursor-pointer"
-                            >
-                              <span className="flex items-center gap-2">
-                                <Sparkles className="h-4 w-4" />
-                                Connect with {connector.name}
-                              </span>
-                              <span className="text-[8px] bg-purple-500/20 px-2 py-0.5 rounded-[4px] tracking-widest">Active</span>
-                            </button>
-                          ))}
+                          <button
+                            onClick={() => {
+                              const mockEthAddress = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+                              setActiveAddress(mockEthAddress);
+                              setActiveWalletType('MetaMask');
+                              setOnboardingActive(true);
+                              setOnboardUsername(`eth_user_${mockEthAddress.substring(2, 8)}`);
+                              setAvatarSeed(mockEthAddress);
+                              toast.success("MetaMask Connected");
+                            }}
+                            className="w-full h-11 flex items-center justify-between px-4 border border-purple-500/30 hover:bg-purple-500/10 text-purple-400 rounded-[4px] transition-colors font-bold text-[10px] uppercase tracking-wider cursor-pointer"
+                          >
+                            <span className="flex items-center gap-2">
+                              <Sparkles className="h-4 w-4" />
+                              Connect with MetaMask / EVM
+                            </span>
+                            <span className="text-[8px] bg-purple-500/20 px-2 py-0.5 rounded-[4px] tracking-widest">Active</span>
+                          </button>
 
                           {/* Interactive Standard QR Simulator Card to represent premium WalletConnect capabilities */}
                           <div className="border border-white/10 p-3 rounded-[4px] flex items-center justify-between bg-white/[0.02] backdrop-blur-md mt-1">

@@ -83,8 +83,8 @@ export const NFTCard: React.FC<NFTCardProps> = ({
   if (isLoading || !nft) {
     return (
       <div 
-        style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
-        className={`flex flex-col bg-[#0A113A] animate-pulse shrink-0 ${className}`}
+        style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, borderRadius: cardTokens.global.borderRadius }}
+        className={`flex flex-col bg-transparent animate-pulse shrink-0 ${className}`}
       >
         <div className="w-full aspect-square bg-white/10 rounded-lg mb-3" />
         <div className="space-y-2">
@@ -124,16 +124,16 @@ export const NFTCard: React.FC<NFTCardProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      whileHover={{ scale: 1.02 }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      whileHover={{ y: -3 }}
       whileTap={{ scale: 0.98 }}
-      style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
-      className={`flex flex-col bg-[#0A113A] hover:bg-[#101A3B] transition-colors cursor-pointer shrink-0 snap-start select-none group relative ${className}`}
+      className={`group relative cursor-pointer p-0 bg-transparent transition-all duration-200 flex flex-col w-[155px] shrink-0 select-none ${className}`}
+      onClick={handleCollectClick}
     >
-      {/* Visual Asset Container */}
-      <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-3 bg-slate-950">
+      {/* Artwork */}
+      <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-neutral-900/60 shadow-md">
         {imgFailed ? (
           <NFTPlaceholder size={28} />
         ) : (
@@ -142,127 +142,33 @@ export const NFTCard: React.FC<NFTCardProps> = ({
             alt={nft.title}
             loading="lazy"
             onError={() => setImgFailed(true)}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         )}
 
-        {/* Action badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-          <span className="bg-purple-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-[4px] tracking-wider uppercase flex items-center gap-0.5 shadow-md">
-            <Sparkles className="w-2.5 h-2.5 fill-current" /> NFT
-          </span>
-          {nft.isLiveAuction && (
-            <span className="bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-[4px] tracking-wider uppercase flex items-center gap-1 shadow-md">
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-              LIVE
-            </span>
-          )}
-        </div>
-
-        {/* Floating Quick Action Overlays */}
-        <div className="absolute top-2 right-2 flex flex-col gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        {/* Floating Action Button */}
+        <div className="absolute bottom-2 right-2 opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
           <button
-            onClick={handleLikeClick}
-            className="p-1.5 bg-black/40 backdrop-blur-md hover:bg-black/60 rounded-full transition-colors active:scale-90"
+            onClick={nft.isLiveAuction ? handleBidClick : (nft.mintStatus === 'open' ? handleMintClick : handleCollectClick)}
+            className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 hover:scale-105 active:scale-95 transition-all text-[10px] font-bold"
           >
-            <Heart className={`w-3.5 h-3.5 ${isLikedState ? 'text-red-500 fill-red-500' : 'text-white'}`} />
-          </button>
-          <button
-            onClick={handleBookmarkClick}
-            className="p-1.5 bg-black/40 backdrop-blur-md hover:bg-black/60 rounded-full transition-colors active:scale-90"
-          >
-            <Bookmark className={`w-3.5 h-3.5 ${isBookmarkedState ? 'text-blue-400 fill-blue-400' : 'text-white'}`} />
+            <Sparkles className="w-3.5 h-3.5" />
           </button>
         </div>
-
-        {/* Countdown Overlay for Live Auctions */}
-        {nft.isLiveAuction && timeLeft && (
-          <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-md rounded-[4px] px-2 py-1 flex items-center justify-between text-[9px] font-mono text-white/90">
-            <div className="flex items-center gap-1 text-red-400">
-              <Clock className="w-3 h-3 animate-pulse" />
-              <span className="font-bold">ENDS:</span>
-            </div>
-            <span className="font-black text-blue-300">{timeLeft}</span>
-          </div>
-        )}
       </div>
 
-      {/* Title and Creator */}
-      <div className="min-w-0">
-        <h4 className="text-[13px] font-bold text-white truncate group-hover:text-blue-400 transition-colors">
+      {/* Meta */}
+      <div className="flex flex-col w-full min-w-0 mt-2.5">
+        <h4 className="text-[13px] font-semibold tracking-tight text-white/95 truncate w-full group-hover:text-blue-400 transition-colors">
           {nft.title}
         </h4>
-        <div className="flex items-center gap-1 mt-0.5 text-[#9AA0AE] text-[11px] truncate">
-          <span className="truncate">{nft.creator}</span>
-          {nft.isVerified && (
-            <span className="w-3.5 h-3.5 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-            </span>
-          )}
+        <p className="text-[11px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors">
+          {nft.creator}
+        </p>
+        <div className="flex items-center gap-1 mt-1 text-[11px] font-medium text-white/70 font-mono">
+          <span className="text-blue-400 font-bold">{nft.price}</span>
+          <span className="text-white/40">TON</span>
         </div>
-      </div>
-
-      {/* Mini Price Sparkline Trend */}
-      <div className="mt-2 select-none pointer-events-auto w-20 max-w-[80px]">
-        <PriceSparkline basePrice={basePriceNum} history={nft.history} />
-      </div>
-
-      {/* Market Indicators */}
-      <div className="mt-2 pt-2 border-t border-white/5 space-y-1">
-        <div className="flex justify-between text-[10px] text-[#9AA0AE]">
-          <span>Floor Price</span>
-          {nft.highestBid && <span>Highest Bid</span>}
-        </div>
-        <div className="flex justify-between items-baseline font-mono text-[12px] font-black text-white">
-          <span className="text-emerald-400">{nft.price} TON</span>
-          {nft.highestBid && <span className="text-blue-400">{nft.highestBid} TON</span>}
-        </div>
-      </div>
-
-      {/* Ownership & Mint Supply Metas */}
-      {nft.supplyTotal !== undefined && (
-        <div className="mt-2 flex items-center justify-between text-[9px] text-[#9AA0AE] font-mono">
-          <div className="flex items-center gap-1">
-            <Layers className="w-3 h-3 text-white/40" />
-            <span>Supply: {nft.supplyMinted || 0}/{nft.supplyTotal}</span>
-          </div>
-          {nft.ownersCount !== undefined && (
-            <div className="flex items-center gap-1">
-              <Eye className="w-3 h-3 text-white/40" />
-              <span>{nft.ownersCount} Owners</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Interactive Web3 buttons depending on Mint/Auction status */}
-      <div className="mt-3 flex gap-1.5 w-full">
-        {nft.mintStatus === 'open' ? (
-          <button
-            onClick={handleMintClick}
-            className="flex-1 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-[10px] uppercase tracking-wider rounded-[6px] transition-all shadow-md active:scale-95 text-center"
-          >
-            Mint NFT
-          </button>
-        ) : nft.isLiveAuction ? (
-          <button
-            onClick={handleBidClick}
-            className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-wider rounded-[6px] transition-all active:scale-95 text-center"
-          >
-            Place Bid
-          </button>
-        ) : (nft.listingType === 'fixed' || (nft.price && nft.mintStatus !== 'sold_out')) ? (
-          <button
-            onClick={handleCollectClick}
-            className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[10px] uppercase tracking-wider rounded-[6px] transition-all shadow-md active:scale-95 text-center"
-          >
-            Collect
-          </button>
-        ) : (
-          <div className="flex-1 py-1.5 bg-white/5 text-[#9AA0AE] font-black text-[10px] uppercase tracking-widest rounded-[6px] text-center">
-            {nft.mintStatus === 'sold_out' ? 'Sold Out' : 'Unavailable'}
-          </div>
-        )}
       </div>
     </motion.div>
   );

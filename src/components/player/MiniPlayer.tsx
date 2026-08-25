@@ -228,7 +228,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       >
         <div 
           onClick={() => setIsDroppedDown(false)}
-          className="group relative flex items-center gap-2.5 p-1.5 pr-3 bg-[#080d2d]/95 hover:bg-[#0c1445] text-white rounded-full border border-[#0098EA]/40 shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden"
+          className="group relative flex items-center gap-2.5 p-1.5 pr-3 bg-black hover:bg-neutral-900 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.6)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden"
           title="Click to expand Mini Player"
         >
           {/* Sleek top progress indicator on collapsed pill */}
@@ -240,7 +240,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           </div>
           {/* Animated artwork thumbnail */}
           <div className="relative flex-shrink-0">
-            <div className="w-9 h-9 rounded-full overflow-hidden border border-[#0098EA]/50 shadow-inner">
+            <div className="w-9 h-9 rounded-full overflow-hidden shadow-inner">
               <img 
                 src={coverUrl} 
                 alt={currentTrack.title}
@@ -335,13 +335,13 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       onDragEnd={handleDragEnd}
       onClick={() => setFullPlayerOpen(true)}
       whileTap={{ scale: 0.99 }}
-      className={`fixed left-0 right-0 lg:left-64 bg-[#0A113A] text-[#F2F4F8] font-sans border-t border-[#16244F] select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-in-out cursor-pointer ${
+      className={`fixed left-0 right-0 lg:left-64 bg-[#0A0E1A]/95 backdrop-blur-xl text-[#F2F4F8] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-[0_-8px_30px_rgba(0,0,0,0.8)] transition-all duration-300 ease-in-out cursor-pointer ${
         isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
       }`}
       style={{ touchAction: "none" }}
       id="tonjam-mini-player"
     >
-      {/* Streaming Health Indicator - Shifted upward towards the top-right angle */}
+      {/* Streaming Health Indicator */}
       <div 
         className="absolute top-1.5 right-2 z-30 flex items-center justify-center p-0.5 pointer-events-auto" 
         id="mini-streaming-health-indicator"
@@ -363,13 +363,13 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         />
       </div>
 
-      <div className="flex items-center justify-between px-3.5 py-2.5">
+      <div className="flex items-center justify-between px-3 py-1.5">
         {/* Artwork + Title + Artist */}
-        <div className="flex items-center gap-3 flex-1 min-w-0" id="mini-metadata-area">
+        <div className="flex items-center gap-2.5 flex-1 min-w-0" id="mini-metadata-area">
           <img
             src={coverUrl}
             alt={currentTrack.title}
-            className="w-10 h-10 object-cover rounded-[10px] flex-shrink-0 border border-[#16244F]"
+            className="w-9 h-9 object-cover rounded-lg flex-shrink-0 shadow-sm"
             onError={(e) => {
               (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
             }}
@@ -391,7 +391,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             </div>
             <ScrollingText
               text={currentTrack.artist}
-              className="text-[11px] font-medium text-[#9AA0AE]"
+              className="text-[11px] font-medium text-zinc-400"
               containerClassName="min-w-0 flex-1"
               id="mini-track-artist"
             />
@@ -399,20 +399,21 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-1 sm:gap-1.5 pr-2">
+        <div className="flex items-center gap-1 sm:gap-1.5 pr-0.5">
           {/* Play/Pause Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               togglePlay();
             }}
-            className="w-9 h-9 rounded-full bg-[#0098EA] text-white flex items-center justify-center hover:bg-[#0098EA]/90 transition-transform active:scale-90 shadow-md"
+            aria-label={isPlaying ? "Pause track" : "Play track"}
+            className="w-8 h-8 rounded-full bg-[#0179f4] text-white flex items-center justify-center hover:bg-[#0179f4]/90 transition-transform active:scale-90 shadow-md shadow-[#0179f4]/35 cursor-pointer border-none"
             title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
-              <Pause className="w-4 h-4 fill-current" />
+              <Pause className="w-3.5 h-3.5 fill-current" />
             ) : (
-              <Play className="w-4 h-4 fill-current ml-0.5" />
+              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
             )}
           </button>
 
@@ -423,7 +424,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                 e.stopPropagation();
                 onQueueClick();
               }}
-              className="p-1.5 text-[#9AA0AE] hover:text-[#F2F4F8] transition-colors hidden sm:block"
+              className="p-1.5 text-zinc-400 hover:text-white transition-colors hidden sm:block cursor-pointer border-none bg-transparent"
               title="Queue"
             >
               <ListMusic className="w-4 h-4" />
@@ -433,7 +434,8 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           {/* More options */}
           <button
             onClick={handleOptionsClick}
-            className="p-1.5 text-[#9AA0AE] hover:text-[#F2F4F8] transition-colors"
+            aria-label="Track options"
+            className="p-1.5 text-zinc-400 hover:text-white transition-colors cursor-pointer border-none bg-transparent"
             title="Options"
           >
             <MoreVertical className="w-4 h-4" />

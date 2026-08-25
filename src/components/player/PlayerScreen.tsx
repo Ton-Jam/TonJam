@@ -182,12 +182,14 @@ export const PlayerScreen: React.FC = () => {
         className="fixed inset-0 z-50 bg-[#050A24] text-[#F2F4F8] font-sans overflow-y-auto overscroll-contain touch-pan-y scrollbar-thin scrollbar-thumb-[#16244F]"
       >
         {/* Scrollable Core Player Body including Header */}
-        <div className="min-h-full max-w-md mx-auto w-full px-4 pt-3 pb-28 flex flex-col items-center justify-start gap-4 sm:gap-5">
-          <PlayerHeader
-            onClose={() => setFullPlayerOpen(false)}
-            onMoreClick={() => setOptionsTrack(currentTrack)}
-            track={currentTrack}
-          />
+        <div className="min-h-full max-w-md mx-auto w-full px-3 pt-2.5 pb-28 flex flex-col items-center justify-start gap-4 sm:gap-5">
+          <div className="w-full">
+            <PlayerHeader
+              onClose={() => setFullPlayerOpen(false)}
+              onMoreClick={() => setOptionsTrack(currentTrack)}
+              track={currentTrack}
+            />
+          </div>
           {/* Artwork with gestures */}
           <PlayerArtwork
             track={currentTrack}
