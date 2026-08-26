@@ -12,6 +12,7 @@ import NFTCard from '@/components/NFTCard';
 import { toast } from 'sonner';
 import { ArtistProfileSkeleton } from '@/pages/Library/components/Skeletons';
 import { ArtistVerificationBadge } from '@/components/ArtistVerificationBadge';
+import ArtistHeader from '@/components/ArtistHeader';
 
 interface ArtistProfileProps {
   artistId?: string;
@@ -252,6 +253,17 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
           </select>
         </div>
       </div>
+
+      {/* Dedicated Artist Header */}
+      <ArtistHeader
+        name={currentArtist.name}
+        avatarUrl={currentArtist.avatarUrl}
+        isFollowing={isFollowing}
+        onToggleFollow={toggleFollow}
+        verified={Boolean(currentArtist.verified || currentArtist.isVerifiedArtist)}
+        username={currentArtist.username}
+        genre={currentArtist.genre}
+      />
 
       {/* Main Profile Card */}
       <div className="bg-[#121833]/30 rounded-2xl overflow-hidden">

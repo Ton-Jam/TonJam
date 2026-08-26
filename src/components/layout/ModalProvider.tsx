@@ -238,8 +238,21 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.95, opacity: 0, y: 15 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-                className="w-full max-w-sm bg-[#0A113A] rounded-2xl p-5 pointer-events-auto flex flex-col select-none"
+                drag="y"
+                dragConstraints={{ top: 0, bottom: 0 }}
+                dragElastic={{ top: 0.05, bottom: 0.6 }}
+                onDragEnd={(_e, info) => {
+                  if (info.offset.y > 90) {
+                    closeModal();
+                  }
+                }}
+                className="w-full max-w-sm bg-[#0A113A] rounded-2xl p-5 pointer-events-auto flex flex-col select-none cursor-grab active:cursor-grabbing shadow-2xl border border-white/10"
               >
+                {/* Visual swipe-to-dismiss handle */}
+                <div className="w-full flex justify-center pb-2">
+                  <div className="w-10 h-1 bg-white/20 rounded-full" />
+                </div>
+
                 {/* Header title */}
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-xs font-black uppercase tracking-widest text-[#9AA0AE]">

@@ -5,6 +5,7 @@ import { Track } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { MOCK_ARTISTS, TJ_COIN_ICON, MOCK_NFTS } from '@/constants';
 import { cn, getPlaceholderImage, shareContent, formatNumber } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/haptics';
 import confetti from 'canvas-confetti';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import SkeletonCard from './SkeletonCard';
@@ -352,6 +353,16 @@ const TrackCard: React.FC<TrackCardProps> = ({
             transition={{ duration: 0.2 }}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.3}
+            onDragEnd={(_e, info) => {
+              if (Math.abs(info.offset.x) > 60) {
+                addToQueue(track);
+                triggerHaptic('success');
+                addNotification(`Added "${track.title}" to queue`, 'success');
+              }
+            }}
             className={`group flex items-center gap-3 p-1.5 rounded-lg bg-transparent transition-all cursor-pointer w-full outline-none select-none ${className}`}
             onClick={handleCardClickInner}
             onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
@@ -406,6 +417,16 @@ const TrackCard: React.FC<TrackCardProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.3}
+            onDragEnd={(_e, info) => {
+              if (Math.abs(info.offset.x) > 60) {
+                addToQueue(track);
+                triggerHaptic('success');
+                addNotification(`Added "${track.title}" to queue`, 'success');
+              }
+            }}
             className={`flex items-center gap-3.5 p-1.5 rounded-lg group/row bg-transparent transition-colors cursor-pointer w-full select-none ${className}`}
             onClick={handleCardClickInner}
             onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
@@ -475,6 +496,16 @@ const TrackCard: React.FC<TrackCardProps> = ({
           whileHover={{ y: -3 }}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.2 }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.3}
+          onDragEnd={(_e, info) => {
+            if (Math.abs(info.offset.x) > 60) {
+              addToQueue(track);
+              triggerHaptic('success');
+              addNotification(`Added "${track.title}" to queue`, 'success');
+            }
+          }}
           className={cn(
             "group relative cursor-pointer p-0 bg-transparent transition-all duration-200 flex flex-col w-[155px] shrink-0 select-none",
             className

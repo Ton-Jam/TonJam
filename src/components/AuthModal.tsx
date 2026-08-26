@@ -167,8 +167,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-[380px] space-y-8"
+          exit={{ opacity: 0, y: 50 }}
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0.05, bottom: 0.6 }}
+          onDragEnd={(_e, info) => {
+            if (info.offset.y > 90) {
+              triggerHaptic('light');
+              onClose();
+            }
+          }}
+          className="w-full max-w-[380px] space-y-8 cursor-grab active:cursor-grabbing select-none"
         >
+          {/* Visual swipe handle */}
+          <div className="w-full flex justify-center -mb-4">
+            <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+          </div>
           <div className="flex flex-col items-center text-center space-y-4">
             <motion.div
               initial={{ scale: 0.8 }}

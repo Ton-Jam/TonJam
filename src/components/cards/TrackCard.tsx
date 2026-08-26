@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Play, Pause, Heart, MoreVertical, CheckCircle2, Headphones, Sparkles, Volume2 } from 'lucide-react';
 import { TrackPlaceholder } from '../placeholders/TrackPlaceholder';
+import { useAudio } from '@/contexts/AudioContext';
+import { triggerHaptic } from '@/lib/haptics';
+import { toast } from 'sonner';
 
 export interface TrackData {
   id: string;
@@ -94,6 +97,8 @@ export const TrackCard: React.FC<TrackCardProps> = ({
     if (onMore) onMore(finalTrack);
   };
 
+  const audio = useAudio();
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -101,6 +106,24 @@ export const TrackCard: React.FC<TrackCardProps> = ({
       transition={{ duration: 0.3, ease: 'easeOut' }}
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.98 }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.3}
+      onDragEnd={(_e, info) => {
+        if (Math.abs(info.offset.x) > 60) {
+          try {
+            audio.addToQueue({
+              id: finalTrack.id,
+              title: finalTrack.title,
+              artist: finalTrack.artist,
+              coverUrl: finalTrack.coverUrl,
+              duration: 180,
+            } as any);
+          } catch (e) {}
+          triggerHaptic('success');
+          toast.success(`Added "${finalTrack.title}" to queue`);
+        }
+      }}
       className={`flex items-center p-1.5 rounded-[10px] bg-transparent transition-colors cursor-pointer w-full group relative select-none ${className}`}
       onClick={() => onPlay?.(finalTrack)}
     >
