@@ -1,3 +1,4 @@
+import { sendTransactionSafe } from "@/services/tonService";
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/contexts/AudioContext';
@@ -510,7 +511,7 @@ export default function NFTLaunchpad() {
         ]
       };
 
-      const result = await tonConnectUI.sendTransaction(transactionPayload);
+      const result = await sendTransactionSafe(tonConnectUI, transactionPayload);
 
       // Successfully minted on TON!
       const mintedNftItem: NFTItem = {

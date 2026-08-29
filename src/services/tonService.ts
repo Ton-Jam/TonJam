@@ -3,6 +3,28 @@ import { TonClient, Address, TupleItemSlice, beginCell, toNano, Cell, contractAd
 import { TonJamCollection, storeStateInit as storeCollectionInit } from '../contracts/nft/TonJamNFT_TonJamCollection';
 import { TonJamMarketplace, storeStateInit as storeMarketplaceInit } from '../contracts/marketplace/TonJamMarketplace_TonJamMarketplace';
 
+export const sendTransactionSafe = async (tonConnectUI: TonConnectUI, transaction: any) => {
+  if (!tonConnectUI || !tonConnectUI.connected || !tonConnectUI.wallet) {
+    try {
+      tonConnectUI?.openModal?.();
+    } catch (e) {
+      console.error("Failed to open TON Connect modal:", e);
+    }
+    throw new Error("Wallet is not connected. Please connect your TON wallet to send transactions.");
+  }
+  try {
+    return await sendTransactionSafe(tonConnectUI, transaction);
+  } catch (error: any) {
+    if (error?.message?.includes("WalletNotConnected") || error?.name?.includes("WalletNotConnected") || !tonConnectUI.connected) {
+      try {
+        tonConnectUI?.openModal?.();
+      } catch (e) {}
+      throw new Error("Wallet is not connected. Please connect your TON wallet to send transactions.");
+    }
+    throw error;
+  }
+};
+
 const TONCENTER_API_KEY = ''; // Optional: Add your API key here
 const TON_ENDPOINT = 'https://testnet.toncenter.com/api/v2/jsonRPC';
 
@@ -139,7 +161,7 @@ export const listNFTOnMarketplace = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Listing Transaction sent:", result);
     return true;
   } catch (error) {
@@ -180,7 +202,7 @@ export const buyNFTFromMarketplace = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Purchase Transaction sent:", result);
     return result.boc;
   } catch (error) {
@@ -216,7 +238,7 @@ export const cancelNFTListing = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Cancel Transaction sent:", result);
     return true;
   } catch (error) {
@@ -256,7 +278,7 @@ export const mintTonJamNFT = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Minting Transaction sent:", result);
     return true;
   } catch (error) {
@@ -301,7 +323,7 @@ export const buyNFT = async (
       messages: messages,
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Purchase Transaction sent:", result);
     return true;
   } catch (error) {
@@ -348,7 +370,7 @@ export const placeBid = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("Bid Transaction sent:", result);
     return true;
   } catch (error) {
@@ -375,7 +397,7 @@ export const acceptBid = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("Accept Bid Transaction sent:", result);
     return true;
   } catch (error) {
@@ -399,7 +421,7 @@ export const depositTON = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("Deposit Transaction sent:", result);
     return true;
   } catch (error) {
@@ -424,7 +446,7 @@ export const purchaseJAM = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("JAM Purchase Transaction sent:", result);
     return true;
   } catch (error) {
@@ -471,7 +493,7 @@ export const deployTonJamCollection = async (
       ],
     };
 
-    await tonConnectUI.sendTransaction(deployTransaction);
+    await sendTransactionSafe(tonConnectUI, deployTransaction);
     
     // Store in localStorage for persistence in this session
     localStorage.setItem('tonjam_collection_address', address);
@@ -515,7 +537,7 @@ export const deployTonJamMarketplace = async (
       ],
     };
 
-    await tonConnectUI.sendTransaction(deployTransaction);
+    await sendTransactionSafe(tonConnectUI, deployTransaction);
     
     // Store in localStorage for persistence in this session
     localStorage.setItem('tonjam_marketplace_address', address);
@@ -545,7 +567,7 @@ export const subscribePremium = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("Premium Subscription Transaction sent:", result);
     return true;
   } catch (error) {
@@ -653,7 +675,7 @@ export const stakeMusicNFT = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Staking Transaction sent:", result);
     return true;
   } catch (error) {
@@ -687,7 +709,7 @@ export const unstakeMusicNFT = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Unstaking Transaction sent:", result);
     return true;
   } catch (error) {
@@ -721,7 +743,7 @@ export const claimNFTStakingRewards = async (
       ],
     };
 
-    const result = await tonConnectUI.sendTransaction(transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Staking Rewards Claim Transaction sent:", result);
     return true;
   } catch (error) {

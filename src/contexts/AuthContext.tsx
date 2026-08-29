@@ -71,8 +71,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isArtist = userProfile?.role === 'artist';
   const isCollector = userProfile?.role === 'collector' || !userProfile?.role;
 
+  const setDocWithRetry = async (docRef: any, data: any, options?: any, maxRetries = 3, delayMs = 1000) => {
+    let attempt = 0;
+    while (attempt < maxRetries) {
+      try {
+        if (options) {
+          await setDoc(docRef, data, options);
+        } else {
+          await setDoc(docRef, data);
+        }
+        return;
+      } catch (err) {
+        attempt++;
+        console.warn(`[AuthContext] Firestore setDoc attempt ${attempt} failed for path:`, err);
+        if (attempt >= maxRetries) {
+          throw err;
+        }
+        await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, attempt - 1)));
+      }
+    }
+  };
+
   const fetchProfile = async (userId: string) => {
     try {
+      console.log(`[AuthContext] Fetching user profile for UID: ${userId}`);
       const docRef = doc(db, 'users', userId);
       const docSnap = await getDoc(docRef);
 
@@ -85,10 +107,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Ensure krusherkrupy@gmail.com is admin
         if (auth.currentUser?.email === 'krusherkrupy@gmail.com' && data.role !== 'admin') {
           try {
-            await setDoc(docRef, { role: 'admin' }, { merge: true });
+            await setDocWithRetry(docRef, { role: 'admin' }, { merge: true });
             data.role = 'admin';
+            console.log(`[AuthContext] Granted admin role to krusherkrupy@gmail.com`);
           } catch (writeErr) {
-            console.error("Failed to update admin role for krusherkrupy in Firestore:", writeErr);
+            console.error("[AuthContext] Failed to update admin role for krusherkrupy in Firestore after retries:", writeErr);
           }
         }
         
@@ -96,19 +119,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!data.bio || data.bio.trim() === '') {
           const shortBio = "Creating the future of sound. Electronic producer and synth enthusiast.";
           try {
-            await setDoc(docRef, { bio: shortBio }, { merge: true });
+            await setDocWithRetry(docRef, { bio: shortBio }, { merge: true });
             data.bio = shortBio;
           } catch (writeErr) {
-            console.error("Failed to automatically update user profile bio in Firestore:", writeErr);
+            console.error("[AuthContext] Failed to automatically update user profile bio in Firestore after retries:", writeErr);
           }
         }
         
         setUserProfile(data);
+        console.log(`[AuthContext] Successfully loaded user profile for UID: ${userId}`);
       } else {
         // Create a default profile if it doesn't exist
         const defaultProfile: Partial<UserProfile> = {
           uid: userId,
-          name: auth.currentUser?.displayName || 'New User',
+          name: auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'New User',
           username: `user_${userId.substring(0, 5)}`,
           avatar: auth.currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
           followers: 0,
@@ -120,14 +144,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         
         try {
-          await setDoc(docRef, defaultProfile);
+          await setDocWithRetry(docRef, defaultProfile);
           setUserProfile(defaultProfile as UserProfile);
+          console.log(`[AuthContext] Successfully created default user profile in Firestore for UID: ${userId}`);
         } catch (error) {
+          console.error(`[AuthContext] Failed to create default user profile in Firestore for UID ${userId} after retries:`, error);
           handleFirestoreError(error, OperationType.WRITE, `users/${userId}`);
           throw error;
         }
       }
     } catch (error) {
+      console.error(`[AuthContext] Error in fetchProfile for UID ${userId}:`, error);
       if (!(error as any).message?.includes('Firestore Error')) {
         handleFirestoreError(error, OperationType.GET, `users/${userId}`);
       }
@@ -276,13 +303,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUpWithEmail = async (email: string, password: string, metadata?: { username?: string }) => {
     try {
+      console.log(`[AuthContext] Starting email sign up for: ${email}`);
       const result = await createUserWithEmailAndPassword(auth, email, password);
+      const newUser = result.user;
+
+      const displayName = metadata?.username || email.split('@')[0];
       if (metadata?.username) {
-        await updateProfile(result.user, { displayName: metadata.username });
+        await updateProfile(newUser, { displayName: metadata.username });
       }
-      return { user: result.user };
-    } catch (error) {
-      console.error('Error signing up with email:', error);
+
+      // Explicitly create user profile in Firestore
+      const docRef = doc(db, 'users', newUser.uid);
+      const defaultProfile: Partial<UserProfile> = {
+        uid: newUser.uid,
+        name: displayName,
+        username: metadata?.username || `user_${newUser.uid.substring(0, 5)}`,
+        avatar: newUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${newUser.uid}`,
+        followers: 0,
+        following: 0,
+        earnings: 0,
+        role: email === 'krusherkrupy@gmail.com' ? 'admin' : 'collector',
+        bio: "Creating the future of sound. Electronic producer and synth enthusiast.",
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        await setDocWithRetry(docRef, defaultProfile, { merge: true });
+        console.log(`[AuthContext] Successfully persisted profile in Firestore for new user: ${newUser.uid}`);
+        setUserProfile(defaultProfile as UserProfile);
+      } catch (firestoreErr) {
+        console.error(`[AuthContext] CRITICAL: Failed to write user profile to Firestore during sign-up for ${newUser.uid} after retries:`, firestoreErr);
+        handleFirestoreError(firestoreErr, OperationType.WRITE, `users/${newUser.uid}`);
+        return { user: newUser, error: firestoreErr };
+      }
+
+      return { user: newUser };
+    } catch (error: any) {
+      console.error('[AuthContext] Error signing up with email:', error?.code, error?.message, error);
       return { error };
     }
   };
@@ -317,9 +374,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           role: 'collector',
           createdAt: new Date().toISOString()
         };
-        await setDoc(docRef, defaultProfile);
+        await setDocWithRetry(docRef, defaultProfile);
       } else {
-        await setDoc(docRef, { walletAddress }, { merge: true });
+        await setDocWithRetry(docRef, { walletAddress }, { merge: true });
       }
       
       await fetchProfile(result.user.uid);

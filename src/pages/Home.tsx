@@ -8,6 +8,7 @@ import { HomeHero } from "@/components/home/HomeHero";
 import { SponsoredPromoCarousel } from "@/components/home/SponsoredPromoCarousel";
 import { ContinueListeningSection } from "@/components/home/ContinueListeningSection";
 import { TrendingFeedSection } from "@/components/home/TrendingFeedSection";
+import { RecentlyPlayedSection } from "@/components/home/RecentlyPlayedSection";
 
 // Lazy-loaded components for optimal performance & chunking
 const MoodAlignmentSection = lazy(() => import("@/components/home/MoodAlignmentSection"));
@@ -60,6 +61,9 @@ const Home: React.FC = () => {
 
         {/* 4. Trending feed */}
         <TrendingFeedSection />
+
+        {/* Recently played */}
+        <RecentlyPlayedSection />
 
         {/* 5. Mood alignment quick access */}
         <Suspense fallback={<HomeSectionSkeleton type="horizontal-cards" count={5} />}>

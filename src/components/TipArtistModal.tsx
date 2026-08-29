@@ -1,3 +1,4 @@
+import { sendTransactionSafe } from "../services/tonService";
 import * as React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
@@ -108,7 +109,7 @@ export const TipArtistModal: React.FC<TipArtistModalProps> = ({ artist, track, o
         ],
       };
 
-      const result = await tonConnectUI.sendTransaction(transaction);
+      const result = await sendTransactionSafe(tonConnectUI, transaction);
 
       if (result) {
         setIsSuccess(true);

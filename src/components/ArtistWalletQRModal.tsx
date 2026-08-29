@@ -1,3 +1,4 @@
+import { sendTransactionSafe } from "../services/tonService";
 import * as React from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -100,7 +101,7 @@ export const ArtistWalletQRModal: React.FC<ArtistWalletQRModalProps> = ({
         ],
       };
 
-      const result = await tonConnectUI.sendTransaction(transaction);
+      const result = await sendTransactionSafe(tonConnectUI, transaction);
 
       if (result) {
         setIsSuccess(true);

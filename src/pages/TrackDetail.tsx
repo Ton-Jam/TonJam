@@ -1,3 +1,4 @@
+import { sendTransactionSafe } from "@/services/tonService";
 import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, onSnapshot, updateDoc, increment, setDoc } from 'firebase/firestore';
@@ -299,7 +300,7 @@ const TrackDetail: React.FC = () => {
         ]
       };
       
-      await tonConnectUI.sendTransaction(transaction);
+      await sendTransactionSafe(tonConnectUI, transaction);
       
       addNotification(`Successfully tipped ${amount} GRAMS to ${track.artist}!`, 'success');
       confetti({

@@ -1,3 +1,4 @@
+import { sendTransactionSafe } from "../services/tonService";
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -222,7 +223,7 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
         ]
       };
 
-      const result = await tonConnectUI.sendTransaction(transaction);
+      const result = await sendTransactionSafe(tonConnectUI, transaction);
 
       setSalesHistory(prev =>
         prev.map(s => ({ ...s, status: 'settled' }))

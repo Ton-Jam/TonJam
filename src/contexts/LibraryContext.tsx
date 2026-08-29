@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MOCK_TESTING_TRACKS, MockTrack } from '@/data/mockTracks';
+import { Track } from '@/types';
 
 interface LibraryContextType {
   testingTracks: MockTrack[];
   injectTestingTracks: () => { success: boolean; count: number; message: string };
   clearTestingTracks: () => { success: boolean; message: string };
   isTestingTracksInjected: boolean;
+  recentlyPlayed: Track[];
 }
 
 const LibraryContext = createContext<LibraryContextType | null>(null);
@@ -20,6 +22,14 @@ export const useLibrary = () => {
 
 export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isTestingTracksInjected, setIsTestingTracksInjected] = useState(false);
+  const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>(() => {
+    try {
+      const saved = localStorage.getItem('tonjam_recently_played');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
 
   // Check if testing tracks are already present in localStorage on mount
   useEffect(() => {
@@ -38,10 +48,25 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     };
 
+    const handleStorageChange = () => {
+      try {
+        const saved = localStorage.getItem('tonjam_recently_played');
+        if (saved) {
+          setRecentlyPlayed(JSON.parse(saved));
+        }
+      } catch (e) {}
+      checkInjectionStatus();
+    };
+
     checkInjectionStatus();
-    window.addEventListener('tonjam_library_updated', checkInjectionStatus);
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('tonjam_library_updated', handleStorageChange);
+    window.addEventListener('tonjam_audio_updated', handleStorageChange);
+
     return () => {
-      window.removeEventListener('tonjam_library_updated', checkInjectionStatus);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('tonjam_library_updated', handleStorageChange);
+      window.removeEventListener('tonjam_audio_updated', handleStorageChange);
     };
   }, []);
 
@@ -133,7 +158,8 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
       testingTracks: MOCK_TESTING_TRACKS,
       injectTestingTracks,
       clearTestingTracks,
-      isTestingTracksInjected
+      isTestingTracksInjected,
+      recentlyPlayed
     }}>
       {children}
     </LibraryContext.Provider>

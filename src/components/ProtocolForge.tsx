@@ -1,3 +1,4 @@
+import { sendTransactionSafe } from "../services/tonService";
  import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -123,7 +124,7 @@ const ProtocolForge: React.FC = () => {
       };
 
       try {
-        await tonConnectUI.sendTransaction(transaction);
+        await sendTransactionSafe(tonConnectUI, transaction);
         setDeploymentStep(3);
         addLog("Phase 3: Transaction broadcasted to TON Testnet.");
         const mockNewAddress = "EQ_TJ_GENESIS_" + Math.random().toString(16).slice(2, 10).toUpperCase();
