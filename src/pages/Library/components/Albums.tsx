@@ -28,10 +28,10 @@ export const Albums: React.FC<AlbumsProps> = ({ albums, layout = 'list' }) => {
     <div className="space-y-4">
       {/* Header with Sort Menu */}
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <Disc className="w-4 h-4 text-[#0052FF]" />
-          Albums Collection
-        </h3>
+          <h2 className="section-title">Albums Collection</h2>
+        </div>
 
         <div className="flex items-center gap-2">
           <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />

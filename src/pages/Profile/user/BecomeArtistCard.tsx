@@ -18,7 +18,7 @@ export const BecomeArtistCard: React.FC<BecomeArtistCardProps> = ({
   ];
 
   return (
-    <div className="bg-gradient-to-r from-blue-950/40 via-indigo-950/40 to-slate-900/40 border border-[#0052FF]/20 rounded-2xl p-5 text-white flex flex-col justify-between">
+    <div className="bg-gradient-to-r from-blue-950/40 via-indigo-950/40 to-slate-900/40 rounded-2xl p-5 text-white flex flex-col justify-between shadow-sm">
       <div>
         <div className="flex items-center gap-2 mb-3">
           <div className="p-1.5 bg-[#0052FF]/10 text-[#0052FF] rounded-lg">
@@ -47,7 +47,7 @@ export const BecomeArtistCard: React.FC<BecomeArtistCardProps> = ({
         </div>
       </div>
 
-      <div className="mt-6 pt-3 border-t border-white/5 flex items-center justify-between gap-4">
+      <div className="mt-6 pt-3 flex items-center justify-between gap-4">
         <div>
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Current Status</span>
           <span className="text-xs font-bold uppercase tracking-widest text-[#0052FF] font-mono">
@@ -70,7 +70,7 @@ export const BecomeArtistCard: React.FC<BecomeArtistCardProps> = ({
         )}
 
         {status === 'pending' && (
-          <div className="px-4 py-2 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5">
+          <div className="px-4 py-2 bg-amber-500/10 text-amber-400 text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
             <span>Under Review</span>
           </div>

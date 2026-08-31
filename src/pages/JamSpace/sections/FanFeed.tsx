@@ -28,7 +28,7 @@ export const FanFeed: React.FC<FanFeedProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-emerald-400" />
-          <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Fan Feedback & Milestones</h3>
+          <h2 className="section-title">Fan Feedback & Milestones</h2>
         </div>
         <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Fan Node Ledger</span>
       </div>

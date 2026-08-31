@@ -33,7 +33,7 @@ export const CommunityHero: React.FC<CommunityHeroProps> = ({
             <Sparkles className="w-4 h-4" />
             <span>TonJam Community Nexus</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
+          <h1 className="tonjam-hero text-white">
             The heart of <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Decentralized Music</span>
           </h1>
           <p className="text-sm text-slate-400 font-medium leading-relaxed max-w-lg">

@@ -15,6 +15,7 @@ interface ScrollingTextProps {
   className?: string;
   containerClassName?: string;
   id?: string;
+  speed?: number; // pixels per second for readable scrolling
 }
 
 const ScrollingText: React.FC<ScrollingTextProps> = ({
@@ -22,24 +23,49 @@ const ScrollingText: React.FC<ScrollingTextProps> = ({
   className = "",
   containerClassName = "",
   id,
+  speed = 35,
 }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const textRef = React.useRef<HTMLSpanElement>(null);
+  const measureRef = React.useRef<HTMLSpanElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
+  const [duration, setDuration] = useState(10);
 
   useEffect(() => {
-    const checkOverflow = () => {
-      if (containerRef.current && textRef.current) {
-        setIsOverflowing(textRef.current.scrollWidth > containerRef.current.clientWidth + 1);
+    const updateOverflow = () => {
+      if (containerRef.current && measureRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const textWidth = measureRef.current.offsetWidth || measureRef.current.scrollWidth;
+        const overflowing = textWidth > containerWidth + 2;
+        setIsOverflowing(overflowing);
+        if (overflowing) {
+          const totalDistance = textWidth + 32;
+          const calculatedDuration = Math.max(6, Math.min(30, totalDistance / speed));
+          setDuration(calculatedDuration);
+        }
       }
     };
 
-    checkOverflow();
-    window.addEventListener("resize", checkOverflow);
-    return () => window.removeEventListener("resize", checkOverflow);
-  }, [text]);
+    updateOverflow();
 
-  const duration = Math.max(7, Math.min(25, text.length * 0.45));
+    const resizeObserver = new ResizeObserver(() => {
+      updateOverflow();
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    window.addEventListener("resize", updateOverflow);
+
+    if (document.fonts) {
+      document.fonts.ready.then(updateOverflow).catch(() => {});
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateOverflow);
+    };
+  }, [text, speed]);
 
   return (
     <div
@@ -48,27 +74,36 @@ const ScrollingText: React.FC<ScrollingTextProps> = ({
       className={`overflow-hidden relative whitespace-nowrap ${containerClassName}`}
       style={{
         maskImage: isOverflowing
-          ? "linear-gradient(to right, transparent 0%, black 6px, black calc(100% - 6px), transparent 100%)"
+          ? "linear-gradient(to right, transparent 0%, black 8px, black calc(100% - 8px), transparent 100%)"
           : "none",
         WebkitMaskImage: isOverflowing
-          ? "linear-gradient(to right, transparent 0%, black 6px, black calc(100% - 6px), transparent 100%)"
+          ? "linear-gradient(to right, transparent 0%, black 8px, black calc(100% - 8px), transparent 100%)"
           : "none",
       }}
     >
+      {/* Invisible measurement element to calculate natural unpadded text width */}
+      <span
+        ref={measureRef}
+        className={`invisible absolute top-0 left-0 whitespace-nowrap pointer-events-none -z-50 select-none opacity-0 ${className}`}
+        aria-hidden="true"
+      >
+        {text}
+      </span>
+
       {isOverflowing ? (
         <div
-          className="animate-mini-marquee"
-          style={{ animationDuration: `${duration}s` }}
+          className="animate-mini-marquee inline-flex"
+          style={{ animationDuration: `${duration}s`, willChange: "transform" }}
         >
-          <span ref={textRef} className={`pr-8 inline-block ${className}`}>
+          <span className={`pr-8 inline-block shrink-0 ${className}`}>
             {text}
           </span>
-          <span className={`pr-8 inline-block ${className}`}>
+          <span className={`pr-8 inline-block shrink-0 ${className}`} aria-hidden="true">
             {text}
           </span>
         </div>
       ) : (
-        <span ref={textRef} className={`inline-block truncate ${className}`}>
+        <span className={`inline-block truncate max-w-full ${className}`}>
           {text}
         </span>
       )}
@@ -228,7 +263,14 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       >
         <div 
           onClick={() => setIsDroppedDown(false)}
-          className="group relative flex items-center gap-2.5 p-1.5 pr-3 bg-black hover:bg-neutral-900 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.6)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden"
+          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.6)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden"
+          style={{
+            backgroundColor: "#000000",
+            background: "#000000",
+            opacity: 1,
+            backdropFilter: "none",
+            WebkitBackdropFilter: "none",
+          }}
           title="Click to expand Mini Player"
         >
           {/* Sleek top progress indicator on collapsed pill */}
@@ -335,10 +377,17 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       onDragEnd={handleDragEnd}
       onClick={() => setFullPlayerOpen(true)}
       whileTap={{ scale: 0.99 }}
-      className={`fixed left-0 right-0 lg:left-64 bg-[#0A0E1A]/95 backdrop-blur-xl text-[#F2F4F8] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-[0_-8px_30px_rgba(0,0,0,0.8)] transition-all duration-300 ease-in-out cursor-pointer ${
+      className={`fixed left-0 right-0 lg:left-64 text-[#F2F4F8] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-in-out cursor-pointer ${
         isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
       }`}
-      style={{ touchAction: "none" }}
+      style={{
+        touchAction: "none",
+        backgroundColor: "#000000",
+        background: "#000000",
+        opacity: 1,
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+      }}
       id="tonjam-mini-player"
     >
       {/* Streaming Health Indicator */}
@@ -375,7 +424,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             }}
             id="mini-artwork"
           />
-          <div className="flex flex-col min-w-0 leading-tight flex-1 max-w-[180px] sm:max-w-xs md:max-w-md lg:max-w-lg">
+          <div className="flex flex-col min-w-0 leading-tight flex-1 mr-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <ScrollingText
                 text={currentTrack.title}

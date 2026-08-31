@@ -13,9 +13,15 @@ export const sendTransactionSafe = async (tonConnectUI: TonConnectUI, transactio
     throw new Error("Wallet is not connected. Please connect your TON wallet to send transactions.");
   }
   try {
-    return await sendTransactionSafe(tonConnectUI, transaction);
+    return await tonConnectUI.sendTransaction(transaction);
   } catch (error: any) {
-    if (error?.message?.includes("WalletNotConnected") || error?.name?.includes("WalletNotConnected") || !tonConnectUI.connected) {
+    if (
+      error?.message?.includes("WalletNotConnected") ||
+      error?.name?.includes("WalletNotConnected") ||
+      error?.message?.includes("_WalletNotConnectedError") ||
+      error?.name === "_WalletNotConnectedError" ||
+      !tonConnectUI.connected
+    ) {
       try {
         tonConnectUI?.openModal?.();
       } catch (e) {}

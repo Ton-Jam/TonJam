@@ -452,7 +452,7 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
   };
 
   return (
-    <PageContainer animate={true} hasPlayerSpacing={true} className="text-white min-h-screen relative pb-24">
+    <PageContainer animate={true} hasPlayerSpacing={true} className="text-white min-h-screen relative pb-28">
       {/* Pull To Refresh Indicator */}
       <AnimatePresence>
         {isRefreshing && (

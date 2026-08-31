@@ -314,7 +314,7 @@ export const UserProfile: React.FC = () => {
             {isOwnProfile && (
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1.5 bg-[#050A24]/80 hover:bg-[#050A24] text-xs font-semibold rounded-full tracking-wider uppercase backdrop-blur-sm transition-all cursor-pointer flex items-center gap-1.5 text-slate-300 hover:text-white shadow-lg"
+                className="px-3 py-1.5 bg-[#050A24] hover:bg-[#0a113a] text-xs font-semibold rounded-full tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5 text-slate-300 hover:text-white shadow-lg"
               >
                 <Camera className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Change Cover</span>

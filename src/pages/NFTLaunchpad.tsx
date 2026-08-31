@@ -200,22 +200,22 @@ const DropCountdown: React.FC<{ targetDate: string; onExpire?: () => void }> = (
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex flex-col items-center bg-white/[0.04] backdrop-blur-md px-3.5 py-2 rounded-xl min-w-[54px]">
+      <div className="flex flex-col items-center bg-white/[0.04] px-3.5 py-2 rounded-xl min-w-[54px]">
         <span className="font-mono text-xl font-black text-white tracking-tight">{String(timeLeft.days).padStart(2, '0')}</span>
         <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-semibold">Days</span>
       </div>
       <span className="text-neutral-500 font-mono font-bold text-lg">:</span>
-      <div className="flex flex-col items-center bg-white/[0.04] backdrop-blur-md px-3.5 py-2 rounded-xl min-w-[54px]">
+      <div className="flex flex-col items-center bg-white/[0.04] px-3.5 py-2 rounded-xl min-w-[54px]">
         <span className="font-mono text-xl font-black text-[#0098EA] tracking-tight">{String(timeLeft.hours).padStart(2, '0')}</span>
         <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-semibold">Hours</span>
       </div>
       <span className="text-neutral-500 font-mono font-bold text-lg">:</span>
-      <div className="flex flex-col items-center bg-white/[0.04] backdrop-blur-md px-3.5 py-2 rounded-xl min-w-[54px]">
+      <div className="flex flex-col items-center bg-white/[0.04] px-3.5 py-2 rounded-xl min-w-[54px]">
         <span className="font-mono text-xl font-black text-[#0098EA] tracking-tight">{String(timeLeft.minutes).padStart(2, '0')}</span>
         <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-semibold">Mins</span>
       </div>
       <span className="text-neutral-500 font-mono font-bold text-lg">:</span>
-      <div className="flex flex-col items-center bg-white/[0.04] backdrop-blur-md px-3.5 py-2 rounded-xl min-w-[54px]">
+      <div className="flex flex-col items-center bg-white/[0.04] px-3.5 py-2 rounded-xl min-w-[54px]">
         <span className="font-mono text-xl font-black text-[#00E5FF] tracking-tight">{String(timeLeft.seconds).padStart(2, '0')}</span>
         <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-semibold">Secs</span>
       </div>
@@ -403,7 +403,14 @@ export default function NFTLaunchpad() {
       }
       const audio = new Audio(drop.audioPreviewUrl);
       audio.onended = () => setPlayingDropId(null);
-      audio.play().catch(() => toast.error('Could not play audio preview'));
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          if (err?.name !== 'AbortError' && !err?.message?.includes('interrupted')) {
+            toast.error('Could not play audio preview');
+          }
+        });
+      }
       audioRef.current = audio;
       setPlayingDropId(drop.id);
       toast.success(`Playing sample for "${drop.title}"`);
@@ -735,7 +742,7 @@ export default function NFTLaunchpad() {
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="p-3.5 bg-gradient-to-tr from-[#0098EA]/30 via-indigo-600/20 to-[#00E5FF]/20 text-[#00E5FF] rounded-2xl shadow-xl backdrop-blur-md">
+            <div className="p-3.5 bg-gradient-to-tr from-[#0098EA]/30 via-indigo-600/20 to-[#00E5FF]/20 text-[#00E5FF] rounded-2xl shadow-xl">
               <Rocket className="h-7 w-7 animate-pulse" />
             </div>
             <div>
@@ -749,14 +756,14 @@ export default function NFTLaunchpad() {
 
           {/* Quick Metrics Bar */}
           <div className="flex items-center gap-3 overflow-x-auto pb-1 no-scrollbar">
-            <div className="bg-white/[0.04] backdrop-blur-md px-4 py-2.5 rounded-2xl flex items-center gap-2.5 shrink-0">
+            <div className="bg-white/[0.04] px-4 py-2.5 rounded-2xl flex items-center gap-2.5 shrink-0">
               <Flame className="w-4 h-4 text-orange-400" />
               <div>
                 <div className="text-xs font-black text-white">{drops.length} Scheduled Drops</div>
                 <div className="text-[9px] uppercase tracking-wider text-neutral-400">Total Pipeline</div>
               </div>
             </div>
-            <div className="bg-white/[0.04] backdrop-blur-md px-4 py-2.5 rounded-2xl flex items-center gap-2.5 shrink-0">
+            <div className="bg-white/[0.04] px-4 py-2.5 rounded-2xl flex items-center gap-2.5 shrink-0">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <div>
                 <div className="text-xs font-black text-white">{connectedAddress ? `${connectedAddress.slice(0, 4)}...${connectedAddress.slice(-4)}` : 'Disconnected'}</div>
@@ -769,7 +776,7 @@ export default function NFTLaunchpad() {
 
       {/* 2. FEATURED GENESIS IMMINENT DROP HERO BANNER */}
       {featuredDrop && (
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-neutral-900/90 via-indigo-950/40 to-neutral-900/90 backdrop-blur-2xl shadow-2xl p-6 sm:p-8">
+        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-neutral-900 via-indigo-950/40 to-neutral-900 shadow-2xl p-6 sm:p-8">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#0098EA]/10 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
@@ -782,10 +789,10 @@ export default function NFTLaunchpad() {
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                 />
-                <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-[#00E5FF] flex items-center gap-1">
+                <div className="absolute top-3 left-3 bg-black/70 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-[#00E5FF] flex items-center gap-1">
                   <Sparkles className="w-3 h-3" /> Featured Genesis Drop
                 </div>
-                <div className="absolute bottom-3 right-3 bg-neutral-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-white shadow-lg">
+                <div className="absolute bottom-3 right-3 bg-neutral-900 px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-white shadow-lg">
                   {featuredDrop.priceTon} TON
                 </div>
               </div>
@@ -894,7 +901,7 @@ export default function NFTLaunchpad() {
       {/* 3. TABS & FILTER CONTROLS - BORDERLESS DARK GLASS */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Navigation Tabs */}
-        <div className="flex gap-1.5 p-1.5 bg-neutral-900/60 backdrop-blur-xl rounded-2xl w-full sm:w-auto overflow-x-auto no-scrollbar">
+        <div className="flex gap-1.5 p-1.5 bg-neutral-900 rounded-2xl w-full sm:w-auto overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('upcoming')}
             className={`py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 shrink-0 ${
@@ -995,7 +1002,7 @@ export default function NFTLaunchpad() {
                   return (
                     <div 
                       key={drop.id}
-                      className="group bg-neutral-900/40 hover:bg-neutral-900/70 backdrop-blur-xl rounded-3xl p-5 flex flex-col justify-between transition-all duration-300 shadow-xl space-y-4"
+                      className="group bg-neutral-900/40 hover:bg-neutral-900/70 rounded-3xl p-5 flex flex-col justify-between transition-all duration-300 shadow-xl space-y-4"
                     >
                       {/* Artwork & Badges */}
                       <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-black/40">
@@ -1005,19 +1012,19 @@ export default function NFTLaunchpad() {
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                         />
-                        <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-[#00E5FF] flex items-center gap-1">
+                        <div className="absolute top-3 left-3 bg-black/70 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-[#00E5FF] flex items-center gap-1">
                           <DollarSign className="h-3 w-3" />
                           {drop.priceTon} TON
                         </div>
                         
                         {/* Top Right: Genre & Notify Me Bell Toggle */}
                         <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
-                          <div className="bg-neutral-950/80 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-neutral-300">
+                          <div className="bg-neutral-950/80 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-neutral-300">
                             {drop.genre}
                           </div>
                           <button
                             onClick={(e) => handleToggleNotify(drop, e)}
-                            className={`p-1.5 rounded-full backdrop-blur-md transition-all duration-300 flex items-center justify-center cursor-pointer shadow-md ${
+                            className={`p-1.5 rounded-full transition-all duration-300 flex items-center justify-center cursor-pointer shadow-md ${
                               subscribedDropIds.includes(drop.id)
                                 ? 'bg-amber-400 text-black scale-105 shadow-[0_0_10px_rgba(251,191,36,0.6)]'
                                 : 'bg-black/70 hover:bg-black/90 text-neutral-300 hover:text-white'
@@ -1179,7 +1186,7 @@ export default function NFTLaunchpad() {
                 {userWhitelistedDrops.map(drop => {
                   const isLive = new Date(drop.releaseDate).getTime() <= Date.now() || drop.status === 'live';
                   return (
-                    <div key={drop.id} className="bg-neutral-900/40 backdrop-blur-xl p-6 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg">
+                    <div key={drop.id} className="bg-neutral-900/40 p-6 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg">
                       <div className="flex items-center gap-4">
                         <img 
                           src={drop.coverUrl} 
@@ -1256,7 +1263,7 @@ export default function NFTLaunchpad() {
             className="grid grid-cols-1 lg:grid-cols-12 gap-8"
           >
             {/* Left: Schedule Drop Form */}
-            <div className="lg:col-span-6 bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+            <div className="lg:col-span-6 bg-neutral-900/40 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
               <div className="space-y-1">
                 <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-[#00E5FF]" />
@@ -1451,7 +1458,7 @@ export default function NFTLaunchpad() {
             <div className="lg:col-span-6 space-y-6">
               
               {/* Studio Scheduled Drops List */}
-              <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 space-y-4 shadow-xl">
+              <div className="bg-neutral-900/40 rounded-3xl p-6 space-y-4 shadow-xl">
                 <h3 className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
                   <Layers className="h-5 w-5 text-[#00E5FF]" />
                   Active Releases Studio
@@ -1508,7 +1515,7 @@ export default function NFTLaunchpad() {
 
               {/* Whitelist Management Detail Panel */}
               {selectedDropForMgmt && (
-                <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 space-y-6 shadow-xl">
+                <div className="bg-neutral-900/40 rounded-3xl p-6 space-y-6 shadow-xl">
                   <div className="flex justify-between items-start">
                     <div>
                       <span className="text-[9px] font-black uppercase tracking-widest text-[#00E5FF]">Whitelist Console</span>
@@ -1606,7 +1613,7 @@ export default function NFTLaunchpad() {
       {/* 5. DIRECT ON-CHAIN MINTING MODAL */}
       <AnimatePresence>
         {mintingDrop && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

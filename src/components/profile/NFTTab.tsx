@@ -1,31 +1,33 @@
 import React, { useState } from 'react';
 import { Search, SlidersHorizontal, Eye, ExternalLink, BadgeCheck } from 'lucide-react';
-
-interface NFTAsset {
-  id: string;
-  title: string;
-  creator: string;
-  coverUrl: string;
-  edition: string;
-  valueTon: number;
-  contractAddress: string;
-}
+import { NFTItem } from '@/types';
 
 interface NFTTabProps {
   onSelectNFT: (nftId: string) => void;
+  nfts?: (NFTItem | any)[];
 }
 
-const MOCK_NFTS_LIST: NFTAsset[] = [
+const MOCK_NFTS_LIST = [
   { id: 'nft_1', title: 'Sonic Resonance #04', creator: 'DJ Krupy', coverUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=400&h=400&q=80', edition: '04/25', valueTon: 15.0, contractAddress: 'EQCt...5_fN' },
   { id: 'nft_2', title: 'Ethereal Escape #12', creator: 'DJ Starlight', coverUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&h=400&q=80', edition: '12/50', valueTon: 8.5, contractAddress: 'EQAx...9k1w' },
   { id: 'nft_3', title: 'Retro Wave #09', creator: 'Cyber Beats', coverUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=400&h=400&q=80', edition: '09/100', valueTon: 25.0, contractAddress: 'EQBv...K5w9' },
   { id: 'nft_4', title: 'Cyberpunk Skyline #01', creator: 'Aero Static', coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=400&h=400&q=80', edition: '01/10', valueTon: 75.0, contractAddress: 'EQD3...W3Fi' }
 ];
 
-export const NFTTab: React.FC<NFTTabProps> = ({ onSelectNFT }) => {
+export const NFTTab: React.FC<NFTTabProps> = ({ onSelectNFT, nfts }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredNfts = MOCK_NFTS_LIST.filter(nft =>
+  const displayList = (nfts && nfts.length > 0) ? nfts.map(nft => ({
+    id: nft.id,
+    title: nft.title || 'Music NFT Collectible',
+    creator: nft.creator || nft.artist || 'Creator',
+    coverUrl: nft.coverUrl || nft.imageUrl || nft.image || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=400&h=400&q=80',
+    edition: nft.edition || '1/1',
+    valueTon: typeof nft.price === 'number' ? nft.price : parseFloat(nft.price || '5.0') || 5.0,
+    contractAddress: nft.contractAddress || 'TON Blockchain'
+  })) : (nfts !== undefined ? [] : MOCK_NFTS_LIST);
+
+  const filteredNfts = displayList.filter(nft =>
     nft.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     nft.creator.toLowerCase().includes(searchQuery.toLowerCase())
   );

@@ -108,6 +108,15 @@ export const uploadMetadata = async (metadata: any): Promise<StorageUploadRespon
 };
 
 /**
+ * Uploads a post media file (image or video) to Firebase Storage at /posts/{userId}/{fileName}
+ */
+export const uploadPostMedia = async (file: File, onProgress?: (progress: number) => void): Promise<StorageUploadResponse> => {
+  const userId = auth.currentUser?.uid || 'anonymous';
+  const storagePath = `posts/${userId}/${Date.now()}_${file.name}`;
+  return uploadFile(file, storagePath, onProgress);
+};
+
+/**
  * Uploads a post image to Firebase Storage at /posts/{userId}/{fileName}
  */
 export const uploadPostImage = async (file: File, onProgress?: (progress: number) => void): Promise<StorageUploadResponse> => {

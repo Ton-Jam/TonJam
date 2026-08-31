@@ -28,7 +28,7 @@ export const ArtistPosts: React.FC<ArtistPostsProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Mic className="w-4 h-4 text-purple-400" />
-          <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Artist Cabin Transmission</h3>
+          <h2 className="section-title">Artist Cabin Transmission</h2>
         </div>
         <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Creator Channels</span>
       </div>

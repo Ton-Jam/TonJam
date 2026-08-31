@@ -749,7 +749,7 @@ export default function ArtistDashboard() {
       <div className="relative z-10 w-full max-w-full p-2 sm:p-4 space-y-4">
         
         {/* Banner Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/[0.02] backdrop-blur-md p-4 sm:p-6 rounded-2xl shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/[0.02] p-4 sm:p-6 rounded-2xl shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]">
           <div className="space-y-0.5">
             <h1 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
               Artist Hub <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
@@ -776,7 +776,7 @@ export default function ArtistDashboard() {
         </div>
 
         {/* Workspace Subtab Selection Grid (Porosity Glass Aesthetic) */}
-        <div className="flex flex-wrap p-1 bg-white/[0.01] backdrop-blur-md rounded-2xl gap-1">
+        <div className="flex flex-wrap p-1 bg-white/[0.01] rounded-2xl gap-1">
           <button
             onClick={() => setActiveTab("overview")}
             className={`flex-1 min-w-[120px] transition-all duration-300 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 ${
@@ -904,21 +904,21 @@ export default function ArtistDashboard() {
               <>
                 {/* Statistics Bento Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <div className="bg-white/[0.02] backdrop-blur-md p-3 rounded-lg relative overflow-hidden group shadow">
+                  <div className="bg-white/[0.02] p-3 rounded-lg relative overflow-hidden group shadow">
                     <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Total Tracks</p>
                     <div className="flex items-end gap-1">
                       <h3 className="text-xl font-black text-cyan-400">{tracks.length}</h3>
                     </div>
                   </div>
 
-                  <div className="bg-white/[0.02] backdrop-blur-md p-3 rounded-lg relative overflow-hidden group shadow">
+                  <div className="bg-white/[0.02] p-3 rounded-lg relative overflow-hidden group shadow">
                     <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Minted</p>
                     <div className="flex items-end gap-1">
                       <h3 className="text-xl font-black text-purple-400">{nfts.length}</h3>
                     </div>
                   </div>
 
-                  <div className="bg-white/[0.02] backdrop-blur-md p-3 rounded-lg relative overflow-hidden group shadow">
+                  <div className="bg-white/[0.02] p-3 rounded-lg relative overflow-hidden group shadow">
                     <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Royalty (TON)</p>
                     <div className="flex items-end gap-1">
                       <h3 className="text-xl font-black text-amber-500">{earnings.toFixed(2)}</h3>
@@ -930,12 +930,12 @@ export default function ArtistDashboard() {
                 <MintingStatus />
 
                 {/* Live Streams Bar Chart */}
-                <div className="bg-white/[0.02] backdrop-blur-md p-4 rounded-xl shadow-lg">
+                <div className="bg-white/[0.02] p-4 rounded-xl shadow-lg">
                   <DailyStreamsChart tracks={tracks} />
                 </div>
 
                 {/* Simulated Feed of Listeners Activity */}
-                <div className="bg-white/[0.02] backdrop-blur-md p-4 rounded-xl shadow-lg">
+                <div className="bg-white/[0.02] p-4 rounded-xl shadow-lg">
                   <ListenerActivityFeed tracks={tracks} />
                 </div>
 
@@ -945,7 +945,7 @@ export default function ArtistDashboard() {
                     <div className="w-0.5 h-4 bg-cyan-500 rounded-full animate-pulse" />
                     <h2 className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em]">Audience Requests</h2>
                   </div>
-                  <div className="bg-white/[0.02] backdrop-blur-md p-4 rounded-xl shadow-lg">
+                  <div className="bg-white/[0.02] p-4 rounded-xl shadow-lg">
                     <SongRequestsTab artistId={user.uid} isOwnProfile={true} />
                   </div>
                 </div>
@@ -961,7 +961,7 @@ export default function ArtistDashboard() {
             {activeTab === "sonic" && (
               <div className="space-y-6">
                 {/* Enhanced Upload Form inside Digital Distribution Studio */}
-                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-2xl shadow-lg relative overflow-hidden">
+                <div className="bg-white/[0.02] p-6 rounded-2xl shadow-lg relative overflow-hidden">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
                       <UploadCloud className="w-4 h-4 text-cyan-400" /> Digital Distribution Studio
@@ -975,7 +975,7 @@ export default function ArtistDashboard() {
                   
                   {isUploading ? (
                     <div className="grid grid-cols-1 gap-6 py-6 transition-all duration-300">
-                      <div className="bg-black/40 backdrop-blur-md p-6 rounded-2xl flex flex-col justify-center items-center py-10">
+                      <div className="bg-black/40 p-6 rounded-2xl flex flex-col justify-center items-center py-10">
                         <div className="w-20 h-20 relative flex items-center justify-center mb-6">
                           {/* Circular progress SVG */}
                           <svg className="w-full h-full transform -rotate-90">
@@ -1391,7 +1391,7 @@ export default function ArtistDashboard() {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="p-4 bg-zinc-900/60 backdrop-blur-md rounded-3xl flex flex-wrap items-center justify-between gap-3"
+                        className="p-4 bg-zinc-900/60 rounded-3xl flex flex-wrap items-center justify-between gap-3"
                       >
                         <div className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-cyan-400" />
@@ -1547,7 +1547,7 @@ export default function ArtistDashboard() {
             {/* PORTFOLIO TAB */}
             {activeTab === "portfolio" && (
               <div className="space-y-4">
-                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-2xl border border-white/5 space-y-6">
+                <div className="bg-white/[0.02] p-6 rounded-2xl border border-white/5 space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <h3 className="text-sm font-black uppercase tracking-tight flex items-center gap-2">
@@ -1598,7 +1598,7 @@ export default function ArtistDashboard() {
                         {nfts.slice(0, 3).map((nft) => (
                           <div key={nft.id} className="aspect-square rounded-2xl overflow-hidden border border-white/5 group relative shadow-lg">
                             <img src={nft.imageUrl || nft.coverUrl || getPlaceholderImage(nft.title)} className="w-full h-full object-cover" alt="" />
-                            <div className="absolute inset-0 bg-cyan-500/20 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <div className="absolute inset-0 bg-cyan-500/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                               <Gem className="w-4 h-4 text-white drop-shadow-lg" />
                             </div>
                           </div>
@@ -1643,7 +1643,7 @@ export default function ArtistDashboard() {
                 <MintingStatus />
                 
                 {/* Secondary sales ledger display */}
-                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[4px] shadow-lg">
+                <div className="bg-white/[0.02] p-6 rounded-[4px] shadow-lg">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
                       <Coins className="w-4 h-4 text-amber-400" /> Web3 NFT sales Ledger
@@ -1703,13 +1703,13 @@ export default function ArtistDashboard() {
                         >
                           <div className="aspect-square rounded-2xl overflow-hidden mb-2 relative">
                             <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-full h-full object-cover" alt="" />
-                            <div className="absolute top-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-md text-[8px] font-black text-cyan-400">
+                            <div className="absolute top-2 right-2 px-2 py-1 bg-black/60 rounded-md text-[8px] font-black text-cyan-400">
                               {nft.price} TON
                             </div>
                           </div>
                           <h4 className="text-[10px] font-black uppercase tracking-tight truncate px-1">{nft.title}</h4>
                           <p className="text-[8px] font-bold text-zinc-500 truncate px-1 mt-0.5">{nft.edition}</p>
-                          <div className="absolute inset-0 bg-purple-600/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-3xl transition-opacity">
+                          <div className="absolute inset-0 bg-purple-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-3xl transition-opacity">
                             <button className="px-3 py-1.5 bg-purple-600 text-[8px] font-black uppercase tracking-widest rounded-lg shadow-xl">
                               Manage NFT
                             </button>
@@ -1733,7 +1733,7 @@ export default function ArtistDashboard() {
               <div className="space-y-6">
                 
                 {/* Side-by-Side Live DMs and Chat Panel */}
-                <div className="grid grid-cols-1 md:grid-cols-3 bg-white/[0.02] backdrop-blur-md rounded-[4px] overflow-hidden shadow-xl min-h-[480px]">
+                <div className="grid grid-cols-1 md:grid-cols-3 bg-white/[0.02] rounded-[4px] overflow-hidden shadow-xl min-h-[480px]">
                   
                   {/* Left Fan/Collector list */}
                   <div className="md:col-span-1 border-r border-white/[0.03] p-4 space-y-3">
@@ -1844,7 +1844,7 @@ export default function ArtistDashboard() {
                 </div>
 
                 {/* Gated Exclusive Content Drops Form */}
-                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[4px] shadow-lg space-y-6">
+                <div className="bg-white/[0.02] p-6 rounded-[4px] shadow-lg space-y-6">
                   <div className="space-y-1">
                     <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-1.5">
                       <Lock className="w-4 h-4 text-purple-400 animate-pulse" /> Launch Exclusive drop (Perks)
@@ -1929,7 +1929,7 @@ export default function ArtistDashboard() {
               <div className="space-y-6">
                 
                 {/* Embedded dynamic metrics overview */}
-                <div className="p-6 rounded-3xl bg-white/[0.02] backdrop-blur-md space-y-4">
+                <div className="p-6 rounded-3xl bg-white/[0.02] space-y-4">
                   <div className="space-y-1">
                     <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-yellow-500 animate-pulse" /> Platform Loyalty Ecosystem
@@ -1957,12 +1957,12 @@ export default function ArtistDashboard() {
 
                 <div className="grid grid-cols-1 gap-6">
                   {/* Collector Tier Indicator */}
-                  <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-3xl">
+                  <div className="bg-white/[0.02] p-6 rounded-3xl">
                     <CollectorTier user={userProfile} isOwnProfile={true} />
                   </div>
 
                   {/* Badge System */}
-                  <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-3xl">
+                  <div className="bg-white/[0.02] p-6 rounded-3xl">
                     <BadgeSystem user={userProfile} isOwnProfile={true} />
                   </div>
                 </div>

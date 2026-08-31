@@ -1009,7 +1009,7 @@ const Tasks: React.FC = () => {
                     <div className="relative w-full h-[100px] rounded-button overflow-hidden bg-background">
                       <img src={item.image} alt={item.title} className="w-full h-full object-cover opacity-80" />
                       <div className="absolute top-2 left-2">
-                        <Badge variant="secondary" className="text-[8px] bg-black/60 text-white backdrop-blur-md px-2.5 py-1">
+                        <Badge variant="secondary" className="text-[8px] bg-black text-white px-2.5 py-1">
                           {item.badge}
                         </Badge>
                       </div>

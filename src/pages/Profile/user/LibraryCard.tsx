@@ -15,7 +15,7 @@ export const LibraryCard: React.FC<LibraryCardProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className="bg-[#101A3B] border border-white/5 rounded-2xl p-5 text-white flex flex-col justify-between">
+    <div className="bg-[#101A3B] rounded-2xl p-5 text-white flex flex-col justify-between shadow-sm">
       <div>
         <div className="flex justify-between items-start mb-4">
           <div className="space-y-1">
@@ -30,12 +30,12 @@ export const LibraryCard: React.FC<LibraryCardProps> = ({
         </div>
 
         <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-sm mb-4">
-          Access your off-chain saved songs, favorited sound nodes, and custom created playlists inside the TonJam network.
+          Access your saved tracks, favorite audio, and custom playlists inside TonJam.
         </p>
 
         {/* Counts Grid */}
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-white/5 border border-white/5 rounded-xl p-3.5 flex items-center gap-3">
+          <div className="bg-white/5 rounded-xl p-3.5 flex items-center gap-3">
             <Heart className="w-5 h-5 text-red-400 fill-current" />
             <div>
               <span className="text-lg font-bold font-mono block leading-none">{tracksCount}</span>
@@ -43,7 +43,7 @@ export const LibraryCard: React.FC<LibraryCardProps> = ({
             </div>
           </div>
 
-          <div className="bg-white/5 border border-white/5 rounded-xl p-3.5 flex items-center gap-3">
+          <div className="bg-white/5 rounded-xl p-3.5 flex items-center gap-3">
             <Disc className="w-5 h-5 text-[#0052FF]" />
             <div>
               <span className="text-lg font-bold font-mono block leading-none">{playlistsCount}</span>

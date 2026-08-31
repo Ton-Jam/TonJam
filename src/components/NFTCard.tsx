@@ -222,24 +222,35 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     // Register active preview stop callback globally
     (window as any)._activePreviewStop = stopPreview;
 
-    audio.play().then(() => {
-      setIsPlayingPreview(true);
-      let timeLeft = 30;
-      setPreviewSeconds(30);
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        setIsPlayingPreview(true);
+        let timeLeft = 30;
+        setPreviewSeconds(30);
 
-      timerRef.current = setInterval(() => {
-        timeLeft -= 1;
-        if (timeLeft <= 0) {
+        timerRef.current = setInterval(() => {
+          timeLeft -= 1;
+          if (timeLeft <= 0) {
+            stopPreview();
+          } else {
+            setPreviewSeconds(timeLeft);
+          }
+        }, 1000);
+      }).catch((err) => {
+        if (
+          err?.name === "AbortError" ||
+          err?.name === "NotAllowedError" ||
+          err?.message?.includes("interrupted")
+        ) {
           stopPreview();
-        } else {
-          setPreviewSeconds(timeLeft);
+          return;
         }
-      }, 1000);
-    }).catch((err) => {
-      console.error("Audio preview failed:", err);
-      addNotification("Preview playback failed", "error");
-      stopPreview();
-    });
+        console.error("Audio preview failed:", err);
+        addNotification("Preview playback failed", "error");
+        stopPreview();
+      });
+    }
 
     audio.onended = () => {
       stopPreview();

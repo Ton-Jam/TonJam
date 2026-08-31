@@ -39,7 +39,7 @@ export const DownloadsManager: React.FC<DownloadsManagerProps> = ({
           <div className="flex items-center gap-1.5 text-foreground">
             <HardDrive className="w-5 h-5 text-emerald-500 shrink-0" />
             <div className="space-y-0.5">
-              <h3 className="text-xs font-bold uppercase tracking-wide">Offline Node Storage</h3>
+              <h2 className="section-title">Offline Node Storage</h2>
               <p className="text-[10px] text-muted-foreground">Cached storage footprint on this device</p>
             </div>
           </div>

@@ -90,8 +90,8 @@ const LibraryPage: React.FC = () => {
   };
 
   return (
-    <div className="page-container w-full min-h-screen bg-[#0b1329] text-white pb-24">
-      <div className="px-4 py-6 sm:px-6 md:px-8 w-full max-w-full space-y-8">
+    <div className="page-container w-full min-h-screen bg-[#050A24] text-white pb-32 font-sans">
+      <div className="w-full max-w-7xl mx-auto px-4 py-6 sm:px-6 md:px-8 space-y-8">
         
         {/* 2. QUICK ACTIONS */}
         {!data.isLoading && (
@@ -200,9 +200,10 @@ const LibraryPage: React.FC = () => {
                 {(data.activeChip === 'Import' || showImporter) && (
                   <div className="border border-white/5 bg-slate-950/40 rounded-2xl p-6 space-y-6">
                     <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-extrabold uppercase tracking-widest text-white flex items-center gap-2">
-                        <Database className="w-4.5 h-4.5 text-[#0052FF]" /> Library Import Service
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Database className="w-4.5 h-4.5 text-[#0052FF]" />
+                        <h2 className="section-title">Library Import Service</h2>
+                      </div>
                       <button 
                         onClick={() => {
                           setShowImporter(false);
@@ -380,7 +381,7 @@ const LibraryPage: React.FC = () => {
                     <div className="space-y-4">
                       <div className="flex items-center gap-2">
                         <Download className="w-5 h-5 text-emerald-500" />
-                        <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">Downloaded Music</h3>
+                        <h2 className="section-title">Downloaded Music</h2>
                       </div>
                       <DownloadsManager 
                         tracks={data.rawTracks}
@@ -410,7 +411,7 @@ const LibraryPage: React.FC = () => {
                   <div id="recently-played-section" className="space-y-4">
                     <div className="flex items-center gap-2">
                       <Clock className="w-5 h-5 text-[#0052FF]" />
-                      <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">Recently Played</h3>
+                      <h2 className="section-title">Recently Played</h2>
                     </div>
                     <QueueManager 
                       queue={data.queue}
@@ -425,7 +426,7 @@ const LibraryPage: React.FC = () => {
                   <div id="history-section" className="space-y-4">
                     <div className="flex items-center gap-2">
                       <History className="w-5 h-5 text-purple-500" />
-                      <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">Detailed Listening History</h3>
+                      <h2 className="section-title">Detailed Listening History</h2>
                     </div>
                     <ListeningHistory 
                       history={data.history}

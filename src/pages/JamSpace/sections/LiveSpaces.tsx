@@ -21,7 +21,7 @@ export const LiveSpaces: React.FC<LiveSpacesProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Radio className="w-4 h-4 text-emerald-500 animate-pulse" />
-          <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Live Audio Nodes</h3>
+          <h2 className="section-title">Live Audio Nodes</h2>
         </div>
         <button
           onClick={() => navigate('/jamspace')}

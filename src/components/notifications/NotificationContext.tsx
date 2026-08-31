@@ -4,7 +4,8 @@ import { generateMockNotifications } from './mock/mockNotifications';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   collection, 
-  getDocs, 
+  query,
+  onSnapshot, 
   doc, 
   writeBatch, 
   setDoc, 
@@ -19,9 +20,11 @@ interface NotificationContextType {
   preferences: NotificationPreferences;
   isLoading: boolean;
   isOffline: boolean;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
-  deleteNotification: (id: string) => void;
+  error: string | null;
+  retryFetch: () => void;
+  markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  deleteNotification: (id: string) => Promise<void>;
   updatePreferences: (prefs: Partial<NotificationPreferences>) => void;
   requestPushPermission: () => Promise<boolean>;
   simulateNotification: (category?: NotificationCategory) => void;
@@ -47,10 +50,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_PREFERENCES);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
+  const [error, setError] = useState<string | null>(null);
+  const [retryIndex, setRetryIndex] = useState<number>(0);
+
+  const retryFetch = useCallback(() => {
+    setError(null);
+    setIsLoading(true);
+    setRetryIndex((prev) => prev + 1);
+  }, []);
 
   // Network listener
   useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
+    const handleOnline = () => {
+      setIsOffline(false);
+      setError(null);
+    };
     const handleOffline = () => setIsOffline(true);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -65,114 +79,119 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return `tonjam_notifications_${uid}_${suffix}`;
   }, [user]);
 
-  // Load state from Firestore with LocalStorage fallback
+  // Real-time listener for Firestore notifications + LocalStorage fallback
   useEffect(() => {
     setIsLoading(true);
-    let active = true;
+    setError(null);
+    const uid = user?.uid;
 
-    const loadData = async () => {
+    // 1. Load preferences from local storage
+    try {
+      const storedPrefs = localStorage.getItem(getStorageKey('prefs'));
+      if (storedPrefs) {
+        setPreferences(JSON.parse(storedPrefs));
+      } else {
+        setPreferences(DEFAULT_PREFERENCES);
+      }
+    } catch (e) {
+      console.warn('Error reading stored prefs:', e);
+    }
+
+    // 2. Load immediate cached list from LocalStorage for zero-latency initial UI
+    try {
+      const storedNotif = localStorage.getItem(getStorageKey('list'));
+      if (storedNotif) {
+        setNotifications(JSON.parse(storedNotif));
+      }
+    } catch (e) {
+      console.warn('Error reading cached notifications:', e);
+    }
+
+    if (!uid) {
+      // Guest User mode - use local storage without seeding fake backend items
       try {
-        const uid = user?.uid;
-        
-        // Load preferences
-        const storedPrefs = localStorage.getItem(getStorageKey('prefs'));
-        if (storedPrefs) {
-          setPreferences(JSON.parse(storedPrefs));
+        const storedGuest = localStorage.getItem(getStorageKey('list'));
+        if (storedGuest) {
+          setNotifications(JSON.parse(storedGuest));
         } else {
-          setPreferences(DEFAULT_PREFERENCES);
-        }
-
-        // Always check localStorage first as instant visual fallback
-        const storedNotif = localStorage.getItem(getStorageKey('list'));
-        if (storedNotif) {
-          setNotifications(JSON.parse(storedNotif));
-        }
-
-        if (uid) {
-          console.log(`[NotificationContext] Fetching notifications from Firestore for user: ${uid}...`);
-          const notifColRef = collection(db, 'users', uid, 'notifications');
-          const querySnapshot = await getDocs(notifColRef).catch((err) => {
-            handleFirestoreError(err, OperationType.GET, `users/${uid}/notifications`);
-            return null;
-          });
-
-          if (!active) return;
-
-          if (querySnapshot && !querySnapshot.empty) {
-            const list: TonJamNotification[] = [];
-            querySnapshot.forEach((doc) => {
-              list.push(doc.data() as TonJamNotification);
-            });
-            
-            // Sort by timestamp descending
-            const sortedList = list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-            
-            setNotifications(sortedList);
-            localStorage.setItem(getStorageKey('list'), JSON.stringify(sortedList));
-            console.log(`[NotificationContext] Loaded ${sortedList.length} notifications from Firestore.`);
-          } else {
-            console.log('[NotificationContext] No notifications in Firestore. Seeding initial mock signals...');
-            const seeded = generateMockNotifications(uid);
-            setNotifications(seeded);
-            localStorage.setItem(getStorageKey('list'), JSON.stringify(seeded));
-
-            // Seed recent notifications to Firestore directly to Cloud
-            const batchSize = 100;
-            const itemsToSeed = seeded.slice(0, 150); // Seed the most recent 150 notifications directly to Cloud
-            
-            try {
-              for (let i = 0; i < itemsToSeed.length; i += batchSize) {
-                const chunk = itemsToSeed.slice(i, i + batchSize);
-                const batch = writeBatch(db);
-                chunk.forEach((item) => {
-                  const docRef = doc(db, 'users', uid, 'notifications', item.id);
-                  batch.set(docRef, item);
-                });
-                await batch.commit();
-              }
-              console.log(`[NotificationContext] Seeded ${itemsToSeed.length} notifications to Firestore.`);
-            } catch (err) {
-              handleFirestoreError(err, OperationType.WRITE, `users/${uid}/notifications`);
-            }
-          }
-        } else {
-          // Guest User mode
-          const storedGuestNotif = localStorage.getItem(getStorageKey('list'));
-          if (storedGuestNotif) {
-            setNotifications(JSON.parse(storedGuestNotif));
-          } else {
-            const seeded = generateMockNotifications('guest_user');
-            setNotifications(seeded);
-            localStorage.setItem(getStorageKey('list'), JSON.stringify(seeded));
-          }
+          setNotifications([]);
         }
       } catch (err) {
-        console.error('[NotificationContext] Error loading notifications:', err);
-      } finally {
-        if (active) {
-          setIsLoading(false);
-        }
+        console.error('Error handling guest notifications:', err);
       }
-    };
+      setIsLoading(false);
+      return;
+    }
 
-    loadData();
+    // Authenticated User: Bind real-time Firestore onSnapshot listener
+    console.log(`[NotificationContext] Subscribing to real-time notifications for user: ${uid}`);
+    const notifColRef = collection(db, 'users', uid, 'notifications');
+    const notifQuery = query(notifColRef);
+
+    const unsubscribe = onSnapshot(
+      notifQuery,
+      (snapshot) => {
+        setError(null);
+        if (snapshot.empty) {
+          setNotifications([]);
+          try {
+            localStorage.setItem(getStorageKey('list'), JSON.stringify([]));
+          } catch (err) {
+            console.warn(err);
+          }
+          setIsLoading(false);
+          return;
+        }
+
+        const list: TonJamNotification[] = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          list.push({
+            id: docSnap.id,
+            userId: data.userId || uid,
+            category: data.category || (data.type ? (data.type === 'track_upload' ? 'artist_release' : data.type === 'bid_update' ? 'auction' : data.type === 'nft_sale' ? 'nft_sale' : 'system') : 'system'),
+            title: data.title || 'Notification',
+            description: data.description || data.message || '',
+            timestamp: data.timestamp || new Date().toISOString(),
+            read: data.read ?? false,
+            avatarUrl: data.avatarUrl,
+            thumbnailUrl: data.thumbnailUrl,
+            link: data.link,
+            quickAction: data.quickAction,
+            metadata: data.metadata,
+          } as TonJamNotification);
+        });
+
+        // Sort by timestamp descending
+        const sortedList = list.sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+
+        setNotifications(sortedList);
+        try {
+          localStorage.setItem(getStorageKey('list'), JSON.stringify(sortedList));
+        } catch (err) {
+          console.warn(err);
+        }
+        setIsLoading(false);
+      },
+      (err) => {
+        console.error('[NotificationContext] Real-time onSnapshot error:', err);
+        setError(err.message || 'Failed to load notifications from network.');
+        handleFirestoreError(err, OperationType.GET, `users/${uid}/notifications`);
+        setIsLoading(false);
+      }
+    );
 
     return () => {
-      active = false;
+      console.log(`[NotificationContext] Unsubscribing from notifications for user: ${uid}`);
+      unsubscribe();
     };
-  }, [user, getStorageKey]);
+  }, [user, getStorageKey, retryIndex]);
 
-  // Save utility helper
-  const saveNotificationsToStorage = useCallback((newList: TonJamNotification[]) => {
-    setNotifications(newList);
-    try {
-      localStorage.setItem(getStorageKey('list'), JSON.stringify(newList));
-    } catch (err) {
-      console.error('Failed to save notifications state:', err);
-    }
-  }, [getStorageKey]);
-
+  // Mark individual notification as read
   const markAsRead = useCallback(async (id: string) => {
+    // 1. Optimistic UI update (instant response)
     setNotifications((prev) => {
       const updated = prev.map((item) =>
         item.id === id ? { ...item, read: true } : item
@@ -185,18 +204,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       return updated;
     });
 
+    // 2. Real-time Firestore sync
     if (user?.uid) {
       try {
         const docRef = doc(db, 'users', user.uid, 'notifications', id);
         await updateDoc(docRef, { read: true });
+        console.log(`[NotificationContext] Marked notification ${id} as read in Firestore.`);
       } catch (err) {
         handleFirestoreError(err, OperationType.UPDATE, `users/${user.uid}/notifications/${id}`);
       }
     }
   }, [user, getStorageKey]);
 
+  // Mark all notifications as read
   const markAllAsRead = useCallback(async () => {
-    // 1. Update local state immediately for instant responsive UI feedback
+    // 1. Optimistic local state update
     setNotifications((prev) => {
       const updated = prev.map((item) => ({ ...item, read: true }));
       try {
@@ -207,26 +229,22 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       return updated;
     });
 
-    // 2. Trigger Firestore batch operation to sync all unread statuses
+    // 2. Firestore batch update
     if (user?.uid) {
       try {
-        // Find unread notifications from the state
         const unreadList = notifications.filter((notif) => !notif.read);
         if (unreadList.length > 0) {
-          const batch = writeBatch(db);
-          let count = 0;
-
-          for (const notif of unreadList) {
-            if (count >= 450) break; // stay within single batch limit of 500
-            const docRef = doc(db, 'users', user.uid, 'notifications', notif.id);
-            batch.update(docRef, { read: true });
-            count++;
-          }
-
-          if (count > 0) {
+          const batchSize = 400; // Stay well under 500 limit
+          for (let i = 0; i < unreadList.length; i += batchSize) {
+            const chunk = unreadList.slice(i, i + batchSize);
+            const batch = writeBatch(db);
+            chunk.forEach((item) => {
+              const docRef = doc(db, 'users', user.uid, 'notifications', item.id);
+              batch.update(docRef, { read: true });
+            });
             await batch.commit();
-            console.log(`[NotificationContext] Firestore batch updated ${count} notifications to read.`);
           }
+          console.log(`[NotificationContext] Firestore batch marked ${unreadList.length} notifications as read.`);
         }
       } catch (err) {
         handleFirestoreError(err, OperationType.UPDATE, `users/${user.uid}/notifications`);
@@ -411,6 +429,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         preferences,
         isLoading,
         isOffline,
+        error,
+        retryFetch,
         markAsRead,
         markAllAsRead,
         deleteNotification,

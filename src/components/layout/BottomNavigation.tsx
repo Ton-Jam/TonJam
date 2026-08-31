@@ -82,10 +82,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   };
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 z-50 bg-[#0A113A] pb-[calc(env(safe-area-inset-bottom,0px)+12px)] select-none transition-all duration-300 ${isHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
-      {/* Subtle thin silver border line */}
-      <div className="h-[0.5px] bg-slate-300/25 w-full" />
-
+    <nav className={`fixed bottom-0 left-0 right-0 z-50 bg-black border-t border-[#C0C0C0]/25 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] select-none transition-all duration-300 ${isHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
       <div className="max-w-lg mx-auto h-[64px] px-2 flex items-center justify-around relative">
         {tabs.map((tab) => {
           const Icon = tab.icon;

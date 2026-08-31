@@ -3,6 +3,7 @@ import { Play, Pause, Heart, BarChart2, Plus, Share2, Search, SlidersHorizontal,
 import { motion } from 'motion/react';
 import { Track } from '@/types';
 import { useToast } from '@/components/layout/ToastProvider';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface TracksSectionProps {
   tracks: Track[];
@@ -16,15 +17,16 @@ export const TracksSection: React.FC<TracksSectionProps> = ({
   onSaveTrack
 }) => {
   const toast = useToast();
-  const [activePlayingId, setActivePlayingId] = useState<string | null>(null);
+  const { currentTrack, isPlaying: audioIsPlaying, playTrack, togglePlay: audioTogglePlay } = useAudio();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const togglePlay = (trackId: string) => {
-    if (activePlayingId === trackId) {
-      setActivePlayingId(null);
+  const handleTrackClick = (track: Track) => {
+    if (currentTrack?.id === track.id) {
+      audioTogglePlay();
     } else {
-      setActivePlayingId(trackId);
-      onPlayTrack?.(trackId);
+      playTrack(track);
+      onPlayTrack?.(track.id);
+      toast.success('Now Playing', track.title);
     }
   };
 
@@ -41,15 +43,15 @@ export const TracksSection: React.FC<TracksSectionProps> = ({
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Search catalog frequencies..."
+            placeholder="Search tracks..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#101A3B] border border-white/5 rounded-full pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-[#0052FF] transition-all placeholder:text-slate-500"
+            className="w-full bg-[#101A3B] rounded-full pl-10 pr-4 py-2.5 text-xs font-semibold outline-none transition-all placeholder:text-slate-500"
           />
         </div>
         <button 
           onClick={() => toast.info('Filters', 'Advanced track filters opened.')}
-          className="p-2.5 bg-[#101A3B] border border-white/5 rounded-full hover:bg-[#15234f] transition-all cursor-pointer text-slate-400"
+          className="p-2.5 bg-[#101A3B] rounded-full hover:bg-[#15234f] transition-all cursor-pointer text-slate-400"
         >
           <SlidersHorizontal className="w-4 h-4" />
         </button>
@@ -59,11 +61,16 @@ export const TracksSection: React.FC<TracksSectionProps> = ({
       <div className="space-y-2">
         {filteredTracks.length > 0 ? (
           filteredTracks.map((track, idx) => {
-            const isPlaying = activePlayingId === track.id;
+            const isCurrentPlaying = currentTrack?.id === track.id && audioIsPlaying;
             return (
               <div
                 key={track.id}
-                className="bg-[#101A3B] border border-white/5 rounded-2xl p-3 flex items-center justify-between group hover:bg-[#15234f] transition-all"
+                onClick={() => handleTrackClick(track)}
+                className={`rounded-2xl p-3 flex items-center justify-between group transition-all cursor-pointer ${
+                  currentTrack?.id === track.id 
+                    ? 'bg-[#15234f] shadow-lg shadow-blue-500/10' 
+                    : 'bg-[#101A3B] hover:bg-[#15234f]'
+                }`}
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   {/* Track Number / Play Button */}
@@ -75,10 +82,13 @@ export const TracksSection: React.FC<TracksSectionProps> = ({
                       referrerPolicy="no-referrer"
                     />
                     <button
-                      onClick={() => togglePlay(track.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTrackClick(track);
+                      }}
                       className="absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity cursor-pointer opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                     >
-                      {isPlaying ? (
+                      {isCurrentPlaying ? (
                         <Pause className="w-5 h-5 text-white fill-current" />
                       ) : (
                         <Play className="w-5 h-5 text-white fill-current" />
@@ -87,7 +97,9 @@ export const TracksSection: React.FC<TracksSectionProps> = ({
                   </div>
 
                   <div className="min-w-0">
-                    <h4 className="text-xs font-bold text-slate-200 truncate group-hover:text-white transition-colors">
+                    <h4 className={`text-xs font-bold truncate transition-colors ${
+                      currentTrack?.id === track.id ? 'text-[#0088CC]' : 'text-slate-200 group-hover:text-white'
+                    }`}>
                       {track.title}
                     </h4>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -98,7 +110,7 @@ export const TracksSection: React.FC<TracksSectionProps> = ({
                       )}
                       <span className="text-[10px] text-slate-500 flex items-center gap-1 font-mono">
                         <BarChart2 className="w-3 h-3 text-[#0052FF]" />
-                        {(((track as any).plays || track.playCount || track.streams || 0) + (isPlaying ? 1 : 0)).toLocaleString()} plays
+                        {(((track as any).plays || track.playCount || track.streams || 0) + (isCurrentPlaying ? 1 : 0)).toLocaleString()} plays
                       </span>
                     </div>
                   </div>
@@ -109,7 +121,10 @@ export const TracksSection: React.FC<TracksSectionProps> = ({
                   
                   <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button 
-                      onClick={() => toast.success('Link Copied', 'Track sharing url copied to clipboard.')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toast.success('Link Copied', 'Track sharing url copied to clipboard.');
+                      }}
                       className="p-1.5 hover:bg-white/5 rounded-full transition-colors cursor-pointer text-slate-400 hover:text-white"
                     >
                       <Share2 className="w-4 h-4" />
@@ -120,8 +135,8 @@ export const TracksSection: React.FC<TracksSectionProps> = ({
             );
           })
         ) : (
-          <div className="text-center py-16 bg-[#101A3B]/40 border border-white/5 rounded-2xl p-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
-            No audio frequencies match criteria
+          <div className="text-center py-16 bg-[#101A3B]/40 rounded-2xl p-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
+            No audio tracks match criteria
           </div>
         )}
       </div>

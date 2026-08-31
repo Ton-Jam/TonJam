@@ -9,6 +9,7 @@ interface ProfileHeaderProps {
   onOpenSettings: () => void;
   onEditCover: () => void;
   onEditAvatar: () => void;
+  onEditProfile?: () => void;
   isOwnProfile?: boolean;
 }
 
@@ -17,6 +18,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onOpenSettings,
   onEditCover,
   onEditAvatar,
+  onEditProfile,
   isOwnProfile = true
 }) => {
   const navigate = useNavigate();
@@ -45,7 +47,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <ArrowLeft className="w-5 h-5 text-slate-300 hover:text-white" />
         </button>
         
-        {/* Top Floating Settings, Dashboard & Share QR Buttons */}
+        {/* Top Floating Settings, Dashboard, Edit Profile & Share QR Buttons */}
         <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
           <button
             onClick={() => setIsQRModalOpen(true)}
@@ -57,6 +59,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           </button>
           {isOwnProfile && (
             <>
+              {onEditProfile && (
+                <button
+                  onClick={onEditProfile}
+                  className="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white text-xs font-bold uppercase tracking-wider rounded-full transition-all cursor-pointer shadow-md"
+                  title="Edit Profile"
+                >
+                  Edit Profile
+                </button>
+              )}
               {profile.isArtistVerified && (
                 <button
                   onClick={() => navigate('/artist-dashboard')}

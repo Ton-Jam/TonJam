@@ -2,42 +2,45 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { 
-  Settings2, 
+  Bell,
   CheckCheck, 
   Trash2, 
   Search, 
   WifiOff, 
   Inbox, 
-  BellRing, 
   Activity, 
   Loader2, 
   ArrowLeft,
-  Settings
+  Settings,
+  Sparkles,
+  AlertCircle,
+  RotateCw
 } from 'lucide-react';
 import { useTonJamNotifications } from './NotificationContext';
 import { TonJamNotification, NotificationFilter, NotificationQuickAction } from './types';
 import NotificationFilters from './NotificationFilters';
 import NotificationCard from './NotificationCard';
 import NotificationSettings from './NotificationSettings';
-import { TonJamButton } from '@/components/ui/buttons/TonJamButton';
-import { 
-  PageTitle, 
-  SectionTitle, 
-  Label, 
-  ButtonText 
-} from '@/components/ui/typography/Typography';
+import { useAudio } from '@/contexts/AudioContext';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 export const NotificationScreen: React.FC = () => {
   const { 
     notifications, 
     unreadCount, 
     isLoading, 
-    isOffline, 
+    isOffline,
+    error,
+    retryFetch,
     markAsRead, 
     markAllAsRead, 
     deleteNotification,
     simulateNotification
   } = useTonJamNotifications();
+
+  const { playTrack, allTracks } = useAudio();
+  const navigate = useNavigate();
 
   const [activeFilter, setActiveFilter] = useState<NotificationFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,7 +48,6 @@ export const NotificationScreen: React.FC = () => {
   
   // High-performance lazy pagination limit
   const [visibleCount, setVisibleCount] = useState(20);
-  const listBottomRef = useRef<HTMLDivElement>(null);
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -132,29 +134,40 @@ export const NotificationScreen: React.FC = () => {
   }, [paginatedNotifications]);
 
   const handleActionClick = (action: NotificationQuickAction, notification: TonJamNotification) => {
-    // Perform simulated actions
+    // Perform responsive actions
     switch (action.type) {
       case 'play':
-        alert(`Starting stream transmission: ${notification.title}`);
+        if (allTracks.length > 0) {
+          playTrack(allTracks[0]);
+          toast.success('Playing Track', { description: notification.title });
+        } else {
+          toast.info('Streaming Track', { description: notification.title });
+        }
         break;
       case 'follow':
-        alert(`Established reverse social link back!`);
+        toast.success('Followed User', { description: 'Connected on TonJam social network' });
         break;
       case 'claim':
-        alert(`Successfully claimed: ${notification.title}`);
+        toast.success('Reward Claimed', { description: '+250 TJ Points credited to your wallet' });
         break;
       case 'bid':
-        alert(`Auction counter-bid proposed to ledger!`);
+        navigate('/auction');
         break;
       case 'mint':
-        alert(`Triggering contract mint for exclusive collectible!`);
+        navigate('/launchpad');
         break;
       case 'reply':
-        alert(`Input reply portal opened.`);
+        navigate('/jamspace');
         break;
       case 'view':
       default:
-        alert(`Navigating to target content details.`);
+        if (notification.category.includes('nft') || notification.category === 'marketplace') {
+          navigate('/marketplace');
+        } else if (notification.category === 'wallet_transaction' || notification.category === 'royalty') {
+          navigate('/profile');
+        } else {
+          navigate('/jamspace');
+        }
         break;
     }
     // Auto mark read on action
@@ -172,12 +185,12 @@ export const NotificationScreen: React.FC = () => {
 
     return (
       <div className="flex flex-col gap-3">
-        <SectionTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 pt-1 flex items-center justify-between border-none">
+        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-4 pt-1 flex items-center justify-between">
           <span>{title}</span>
-          <Label className="text-[9px] font-semibold text-slate-600 bg-white/[0.03] px-2 py-0.5 rounded-full select-none normal-case">
-            {list.length} signals
-          </Label>
-        </SectionTitle>
+          <span className="text-[9px] font-semibold text-slate-400 bg-white/[0.04] px-2 py-0.5 rounded-full select-none normal-case">
+            {list.length} {list.length === 1 ? 'alert' : 'alerts'}
+          </span>
+        </div>
         <div className="flex flex-col gap-2.5 px-4">
           <AnimatePresence mode="popLayout">
             {list.map((item) => (
@@ -204,7 +217,7 @@ export const NotificationScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-[calc(100vh-64px)] bg-background text-text-primary font-sans pb-20 sm:pb-16 relative">
+    <div className="flex flex-col w-full min-h-[calc(100vh-64px)] bg-[#050A24] text-white font-sans pb-28 relative">
       
       {/* OFFLINE STATUS BANNER */}
       <AnimatePresence>
@@ -213,41 +226,49 @@ export const NotificationScreen: React.FC = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="w-full bg-error/10 text-error py-2.5 px-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider select-none shrink-0"
+            className="w-full bg-rose-500/20 text-rose-300 py-2.5 px-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider select-none shrink-0"
           >
             <WifiOff className="w-4 h-4 shrink-0 animate-pulse" />
-            <span>Connection Interrupted. Cache Mode Enabled.</span>
+            <span>Offline Mode Enabled. Viewing cached notifications.</span>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* STICKY HEADER */}
-      <div className="sticky top-0 z-20 w-full bg-background/95 backdrop-blur-lg flex flex-col shrink-0">
+      <div className="sticky top-0 z-20 w-full bg-[#050A24]/95 backdrop-blur-xl flex flex-col shrink-0">
         
         {/* TOP RAIL */}
-        <div className="flex items-center justify-between px-4 py-2.5 sm:py-3.5">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-4 py-3 sm:py-4">
+          <div className="flex items-center gap-3">
             {showSettings ? (
               <button 
                 onClick={() => setShowSettings(false)}
-                className="h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-full text-text-muted hover:text-text-primary transition-colors bg-surface"
+                className="h-9 w-9 flex items-center justify-center rounded-full text-slate-300 hover:text-white transition-colors bg-white/[0.06] active:scale-95"
+                title="Back to notifications"
               >
                 <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             ) : (
-              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-primary rounded-full animate-pulse" />
+              <div className="w-9 h-9 rounded-full bg-[#0052FF]/20 flex items-center justify-center text-[#0088CC] shrink-0">
+                <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
             )}
             <div>
-              <h1 className="text-sm font-black tracking-widest uppercase text-text-primary leading-none">
-                {showSettings ? 'Telemetry Settings' : 'Signals Hub'}
+              <h1 className="page-title leading-none">
+                {showSettings ? 'Notification Settings' : 'Notifications'}
               </h1>
               {!showSettings && (
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-primary">
-                    {unreadCount} unread
-                  </span>
-                  <span className="text-[8px] font-bold text-divider">•</span>
-                  <span className="text-[9px] font-semibold text-text-muted">
+                <div className="flex items-center gap-2 mt-1">
+                  {unreadCount > 0 ? (
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full">
+                      {unreadCount} unread
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-semibold text-slate-400">
+                      All caught up
+                    </span>
+                  )}
+                  <span className="text-[9px] font-semibold text-slate-500">
                     {notifications.length} total
                   </span>
                 </div>
@@ -256,27 +277,32 @@ export const NotificationScreen: React.FC = () => {
           </div>
 
           {/* DYNAMIC HEADER ACTIONS */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             {!showSettings && unreadCount > 0 && (
               <button
-                onClick={markAllAsRead}
-                className="h-8 sm:h-9 px-3 text-text-muted hover:text-text-primary flex items-center gap-1.5 bg-surface rounded-button border border-divider"
+                onClick={() => {
+                  markAllAsRead();
+                  toast.success('All marked as read');
+                }}
+                className="h-9 px-3.5 text-slate-200 hover:text-white flex items-center gap-1.5 bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 rounded-full transition-all cursor-pointer"
                 title="Mark all as read"
               >
-                <CheckCheck className="w-3.5 h-3.5" />
-                <span className="text-[9px] font-black uppercase tracking-wider hidden xs:inline">Mark Read</span>
+                <CheckCheck className="w-4 h-4 text-emerald-400" />
+                <span className="text-[10px] font-black uppercase tracking-wider hidden xs:inline">Mark Read</span>
               </button>
             )}
 
             <button
               onClick={() => setShowSettings(!showSettings)}
               className={cn(
-                "h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-button transition-all",
-                showSettings ? "bg-primary text-black" : "bg-surface text-text-muted hover:text-text-primary border border-divider"
+                "h-9 w-9 flex items-center justify-center rounded-full transition-all cursor-pointer active:scale-95",
+                showSettings 
+                  ? "bg-[#0088CC] text-white shadow-lg shadow-[#0088CC]/30" 
+                  : "bg-white/[0.06] text-slate-300 hover:text-white hover:bg-white/[0.12]"
               )}
               title="Notification Settings"
             >
-              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Settings className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -288,26 +314,26 @@ export const NotificationScreen: React.FC = () => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col gap-2 py-2 sm:py-3 shrink-0 bg-background"
+              className="flex flex-col gap-2 py-2 shrink-0 bg-[#050A24]"
             >
               {/* SEARCH INPUT BAR */}
               <div className="px-4">
-                <div className="relative w-full rounded-card bg-surface border border-divider hover:border-primary/30 focus-within:border-primary transition-colors flex items-center px-3.5 py-2.5">
-                  <Search className="w-3.5 h-3.5 text-text-muted shrink-0" />
+                <div className="relative w-full rounded-2xl bg-white/[0.04] hover:bg-white/[0.07] focus-within:bg-white/[0.08] transition-colors flex items-center px-4 py-2.5">
+                  <Search className="w-4 h-4 text-slate-400 shrink-0" />
                   <input
                     type="text"
-                    placeholder="Query signals..."
+                    placeholder="Search notifications..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="
-                      w-full bg-transparent border-none text-xs text-text-primary placeholder-text-muted 
+                      w-full bg-transparent border-none text-xs text-white placeholder-slate-500 
                       ml-2.5 outline-none font-semibold leading-none
                     "
                   />
                   {searchQuery && (
                     <button 
                       onClick={() => setSearchQuery('')}
-                      className="text-[10px] font-black text-text-muted hover:text-text-primary uppercase tracking-widest"
+                      className="text-[10px] font-black text-slate-400 hover:text-white uppercase tracking-widest px-1"
                     >
                       Clear
                     </button>
@@ -334,20 +360,45 @@ export const NotificationScreen: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col gap-4 px-4 py-2"
+              className="flex flex-col gap-3 px-4 py-2"
             >
               <div className="flex items-center gap-2.5 mb-2 px-1">
-                <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">
-                  Synchronizing telemetry registers...
+                <Loader2 className="w-4 h-4 text-[#0088CC] animate-spin" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Loading activity center...
                 </span>
               </div>
               {Array.from({ length: 5 }).map((_, idx) => (
                 <div 
                   key={idx} 
-                  className="w-full h-20 rounded-card bg-surface border border-divider animate-pulse"
+                  className="w-full h-20 rounded-2xl bg-white/[0.03] animate-pulse"
                 />
               ))}
+            </motion.div>
+          ) : error && notifications.length === 0 ? (
+            <motion.div 
+              key="error-state"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="py-16 px-6 flex flex-col items-center justify-center text-center select-none"
+            >
+              <div className="w-14 h-14 rounded-full bg-rose-500/10 flex items-center justify-center mb-4 text-rose-400">
+                <AlertCircle className="w-7 h-7" />
+              </div>
+              <h2 className="text-sm font-black uppercase tracking-wider text-white">
+                Unable to Load Notifications
+              </h2>
+              <p className="text-xs text-slate-400 font-medium max-w-xs leading-relaxed mt-1 mb-5">
+                {error || 'An error occurred while connecting to the notification stream.'}
+              </p>
+              <button
+                onClick={retryFetch}
+                className="px-5 py-2.5 bg-[#0052FF] hover:bg-[#1a66ff] text-white rounded-full text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+              >
+                <RotateCw className="w-3.5 h-3.5" />
+                <span>Retry Connection</span>
+              </button>
             </motion.div>
           ) : showSettings ? (
             <motion.div 
@@ -380,10 +431,10 @@ export const NotificationScreen: React.FC = () => {
                     <div className="px-4 pb-8 pt-2 flex justify-center">
                       <button
                         onClick={handleLoadMore}
-                        className="w-full sm:w-auto h-11 px-6 rounded-button bg-surface border border-divider flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest hover:border-primary transition-all"
+                        className="w-full sm:w-auto h-11 px-6 rounded-full bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-white transition-all cursor-pointer"
                       >
-                        <Activity className="w-3.5 h-3.5 text-primary animate-pulse" />
-                        <span>Sync next 20 signals ({filteredNotifications.length - visibleCount} remaining)</span>
+                        <Activity className="w-3.5 h-3.5 text-[#0088CC] animate-pulse" />
+                        <span>Load next 20 ({filteredNotifications.length - visibleCount} remaining)</span>
                       </button>
                     </div>
                   )}
@@ -392,28 +443,32 @@ export const NotificationScreen: React.FC = () => {
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="py-24 px-6 flex flex-col items-center justify-center text-center select-none"
+                  className="py-16 px-6 flex flex-col items-center justify-center text-center select-none"
                 >
-                  <div className="w-16 h-16 rounded-full bg-surface border border-divider flex items-center justify-center mb-5 text-text-muted">
-                    <Inbox className="w-8 h-8" />
+                  <div className="w-14 h-14 rounded-full bg-white/[0.04] flex items-center justify-center mb-3.5 text-slate-400">
+                    <Inbox className="w-7 h-7" />
                   </div>
                   
-                  <h2 className="text-sm font-black uppercase tracking-widest text-text-primary">
-                    {activeFilter === 'unread' ? 'Clean Signal Status' : 'Registry Empty'}
+                  <h2 className="text-sm font-black uppercase tracking-wider text-white">
+                    {activeFilter === 'unread' ? "You're All Caught Up" : 'No Activity Found'}
                   </h2>
                   
-                  <p className="text-[11px] text-text-muted font-semibold max-w-xs leading-relaxed mt-2 uppercase">
+                  <p className="text-xs text-slate-400 font-medium max-w-xs leading-relaxed mt-1.5">
                     {activeFilter === 'unread' 
-                      ? 'No unread telemetry signals detected. All active frequency alerts are cleared!'
-                      : 'No signals matched your query criteria. Synchronize developer triggers or alter your filters.'
+                      ? 'No unread notifications pending in your feed.'
+                      : 'No notifications matched your current filter or search criteria.'
                     }
                   </p>
 
                   <button
-                    onClick={() => simulateNotification()}
-                    className="mt-6 px-6 py-3 bg-primary text-black rounded-button text-[10px] font-black uppercase tracking-widest shadow-xl hover:scale-105 transition-all"
+                    onClick={() => {
+                      simulateNotification();
+                      toast.success('Activity Generated', { description: 'New notification added to activity feed' });
+                    }}
+                    className="mt-5 px-5 py-2.5 bg-[#0052FF] hover:bg-[#1a66ff] text-white rounded-full text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2"
                   >
-                    Broadcast Simulation Signal
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Send Test Notification</span>
                   </button>
                 </motion.div>
               )}

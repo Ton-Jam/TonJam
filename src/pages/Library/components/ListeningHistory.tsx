@@ -77,7 +77,7 @@ export const ListeningHistory: React.FC<ListeningHistoryProps> = ({
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-1.5">
           <History className="w-5 h-5 text-purple-500" />
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Listening History Timeline</h3>
+          <h2 className="section-title">Listening History Timeline</h2>
         </div>
 
         {history.length > 0 && (

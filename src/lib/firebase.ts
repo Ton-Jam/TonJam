@@ -1,42 +1,59 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, TwitterAuthProvider, Auth } from 'firebase/auth';
 import { 
   getFirestore, 
   initializeFirestore, 
   doc, 
   getDocFromServer,
   CACHE_SIZE_UNLIMITED,
-  setLogLevel
+  setLogLevel,
+  Firestore
 } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAnalytics } from 'firebase/analytics';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
+import { getAnalytics, Analytics } from 'firebase/analytics';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Silence Firestore benign network errors 
 setLogLevel('error');
 
-const app = initializeApp(firebaseConfig);
+// Ensure single FirebaseApp instance without conflicting duplicate initialization
+export const app: FirebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Initialize Analytics if supported (measurementId is present)
-export const analytics = typeof window !== 'undefined' && firebaseConfig.measurementId ? getAnalytics(app) : null;
+// Initialize Analytics safely if supported and running in client environment
+export const analytics: Analytics | null = 
+  typeof window !== 'undefined' && firebaseConfig.measurementId 
+    ? (() => {
+        try {
+          return getAnalytics(app);
+        } catch {
+          return null;
+        }
+      })()
+    : null;
 
-// Initialize Firestore with settings for reliability in various network environments
+// Initialize Firestore with specific database ID from firebase-applet-config.json
 const firestoreDatabaseId = (firebaseConfig as any).firestoreDatabaseId || '(default)';
 
 console.log(`[Firebase] Initializing Firestore. Project: ${firebaseConfig.projectId}, Database: ${firestoreDatabaseId}`);
 
-// Use initializeFirestore with forced long polling for AI Studio environments
-// Adding CACHE_SIZE_UNLIMITED and experimentalAutoDetectLongPolling: false for better stability
-export const db = initializeFirestore(app, {
-  ignoreUndefinedProperties: true,
-  experimentalForceLongPolling: true,
-  experimentalAutoDetectLongPolling: false,
-  useFetchStreams: false,
-  cacheSizeBytes: CACHE_SIZE_UNLIMITED,
-} as any, firestoreDatabaseId);
+// Use initializeFirestore with safe fallback if already started
+let dbInstance: Firestore;
+try {
+  dbInstance = initializeFirestore(app, {
+    ignoreUndefinedProperties: true,
+    experimentalForceLongPolling: true,
+    experimentalAutoDetectLongPolling: false,
+    useFetchStreams: false,
+    cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+  } as any, firestoreDatabaseId);
+} catch {
+  dbInstance = getFirestore(app, firestoreDatabaseId);
+}
 
-export const auth = getAuth(app);
-export const storage = getStorage(app);
+export const db: Firestore = dbInstance;
+
+export const auth: Auth = getAuth(app);
+export const storage: FirebaseStorage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 export const twitterProvider = new TwitterAuthProvider();
 

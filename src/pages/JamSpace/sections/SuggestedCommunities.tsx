@@ -17,7 +17,7 @@ export const SuggestedCommunities: React.FC<SuggestedCommunitiesProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Compass className="w-4 h-4 text-emerald-400" />
-          <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Recommended Guilds</h3>
+          <h2 className="section-title">Recommended Guilds</h2>
         </div>
         <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Expand Collective Networks</span>
       </div>

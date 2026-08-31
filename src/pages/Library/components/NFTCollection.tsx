@@ -111,7 +111,7 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
         <div className="space-y-1">
           <div className="flex items-center gap-1.5">
             <Zap className="w-5 h-5 text-purple-500 animate-pulse" />
-            <h3 className="text-sm font-black text-foreground uppercase tracking-tight">Music NFT Vault</h3>
+            <h2 className="section-title">Music NFT Vault</h2>
           </div>
           <p className="text-[10px] text-muted-foreground max-w-sm">
             Decentralized audio artifacts secured on The Open Network (TON). Earn active royalty rewards.

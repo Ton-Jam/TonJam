@@ -2443,8 +2443,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const depositTON = async (amount: string) => {
     setIsLoading(true);
     try {
-      if (!tonConnectUI.connected) {
+      if (!tonConnectUI?.connected || !tonConnectUI?.wallet) {
         addNotification("Please connect your wallet first", "error");
+        tonConnectUI?.openModal?.();
         return;
       }
 
@@ -2481,8 +2482,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const withdrawTON = async (amount: string, address: string) => {
     setIsLoading(true);
     try {
-      if (!tonConnectUI.connected) {
+      if (!tonConnectUI?.connected || !tonConnectUI?.wallet) {
         addNotification("Please connect your wallet first", "error");
+        tonConnectUI?.openModal?.();
         return;
       }
 
@@ -2526,8 +2528,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const purchaseJAM = async (amount: string, jamAmount: string) => {
     setIsLoading(true);
     try {
-      if (!tonConnectUI.connected) {
+      if (!tonConnectUI?.connected || !tonConnectUI?.wallet) {
         addNotification("Please connect your wallet first", "error");
+        tonConnectUI?.openModal?.();
         return;
       }
 
@@ -2567,8 +2570,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const subscribePremium = async (amount: string) => {
     setIsLoading(true);
     try {
-      if (!tonConnectUI.connected) {
+      if (!tonConnectUI?.connected || !tonConnectUI?.wallet) {
         addNotification("Please connect your wallet first", "error");
+        tonConnectUI?.openModal?.();
         return;
       }
 

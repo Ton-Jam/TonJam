@@ -60,7 +60,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ analytics })
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-1.5 text-foreground">
               <BarChart3 className="w-4 h-4 text-[#0052FF]" />
-              <h4 className="text-xs font-bold uppercase tracking-wide">Weekly Stream Timeline</h4>
+              <h2 className="section-title">Weekly Stream Timeline</h2>
             </div>
             <span className="text-[9px] font-mono text-muted-foreground uppercase font-bold tracking-widest">Hours / Day</span>
           </div>
@@ -144,7 +144,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ analytics })
         {/* Favorite Genre distributions */}
         <div className="bg-white/[0.02] dark:bg-white/[0.02] bg-black/[0.02] border border-black/5 dark:border-white/5 rounded-[10px] p-4 space-y-4">
           <div className="flex items-center justify-between px-1 text-foreground">
-            <h4 className="text-xs font-bold uppercase tracking-wide">Favorite Genre Nodes</h4>
+            <h2 className="section-title">Favorite Genre Nodes</h2>
             <span className="text-[9px] font-mono font-bold text-muted-foreground uppercase tracking-widest">Share %</span>
           </div>
 
@@ -158,8 +158,8 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ analytics })
                 {/* Visual meter bar */}
                 <div className="w-full h-1.5 bg-black/10 dark:bg-white/5 rounded-full overflow-hidden">
                   <div 
-                    className="bg-[#0052FF] h-full rounded-full"
-                    style={{ width: `${genre.percentage}%` }}
+                    className="bg-[#0052FF] h-full rounded-full" 
+                    style={{ width: `${genre.percentage}%` }} 
                   />
                 </div>
               </div>
@@ -173,7 +173,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ analytics })
         <div className="bg-white/[0.02] dark:bg-white/[0.02] bg-black/[0.02] border border-black/5 dark:border-white/5 rounded-[10px] p-4 space-y-3">
           <div className="flex items-center gap-1.5 text-foreground px-1 mb-1">
             <Disc className="w-4 h-4 text-pink-500" />
-            <h4 className="text-xs font-bold uppercase tracking-wide">Top Tracks This Month</h4>
+            <h2 className="section-title">Top Tracks This Month</h2>
           </div>
 
           <div className="space-y-2">
@@ -199,7 +199,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ analytics })
         <div className="bg-white/[0.02] dark:bg-white/[0.02] bg-black/[0.02] border border-black/5 dark:border-white/5 rounded-[10px] p-4 space-y-3">
           <div className="flex items-center gap-1.5 text-foreground px-1 mb-1">
             <Star className="w-4 h-4 text-amber-500" />
-            <h4 className="text-xs font-bold uppercase tracking-wide">Top Artists Played</h4>
+            <h2 className="section-title">Top Artists Played</h2>
           </div>
 
           <div className="space-y-2">

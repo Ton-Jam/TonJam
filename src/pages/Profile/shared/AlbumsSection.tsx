@@ -16,7 +16,7 @@ export const AlbumsSection: React.FC<AlbumsSectionProps> = ({
 }) => {
   if (albums.length === 0) {
     return (
-      <div className="text-center py-12 bg-[#101A3B]/40 border border-white/5 rounded-2xl p-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
+      <div className="text-center py-12 bg-[#101A3B]/40 rounded-2xl p-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
         No albums found
       </div>
     );
@@ -35,7 +35,7 @@ export const AlbumsSection: React.FC<AlbumsSectionProps> = ({
           <motion.div
             key={album.id}
             onClick={() => onSelectAlbum?.(album.id)}
-            className="bg-[#101A3B] border border-white/5 rounded-2xl p-3 flex flex-col group hover:bg-[#15234f] transition-all cursor-pointer relative"
+            className="bg-[#101A3B] rounded-2xl p-3 flex flex-col group hover:bg-[#15234f] transition-all cursor-pointer relative shadow-sm"
           >
             {/* Cover Image */}
             <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-slate-900 mb-3">

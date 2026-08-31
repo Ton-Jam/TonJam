@@ -58,9 +58,9 @@ export const LibraryHero: React.FC<LibraryHeroProps> = ({
               <span className="text-[8px] font-black uppercase tracking-wider">Premium Node unlocked</span>
             </div>
           </div>
-          <h2 className="text-xl font-black text-foreground tracking-tight leading-tight">
+          <h1 className="page-title">
             {greeting}, {userName || 'Collector'}
-          </h2>
+          </h1>
           <p className="text-xs text-muted-foreground leading-normal max-w-md">
             Welcome to your decentralized acoustic collection space. All licenses, stream caches, and smart contracts are fully verified.
           </p>

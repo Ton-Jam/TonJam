@@ -30,7 +30,7 @@ export const NFTCommunity: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Coins className="w-4 h-4 text-amber-400" />
-          <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">NFT Collector Vault</h3>
+          <h2 className="section-title">NFT Collector Vault</h2>
         </div>
         <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">TON Contract Ledger</span>
       </div>

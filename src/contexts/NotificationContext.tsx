@@ -74,10 +74,54 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
+  // Real-time Firestore onSnapshot listener for user notifications
+  useEffect(() => {
+    if (!user || !user.uid) {
+      setNotifications(notificationService.getNotifications('guest'));
+      return;
+    }
+
+    const notifColRef = collection(db, 'users', user.uid, 'notifications');
+    const unsubscribe = onSnapshot(
+      notifColRef,
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const list: Notification[] = [];
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data() as any;
+            list.push({
+              id: docSnap.id,
+              userId: data.userId || user.uid,
+              type: data.type || (data.category ? 'bid_update' : 'event'),
+              title: data.title || 'Notification',
+              message: data.message || data.description || '',
+              read: data.read ?? false,
+              timestamp: data.timestamp || new Date().toISOString(),
+              link: data.link || '',
+              metadata: data.metadata || {},
+            });
+          });
+
+          // Sort descending by timestamp
+          list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+          setNotifications(list);
+          notificationService.saveNotifications(user.uid, list);
+        } else {
+          // Fall back to local storage if Firestore collection is not seeded yet
+          refreshNotifications();
+        }
+      },
+      (error) => {
+        console.warn('[NotificationContext] onSnapshot error:', error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [user]);
+
   const addNotification = (n: Omit<Notification, 'id' | 'read' | 'timestamp'>) => {
     const userId = user?.uid || 'guest';
     notificationService.addNotification(userId, n);
-    refreshNotifications();
   };
 
   // Load local price alerts on mount
@@ -419,7 +463,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
     const updated = notifications.map(n => n.id === id ? { ...n, read: true } : n);
     setNotifications(updated);
-    notificationService.saveNotifications(user.uid, updated);
+    notificationService.markAsRead(user.uid, id);
   };
 
   const updatePreferences = (prefs: NotificationPreferences) => {

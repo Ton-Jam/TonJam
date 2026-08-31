@@ -807,7 +807,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileSidebarOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden"
+              className="fixed inset-0 bg-black/70 z-[60] lg:hidden"
             />
             <motion.aside 
               initial={{ x: '-100%' }}
@@ -922,7 +922,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Mobile Navigation */}
       {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
         <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[70] h-16 transition-all duration-300 ease-in-out ${isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
-          <nav className="h-full w-full bg-black/95 backdrop-blur-xl border-t border-[#C0C0C0]/25 px-2 flex justify-around items-center" aria-label="Mobile Navigation">
+          <nav className="h-full w-full bg-black border-t border-[#C0C0C0]/25 px-2 flex justify-around items-center" aria-label="Mobile Navigation">
             <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
             <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
             <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jamspace" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />

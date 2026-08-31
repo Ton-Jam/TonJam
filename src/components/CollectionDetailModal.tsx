@@ -69,7 +69,14 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
     } else {
       if (nft.audioUrl) {
         audio.src = nft.audioUrl;
-        audio.play();
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            if (err?.name !== "AbortError" && !err?.message?.includes("interrupted")) {
+              console.error("Audio playback error:", err);
+            }
+          });
+        }
         setPlayingTrackId(nft.id);
         setTimeout(() => {
           audio.pause();

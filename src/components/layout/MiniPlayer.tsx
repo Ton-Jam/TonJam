@@ -93,8 +93,15 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={{ top: 0.3, bottom: 0 }}
       onDragEnd={handleDragEnd}
-      style={{ y: dragY, opacity }}
-      className="fixed bottom-[72px] left-4 right-4 z-40 select-none bg-[#12141C]/80 backdrop-blur-2xl rounded-2xl shadow-2xl p-3 flex flex-col gap-2 cursor-pointer active:cursor-grabbing"
+      style={{
+        y: dragY,
+        opacity: 1,
+        backgroundColor: "#000000",
+        background: "#000000",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+      }}
+      className="fixed bottom-[72px] left-4 right-4 z-40 select-none rounded-2xl shadow-2xl p-3 flex flex-col gap-2 cursor-pointer active:cursor-grabbing border-none"
       onClick={onExpand}
     >
       {/* Top tiny touch handle bar to represent physical swipeability */}

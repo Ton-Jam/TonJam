@@ -19,7 +19,7 @@ export const PlaylistSection: React.FC<PlaylistSectionProps> = ({
 
   if (playlists.length === 0) {
     return (
-      <div className="text-center py-12 bg-[#101A3B]/40 border border-white/5 rounded-2xl p-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
+      <div className="text-center py-12 bg-[#101A3B]/40 rounded-2xl p-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
         No playlists curated
       </div>
     );
@@ -38,7 +38,7 @@ export const PlaylistSection: React.FC<PlaylistSectionProps> = ({
           <motion.div
             key={playlist.id}
             onClick={() => onSelectPlaylist?.(playlist.id)}
-            className="bg-[#101A3B] border border-white/5 rounded-2xl p-3 flex flex-col group hover:bg-[#15234f] transition-all cursor-pointer relative"
+            className="bg-[#101A3B] rounded-2xl p-3 flex flex-col group hover:bg-[#15234f] transition-all cursor-pointer relative shadow-sm"
           >
             {/* Cover art block */}
             <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-slate-900 mb-3">

@@ -21,7 +21,7 @@ export const ActivityCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#101A3B] border border-white/5 rounded-2xl p-5 text-white flex flex-col justify-between">
+    <div className="bg-[#101A3B] rounded-2xl p-5 text-white flex flex-col justify-between shadow-sm">
       <div>
         <div className="flex justify-between items-start mb-4">
           <div className="space-y-1">
@@ -38,7 +38,7 @@ export const ActivityCard: React.FC = () => {
         {/* Ledger logs list */}
         <div className="space-y-2.5 mb-4">
           {logs.map((log) => (
-            <div key={log.id} className="bg-white/5 p-2.5 rounded-xl flex items-center justify-between border border-white/5">
+            <div key={log.id} className="bg-white/5 p-2.5 rounded-xl flex items-center justify-between">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="p-1.5 bg-white/5 rounded-md shrink-0">
                   {getLogIcon(log.type)}

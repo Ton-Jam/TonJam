@@ -20,10 +20,10 @@ export const ContinueListening: React.FC<ContinueListeningProps> = ({ tracks, on
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <Disc className="w-4 h-4 text-[#0052FF] animate-spin-slow" />
-          Continue Listening
-        </h3>
+          <h2 className="section-title">Continue Listening</h2>
+        </div>
         <button
           onClick={() => navigate('/explore/tracks?title=Continue+Listening&filter=recent')}
           className="text-xs font-bold text-[#0052FF] hover:text-[#0052FF]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"

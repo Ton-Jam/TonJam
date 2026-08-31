@@ -377,7 +377,7 @@ const NFTDetail: React.FC = () => {
 
     import('sonner').then(({ toast }) => {
       toast.custom((t) => (
-        <div className="flex bg-[#030712]/95 backdrop-blur-md rounded-[4px] p-4 shadow-2xl items-center gap-3">
+        <div className="flex bg-[#030712] rounded-[4px] p-4 shadow-2xl items-center gap-3">
           <div className="bg-rose-500/10 p-2 rounded-full flex items-center justify-center text-rose-400">
             <TrendingDown className="h-5 w-5 animate-pulse" />
           </div>
@@ -872,7 +872,7 @@ const NFTDetail: React.FC = () => {
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
       {isFetchingMetadata && (
-        <div className="fixed inset-0 z-50 bg-background/60 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-50 bg-background/90 flex flex-col items-center justify-center animate-in fade-in duration-300">
           <LoadingSpinner size={64} />
           <p className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em] animate-pulse mt-8">
             Syncing Neural Relay...
@@ -882,7 +882,7 @@ const NFTDetail: React.FC = () => {
       <div className="relative z-10 w-full max-w-full px-4 md:px-4 pt-4">
         <div className="flex justify-end items-center mb-4">
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-4 px-4 py-4 bg-white/5 backdrop-blur-md rounded-full border border-white/10">
+            <div className="hidden md:flex items-center gap-4 px-4 py-4 bg-white/5 rounded-full border border-white/10">
               <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
               <span className="text-[9px] font-bold text-foreground/80 uppercase tracking-widest">
                 On-Chain Verified
@@ -890,14 +890,14 @@ const NFTDetail: React.FC = () => {
             </div>
             <button
               onClick={handleShare}
-              className="w-10 h-10 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-muted-foreground hover:text-blue-400 hover:border-blue-400/50 transition-all"
+              className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-full border border-white/10 text-muted-foreground hover:text-blue-400 hover:border-blue-400/50 transition-all"
               title="Share Protocol"
             >
               <Share2 className="h-4 w-4" />
             </button>
             <button
               onClick={() => setShowPriceAlertModal(true)}
-              className="w-10 h-10 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-muted-foreground hover:text-amber-400 hover:border-amber-400/50 transition-all"
+              className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-full border border-white/10 text-muted-foreground hover:text-amber-400 hover:border-amber-400/50 transition-all"
               title="Price Alert"
             >
               <Bell className="h-4 w-4" />
@@ -905,7 +905,7 @@ const NFTDetail: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="w-10 h-10 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-muted-foreground hover:text-foreground hover:border-white/30 transition-all"
+                  className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-full border border-white/10 text-muted-foreground hover:text-foreground hover:border-white/30 transition-all"
                   title="More Options"
                 >
                   <MoreHorizontal className="h-4 w-4" />
@@ -940,7 +940,7 @@ const NFTDetail: React.FC = () => {
                 <AuctionCountdownTimer 
                   nft={localNft} 
                   variant="default" 
-                  className="bg-background/80 backdrop-blur-2xl border border-transparent shadow-2xl" 
+                  className="bg-background border border-transparent shadow-2xl" 
                 />
               }
             />
@@ -975,7 +975,7 @@ const NFTDetail: React.FC = () => {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="bg-white/5 backdrop-blur-md p-3 rounded-[4px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10"
+                  className="bg-white/5 p-3 rounded-[4px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
@@ -1222,7 +1222,7 @@ const NFTDetail: React.FC = () => {
 
             {/* Pricing Section - Hardware Style */}
             <div className={cn(
-              "bg-white/5 backdrop-blur-xl rounded-[4px] p-4 sm:p-8 mb-4 border border-white/10 relative overflow-hidden group transition-all duration-300",
+              "bg-white/5 rounded-[4px] p-4 sm:p-8 mb-4 border border-white/10 relative overflow-hidden group transition-all duration-300",
               showGlow && "bid-container-glow"
             )}>
               <div className="absolute top-0 right-0 p-8 opacity-[0.05] rotate-12 pointer-events-none group-hover:rotate-[30deg] transition-transform duration-1000">
@@ -1273,7 +1273,7 @@ const NFTDetail: React.FC = () => {
                   <PriceSparkline basePrice={parseFloat(localNft.price) || 0} history={localNft.history} />
 
                   {isAuction && (
-                    <div className="bg-white/5 backdrop-blur-md p-2 rounded-[4px] border border-white/10 flex items-center justify-between gap-4 shadow-lg text-[10px]">
+                    <div className="bg-white/5 p-2 rounded-[4px] border border-white/10 flex items-center justify-between gap-4 shadow-lg text-[10px]">
                       <div className="flex flex-col items-start">
                         <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60">
                           Highest Bid
@@ -1473,7 +1473,7 @@ const NFTDetail: React.FC = () => {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       onClick={() => setIsTipping(false)}
-                      className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+                      className="absolute inset-0 bg-background/80"
                     />
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1649,7 +1649,7 @@ const NFTDetail: React.FC = () => {
                     className="grid grid-cols-1 md:grid-cols-3 gap-6"
                   >
                     {metadataError && (
-                      <div className="col-span-full p-4 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-[4px] flex items-center justify-between">
+                      <div className="col-span-full p-4 bg-red-500/10 border border-red-500/20 rounded-[4px] flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
                             <X className="h-5 w-5 text-red-500" />
@@ -1787,7 +1787,7 @@ const NFTDetail: React.FC = () => {
                     </div>
 
                     <div className="col-span-full md:col-span-2 space-y-4">
-                      <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[4px]">
+                      <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[4px]">
                         <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
                           <div className="w-1.5 h-4 bg-emerald-500 rounded-full" />
                           Protocol Distribution
@@ -1826,7 +1826,7 @@ const NFTDetail: React.FC = () => {
                     </div>
 
                     <div className="col-span-full md:col-span-1 space-y-4">
-                      <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[4px] flex flex-col justify-center">
+                      <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[4px] flex flex-col justify-center">
                         <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
                           <div className="w-1.5 h-4 bg-purple-500 rounded-full" />
                           Provenance
@@ -1860,7 +1860,7 @@ const NFTDetail: React.FC = () => {
                       </div>
 
                       {localNft.contractAddress && (
-                        <div className="p-6 bg-white/[0.02] backdrop-blur-md rounded-[4px] flex flex-col items-center justify-center text-center space-y-4">
+                        <div className="p-6 bg-white/[0.02] rounded-[4px] flex flex-col items-center justify-center text-center space-y-4">
                           <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] flex items-center gap-3 w-full text-left">
                             <div className="w-1.5 h-4 bg-blue-500 rounded-full" />
                             GRAM Explorer QR
@@ -1915,7 +1915,7 @@ const NFTDetail: React.FC = () => {
 
                     {isAuction && (
                       <div className="col-span-full space-y-4">
-                        <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[4px]">
+                        <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[4px]">
                           <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
                             <div className="w-1.5 h-4 bg-orange-500 rounded-full" />
                             Active Bids

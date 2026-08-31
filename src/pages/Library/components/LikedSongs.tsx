@@ -44,7 +44,7 @@ export const LikedSongs: React.FC<LikedSongsProps> = ({
             <Heart className="w-5 h-5 fill-current" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-foreground uppercase tracking-tight">Liked Songs</h3>
+            <h2 className="section-title">Liked Songs</h2>
             <p className="text-[10px] text-muted-foreground uppercase font-mono font-bold tracking-wider">{tracks.length} tracks saved on device</p>
           </div>
         </div>

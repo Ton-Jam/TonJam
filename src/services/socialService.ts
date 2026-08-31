@@ -51,22 +51,40 @@ export const unlikePost = async (postId: string, userId: string) => {
   }
 };
 
-export const addComment = async (postId: string, userId: string, userName: string, content: string) => {
+export const addComment = async (postId: string, userId: string, userName: string, content: string, userAvatar?: string) => {
   try {
-    const docRef = await addDoc(collection(db, 'posts', postId, 'comments'), {
+    const commentData = {
+      postId,
+      targetId: postId,
       userId,
       userName,
+      userAvatar: userAvatar || '',
       content,
-      createdAt: serverTimestamp()
-    });
+      text: content,
+      createdAt: serverTimestamp(),
+      timestamp: new Date().toISOString()
+    };
+
+    const docRef = await addDoc(collection(db, 'comments'), commentData);
+
+    try {
+      await addDoc(collection(db, 'posts', postId, 'comments'), commentData);
+    } catch {
+      // Subcollection write is secondary
+    }
     
-    await updateDoc(doc(db, 'posts', postId), {
-      commentsCount: increment(1)
-    });
+    try {
+      await updateDoc(doc(db, 'posts', postId), {
+        commentsCount: increment(1),
+        comments: increment(1)
+      });
+    } catch {
+      // Post counter increment
+    }
     
     return { id: docRef.id };
   } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, `posts/${postId}/comments`);
+    handleFirestoreError(error, OperationType.CREATE, 'comments');
   }
 };
 
@@ -130,3 +148,49 @@ export const followCollection = async (userId: string, collectionId: string) => 
     handleFirestoreError(error, OperationType.CREATE, 'follows');
   }
 };
+
+export const repostPost = async (postId: string, userId: string, postData?: any) => {
+  try {
+    const repostId = `${userId}_${postId}`;
+    await setDoc(doc(db, 'reposts', repostId), {
+      userId,
+      postId,
+      postData: postData || null,
+      createdAt: serverTimestamp()
+    });
+    
+    await updateDoc(doc(db, 'posts', postId), {
+      reposts: increment(1)
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, 'reposts');
+  }
+};
+
+export const unrepostPost = async (postId: string, userId: string) => {
+  try {
+    const repostId = `${userId}_${postId}`;
+    await deleteDoc(doc(db, 'reposts', repostId));
+    
+    await updateDoc(doc(db, 'posts', postId), {
+      reposts: increment(-1)
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, 'reposts');
+  }
+};
+
+export const reportPost = async (postId: string, userId: string, reason: string = 'Inappropriate content') => {
+  try {
+    const reportId = `${userId}_${postId}_${Date.now()}`;
+    await setDoc(doc(db, 'reports', reportId), {
+      postId,
+      userId,
+      reason,
+      createdAt: serverTimestamp()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, 'reports');
+  }
+};
+

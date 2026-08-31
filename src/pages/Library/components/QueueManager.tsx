@@ -20,7 +20,7 @@ export const QueueManager: React.FC<QueueManagerProps> = ({
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-1.5">
           <ListMusic className="w-5 h-5 text-amber-500" />
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Active Playing Queue</h3>
+          <h2 className="section-title">Active Playing Queue</h2>
         </div>
 
         {queue.length > 0 && (

@@ -11,10 +11,10 @@ export const Artists: React.FC<ArtistsProps> = ({ artists }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-emerald-500" />
-          Followed Sonic Entities
-        </h3>
+          <h2 className="section-title">Followed Sonic Entities</h2>
+        </div>
         <span className="text-[10px] text-muted-foreground font-mono font-medium">Verified creator nodes</span>
       </div>
 

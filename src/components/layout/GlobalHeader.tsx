@@ -71,9 +71,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         ${isHidden ? '-translate-y-full' : 'translate-y-0'}
       `}
       style={{
-        backgroundColor: `rgba(5, 6, 8, ${isScrolled ? 0.85 : 0})`,
-        backdropFilter: isScrolled ? 'blur(16px)' : 'blur(0px)',
-        WebkitBackdropFilter: isScrolled ? 'blur(16px)' : 'blur(0px)',
+        backgroundColor: isScrolled ? '#000000' : 'transparent',
       }}
     >
       {/* Left section: Back button or Logo + Title */}

@@ -3,6 +3,10 @@ import './index.css';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import App from './App';
+import { runFirebaseDiagnostics } from './lib/firebase-debug';
+
+// Run non-blocking Firebase startup diagnostics
+runFirebaseDiagnostics().catch(() => {});
 
 /**
  * TON Connect SDK Analytics Error Suppression

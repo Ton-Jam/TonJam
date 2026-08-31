@@ -5,6 +5,7 @@ import { LibraryTrack, LibraryNFT } from '../../Library/types';
 import { MOCK_LIBRARY_TRACKS, MOCK_LIBRARY_NFTS } from '../../Library/mock';
 import { toast } from 'sonner';
 import { saveBookmarkToFirestore, removeBookmarkFromFirestore } from '../../../services/bookmarkService';
+import { likePost, unlikePost, repostPost, unrepostPost } from '../../../services/socialService';
 
 export const useJamSpaceData = (currentUser?: { name?: string; email?: string; photoURL?: string; uid?: string }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -218,11 +219,13 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     setPosts([newPost, ...posts]);
   };
 
-  const handleLikePost = (postId: string) => {
+  const handleLikePost = async (postId: string) => {
+    let targetLiked = false;
     setPosts(prevPosts =>
       prevPosts.map(p => {
         if (p.id === postId) {
           const isLiked = !p.isLiked;
+          targetLiked = isLiked;
           return {
             ...p,
             isLiked,
@@ -232,13 +235,29 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
         return p;
       })
     );
+
+    try {
+      const userId = user?.id || currentUser?.uid || 'current-user';
+      if (targetLiked) {
+        await likePost(postId, userId);
+      } else {
+        await unlikePost(postId, userId);
+      }
+    } catch (err) {
+      console.error("[useJamSpaceData] Failed to update like in Firestore:", err);
+    }
   };
 
-  const handleRepostPost = (postId: string) => {
+  const handleRepostPost = async (postId: string) => {
+    let targetReposted = false;
+    let postObj: Post | undefined;
+
     setPosts(prevPosts =>
       prevPosts.map(p => {
         if (p.id === postId) {
           const isReposted = !p.isReposted;
+          targetReposted = isReposted;
+          postObj = p;
           return {
             ...p,
             isReposted,
@@ -248,6 +267,20 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
         return p;
       })
     );
+
+    try {
+      const userId = user?.id || currentUser?.uid || 'current-user';
+      if (targetReposted) {
+        await repostPost(postId, userId, postObj);
+        toast.success('Broadcasted post to your profile feed');
+      } else {
+        await unrepostPost(postId, userId);
+        toast.success('Removed repost from your profile feed');
+      }
+    } catch (err) {
+      console.error("[useJamSpaceData] Failed to update repost in Firestore:", err);
+      toast.error('Failed to update repost');
+    }
   };
 
   const handleBookmarkPost = (postId: string) => {

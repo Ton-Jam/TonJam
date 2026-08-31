@@ -1,6 +1,6 @@
 import { Notification, NotificationPreferences } from '@/types';
 import { db } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 
 const STORAGE_KEY_NOTIFICATIONS = 'notifications';
 const STORAGE_KEY_PREFERENCES = 'notification_preferences';
@@ -13,6 +13,43 @@ export const notificationService = {
 
   saveNotifications: (userId: string, notifications: Notification[]) => {
     localStorage.setItem(`${STORAGE_KEY_NOTIFICATIONS}_${userId}`, JSON.stringify(notifications));
+  },
+
+  markAsRead: async (userId: string, id: string) => {
+    const notifications = notificationService.getNotifications(userId);
+    const updated = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
+    notificationService.saveNotifications(userId, updated);
+
+    if (userId && userId !== 'guest' && userId !== 'guest_user') {
+      try {
+        const docRef = doc(db, 'users', userId, 'notifications', id);
+        await updateDoc(docRef, { read: true });
+      } catch (err) {
+        console.warn('[notificationService] Firestore markAsRead error:', err);
+      }
+    }
+  },
+
+  markAllAsRead: async (userId: string) => {
+    const notifications = notificationService.getNotifications(userId);
+    const updated = notifications.map((n) => ({ ...n, read: true }));
+    notificationService.saveNotifications(userId, updated);
+
+    if (userId && userId !== 'guest' && userId !== 'guest_user') {
+      try {
+        const unread = notifications.filter((n) => !n.read);
+        if (unread.length > 0) {
+          const batch = writeBatch(db);
+          unread.slice(0, 400).forEach((n) => {
+            const docRef = doc(db, 'users', userId, 'notifications', n.id);
+            batch.update(docRef, { read: true });
+          });
+          await batch.commit();
+        }
+      } catch (err) {
+        console.warn('[notificationService] Firestore markAllAsRead error:', err);
+      }
+    }
   },
 
   getPreferences: (userId: string): NotificationPreferences => {

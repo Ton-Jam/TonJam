@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, 
@@ -7,18 +7,26 @@ import {
   X, 
   Check, 
   Share2, 
-  Sparkles,
-  Award,
-  BookOpen,
-  User,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  Sun,
-  Moon,
-  LogOut,
-  Copy
+  Sparkles, 
+  Award, 
+  BookOpen, 
+  User, 
+  Image as ImageIcon, 
+  Link as LinkIcon, 
+  Sun, 
+  Moon, 
+  LogOut, 
+  Copy,
+  Edit3
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAudio } from '@/contexts/AudioContext';
+import { useNFT } from '@/contexts/NFTContext';
+import { UserProfile as UserProfileType } from '@/types';
+import { getPlaceholderImage } from '@/lib/utils';
 
 // Import subcomponents
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
@@ -36,26 +44,136 @@ import { ArtistAnalyticsSection } from '@/components/profile/ArtistAnalyticsSect
 import { ArtistDashboardCard } from '@/components/profile/ArtistDashboardCard';
 import { TonWalletVerification } from '@/components/profile/TonWalletVerification';
 import { MOCK_PROFILE, ProfileData } from '@/components/profile/ProfileTypes';
+import EditProfileModal from '@/components/EditProfileModal';
 
-// Import newly updated layout components and contexts
+// Import layout components and contexts
 import { PageContainer } from '@/components/layout/PageContainer';
 import { BottomSheet } from '@/components/layout/BottomSheet';
-import { ToastProvider, useToast } from '@/components/layout/ToastProvider';
-import { ModalProvider, useModal } from '@/components/layout/ModalProvider';
+import { useToast } from '@/components/layout/ToastProvider';
+import { useModal } from '@/components/layout/ModalProvider';
 
 const ProfileScreenContent: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { openModal } = useModal();
+  const { user: authUser, userProfile: authUserProfile } = useAuth();
+  const { playlists } = useAudio();
+  const { nfts } = useNFT();
   
-  const [profile, setProfile] = useState<ProfileData>(MOCK_PROFILE);
+  const [profile, setProfile] = useState<ProfileData>(() => {
+    if (authUserProfile) {
+      return {
+        uid: authUserProfile.uid,
+        name: authUserProfile.name || 'TONJAM User',
+        username: authUserProfile.username || 'tonjam_user',
+        avatar: authUserProfile.avatar || getPlaceholderImage(`user-${authUserProfile.uid}`),
+        bannerUrl: authUserProfile.bannerUrl || MOCK_PROFILE.bannerUrl,
+        bio: authUserProfile.bio || MOCK_PROFILE.bio,
+        genre: MOCK_PROFILE.genre,
+        country: MOCK_PROFILE.country,
+        memberSince: authUserProfile.createdAt ? new Date(authUserProfile.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : MOCK_PROFILE.memberSince,
+        walletAddress: authUserProfile.walletAddress || MOCK_PROFILE.walletAddress,
+        isSpotifyVerified: Boolean(authUserProfile.isVerifiedArtist),
+        isArtistVerified: Boolean(authUserProfile.isVerifiedArtist || authUserProfile.role === 'artist'),
+        isTonVerified: Boolean(authUserProfile.walletAddress),
+        verificationStatus: authUserProfile.isVerifiedArtist ? 'verified' : 'none',
+        followers: authUserProfile.followers || 0,
+        following: authUserProfile.following || 0,
+        monthlyListeners: 1200,
+        totalStreams: 4500,
+        nftsOwned: 0,
+        nftsSold: 0,
+        playlistsCount: 0,
+        tjPoints: authUserProfile.tjBalance || 150,
+        socials: authUserProfile.socials || MOCK_PROFILE.socials
+      };
+    }
+    return MOCK_PROFILE;
+  });
+
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showQRCode, setShowQRCode] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [isArtistDashboardMode, setIsArtistDashboardMode] = useState<boolean>(false);
+
+  const targetUid = authUser?.uid || authUserProfile?.uid || profile.uid;
+
+  // Real-time Firestore subscription for users/{uid}
+  useEffect(() => {
+    if (!targetUid) return;
+
+    const userDocRef = doc(db, 'users', targetUid);
+    const unsubscribe = onSnapshot(
+      userDocRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setProfile((prev) => ({
+            ...prev,
+            uid: docSnap.id,
+            name: data.name || prev.name,
+            username: data.username || prev.username,
+            avatar: data.avatar || prev.avatar,
+            bannerUrl: data.bannerUrl || prev.bannerUrl,
+            bio: data.bio !== undefined ? data.bio : prev.bio,
+            genre: data.genre || prev.genre,
+            country: data.country || prev.country,
+            memberSince: data.memberSince || (data.createdAt ? new Date(data.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : prev.memberSince),
+            walletAddress: data.walletAddress || prev.walletAddress,
+            isSpotifyVerified: Boolean(data.isSpotifyVerified ?? prev.isSpotifyVerified),
+            isArtistVerified: Boolean(data.isArtistVerified || data.isVerifiedArtist || data.role === 'artist' || prev.isArtistVerified),
+            isTonVerified: Boolean(data.isTonVerified ?? (data.walletAddress ? true : prev.isTonVerified)),
+            verificationStatus: data.verificationStatus || (data.isVerifiedArtist ? 'verified' : prev.verificationStatus),
+            followers: typeof data.followers === 'number' ? data.followers : prev.followers,
+            following: typeof data.following === 'number' ? data.following : prev.following,
+            monthlyListeners: typeof data.monthlyListeners === 'number' ? data.monthlyListeners : prev.monthlyListeners,
+            totalStreams: typeof data.totalStreams === 'number' ? data.totalStreams : prev.totalStreams,
+            nftsSold: typeof data.nftsSold === 'number' ? data.nftsSold : prev.nftsSold,
+            tjPoints: typeof data.tjPoints === 'number' ? data.tjPoints : (data.tjBalance ?? prev.tjPoints),
+            socials: data.socials || prev.socials
+          }));
+        }
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.GET, `users/${targetUid}`);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [targetUid]);
+
+  // Compute real owned NFTs
+  const ownedNfts = useMemo(() => {
+    return nfts.filter(
+      (nft) =>
+        nft.ownerId === targetUid ||
+        (profile.walletAddress && nft.owner === profile.walletAddress) ||
+        nft.owner === profile.name ||
+        nft.owner === profile.username
+    );
+  }, [nfts, targetUid, profile.walletAddress, profile.name, profile.username]);
+
+  // Compute real user playlists
+  const userPlaylists = useMemo(() => {
+    return playlists.filter(
+      (pl) =>
+        pl.creator === profile.name ||
+        pl.creator === profile.username ||
+        (pl as any).creatorId === targetUid ||
+        (pl as any).userId === targetUid
+    );
+  }, [playlists, profile.name, profile.username, targetUid]);
+
+  // Keep stats in sync with computed NFTs and Playlists count
+  const dynamicProfile: ProfileData = useMemo(() => ({
+    ...profile,
+    nftsOwned: ownedNfts.length > 0 ? ownedNfts.length : profile.nftsOwned,
+    playlistsCount: userPlaylists.length > 0 ? userPlaylists.length : profile.playlistsCount
+  }), [profile, ownedNfts.length, userPlaylists.length]);
 
   // Apply Theme Toggle Class
   useEffect(() => {
@@ -76,30 +194,65 @@ const ProfileScreenContent: React.FC = () => {
     }, 1200);
   };
 
-  const handleBecomeArtist = () => {
+  const handleBecomeArtist = async () => {
     setProfile(prev => ({ ...prev, verificationStatus: 'pending' }));
     toast.info('Application Pending', 'Verification application submitted successfully');
     
+    try {
+      if (targetUid) {
+        const userRef = doc(db, 'users', targetUid);
+        await updateDoc(userRef, cleanUpdateData({
+          verificationStatus: 'pending'
+        }));
+      }
+    } catch (err) {
+      console.warn('Could not update pending status:', err);
+    }
+    
     // Auto-approve after 4 seconds to show transition layout animation
-    setTimeout(() => {
+    setTimeout(async () => {
       setProfile(prev => ({ 
         ...prev, 
         verificationStatus: 'verified',
         isArtistVerified: true 
       }));
       toast.success('Verification Complete', 'Congratulations! You are now a verified GramJam artist');
+      try {
+        if (targetUid) {
+          const userRef = doc(db, 'users', targetUid);
+          await updateDoc(userRef, cleanUpdateData({
+            verificationStatus: 'verified',
+            isArtistVerified: true,
+            role: 'artist'
+          }));
+        }
+      } catch (e) {
+        console.warn('Could not persist verified artist state:', e);
+      }
     }, 4500);
   };
 
   const handleCopyProfileLink = () => {
-    navigator.clipboard.writeText(`https://gramjam.app/user/${profile.username}`);
+    navigator.clipboard.writeText(`https://gramjam.app/user/${dynamicProfile.username}`);
     setCopiedLink(true);
     toast.success('Link Copied', 'Profile URL copied to clipboard');
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  const handleProfileUpdate = (updated: UserProfileType) => {
+    setProfile((prev) => ({
+      ...prev,
+      name: updated.name || prev.name,
+      username: updated.username || prev.username,
+      bio: updated.bio !== undefined ? updated.bio : prev.bio,
+      avatar: updated.avatar || prev.avatar,
+      socials: updated.socials || prev.socials
+    }));
+    toast.success('Profile Updated', 'Your profile details have been saved.');
+  };
+
   const renderActiveTabContent = () => {
-    if (isArtistDashboardMode && profile.isArtistVerified) {
+    if (isArtistDashboardMode && dynamicProfile.isArtistVerified) {
       return (
         <ArtistDashboardCard 
           onUploadTrack={() => navigate('/upload')}
@@ -113,32 +266,60 @@ const ProfileScreenContent: React.FC = () => {
       case 'overview':
         return (
           <OverviewTab 
-            profile={profile}
+            profile={dynamicProfile}
             onPlayTrack={(id) => toast.info('Playing Track', `Frequency sequence ${id} loaded`)}
             onSelectArtist={(uid) => toast.info('Opening Artist', `Navigating to artist ${uid}`)}
           />
         );
       case 'analytics':
-        return <ArtistAnalyticsSection profile={profile} />;
+        return <ArtistAnalyticsSection profile={dynamicProfile} />;
       case 'tracks':
         return <TracksTab onPlayTrack={(id) => toast.info('Playing Track', `Frequency sequence ${id} loaded`)} />;
       case 'nfts':
-        return <NFTTab onSelectNFT={(id) => toast.info('NFT Details', `Accessing metadata block ${id}`)} />;
+        return (
+          <NFTTab 
+            nfts={ownedNfts.length > 0 ? ownedNfts : undefined}
+            onSelectNFT={(id) => {
+              navigate(`/nft/${id}`);
+            }} 
+          />
+        );
       case 'playlists':
-        return <PlaylistTab onSelectPlaylist={(id) => toast.info('Opening Playlist', `Accessing node list ${id}`)} />;
+        return (
+          <PlaylistTab 
+            playlists={userPlaylists.length > 0 ? userPlaylists : undefined}
+            onSelectPlaylist={(id) => {
+              navigate(`/playlist/${id}`);
+            }} 
+          />
+        );
       case 'activity':
         return <ActivityTab />;
       case 'about':
-        return <AboutTab profile={profile} />;
+        return <AboutTab profile={dynamicProfile} />;
       case 'following':
         return (
           <div className="bg-[#101A3B] border border-white/5 rounded-[12px] p-6 text-center text-slate-400 text-sm font-semibold uppercase tracking-wider">
-            You are following {profile.following} creators in the ecosystem.
+            You are following {dynamicProfile.following} creators in the ecosystem.
           </div>
         );
       default:
         return null;
     }
+  };
+
+  const userProfileForModal: UserProfileType = {
+    uid: dynamicProfile.uid,
+    name: dynamicProfile.name,
+    username: dynamicProfile.username,
+    avatar: dynamicProfile.avatar,
+    bio: dynamicProfile.bio || '',
+    walletAddress: dynamicProfile.walletAddress || '',
+    socials: dynamicProfile.socials || {},
+    followers: dynamicProfile.followers,
+    following: dynamicProfile.following,
+    earnings: 0,
+    tjBalance: dynamicProfile.tjPoints
   };
 
   return (
@@ -169,27 +350,38 @@ const ProfileScreenContent: React.FC = () => {
 
       {/* Profile Header Block */}
       <ProfileHeader 
-        profile={profile}
+        profile={dynamicProfile}
         onOpenSettings={() => setShowSettings(true)}
         onEditCover={() => toast.info('Cover Update', 'Select new banner artwork')}
-        onEditAvatar={() => toast.info('Avatar Update', 'Select new profile image')}
+        onEditAvatar={() => setShowEditModal(true)}
+        onEditProfile={() => setShowEditModal(true)}
       />
 
       {/* Main Content Body */}
       <div className="p-4 sm:p-6 space-y-6">
         
         {/* Action Buttons Row */}
-        <div className="flex gap-3">
-          <ProfileActionButton 
-            isArtistVerified={profile.isArtistVerified}
-            verificationStatus={profile.verificationStatus}
-            onBecomeArtist={handleBecomeArtist}
-            onOpenDashboard={() => setIsArtistDashboardMode(!isArtistDashboardMode)}
-          />
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => setShowEditModal(true)}
+            className="flex-1 py-3.5 px-6 bg-white/10 hover:bg-white/20 active:bg-white/15 text-white font-bold text-xs uppercase tracking-wider rounded-[12px] flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
+          >
+            <Edit3 className="w-4 h-4 shrink-0 text-[#0052FF]" />
+            <span>Edit Profile</span>
+          </button>
+          
+          <div className="flex-1">
+            <ProfileActionButton 
+              isArtistVerified={dynamicProfile.isArtistVerified}
+              verificationStatus={dynamicProfile.verificationStatus}
+              onBecomeArtist={handleBecomeArtist}
+              onOpenDashboard={() => setIsArtistDashboardMode(!isArtistDashboardMode)}
+            />
+          </div>
         </div>
 
         {/* Quick Stats Grid */}
-        <ProfileStats profile={profile} />
+        <ProfileStats profile={dynamicProfile} />
 
         {/* Reusable Quick Actions Grids */}
         <QuickActions 
@@ -208,8 +400,8 @@ const ProfileScreenContent: React.FC = () => {
 
         {/* TON Blockchain Wallet Verification Node */}
         <TonWalletVerification 
-          walletAddress={profile.walletAddress}
-          isVerified={profile.isTonVerified}
+          walletAddress={dynamicProfile.walletAddress}
+          isVerified={dynamicProfile.isTonVerified}
           onVerifiedSuccess={() => setProfile(prev => ({ ...prev, isTonVerified: true }))}
         />
 
@@ -236,6 +428,15 @@ const ProfileScreenContent: React.FC = () => {
 
       </div>
 
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <EditProfileModal
+          user={userProfileForModal}
+          onClose={() => setShowEditModal(false)}
+          onUpdate={handleProfileUpdate}
+        />
+      )}
+
       {/* Unified Draggable Bottom Sheet for Options Settings */}
       <BottomSheet
         isOpen={showSettings}
@@ -244,7 +445,7 @@ const ProfileScreenContent: React.FC = () => {
       >
         <div className="space-y-1 py-1">
           <button
-            onClick={() => { navigate('/edit-profile'); setShowSettings(false); }}
+            onClick={() => { setShowEditModal(true); setShowSettings(false); }}
             className="w-full flex items-center gap-4 px-4 py-3 hover:bg-white/5 active:bg-white/10 rounded-xl transition-colors text-left text-sm font-medium cursor-pointer"
           >
             <User className="w-5 h-5 text-[#0052FF]" />
@@ -353,7 +554,7 @@ const ProfileScreenContent: React.FC = () => {
               </div>
 
               <p className="text-xs text-slate-400 mt-4 leading-relaxed font-mono">
-                @{profile.username}
+                @{dynamicProfile.username}
               </p>
             </motion.div>
           </div>

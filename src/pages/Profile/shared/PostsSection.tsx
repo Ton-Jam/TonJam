@@ -34,7 +34,7 @@ export const PostsSection: React.FC<PostsSectionProps> = ({ posts }) => {
 
   if (posts.length === 0) {
     return (
-      <div className="text-center py-12 bg-[#101A3B]/40 border border-white/5 rounded-2xl p-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
+      <div className="text-center py-12 bg-[#101A3B]/40 rounded-2xl p-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
         No community announcements posted
       </div>
     );
@@ -49,12 +49,12 @@ export const PostsSection: React.FC<PostsSectionProps> = ({ posts }) => {
             key={post.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[#101A3B] border border-white/5 rounded-2xl p-4 sm:p-5 text-white space-y-4 relative"
+            className="bg-[#101A3B] rounded-2xl p-4 sm:p-5 text-white space-y-4 relative shadow-sm"
           >
             {/* Post Header */}
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-white border border-white/5">
+                <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
                   TJ
                 </div>
                 <div>
@@ -86,7 +86,7 @@ export const PostsSection: React.FC<PostsSectionProps> = ({ posts }) => {
 
             {/* Post Media if available */}
             {post.mediaUrl && (
-              <div className="rounded-xl overflow-hidden aspect-[16/9] w-full bg-slate-950/60 max-h-64 border border-white/5">
+              <div className="rounded-xl overflow-hidden aspect-[16/9] w-full bg-slate-950/60 max-h-64">
                 <img
                   src={post.mediaUrl}
                   alt="Post attachment"
@@ -97,7 +97,7 @@ export const PostsSection: React.FC<PostsSectionProps> = ({ posts }) => {
             )}
 
             {/* Post Footer/Interactions */}
-            <div className="flex items-center gap-4 border-t border-white/5 pt-3 text-xs text-slate-400 font-semibold select-none">
+            <div className="flex items-center gap-4 pt-3 text-xs text-slate-400 font-semibold select-none bg-white/[0.02] -mx-4 -mb-4 px-4 py-3 rounded-b-2xl">
               <button
                 onClick={() => handleLike(post.id)}
                 className={`flex items-center gap-1.5 transition-colors cursor-pointer ${

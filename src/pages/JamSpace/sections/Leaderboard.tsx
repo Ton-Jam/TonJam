@@ -9,7 +9,7 @@ export const Leaderboard: React.FC = () => {
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-amber-500 animate-bounce" />
           <div>
-            <h3 className="text-sm font-extrabold uppercase tracking-widest text-white">TON Community Leaderboard</h3>
+            <h2 className="section-title">TON Community Leaderboard</h2>
             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Top contributors, artists & helpful fans</p>
           </div>
         </div>

@@ -79,7 +79,7 @@ const JamSpaceMain: React.FC = () => {
   };
 
   return (
-    <div className={`w-full min-h-screen bg-[#050A24] text-white pb-24 font-sans`}>
+    <div className={`w-full min-h-screen bg-[#050A24] text-white pb-32 font-sans`}>
       <div className="w-full max-w-7xl mx-auto px-4 py-6 sm:px-6 space-y-8 relative">
         {/* Top Header Controls (Integrated Ribbon functions) */}
         <div className="flex items-center justify-between mb-2">
