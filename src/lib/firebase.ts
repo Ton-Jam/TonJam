@@ -4,6 +4,7 @@ import {
   getFirestore, 
   initializeFirestore, 
   doc, 
+  getDoc,
   getDocFromServer,
   CACHE_SIZE_UNLIMITED,
   setLogLevel,
@@ -41,10 +42,7 @@ let dbInstance: Firestore;
 try {
   dbInstance = initializeFirestore(app, {
     ignoreUndefinedProperties: true,
-    experimentalForceLongPolling: true,
-    experimentalAutoDetectLongPolling: false,
-    useFetchStreams: false,
-    cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+    experimentalAutoDetectLongPolling: true,
   } as any, firestoreDatabaseId);
 } catch {
   dbInstance = getFirestore(app, firestoreDatabaseId);
@@ -57,37 +55,20 @@ export const storage: FirebaseStorage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 export const twitterProvider = new TwitterAuthProvider();
 
-// Add a specific test for the provided database ID
-async function testConnection(retries = 3) {
+// Safe background connection check without throwing blocking offline errors
+async function testConnection() {
   if (typeof window === 'undefined') return;
-  
-  for (let i = 0; i < retries; i++) {
-    try {
-      console.log(`[Firebase] Connection check attempt ${i + 1} for database: ${firestoreDatabaseId}...`);
-      // Use getDocFromServer on a explicitly allowed path in rules
-      const testDocRef = doc(db, 'test', 'connectivity');
-      await getDocFromServer(testDocRef);
+  try {
+    const testDocRef = doc(db, 'test', 'connectivity');
+    await getDoc(testDocRef);
+    console.log("[Firebase] Firestore connectivity initialized.");
+  } catch (error: any) {
+    const errorMessage = error?.message || String(error);
+    const errorCode = error?.code;
+    if (errorMessage.includes('Insufficient permissions') || errorCode === 'permission-denied') {
       console.log("[Firebase] Firestore connectivity verified.");
-      return;
-    } catch (error: any) {
-      const errorMessage = error?.message || String(error);
-      const errorCode = error?.code;
-      
-      if (errorMessage.includes('Insufficient permissions') || errorCode === 'permission-denied') {
-        console.log("[Firebase] Firestore connectivity verified (Endpoint reachable, permission denied is expected).");
-        return;
-      } 
-      
-      console.warn(`[Firebase] Connection attempt ${i + 1} failed: ${errorCode || 'unknown'} - ${errorMessage}`);
-      
-      if (errorCode === 'unavailable' || errorMessage.includes('offline')) {
-        console.info("[Firebase] Suggestion: If this persists, try checking if the Firestore database is provisioned in the Firebase console.");
-      }
-      
-      if (i < retries - 1) {
-        const delay = Math.pow(2, i) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
+    } else {
+      console.info("[Firebase] Firestore operating in offline/client mode:", errorCode || errorMessage);
     }
   }
 }

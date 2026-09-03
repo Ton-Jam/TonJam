@@ -24,9 +24,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   return (
-    <div className="relative w-full bg-[#050A24] text-white">
+    <div className="relative w-full bg-black text-white">
       {/* Cover Image Container */}
-      <div className="relative w-full h-32 sm:h-40 md:h-48 overflow-hidden bg-slate-950">
+      <div className="relative w-full h-32 sm:h-40 md:h-48 overflow-hidden bg-black">
         <img 
           src={profile.coverPhoto || profile.bannerUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&h=400&q=80'} 
           alt="Profile cover" 
@@ -34,12 +34,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           referrerPolicy="no-referrer"
         />
         {/* Flat darken overlay */}
-        <div className="absolute inset-0 bg-black/35" />
+        <div className="absolute inset-0 bg-black/40" />
         
         {/* Top Floating Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer z-10"
+          className="absolute top-4 left-4 p-2.5 bg-black/70 hover:bg-black active:scale-95 text-white rounded-full transition-all cursor-pointer z-10"
           title="Back"
           aria-label="Go Back"
         >
@@ -50,7 +50,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
           <button
             onClick={() => setIsQRModalOpen(true)}
-            className="p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer flex items-center justify-center"
+            className="p-2.5 bg-black/70 hover:bg-black active:scale-95 text-white rounded-full transition-all cursor-pointer flex items-center justify-center"
             title="Share Profile QR Code"
             aria-label="Share Profile QR Code"
           >
@@ -61,7 +61,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               {profile.isArtistVerified && (
                 <button
                   onClick={() => navigate('/artist-dashboard')}
-                  className="px-3 py-1.5 bg-[#0052FF] hover:bg-[#1a66ff] active:scale-95 text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1.5 transition-all cursor-pointer shadow-lg"
+                  className="px-3 py-1.5 bg-primary hover:bg-primary/90 active:scale-95 text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1.5 transition-all cursor-pointer shadow-lg"
                   title="Artist Dashboard"
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" />
@@ -70,7 +70,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               )}
               <button
                 onClick={onOpenSettings}
-                className="p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer"
+                className="p-2.5 bg-black/70 hover:bg-black active:scale-95 text-white rounded-full transition-all cursor-pointer"
                 title="Profile Settings"
                 aria-label="Settings"
               >
@@ -83,7 +83,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         {isOwnProfile && (
           <button
             onClick={onEditCover}
-            className="absolute bottom-4 right-4 px-3 py-1.5 bg-[#050A24]/60 hover:bg-[#050A24]/90 text-xs font-semibold rounded-full tracking-wider uppercase backdrop-blur-sm transition-all cursor-pointer z-10 flex items-center gap-1.5"
+            className="absolute bottom-4 right-4 px-3 py-1.5 bg-black/70 hover:bg-black text-xs font-semibold rounded-full tracking-wider uppercase transition-all cursor-pointer z-10 flex items-center gap-1.5"
           >
             <Camera className="w-3.5 h-3.5" />
             <span>Change Cover</span>
@@ -97,7 +97,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         {/* Avatar Overlap */}
         <div className="relative -mt-12 sm:-mt-16 mb-4 flex items-end justify-between">
           <div className="relative group">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-[3px] border-[#050A24] bg-slate-900 shadow-none">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-[3px] border-black bg-neutral-900 shadow-none">
               <img 
                 src={profile.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=500&h=500&q=80'} 
                 alt={profile.name} 
@@ -150,7 +150,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         {/* Name and Handle */}
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase font-sans">
+            <h1 className="page-title">
               {profile.name}
             </h1>
             <ArtistVerificationBadge 

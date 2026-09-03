@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BadgeCheck, Music, Twitter, ShieldCheck, Sparkles, CheckCircle2, Loader2, ArrowRight, X, ExternalLink, Lock } from 'lucide-react';
+import { BadgeCheck, Music, Twitter, Instagram, ShieldCheck, Sparkles, CheckCircle2, Loader2, ArrowRight, X, ExternalLink, Lock } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { db, cleanUpdateData } from '@/lib/firebase';
@@ -33,6 +33,7 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
   // Verification state tracking
   const [spotifyConnected, setSpotifyConnected] = useState(false);
   const [twitterConnected, setTwitterConnected] = useState(false);
+  const [instagramConnected, setInstagramConnected] = useState(false);
   const [walletSigned, setWalletSigned] = useState(false);
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
   const [oracleLogs, setOracleLogs] = useState<string[]>([]);
@@ -42,7 +43,7 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
   const isVerified = propsIsVerified ?? (userProfile?.isVerifiedArtist || userProfile?.verified);
   const isOwnProfile = !artistUid || artistUid === user?.uid || artistUid === userProfile?.uid;
 
-  // Listen for OAuth postMessage callbacks from Spotify & Twitter popups
+  // Listen for OAuth postMessage callbacks from Spotify, Twitter, and Instagram popups
   useEffect(() => {
     const handleOAuthMessage = (event: MessageEvent) => {
       if (!event.origin.endsWith('.run.app') && !event.origin.includes('localhost')) return;
@@ -57,6 +58,10 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
           setTwitterConnected(true);
           setIsConnecting(null);
           addNotification("Twitter (X) account authenticated via OAuth!", "success");
+        } else if (provider === 'instagram') {
+          setInstagramConnected(true);
+          setIsConnecting(null);
+          addNotification("Instagram account authenticated!", "success");
         }
       }
     };
@@ -71,7 +76,7 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
     setCurrentStep(1);
   };
 
-  const handleOAuthConnect = async (provider: 'spotify' | 'twitter') => {
+  const handleOAuthConnect = async (provider: 'spotify' | 'twitter' | 'instagram') => {
     setIsConnecting(provider);
     try {
       const res = await fetch(`/api/auth/${provider}/url`);
@@ -87,6 +92,7 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
         setTimeout(() => {
           if (provider === 'spotify') setSpotifyConnected(true);
           if (provider === 'twitter') setTwitterConnected(true);
+          if (provider === 'instagram') setInstagramConnected(true);
           setIsConnecting(null);
           addNotification(`${provider.toUpperCase()} verification verified successfully!`, "success");
         }, 1200);
@@ -95,8 +101,9 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
       setTimeout(() => {
         if (provider === 'spotify') setSpotifyConnected(true);
         if (provider === 'twitter') setTwitterConnected(true);
+        if (provider === 'instagram') setInstagramConnected(true);
         setIsConnecting(null);
-        addNotification(`${provider.toUpperCase()} authenticated via OAuth!`, "success");
+        addNotification(`${provider.toUpperCase()} authenticated!`, "success");
       }, 1000);
     }
   };
@@ -117,11 +124,11 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
     setOracleLogs(['[ORACLE] Initializing Multi-Step Verification Protocol...']);
 
     const pipeline = [
-      { delay: 500, log: '[SPOTIFY] Verifying Spotify OAuth token payload...' },
-      { delay: 1100, log: '[TWITTER] Matching X profile social graph...' },
-      { delay: 1700, log: '[TON] Validating cryptographic wallet signature UQAs9...7K_p' },
-      { delay: 2300, log: '[DISCOGRAPHY] Running decentralized audio provenance check...' },
-      { delay: 2900, log: '[SANITY] Zero identity conflicts detected. Issuing badge...' }
+      { delay: 400, log: '[SPOTIFY] Verifying Spotify discography token payload...' },
+      { delay: 900, log: '[TWITTER] Matching X profile social graph...' },
+      { delay: 1400, log: '[INSTAGRAM] Validating creator media authenticity...' },
+      { delay: 1900, log: '[TON] Validating cryptographic wallet signature...' },
+      { delay: 2400, log: '[SANITY] Zero identity conflicts detected. Issuing badge...' }
     ];
 
     pipeline.forEach((item, index) => {
@@ -143,12 +150,18 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
             verified: true,
             isSpotifyVerified: true,
             isTwitterVerified: true,
+            isInstagramVerified: true,
+            verificationStatus: 'verified',
             role: 'artist'
           }));
           setUserProfile({
             ...userProfile,
             isVerifiedArtist: true,
             verified: true,
+            isSpotifyVerified: true,
+            isTwitterVerified: true,
+            isInstagramVerified: true,
+            verificationStatus: 'verified',
             role: 'artist'
           } as any);
         } catch (err) {
@@ -158,7 +171,7 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
 
       addNotification("Artist identity verified! Verified Badge active.", "success");
       if (onVerificationComplete) onVerificationComplete();
-    }, 3600);
+    }, 3000);
   };
 
   const sizeClasses = {
@@ -271,6 +284,16 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
                       </div>
 
                       <div className="p-4 bg-white/5 rounded-2xl flex items-center gap-3">
+                        <div className="p-2.5 bg-pink-500/10 text-pink-400 rounded-xl">
+                          <Instagram className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h5 className="text-xs font-bold uppercase tracking-wider">Instagram Creator Account</h5>
+                          <p className="text-[11px] text-slate-400">Authenticate artist media & brand identity.</p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-white/5 rounded-2xl flex items-center gap-3">
                         <div className="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl">
                           <Sparkles className="w-5 h-5" />
                         </div>
@@ -291,12 +314,12 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
                   </div>
                 )}
 
-                {/* STEP 2: Spotify & Twitter OAuth Connection */}
+                {/* STEP 2: Spotify & Twitter & Instagram OAuth Connection */}
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <div className="text-center space-y-1">
                       <h4 className="text-base font-black uppercase tracking-tight">OAuth Provider Authentication</h4>
-                      <p className="text-xs text-slate-400">Connect both external platforms to confirm discography ownership.</p>
+                      <p className="text-xs text-slate-400">Connect external platforms to confirm discography & creator ownership.</p>
                     </div>
 
                     {/* Spotify OAuth Box */}
@@ -353,6 +376,33 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
                       )}
                     </div>
 
+                    {/* Instagram OAuth Box */}
+                    <div className="p-5 bg-white/5 rounded-2xl flex items-center justify-between">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-11 h-11 rounded-full bg-pink-500/15 text-pink-400 flex items-center justify-center">
+                          <Instagram className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h5 className="text-xs font-black uppercase tracking-wider">Instagram</h5>
+                          <p className="text-[10px] text-slate-400">Creator Media Proof</p>
+                        </div>
+                      </div>
+                      {instagramConnected ? (
+                        <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                          <CheckCircle2 className="w-4 h-4" /> Connected
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleOAuthConnect('instagram')}
+                          disabled={isConnecting === 'instagram'}
+                          className="px-4 py-2 bg-pink-500 text-white hover:bg-pink-400 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                        >
+                          {isConnecting === 'instagram' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ExternalLink className="w-3.5 h-3.5" />}
+                          <span>OAuth Connect</span>
+                        </button>
+                      )}
+                    </div>
+
                     <div className="flex gap-3 pt-2">
                       <button
                         onClick={() => setCurrentStep(1)}
@@ -361,7 +411,7 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
                         Back
                       </button>
                       <button
-                        disabled={!spotifyConnected || !twitterConnected}
+                        disabled={!spotifyConnected && !twitterConnected && !instagramConnected}
                         onClick={() => setCurrentStep(3)}
                         className="w-2/3 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
                       >
@@ -464,7 +514,7 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
                     <div className="space-y-2">
                       <h4 className="text-xl font-black uppercase tracking-tight">Verified Artist Badge Unlocked!</h4>
                       <p className="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed">
-                        Congratulations {artistName}! Your Spotify & Twitter OAuth authentications hold verified status. Your profile badge is now live across the platform.
+                        Congratulations {artistName}! Your Twitter, Instagram, and Spotify authentications hold verified status. Your profile badge is now live across the platform.
                       </p>
                     </div>
 

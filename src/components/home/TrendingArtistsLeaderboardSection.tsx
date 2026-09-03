@@ -81,12 +81,12 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
         </div>
         
         {/* Metric Toggle Buttons */}
-        <div className="flex bg-zinc-900/60 p-1 rounded-xl w-full">
+        <div className="flex bg-white/[0.04] p-1 rounded-xl w-full">
           <button
             onClick={() => setTrendingMetric('sales')}
             className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-black rounded-lg transition-all cursor-pointer border-none outline-none ${
               trendingMetric === 'sales'
-                ? "bg-primary text-black shadow-md"
+                ? "bg-primary text-black"
                 : "text-zinc-400 hover:text-white bg-transparent"
             }`}
           >
@@ -96,7 +96,7 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
             onClick={() => setTrendingMetric('growth')}
             className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-black rounded-lg transition-all cursor-pointer border-none outline-none ${
               trendingMetric === 'growth'
-                ? "bg-primary text-black shadow-md"
+                ? "bg-primary text-black"
                 : "text-zinc-400 hover:text-white bg-transparent"
             }`}
           >
@@ -105,7 +105,7 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <AnimatePresence mode="popLayout">
           {rankedTrendingCreators.map((artist, idx) => {
             const rank = idx + 1;
@@ -119,7 +119,7 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
                 onClick={() => navigate(`/artist/${artist.uid}`)}
-                className="group flex items-center justify-between p-3.5 bg-zinc-950 hover:bg-zinc-900 transition-all duration-300 rounded-2xl cursor-pointer"
+                className="group flex items-center justify-between py-2.5 px-2 bg-transparent hover:bg-white/[0.03] transition-all duration-200 rounded-xl cursor-pointer"
               >
                 {/* Left: Rank, Avatar, Name & Handle */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">

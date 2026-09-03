@@ -929,38 +929,41 @@ async function startServer() {
         }
     });
 
-    // Serve static files from public/uploads
+    // Serve static files from public and public/uploads
     app.use('/uploads', express.static(uploadsDir));
+    app.use(express.static(path.join(process.cwd(), 'public'), {
+        setHeaders: (res) => {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+        }
+    }));
 
-    // Explicitly serve and validate tonconnect-manifest.json
+    // Explicitly serve and validate tonconnect-manifest.json dynamically
     app.get('/tonconnect-manifest.json', (req, res) => {
         try {
-            const manifestPath = path.join(process.cwd(), 'public', 'tonconnect-manifest.json');
-            const manifestData = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+            const rawProto = (req.headers['x-forwarded-proto'] as string) || (req.secure ? 'https' : req.protocol) || 'https';
+            const protocol = rawProto.split(',')[0].trim();
+            const host = req.get('host') || 'ais-dev-mfbg5o2augtyymzecgehh7-9697536059.europe-west2.run.app';
+            
+            // TON Connect specification mandates HTTPS dApp URLs unless purely on localhost
+            const isLocal = host.startsWith('localhost') || host.startsWith('127.0.0.1');
+            const scheme = isLocal ? 'http' : 'https';
+            const origin = `${scheme}://${host}`;
 
-            // Validation Mechanism as per Ton Connect Documentation
-            const errors: string[] = [];
-
-            if (!manifestData.url || typeof manifestData.url !== 'string') {
-                errors.push("Missing or invalid 'url'. Must be a string.");
-            }
-            if (!manifestData.name || typeof manifestData.name !== 'string') {
-                errors.push("Missing or invalid 'name'. Must be a string.");
-            }
-            if (!manifestData.iconUrl || typeof manifestData.iconUrl !== 'string') {
-                errors.push("Missing or invalid 'iconUrl'. Must be a string.");
-            }
-
-            if (errors.length > 0) {
-                console.error('Manifest validation errors:', errors);
-                return res.status(400).json({ error: 'App manifest content error', details: errors });
-            }
+            const manifestData = {
+                url: origin,
+                name: "TonJam",
+                iconUrl: `${origin}/tonjam-icon.png`,
+                termsOfUseUrl: origin,
+                privacyPolicyUrl: origin
+            };
 
             res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', '*');
             res.setHeader('Content-Type', 'application/json; charset=utf-8');
             res.json(manifestData);
         } catch (error: any) {
-            console.error('Failed to parse tonconnect-manifest.json:', error);
+            console.error('Failed to generate tonconnect-manifest.json:', error);
             res.status(500).json({ error: 'Internal Server Error' });
         }
     });
@@ -2216,26 +2219,6 @@ async function startServer() {
             console.error('Spotify Liked Songs Proxy Error:', error.response?.data || error.message);
             res.status(500).json({ error: 'Failed to fetch Spotify liked songs' });
         }
-    });
-
-    // TON Connect Manifest Dynamic Route
-    app.get('/tonconnect-manifest.json', (req, res) => {
-        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-        const host = req.get('host');
-        const origin = `${protocol}://${host}`;
-        
-        const manifest = {
-            manifestVersion: 2,
-            url: origin,
-            name: "GramJam",
-            iconUrl: "https://i.postimg.cc/63GsZHzq/TonJam-icon.png",
-            termsOfUseUrl: origin,
-            privacyPolicyUrl: origin
-        };
-        
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.json(manifest);
     });
 
     const isVercel = !!process.env.VERCEL;

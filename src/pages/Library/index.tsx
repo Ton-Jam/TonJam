@@ -20,6 +20,7 @@ import { CardSkeleton, StatsSkeleton, RowSkeleton } from './components/Skeletons
 import { LibraryImporter } from './components/LibraryImporter';
 import { RoyaltiesDashboard } from './components/RoyaltiesDashboard';
 import { ArtistProfile } from '@/components/ArtistProfile';
+import { PageLayout } from '@/components/layout/PageLayout';
 
 import { 
   Sparkles, Heart, Download, Zap, Disc, Clock, Search, List, LayoutGrid, 
@@ -90,9 +91,7 @@ const LibraryPage: React.FC = () => {
   };
 
   return (
-    <div className="page-container w-full min-h-screen bg-[#050A24] text-white pb-32 font-sans">
-      <div className="w-full max-w-7xl mx-auto px-4 py-6 sm:px-6 md:px-8 space-y-8">
-        
+    <PageLayout containerClassName="space-y-8" topSpacing="default">
         {/* 2. QUICK ACTIONS */}
         {!data.isLoading && (
           <QuickActions 
@@ -460,8 +459,7 @@ const LibraryPage: React.FC = () => {
             </AnimatePresence>
           )}
         </div>
-      </div>
-    </div>
+    </PageLayout>
   );
 };
 

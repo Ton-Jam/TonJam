@@ -47,6 +47,7 @@ import { ListenStreakIndicator } from '@/components/profile/ListenStreakIndicato
 import { BadgeSystem } from '@/components/BadgeSystem';
 import { AchievementList } from '@/components/profile/AchievementList';
 import NFTCard from '@/components/NFTCard';
+import { SecureUserNFTDashboard } from '@/components/SecureUserNFTDashboard';
 import PlaylistCard from '@/components/PlaylistCard';
 import ArtistListItem from '@/components/ArtistListItem';
 import SocialFeed from '@/components/SocialFeed';
@@ -377,7 +378,7 @@ export const UserProfile: React.FC = () => {
         {/* Identity & Badges */}
         <div className="space-y-2 max-w-2xl">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase font-sans">
+            <h1 className="page-title">
               {user.name}
             </h1>
             <ArtistVerificationBadge 
@@ -621,7 +622,9 @@ export const UserProfile: React.FC = () => {
               {/* NFTS COLLECTION TAB */}
               {activeTab === 'nfts' && (
                 <div className="space-y-6">
-                  {ownedNfts.length > 0 ? (
+                  {isOwnProfile ? (
+                    <SecureUserNFTDashboard />
+                  ) : ownedNfts.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {ownedNfts.map(nft => (
                         <NFTCard key={nft.id} nft={nft} />

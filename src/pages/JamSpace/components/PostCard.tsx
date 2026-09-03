@@ -350,14 +350,14 @@ export const PostCard: React.FC<PostCardProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className={`jamspace-post-card bg-slate-900 border ${post.isPinned ? 'border-[#0052FF]/30' : 'border-white/[0.03]'} rounded-[10px] p-4 text-white flex flex-col relative transition-opacity duration-300 ${isReported ? 'opacity-70' : 'opacity-100'}`}
+      exit={{ opacity: 0, y: -6 }}
+      className={`jamspace-post-card bg-transparent border-b border-white/[0.04] py-5 px-1 text-white flex flex-col relative transition-opacity duration-300 ${isReported ? 'opacity-70' : 'opacity-100'}`}
     >
       {/* Header with Pinned info */}
       {post.isPinned && (
-        <div className="flex items-center gap-1.5 text-[#0052FF] text-[10px] font-extrabold uppercase tracking-widest mb-3 pb-2 border-b border-white/[0.02]">
+        <div className="flex items-center gap-1.5 text-primary text-[10px] font-extrabold uppercase tracking-widest mb-3 pb-2 border-b border-white/[0.02]">
           <Pin className="w-3.5 h-3.5 fill-current" />
           <span>Pinned Announcement</span>
         </div>

@@ -43,11 +43,11 @@ export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spac
         </div>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-1.5">
         {spaces.map((room) => (
           <div
             key={room.id}
-            className="p-3.5 sm:p-4 rounded-2xl bg-zinc-950 flex items-center justify-between gap-3 border-none hover:bg-zinc-900 transition-colors"
+            className="p-3 sm:p-3.5 rounded-xl bg-transparent hover:bg-white/[0.03] flex items-center justify-between gap-3 border-none transition-colors"
           >
             <div className="space-y-1 text-left min-w-0">
               <div className="flex items-center gap-2">

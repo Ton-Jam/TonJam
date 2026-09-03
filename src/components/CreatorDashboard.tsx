@@ -59,6 +59,7 @@ import { toast } from 'sonner';
 import FanLeaderboardWidget from './FanLeaderboardWidget';
 import MintingStatus from './MintingStatus';
 import LiveTourManager from './LiveTourManager';
+import ArtistVerificationSection from './ArtistVerificationSection';
 
 import { DateRangePicker, DateRangeState } from './DateRangePicker';
 
@@ -524,7 +525,37 @@ export const CreatorDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 1. CORE THREE METRICS CARDS (Total Plays, Royalty Earnings, Recent Trade Volume) */}
+      {/* Creator Navigation Tabs */}
+      <div className="flex items-center gap-2 p-1.5 bg-black/40 rounded-2xl w-fit">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={cn(
+            "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-none outline-none",
+            activeTab === 'overview' 
+              ? "bg-white/10 text-white shadow-lg" 
+              : "text-zinc-400 hover:text-white hover:bg-white/5"
+          )}
+        >
+          <BarChart3 className="w-3.5 h-3.5" /> Analytics & Intelligence
+        </button>
+        <button
+          onClick={() => setActiveTab('nfts')}
+          className={cn(
+            "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border-none outline-none",
+            activeTab === 'nfts' 
+              ? "bg-cyan-500/20 text-cyan-400 shadow-lg" 
+              : "text-zinc-400 hover:text-white hover:bg-white/5"
+          )}
+        >
+          <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" /> Artist Verification
+        </button>
+      </div>
+
+      {activeTab === 'nfts' ? (
+        <ArtistVerificationSection />
+      ) : (
+        <>
+          {/* 1. CORE THREE METRICS CARDS (Total Plays, Royalty Earnings, Recent Trade Volume) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1: Total Music NFT Plays */}
         <div className="bg-[#0A113A]/60 backdrop-blur-md p-5 rounded-3xl space-y-3 relative overflow-hidden group hover:bg-[#121B4C]/80 transition-all">
@@ -929,6 +960,8 @@ export const CreatorDashboard: React.FC = () => {
       <MintingStatus />
       <LiveTourManager />
       <FanLeaderboardWidget />
+        </>
+      )}
     </motion.div>
   );
 };

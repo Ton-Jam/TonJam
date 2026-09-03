@@ -390,109 +390,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       }}
       id="tonjam-mini-player"
     >
-      {/* Streaming Health Indicator */}
-      <div 
-        className="absolute top-1.5 right-2 z-30 flex items-center justify-center p-0.5 pointer-events-auto" 
-        id="mini-streaming-health-indicator"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <span 
-          className={`w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-300 cursor-pointer ${
-            audioConnectionState === 'connected' ? 'bg-emerald-400 shadow-[0_0_5px_#34d399]' :
-            audioConnectionState === 'connecting' ? 'bg-amber-400 animate-pulse' :
-            audioConnectionState === 'error' ? 'bg-rose-500 animate-bounce shadow-[0_0_5px_#f43f5e]' :
-            'bg-slate-500'
-          }`}
-          title={
-            audioConnectionState === 'connected' ? 'Streaming Health: Optimal (Connected)' :
-            audioConnectionState === 'connecting' ? 'Streaming Health: Connecting...' :
-            audioConnectionState === 'error' ? 'Streaming Health: Error / Stream Blocked' :
-            'Streaming Health: Idle'
-          }
-        />
-      </div>
-
-      <div className="flex items-center justify-between px-3 py-1.5">
-        {/* Artwork + Title + Artist */}
-        <div className="flex items-center gap-2.5 flex-1 min-w-0" id="mini-metadata-area">
-          <img
-            src={coverUrl}
-            alt={currentTrack.title}
-            className="w-9 h-9 object-cover rounded-lg flex-shrink-0 shadow-sm"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
-            }}
-            id="mini-artwork"
-          />
-          <div className="flex flex-col min-w-0 leading-tight flex-1 mr-2">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <ScrollingText
-                text={currentTrack.title}
-                className="text-xs font-bold text-[#F2F4F8]"
-                containerClassName="min-w-0 flex-1"
-                id="mini-track-title"
-              />
-              {currentTrack.isHighFidelity && (
-                <span className="px-1 py-0.2 bg-[#0098EA]/20 text-[#0098EA] text-[8px] font-black rounded-xs uppercase shrink-0">
-                  Hi-Fi
-                </span>
-              )}
-            </div>
-            <ScrollingText
-              text={currentTrack.artist}
-              className="text-[11px] font-medium text-zinc-400"
-              containerClassName="min-w-0 flex-1"
-              id="mini-track-artist"
-            />
-          </div>
-        </div>
-
-        {/* Action Controls */}
-        <div className="flex items-center gap-1 sm:gap-1.5 pr-0.5">
-          {/* Play/Pause Button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              togglePlay();
-            }}
-            aria-label={isPlaying ? "Pause track" : "Play track"}
-            className="w-8 h-8 rounded-full bg-[#0179f4] text-white flex items-center justify-center hover:bg-[#0179f4]/90 transition-transform active:scale-90 shadow-md shadow-[#0179f4]/35 cursor-pointer border-none"
-            title={isPlaying ? "Pause" : "Play"}
-          >
-            {isPlaying ? (
-              <Pause className="w-3.5 h-3.5 fill-current" />
-            ) : (
-              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-            )}
-          </button>
-
-          {/* Queue Button */}
-          {onQueueClick && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onQueueClick();
-              }}
-              className="p-1.5 text-zinc-400 hover:text-white transition-colors hidden sm:block cursor-pointer border-none bg-transparent"
-              title="Queue"
-            >
-              <ListMusic className="w-4 h-4" />
-            </button>
-          )}
-
-          {/* More options */}
-          <button
-            onClick={handleOptionsClick}
-            aria-label="Track options"
-            className="p-1.5 text-zinc-400 hover:text-white transition-colors cursor-pointer border-none bg-transparent"
-            title="Options"
-          >
-            <MoreVertical className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Interactive scrubbing progress bar sitting directly at bottom edge */}
+      {/* Interactive Flush Top Seek Bar (Perfect 1px top alignment) */}
       <div 
         ref={progressBarRef}
         onPointerDown={handlePointerDown}
@@ -522,35 +420,134 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             if (typeof seek === 'function') seek(next);
           }
         }}
-        className="relative w-full h-3.5 -mt-1 flex items-end cursor-pointer group/seek select-none z-30 touch-none outline-none" 
+        className="relative w-full h-[1px] group/seek cursor-pointer select-none z-30 touch-none outline-none bg-white/10" 
         id="mini-progress-track"
         title="Click or drag to scrub playback position"
       >
+        {/* Expanded touch/click target area */}
+        <div className="absolute -top-1.5 -bottom-1.5 left-0 right-0 z-10" />
+
         {/* Hover/Scrub Time Tooltip */}
         {(isScrubbing || hoverPos !== null) && duration > 0 && (
           <div 
-            className="absolute -top-7 -translate-x-1/2 px-1.5 py-0.5 bg-[#050A24]/95 text-white text-[10px] font-mono font-bold rounded shadow-lg pointer-events-none z-40 transition-opacity"
+            className="absolute top-2 -translate-x-1/2 px-1.5 py-0.5 bg-[#050A24]/95 text-white text-[10px] font-mono font-bold rounded shadow-lg pointer-events-none z-40 transition-opacity"
             style={{ left: `${Math.max(5, Math.min(95, isScrubbing ? localProgress : (hoverPos ?? localProgress)))}%` }}
           >
             {formatTime(((isScrubbing ? localProgress : (hoverPos ?? localProgress)) / 100) * duration)}
           </div>
         )}
 
-        {/* Background Track */}
-        <div className="w-full h-[2px] group-hover/seek:h-[4px] group-active/seek:h-[4px] bg-[#050A24] transition-all relative overflow-visible">
-          {/* Progress Fill */}
-          <div
-            className="h-full bg-gradient-to-r from-blue-600 via-[#0098EA] to-cyan-400 relative transition-[height] shadow-[0_0_10px_rgba(0,152,234,0.8)]"
-            style={{ width: `${localProgress}%` }}
-            id="mini-progress-indicator"
-          >
-            {/* Glowing Seek Knob / Thumb (shown on hover and active scrub) */}
-            <div 
-              className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-3 h-3 bg-white rounded-full shadow-[0_0_10px_rgba(0,152,234,1)] transition-transform duration-100 ${
-                isScrubbing ? 'scale-100' : 'scale-0 group-hover/seek:scale-100'
-              }`} 
+        {/* Progress Fill */}
+        <div
+          className="h-full bg-gradient-to-r from-blue-600 via-[#0098EA] to-cyan-400 relative transition-all shadow-[0_0_4px_rgba(0,152,234,0.5)]"
+          style={{ width: `${localProgress}%` }}
+          id="mini-progress-indicator"
+        >
+          {/* Glowing Seek Knob / Thumb (shown on hover and active scrub) */}
+          <div 
+            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_6px_rgba(0,152,234,1)] transition-transform duration-100 ${
+              isScrubbing ? 'scale-100' : 'scale-0 group-hover/seek:scale-100'
+            }`} 
+          />
+        </div>
+      </div>
+
+      {/* Main Content Row: Artwork, Metadata, Controls */}
+      <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 gap-3">
+        {/* Artwork + Title + Artist */}
+        <div className="flex items-center gap-2.5 flex-1 min-w-0" id="mini-metadata-area">
+          <div className="relative shrink-0">
+            <img
+              src={coverUrl}
+              alt={currentTrack.title}
+              className="w-10 h-10 object-cover rounded-md shrink-0 shadow-sm"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
+              }}
+              id="mini-artwork"
+            />
+            {/* Streaming Health Indicator badge on artwork corner */}
+            <span 
+              className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-black shrink-0 transition-all duration-300 ${
+                audioConnectionState === 'connected' ? 'bg-emerald-400 shadow-[0_0_4px_#34d399]' :
+                audioConnectionState === 'connecting' ? 'bg-amber-400 animate-pulse' :
+                audioConnectionState === 'error' ? 'bg-rose-500 animate-bounce' :
+                'bg-slate-500'
+              }`}
+              title={
+                audioConnectionState === 'connected' ? 'Streaming: Connected' :
+                audioConnectionState === 'connecting' ? 'Streaming: Connecting...' :
+                audioConnectionState === 'error' ? 'Streaming: Blocked / Error' :
+                'Streaming: Idle'
+              }
             />
           </div>
+
+          <div className="flex flex-col min-w-0 justify-center leading-tight flex-1">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <ScrollingText
+                text={currentTrack.title}
+                className="text-xs sm:text-sm font-bold text-[#F2F4F8]"
+                containerClassName="min-w-0 flex-1"
+                id="mini-track-title"
+              />
+              {currentTrack.isHighFidelity && (
+                <span className="px-1 py-0.2 bg-[#0098EA]/20 text-[#0098EA] text-[8px] font-black rounded-xs uppercase shrink-0">
+                  Hi-Fi
+                </span>
+              )}
+            </div>
+            <ScrollingText
+              text={currentTrack.artist}
+              className="text-[11px] sm:text-xs font-medium text-zinc-400 mt-0.5"
+              containerClassName="min-w-0 flex-1"
+              id="mini-track-artist"
+            />
+          </div>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Play/Pause Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlay();
+            }}
+            aria-label={isPlaying ? "Pause track" : "Play track"}
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0098EA] text-white flex items-center justify-center hover:bg-[#0098EA]/90 transition-transform active:scale-90 shadow-md shadow-[#0098EA]/30 cursor-pointer border-none shrink-0"
+            title={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? (
+              <Pause className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
+            ) : (
+              <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current ml-0.5" />
+            )}
+          </button>
+
+          {/* Queue Button */}
+          {onQueueClick && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onQueueClick();
+              }}
+              className="p-1.5 text-zinc-400 hover:text-white transition-colors hidden sm:flex items-center justify-center cursor-pointer border-none bg-transparent"
+              title="Queue"
+            >
+              <ListMusic className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* More options */}
+          <button
+            onClick={handleOptionsClick}
+            aria-label="Track options"
+            className="p-1.5 text-zinc-400 hover:text-white transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent"
+            title="Options"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </motion.div>

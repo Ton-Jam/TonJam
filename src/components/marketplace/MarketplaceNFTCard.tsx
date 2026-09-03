@@ -34,6 +34,7 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
   className,
 }) => {
   const navigate = useNavigate();
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [is3DModalOpen, setIs3DModalOpen] = useState(false);
   const { playTrack, currentTrack, isPlaying, togglePlay, addNotification } = useAudio();
   const { convertPrice } = useGramPrice();
@@ -189,11 +190,25 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
       >
       {/* Artwork Image */}
       <div className="relative aspect-square w-full overflow-hidden bg-black/40">
+        {!isImageLoaded && (
+          <div className="absolute inset-0 bg-neutral-900/90 overflow-hidden flex flex-col items-center justify-center z-0 select-none">
+            <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+            <div className="flex flex-col items-center gap-1 opacity-25 animate-blockchain-glow">
+              <img src="/ton-logo.svg" onError={(e) => { e.currentTarget.style.display = 'none'; }} alt="TON" className="w-6 h-6 drop-shadow-sm" />
+              <span className="text-[8px] font-mono font-bold tracking-widest text-cyan-400 uppercase">SYNCING</span>
+            </div>
+          </div>
+        )}
         <img
           src={nft.imageUrl}
           alt={nft.title}
           referrerPolicy="no-referrer"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          onLoad={() => setIsImageLoaded(true)}
+          onError={() => setIsImageLoaded(true)}
+          className={cn(
+            "w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
+            isImageLoaded ? "opacity-100" : "opacity-0"
+          )}
         />
 
         {/* Hover overlay with detail look trigger */}

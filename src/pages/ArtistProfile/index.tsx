@@ -20,6 +20,7 @@ import { TipArtistModal } from "@/components/TipArtistModal";
 import ArtistOptionsModal from "@/components/ArtistOptionsModal";
 import { CollabRequestModal } from "./components/CollabRequestModal";
 import { ArtistWalletQRModal } from "@/components/ArtistWalletQRModal";
+import { AutomatedArtistVerification } from "@/components/AutomatedArtistVerification";
 
 // Hook & Subsections
 import { useArtistProfile } from "./hooks/useArtistProfile";
@@ -271,12 +272,10 @@ const ArtistProfile: React.FC = () => {
         <div className="relative z-20 px-6 sm:px-10 md:px-12 pb-6 flex flex-col justify-end space-y-2">
           
           <div className="flex items-center gap-3 flex-wrap">
-            {artist.verified !== false && (
-              <div className="flex items-center gap-1.5 bg-[#0052FF]/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold shadow-md">
-                <BadgeCheck className="w-4 h-4 text-[#0098EA] fill-[#0098EA]" />
-                <span>Verified Creator</span>
-              </div>
-            )}
+            <AutomatedArtistVerification 
+              artist={artist} 
+              size="md"
+            />
 
             {artist.walletAddress && (
               <div 

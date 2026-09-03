@@ -1042,22 +1042,28 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [transactions]);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const user = auth.currentUser;
-      if (isPlaying && currentTrack && user) {
-        const streamPaymentTimeout = setTimeout(async () => {
-          // Process real royalty distribution
-          try {
-            await royaltyService.processStreamRoyalty(currentTrack);
-          } catch (error) {
-            console.error("Failed to process stream royalty:", error);
-          }
-        }, 10000); // Trigger after 10 seconds of playback
+    let streamPaymentTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isCancelled = false;
 
-        return () => clearTimeout(streamPaymentTimeout);
+    const user = auth.currentUser;
+    if (isPlaying && currentTrack && user) {
+      streamPaymentTimeout = setTimeout(async () => {
+        if (isCancelled) return;
+        // Process real royalty distribution
+        try {
+          await royaltyService.processStreamRoyalty(currentTrack);
+        } catch (error) {
+          console.error("Failed to process stream royalty:", error);
+        }
+      }, 10000); // Trigger after 10 seconds of playback
+    }
+
+    return () => {
+      isCancelled = true;
+      if (streamPaymentTimeout) {
+        clearTimeout(streamPaymentTimeout);
       }
     };
-    checkAuth();
   }, [isPlaying, currentTrack?.id]);
 
   useEffect(() => {
@@ -1408,6 +1414,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       if (transactionsUnsubscribe) transactionsUnsubscribe();
       if (playlistsUnsubscribe) playlistsUnsubscribe();
       if (userDocUnsubscribe) userDocUnsubscribe();
+      if (playlistFoldersUnsubscribe) playlistFoldersUnsubscribe();
     };
   }, []);
 
@@ -2256,8 +2263,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const handleTimeUpdate = () => {
       if (isSeeking) return;
-      if (audio.duration)
+      if (audio.duration && isFinite(audio.duration) && audio.duration > 0) {
         setProgress((audio.currentTime / audio.duration) * 100);
+      }
     };
 
     const handleEnded = () => {
@@ -2283,6 +2291,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const handlePlaying = () => {
       setAudioConnectionState("connected");
+      setIsLoading(false);
     };
 
     const handleWaiting = () => {
@@ -2291,6 +2300,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const handleCanPlay = () => {
       setAudioConnectionState("connected");
+      setIsLoading(false);
     };
 
     const handlePause = () => {
@@ -2302,6 +2312,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     const handleStreamError = (e: any) => {
       console.warn("Audio connection blocked or failed:", e);
       setAudioConnectionState("error");
+      setIsLoading(false);
     };
 
     audio.addEventListener("timeupdate", handleTimeUpdate);
@@ -2325,6 +2336,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       audio.removeEventListener("error", handleStreamError);
     };
   }, [queue, currentTrack, repeatMode, isShuffle, isSeeking]);
+
+  // Clean up global audio resources on provider unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+      if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+        audioContextRef.current.close().catch(() => {});
+      }
+    };
+  }, []);
 
   const addNotification = (
     message: string,
@@ -3163,6 +3187,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
+    // Stop any active card previews globally before starting full track
+    if ((window as any)._activePreviewStop) {
+      try {
+        (window as any)._activePreviewStop();
+      } catch (err) {
+        console.warn("Error stopping active preview:", err);
+      }
+    }
+
     setRecentlyPlayed((prev) => {
       const filtered = prev.filter((t) => t.id !== track.id);
       return [track, ...filtered].slice(0, 10);
@@ -3609,6 +3642,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (repeatMode === "all" && queue.length > 0) {
         playTrack(queue[0]);
+      } else {
+        setIsPlaying(false);
+        setProgress(0);
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
       }
     }
   };
@@ -3625,9 +3664,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const seek = (value: number) => {
-    if (audioRef.current && audioRef.current.duration) {
-      audioRef.current.currentTime = (value / 100) * audioRef.current.duration;
-      setProgress(value);
+    if (audioRef.current && isFinite(audioRef.current.duration) && audioRef.current.duration > 0) {
+      const safeVal = Math.max(0, Math.min(100, isNaN(value) ? 0 : value));
+      audioRef.current.currentTime = (safeVal / 100) * audioRef.current.duration;
+      setProgress(safeVal);
     }
   };
 

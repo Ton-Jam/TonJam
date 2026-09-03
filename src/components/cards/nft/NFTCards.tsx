@@ -7,6 +7,7 @@ import {
 import { NFTPlaceholder } from '../../placeholders/NFTPlaceholder';
 import { CollectionPlaceholder } from '../../placeholders/CollectionPlaceholder';
 import { cardTokens } from '@/design';
+import SkeletonCard from '@/components/SkeletonCard';
 
 // --- TS INTERFACES ---
 
@@ -60,18 +61,7 @@ export const NFTCard: React.FC<{
   const [bookmarked, setBookmarked] = useState(nft?.isBookmarked || false);
 
   if (isLoading || !nft) {
-    return (
-      <div 
-        style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, padding: cardTokens.nftTrack.padding, borderRadius: cardTokens.global.borderRadius }}
-        className={`flex flex-col bg-[#0A113A]/60 animate-pulse shrink-0 ${className}`}
-      >
-        <div className="w-full aspect-square bg-white/10 rounded-lg mb-3" />
-        <div className="space-y-2">
-          <div className="h-4 bg-white/10 rounded w-2/3" />
-          <div className="h-3 bg-white/10 rounded w-1/2" />
-        </div>
-      </div>
-    );
+    return <SkeletonCard className={className} />;
   }
 
   return (

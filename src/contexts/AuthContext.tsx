@@ -19,6 +19,11 @@ import { auth, db, googleProvider, twitterProvider, handleFirestoreError, Operat
 import { UserProfile } from '@/types';
 import { clearDriveToken } from '@/services/googleDriveService';
 import { syncBookmarksFromFirestore } from '@/services/bookmarkService';
+import { 
+  verifyUserProfileIntegrity, 
+  logProfileIntegrityReport, 
+  ProfileIntegrityReport 
+} from '@/lib/profileIntegrityDiagnostics';
 
 interface AuthContextType {
   user: User | null;
@@ -35,6 +40,7 @@ interface AuthContextType {
   signInWithWallet: (walletAddress: string, walletType: string) => Promise<{ user?: User; error?: any }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  checkProfileIntegrity: (logToConsole?: boolean) => Promise<ProfileIntegrityReport>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -52,6 +58,7 @@ const AuthContext = createContext<AuthContextType>({
   signInWithWallet: async () => ({ error: 'Not implemented' }),
   signOut: async () => {},
   refreshProfile: async () => {},
+  checkProfileIntegrity: async () => ({} as ProfileIntegrityReport),
 });
 
 export const useAuth = () => {
@@ -93,6 +100,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const fetchProfile = async (userId: string) => {
+    const cachedKey = `tonjam_user_profile_${userId}`;
+    let existingCached: UserProfile | null = null;
+    try {
+      const cachedStr = localStorage.getItem(cachedKey);
+      if (cachedStr) {
+        existingCached = JSON.parse(cachedStr);
+        if (existingCached) {
+          setUserProfile(existingCached);
+        }
+      }
+    } catch {
+      // Ignore cache parse errors
+    }
+
     try {
       console.log(`[AuthContext] Fetching user profile for UID: ${userId}`);
       const docRef = doc(db, 'users', userId);
@@ -111,7 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             data.role = 'admin';
             console.log(`[AuthContext] Granted admin role to krusherkrupy@gmail.com`);
           } catch (writeErr) {
-            console.error("[AuthContext] Failed to update admin role for krusherkrupy in Firestore after retries:", writeErr);
+            console.warn("[AuthContext] Failed to update admin role in Firestore:", writeErr);
           }
         }
         
@@ -122,11 +143,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await setDocWithRetry(docRef, { bio: shortBio }, { merge: true });
             data.bio = shortBio;
           } catch (writeErr) {
-            console.error("[AuthContext] Failed to automatically update user profile bio in Firestore after retries:", writeErr);
+            console.warn("[AuthContext] Failed to update user profile bio in Firestore:", writeErr);
           }
         }
         
         setUserProfile(data);
+        try {
+          localStorage.setItem(cachedKey, JSON.stringify(data));
+        } catch {}
         console.log(`[AuthContext] Successfully loaded user profile for UID: ${userId}`);
       } else {
         // Create a default profile if it doesn't exist
@@ -145,19 +169,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         try {
           await setDocWithRetry(docRef, defaultProfile);
-          setUserProfile(defaultProfile as UserProfile);
-          console.log(`[AuthContext] Successfully created default user profile in Firestore for UID: ${userId}`);
-        } catch (error) {
-          console.error(`[AuthContext] Failed to create default user profile in Firestore for UID ${userId} after retries:`, error);
-          handleFirestoreError(error, OperationType.WRITE, `users/${userId}`);
-          throw error;
+        } catch (err) {
+          console.warn(`[AuthContext] Set default profile offline fallback for UID ${userId}`);
         }
+        setUserProfile(defaultProfile as UserProfile);
+        try {
+          localStorage.setItem(cachedKey, JSON.stringify(defaultProfile));
+        } catch {}
+        console.log(`[AuthContext] Initialized user profile for UID: ${userId}`);
       }
-    } catch (error) {
-      console.error(`[AuthContext] Error in fetchProfile for UID ${userId}:`, error);
-      if (!(error as any).message?.includes('Firestore Error')) {
-        handleFirestoreError(error, OperationType.GET, `users/${userId}`);
+    } catch (error: any) {
+      console.warn(`[AuthContext] Operating in offline/cached profile mode for UID ${userId}:`, error?.message || error);
+      
+      // If no profile was set yet from cache, provide an active fallback profile so the session is never blocked
+      if (!existingCached) {
+        const fallbackProfile: UserProfile = {
+          uid: userId,
+          name: auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'User',
+          username: `user_${userId.substring(0, 5)}`,
+          avatar: auth.currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+          followers: 0,
+          following: 0,
+          earnings: 0,
+          role: auth.currentUser?.email === 'krusherkrupy@gmail.com' ? 'admin' : 'collector',
+          bio: "Creating the future of sound. Electronic producer and synth enthusiast.",
+          createdAt: new Date().toISOString()
+        } as UserProfile;
+
+        setUserProfile(fallbackProfile);
+        try {
+          localStorage.setItem(cachedKey, JSON.stringify(fallbackProfile));
+        } catch {}
       }
+
+      handleFirestoreError(error, OperationType.GET, `users/${userId}`);
     }
   };
 
@@ -165,6 +210,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       await fetchProfile(user.uid);
     }
+  };
+
+  const checkProfileIntegrity = async (logToConsole = true): Promise<ProfileIntegrityReport> => {
+    const report = await verifyUserProfileIntegrity({
+      userId: user?.uid,
+      currentProfile: userProfile,
+      preferServer: true
+    });
+
+    if (logToConsole) {
+      logProfileIntegrityReport(report);
+    }
+
+    return report;
   };
 
   useEffect(() => {
@@ -221,13 +280,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // 3. Listen for message from callback
         await new Promise<void>((resolve, reject) => {
+          let checkClosed: any = null;
           const handleMessage = async (event: MessageEvent) => {
-            if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+            if (event.data?.type === 'GOOGLE_AUTH_SUCCESS') {
+              if (checkClosed) clearInterval(checkClosed);
+              window.removeEventListener('message', handleMessage);
               try {
                 const { idToken } = event.data;
                 const credential = GoogleAuthProvider.credential(idToken);
                 await signInWithCredential(auth, credential);
-                window.removeEventListener('message', handleMessage);
                 resolve();
               } catch (err) {
                 reject(err);
@@ -237,7 +298,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           window.addEventListener('message', handleMessage);
 
           // Cleanup if popup is closed manually
-          const checkClosed = setInterval(() => {
+          checkClosed = setInterval(() => {
             if (popup.closed) {
               clearInterval(checkClosed);
               window.removeEventListener('message', handleMessage);
@@ -411,7 +472,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       sendPasswordReset,
       signInWithWallet,
       signOut,
-      refreshProfile
+      refreshProfile,
+      checkProfileIntegrity
     }}>
       {children}
     </AuthContext.Provider>

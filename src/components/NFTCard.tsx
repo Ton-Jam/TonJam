@@ -15,6 +15,7 @@ import SendNFTModal from './SendNFTModal';
 import SellNFTModal from './SellNFTModal';
 import SkeletonCard from './SkeletonCard';
 import ConfirmationModal from './ConfirmationModal';
+import NFTPurchaseConfirmationDialog from './NFTPurchaseConfirmationDialog';
 import NFTOptionsModal from './NFTOptionsModal';
 import ManageNFTModal from './ManageNFTModal';
 import BidModal from './BidModal';
@@ -153,8 +154,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     }
   };
 
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [isRowImageLoaded, setIsRowImageLoaded] = useState(false);
+
   if (isLoading) {
-    return <SkeletonCard variant={variant} />;
+    return <SkeletonCard variant={variant} className={className} />;
   }
   const associatedTrack = MOCK_TRACKS.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
@@ -551,11 +555,24 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm"
               onClick={(e) => { e.stopPropagation(); handlePreviewToggle(e); }}
             >
+              {!isRowImageLoaded && (
+                <div className="absolute inset-0 bg-neutral-800/80 overflow-hidden flex items-center justify-center z-0">
+                  <div className="absolute inset-0 animate-shimmer-fast" />
+                  <img src={TON_LOGO} alt="TON" className="w-4 h-4 opacity-20 animate-blockchain-glow" />
+                </div>
+              )}
               <img 
                 src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
                 alt={nft.title} 
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                onError={(e) => { e.currentTarget.src = getPlaceholderImage(`nft-${nft.id}`); }}
+                onLoad={() => setIsRowImageLoaded(true)}
+                className={cn(
+                  "w-full h-full object-cover transition-all duration-300 group-hover:scale-105",
+                  isRowImageLoaded ? "opacity-100" : "opacity-0"
+                )} 
+                onError={(e) => { 
+                  setIsRowImageLoaded(true);
+                  e.currentTarget.src = getPlaceholderImage(`nft-${nft.id}`); 
+                }}
               />
               <div className={`absolute inset-0 flex items-center justify-center bg-black/45 transition-opacity ${isActive || isPlayingPreview ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                 {isPlayingPreview || (isActive && isPlaying) ? (
@@ -636,12 +653,28 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           >
             {/* Artwork - 1:1 Square with Spotify-style Floating Action Button */}
             <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-neutral-900/60 shadow-md">
+              {!isImageLoaded && (
+                <div className="absolute inset-0 bg-neutral-900 overflow-hidden flex flex-col items-center justify-center z-0 select-none">
+                  <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+                  <div className="flex flex-col items-center gap-1 opacity-25 animate-blockchain-glow">
+                    <img src={TON_LOGO} alt="TON" className="w-6 h-6 drop-shadow-sm" />
+                    <span className="text-[8px] font-mono font-bold tracking-widest text-cyan-400 uppercase">SYNCING</span>
+                  </div>
+                </div>
+              )}
               <img
                 src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
                 loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                onLoad={() => setIsImageLoaded(true)}
+                className={cn(
+                  "w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
+                  isImageLoaded ? "opacity-100" : "opacity-0"
+                )}
                 alt={nft.title}
-                onError={(e) => { e.currentTarget.src = getPlaceholderImage(`nft-${nft.id}`); }}
+                onError={(e) => { 
+                  setIsImageLoaded(true);
+                  e.currentTarget.src = getPlaceholderImage(`nft-${nft.id}`); 
+                }}
               />
 
               {/* Floating Play / Preview Action Button */}
@@ -780,21 +813,19 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         />
       )}
 
-      <ConfirmationModal
+      <NFTPurchaseConfirmationDialog
         isOpen={isConfirmPurchaseOpen}
         onClose={() => setIsConfirmPurchaseOpen(false)}
         onConfirm={executeDirectPurchase}
         title="Confirm NFT Purchase"
-        description="Verify transaction parameters before broadcasting payment to the TON blockchain relay."
+        description="Verify transaction parameters and dual currency cost before broadcasting payment to the TON blockchain relay."
         confirmText="Confirm & Purchase"
-        assetName={nft.title}
-        assetImage={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
-        tonAmount={nft.price}
+        nft={nft}
         networkFee="0.05"
-        totalAmount={(parseFloat(nft.price?.replace(' TON', '') || "0") + 0.05).toFixed(2)}
-        fromAddress={userProfile.walletAddress}
-        recipient={nft.owner}
-        transactionType="NFT Acquisition"
+        platformFeePercentage={0}
+        userWalletAddress={userProfile.walletAddress}
+        recipientAddress={nft.owner}
+        isProcessing={isPurchasing}
       />
     </>
   );

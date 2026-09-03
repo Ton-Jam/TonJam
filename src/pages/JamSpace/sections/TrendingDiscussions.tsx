@@ -53,7 +53,7 @@ export const TrendingDiscussions: React.FC = () => {
         {discussions.map((disc, idx) => (
           <motion.div
             key={disc.id}
-            className="bg-slate-900 border border-white/[0.03] rounded-[10px] p-4 flex flex-col justify-between"
+            className="bg-transparent hover:bg-white/[0.02] p-3.5 rounded-xl flex flex-col justify-between border-none transition-colors"
             whileHover={{ y: -2 }}
           >
             <div className="space-y-2">

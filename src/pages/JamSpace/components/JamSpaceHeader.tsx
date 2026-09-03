@@ -98,7 +98,7 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
           <Volume2 className="w-5 h-5 animate-pulse" />
         </div>
         <div>
-          <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">JamSpace Signal Gate</h2>
+          <h2 className="section-title">JamSpace Signal Gate</h2>
           <p className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">Decentralized Stream Selector</p>
         </div>
       </div>

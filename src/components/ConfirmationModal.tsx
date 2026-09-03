@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Timer, AlertTriangle } from "lucide-react";
+import { Timer, AlertTriangle, TrendingUp } from "lucide-react";
+import { useTonPrice } from '@/contexts/TonPriceContext';
+import { useGramPrice } from '@/contexts/GramPriceContext';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -60,6 +62,37 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   walletBalance,
   currencySymbol = "TON",
 }) => {
+  const { price: tonPriceUsd } = useTonPrice();
+  const { fiatCurrency } = useGramPrice();
+
+  const fiatRates: Record<string, { rate: number; symbol: string }> = useMemo(() => ({
+    USD: { rate: 1.0, symbol: '$' },
+    EUR: { rate: 0.92, symbol: '€' },
+    GBP: { rate: 0.78, symbol: '£' },
+    RUB: { rate: 90.0, symbol: '₽' },
+    AED: { rate: 3.67, symbol: 'AED ' },
+    TRY: { rate: 34.0, symbol: '₺' },
+    INR: { rate: 84.0, symbol: '₹' },
+    CNY: { rate: 7.25, symbol: '¥' },
+  }), []);
+
+  const activeFiat = fiatRates[fiatCurrency] || fiatRates.USD;
+  const currentTonRate = tonPriceUsd || 7.50;
+
+  const formatLocalCurrency = (tonStr: string | undefined): string => {
+    if (!tonStr) return '';
+    const clean = tonStr.replace(/,/g, '').replace(/ TON/gi, '').trim();
+    const num = parseFloat(clean);
+    if (isNaN(num)) return '';
+    const usd = num * currentTonRate;
+    const local = usd * activeFiat.rate;
+    const formatted = local.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return fiatCurrency === 'RUB' ? `${formatted} ${activeFiat.symbol}` : `${activeFiat.symbol}${formatted}`;
+  };
+
+  const totalLocalPrice = useMemo(() => {
+    return formatLocalCurrency(totalAmount || tonAmount);
+  }, [totalAmount, tonAmount, currentTonRate, activeFiat, fiatCurrency]);
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-[16px] bg-[#0A0F29]/95 backdrop-blur-2xl p-6 border-none shadow-2xl">
@@ -134,7 +167,12 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                   <span className="text-[11px] font-black uppercase tracking-wider text-white">Estimated Total</span>
                   <div className="text-right">
                     <span className="font-mono text-blue-400 font-black text-lg leading-none">{totalAmount} {currencySymbol}</span>
-                    <p className="text-[8px] font-bold text-blue-400/60 uppercase tracking-widest mr-0.5">Final Confirmation Required</p>
+                    {totalLocalPrice && (
+                      <div className="text-xs font-mono font-bold text-cyan-300 mt-0.5">
+                        ≈ {totalLocalPrice} <span className="text-[9px] uppercase text-cyan-400/70">({fiatCurrency})</span>
+                      </div>
+                    )}
+                    <p className="text-[8px] font-bold text-blue-400/60 uppercase tracking-widest mr-0.5 mt-0.5">Final Confirmation Required</p>
                   </div>
                 </div>
               )}

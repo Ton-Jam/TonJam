@@ -1,20 +1,23 @@
 import React from 'react';
 import { Artist } from '@/types';
-import { ArtistVerificationBadge } from './ArtistVerificationBadge';
+import { AutomatedArtistVerification } from './AutomatedArtistVerification';
 
 interface ArtistVerificationProps {
   artist: Artist;
+  size?: 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
 }
 
-const ArtistVerification: React.FC<ArtistVerificationProps> = ({ artist }) => {
-  const isVerified = Boolean(artist.verificationStatus === 'verified' || artist.verified || artist.isVerifiedArtist);
-
+const ArtistVerification: React.FC<ArtistVerificationProps> = ({ 
+  artist, 
+  size = 'md',
+  showLabel = true 
+}) => {
   return (
-    <ArtistVerificationBadge
-      isVerified={isVerified}
-      artistName={artist.name}
-      artistUid={artist.uid}
-      size="md"
+    <AutomatedArtistVerification
+      artist={artist}
+      size={size}
+      showLabel={showLabel}
     />
   );
 };

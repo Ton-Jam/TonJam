@@ -41,7 +41,8 @@ import {
   Loader2,
   ImageIcon,
   Handshake,
-  Calendar
+  Calendar,
+  ShieldCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { BackButton } from "@/components/BackButton";
@@ -71,6 +72,7 @@ import { StreamingStatsChart } from "@/components/StreamingStatsChart";
 import { NFTChart } from "@/components/NFTChart";
 import { ArtistAnalyticsChart } from "@/components/ArtistAnalyticsChart";
 import CreatorDashboard from "@/components/CreatorDashboard";
+import ArtistVerificationSection from "@/components/ArtistVerificationSection";
 import MintingStatus from "@/components/MintingStatus";
 import LiveTourManager from "@/components/LiveTourManager";
 
@@ -86,7 +88,7 @@ export default function ArtistDashboard() {
   const { user, isArtist, isAdmin, loading } = useAuth();
   
   // Tabs state
-  const [activeTab, setActiveTab] = useState<"overview" | "creator" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty" | "royalties" | "portfolio" | "collabs" | "tours">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "creator" | "verification" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty" | "royalties" | "portfolio" | "collabs" | "tours">("overview");
   const [isRoyaltyModalOpen, setIsRoyaltyModalOpen] = useState(false);
 
   const artistDataForRoyalty = useMemo(() => {
@@ -798,6 +800,16 @@ export default function ArtistDashboard() {
             <Activity className="w-3.5 h-3.5 text-yellow-500" /> Creator Alpha
           </button>
           <button
+            onClick={() => setActiveTab("verification")}
+            className={`flex-1 min-w-[120px] transition-all duration-300 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 ${
+              activeTab === "verification" 
+                ? "bg-white/[0.06] text-white shadow-lg shadow-black/30" 
+                : "text-zinc-500 hover:text-white hover:bg-white/[0.02]"
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" /> Verification
+          </button>
+          <button
             onClick={() => setActiveTab("sonic")}
             className={`flex-1 min-w-[120px] transition-all duration-300 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 ${
               activeTab === "sonic" 
@@ -955,6 +967,11 @@ export default function ArtistDashboard() {
             {/* CREATOR DASHBOARD TAB */}
             {activeTab === "creator" && (
               <CreatorDashboard />
+            )}
+
+            {/* ARTIST VERIFICATION TAB */}
+            {activeTab === "verification" && (
+              <ArtistVerificationSection />
             )}
 
             {/* SONIC TAB */}

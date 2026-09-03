@@ -284,8 +284,12 @@ const Login: React.FC = () => {
     setCustomFilePreview('');
     setOnboardUsername('');
     
-    if (tonAddress) {
-      await tonConnectUI.disconnect();
+    if (tonConnectUI && tonConnectUI.connected && (tonConnectUI.wallet || (tonConnectUI as any).connector?.wallet)) {
+      try {
+        await tonConnectUI.disconnect();
+      } catch (e) {
+        console.warn("Error disconnecting TON wallet:", e);
+      }
     }
     toast.info("Wallet Disconnected");
   };

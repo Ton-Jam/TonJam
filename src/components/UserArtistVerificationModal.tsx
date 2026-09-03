@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, ShieldCheck, Twitter, Music, Wallet, CheckCircle2, Loader2, Globe } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 import { db, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { useEffect } from 'react';
 
 interface UserArtistVerificationModalProps {
@@ -101,16 +101,42 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
   const handleCompleteVerification = async () => {
     setIsVerifying(true);
     try {
-      const userRef = doc(db, 'users', userProfile.uid);
-      await updateDoc(userRef, { 
-        isVerifiedArtist: true,
-        role: 'artist'
-      });
-      setUserProfile({ ...userProfile, isVerifiedArtist: true, role: 'artist' });
-      addNotification("Artist identity verified successfully!", "success");
+      const currentUid = userProfile.uid;
+      const nowIso = new Date().toISOString();
+
+      const socialLinksList = [
+        ...(userProfile.socials?.spotify ? [{ platform: 'spotify', url: userProfile.socials.spotify }] : []),
+        ...(userProfile.socials?.x || userProfile.socials?.twitter ? [{ platform: 'twitter', url: userProfile.socials?.x || userProfile.socials?.twitter }] : []),
+        ...(userProfile.socials?.instagram ? [{ platform: 'instagram', url: userProfile.socials.instagram }] : []),
+        ...(userProfile.walletAddress ? [{ platform: 'wallet', url: userProfile.walletAddress }] : [])
+      ];
+
+      // 1. Create verification request in verificationRequests
+      await addDoc(collection(db, 'verificationRequests'), cleanUpdateData({
+        userId: currentUid,
+        artistName: userProfile.name || userProfile.username || 'Artist',
+        email: userProfile.email || '',
+        bio: userProfile.bio || '',
+        genre: userProfile.genre || 'Electronic',
+        socialLinks: socialLinksList,
+        portfolioUrl: userProfile.socials?.spotify || userProfile.socials?.x || '',
+        status: 'pending',
+        submittedAt: nowIso,
+        createdAt: nowIso,
+        updatedAt: nowIso
+      }));
+
+      // 2. Set user verificationStatus to pending (without self-escalating role or isVerifiedArtist)
+      const userRef = doc(db, 'users', currentUid);
+      await updateDoc(userRef, cleanUpdateData({ 
+        verificationStatus: 'pending'
+      }));
+
+      setUserProfile({ ...userProfile, verificationStatus: 'pending' });
+      addNotification("Artist verification submitted for admin review!", "success");
       onClose();
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${userProfile.uid}`);
+      handleFirestoreError(error, OperationType.CREATE, 'verificationRequests');
     } finally {
       setIsVerifying(false);
     }

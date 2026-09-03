@@ -144,41 +144,103 @@ service cloud.firestore {
     // 👤 USERS
     match /users/{userId} {
       allow read: if true;
-      allow create, update: if isSignedIn();
+      allow create: if isSignedIn() && (isOwner(userId) || isAdmin()) && (
+        isAdmin() || (
+          (!incoming().keys().contains('role') || incoming().role == 'collector') &&
+          (!incoming().keys().contains('isAdmin') || incoming().isAdmin == false) &&
+          (!incoming().keys().contains('isVerified') || incoming().isVerified == false) &&
+          (!incoming().keys().contains('isVerifiedArtist') || incoming().isVerifiedArtist == false) &&
+          (!incoming().keys().contains('verified') || incoming().verified == false) &&
+          (!incoming().keys().contains('verificationStatus') || incoming().verificationStatus == 'unverified' || incoming().verificationStatus == 'pending') &&
+          (!incoming().keys().contains('creatorPerks') || incoming().creatorPerks == null)
+        )
+      );
+      allow update: if isSignedIn() && (isOwner(userId) || isAdmin()) && (
+        isAdmin() || (
+          // Non-admins CANNOT change role, isAdmin, or verified flags
+          !incoming().diff(existing()).affectedKeys().hasAny([
+            'role', 
+            'isAdmin', 
+            'isVerified', 
+            'isVerifiedArtist', 
+            'verified', 
+            'creatorPerks',
+            'approvedAt',
+            'resolvedAt',
+            'reviewerId',
+            'reviewerNotes',
+            'verificationDate'
+          ]) &&
+          // Non-admins can only set verificationStatus to 'pending' or keep existing, NEVER directly to 'verified'
+          (
+            !incoming().diff(existing()).affectedKeys().hasAny(['verificationStatus']) || 
+            incoming().verificationStatus == existing().verificationStatus ||
+            (incoming().verificationStatus == 'pending' && existing().verificationStatus != 'verified')
+          )
+        )
+      );
       allow delete: if isAdmin();
     }
 
     // 🎨 ARTISTS
     match /artists/{artistId} {
       allow read: if true;
-      allow write: if isSignedIn();
+      allow write: if isSignedIn() && (isOwner(artistId) || isAdmin());
     }
 
     // 🎵 TRACKS
     match /tracks/{trackId} {
       allow read: if true;
-      allow create, update: if isSignedIn();
+      allow create: if isSignedIn() && (
+        !incoming().keys().contains('artistId') || 
+        incoming().artistId == request.auth.uid || 
+        isAdmin()
+      );
+      allow update: if isSignedIn() && (
+        isOwner(existing().artistId) || 
+        isAdmin() || 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plays', 'streams', 'likes', 'playCount', 'likeCount'])
+      );
       allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().artistId));
     }
 
     // 🖼 NFTS
     match /nfts/{nftId} {
       allow read: if true;
-      allow create, update: if isSignedIn() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']);
+      allow create: if isSignedIn() && (
+        !incoming().keys().contains('creatorId') || 
+        incoming().creatorId == request.auth.uid || 
+        isAdmin()
+      );
+      allow update: if isSignedIn() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes', 'price']);
       allow delete: if isAdmin();
     }
 
     // 📅 EVENTS
     match /events/{eventId} {
       allow read: if true;
-      allow create, update: if isSignedIn();
+      allow create: if isSignedIn() && (
+        !incoming().keys().contains('artistId') || 
+        incoming().artistId == request.auth.uid || 
+        isAdmin()
+      );
+      allow update: if isSignedIn() && (isOwner(existing().artistId) || isAdmin());
       allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().artistId));
     }
 
     // 🧠 POSTS & INTERACTIONS
     match /posts/{postId} {
       allow read: if true;
-      allow create, update: if isSignedIn();
+      allow create: if isSignedIn() && (
+        !incoming().keys().contains('userId') || 
+        incoming().userId == request.auth.uid || 
+        isAdmin()
+      );
+      allow update: if isSignedIn() && (
+        isOwner(existing().userId) || 
+        isAdmin() || 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'repostsCount', 'commentsCount', 'sharesCount', 'likes', 'reposts'])
+      );
       allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().userId));
 
       match /likes/{likeId} {
@@ -188,13 +250,23 @@ service cloud.firestore {
 
       match /comments/{commentId} {
         allow read: if true;
-        allow create, update, delete: if isSignedIn();
+        allow create: if isSignedIn() && (
+          !incoming().keys().contains('userId') || 
+          incoming().userId == request.auth.uid || 
+          isAdmin()
+        );
+        allow update, delete: if isSignedIn() && (isOwner(existing().userId) || isAdmin());
       }
     }
 
     match /comments/{commentId} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create: if isSignedIn() && (
+        !incoming().keys().contains('userId') || 
+        incoming().userId == request.auth.uid || 
+        isAdmin()
+      );
+      allow update, delete: if isSignedIn() && (isOwner(existing().userId) || isAdmin());
     }
 
     match /follows/{followId} {
@@ -230,9 +302,18 @@ service cloud.firestore {
     }
 
     match /verificationRequests/{requestId} {
-      allow read: if true;
-      allow create, update: if isSignedIn();
-      allow delete: if isAdmin();
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (
+        isAdmin() || (
+          incoming().userId == request.auth.uid &&
+          (!incoming().keys().contains('status') || incoming().status == 'pending') &&
+          !incoming().keys().contains('reviewerNotes') &&
+          !incoming().keys().contains('reviewedBy') &&
+          !incoming().keys().contains('reviewerId') &&
+          !incoming().keys().contains('resolvedAt')
+        )
+      );
+      allow update, delete: if isAdmin();
     }
 
     match /task_completions/{id} {
@@ -247,14 +328,27 @@ service cloud.firestore {
 
       match /votes/{userId} {
         allow read: if true;
-        allow create: if isSignedIn();
+        allow create: if isSignedIn() && (userId == request.auth.uid || isAdmin());
         allow update, delete: if false;
       }
     }
 
     match /playlists/{playlistId} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create: if isSignedIn() && (
+        !incoming().keys().contains('creatorId') || 
+        incoming().creatorId == request.auth.uid || 
+        !incoming().keys().contains('userId') || 
+        incoming().userId == request.auth.uid || 
+        isAdmin()
+      );
+      allow update: if isSignedIn() && (
+        isOwner(existing().creatorId) || 
+        isOwner(existing().userId) || 
+        isAdmin() ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'plays', 'followers', 'tracks'])
+      );
+      allow delete: if isAdmin() || (isSignedIn() && (isOwner(existing().creatorId) || isOwner(existing().userId)));
     }
 
     match /playlistFolders/{folderId} {
@@ -272,7 +366,11 @@ service cloud.firestore {
     // 💸 TRANSACTIONS
     match /transactions/{txId} {
       allow read: if true;
-      allow create: if isSignedIn();
+      allow create: if isSignedIn() && (
+        !incoming().keys().contains('userId') || 
+        incoming().userId == request.auth.uid || 
+        isAdmin()
+      );
       allow update, delete: if false;
     }
 
@@ -288,8 +386,12 @@ service cloud.firestore {
     
     match /jamRooms/{roomId}/messages/{messageId} {
       allow read: if true;
-      allow create: if isSignedIn();
-      allow delete: if isAdmin();
+      allow create: if isSignedIn() && (
+        !incoming().keys().contains('senderId') || 
+        incoming().senderId == request.auth.uid || 
+        isAdmin()
+      );
+      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().senderId));
     }
     
     match /subscriptions/{id} {
@@ -298,28 +400,29 @@ service cloud.firestore {
     }
     
     match /users/{userId}/tasks/{taskId} {
-      allow read: if true;
-      allow write: if isSignedIn();
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
     match /users/{userId}/eqPresets/{presetId} {
-      allow read: if true;
-      allow write: if isSignedIn();
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
     match /users/{userId}/bookmarks/{bookmarkId} {
-      allow read: if true;
-      allow write: if isSignedIn();
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
     match /users/{userId}/notifications/{notificationId} {
-      allow read: if true;
-      allow write: if isSignedIn();
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isOwner(userId) || isAdmin();
     }
 
     match /users/{userId}/priceAlerts/{alertId} {
-      allow read: if true;
-      allow write: if isSignedIn();
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
     // 🚀 SPONSORED CONTENT & TASKS

@@ -462,11 +462,15 @@ export interface UserProfile {
   };
   socials?: {
     x?: string;
+    twitter?: string;
     spotify?: string;
     instagram?: string;
     website?: string;
     telegram?: string;
+    soundcloud?: string;
   };
+  email?: string;
+  genre?: string;
   location?: string;
   website?: string;
   isPremium?: boolean;
@@ -498,7 +502,7 @@ export interface UserProfile {
   badges?: string[];
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   isVerified?: boolean;
-  verificationStatus?: 'unverified' | 'pending' | 'verified' | 'rejected';
+  verificationStatus?: 'unverified' | 'pending' | 'needs_revision' | 'verified' | 'rejected';
   royaltyConfig?: {
     streamingSplits: RoyaltySplit[];
     nftSaleSplits: RoyaltySplit[];
@@ -514,16 +518,22 @@ export interface ArtistVerificationRequest {
   bio: string;
   statement?: string; // New field
   genre: string;
-  socialLinks: {
+  socialLinks?: {
     x?: string;
+    twitter?: string;
     spotify?: string;
     instagram?: string;
     website?: string;
     soundcloud?: string;
-  };
-  portfolioUrls: string[];
-  status: 'pending' | 'approved' | 'rejected';
+  } | Array<{ platform: string; url: string; }>;
+  portfolioUrls?: string[];
+  portfolioUrl?: string;
+  status: 'pending' | 'needs_revision' | 'approved' | 'rejected';
   reviewerNotes?: string;
+  reviewerId?: string;
+  reviewedBy?: string;
+  resolvedAt?: string;
+  submittedAt?: string;
   createdAt: string;
   updatedAt?: string;
 }

@@ -4,22 +4,30 @@ import { TonJamCollection, storeStateInit as storeCollectionInit } from '../cont
 import { TonJamMarketplace, storeStateInit as storeMarketplaceInit } from '../contracts/marketplace/TonJamMarketplace_TonJamMarketplace';
 
 export const sendTransactionSafe = async (tonConnectUI: TonConnectUI, transaction: any) => {
-  if (!tonConnectUI || !tonConnectUI.connected || !tonConnectUI.wallet) {
+  const isConnected = Boolean(
+    tonConnectUI &&
+    tonConnectUI.connected &&
+    (tonConnectUI.wallet || (tonConnectUI as any).connector?.wallet)
+  );
+
+  if (!isConnected) {
     try {
       tonConnectUI?.openModal?.();
     } catch (e) {
-      console.error("Failed to open TON Connect modal:", e);
+      console.warn("Failed to open TON Connect modal:", e);
     }
     throw new Error("Wallet is not connected. Please connect your TON wallet to send transactions.");
   }
+
   try {
     return await tonConnectUI.sendTransaction(transaction);
   } catch (error: any) {
+    const errorStr = (error?.message || error?.name || String(error) || "").toLowerCase();
     if (
-      error?.message?.includes("WalletNotConnected") ||
-      error?.name?.includes("WalletNotConnected") ||
-      error?.message?.includes("_WalletNotConnectedError") ||
-      error?.name === "_WalletNotConnectedError" ||
+      errorStr.includes("walletnotconnected") ||
+      errorStr.includes("_walletnotconnectederror") ||
+      errorStr.includes("wallet is not connected") ||
+      errorStr.includes("not connected") ||
       !tonConnectUI.connected
     ) {
       try {

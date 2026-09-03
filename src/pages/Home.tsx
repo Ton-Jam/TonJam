@@ -1,10 +1,10 @@
 import React, { Suspense, lazy } from "react";
-import { motion } from "motion/react";
-import { fadeIn } from "@/motion";
 import { HomeSectionSkeleton } from "@/components/home/HomeSkeleton";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 // Core immediate components
 import { HomeHero } from "@/components/home/HomeHero";
+import { HomeGenreFilterBar } from "@/components/home/HomeGenreFilterBar";
 import { SponsoredPromoCarousel } from "@/components/home/SponsoredPromoCarousel";
 import { ContinueListeningSection } from "@/components/home/ContinueListeningSection";
 import { TrendingFeedSection } from "@/components/home/TrendingFeedSection";
@@ -31,11 +31,11 @@ const HomeFooter = lazy(() => import("@/components/home/HomeFooter"));
 
 const Home: React.FC = () => {
   return (
-    <motion.div 
-      initial="initial"
-      animate="animate"
-      variants={fadeIn}
-      className="min-h-screen bg-black text-white pb-32 overflow-x-hidden selection:bg-primary/30 select-none"
+    <PageLayout 
+      animate={true} 
+      className="bg-black relative selection:bg-primary/30 select-none"
+      containerClassName="space-y-6 sm:space-y-8"
+      topSpacing="default"
     >
       {/* Subtle ambient lighting glows */}
       <div 
@@ -47,11 +47,11 @@ const Home: React.FC = () => {
         style={{ filter: 'blur(100px)', transform: 'translateZ(0)' }} 
       />
 
-      {/* Main Container */}
-      <div className="w-full max-w-full px-3.5 sm:px-6 md:px-8 pt-3 sm:pt-5 space-y-6 sm:space-y-8 pb-12">
-        
-        {/* 1. Welcome Hero with greeting and Ton price chart */}
-        <HomeHero />
+      {/* 1. Welcome Hero with greeting and Ton price chart */}
+      <HomeHero />
+
+      {/* Genre Filter Pills (Dynamic horizontal scroll) */}
+      <HomeGenreFilterBar />
 
         {/* 2. Sponsored promo carousel */}
         <SponsoredPromoCarousel />
@@ -149,9 +149,7 @@ const Home: React.FC = () => {
         <Suspense fallback={null}>
           <HomeFooter />
         </Suspense>
-
-      </div>
-    </motion.div>
+    </PageLayout>
   );
 };
 

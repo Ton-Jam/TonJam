@@ -112,3 +112,13 @@ export async function runFirebaseDiagnostics(): Promise<FirebaseDiagnosticReport
   console.groupEnd();
   return report;
 }
+
+export { 
+  verifyUserProfileIntegrity, 
+  logProfileIntegrityReport 
+} from './profileIntegrityDiagnostics';
+export type { 
+  ProfileIntegrityReport, 
+  ProfileFieldDiscrepancy, 
+  IntegrityStatus 
+} from './profileIntegrityDiagnostics';

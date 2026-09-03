@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { MOCK_TESTING_TRACKS, MockTrack } from '@/data/mockTracks';
 import { Track } from '@/types';
+import { GENRES } from '@/constants';
 
 interface LibraryContextType {
   testingTracks: MockTrack[];
@@ -8,6 +9,9 @@ interface LibraryContextType {
   clearTestingTracks: () => { success: boolean; message: string };
   isTestingTracksInjected: boolean;
   recentlyPlayed: Track[];
+  selectedGenre: string;
+  setSelectedGenre: (genre: string) => void;
+  availableGenres: string[];
 }
 
 const LibraryContext = createContext<LibraryContextType | null>(null);
@@ -22,6 +26,7 @@ export const useLibrary = () => {
 
 export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isTestingTracksInjected, setIsTestingTracksInjected] = useState(false);
+  const [selectedGenre, setSelectedGenre] = useState<string>('All');
   const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>(() => {
     try {
       const saved = localStorage.getItem('tonjam_recently_played');
@@ -30,6 +35,13 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return [];
     }
   });
+
+  const availableGenres = useMemo(() => {
+    const genreSet = new Set<string>();
+    genreSet.add('All');
+    GENRES.forEach(g => genreSet.add(g.name));
+    return Array.from(genreSet);
+  }, []);
 
   // Check if testing tracks are already present in localStorage on mount
   useEffect(() => {
@@ -159,7 +171,10 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
       injectTestingTracks,
       clearTestingTracks,
       isTestingTracksInjected,
-      recentlyPlayed
+      recentlyPlayed,
+      selectedGenre,
+      setSelectedGenre,
+      availableGenres
     }}>
       {children}
     </LibraryContext.Provider>

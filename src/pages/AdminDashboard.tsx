@@ -52,6 +52,7 @@ const AdminDashboard: React.FC = () => {
 
   const [verificationRequests, setVerificationRequests] = useState<any[]>([]);
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
+  const [reviewerNotesMap, setReviewerNotesMap] = useState<Record<string, string>>({});
 
   const [allSponsorships, setAllSponsorships] = useState<SponsoredContent[]>([]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
@@ -158,6 +159,7 @@ const AdminDashboard: React.FC = () => {
 
   const handleApproveVerification = async (request: any) => {
     setIsVerifying(request.id);
+    const notes = reviewerNotesMap[request.id]?.trim() || 'Verified by administrator';
     try {
       const batch = writeBatch(db);
       
@@ -168,13 +170,13 @@ const AdminDashboard: React.FC = () => {
         isVerifiedArtist: true,
         role: 'artist',
         verificationStatus: 'verified',
-        bio: request.metadata?.bio || '',
-        genre: request.metadata?.genre || '',
+        bio: request.metadata?.bio || request.bio || '',
+        genre: request.metadata?.genre || request.genre || '',
         socials: {
-          x: request.socialLinks?.find((s: any) => s.platform === 'twitter')?.url || '',
-          instagram: request.socialLinks?.find((s: any) => s.platform === 'instagram')?.url || '',
-          website: request.portfolioUrl || '',
-          spotify: request.socialLinks?.find((s: any) => s.platform === 'spotify')?.url || ''
+          x: request.socialLinks?.find((s: any) => s.platform === 'twitter')?.url || request.socialsMap?.x || '',
+          instagram: request.socialLinks?.find((s: any) => s.platform === 'instagram')?.url || request.socialsMap?.instagram || '',
+          website: request.portfolioUrl || request.socialsMap?.website || '',
+          spotify: request.socialLinks?.find((s: any) => s.platform === 'spotify')?.url || request.socialsMap?.spotify || ''
         }
       });
 
@@ -182,6 +184,7 @@ const AdminDashboard: React.FC = () => {
       const requestRef = doc(db, 'verificationRequests', request.id);
       batch.update(requestRef, { 
         status: 'approved',
+        reviewerNotes: notes,
         resolvedAt: new Date().toISOString()
       });
 
@@ -195,8 +198,35 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleRequestRevision = async (request: any) => {
+    setIsVerifying(request.id);
+    const notes = reviewerNotesMap[request.id]?.trim() || 'Please update your social links and resubmit for verification.';
+    try {
+      const batch = writeBatch(db);
+      
+      const userRef = doc(db, 'users', request.userId);
+      batch.update(userRef, { verificationStatus: 'needs_revision' });
+
+      const requestRef = doc(db, 'verificationRequests', request.id);
+      batch.update(requestRef, { 
+        status: 'needs_revision',
+        reviewerNotes: notes,
+        resolvedAt: new Date().toISOString()
+      });
+
+      await batch.commit();
+      toast.success(`Revision requested for ${request.artistName}`);
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to request revision');
+    } finally {
+      setIsVerifying(null);
+    }
+  };
+
   const handleRejectVerification = async (request: any) => {
     setIsVerifying(request.id);
+    const notes = reviewerNotesMap[request.id]?.trim() || 'Verification request declined';
     try {
       const batch = writeBatch(db);
       
@@ -206,6 +236,7 @@ const AdminDashboard: React.FC = () => {
       const requestRef = doc(db, 'verificationRequests', request.id);
       batch.update(requestRef, { 
         status: 'rejected',
+        reviewerNotes: notes,
         resolvedAt: new Date().toISOString()
       });
 
@@ -729,54 +760,88 @@ const AdminDashboard: React.FC = () => {
             <div className="space-y-4">
               {verificationRequests.length > 0 ? (
                 verificationRequests.map((req) => (
-                  <div key={req.id} className="p-4 bg-muted/30 rounded-xl border border-border/30 flex flex-col md:flex-row gap-4 justify-between">
-                    <div className="space-y-2">
-                       <div className="flex items-center gap-2">
-                         <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
-                           req.status === 'approved' ? 'bg-green-500/10 text-green-500' : 
-                           req.status === 'pending' ? 'bg-amber-500/10 text-amber-500' : 
-                           'bg-red-500/10 text-red-500'
-                         }`}>
-                           {req.status}
-                         </span>
-                         <span className="text-sm font-bold text-foreground">{req.artistName}</span>
-                       </div>
-                       <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                         {req.metadata?.genre} • {req.metadata?.bio?.substring(0, 100)}...
-                       </p>
-                       <div className="flex gap-4">
-                         {req.socialLinks?.map((s: any) => s.url && (
-                           <a key={s.platform} href={s.url} target="_blank" rel="noreferrer" className="text-[9px] text-blue-400 hover:underline flex items-center gap-1 uppercase font-bold">
-                             {s.platform} <ExternalLink className="w-2 h-2" />
-                           </a>
-                         ))}
-                         {req.portfolioUrl && (
-                           <a href={req.portfolioUrl} target="_blank" rel="noreferrer" className="text-[9px] text-purple-400 hover:underline flex items-center gap-1 uppercase font-bold">
-                             Portfolio <ExternalLink className="w-2 h-2" />
-                           </a>
+                  <div key={req.id} className="p-5 bg-muted/30 rounded-xl border border-border/30 flex flex-col gap-4">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="space-y-2">
+                         <div className="flex items-center gap-2.5">
+                           <span className={`text-[8px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                             req.status === 'approved' ? 'bg-green-500/10 text-green-500' : 
+                             req.status === 'pending' ? 'bg-amber-500/10 text-amber-500' : 
+                             req.status === 'needs_revision' ? 'bg-orange-500/10 text-orange-400' :
+                             'bg-red-500/10 text-red-500'
+                           }`}>
+                             {req.status === 'needs_revision' ? 'Needs Revision' : req.status}
+                           </span>
+                           <span className="text-sm font-bold text-foreground">{req.artistName}</span>
+                           <span className="text-[10px] text-muted-foreground font-mono">UID: {req.userId?.substring(0, 8)}...</span>
+                         </div>
+                         <p className="text-[11px] text-muted-foreground font-medium">
+                           <span className="font-bold text-foreground/80">{req.metadata?.genre || req.genre || 'Genre'}</span> • {req.metadata?.bio || req.bio || 'No bio provided'}
+                         </p>
+                         {req.statement && (
+                           <p className="text-[10px] text-zinc-400 italic">
+                             Statement: "{req.statement}"
+                           </p>
                          )}
-                       </div>
+                         <div className="flex flex-wrap gap-3 pt-1">
+                           {req.socialLinks?.map((s: any, sIdx: number) => s.url && (
+                             <a key={sIdx} href={s.url} target="_blank" rel="noreferrer" className="text-[10px] text-blue-400 hover:underline flex items-center gap-1 uppercase font-bold">
+                               {s.platform} <ExternalLink className="w-2.5 h-2.5" />
+                             </a>
+                           ))}
+                           {req.portfolioUrl && (
+                             <a href={req.portfolioUrl} target="_blank" rel="noreferrer" className="text-[10px] text-purple-400 hover:underline flex items-center gap-1 uppercase font-bold">
+                               Portfolio <ExternalLink className="w-2.5 h-2.5" />
+                             </a>
+                           )}
+                         </div>
+                      </div>
+
+                      {req.reviewerNotes && (
+                        <div className="p-2.5 rounded-lg bg-black/20 text-[10px] text-zinc-300 md:max-w-xs">
+                          <span className="font-bold text-zinc-400 uppercase tracking-wider block">Reviewer Note:</span>
+                          "{req.reviewerNotes}"
+                        </div>
+                      )}
                     </div>
                     
                     {req.status === 'pending' && (
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleRejectVerification(req)}
-                          disabled={isVerifying === req.id}
-                          className="border-red-500/20 text-red-500 hover:bg-red-500/10 text-[10px] uppercase font-bold h-10 px-4"
-                        >
-                          Reject
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleApproveVerification(req)}
-                          disabled={isVerifying === req.id}
-                          className="bg-green-600 hover:bg-green-500 text-white text-[10px] uppercase font-bold h-10 px-4"
-                        >
-                          {isVerifying === req.id ? 'Approving...' : 'Approve & Verify'}
-                        </Button>
+                      <div className="pt-3 border-t border-border/20 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                        <input
+                          type="text"
+                          placeholder="Optional reviewer notes / revision instructions..."
+                          value={reviewerNotesMap[req.id] || ''}
+                          onChange={(e) => setReviewerNotesMap(prev => ({ ...prev, [req.id]: e.target.value }))}
+                          className="flex-1 px-3 py-2 text-xs bg-background/50 border border-border/40 rounded-lg text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary"
+                        />
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleRejectVerification(req)}
+                            disabled={isVerifying === req.id}
+                            className="border-red-500/20 text-red-500 hover:bg-red-500/10 text-[10px] uppercase font-bold h-9 px-3"
+                          >
+                            Reject
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRequestRevision(req)}
+                            disabled={isVerifying === req.id}
+                            className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10 text-[10px] uppercase font-bold h-9 px-3"
+                          >
+                            Request Revision
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={() => handleApproveVerification(req)}
+                            disabled={isVerifying === req.id}
+                            className="bg-green-600 hover:bg-green-500 text-white text-[10px] uppercase font-bold h-9 px-4"
+                          >
+                            {isVerifying === req.id ? 'Approving...' : 'Approve & Verify'}
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>

@@ -34,7 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import LoadingOverlay from './LoadingOverlay';
-import ConfirmationModal from './ConfirmationModal';
+import NFTPurchaseConfirmationDialog from './NFTPurchaseConfirmationDialog';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface BuyNFTModalProps {
@@ -351,21 +351,18 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
         </AnimatePresence>
       </DialogContent>
 
-      <ConfirmationModal
+      <NFTPurchaseConfirmationDialog
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={executePurchase}
-        title="Execute Purchase Protocol?"
-        description="Verify signal parameters before broadcasting to the TON blockchain relay."
+        title="Confirm NFT Acquisition"
+        description="Verify transaction parameters and dual currency cost before broadcasting to the TON blockchain."
         confirmText="Confirm & Acquire"
-        assetName={nft.title}
-        assetImage={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
-        tonAmount={price.toString()}
-        networkFee={gasFee.toString()}
-        totalAmount={total}
-        fromAddress={userAddress}
-        recipient={nft.owner}
-        transactionType="Acquisition Execution"
+        nft={nft}
+        networkFee={gasFee}
+        platformFeePercentage={0.05}
+        userWalletAddress={userAddress}
+        recipientAddress={nft.owner}
       />
     </Dialog>
   );

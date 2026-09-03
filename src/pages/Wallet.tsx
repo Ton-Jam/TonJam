@@ -25,6 +25,7 @@ import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { doc, getDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { TON_LOGO, JAM_PRICE_USD, TJ_COIN_ICON } from '@/constants';
+import { SecureUserNFTDashboard } from '@/components/SecureUserNFTDashboard';
 import { toast } from 'sonner';
 
 const TON_PRICE_USD = 5.30;
@@ -315,7 +316,15 @@ const Wallet: React.FC = () => {
               
               {userAddress ? (
                 <button
-                  onClick={() => tonConnectUI.disconnect()}
+                  onClick={async () => {
+                    try {
+                      if (tonConnectUI && tonConnectUI.connected && (tonConnectUI.wallet || (tonConnectUI as any).connector?.wallet)) {
+                        await tonConnectUI.disconnect();
+                      }
+                    } catch (e) {
+                      console.warn("Error disconnecting TON wallet:", e);
+                    }
+                  }}
                   className="px-3 py-2 text-[9px] font-bold text-red-400 uppercase tracking-wider hover:bg-red-500/10 transition-all rounded-[4px]"
                 >
                   Disconnect
@@ -665,6 +674,11 @@ const Wallet: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* Secure User Profile & Owned Music NFTs Dashboard */}
+      <section className="space-y-4">
+        <SecureUserNFTDashboard />
+      </section>
 
       {/* Refer-a-Fan Banner */}
       <section className="relative rounded-none sm:rounded-[4px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black px-4 py-6 sm:p-6 lg:p-6 flex flex-col md:flex-row items-center justify-between gap-6 border border-amber-500/20">

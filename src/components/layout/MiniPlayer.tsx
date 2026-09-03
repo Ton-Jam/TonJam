@@ -101,12 +101,24 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         backdropFilter: "none",
         WebkitBackdropFilter: "none",
       }}
-      className="fixed bottom-[72px] left-4 right-4 z-40 select-none rounded-2xl shadow-2xl p-3 flex flex-col gap-2 cursor-pointer active:cursor-grabbing border-none"
+      className="fixed bottom-[72px] left-4 right-4 z-40 select-none rounded-2xl shadow-2xl p-3 pt-2 flex flex-col gap-2 cursor-pointer active:cursor-grabbing border-none overflow-hidden"
       onClick={onExpand}
     >
-      {/* Top tiny touch handle bar to represent physical swipeability */}
-      <div className="flex justify-center -mt-1.5 mb-1 opacity-50">
-        <ChevronUp className="w-3.5 h-3.5 text-[#9AA0AE] animate-bounce" />
+      {/* Embedded Progress Bar at Top (1px flush) */}
+      <div 
+        ref={progressBarRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full h-[1px] -mt-2 mb-1 flex items-center cursor-pointer group/seek select-none touch-none bg-white/10"
+        title="Click or drag to scrub"
+      >
+        <div
+          className="h-full bg-blue-500 transition-all duration-150"
+          style={{ width: `${Math.min(100, Math.max(0, localProgress))}%` }}
+        />
       </div>
 
       <div className="flex items-center justify-between gap-3">
@@ -159,25 +171,6 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               <Play className="w-4 h-4 fill-white text-white ml-0.5" />
             )}
           </button>
-        </div>
-      </div>
-
-      {/* Embedded Progress Bar */}
-      <div 
-        ref={progressBarRef}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full h-3 -my-1 flex items-center cursor-pointer group/seek select-none touch-none"
-        title="Click or drag to scrub"
-      >
-        <div className="w-full h-1 group-hover/seek:h-1.5 bg-white/10 rounded-full overflow-hidden transition-all">
-          <div
-            className="h-full bg-blue-500 rounded-full transition-all duration-150"
-            style={{ width: `${Math.min(100, Math.max(0, localProgress))}%` }}
-          />
         </div>
       </div>
     </motion.div>

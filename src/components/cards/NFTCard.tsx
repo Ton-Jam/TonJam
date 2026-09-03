@@ -4,6 +4,7 @@ import { Sparkles, Heart, Bookmark, Eye, Layers, Clock } from 'lucide-react';
 import { NFTPlaceholder } from '../placeholders/NFTPlaceholder';
 import { PriceSparkline } from '../PriceSparkline';
 import { cardTokens } from '@/design';
+import SkeletonCard from '../SkeletonCard';
 
 export interface NFTData {
   id: string;
@@ -81,18 +82,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
   }, [nft?.auctionEndsAt]);
 
   if (isLoading || !nft) {
-    return (
-      <div 
-        style={{ width: cardTokens.nftTrack.width, minHeight: cardTokens.nftTrack.cardHeight, borderRadius: cardTokens.global.borderRadius }}
-        className={`flex flex-col bg-transparent animate-pulse shrink-0 ${className}`}
-      >
-        <div className="w-full aspect-square bg-white/10 rounded-lg mb-3" />
-        <div className="space-y-2">
-          <div className="h-4 bg-white/10 rounded w-2/3" />
-          <div className="h-3 bg-white/10 rounded w-1/2" />
-        </div>
-      </div>
-    );
+    return <SkeletonCard className={className} />;
   }
 
   const handleMintClick = (e: React.MouseEvent) => {

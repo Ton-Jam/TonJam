@@ -95,16 +95,16 @@ export const ProfileStats: React.FC<ProfileStatsProps> = ({ profile }) => {
         <div
           key={stat.id}
           onClick={() => handleClick(stat.path)}
-          className={`bg-[#101A3B] rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md ${
+          className={`bg-neutral-950/80 hover:bg-neutral-900/80 rounded-xl p-3.5 flex flex-col justify-between transition-all duration-200 border-none ${
             stat.highlight 
-              ? 'bg-gradient-to-br from-[#101A3B] to-[#1a1435] shadow-[0_4px_16px_rgba(249,115,22,0.15)]' 
-              : 'hover:bg-[#15234f]'
+              ? 'bg-neutral-950 hover:bg-neutral-900' 
+              : ''
           } ${
             stat.path ? 'cursor-pointer' : ''
           }`}
         >
           <div className="flex items-center justify-between gap-1.5 mb-1.5">
-            <span className={`text-[10px] font-bold uppercase tracking-wider leading-none ${stat.highlight ? 'text-orange-300' : 'text-slate-400'}`}>
+            <span className={`text-[10px] font-bold uppercase tracking-wider leading-none ${stat.highlight ? 'text-orange-300' : 'text-zinc-400'}`}>
               {stat.label}
             </span>
             <div className={`shrink-0 p-1 rounded-md ${stat.highlight ? 'bg-orange-500/20' : 'bg-white/5'}`}>

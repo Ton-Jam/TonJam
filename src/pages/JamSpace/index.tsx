@@ -38,6 +38,7 @@ import { NotificationsPanel } from './components/NotificationsPanel';
 import { PostCard } from './components/PostCard';
 import { JamSpaceHeader } from './components/JamSpaceHeader';
 import { JamSpaceQuickCompose } from './components/JamSpaceQuickCompose';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { 
   HeroSkeleton, 
   LiveSpacesSkeleton, 
@@ -79,8 +80,7 @@ const JamSpaceMain: React.FC = () => {
   };
 
   return (
-    <div className={`w-full min-h-screen bg-[#050A24] text-white pb-32 font-sans`}>
-      <div className="w-full max-w-7xl mx-auto px-4 py-6 sm:px-6 space-y-8 relative">
+    <PageLayout containerClassName="space-y-8 relative" topSpacing="default">
         {/* Top Header Controls (Integrated Ribbon functions) */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -342,7 +342,6 @@ const JamSpaceMain: React.FC = () => {
 
           </div>
         )}
-      </div>
 
       {/* FLOATING ACTION BUTTON (FAB) FOR COMPOSING */}
       <motion.button
@@ -379,7 +378,7 @@ const JamSpaceMain: React.FC = () => {
           />
         )}
       </AnimatePresence>
-    </div>
+    </PageLayout>
   );
 };
 

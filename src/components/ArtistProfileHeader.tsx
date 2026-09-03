@@ -68,11 +68,14 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
                     Live
                 </Badge>
             )}
-            {artist.username && (
-                <Badge variant="secondary" className="bg-muted/40 backdrop-blur-md text-foreground/70 border-border/50 font-bold text-[8px] tracking-widest px-3 py-0.5 rounded-full uppercase hover:bg-muted/60 transition-colors w-fit mb-1">
-                    {artist.username.replace('@', '')}
-                </Badge>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              {artist.username && (
+                  <Badge variant="secondary" className="bg-muted/40 backdrop-blur-md text-foreground/70 font-bold text-[8px] tracking-widest px-3 py-0.5 rounded-full uppercase hover:bg-muted/60 transition-colors w-fit">
+                      {artist.username.replace('@', '')}
+                  </Badge>
+              )}
+              <ArtistVerification artist={artist} size="sm" />
+            </div>
         </div>
       
       {/* Action Buttons & Social Icons - Horizontally Aligned */}

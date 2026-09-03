@@ -31,7 +31,7 @@ export const TopTrendingSongsSection: React.FC = () => {
         </button>
       </div>
 
-      <div className="rounded-2xl bg-zinc-950 p-2 sm:p-2.5 space-y-1.5 border-none">
+      <div className="space-y-1 w-full">
         {topSongs.map((track, idx) => (
           <TrackCard 
             key={track.id} 
