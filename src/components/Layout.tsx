@@ -819,7 +819,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="flex items-center justify-between mb-2">
                 <Link to="/" onClick={() => setIsMobileSidebarOpen(false)} className="flex items-center gap-2">
                   <img src={APP_LOGO} alt="" className="w-8 h-8 object-contain" />
-                  <span className="font-bold text-lg tracking-tight text-foreground uppercase">JamSpace</span>
+                  <span className="font-bold text-lg tracking-tight text-foreground uppercase">TonJam</span>
                 </Link>
                 <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 rounded-full hover:bg-white/10 text-foreground active:scale-95">
                   <ArrowLeftIcon className="h-6 w-6 text-foreground" strokeWidth={3.5} />
@@ -975,7 +975,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           className="w-[40px] h-[40px] object-contain" 
           aria-hidden="true" 
         />
-        <span className="font-bold text-lg tracking-tight text-foreground uppercase">JamSpace</span>
+        <span className="font-bold text-lg tracking-tight text-foreground uppercase">TonJam</span>
       </Link>
       <div className="flex items-center gap-2">
         <ModeToggle />
