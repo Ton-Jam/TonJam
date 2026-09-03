@@ -734,7 +734,7 @@ const Login: React.FC = () => {
                       {/* PROFILE DETAIL FIELDS */}
                       <div className="space-y-3 pt-3 border-t border-white/10">
                         <div className="space-y-1">
-                          <Label htmlFor="onboard_username" className="text-[9px] font-black uppercase tracking-widest text-white/70">GramJam Profile Name</Label>
+                          <Label htmlFor="onboard_username" className="text-[9px] font-black uppercase tracking-widest text-white/70">TonJam Profile Name</Label>
                           <Input
                             id="onboard_username"
                             type="text"

@@ -1,6 +1,6 @@
 {
-  "name": "Gramjam",
-  "description": "Gramjam is the premier decentralized music and NFT marketplace built on the GRAM blockchain. Discover exclusive tracks, buy and sell music NFTs, and connect directly with independent artists in the Web3 ecosystem.",
+  "name": "TonJam",
+  "description": "TonJam is the premier decentralized music and NFT marketplace built on the TON blockchain. Discover exclusive tracks, buy and sell music NFTs, and connect directly with independent artists in the Web3 ecosystem.",
   "requestFramePermissions": [
     "camera",
     "microphone",

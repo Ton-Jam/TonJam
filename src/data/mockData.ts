@@ -39,7 +39,7 @@ export const artists: ArtistData[] = Array.from({ length: 100 }, (_, i) => {
     monthlyListeners: randomRange(1000, 450000),
     featuredTrackTitle: `${randomElement(ADJECTIVES)} ${randomElement(NOUNS)}`,
     genre: randomElement(GENRES),
-    bio: `Web3 Sound Architect weaving ${randomElement(GENRES)} melodies for the Gram Network. Connecting directly with fans via GramJam.`,
+    bio: `Web3 Sound Architect weaving ${randomElement(GENRES)} melodies for the TON Network. Connecting directly with fans via TonJam.`,
     nftHolders: randomRange(10, 450),
     totalSalesVolume: (randomRange(50, 4500)).toString(),
     rank: i + 1,
@@ -103,7 +103,7 @@ export const playlists: PlaylistData[] = Array.from({ length: 120 }, (_, i) => {
   return {
     id: `playlist-${i + 1}`,
     title: `${randomElement(GENRES)} Mix Vol. ${randomRange(1, 10)}`,
-    creator: i % 3 === 0 ? 'GramJam Official' : artists[i % artists.length].name,
+    creator: i % 3 === 0 ? 'TonJam Official' : artists[i % artists.length].name,
     isCreatorVerified: i % 3 === 0,
     coverUrl: `https://images.unsplash.com/photo-${1530000000000 + (i * 5678)}?auto=format&fit=crop&q=80&w=200&h=200`,
     trackCount: randomRange(10, 40),
@@ -123,7 +123,7 @@ export const users: UserProfileData[] = Array.from({ length: 300 }, (_, i) => {
     username: `@${name.toLowerCase()}`,
     displayName: `Listener ${i + 1}`,
     avatarUrl: `https://images.unsplash.com/photo-${1540000000000 + (i * 6789)}?auto=format&fit=crop&q=80&w=150&h=150`,
-    bio: `Proud Web3 Sync enthusiast. Collected ${randomRange(2, 25)} NFT Tracks on GramJam!`,
+    bio: `Proud Web3 Sync enthusiast. Collected ${randomRange(2, 25)} NFT Tracks on TonJam!`,
     isVerified: i % 10 === 0,
     isPremium: i % 3 === 0,
     followersCount: randomRange(5, 1200),
@@ -164,7 +164,7 @@ export const wallets = Array.from({ length: 30 }, (_, i) => {
     balanceUsd: (randomRange(5, 15000)).toLocaleString(),
     tokens: [
       { id: 't1', name: 'Gram Network', symbol: 'GRAM', balance: '254.20', priceUsd: '6.45', change24h: 3.4 },
-      { id: 't2', name: 'GramJam Native', symbol: 'JAM', balance: '12,500.00', priceUsd: '0.12', change24h: 12.5 },
+      { id: 't2', name: 'TonJam Native', symbol: 'JAM', balance: '12,500.00', priceUsd: '0.12', change24h: 12.5 },
     ]
   };
 });

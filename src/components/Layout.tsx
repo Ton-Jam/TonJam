@@ -921,8 +921,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="lg:hidden">
         {/* Mobile Navigation */}
       {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
-        <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[70] h-16 transition-all duration-300 ease-in-out ${isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
-          <nav className="h-full w-full bg-black border-t border-[#c0c0c0]/50 px-2 flex justify-around items-center" aria-label="Mobile Navigation">
+        <div 
+          id="tonjam-mobile-nav"
+          className={`lg:hidden fixed bottom-0 left-0 right-0 z-[70] h-16 transition-all duration-300 ease-in-out ${isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
+        >
+          <nav 
+            id="tonjam-mobile-nav-bar"
+            className="h-full w-full bg-black border-t border-[#c0c0c0]/50 px-2 flex justify-around items-center" 
+            aria-label="Mobile Navigation"
+          >
             <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
             <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
             <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jamspace" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />

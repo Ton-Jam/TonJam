@@ -182,7 +182,7 @@ export const SecureUserNFTDashboard: React.FC = () => {
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                  {userProfile?.name || userProfile?.username || user?.displayName || 'GramJam Member'}
+                  {userProfile?.name || userProfile?.username || user?.displayName || 'TonJam Member'}
                 </h1>
                 <span className="text-[10px] font-mono uppercase font-black px-2.5 py-0.5 rounded-full bg-cyan-400/10 text-cyan-400">
                   {userProfile?.isVerifiedArtist ? 'Verified Artist' : 'Music Collector'}

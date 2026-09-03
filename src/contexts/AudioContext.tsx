@@ -3654,8 +3654,18 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const prevTrack = () => {
     if (queue.length === 0 || !currentTrack) return;
+    if (audioRef.current && audioRef.current.currentTime > 3) {
+      audioRef.current.currentTime = 0;
+      setProgress(0);
+      return;
+    }
     const index = queue.findIndex((t) => t.id === currentTrack.id);
-    if (index > 0) playTrack(queue[index - 1]);
+    if (index > 0) {
+      playTrack(queue[index - 1]);
+    } else if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      setProgress(0);
+    }
   };
 
   const addToQueue = (track: Track) => {

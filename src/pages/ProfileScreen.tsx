@@ -216,7 +216,7 @@ const ProfileScreenContent: React.FC = () => {
         verificationStatus: 'verified',
         isArtistVerified: true 
       }));
-      toast.success('Verification Complete', 'Congratulations! You are now a verified GramJam artist');
+      toast.success('Verification Complete', 'Congratulations! You are now a verified TonJam artist');
       try {
         if (targetUid) {
           const userRef = doc(db, 'users', targetUid);
@@ -233,7 +233,7 @@ const ProfileScreenContent: React.FC = () => {
   };
 
   const handleCopyProfileLink = () => {
-    navigator.clipboard.writeText(`https://gramjam.app/user/${dynamicProfile.username}`);
+    navigator.clipboard.writeText(`https://tonjam.app/user/${dynamicProfile.username}`);
     setCopiedLink(true);
     toast.success('Link Copied', 'Profile URL copied to clipboard');
     setTimeout(() => setCopiedLink(false), 2000);

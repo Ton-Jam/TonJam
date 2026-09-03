@@ -211,7 +211,7 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
         nanoValue = Math.floor(amountToWithdraw * 1e9).toString();
       }
 
-      const recipient = userAddress || 'UQCc_GramJam_Artist_Wallet_Primary';
+      const recipient = userAddress || 'UQCc_TonJam_Artist_Wallet_Primary';
 
       const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 300,

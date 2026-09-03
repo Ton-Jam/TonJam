@@ -921,3 +921,61 @@ body {
   color: #f8fafc !important;
 }
 
+/* Dynamic Spacing Engine for MiniPlayer & Navigation bar based on screen height & width */
+:root {
+  --tonjam-nav-height: 4rem; /* 64px standard */
+  --tonjam-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tonjam-mini-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom));
+  --tonjam-collapsed-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom) + 1rem); /* 80px default */
+}
+
+/* Compact / Short Screen Heights (< 670px, e.g. landscape or older compact screens) */
+@media screen and (max-height: 670px) {
+  :root {
+    --tonjam-nav-height: 3.5rem; /* 56px */
+    --tonjam-mini-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom));
+    --tonjam-collapsed-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom) + 0.75rem); /* 68px */
+  }
+}
+
+/* Tall & Narrow Screen Heights (>= 800px, e.g. tall aspect ratios 19.5:9, 20:9 on modern phones) */
+@media screen and (min-height: 800px) {
+  :root {
+    --tonjam-nav-height: 4.25rem; /* 68px */
+    --tonjam-mini-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom));
+    --tonjam-collapsed-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom) + 1.25rem); /* 88px */
+  }
+}
+
+/* Ultra-Tall Device Viewports (>= 900px height, e.g. Pixel Pro, Galaxy Ultra) */
+@media screen and (min-height: 900px) {
+  :root {
+    --tonjam-nav-height: 4.5rem; /* 72px */
+    --tonjam-mini-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom));
+    --tonjam-collapsed-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom) + 1.5rem); /* 96px */
+  }
+}
+
+/* Width constraint override for very narrow screens (< 375px) on standard heights */
+@media screen and (max-width: 374.98px) and (max-height: 799px) {
+  :root {
+    --tonjam-nav-height: 3.5rem;
+    --tonjam-mini-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom));
+    --tonjam-collapsed-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom) + 0.75rem);
+  }
+}
+
+/* Apply CSS variables to Navigation and Player elements */
+#tonjam-mobile-nav {
+  height: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom)) !important;
+  padding-bottom: var(--tonjam-safe-bottom) !important;
+}
+
+#tonjam-mini-player.bottom-16 {
+  bottom: var(--tonjam-mini-player-bottom) !important;
+}
+
+#tonjam-dropped-down-player.bottom-20 {
+  bottom: var(--tonjam-collapsed-player-bottom) !important;
+}
+
