@@ -29,28 +29,28 @@ export const EarnTJSection: React.FC = () => {
       {/* Subtle green aura */}
       <div className="absolute top-[20px] right-[-20px] w-28 h-28 bg-emerald-500/10 rounded-full blur-[40px] pointer-events-none" />
 
-      <div className="flex items-center justify-between gap-3 mb-4 relative z-10">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between gap-2 sm:gap-3 mb-4 relative z-10">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
             <Flame className="w-5 h-5 text-emerald-400 fill-emerald-400/20" />
           </div>
-          <div>
-            <h3 className="text-sm sm:text-base font-black text-white leading-tight">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-xs sm:text-base font-black text-white leading-tight truncate">
               Earn up to {dailyEarnable > 0 ? dailyEarnable : 250} TJ Today
             </h3>
-            <p className="text-xs text-zinc-400">
+            <p className="text-[11px] sm:text-xs text-zinc-400 truncate">
               Keep daily alignment rewards streaming
             </p>
           </div>
         </div>
 
         {/* Live Coins Balance */}
-        <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full shrink-0">
-          <img src={TJ_COIN_ICON} alt="TJ" className="w-4 h-4 object-contain" />
+        <div className="flex items-center gap-1.5 bg-white/5 px-2.5 sm:px-3 py-1.5 rounded-full shrink-0">
+          <img src={TJ_COIN_ICON} alt="TJ" className="w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain" />
           <span className="text-xs font-mono font-black text-white">
             {parseFloat(String(userProfile?.jamBalance || '0')).toLocaleString()}
           </span>
-          <span className="text-[9px] font-black text-zinc-400 ml-0.5">JAM</span>
+          <span className="text-[8px] sm:text-[9px] font-black text-zinc-400 ml-0.5">JAM</span>
         </div>
       </div>
 
@@ -68,14 +68,14 @@ export const EarnTJSection: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-4 pt-3 flex items-center justify-between gap-3 relative z-10">
-        <span className="text-xs text-zinc-400 truncate max-w-[200px] sm:max-w-xs">
+      <div className="mt-4 pt-3 flex items-center justify-between gap-2 sm:gap-3 relative z-10">
+        <span className="text-[11px] sm:text-xs text-zinc-400 truncate min-w-0 flex-1">
           Next: <strong className="text-white">{nextUpTask.title}</strong> ({nextUpTask.reward})
         </span>
         <Button
           size="sm"
           onClick={() => navigate("/tasks")}
-          className="h-8 bg-primary hover:bg-primary/90 text-black font-black text-[10px] uppercase tracking-widest px-4 rounded-full border-none cursor-pointer transition-transform hover:scale-105 active:scale-95"
+          className="h-8 bg-primary hover:bg-primary/90 text-black font-black text-[10px] uppercase tracking-widest px-3.5 sm:px-4 rounded-full border-none cursor-pointer shrink-0 transition-transform hover:scale-105 active:scale-95"
         >
           View Tasks <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
         </Button>

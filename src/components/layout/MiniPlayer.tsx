@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import { Play, Pause, ListMusic, ChevronUp } from 'lucide-react';
+import { useCoverColor } from '@/lib/color-utils';
 
 interface MiniPlayerProps {
   track?: {
@@ -79,6 +80,8 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     }
   };
 
+  const coverColor = useCoverColor(track?.coverUrl);
+
   if (!track) return null;
 
   const handleDragEnd = (_event: any, info: any) => {
@@ -96,14 +99,38 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       style={{
         y: dragY,
         opacity: 1,
-        backgroundColor: "#000000",
-        background: "#000000",
-        backdropFilter: "none",
-        WebkitBackdropFilter: "none",
+        backgroundColor: "#050A24",
       }}
       className="fixed bottom-[72px] left-4 right-4 z-40 select-none rounded-2xl shadow-2xl p-3 pt-2 flex flex-col gap-2 cursor-pointer active:cursor-grabbing border-none overflow-hidden"
       onClick={onExpand}
     >
+      {/* Ambient Cover Photo & Dominant Color Gradient Background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
+        {track.coverUrl && (
+          <img
+            src={track.coverUrl}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-30 transition-opacity duration-500"
+          />
+        )}
+        <div
+          className="absolute inset-0 transition-opacity duration-500"
+          style={{
+            background: `linear-gradient(135deg, ${coverColor}55 0%, ${coverColor}18 100%)`,
+            opacity: 0.8,
+          }}
+        />
+        <div
+          className="absolute inset-0 transition-opacity duration-500 mix-blend-screen"
+          style={{
+            background: `radial-gradient(circle at 15% 50%, ${coverColor}60 0%, transparent 65%)`,
+            opacity: 0.45,
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050A24]/90 via-[#050A24]/75 to-[#000000]/90" />
+      </div>
+
       {/* Embedded Progress Bar at Top (1px flush) */}
       <div 
         ref={progressBarRef}
@@ -112,7 +139,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         onClick={(e) => e.stopPropagation()}
-        className="w-full h-[1px] -mt-2 mb-1 flex items-center cursor-pointer group/seek select-none touch-none bg-white/10"
+        className="relative z-10 w-full h-[1px] -mt-2 mb-1 flex items-center cursor-pointer group/seek select-none touch-none bg-white/10"
         title="Click or drag to scrub"
       >
         <div
@@ -121,7 +148,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         />
       </div>
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="relative z-10 flex items-center justify-between gap-3">
         {/* Track Metadata Info */}
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#1E2230] flex-shrink-0">

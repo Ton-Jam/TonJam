@@ -42,7 +42,8 @@ import { AlbumCard } from "./AlbumCard";
 import { CommentsSheet } from "./CommentsSheet";
 import { EqualizerSettings } from "./EqualizerSettings";
 import { SmartRadioPanel } from "./SmartRadioPanel";
-import { shareContent } from "@/lib/utils";
+import { shareContent, getPlaceholderImage } from "@/lib/utils";
+import { useCoverColor } from "@/lib/color-utils";
 import { toast } from "sonner";
 
 export const PlayerScreen: React.FC = () => {
@@ -98,6 +99,9 @@ export const PlayerScreen: React.FC = () => {
       active = false;
     };
   }, [currentTrack?.id, isTrackCached]);
+
+  const coverUrl = currentTrack?.coverUrl || getPlaceholderImage("cover");
+  const coverColor = useCoverColor(coverUrl);
 
   if (!isFullPlayerOpen || !currentTrack) return null;
 
@@ -181,8 +185,37 @@ export const PlayerScreen: React.FC = () => {
         transition={{ duration: 0.25, ease: "easeInOut" }}
         className="fixed inset-0 z-50 bg-[#050A24] text-[#F2F4F8] font-sans overflow-y-auto overscroll-contain touch-pan-y scrollbar-thin scrollbar-thumb-[#16244F]"
       >
+        {/* Cover Photo Dominant Color Gradient Ambient Background */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 select-none">
+          {coverUrl && (
+            <img
+              src={coverUrl}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover blur-3xl scale-125 opacity-30 transition-opacity duration-700"
+            />
+          )}
+          {/* Subtle extracted dominant color radial and linear soft gradients */}
+          <div
+            className="absolute inset-0 transition-all duration-700 ease-out"
+            style={{
+              background: `radial-gradient(circle at 50% 25%, ${coverColor}66 0%, ${coverColor}22 55%, transparent 100%)`,
+              opacity: 0.85,
+            }}
+          />
+          <div
+            className="absolute inset-0 transition-all duration-700 ease-out mix-blend-screen"
+            style={{
+              background: `radial-gradient(ellipse at 50% 18%, ${coverColor}55 0%, transparent 60%)`,
+              opacity: 0.55,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050A24]/60 via-[#050A24]/80 to-[#000000]/95" />
+          <div className="absolute inset-0 bg-radial from-transparent via-[#050A24]/30 to-[#000000]" />
+        </div>
+
         {/* Scrollable Core Player Body including Header */}
-        <div className="min-h-full max-w-md mx-auto w-full px-3 pt-2.5 pb-28 flex flex-col items-center justify-start gap-4 sm:gap-5">
+        <div className="relative z-10 min-h-full max-w-md mx-auto w-full px-3 pt-2.5 pb-28 flex flex-col items-center justify-start gap-4 sm:gap-5">
           <div className="w-full">
             <PlayerHeader
               onClose={() => setFullPlayerOpen(false)}

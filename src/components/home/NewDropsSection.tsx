@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, ChevronRight, Music } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -6,13 +6,14 @@ import { useAudio } from "@/contexts/AudioContext";
 import { useLibrary } from "@/contexts/LibraryContext";
 import TrackCard from "@/components/TrackCard";
 import { MOCK_TRACKS } from "@/constants";
+import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 export const NewDropsSection: React.FC = () => {
   const navigate = useNavigate();
   const { allTracks } = useAudio();
   const { selectedGenre, setSelectedGenre, availableGenres } = useLibrary();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const genreScrollRef = useRef<HTMLDivElement>(null);
+  const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
+  const { scrollRef: genreScrollRef, handlers: genreHandlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const baseTracks = useMemo(() => {
     const list = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
@@ -69,7 +70,7 @@ export const NewDropsSection: React.FC = () => {
   return (
     <section className="space-y-3.5 text-left w-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-0.5">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary animate-pulse" />
           <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
@@ -92,8 +93,9 @@ export const NewDropsSection: React.FC = () => {
       {/* Dynamic Horizontal Scroll Genre Filter Bar */}
       <div 
         ref={genreScrollRef}
-        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 w-full snap-x snap-mandatory"
-        style={{ scrollBehavior: 'smooth' }}
+        {...genreHandlers}
+        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {availableGenres.map((genre) => {
           const isSelected = (selectedGenre || 'All') === genre;
@@ -117,8 +119,9 @@ export const NewDropsSection: React.FC = () => {
       {/* Horizontal Scroll Track Cards */}
       <div 
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-0.5 w-full snap-x snap-mandatory min-h-[220px]"
-        style={{ scrollBehavior: 'smooth' }}
+        {...handlers}
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory min-h-[220px] overscroll-x-contain select-none"
+        style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         <AnimatePresence mode="popLayout">
           {filteredDrops.length > 0 ? (

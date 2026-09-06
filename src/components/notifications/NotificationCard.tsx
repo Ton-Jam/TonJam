@@ -27,6 +27,7 @@ interface NotificationCardProps {
   onMarkRead: (id: string) => void;
   onDelete: (id: string) => void;
   onActionClick: (action: NotificationQuickAction, notification: TonJamNotification) => void;
+  onCardClick?: (notification: TonJamNotification) => void;
 }
 
 export const formatTimeAgo = (isoString: string): string => {
@@ -81,6 +82,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   onMarkRead,
   onDelete,
   onActionClick,
+  onCardClick,
 }) => {
   const cardControls = useAnimation();
   const meta = CATEGORY_META[notification.category] || { icon: HelpCircle, color: 'text-slate-400 bg-white/[0.05]', label: 'Alert' };
@@ -130,6 +132,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         onClick={() => {
           if (isUnread) {
             onMarkRead(notification.id);
+          }
+          if (onCardClick) {
+            onCardClick(notification);
           }
         }}
         className={`

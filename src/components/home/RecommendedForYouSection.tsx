@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, ChevronRight } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
@@ -6,6 +6,7 @@ import TrackCard from "@/components/TrackCard";
 import NFTCard from "@/components/NFTCard";
 import { MOCK_TRACKS } from "@/constants";
 import { NFTItem } from "@/types";
+import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 const STATIC_RECOMMENDED_NFTS = [
   { id: "nft-r1", title: "Deep Oceans #04", price: "4.5 TON", owner: "Echo Phase", cover: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true" },
@@ -16,7 +17,7 @@ const STATIC_RECOMMENDED_NFTS = [
 export const RecommendedForYouSection: React.FC = () => {
   const navigate = useNavigate();
   const { allTracks } = useAudio();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const recommendedTracks = useMemo(() => {
     return (allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 6);
@@ -41,7 +42,7 @@ export const RecommendedForYouSection: React.FC = () => {
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-0.5">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary animate-pulse" />
           <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
@@ -58,15 +59,16 @@ export const RecommendedForYouSection: React.FC = () => {
 
       <div 
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto no-scrollbar pb-3 px-0.5 w-full"
-        style={{ scrollBehavior: 'smooth' }}
+        {...handlers}
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {recommendedTracks.map((rec) => (
           <TrackCard 
             key={rec.id} 
             track={rec} 
             variant="default" 
-            className="w-[150px] sm:w-[165px] shrink-0" 
+            className="w-[140px] sm:w-[155px] shrink-0 snap-start" 
           />
         ))}
 
@@ -75,7 +77,7 @@ export const RecommendedForYouSection: React.FC = () => {
             key={nft.id} 
             nft={nft} 
             variant="default" 
-            className="w-[150px] sm:w-[165px] shrink-0" 
+            className="w-[140px] sm:w-[155px] shrink-0 snap-start" 
           />
         ))}
       </div>

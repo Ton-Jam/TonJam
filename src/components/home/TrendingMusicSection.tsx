@@ -23,6 +23,7 @@ import { useNFT } from '@/contexts/NFTContext';
 import { TON_LOGO, MOCK_TRACKS } from '@/constants';
 import { Track, NFTItem } from '@/types';
 import confetti from 'canvas-confetti';
+import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 import { toast } from 'sonner';
 
 interface TopCollection {
@@ -166,10 +167,13 @@ export const TrendingMusicSection: React.FC = () => {
     navigate('/marketplace');
   };
 
+  const { scrollRef: scrollRef1, handlers: handlers1 } = useHorizontalDragScroll<HTMLDivElement>();
+  const { scrollRef: scrollRef2, handlers: handlers2 } = useHorizontalDragScroll<HTMLDivElement>();
+
   return (
     <div className="space-y-5 text-left my-2">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-0.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="flex items-center gap-1.5 bg-amber-500/10 text-amber-400 text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">
@@ -224,7 +228,7 @@ export const TrendingMusicSection: React.FC = () => {
       {/* 1. MOST POPULAR TRACKS (Scrollable Horizontal List) */}
       {(activeTab === 'all' || activeTab === 'tracks') && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between px-0.5">
+          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-400" />
               <h3 className="text-sm font-black uppercase tracking-wider text-zinc-200">
@@ -239,7 +243,12 @@ export const TrendingMusicSection: React.FC = () => {
             </button>
           </div>
 
-          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
+          <div 
+            ref={scrollRef1}
+            {...handlers1}
+            className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none" 
+            style={{ overscrollBehaviorX: 'contain' }}
+          >
             {popularTracks.map((track, idx) => {
               const rank = idx + 1;
               const isCurrentPlaying = currentTrack?.id === track.id && isPlaying;
@@ -249,7 +258,7 @@ export const TrendingMusicSection: React.FC = () => {
                   key={track.id}
                   whileHover={{ y: -4 }}
                   transition={{ duration: 0.2 }}
-                  className="w-[180px] shrink-0 bg-[#0A113A]/60 hover:bg-[#121B4C]/80 backdrop-blur-md p-3 rounded-2xl space-y-2.5 transition-all shadow-md group relative cursor-pointer"
+                  className="w-[160px] sm:w-[180px] shrink-0 snap-start bg-[#0A113A]/60 hover:bg-[#121B4C]/80 backdrop-blur-md p-3 rounded-2xl space-y-2.5 transition-all shadow-md group relative cursor-pointer"
                   onClick={() => playTrack(track)}
                 >
                   {/* Image & Overlay Rank Badge */}
@@ -336,7 +345,7 @@ export const TrendingMusicSection: React.FC = () => {
       {/* 2. TOP-SELLING COLLECTIONS (Scrollable Horizontal List) */}
       {(activeTab === 'all' || activeTab === 'collections') && (
         <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between px-0.5">
+          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-emerald-400" />
               <h3 className="text-sm font-black uppercase tracking-wider text-zinc-200">
@@ -348,14 +357,19 @@ export const TrendingMusicSection: React.FC = () => {
             </span>
           </div>
 
-          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
+          <div 
+            ref={scrollRef2}
+            {...handlers2}
+            className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none" 
+            style={{ overscrollBehaviorX: 'contain' }}
+          >
             {topCollections.map((col) => (
               <motion.div
                 key={col.id}
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
                 onClick={() => navigate('/marketplace')}
-                className="w-[220px] shrink-0 bg-[#0A113A]/60 hover:bg-[#121B4C]/80 backdrop-blur-md p-3.5 rounded-2xl space-y-3 transition-all shadow-md group relative cursor-pointer"
+                className="w-[210px] sm:w-[230px] shrink-0 snap-start bg-[#0A113A]/60 hover:bg-[#121B4C]/80 backdrop-blur-md p-3.5 rounded-2xl space-y-3 transition-all shadow-md group relative cursor-pointer"
               >
                 {/* Collection Cover Image */}
                 <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black/40">

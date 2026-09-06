@@ -52,17 +52,19 @@ export const SPONSORED_PROMOS: SponsoredPromo[] = [
 export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = ({ promos = SPONSORED_PROMOS }) => {
   const navigate = useNavigate();
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
+    if (isPaused) return;
     const interval = setInterval(() => {
       setCurrentPromoIndex((prev) => (prev + 1) % promos.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [promos.length]);
+  }, [promos.length, isPaused]);
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-0.5">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <h2 className="text-xs font-black uppercase tracking-widest text-zinc-400">
           Featured Spotlights & Launches
         </h2>
@@ -71,7 +73,14 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
         </span>
       </div>
 
-      <div className="relative rounded-2xl overflow-hidden bg-zinc-950 h-[175px] sm:h-[190px]">
+      <div className="w-full px-0 sm:px-4 md:px-6 lg:px-8">
+        <div 
+          className="relative rounded-none sm:rounded-2xl overflow-hidden bg-zinc-950 h-[175px] sm:h-[190px] w-full"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
+        >
         <AnimatePresence mode="wait">
           {promos.map((item, idx) => {
             if (idx !== currentPromoIndex) return null;
@@ -82,7 +91,7 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
-                className="absolute inset-0 flex flex-col justify-end p-5 sm:p-6"
+                className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 pr-16 sm:pr-24"
               >
                 <img 
                   src={item.artwork} 
@@ -90,13 +99,13 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
                   className="absolute inset-0 w-full h-full object-cover opacity-40 scale-105 transition-transform duration-700" 
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
                 
-                <div className="relative z-10 space-y-1">
+                <div className="relative z-10 space-y-1 min-w-0">
                   <Badge variant="default" className="text-[8px] uppercase tracking-widest bg-primary text-black font-black px-2 py-0.5 rounded-md border-none">
                     {item.badge}
                   </Badge>
-                  <h3 className="text-base sm:text-lg font-black text-white mt-1 leading-tight tracking-tight">
+                  <h3 className="text-base sm:text-lg font-black text-white mt-1 leading-tight tracking-tight truncate">
                     {item.title}
                   </h3>
                   <p className="text-xs text-zinc-300 line-clamp-1 max-w-sm sm:max-w-md">
@@ -126,7 +135,7 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
         </AnimatePresence>
 
         {/* Pagination Indicators */}
-        <div className="absolute bottom-4 right-5 z-10 flex gap-1.5 items-center">
+        <div className="absolute bottom-3.5 right-4 sm:bottom-4 sm:right-5 z-10 flex gap-1.5 items-center">
           {promos.map((_, idx) => (
             <button
               key={idx}
@@ -139,8 +148,9 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
           ))}
         </div>
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 };
 
 export default SponsoredPromoCarousel;

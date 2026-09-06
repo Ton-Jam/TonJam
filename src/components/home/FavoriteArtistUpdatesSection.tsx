@@ -4,6 +4,7 @@ import { UserCheck, ChevronRight } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import ArtistCard from "@/components/ArtistCard";
 import { Artist } from "@/types";
+import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 const STATIC_TRENDING_ARTISTS = [
   { id: "art-1", name: "DJ Krupy", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=krupy", followers: "142.5k", verified: true },
@@ -21,6 +22,7 @@ const STATIC_TRENDING_ARTISTS = [
 export const FavoriteArtistUpdatesSection: React.FC = () => {
   const navigate = useNavigate();
   const { followedUserIds = [], artists = [] } = useAudio();
+  const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const getIsFollowing = (artId: string) => {
     if (!followedUserIds || followedUserIds.length === 0) {
@@ -49,7 +51,7 @@ export const FavoriteArtistUpdatesSection: React.FC = () => {
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-0.5">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <UserCheck className="w-4 h-4 text-primary" />
           <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
@@ -64,13 +66,18 @@ export const FavoriteArtistUpdatesSection: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-0.5 w-full">
+      <div 
+        ref={scrollRef}
+        {...handlers}
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        style={{ overscrollBehaviorX: 'contain' }}
+      >
         {followedArtists.map((art) => (
           <ArtistCard 
             key={art.uid} 
             artist={art}
             variant="default"
-            className="w-[120px] sm:w-[130px] shrink-0 bg-zinc-950 px-3 py-4 rounded-2xl border-none hover:bg-zinc-900 transition-colors"
+            className="w-[120px] sm:w-[130px] shrink-0 snap-start bg-zinc-950 px-3 py-4 rounded-2xl border-none hover:bg-zinc-900 transition-colors"
           />
         ))}
       </div>

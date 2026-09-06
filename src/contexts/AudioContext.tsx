@@ -73,6 +73,8 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import { getPlaceholderImage } from "@/lib/utils";
 import { useAudioStore } from "@/store/audioStore";
+import { notificationService } from "@/services/notificationService";
+import { toast } from "sonner";
 import { useUserStore } from "@/store/userStore";
 import { triggerHaptic } from "@/lib/haptics";
 
@@ -1839,6 +1841,57 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         await updateDoc(nftRef, cleanUpdates);
       }
 
+      // Check if a new bid or offer was submitted and notify the seller/creator
+      if (cleanUpdates.offers && Array.isArray(cleanUpdates.offers) && cleanUpdates.offers.length > 0) {
+        const latestOffer = cleanUpdates.offers[0] as any;
+        const targetNft = allNFTs.find((n) => n.id === nftId) || (currentNftData as NFTItem);
+        if (targetNft) {
+          const sellerId = targetNft.ownerId || 
+            (targetNft.owner && !targetNft.owner.startsWith('EQ') && !targetNft.owner.startsWith('UQ') ? targetNft.owner : null) || 
+            targetNft.artistId || 
+            targetNft.creator;
+
+          const bidderDisplay = latestOffer?.offerer ? `${latestOffer.offerer.slice(0, 6)}...` : 'a collector';
+          const offerPrice = latestOffer?.price || targetNft.price || '0';
+
+          if (sellerId) {
+            notificationService.addNotification(sellerId, {
+              userId: sellerId,
+              type: 'bid_update',
+              title: 'BID UPDATE ON YOUR NFT!',
+              message: `New bid of ${offerPrice} TON placed on your listed music NFT "${targetNft.title}" by ${bidderDisplay}.`,
+              link: `/nft/${targetNft.id}`,
+              metadata: {
+                nftId: targetNft.id,
+                type: 'new_bid',
+                bidAmount: parseFloat(offerPrice),
+                thumbnailUrl: targetNft.imageUrl || targetNft.coverUrl,
+                coverUrl: targetNft.imageUrl || targetNft.coverUrl,
+              }
+            });
+          }
+
+          // If current active user is the seller or owner, alert them directly with toast
+          const isCurrentUserOwner = 
+            (userProfile?.walletAddress && targetNft.owner === userProfile.walletAddress) ||
+            (userProfile?.uid && (sellerId === userProfile.uid || targetNft.owner === userProfile.uid)) ||
+            userProfile?.listedNftIds?.includes(targetNft.id) ||
+            userProfile?.ownedNftIds?.includes(targetNft.id);
+
+          if (isCurrentUserOwner) {
+            toast.info(`🎯 Bid Update on "${targetNft.title}"!`, {
+              description: `New bid of ${offerPrice} TON from ${bidderDisplay}.`,
+              action: {
+                label: "View NFT",
+                onClick: () => {
+                  window.location.hash = `#/nft/${targetNft.id}`;
+                }
+              }
+            });
+          }
+        }
+      }
+
       if (!silent) addNotification("Asset protocol updated", "success");
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `nfts/${nftId}`);
@@ -1867,6 +1920,37 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       const cleanTrack = cleanObject(trackWithId);
       await setDoc(doc(db, "tracks", track.id), cleanTrack);
       addNotification(`Track "${track.title}" uploaded`, "success");
+
+      // Notify followers if this track is from a tracked/followed artist
+      const artistId = track.artistId || userProfile?.uid || "";
+      const artistName = track.artist || userProfile?.name || "Followed Artist";
+      
+      if (followedUserIds && (followedUserIds.includes(artistId) || (track.artist && followedUserIds.some(fid => fid.toLowerCase() === track.artist.toLowerCase())))) {
+        notificationService.addNotification(userProfile.uid, {
+          userId: userProfile.uid,
+          type: 'track_upload',
+          title: 'NEW TRACK DROP!',
+          message: `${artistName} just dropped a new track: "${track.title}"! Sync up and stream now.`,
+          link: `/track/${track.id}`,
+          metadata: {
+            trackId: track.id,
+            artistId,
+            type: 'new_release',
+            thumbnailUrl: track.coverUrl,
+            coverUrl: track.coverUrl,
+          }
+        });
+
+        toast.success(`🎵 New Track Drop from ${artistName}!`, {
+          description: `"${track.title}" is out now. Tap to listen.`,
+          action: {
+            label: "Play Track",
+            onClick: () => {
+              playTrack(trackWithId);
+            }
+          }
+        });
+      }
     } catch (error) {
       console.warn("Firestore error saving track:", error);
       // Even if remote save fails in preview mode, keep track in local session
@@ -4940,6 +5024,9 @@ export const useAudio = () => {
         }
         if (prop === "repeatMode") {
           return "off";
+        }
+        if (prop === "currentTrack" || prop === "trackToAddToPlaylist" || prop === "optionsTrack" || prop === "activePlaylistId" || prop === "genesisContractAddress" || prop === "userAddress" || prop === "discoverWeekly" || prop === "exclusiveContent" || prop === "optionsCallbacks") {
+          return null;
         }
         if (prop === "smartShuffleMode") {
           return "mood";

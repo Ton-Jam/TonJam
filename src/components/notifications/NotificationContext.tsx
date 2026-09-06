@@ -13,6 +13,7 @@ import {
   deleteDoc 
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { toast } from 'sonner';
 
 interface NotificationContextType {
   notifications: TonJamNotification[];
@@ -28,6 +29,8 @@ interface NotificationContextType {
   updatePreferences: (prefs: Partial<NotificationPreferences>) => void;
   requestPushPermission: () => Promise<boolean>;
   simulateNotification: (category?: NotificationCategory) => void;
+  simulateBidUpdate: () => void;
+  simulateTrackDrop: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -419,6 +422,124 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [user, getStorageKey]);
 
+  const simulateBidUpdate = useCallback(() => {
+    const id = `sim-bid-${Date.now()}`;
+    const uid = user?.uid || 'guest_user';
+    const bidAmount = (Math.random() * 20 + 15).toFixed(1);
+    const bidderSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+
+    const notif: TonJamNotification = {
+      id,
+      userId: uid,
+      category: 'auction',
+      title: 'BID UPDATE ON YOUR NFT!',
+      description: `A new bid of ${bidAmount} TON was placed on your listed music NFT "Sonic Wave Genesis" by EQD...${bidderSuffix}`,
+      timestamp: new Date().toISOString(),
+      read: false,
+      thumbnailUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&fit=crop&q=80',
+      quickAction: {
+        label: 'View NFT',
+        type: 'bid',
+        payload: { nftId: 'sample-nft-1' }
+      },
+      metadata: {
+        nftId: 'sample-nft-1',
+        type: 'new_bid',
+        bidAmount: parseFloat(bidAmount)
+      }
+    };
+
+    setNotifications((prev) => {
+      const updated = [notif, ...prev];
+      try {
+        localStorage.setItem(getStorageKey('list'), JSON.stringify(updated));
+      } catch (err) {
+        console.error(err);
+      }
+      return updated;
+    });
+
+    toast.info(`🎯 Bid Update on "Sonic Wave Genesis"!`, {
+      description: `New bid of ${bidAmount} TON placed by EQD...${bidderSuffix}`,
+      action: {
+        label: 'View NFT',
+        onClick: () => {
+          window.location.hash = '#/nft/sample-nft-1';
+        }
+      }
+    });
+
+    if (user?.uid) {
+      try {
+        const docRef = doc(db, 'users', user.uid, 'notifications', id);
+        setDoc(docRef, notif).catch(console.warn);
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+  }, [user, getStorageKey]);
+
+  const simulateTrackDrop = useCallback(() => {
+    const id = `sim-drop-${Date.now()}`;
+    const uid = user?.uid || 'guest_user';
+    const artistNames = ['Luna Ray', 'Burna Boy', 'Cyber Pulse', 'Snoop Dogg'];
+    const chosenArtist = artistNames[Math.floor(Math.random() * artistNames.length)];
+    const trackTitles = ['Solar Flare', 'Lagos City Vibe', 'Neon Mirage', 'Bass Resonance'];
+    const chosenTrack = trackTitles[Math.floor(Math.random() * trackTitles.length)];
+
+    const notif: TonJamNotification = {
+      id,
+      userId: uid,
+      category: 'artist_release',
+      title: 'NEW TRACK DROP!',
+      description: `${chosenArtist} just dropped a new track: "${chosenTrack}"! Sync up and stream now.`,
+      timestamp: new Date().toISOString(),
+      read: false,
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&fit=crop&q=80',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&fit=crop&q=80',
+      quickAction: {
+        label: 'Listen',
+        type: 'play',
+        payload: { trackId: 'sample-track-1' }
+      },
+      metadata: {
+        trackId: 'sample-track-1',
+        type: 'new_release',
+        artist: chosenArtist,
+        title: chosenTrack
+      }
+    };
+
+    setNotifications((prev) => {
+      const updated = [notif, ...prev];
+      try {
+        localStorage.setItem(getStorageKey('list'), JSON.stringify(updated));
+      } catch (err) {
+        console.error(err);
+      }
+      return updated;
+    });
+
+    toast.success(`🎵 New Track Drop from ${chosenArtist}!`, {
+      description: `"${chosenTrack}" is out now. Stream immediately.`,
+      action: {
+        label: 'Listen',
+        onClick: () => {
+          window.location.hash = '#/track/sample-track-1';
+        }
+      }
+    });
+
+    if (user?.uid) {
+      try {
+        const docRef = doc(db, 'users', user.uid, 'notifications', id);
+        setDoc(docRef, notif).catch(console.warn);
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+  }, [user, getStorageKey]);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
@@ -437,6 +558,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         updatePreferences,
         requestPushPermission,
         simulateNotification,
+        simulateBidUpdate,
+        simulateTrackDrop,
       }}
     >
       {children}

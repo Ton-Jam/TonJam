@@ -192,7 +192,8 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
       {/* HORIZONTAL SCROLL CONTAINER */}
       <div
         ref={scrollContainerRef}
-        className="flex gap-3.5 overflow-x-auto no-scrollbar pb-2 pt-0.5 scroll-smooth snap-x snap-mandatory"
+        className="flex gap-3.5 overflow-x-auto no-scrollbar pb-2 pt-0.5 scroll-smooth snap-x snap-mandatory overscroll-x-contain"
+        style={{ overscrollBehaviorX: 'contain' }}
       >
         {recentNFTs.map((nft, idx) => {
           const isThisTrackPlaying = currentTrack?.id === nft.trackId && isPlaying;

@@ -1,16 +1,17 @@
-import React, { useRef } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, History } from "lucide-react";
 import { useLibrary } from "@/contexts/LibraryContext";
 import { useAudio } from "@/contexts/AudioContext";
 import TrackCard from "@/components/TrackCard";
 import { MOCK_TRACKS } from "@/constants";
+import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 export const RecentlyPlayedSection: React.FC = () => {
   const navigate = useNavigate();
   const { recentlyPlayed } = useLibrary();
   const { allTracks } = useAudio();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const displayTracks = (recentlyPlayed && recentlyPlayed.length > 0)
     ? recentlyPlayed.slice(0, 5)
@@ -20,7 +21,7 @@ export const RecentlyPlayedSection: React.FC = () => {
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-0.5">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <History className="w-5 h-5 text-indigo-400" />
           <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
@@ -37,8 +38,9 @@ export const RecentlyPlayedSection: React.FC = () => {
 
       <div 
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-0.5 w-full snap-x snap-mandatory"
-        style={{ scrollBehavior: 'smooth' }}
+        {...handlers}
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {displayTracks.map((track) => (
           <TrackCard 

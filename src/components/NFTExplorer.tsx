@@ -270,7 +270,7 @@ export const NFTExplorer: React.FC = () => {
   }, [collections]);
 
   return (
-    <div className="bg-[#0A1128] rounded-2xl p-6 border border-white/5 relative overflow-hidden">
+    <div className="bg-[#0A1128] rounded-2xl p-6 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -297,7 +297,7 @@ export const NFTExplorer: React.FC = () => {
           
           {/* Details Tooltip / Card */}
           {selectedCollection && (
-            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:w-80 bg-slate-900/90 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-2xl animate-fade-in z-20">
+            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:w-80 bg-slate-900/90 backdrop-blur-md rounded-xl p-4 shadow-2xl animate-fade-in z-20">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">
                   <img 

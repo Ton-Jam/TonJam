@@ -4,6 +4,7 @@ import { motion, PanInfo, AnimatePresence } from "motion/react";
 import { Play, Pause, ListMusic, MoreVertical, Heart, ChevronUp, Music2 } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
+import { useCoverColor } from "@/lib/color-utils";
 
 interface MiniPlayerProps {
   onQueueClick?: () => void;
@@ -223,6 +224,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     }
   };
 
+  const coverUrl = currentTrack?.coverUrl || getPlaceholderImage("cover");
+  const coverColor = useCoverColor(coverUrl);
+
   if (!currentTrack) return null;
 
   const isLiked = likedTrackIds.includes(currentTrack.id);
@@ -246,8 +250,6 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     toggleLikeTrack(currentTrack.id);
   };
 
-  const coverUrl = currentTrack.coverUrl || getPlaceholderImage("cover");
-
   // RENDER DROPPED-DOWN (COLLAPSED) FLOATING PILL
   if (isDroppedDown) {
     return (
@@ -265,23 +267,40 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           onClick={() => setIsDroppedDown(false)}
           className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.6)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden"
           style={{
-            backgroundColor: "#000000",
-            background: "#000000",
+            backgroundColor: "#050A24",
             opacity: 1,
-            backdropFilter: "none",
-            WebkitBackdropFilter: "none",
           }}
           title="Click to expand Mini Player"
         >
+          {/* Ambient Cover Photo & Dominant Color Gradient Background */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
+            {coverUrl && (
+              <img
+                src={coverUrl}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover blur-lg scale-150 opacity-35"
+              />
+            )}
+            <div
+              className="absolute inset-0 transition-opacity duration-500"
+              style={{
+                background: `linear-gradient(135deg, ${coverColor}55 0%, ${coverColor}18 100%)`,
+                opacity: 0.75,
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/90" />
+          </div>
+
           {/* Sleek top progress indicator on collapsed pill */}
-          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-slate-800/80">
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-slate-800/80 z-10">
             <div 
               className="h-full bg-gradient-to-r from-blue-500 via-[#0098EA] to-cyan-400" 
               style={{ width: `${localProgress}%` }} 
             />
           </div>
           {/* Animated artwork thumbnail */}
-          <div className="relative flex-shrink-0">
+          <div className="relative flex-shrink-0 z-10">
             <div className="w-9 h-9 rounded-full overflow-hidden shadow-inner">
               <img 
                 src={coverUrl} 
@@ -297,7 +316,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           </div>
 
           {/* Track Info */}
-          <div className="flex flex-col min-w-0 pr-1 max-w-[100px] sm:max-w-[130px]">
+          <div className="relative z-10 flex flex-col min-w-0 pr-1 max-w-[100px] sm:max-w-[130px]">
             <div className="flex items-center gap-1 min-w-0">
               <Music2 className="w-3 h-3 text-[#0098EA] shrink-0" />
               <ScrollingText
@@ -319,7 +338,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               e.stopPropagation();
               togglePlay();
             }}
-            className="w-7 h-7 rounded-full bg-[#0098EA] hover:bg-blue-400 text-white flex items-center justify-center shadow-md transition-transform active:scale-90 shrink-0"
+            className="relative z-10 w-7 h-7 rounded-full bg-[#0098EA] hover:bg-blue-400 text-white flex items-center justify-center shadow-md transition-transform active:scale-90 shrink-0"
             title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
@@ -335,7 +354,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               e.stopPropagation();
               setIsDroppedDown(false);
             }}
-            className="p-1 text-slate-400 hover:text-white transition-colors shrink-0"
+            className="relative z-10 p-1 text-slate-400 hover:text-white transition-colors shrink-0"
             title="Expand Mini Player"
           >
             <ChevronUp className="w-4 h-4 text-[#0098EA]" />
@@ -382,14 +401,38 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       }`}
       style={{
         touchAction: "none",
-        backgroundColor: "#000000",
-        background: "#000000",
+        backgroundColor: "#050A24",
         opacity: 1,
-        backdropFilter: "none",
-        WebkitBackdropFilter: "none",
       }}
       id="tonjam-mini-player"
     >
+      {/* Ambient Cover Photo & Dominant Color Gradient Background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
+        {coverUrl && (
+          <img
+            src={coverUrl}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-30 transition-opacity duration-500"
+          />
+        )}
+        <div
+          className="absolute inset-0 transition-opacity duration-500"
+          style={{
+            background: `linear-gradient(135deg, ${coverColor}55 0%, ${coverColor}18 100%)`,
+            opacity: 0.8,
+          }}
+        />
+        <div
+          className="absolute inset-0 transition-opacity duration-500 mix-blend-screen"
+          style={{
+            background: `radial-gradient(circle at 15% 50%, ${coverColor}60 0%, transparent 65%)`,
+            opacity: 0.45,
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050A24]/90 via-[#050A24]/75 to-[#000000]/90" />
+      </div>
+
       {/* Interactive Flush Top Seek Bar (Perfect 1px top alignment) */}
       <div 
         ref={progressBarRef}
@@ -453,7 +496,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       </div>
 
       {/* Main Content Row: Artwork, Metadata, Controls */}
-      <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 gap-3">
+      <div className="relative z-10 flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 gap-3">
         {/* Artwork + Title + Artist */}
         <div className="flex items-center gap-2.5 flex-1 min-w-0" id="mini-metadata-area">
           <div className="relative shrink-0">

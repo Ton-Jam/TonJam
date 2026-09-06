@@ -376,21 +376,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Header */}
       {!isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isLoginPage && !isDiscover && !isArtistProfile && (
         <motion.header 
-          className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} bg-black border-none`}
+          className={`fixed top-0 left-0 right-0 z-40 px-2.5 sm:px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} bg-black border-none`}
         >
           {/* Background with blur and seamless backdrop */}
           <motion.div 
             className="absolute inset-0 bg-black -z-10"
           />
           
-          <div className={`flex items-center ${headerTitle ? 'justify-center flex-1' : 'gap-4 flex-1'}`}>
+          <div className={`flex items-center min-w-0 ${headerTitle ? 'justify-center flex-1' : 'gap-2 sm:gap-4 flex-1'}`}>
             {isHome ? (
               !headerTitle && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
                       onClick={() => setIsMobileSidebarOpen(true)}
-                      className="lg:hidden p-2 rounded-[4px] bg-muted/30 hover:bg-muted transition-all"
+                      className="lg:hidden p-2 rounded-[4px] bg-muted/30 hover:bg-muted transition-all flex-shrink-0"
                       aria-label="Open sidebar"
                     >
                       <motion.img 
@@ -408,33 +408,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-3 pl-2"
+                    className="flex items-center gap-3 pl-2 min-w-0"
                 >
-                    <Avatar className="w-8 h-8 rounded-full border border-border/50">
+                    <Avatar className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0">
                         <AvatarImage src={activeArtist.avatarUrl} alt={activeArtist.name} />
                         <AvatarFallback>{activeArtist.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
-                    <span className="font-black tracking-tighter uppercase">{activeArtist.name}</span>
+                    <span className="font-black tracking-tighter uppercase truncate">{activeArtist.name}</span>
                 </motion.div>
             ) : (
-              <div className={`flex items-center ${headerTitle ? 'w-full justify-center relative' : 'gap-2'}`}>
+              <div className={`flex items-center min-w-0 ${headerTitle ? 'w-full justify-center relative' : 'gap-1.5 sm:gap-2'}`}>
                 {!headerTitle && (
                   <BackButton 
-                    className={`p-2 rounded-[4px] bg-transparent hover:bg-white/5 transition-all ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}
+                    className={`p-2 rounded-[4px] bg-transparent hover:bg-white/5 transition-all flex-shrink-0 ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}
                     ariaLabel="Go back"
                   />
                 )}
-                <div className={`${headerTitle ? 'flex' : 'lg:hidden'} flex-col justify-center items-center`}>
+                <div className={`${headerTitle ? 'flex' : 'lg:hidden'} flex-col justify-center items-center min-w-0`}>
                   <span className={cn(
                     "font-bold uppercase tracking-widest truncate transition-all duration-300",
-                    headerTitle ? "text-sm" : "text-[12px] tracking-tighter max-w-[120px]"
+                    headerTitle ? "text-sm" : "text-[11px] sm:text-[12px] tracking-tighter max-w-[85px] min-[360px]:max-w-[110px] sm:max-w-[150px]"
                   )}>
                     {headerTitle || (isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : isPostDetail ? 'Post' : isWallet ? 'Wallet' : isSearch ? 'Search' : isSettings ? 'Settings' : isProfile ? (userProfile?.name || userProfile?.username || 'User') : isDiscover ? 'Discover' : isTasks ? 'Tasks' : isGovernance ? 'Governance' : isAdmin ? 'Admin' : (location.pathname.split('/')[1] || '').replace('-', ' ')))}
                   </span>
                 </div>
                 {headerTitle && !isHome && (
                   <BackButton 
-                    className="absolute left-0 p-2 rounded-[4px] bg-transparent hover:bg-white/5 transition-all text-foreground"
+                    className="absolute left-0 p-2 rounded-[4px] bg-transparent hover:bg-white/5 transition-all text-foreground flex-shrink-0"
                     ariaLabel="Go back"
                   />
                 )}
@@ -638,7 +638,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
           </div>
 
-          <div className={cn("items-center gap-[3px] transition-all duration-300", headerTitle ? "hidden" : "flex")}>
+          <div className={cn("items-center gap-1 sm:gap-1.5 flex-shrink-0 transition-all duration-300", headerTitle ? "hidden" : "flex")}>
             {/* Global Filter Icon for Discovery/Marketplace/Library */}
             {(isMarketplace || isDiscover || isLibrary || isJamspace) && (
               <Tooltip>
@@ -646,7 +646,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <button 
                     onClick={() => setIsDiscoverFiltersOpen(true)}
                     className={cn(
-                      "p-2.5 rounded-[4px] transition-all flex items-center gap-2",
+                      "p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] transition-all flex items-center gap-2",
                       isDiscoverFiltersOpen ? "text-blue-500 bg-blue-500/10" : "text-muted-foreground hover:bg-muted"
                     )}
                   >
@@ -657,7 +657,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Tooltip>
             )}
 
-            <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden sm:block" />
+            <Separator orientation="vertical" className="h-6 bg-border/40 mx-0.5 hidden sm:block" />
 
             {/* GRAMS Price Ticker */}
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-muted/20">
@@ -672,30 +672,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </span>
             </div>
 
-            <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden lg:block" />
+            <Separator orientation="vertical" className="h-6 bg-border/40 mx-0.5 hidden lg:block" />
 
             {/* Task Center Badge */}
-            <button onClick={() => navigate('/tasks')} className={`flex items-center gap-3 px-3 py-1.5 rounded-[4px] transition-colors hover:bg-transparent ${!isHome ? 'hidden sm:flex' : ''}`}>
-               <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[32px] h-[32px] object-contain" />
+            <button 
+              onClick={() => navigate('/tasks')} 
+              className={`items-center gap-1.5 sm:gap-3 px-1.5 sm:px-3 py-1 rounded-[4px] transition-colors hover:bg-transparent flex-shrink-0 ${!isHome ? 'hidden md:flex' : 'hidden min-[380px]:flex'}`}
+            >
+               <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[26px] h-[26px] sm:w-[32px] sm:h-[32px] object-contain" />
                {tonBalance !== null && (
-                  <span className="text-[9px] font-black tracking-tighter text-blue-500 opacity-60">{tonBalance.toFixed(2)} TON</span>
+                  <span className="text-[9px] font-black tracking-tighter text-blue-500 opacity-60 hidden min-[440px]:inline">{tonBalance.toFixed(2)} TON</span>
                )}
             </button>
 
-            <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden sm:block" />
+            <Separator orientation="vertical" className="h-6 bg-border/40 mx-0.5 hidden sm:block" />
 
-            <div className="flex items-center gap-[1px]">
+            <div className="flex items-center gap-0.5 sm:gap-1">
               {!isMarketplace && !isDiscover && !isLibrary && !isTrendingNFTs && (
                 <NotificationBell />
               )}
 
               {isLibrary ? (
-              <div className="flex items-center gap-[1px]">
+              <div className="flex items-center gap-0.5 sm:gap-1">
                  <Tooltip>
                     <TooltipTrigger asChild>
                       <button 
                         onClick={() => setIsHeaderSearchOpen(!isHeaderSearchOpen)}
-                        className={`p-2.5 rounded-[4px] transition-all flex items-center gap-2 ${isHeaderSearchOpen ? 'text-blue-500 bg-blue-500/10' : 'text-muted-foreground hover:bg-muted'}`}
+                        className={`p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] transition-all flex items-center gap-2 ${isHeaderSearchOpen ? 'text-blue-500 bg-blue-500/10' : 'text-muted-foreground hover:bg-muted'}`}
                       >
                         <MagnifyingGlassIcon className="h-5 w-5" strokeWidth={2.5} />
                       </button>
@@ -707,7 +710,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <TooltipTrigger asChild>
                       <button 
                         onClick={() => setIsCreatePlaylistModalOpen(true)}
-                        className="p-2.5 rounded-[4px] hover:bg-muted transition-all text-muted-foreground"
+                        className="p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] hover:bg-muted transition-all text-muted-foreground"
                       >
                         <PlusIcon className="h-5 w-5" strokeWidth={2.5} />
                       </button>
@@ -723,7 +726,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         await disconnectWalletContext();
                         navigate('/wallet');
                       }}
-                      className={`p-2.5 rounded-[4px] hover:bg-destructive/10 hover:text-destructive transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
+                      className={`p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] hover:bg-destructive/10 hover:text-destructive transition-all flex items-center gap-1.5 sm:gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
                     >
                       <WalletIcon className="h-5 w-5" strokeWidth={2.5} />
                       <div className="hidden md:flex flex-col items-start leading-none gap-0.5">
@@ -743,7 +746,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       onClick={() => {
                         navigate('/wallet');
                       }}
-                      className={`p-2.5 rounded-[4px] hover:bg-muted transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
+                      className={`p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] hover:bg-muted transition-all flex items-center gap-1.5 sm:gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
                     >
                       <WalletIcon className="h-5 w-5" strokeWidth={2.5} />
                       <span className="hidden md:inline text-[9px] font-black uppercase tracking-widest">Connect</span>
@@ -753,13 +756,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </Tooltip>
               )}
               
-              <Separator orientation="vertical" className="h-4 bg-border/40 mx-1" />
+              <Separator orientation="vertical" className="h-4 bg-border/40 mx-0.5 hidden sm:block" />
 
               {user && !isLibrary ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link to="/profile" className={`flex items-center gap-2 p-1 rounded-[4px] hover:bg-muted transition-all ${isProfile ? 'ring-1 ring-blue-500/30' : ''}`}>
-                      <Avatar className="w-8 h-8 rounded-[4px]">
+                    <Link to="/profile" className={`flex items-center gap-2 p-1 min-w-[36px] min-h-[36px] justify-center rounded-[4px] hover:bg-muted transition-all ${isProfile ? 'ring-1 ring-blue-500/30' : ''}`}>
+                      <Avatar className="w-8 h-8 rounded-[4px] flex-shrink-0">
                         <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt="" className="object-cover" />
                         <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-[4px] text-[10px] font-bold">
                           {user.displayName ? user.displayName.slice(0, 2).toUpperCase() : '??'}
@@ -778,7 +781,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <button 
                       onClick={() => navigate('/login')}
-                      className="p-2.5 rounded-[4px] hover:bg-muted transition-all text-muted-foreground"
+                      className="p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] hover:bg-muted transition-all text-muted-foreground"
                     >
                       <UserIcon className="h-5 w-5" strokeWidth={2.5} />
                     </button>
@@ -927,7 +930,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         >
           <nav 
             id="tonjam-mobile-nav-bar"
-            className="h-full w-full bg-black border-t border-[#c0c0c0]/50 px-2 flex justify-around items-center" 
+            className="h-full w-full bg-black/95 backdrop-blur-xl border-t border-white/[0.06] px-2 flex justify-around items-center" 
             aria-label="Mobile Navigation"
           >
             <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />

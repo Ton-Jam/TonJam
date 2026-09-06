@@ -48,7 +48,7 @@ interface TrendingTracksSectionProps {
 
 export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
   title = "Trending NFT Tracks",
-  subtitle = "High-performing audio artifacts synced directly from the GRAM NFT database"
+  subtitle = "High-performing audio artifacts synced directly from the TON NFT database"
 }) => {
   const navigate = useNavigate();
   const { allTracks = [], allNFTs = [], playTrack, togglePlay, currentTrack, isPlaying } = useAudio();
@@ -86,7 +86,7 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
             coverUrl: data.imageUrl || data.coverUrl || matchedTrack?.coverUrl || getPlaceholderImage(data.title || 'NFT'),
             audioUrl: data.audioUrl || matchedTrack?.audioUrl,
             price: data.price || matchedTrack?.price || '10',
-            currency: data.currency || 'GRAM',
+            currency: data.currency || 'TON',
             streams: data.streams || matchedTrack?.playCount || matchedTrack?.streams || Math.floor(Math.random() * 8000) + 2000,
             likes: data.likes || matchedTrack?.likes || Math.floor(Math.random() * 900) + 100,
             edition: data.edition || matchedTrack?.editions || '1/1',
@@ -111,7 +111,7 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
                 coverUrl: nft.imageUrl || nft.coverUrl || matchedTrack?.coverUrl || getPlaceholderImage(nft.title),
                 audioUrl: nft.audioUrl || matchedTrack?.audioUrl,
                 price: nft.price || '12',
-                currency: 'GRAM',
+                currency: 'TON',
                 streams: matchedTrack?.playCount || matchedTrack?.streams || Math.floor(Math.random() * 5000) + 3000,
                 likes: matchedTrack?.likes || Math.floor(Math.random() * 500) + 200,
                 edition: nft.edition || '1/1',
@@ -137,7 +137,7 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
                   coverUrl: t.coverUrl,
                   audioUrl: t.audioUrl,
                   price: t.nftPrice || t.price || '15',
-                  currency: 'GRAM',
+                  currency: 'TON',
                   streams: t.playCount || t.streams || 4200,
                   likes: t.likes || 310,
                   edition: t.editions || '1/100',
@@ -175,7 +175,7 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
             coverUrl: t.coverUrl,
             audioUrl: t.audioUrl,
             price: t.nftPrice || t.price || '10',
-            currency: 'GRAM',
+            currency: 'TON',
             streams: t.playCount || t.streams || (10000 - idx * 800),
             likes: t.likes || 450,
             edition: '1/100',
@@ -248,7 +248,7 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
       className="space-y-4 my-2"
     >
       {/* Component Header */}
-      <div className="flex items-end justify-between px-1">
+      <div className="flex items-end justify-between px-4 sm:px-6 lg:px-8">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-[9px] font-mono font-black text-cyan-400 uppercase tracking-widest flex items-center gap-1 bg-cyan-500/10 px-2 py-0.5 rounded-full">
@@ -265,14 +265,14 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => scroll('left')}
-            className="p-2 rounded-xl bg-[#0c133a] hover:bg-[#121c4e] text-slate-300 hover:text-white transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
             aria-label="Scroll left"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => scroll('right')}
-            className="p-2 rounded-xl bg-[#0c133a] hover:bg-[#121c4e] text-slate-300 hover:text-white transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
             aria-label="Scroll right"
           >
             <ChevronRight className="w-4 h-4" />
@@ -283,8 +283,8 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
       {/* Horizontal Scroll Track List */}
       <div
         ref={scrollContainerRef}
-        className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1 select-none"
-        style={{ WebkitOverflowScrolling: 'touch' }}
+        className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-4 sm:px-6 lg:px-8 select-none w-full snap-x snap-mandatory overscroll-x-contain"
+        style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
       >
         {loading ? (
           // Skeleton Loading State

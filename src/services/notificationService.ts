@@ -117,7 +117,8 @@ export const notificationService = {
       // TonJamNotification schema fields
       category: categoryMapping[notification.type] || 'system',
       description: notification.message,
-      thumbnailUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&fit=crop&q=80',
+      thumbnailUrl: notification.metadata?.thumbnailUrl || notification.metadata?.coverUrl || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&fit=crop&q=80',
+      avatarUrl: notification.metadata?.avatarUrl,
     };
 
     // Add quick actions for interactive notification screens
@@ -129,7 +130,7 @@ export const notificationService = {
       };
     } else if (unifiedNotification.category === 'auction') {
       unifiedNotification.quickAction = {
-        label: 'Counter Bid',
+        label: 'View NFT',
         type: 'bid',
         payload: { nftId: notification.metadata?.nftId }
       };
@@ -139,6 +140,17 @@ export const notificationService = {
         type: 'view',
         payload: { nftId: notification.metadata?.nftId }
       };
+    }
+
+    // Sync directly into TonJam notifications local cache for zero-latency UI updates
+    try {
+      const tonjamKey = `tonjam_notifications_${userId}_list`;
+      const existingList = localStorage.getItem(tonjamKey);
+      const parsed = existingList ? JSON.parse(existingList) : [];
+      const updatedList = [unifiedNotification, ...parsed.filter((n: any) => n.id !== id)];
+      localStorage.setItem(tonjamKey, JSON.stringify(updatedList));
+    } catch (cacheErr) {
+      console.warn("[notificationService] TonJam cache sync:", cacheErr);
     }
 
     // Write to Firestore /users/{userId}/notifications/{id} asynchronously

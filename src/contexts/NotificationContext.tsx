@@ -44,7 +44,7 @@ export const useNotification = () => {
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const { userBids, allTracks, followedUserIds, allNFTs, userProfile } = useAudio();
+  const { userBids, allTracks, followedUserIds, allNFTs, userProfile, playTrack } = useAudio();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [priceAlerts, setPriceAlerts] = useState<PriceAlert[]>([]);
   const [activePriceDropModal, setActivePriceDropModal] = useState<TriggeredPriceDrop | null>(null);
@@ -287,16 +287,39 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       // 1. Followed Artist Track Releases Check
       if (allTracks && allTracks.length > 0 && followedUserIds && followedUserIds.length > 0) {
         allTracks.forEach((track) => {
-          if (followedUserIds.includes(track.artistId || "")) {
+          const isFollowed = followedUserIds.some((fid) => 
+            fid && (
+              fid === track.artistId ||
+              (track.artist && fid.toLowerCase() === track.artist.toLowerCase())
+            )
+          );
+
+          if (isFollowed) {
             if (!alertedReleases.current.has(track.id)) {
               notificationService.addNotification(user.uid, {
                 userId: user.uid,
                 type: 'track_upload',
-                title: 'NEW RELEASE SIGNAL!',
-                message: `Tracked artist "${track.artist}" dropped a new frequency: "${track.title}"! Sync up and stream.`,
+                title: 'NEW TRACK DROP!',
+                message: `${track.artist || 'Followed artist'} just dropped a new track: "${track.title}"! Sync up and stream now.`,
                 link: `/track/${track.id}`,
-                metadata: { trackId: track.id, type: 'new_release' }
+                metadata: { 
+                  trackId: track.id, 
+                  type: 'new_release',
+                  thumbnailUrl: track.coverUrl,
+                  coverUrl: track.coverUrl,
+                }
               });
+
+              toast.success(`🎵 New Track Drop from ${track.artist || 'Followed Artist'}!`, {
+                description: `"${track.title}" is out now. Tap to listen.`,
+                action: {
+                  label: "Play Track",
+                  onClick: () => {
+                    if (playTrack) playTrack(track);
+                  }
+                }
+              });
+
               alertedReleases.current.add(track.id);
               altered = true;
             }
@@ -370,23 +393,48 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
 
       // 4. New Bid on My NFT Check
-      if (allNFTs && allNFTs.length > 0 && userProfile?.walletAddress) {
+      if (allNFTs && allNFTs.length > 0) {
         allNFTs.forEach((nft) => {
-          const isMyNFT = nft.owner === userProfile.walletAddress || nft.artistId === user.uid;
-          const isAuction = nft.listingType === 'auction' || nft.isAuction;
-          if (isMyNFT && isAuction && nft.offers && nft.offers.length > 0) {
+          const isMyNFT = 
+            (userProfile?.walletAddress && nft.owner === userProfile.walletAddress) ||
+            (user?.uid && (nft.ownerId === user.uid || nft.owner === user.uid || nft.artistId === user.uid || nft.creator === user.uid)) ||
+            (userProfile?.listedNftIds && userProfile.listedNftIds.includes(nft.id)) ||
+            (userProfile?.ownedNftIds && userProfile.ownedNftIds.includes(nft.id));
+
+          if (isMyNFT && nft.offers && nft.offers.length > 0) {
             const highestOffer = nft.offers[0];
-            if (highestOffer.offerer !== userProfile.walletAddress) {
-              const alertKey = `new_bid_${nft.id}_${highestOffer.price}`;
+            const isSelfBid = 
+              (userProfile?.walletAddress && highestOffer.offerer === userProfile.walletAddress) ||
+              (user?.uid && highestOffer.offerer === user.uid);
+
+            if (!isSelfBid) {
+              const alertKey = `new_bid_${nft.id}_${highestOffer.price}_${highestOffer.offerer}`;
               if (!alertedNewBids.current.has(alertKey)) {
                 notificationService.addNotification(user.uid, {
                   userId: user.uid,
                   type: 'bid_update',
-                  title: 'NEW HIGH BID RECEIVED!',
-                  message: `A new bid of ${highestOffer.price} TON has been placed on your NFT "${nft.title}" by ${highestOffer.offerer.slice(0, 6)}...`,
+                  title: 'BID UPDATE ON YOUR NFT!',
+                  message: `A new bid of ${highestOffer.price} TON was placed on your listed music NFT "${nft.title}" by ${highestOffer.offerer.slice(0, 6)}...`,
                   link: `/nft/${nft.id}`,
-                  metadata: { nftId: nft.id, type: 'new_bid', bidAmount: parseFloat(highestOffer.price) }
+                  metadata: { 
+                    nftId: nft.id, 
+                    type: 'new_bid', 
+                    bidAmount: parseFloat(highestOffer.price),
+                    thumbnailUrl: nft.imageUrl || nft.coverUrl,
+                    coverUrl: nft.imageUrl || nft.coverUrl,
+                  }
                 });
+
+                toast.info(`🎯 Bid Update on "${nft.title}"!`, {
+                  description: `New bid of ${highestOffer.price} TON received from ${highestOffer.offerer.slice(0, 6)}...`,
+                  action: {
+                    label: "View NFT",
+                    onClick: () => {
+                      window.location.hash = `#/nft/${nft.id}`;
+                    }
+                  }
+                });
+
                 alertedNewBids.current.add(alertKey);
                 localStorage.setItem('tonjam_alerted_new_bids', JSON.stringify(Array.from(alertedNewBids.current)));
                 altered = true;

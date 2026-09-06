@@ -4,6 +4,7 @@ import { Sparkles, Moon, Zap, Target, Smile, Frown } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import MoodPlaylist from "@/components/MoodPlaylist";
 import { MOCK_TRACKS } from "@/constants";
+import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 const MOODS = [
   { id: 'chill', name: 'Chill', icon: Moon, description: 'Ambient, Lofi, Jazz & Classical frequencies', color: 'from-[#00F2FE] to-[#4FACFE]', textAccent: 'text-[#00F2FE]' },
@@ -16,6 +17,7 @@ const MOODS = [
 export const MoodAlignmentSection: React.FC = () => {
   const { allTracks, playTrack, playAll } = useAudio();
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const MOOD_GENRES_MAP = useMemo<Record<string, string[]>>(() => ({
     chill: ['lofi', 'ambient', 'jazz', 'r&b', 'classical', 'synthwave'],
@@ -53,9 +55,9 @@ export const MoodAlignmentSection: React.FC = () => {
                          'rgba(0, 0, 0, 0)',
       }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
-      className="space-y-3.5 text-left p-3 sm:p-4 rounded-3xl -mx-3 sm:-mx-4 transition-all"
+      className="space-y-3.5 text-left py-2 rounded-none transition-all w-full"
     >
-      <div className="flex items-center justify-between px-0.5">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary shrink-0 animate-pulse" />
           <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
@@ -68,7 +70,12 @@ export const MoodAlignmentSection: React.FC = () => {
       </div>
 
       {/* Mood Selector Pills (Horizontal Scroll) */}
-      <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 px-0.5">
+      <div 
+        ref={scrollRef}
+        {...handlers}
+        className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 px-4 sm:px-6 lg:px-8 w-full overscroll-x-contain select-none"
+        style={{ overscrollBehaviorX: 'contain' }}
+      >
         {MOODS.map((mood) => {
           const MoodIcon = mood.icon;
           const isSelected = selectedMood === mood.id;

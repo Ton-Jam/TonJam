@@ -23,7 +23,7 @@ export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spac
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-0.5">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Radio className="w-4 h-4 text-[#FF3A5C] animate-pulse" />
           <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
@@ -43,25 +43,25 @@ export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spac
         </div>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 px-4 sm:px-6 lg:px-8 w-full">
         {spaces.map((room) => (
           <div
             key={room.id}
             className="p-3 sm:p-3.5 rounded-xl bg-transparent hover:bg-white/[0.03] flex items-center justify-between gap-3 border-none transition-colors"
           >
-            <div className="space-y-1 text-left min-w-0">
+            <div className="space-y-1 text-left min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#FF3A5C] animate-ping" />
                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 leading-none">
                   {room.host} Space
                 </span>
               </div>
-              <h4 className="text-xs sm:text-sm font-black text-white leading-tight tracking-tight truncate max-w-[220px] sm:max-w-md">
+              <h4 className="text-xs sm:text-sm font-black text-white leading-tight tracking-tight truncate w-full">
                 {room.title}
               </h4>
               <div className="flex items-center gap-1.5 text-[10px] text-zinc-400">
-                <Users className="w-3.5 h-3.5 text-primary" />
-                <span>Shared with <strong className="text-white">{room.listeners}</strong> listening</span>
+                <Users className="w-3.5 h-3.5 text-primary shrink-0" />
+                <span className="truncate">Shared with <strong className="text-white">{room.listeners}</strong> listening</span>
               </div>
             </div>
 

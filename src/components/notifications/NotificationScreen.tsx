@@ -36,7 +36,9 @@ export const NotificationScreen: React.FC = () => {
     markAsRead, 
     markAllAsRead, 
     deleteNotification,
-    simulateNotification
+    simulateNotification,
+    simulateBidUpdate,
+    simulateTrackDrop,
   } = useTonJamNotifications();
 
   const { playTrack, allTracks } = useAudio();
@@ -136,23 +138,35 @@ export const NotificationScreen: React.FC = () => {
   const handleActionClick = (action: NotificationQuickAction, notification: TonJamNotification) => {
     // Perform responsive actions
     switch (action.type) {
-      case 'play':
-        if (allTracks.length > 0) {
+      case 'play': {
+        const targetTrackId = action.payload?.trackId || notification.metadata?.trackId;
+        const foundTrack = targetTrackId ? allTracks.find(t => t.id === targetTrackId) : null;
+        if (foundTrack) {
+          playTrack(foundTrack);
+          toast.success('Playing Track', { description: foundTrack.title });
+        } else if (allTracks.length > 0) {
           playTrack(allTracks[0]);
           toast.success('Playing Track', { description: notification.title });
         } else {
           toast.info('Streaming Track', { description: notification.title });
         }
         break;
+      }
       case 'follow':
         toast.success('Followed User', { description: 'Connected on TonJam social network' });
         break;
       case 'claim':
         toast.success('Reward Claimed', { description: '+250 TJ Points credited to your wallet' });
         break;
-      case 'bid':
-        navigate('/auction');
+      case 'bid': {
+        const targetNftId = action.payload?.nftId || notification.metadata?.nftId;
+        if (targetNftId) {
+          navigate(`/nft/${targetNftId}`);
+        } else {
+          navigate('/marketplace');
+        }
         break;
+      }
       case 'mint':
         navigate('/launchpad');
         break;
@@ -160,8 +174,12 @@ export const NotificationScreen: React.FC = () => {
         navigate('/jamspace');
         break;
       case 'view':
-      default:
-        if (notification.category.includes('nft') || notification.category === 'marketplace') {
+      default: {
+        if (notification.metadata?.nftId) {
+          navigate(`/nft/${notification.metadata.nftId}`);
+        } else if (notification.metadata?.trackId) {
+          navigate(`/track/${notification.metadata.trackId}`);
+        } else if (notification.category.includes('nft') || notification.category === 'marketplace' || notification.category === 'auction') {
           navigate('/marketplace');
         } else if (notification.category === 'wallet_transaction' || notification.category === 'royalty') {
           navigate('/profile');
@@ -169,9 +187,27 @@ export const NotificationScreen: React.FC = () => {
           navigate('/jamspace');
         }
         break;
+      }
     }
     // Auto mark read on action
     markAsRead(notification.id);
+  };
+
+  const handleCardClick = (notification: TonJamNotification) => {
+    if (!notification.read) {
+      markAsRead(notification.id);
+    }
+    if (notification.metadata?.nftId) {
+      navigate(`/nft/${notification.metadata.nftId}`);
+    } else if (notification.metadata?.trackId) {
+      navigate(`/track/${notification.metadata.trackId}`);
+    } else if (notification.category === 'auction' || notification.category === 'nft_sale' || notification.category === 'nft_purchase') {
+      navigate('/marketplace');
+    } else if (notification.category === 'artist_release' || notification.category === 'music') {
+      if (allTracks.length > 0) {
+        playTrack(allTracks[0]);
+      }
+    }
   };
 
   // Infinite scroll loader trigger
@@ -207,6 +243,7 @@ export const NotificationScreen: React.FC = () => {
                   onMarkRead={markAsRead}
                   onDelete={deleteNotification}
                   onActionClick={handleActionClick}
+                  onCardClick={handleCardClick}
                 />
               </motion.div>
             ))}
@@ -460,16 +497,36 @@ export const NotificationScreen: React.FC = () => {
                     }
                   </p>
 
-                  <button
-                    onClick={() => {
-                      simulateNotification();
-                      toast.success('Activity Generated', { description: 'New notification added to activity feed' });
-                    }}
-                    className="mt-5 px-5 py-2.5 bg-[#0052FF] hover:bg-[#1a66ff] text-white rounded-full text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Send Test Notification</span>
-                  </button>
+                  <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+                    <button
+                      onClick={() => {
+                        simulateBidUpdate();
+                      }}
+                      className="px-4 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-full text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                    >
+                      <span>🎯 Test Bid Alert</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        simulateTrackDrop();
+                      }}
+                      className="px-4 py-2.5 bg-[#0088CC]/20 hover:bg-[#0088CC]/30 text-[#0088CC] rounded-full text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                    >
+                      <span>🎵 Test Track Drop</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        simulateNotification();
+                        toast.success('Activity Generated', { description: 'New notification added to activity feed' });
+                      }}
+                      className="px-4 py-2.5 bg-white/[0.06] hover:bg-white/[0.12] text-white rounded-full text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>General Alert</span>
+                    </button>
+                  </div>
                 </motion.div>
               )}
             </motion.div>

@@ -64,7 +64,7 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
 
   return (
     <section className="space-y-4 text-left w-full">
-      <div className="flex flex-col gap-3 px-0.5">
+      <div className="flex flex-col gap-3 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary animate-pulse" />
@@ -105,7 +105,7 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
         </div>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1 px-4 sm:px-6 lg:px-8 w-full">
         <AnimatePresence mode="popLayout">
           {rankedTrendingCreators.map((artist, idx) => {
             const rank = idx + 1;

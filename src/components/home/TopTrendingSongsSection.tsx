@@ -16,7 +16,7 @@ export const TopTrendingSongsSection: React.FC = () => {
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-0.5">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-emerald-400" />
           <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
@@ -31,7 +31,7 @@ export const TopTrendingSongsSection: React.FC = () => {
         </button>
       </div>
 
-      <div className="space-y-1 w-full">
+      <div className="space-y-1 w-full px-4 sm:px-6 lg:px-8">
         {topSongs.map((track, idx) => (
           <TrackCard 
             key={track.id} 

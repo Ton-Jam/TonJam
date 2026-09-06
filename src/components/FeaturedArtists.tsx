@@ -6,10 +6,12 @@ import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { getPlaceholderImage } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 
 const FeaturedArtists: React.FC = () => {
   const { artists, allTracks, playTrack, followedUserIds = [], toggleFollowUser } = useAudio();
   const navigate = useNavigate();
+  const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   // Get top 8 artists by followers (mock or real)
   const featuredArtists = useMemo(() => {
@@ -19,8 +21,8 @@ const FeaturedArtists: React.FC = () => {
   }, [artists]);
 
   return (
-    <div className="space-y-4 pt-2">
-      <div className="flex items-center justify-between px-0.5">
+    <div className="space-y-4 pt-2 w-full">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <h2 className="text-lg font-black tracking-tight text-white">
           Featured Artists
         </h2>
@@ -34,7 +36,12 @@ const FeaturedArtists: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-3 px-0.5 w-full snap-x snap-mandatory">
+      <div 
+        ref={scrollRef}
+        {...handlers}
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-3 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        style={{ overscrollBehaviorX: 'contain' }}
+      >
         {featuredArtists.map((artist) => {
           // Find artist's top tracks from allTracks
           const artistTracks = allTracks

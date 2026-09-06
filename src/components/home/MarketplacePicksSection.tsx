@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingBag, ChevronRight } from "lucide-react";
 import NFTCard from "@/components/NFTCard";
+import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 export interface MarketplacePick {
   id: string;
@@ -21,11 +22,11 @@ const STATIC_MARKETPLACE_PICKS: MarketplacePick[] = [
 
 export const MarketplacePicksSection: React.FC<{ picks?: MarketplacePick[] }> = ({ picks = STATIC_MARKETPLACE_PICKS }) => {
   const navigate = useNavigate();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-0.5">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <ShoppingBag className="w-4 h-4 text-primary" />
           <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
@@ -42,8 +43,9 @@ export const MarketplacePicksSection: React.FC<{ picks?: MarketplacePick[] }> = 
 
       <div 
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-0.5 w-full snap-x snap-mandatory"
-        style={{ scrollBehavior: 'smooth' }}
+        {...handlers}
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {picks.map((pick) => (
           <NFTCard 

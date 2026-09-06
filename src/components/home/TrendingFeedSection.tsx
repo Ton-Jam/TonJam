@@ -1,14 +1,15 @@
-import React, { useRef, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flame, ChevronRight } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import TrackCard from "@/components/TrackCard";
 import { MOCK_TRACKS } from "@/constants";
+import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 export const TrendingFeedSection: React.FC = () => {
   const navigate = useNavigate();
   const { allTracks } = useAudio();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const trendingTracks = useMemo(() => {
     const list = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
@@ -17,7 +18,7 @@ export const TrendingFeedSection: React.FC = () => {
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-0.5">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Flame className="w-5 h-5 text-amber-400 fill-amber-400/20 animate-pulse" />
           <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
@@ -34,8 +35,9 @@ export const TrendingFeedSection: React.FC = () => {
 
       <div 
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-0.5 w-full snap-x snap-mandatory"
-        style={{ scrollBehavior: 'smooth' }}
+        {...handlers}
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {trendingTracks.map((track) => (
           <TrackCard 
