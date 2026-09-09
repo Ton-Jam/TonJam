@@ -6,13 +6,15 @@ export const HomeSectionSkeleton: React.FC<{
 }> = ({ type = "horizontal-cards", count = 5 }) => {
   if (type === "banner") {
     return (
-      <div className="w-full h-44 rounded-2xl bg-zinc-900/60 animate-pulse" />
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="w-full h-44 rounded-2xl bg-zinc-900/60 animate-pulse" />
+      </div>
     );
   }
 
   if (type === "vertical-rows") {
     return (
-      <div className="space-y-3">
+      <div className="space-y-3 px-4 sm:px-6 lg:px-8">
         <div className="h-5 w-40 bg-zinc-900/70 rounded-lg animate-pulse" />
         <div className="rounded-2xl bg-zinc-900/40 p-3 space-y-2">
           {Array.from({ length: count }).map((_, i) => (
@@ -32,7 +34,7 @@ export const HomeSectionSkeleton: React.FC<{
 
   if (type === "grid") {
     return (
-      <div className="space-y-3">
+      <div className="space-y-3 px-4 sm:px-6 lg:px-8">
         <div className="h-5 w-44 bg-zinc-900/70 rounded-lg animate-pulse" />
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {Array.from({ length: count }).map((_, i) => (
@@ -44,8 +46,8 @@ export const HomeSectionSkeleton: React.FC<{
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between px-1">
+    <div className="space-y-3 px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between">
         <div className="h-5 w-36 bg-zinc-900/70 rounded-lg animate-pulse" />
         <div className="h-4 w-12 bg-zinc-900/50 rounded-lg animate-pulse" />
       </div>

@@ -20,12 +20,13 @@ export const EarnTJSection: React.FC = () => {
   }, 0);
 
   return (
-    <motion.section
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-      className="w-full text-left rounded-2xl bg-zinc-950 p-4 sm:p-5 relative overflow-hidden border-none"
-    >
+    <div className="w-full px-4 sm:px-6 lg:px-8">
+      <motion.section
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="w-full text-left rounded-2xl bg-zinc-950 p-4 sm:p-5 relative overflow-hidden border-none"
+      >
       {/* Subtle green aura */}
       <div className="absolute top-[20px] right-[-20px] w-28 h-28 bg-emerald-500/10 rounded-full blur-[40px] pointer-events-none" />
 
@@ -81,6 +82,7 @@ export const EarnTJSection: React.FC = () => {
         </Button>
       </div>
     </motion.section>
+    </div>
   );
 };
 

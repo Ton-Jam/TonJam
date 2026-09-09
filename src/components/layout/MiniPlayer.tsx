@@ -99,37 +99,14 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       style={{
         y: dragY,
         opacity: 1,
-        backgroundColor: "#050A24",
+        backgroundColor: "#000000",
       }}
-      className="fixed bottom-[72px] left-4 right-4 z-40 select-none rounded-2xl shadow-2xl p-3 pt-2 flex flex-col gap-2 cursor-pointer active:cursor-grabbing border-none overflow-hidden"
+      className="fixed left-0 right-0 lg:left-64 bottom-16 lg:bottom-0 z-40 select-none shadow-2xl p-3 pt-2 flex flex-col gap-2 cursor-pointer active:cursor-grabbing border-none overflow-hidden bg-black"
+      id="tonjam-mini-player"
       onClick={onExpand}
     >
-      {/* Ambient Cover Photo & Dominant Color Gradient Background */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
-        {track.coverUrl && (
-          <img
-            src={track.coverUrl}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-30 transition-opacity duration-500"
-          />
-        )}
-        <div
-          className="absolute inset-0 transition-opacity duration-500"
-          style={{
-            background: `linear-gradient(135deg, ${coverColor}55 0%, ${coverColor}18 100%)`,
-            opacity: 0.8,
-          }}
-        />
-        <div
-          className="absolute inset-0 transition-opacity duration-500 mix-blend-screen"
-          style={{
-            background: `radial-gradient(circle at 15% 50%, ${coverColor}60 0%, transparent 65%)`,
-            opacity: 0.45,
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050A24]/90 via-[#050A24]/75 to-[#000000]/90" />
-      </div>
+      {/* Solid Black Background */}
+      <div className="absolute inset-0 pointer-events-none bg-black z-0 select-none" />
 
       {/* Embedded Progress Bar at Top (1px flush) */}
       <div 

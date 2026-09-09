@@ -15,7 +15,7 @@ const FeaturedArtists: React.FC = () => {
 
   // Get top 8 artists by followers (mock or real)
   const featuredArtists = useMemo(() => {
-    return [...artists]
+    return [...(artists || [])]
       .sort((a, b) => (b.followers || 0) - (a.followers || 0))
       .slice(0, 8);
   }, [artists]);
@@ -44,7 +44,7 @@ const FeaturedArtists: React.FC = () => {
       >
         {featuredArtists.map((artist) => {
           // Find artist's top tracks from allTracks
-          const artistTracks = allTracks
+          const artistTracks = (allTracks || [])
             .filter(t => t.artistId === artist.uid || t.artist === artist.name)
             .sort((a, b) => (b.playCount || 0) - (a.playCount || 0))
             .slice(0, 2);

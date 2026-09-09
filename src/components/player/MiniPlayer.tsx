@@ -265,32 +265,15 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       >
         <div 
           onClick={() => setIsDroppedDown(false)}
-          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.6)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden"
+          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.8)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden bg-black"
           style={{
-            backgroundColor: "#050A24",
+            backgroundColor: "#000000",
             opacity: 1,
           }}
           title="Click to expand Mini Player"
         >
-          {/* Ambient Cover Photo & Dominant Color Gradient Background */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
-            {coverUrl && (
-              <img
-                src={coverUrl}
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover blur-lg scale-150 opacity-35"
-              />
-            )}
-            <div
-              className="absolute inset-0 transition-opacity duration-500"
-              style={{
-                background: `linear-gradient(135deg, ${coverColor}55 0%, ${coverColor}18 100%)`,
-                opacity: 0.75,
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/90" />
-          </div>
+          {/* Solid Black Background */}
+          <div className="absolute inset-0 pointer-events-none bg-black z-0 select-none" />
 
           {/* Sleek top progress indicator on collapsed pill */}
           <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-slate-800/80 z-10">
@@ -396,42 +379,18 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       onDragEnd={handleDragEnd}
       onClick={() => setFullPlayerOpen(true)}
       whileTap={{ scale: 0.99 }}
-      className={`fixed left-0 right-0 lg:left-64 text-[#F2F4F8] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-in-out cursor-pointer ${
+      className={`fixed left-0 right-0 lg:left-64 text-[#F2F4F8] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-in-out cursor-pointer bg-black ${
         isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
       }`}
       style={{
         touchAction: "none",
-        backgroundColor: "#050A24",
+        backgroundColor: "#000000",
         opacity: 1,
       }}
       id="tonjam-mini-player"
     >
-      {/* Ambient Cover Photo & Dominant Color Gradient Background */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
-        {coverUrl && (
-          <img
-            src={coverUrl}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-30 transition-opacity duration-500"
-          />
-        )}
-        <div
-          className="absolute inset-0 transition-opacity duration-500"
-          style={{
-            background: `linear-gradient(135deg, ${coverColor}55 0%, ${coverColor}18 100%)`,
-            opacity: 0.8,
-          }}
-        />
-        <div
-          className="absolute inset-0 transition-opacity duration-500 mix-blend-screen"
-          style={{
-            background: `radial-gradient(circle at 15% 50%, ${coverColor}60 0%, transparent 65%)`,
-            opacity: 0.45,
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050A24]/90 via-[#050A24]/75 to-[#000000]/90" />
-      </div>
+      {/* Solid Black Background */}
+      <div className="absolute inset-0 pointer-events-none bg-black z-0 select-none" />
 
       {/* Interactive Flush Top Seek Bar (Perfect 1px top alignment) */}
       <div 

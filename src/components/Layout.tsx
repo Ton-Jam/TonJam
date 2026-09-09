@@ -930,7 +930,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         >
           <nav 
             id="tonjam-mobile-nav-bar"
-            className="h-full w-full bg-black/95 backdrop-blur-xl border-t border-white/[0.06] px-2 flex justify-around items-center" 
+            className="h-full w-full bg-black/95 backdrop-blur-xl border-t border-[#c0c0c0]/30 px-2 flex justify-around items-center" 
             aria-label="Mobile Navigation"
           >
             <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />

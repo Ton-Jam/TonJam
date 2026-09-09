@@ -82,6 +82,17 @@ export const NFTExplorer: React.FC = () => {
         setCollections(fetched);
       } catch (error) {
         handleFirestoreError(error, OperationType.LIST, 'collections');
+        const fallbackMock: BubbleNode[] = [
+          { id: '1', name: 'Sonic Origins', creator: 'AudioPunks', totalVolume: 12500, floorPrice: '15.5', coverUrl: 'https://images.unsplash.com/photo-1614113489855-66422ad300a4?w=400&q=80', radius: 68 },
+          { id: '2', name: 'Ambient Dreams', creator: 'LoFi Beats', totalVolume: 8200, floorPrice: '4.2', coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80', radius: 54 },
+          { id: '3', name: 'Cyberpunk Synths', creator: 'Neon Riot', totalVolume: 18400, floorPrice: '25.0', coverUrl: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=400&q=80', radius: 80 },
+          { id: '4', name: 'Acoustic Sessions', creator: 'John Doe', totalVolume: 3500, floorPrice: '2.1', coverUrl: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80', radius: 36 },
+          { id: '5', name: 'Bass Drops', creator: 'DJ Max', totalVolume: 9100, floorPrice: '8.8', coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80', radius: 58 },
+          { id: '6', name: 'Vinyl Classics', creator: 'Retro', totalVolume: 6700, floorPrice: '5.0', coverUrl: 'https://images.unsplash.com/photo-1460036521480-ff49c08c2781?w=400&q=80', radius: 48 },
+          { id: '7', name: 'Vaporwave Vol. 1', creator: 'Aesthetic', totalVolume: 10200, floorPrice: '12.0', coverUrl: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&q=80', radius: 62 },
+          { id: '8', name: 'Techno Underground', creator: 'Underground', totalVolume: 5300, floorPrice: '3.5', coverUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&q=80', radius: 44 }
+        ];
+        setCollections(fallbackMock);
       } finally {
         setLoading(false);
       }

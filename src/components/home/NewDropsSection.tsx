@@ -23,7 +23,7 @@ export const NewDropsSection: React.FC = () => {
   const filteredDrops = useMemo(() => {
     if (!selectedGenre || selectedGenre === 'All') {
       const repeated = [...baseTracks];
-      while (repeated.length < 12) {
+      while (repeated.length < 12 && baseTracks.length > 0) {
         repeated.push(...baseTracks.map((t, idx) => ({ ...t, id: `${t.id}-drop-${idx}` })));
       }
       return repeated.slice(0, 12);

@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ChevronLeft, 
@@ -14,6 +14,7 @@ import { useNFT } from '@/contexts/NFTContext';
 import { useAudio } from '@/contexts/AudioContext';
 import { TON_LOGO, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { NFTItem, Track } from '@/types';
+import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 
 interface RecentlyMintedNFTsProps {
   title?: string;
@@ -27,7 +28,7 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
   const navigate = useNavigate();
   const { nfts, mintingStatus } = useNFT();
   const { currentTrack, isPlaying, playTrack, togglePlay, allTracks, artists } = useAudio();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { scrollRef: scrollContainerRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   // Combine NFTs from NFTProvider and completed mints
   const recentNFTs = useMemo(() => {
@@ -192,7 +193,8 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
       {/* HORIZONTAL SCROLL CONTAINER */}
       <div
         ref={scrollContainerRef}
-        className="flex gap-3.5 overflow-x-auto no-scrollbar pb-2 pt-0.5 scroll-smooth snap-x snap-mandatory overscroll-x-contain"
+        {...handlers}
+        className="flex gap-3.5 overflow-x-auto no-scrollbar pb-2 pt-0.5 scroll-smooth snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ overscrollBehaviorX: 'contain' }}
       >
         {recentNFTs.map((nft, idx) => {

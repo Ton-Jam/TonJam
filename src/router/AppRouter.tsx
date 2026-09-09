@@ -33,7 +33,7 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
   });
 
 // Lazy imports
-const Home = lazyWithRetry(() => import('@/pages/Home'));
+const Home = lazyWithRetry(() => import('@/pages/HomePage'));
 const Discover = lazyWithRetry(() => import('@/pages/Discover'));
 const JamSpace = lazyWithRetry(() => import('@/pages/JamSpace'));
 const Marketplace = lazyWithRetry(() => import('@/pages/Marketplace'));
@@ -74,7 +74,7 @@ const DJKrupy = lazyWithRetry(() => import('@/pages/DJKrupy'));
 const FollowersFollowing = lazyWithRetry(() => import('@/pages/FollowersFollowing'));
 const AlbumDetails = lazyWithRetry(() => import('@/pages/AlbumDetails'));
 const Governance = lazyWithRetry(() => import('@/pages/Governance'));
-const HomeFeed = lazyWithRetry(() => import('@/pages/Home'));
+const HomeFeed = lazyWithRetry(() => import('@/pages/HomePage'));
 const UIKitShowcase = lazyWithRetry(() => import('@/pages/UIKitShowcase'));
 const Dashboard = lazyWithRetry(() => import('@/pages/Dashboard'));
 const ArtistOnboarding = lazyWithRetry(() => import('@/pages/ArtistOnboarding'));

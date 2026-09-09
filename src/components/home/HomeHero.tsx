@@ -23,7 +23,7 @@ export const HomeHero: React.FC = () => {
       <div className="flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 pt-2 sm:pt-4">
         {/* Left: Greeting & Welcome Copy */}
         <div className="space-y-0.5 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white truncate">
+          <h1 className="text-base sm:text-lg font-bold tracking-tight text-white truncate">
             {greeting}, {userProfile?.username || "Listener"}
           </h1>
           <p className="text-xs text-zinc-400 font-medium truncate">

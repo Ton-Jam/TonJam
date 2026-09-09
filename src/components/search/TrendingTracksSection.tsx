@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -20,6 +20,7 @@ import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { useAudio } from '@/contexts/AudioContext';
 import { Track, NFTItem } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
+import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 
 export interface TrendingTrackItem {
   id: string;
@@ -54,7 +55,7 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
   const { allTracks = [], allNFTs = [], playTrack, togglePlay, currentTrack, isPlaying } = useAudio();
   const [trendingTracks, setTrendingTracks] = useState<TrendingTrackItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { scrollRef: scrollContainerRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   // Fetch high-performing tracks from NFT database in Firestore
   useEffect(() => {
@@ -283,6 +284,7 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
       {/* Horizontal Scroll Track List */}
       <div
         ref={scrollContainerRef}
+        {...handlers}
         className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-4 sm:px-6 lg:px-8 select-none w-full snap-x snap-mandatory overscroll-x-contain"
         style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
       >
