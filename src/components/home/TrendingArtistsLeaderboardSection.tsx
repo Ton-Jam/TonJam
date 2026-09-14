@@ -6,6 +6,7 @@ import confetti from "canvas-confetti";
 import { useAudio } from "@/contexts/AudioContext";
 import { TON_LOGO, MOCK_ARTISTS } from "@/constants";
 import { getPlaceholderImage } from "@/lib/utils";
+import LazyArtworkImage from "@/components/common/LazyArtworkImage";
 import { Artist } from "@/types";
 
 export const TrendingArtistsLeaderboardSection: React.FC = () => {
@@ -135,12 +136,11 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
 
                   <div className="relative flex-shrink-0">
                     <div className="w-10 h-10 rounded-full overflow-hidden bg-white/10">
-                      <img 
+                      <LazyArtworkImage 
                         src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
+                        fallbackSrc={getPlaceholderImage(`artist-${artist.uid}`)}
                         alt={artist.name} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }}
-                        referrerPolicy="no-referrer"
                       />
                     </div>
                     {artist.isVerifiedArtist && (

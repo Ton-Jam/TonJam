@@ -251,9 +251,9 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
   };
 
   return (
-    <div className={`-mx-4 sm:-mx-6 md:-mx-8 space-y-3.5 text-left ${className}`} id="top-artists-section">
+    <div className={`w-full space-y-3.5 text-left ${className}`} id="top-artists-section">
       {/* Header Section */}
-      <div className="flex items-center justify-between px-4 sm:px-6 md:px-8">
+      <div className="flex items-center justify-between">
         <div className="space-y-0.5 min-w-0">
           <div className="flex items-center gap-2">
             <h2 className="text-section-title text-text-primary flex items-center gap-1.5">
@@ -272,7 +272,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
         {/* Filter Pills & Navigation Actions */}
         <div className="flex items-center gap-2 shrink-0">
           {showFilters && (
-            <div className="hidden md:flex items-center gap-1 bg-card/60 p-1 rounded-xl border border-white/5">
+            <div className="hidden md:flex items-center gap-1 bg-card/60 p-1 rounded-xl border border-[#c0c0c0]/25">
               {[
                 { id: 'volume', label: 'Volume', icon: Zap },
                 { id: 'active', label: 'NFTs', icon: Disc },
@@ -285,10 +285,10 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                   <button
                     key={tab.id}
                     onClick={() => setSortMetric(tab.id as SortMetric)}
-                    className={`flex items-center gap-1 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+                    className={`flex items-center gap-1 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer whitespace-nowrap border ${
                       isActive
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-blue-600 text-white shadow-sm border-[#c0c0c0]/40'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/5 border-[#c0c0c0]/25'
                     }`}
                   >
                     <Icon className="w-3 h-3" />
@@ -304,14 +304,14 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
               <button
                 onClick={scrollLeft}
                 aria-label="Scroll Left"
-                className="w-7 h-7 rounded-lg bg-card/80 hover:bg-white/10 text-zinc-300 hover:text-white flex items-center justify-center border border-white/5 transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-lg bg-card/80 hover:bg-white/10 text-zinc-300 hover:text-white flex items-center justify-center border border-[#c0c0c0]/25 transition-colors cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={scrollRight}
                 aria-label="Scroll Right"
-                className="w-7 h-7 rounded-lg bg-card/80 hover:bg-white/10 text-zinc-300 hover:text-white flex items-center justify-center border border-white/5 transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-lg bg-card/80 hover:bg-white/10 text-zinc-300 hover:text-white flex items-center justify-center border border-[#c0c0c0]/25 transition-colors cursor-pointer"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -329,7 +329,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 
       {/* Mobile Filter Chips (visible on small screens) */}
       {showFilters && (
-        <div className="flex md:hidden items-center gap-1.5 px-4 sm:px-6 overflow-x-auto no-scrollbar pb-1">
+        <div className="flex md:hidden items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
           {[
             { id: 'volume', label: 'Volume', icon: Zap },
             { id: 'active', label: 'NFTs', icon: Disc },
@@ -344,8 +344,8 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                 onClick={() => setSortMetric(tab.id as SortMetric)}
                 className={`flex items-center gap-1 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-card/60 text-zinc-400 hover:text-white border border-white/5'
+                    ? 'bg-blue-600 text-white shadow-sm border border-[#c0c0c0]/40'
+                    : 'bg-card/60 text-zinc-400 hover:text-white border border-[#c0c0c0]/25'
                 }`}
               >
                 <Icon className="w-3 h-3" />
@@ -360,7 +360,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
       {variant === 'scroll' ? (
         <div 
           ref={scrollContainerRef}
-          className="flex gap-3.5 overflow-x-auto no-scrollbar pb-3 px-4 sm:px-6 md:px-8 w-full scroll-smooth"
+          className="flex gap-3.5 overflow-x-auto no-scrollbar pb-3 w-full scroll-smooth"
         >
           {topCreators.map((creator) => {
             const isFollowed = followedUserIds.includes(creator.uid);
@@ -380,7 +380,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                 key={`scroll-artist-${creator.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/artist/${creator.uid}`)}
-                className="w-[210px] sm:w-[230px] shrink-0 bg-card/60 backdrop-blur-md rounded-2xl p-4 transition-all flex flex-col justify-between space-y-3 cursor-pointer group relative overflow-hidden shadow-lg hover:bg-card/80"
+                className="w-[210px] sm:w-[230px] shrink-0 bg-card/60 backdrop-blur-md rounded-2xl p-4 transition-all flex flex-col justify-between space-y-3 cursor-pointer group relative overflow-hidden shadow-lg hover:bg-card/80 border border-[#c0c0c0]/25"
               >
                 {/* Top Row: Rank Badge & Follow Action */}
                 <div className="flex items-center justify-between z-10">
@@ -391,7 +391,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 
                   <button
                     onClick={(e) => handleFollowClick(e, creator.uid)}
-                    className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer border border-[#c0c0c0]/30 ${
                       isFollowed
                         ? 'bg-blue-500/20 text-blue-400'
                         : 'bg-white/10 hover:bg-white text-white hover:text-black'
@@ -408,7 +408,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                     <img
                       src={creator.avatar}
                       alt={creator.name}
-                      className="w-16 h-16 rounded-full bg-zinc-900 object-cover group-hover:scale-105 transition-transform shadow-md"
+                      className="w-16 h-16 rounded-full bg-zinc-900 object-cover group-hover:scale-105 transition-transform shadow-md border border-[#c0c0c0]/25"
                       loading="lazy"
                     />
                     {creator.isVerified && (
@@ -468,7 +468,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
         </div>
       ) : (
         /* GRID VIEW FALLBACK */
-        <div className="px-4 sm:px-6 md:px-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
           {topCreators.map((creator) => {
             const isFollowed = followedUserIds.includes(creator.uid);
             return (
@@ -476,16 +476,16 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                 key={`grid-artist-${creator.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/artist/${creator.uid}`)}
-                className="bg-card/60 hover:bg-card rounded-2xl p-4 flex flex-col items-center text-center justify-between space-y-3 transition-all border border-white/5 group cursor-pointer"
+                className="bg-card/60 hover:bg-card rounded-2xl p-4 flex flex-col items-center text-center justify-between space-y-3 transition-all border border-[#c0c0c0]/25 group cursor-pointer"
               >
                 <div className="relative">
                   <img
                     src={creator.avatar}
                     alt={creator.name}
-                    className="w-16 h-16 rounded-full bg-zinc-900 object-cover shadow-md"
+                    className="w-16 h-16 rounded-full bg-zinc-900 object-cover shadow-md border border-[#c0c0c0]/25"
                     loading="lazy"
                   />
-                  <span className="absolute -top-1 -left-1 w-6 h-6 rounded-full bg-zinc-900 text-blue-400 flex items-center justify-center text-[10px] font-mono font-black border border-white/10">
+                  <span className="absolute -top-1 -left-1 w-6 h-6 rounded-full bg-zinc-900 text-blue-400 flex items-center justify-center text-[10px] font-mono font-black border border-[#c0c0c0]/25">
                     #{creator.rank}
                   </span>
                   {creator.isVerified && (
@@ -504,7 +504,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                   </span>
                 </div>
 
-                <div className="w-full bg-white/5 rounded-xl p-2 space-y-1 text-center">
+                <div className="w-full bg-white/5 rounded-xl p-2 space-y-1 text-center border border-[#c0c0c0]/15">
                   <div className="text-xs font-black text-emerald-400 flex items-center justify-center gap-1">
                     <img src={TON_LOGO} alt="TON" className="w-3 h-3" />
                     <span>{creator.volumeTON.toLocaleString()} TON</span>
@@ -517,9 +517,9 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 
                 <button
                   onClick={(e) => handleFollowClick(e, creator.uid)}
-                  className={`w-full py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1 transition-all ${
+                  className={`w-full py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1 transition-all border border-[#c0c0c0]/30 ${
                     isFollowed
-                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      ? 'bg-blue-500/20 text-blue-400'
                       : 'bg-white text-black hover:bg-zinc-200'
                   }`}
                 >

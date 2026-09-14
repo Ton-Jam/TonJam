@@ -47,7 +47,7 @@ export const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
   const itemSnapClass = snapAlign === 'start' ? 'snap-start' : snapAlign === 'center' ? 'snap-center' : snapAlign === 'end' ? 'snap-end' : '';
 
   return (
-    <div className="relative w-full overflow-hidden select-none">
+    <div className="relative w-full select-none">
       <div
         ref={containerRef}
         onMouseDown={handleMouseDown}
@@ -59,12 +59,11 @@ export const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
           overflow-x-auto 
           scrollbar-none 
           overscroll-x-contain 
-          -mx-4 
-          px-4 
           pb-4 
           cursor-grab 
           active:cursor-grabbing
           touch-pan-x
+          w-full
           ${snapClass} 
           ${gap} 
           ${className}

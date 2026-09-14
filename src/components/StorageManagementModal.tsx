@@ -133,10 +133,12 @@ const StorageManagementModal: React.FC<StorageManagementModalProps> = ({ isOpen,
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(track.id)}
                       className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                      aria-label={`Delete cached track ${track.id.substring(0, 12)}`}
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
@@ -147,7 +149,11 @@ const StorageManagementModal: React.FC<StorageManagementModalProps> = ({ isOpen,
           </Table>
         </div>
         <DialogFooter>
-          <Button onClick={onClose} className="w-full bg-blue-500 text-white hover:bg-blue-600 rounded-full font-black uppercase tracking-widest text-[10px]">
+          <Button 
+            type="button"
+            onClick={onClose} 
+            className="w-full bg-blue-500 text-white hover:bg-blue-600 rounded-full font-black uppercase tracking-widest text-[10px]"
+          >
             Close
           </Button>
         </DialogFooter>

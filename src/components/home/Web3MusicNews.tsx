@@ -133,7 +133,7 @@ export const Web3MusicNews: React.FC<Web3MusicNewsProps> = ({ className = '' }) 
   }
 
   return (
-    <div id="web3-music-news-section" className={`bg-[#0A1128]/60 backdrop-blur-md rounded-3xl p-5 sm:p-6 text-left transition-all ${className}`}>
+    <div id="web3-music-news-section" className={`bg-[#0A1128]/60 backdrop-blur-md rounded-2xl p-4 sm:p-6 text-left transition-all ${className}`}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div className="flex items-start gap-3">

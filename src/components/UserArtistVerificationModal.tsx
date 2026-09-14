@@ -1,309 +1,741 @@
-import React, { useState } from 'react';
-import { X, ShieldCheck, Twitter, Music, Wallet, CheckCircle2, Loader2, Globe } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  X, 
+  ShieldCheck, 
+  Twitter, 
+  Instagram, 
+  CheckCircle2, 
+  Loader2, 
+  AlertCircle, 
+  Clock, 
+  XCircle, 
+  ExternalLink,
+  Sparkles,
+  Send,
+  RefreshCw
+} from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 import { db, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
-import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
-import { useEffect } from 'react';
+import { doc, updateDoc, collection, addDoc, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { toast } from 'sonner';
+import { ArtistVerificationRequest } from '@/types';
 
 interface UserArtistVerificationModalProps {
   onClose: () => void;
 }
 
+export const normalizeSocialUrl = (input: string, platform: 'twitter' | 'instagram'): string => {
+  let clean = input.trim();
+  if (!clean) return '';
+  if (clean === 'verified' || clean === 'connected' || clean === 'mock') return '';
+
+  clean = clean.replace(/\/+$/, '');
+
+  if (platform === 'twitter') {
+    if (clean.startsWith('@')) {
+      clean = clean.substring(1);
+    }
+    if (clean.startsWith('http://') || clean.startsWith('https://')) {
+      return clean.replace(/^http:\/\/twitter\.com\//, 'https://x.com/').replace(/^https:\/\/twitter\.com\//, 'https://x.com/');
+    }
+    return `https://x.com/${clean}`;
+  }
+
+  if (platform === 'instagram') {
+    if (clean.startsWith('@')) {
+      clean = clean.substring(1);
+    }
+    if (clean.startsWith('http://') || clean.startsWith('https://')) {
+      return clean.replace(/^http:\/\//, 'https://');
+    }
+    return `https://instagram.com/${clean}`;
+  }
+
+  return clean;
+};
+
 const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = ({ onClose }) => {
   const { userProfile, setUserProfile, addNotification } = useAudio();
-  const [step, setStep] = useState(1);
-  const [isVerifying, setIsVerifying] = useState(false);
-  
-  const [linkedAccounts, setLinkedAccounts] = useState({
-    x: !!userProfile.socials?.x,
-    spotify: !!userProfile.socials?.spotify,
-    vercel: !!(userProfile as any).socials?.vercel,
-    wallet: !!userProfile.walletAddress
-  });
 
+  // Requests state
+  const [requests, setRequests] = useState<ArtistVerificationRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [connectingProvider, setConnectingProvider] = useState<'twitter' | 'instagram' | null>(null);
+
+  // Form inputs
+  const [artistName, setArtistName] = useState(userProfile.name || userProfile.username || '');
+  const [genre, setGenre] = useState(userProfile.genre || 'Electronic');
+  const [bio, setBio] = useState(userProfile.bio || '');
+  
+  // Connection states
+  const [isTwitterConnected, setIsTwitterConnected] = useState<boolean>(
+    Boolean(userProfile.socials?.x || userProfile.socials?.twitter)
+  );
+  const [isInstagramConnected, setIsInstagramConnected] = useState<boolean>(
+    Boolean(userProfile.socials?.instagram)
+  );
+
+  // URL inputs
+  const [twitterUrl, setTwitterUrl] = useState(
+    userProfile.socials?.x || userProfile.socials?.twitter || (userProfile.username ? `@${userProfile.username}` : '')
+  );
+  const [instagramUrl, setInstagramUrl] = useState(
+    userProfile.socials?.instagram || (userProfile.username ? `@${userProfile.username}` : '')
+  );
+
+  const [formErrors, setFormErrors] = useState<{
+    artistName?: string;
+    twitter?: string;
+    instagram?: string;
+    general?: string;
+  }>({});
+
+  // Sync profile data on mount or change
+  useEffect(() => {
+    if (userProfile) {
+      if (!artistName) setArtistName(userProfile.name || userProfile.username || '');
+      if (!bio) setBio(userProfile.bio || '');
+      if (userProfile.socials?.x || userProfile.socials?.twitter) {
+        setIsTwitterConnected(true);
+      }
+      if (userProfile.socials?.instagram) {
+        setIsInstagramConnected(true);
+      }
+    }
+  }, [userProfile]);
+
+  // Listen for verification requests in Firestore
+  useEffect(() => {
+    if (!userProfile?.uid) {
+      setLoadingRequests(false);
+      return;
+    }
+
+    const q = query(
+      collection(db, 'verificationRequests'),
+      where('userId', '==', userProfile.uid),
+      orderBy('submittedAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetched: ArtistVerificationRequest[] = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data()
+        } as ArtistVerificationRequest));
+        setRequests(fetched);
+        setLoadingRequests(false);
+      },
+      (error) => {
+        console.warn('Error fetching verification requests:', error);
+        setLoadingRequests(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [userProfile?.uid]);
+
+  // Listen for OAuth messages from popup window
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       // Validate origin
-      if (!event.origin.endsWith('.run.app') && !event.origin.includes('localhost')) return;
+      const isAllowedOrigin = 
+        event.origin === window.location.origin || 
+        event.origin.endsWith('.run.app') || 
+        event.origin.includes('localhost');
 
-      if (event.data?.type === 'SPOTIFY_VERIFIED') {
-        const profile = event.data.data;
-        updateRemoteSocial('spotify', profile.external_urls?.spotify || 'verified');
-        setLinkedAccounts(prev => ({ ...prev, spotify: true }));
-        addNotification("Spotify linked successfully", "success");
-      }
+      if (!isAllowedOrigin) return;
 
-      if (event.data?.type === 'VERCEL_SSO_SUCCESS') {
-        const data = event.data.data;
-        updateRemoteSocial('vercel', data.user?.username || 'verified');
-        setLinkedAccounts(prev => ({ ...prev, vercel: true }));
-        addNotification("Vercel linked successfully", "success");
+      if (event.data?.type === 'OAUTH_AUTH_SUCCESS') {
+        const provider = String(event.data?.provider || '').toLowerCase();
+        
+        if (provider === 'twitter' || provider === 'x') {
+          setIsTwitterConnected(true);
+          if (!twitterUrl.trim()) {
+            setTwitterUrl(userProfile.username ? `@${userProfile.username}` : 'https://x.com/');
+          }
+          addNotification('Twitter / X account connected successfully', 'success');
+          toast.success('Twitter / X account connected!');
+        } else if (provider === 'instagram') {
+          setIsInstagramConnected(true);
+          if (!instagramUrl.trim()) {
+            setInstagramUrl(userProfile.username ? `@${userProfile.username}` : 'https://instagram.com/');
+          }
+          addNotification('Instagram account connected successfully', 'success');
+          toast.success('Instagram account connected!');
+        }
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [userProfile]);
+  }, [userProfile, twitterUrl, instagramUrl, addNotification]);
 
-  const updateRemoteSocial = async (platform: string, value: string) => {
+  // OAuth connect trigger
+  const handleConnect = async (provider: 'twitter' | 'instagram') => {
     try {
-      const userRef = doc(db, 'users', userProfile.uid);
-      const socials = { ...(userProfile.socials || {}), [platform]: value };
-      await updateDoc(userRef, cleanUpdateData({ socials }));
-      setUserProfile({ ...userProfile, socials });
-    } catch (error) {
-      console.error(`Error updating ${platform}:`, error);
-    }
-  };
+      setConnectingProvider(provider);
+      const res = await fetch(`/api/auth/${provider}/url`);
+      if (!res.ok) {
+        throw new Error(`Failed to initialize ${provider} authorization flow`);
+      }
+      const data = await res.json();
+      if (!data.url) {
+        throw new Error('No authorization URL returned');
+      }
 
-  const handleLinkAccount = async (platform: 'x' | 'spotify' | 'wallet' | 'vercel') => {
-    if (platform === 'x' || platform === 'wallet') {
-      setIsVerifying(true);
-      // Simulate OAuth / Wallet connection delay for these for now
-      setTimeout(() => {
-        setIsVerifying(false);
-        setLinkedAccounts(prev => ({ ...prev, [platform]: true }));
-        
-        // Update user profile with mock data
-        const updates: any = {};
-        if (platform === 'x') {
-          updates.socials = { ...userProfile.socials, x: `https://x.com/${userProfile.username}` };
-        } else if (platform === 'wallet') {
-          updates.walletAddress = 'EQD...mock...wallet';
-        }
-        
-        setUserProfile({ ...userProfile, ...updates });
-        addNotification(`${platform.toUpperCase()} linked successfully`, 'success');
-      }, 1500);
-      return;
-    }
-
-    try {
-      setIsVerifying(true);
-      const response = await fetch(`/api/auth/${platform}/url`);
-      if (!response.ok) throw new Error(`Failed to get ${platform} auth URL`);
-      const { url } = await response.json();
-      
       const width = 600;
       const height = 700;
       const left = window.innerWidth / 2 - width / 2;
       const top = window.innerHeight / 2 - height / 2;
-      
-      window.open(url, `${platform}_oauth`, `width=${width},height=${height},left=${left},top=${top}`);
-    } catch (error) {
-      console.error(`OAuth error for ${platform}:`, error);
-      addNotification(`Failed to connect ${platform}`, 'error');
+
+      window.open(
+        data.url,
+        `${provider}_oauth_window`,
+        `width=${width},height=${height},left=${left},top=${top},status=0,toolbar=0,menubar=0`
+      );
+    } catch (error: any) {
+      console.error(`OAuth trigger error for ${provider}:`, error);
+      toast.error(`Unable to open ${provider} login: ${error.message || 'Error'}`);
     } finally {
-      setIsVerifying(false);
+      setConnectingProvider(null);
     }
   };
 
-  const handleCompleteVerification = async () => {
-    setIsVerifying(true);
+  // Determine verification status
+  const isVerified = Boolean(
+    userProfile.isVerified || 
+    userProfile.isVerifiedArtist || 
+    userProfile.verified || 
+    userProfile.role === 'artist'
+  );
+
+  const activePendingRequest = requests.find((r) => r.status === 'pending');
+  const activeRevisionRequest = requests.find((r) => r.status === 'needs_revision');
+  const latestRequest = requests[0];
+
+  const currentStatus: 'verified' | 'pending' | 'needs_revision' | 'rejected' | 'unverified' = isVerified
+    ? 'verified'
+    : activePendingRequest
+      ? 'pending'
+      : activeRevisionRequest || latestRequest?.status === 'needs_revision' || (userProfile.verificationStatus as any) === 'needs_revision'
+        ? 'needs_revision'
+        : latestRequest?.status === 'rejected' || (userProfile.verificationStatus as any) === 'rejected'
+          ? 'rejected'
+          : (userProfile.verificationStatus as any) || 'unverified';
+
+  // Validation
+  const hasTwitterUrl = Boolean(twitterUrl.trim() && normalizeSocialUrl(twitterUrl, 'twitter'));
+  const hasInstagramUrl = Boolean(instagramUrl.trim() && normalizeSocialUrl(instagramUrl, 'instagram'));
+  const canSubmit = isTwitterConnected && isInstagramConnected && hasTwitterUrl && hasInstagramUrl && Boolean(artistName.trim());
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canSubmit || isSubmitting) return;
+
+    const cleanTwitter = normalizeSocialUrl(twitterUrl, 'twitter');
+    const cleanInstagram = normalizeSocialUrl(instagramUrl, 'instagram');
+
+    if (!cleanTwitter) {
+      setFormErrors((prev) => ({ ...prev, twitter: 'Please enter a valid Twitter/X profile URL or handle' }));
+      return;
+    }
+    if (!cleanInstagram) {
+      setFormErrors((prev) => ({ ...prev, instagram: 'Please enter a valid Instagram profile URL or handle' }));
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       const currentUid = userProfile.uid;
       const nowIso = new Date().toISOString();
 
       const socialLinksList = [
-        ...(userProfile.socials?.spotify ? [{ platform: 'spotify', url: userProfile.socials.spotify }] : []),
-        ...(userProfile.socials?.x || userProfile.socials?.twitter ? [{ platform: 'twitter', url: userProfile.socials?.x || userProfile.socials?.twitter }] : []),
-        ...(userProfile.socials?.instagram ? [{ platform: 'instagram', url: userProfile.socials.instagram }] : []),
-        ...(userProfile.walletAddress ? [{ platform: 'wallet', url: userProfile.walletAddress }] : [])
+        { platform: 'twitter', url: cleanTwitter },
+        { platform: 'instagram', url: cleanInstagram }
       ];
 
-      // 1. Create verification request in verificationRequests
+      const socialsMap = {
+        twitter: cleanTwitter,
+        x: cleanTwitter,
+        instagram: cleanInstagram
+      };
+
+      // 1. Create document in verificationRequests
       await addDoc(collection(db, 'verificationRequests'), cleanUpdateData({
         userId: currentUid,
-        artistName: userProfile.name || userProfile.username || 'Artist',
+        artistName: artistName.trim(),
         email: userProfile.email || '',
-        bio: userProfile.bio || '',
-        genre: userProfile.genre || 'Electronic',
+        bio: bio.trim(),
+        genre: genre.trim(),
         socialLinks: socialLinksList,
-        portfolioUrl: userProfile.socials?.spotify || userProfile.socials?.x || '',
+        socialsMap: socialsMap,
+        portfolioUrl: cleanTwitter,
         status: 'pending',
         submittedAt: nowIso,
         createdAt: nowIso,
         updatedAt: nowIso
       }));
 
-      // 2. Set user verificationStatus to pending (without self-escalating role or isVerifiedArtist)
+      // 2. Update user profile to pending (no self-approval)
       const userRef = doc(db, 'users', currentUid);
-      await updateDoc(userRef, cleanUpdateData({ 
-        verificationStatus: 'pending'
+      const updatedSocials = {
+        ...(userProfile.socials || {}),
+        x: cleanTwitter,
+        twitter: cleanTwitter,
+        instagram: cleanInstagram
+      };
+
+      await updateDoc(userRef, cleanUpdateData({
+        verificationStatus: 'pending',
+        bio: bio.trim() || userProfile.bio || '',
+        genre: genre.trim() || 'Electronic',
+        socials: updatedSocials
       }));
 
-      setUserProfile({ ...userProfile, verificationStatus: 'pending' });
-      addNotification("Artist verification submitted for admin review!", "success");
-      onClose();
-    } catch (error) {
+      setUserProfile({
+        ...userProfile,
+        verificationStatus: 'pending',
+        bio: bio.trim() || userProfile.bio || '',
+        genre: genre.trim() || 'Electronic',
+        socials: updatedSocials
+      });
+
+      addNotification('Artist verification submitted for moderator review!', 'success');
+      toast.success('Verification request submitted for moderator review!');
+    } catch (error: any) {
+      console.error('Error submitting verification:', error);
       handleFirestoreError(error, OperationType.CREATE, 'verificationRequests');
+      toast.error('Failed to submit verification request. Please try again.');
     } finally {
-      setIsVerifying(false);
+      setIsSubmitting(false);
     }
   };
 
-  const canVerify = linkedAccounts.x && linkedAccounts.spotify && linkedAccounts.wallet && linkedAccounts.vercel;
-
   return (
-    <div className="fixed inset-0 z-[100] bg-white dark:bg-[#0B0F14] text-zinc-900 dark:text-zinc-100 overflow-y-auto animate-in fade-in duration-300">
-      <div className="max-w-md mx-auto px-6 py-12 md:py-20 min-h-screen flex flex-col justify-between gap-12">
+    <div 
+      id="user-artist-verification-modal-backdrop" 
+      className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="artist-verification-modal-title"
+    >
+      <div 
+        id="user-artist-verification-modal-container"
+        className="w-full max-w-lg bg-[#0B0F14] text-zinc-100 rounded-3xl p-6 md:p-8 shadow-2xl relative my-8"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pb-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-              <ShieldCheck className="h-6 w-6" />
+            <div className="w-11 h-11 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center shrink-0">
+              <ShieldCheck className="h-6 w-6 text-cyan-400" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">Artist Verification</h2>
-              <p className="text-[10px] font-bold text-zinc-400 dark:text-white/40 uppercase tracking-[0.2em] mt-0.5">Identity Protocol</p>
+              <h2 id="artist-verification-modal-title" className="text-lg font-black uppercase tracking-tight text-white flex items-center gap-2">
+                Artist Verification
+              </h2>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                Official Identity & Social Authentication
+              </p>
             </div>
           </div>
           <button 
+            type="button"
+            id="close-artist-verification-modal-btn"
             onClick={onClose} 
-            className="p-3 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-white/60 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors focus:outline-none"
+            className="p-2.5 rounded-full bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus:outline-none"
+            aria-label="Close verification modal"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Content Body */}
-        <div className="flex-1 flex flex-col justify-center space-y-8">
-          <div className="space-y-3">
-            <h3 className="text-lg font-black text-zinc-800 dark:text-zinc-100 uppercase tracking-wide">Link Accounts</h3>
-            <p className="text-xs font-bold text-zinc-500 dark:text-white/50 uppercase tracking-widest leading-relaxed">
-              Connect the four external identities below to verify your digital footprint and unlock advanced creator capabilities on TONJAM.
+        {/* State: Verified */}
+        {currentStatus === 'verified' && (
+          <div className="space-y-6 py-4">
+            <div className="p-6 rounded-2xl bg-cyan-500/10 text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-cyan-500/20 text-cyan-400 mx-auto flex items-center justify-center">
+                <CheckCircle2 className="w-7 h-7" />
+              </div>
+              <h3 className="text-base font-black text-white uppercase tracking-wider">
+                Artist Profile Verified
+              </h3>
+              <p className="text-xs text-zinc-300 leading-relaxed max-w-sm mx-auto">
+                Your artist credentials have been reviewed and approved by TonJam moderators. You have full creator rights and badge authentication.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-wider">
+                Connected Social Profiles
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(userProfile.socials?.x || userProfile.socials?.twitter) && (
+                  <a 
+                    href={normalizeSocialUrl(userProfile.socials.x || userProfile.socials.twitter || '', 'twitter')}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 text-blue-400 text-xs font-bold hover:bg-white/10 transition-colors"
+                  >
+                    <Twitter className="w-3.5 h-3.5" /> Twitter (X) <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+                {userProfile.socials?.instagram && (
+                  <a 
+                    href={normalizeSocialUrl(userProfile.socials.instagram, 'instagram')}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 text-pink-400 text-xs font-bold hover:bg-white/10 transition-colors"
+                  >
+                    <Instagram className="w-3.5 h-3.5" /> Instagram <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full h-12 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-black uppercase tracking-widest transition-all"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* State: Pending */}
+        {currentStatus === 'pending' && (
+          <div className="space-y-6 py-4">
+            <div className="p-6 rounded-2xl bg-amber-500/10 text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center">
+                <Clock className="w-7 h-7 animate-pulse" />
+              </div>
+              <h3 className="text-base font-black text-white uppercase tracking-wider">
+                Application Under Review
+              </h3>
+              <p className="text-xs text-zinc-300 leading-relaxed max-w-sm mx-auto">
+                Your artist verification request is currently in queue. TonJam moderators will review your official Twitter/X and Instagram profiles.
+              </p>
+            </div>
+
+            {activePendingRequest && (
+              <div className="p-4 rounded-xl bg-white/5 space-y-2 text-xs">
+                <div className="flex justify-between text-[11px] text-zinc-400">
+                  <span>Artist Name:</span>
+                  <span className="font-bold text-white">{activePendingRequest.artistName}</span>
+                </div>
+                <div className="flex justify-between text-[11px] text-zinc-400">
+                  <span>Submitted:</span>
+                  <span className="font-mono text-zinc-300">
+                    {activePendingRequest.submittedAt ? new Date(activePendingRequest.submittedAt).toLocaleDateString() : 'Recently'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-[11px] text-zinc-400">
+                  <span>Review Status:</span>
+                  <span className="font-bold text-amber-400 uppercase">Pending Moderator Review</span>
+                </div>
+              </div>
+            )}
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full h-12 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-black uppercase tracking-widest transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* State: Needs Revision / Rejected Notice (Allows resubmission) */}
+        {(currentStatus === 'needs_revision' || currentStatus === 'rejected') && (
+          <div className="mb-6 p-4 rounded-2xl bg-orange-500/10 space-y-2">
+            <div className="flex items-center gap-2 text-orange-400">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span className="text-xs font-black uppercase tracking-wide">
+                {currentStatus === 'needs_revision' ? 'Revision Requested by Moderator' : 'Previous Request Declined'}
+              </span>
+            </div>
+            {latestRequest?.reviewerNotes && (
+              <p className="text-xs text-zinc-300 italic pl-6">
+                "{latestRequest.reviewerNotes}"
+              </p>
+            )}
+            <p className="text-[11px] text-zinc-400 pl-6">
+              Please review and update your Twitter/X and Instagram handles below, then resubmit for review.
             </p>
           </div>
+        )}
 
-          <div className="space-y-3">
-            {/* X (Twitter) Link */}
-            <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-white/5 rounded-2xl transition-all">
-              <div className="flex items-center gap-3.5">
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${linkedAccounts.x ? 'bg-blue-500/10 text-blue-500 dark:text-blue-400' : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-400 dark:text-white/30'}`}>
-                  <Twitter className="h-5 w-5 fill-current" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-wider">X (Twitter)</h4>
-                  <p className="text-[10px] font-bold text-zinc-400 dark:text-white/30 uppercase tracking-widest">Social Footprint</p>
-                </div>
-              </div>
-              {linkedAccounts.x ? (
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Linked</span>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => handleLinkAccount('x')}
-                  disabled={isVerifying}
-                  className="h-9 px-4 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
-                >
-                  Connect
-                </button>
-              )}
+        {/* State: Form (Unverified / Needs Revision / Rejected) */}
+        {(currentStatus === 'unverified' || currentStatus === 'needs_revision' || currentStatus === 'rejected') && (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-1">
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Connect both your official Twitter/X and Instagram accounts and provide their profile handles to request verification review from TonJam moderators.
+              </p>
             </div>
 
-            {/* Spotify Link */}
-            <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-white/5 rounded-2xl transition-all">
-              <div className="flex items-center gap-3.5">
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${linkedAccounts.spotify ? 'bg-[#1DB954]/10 text-[#1DB954]' : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-400 dark:text-white/30'}`}>
-                  <Music className="h-5 w-5" />
+            {/* Basic Info */}
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label 
+                  htmlFor="verification-artist-name-input"
+                  className="block text-[10px] font-mono uppercase font-bold text-zinc-400 tracking-wider"
+                >
+                  Artist / Stage Name <span className="text-cyan-400">*</span>
+                </label>
+                <input
+                  id="verification-artist-name-input"
+                  type="text"
+                  value={artistName}
+                  onChange={(e) => setArtistName(e.target.value)}
+                  placeholder="e.g. Neon Horizon"
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-all"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label 
+                    htmlFor="verification-genre-select"
+                    className="block text-[10px] font-mono uppercase font-bold text-zinc-400 tracking-wider"
+                  >
+                    Primary Genre
+                  </label>
+                  <select
+                    id="verification-genre-select"
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-all cursor-pointer"
+                  >
+                    <option value="Electronic" className="bg-zinc-900 text-white">Electronic</option>
+                    <option value="Hip Hop" className="bg-zinc-900 text-white">Hip Hop</option>
+                    <option value="Techno" className="bg-zinc-900 text-white">Techno / House</option>
+                    <option value="Synthwave" className="bg-zinc-900 text-white">Synthwave</option>
+                    <option value="Ambient" className="bg-zinc-900 text-white">Ambient</option>
+                    <option value="Pop" className="bg-zinc-900 text-white">Pop / Indie</option>
+                    <option value="Rock" className="bg-zinc-900 text-white">Rock</option>
+                  </select>
                 </div>
-                <div>
-                  <h4 className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-wider">Spotify</h4>
-                  <p className="text-[10px] font-bold text-zinc-400 dark:text-white/30 uppercase tracking-widest">Discography Proof</p>
+
+                <div className="space-y-1.5">
+                  <label 
+                    htmlFor="verification-bio-input"
+                    className="block text-[10px] font-mono uppercase font-bold text-zinc-400 tracking-wider"
+                  >
+                    Short Bio (Optional)
+                  </label>
+                  <input
+                    id="verification-bio-input"
+                    type="text"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Short artist bio..."
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-all"
+                  />
                 </div>
               </div>
-              {linkedAccounts.spotify ? (
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Linked</span>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => handleLinkAccount('spotify')}
-                  disabled={isVerifying}
-                  className="h-9 px-4 bg-[#1DB954] hover:bg-[#1ed760] active:scale-95 text-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
-                >
-                  Connect
-                </button>
-              )}
             </div>
 
-            {/* Vercel Link */}
-            <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-white/5 rounded-2xl transition-all">
-              <div className="flex items-center gap-3.5">
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${linkedAccounts.vercel ? 'bg-zinc-900/10 text-zinc-900 dark:bg-white/10 dark:text-white' : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-400 dark:text-white/30'}`}>
-                  <Globe className="h-5 w-5" />
+            {/* Social Connection Cards */}
+            <div className="space-y-4 pt-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono uppercase font-bold text-zinc-400 tracking-wider">
+                  Required Social Connections (2/2)
+                </span>
+                <span className="text-[10px] font-bold text-cyan-400">
+                  {(isTwitterConnected ? 1 : 0) + (isInstagramConnected ? 1 : 0)} of 2 Connected
+                </span>
+              </div>
+
+              {/* Twitter / X Card */}
+              <div 
+                id="verification-twitter-card"
+                className="p-4 rounded-2xl bg-white/5 space-y-3 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                      isTwitterConnected ? 'bg-blue-500/20 text-blue-400' : 'bg-white/5 text-zinc-400'
+                    }`}>
+                      <Twitter className="h-5 w-5 fill-current" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-white uppercase tracking-wider">Twitter / X</h4>
+                      <p className="text-[10px] text-zinc-400">Official artist social account</p>
+                    </div>
+                  </div>
+
+                  {isTwitterConnected ? (
+                    <div 
+                      id="twitter-connected-badge"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-wider"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>Connected</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      id="connect-twitter-btn"
+                      onClick={() => handleConnect('twitter')}
+                      disabled={connectingProvider === 'twitter'}
+                      className="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-wider transition-all disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-blue-400 focus:outline-none flex items-center gap-1.5"
+                    >
+                      {connectingProvider === 'twitter' ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <span>Connect</span>
+                      )}
+                    </button>
+                  )}
                 </div>
-                <div>
-                  <h4 className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-wider">Vercel</h4>
-                  <p className="text-[10px] font-bold text-zinc-400 dark:text-white/30 uppercase tracking-widest">Web Deployments</p>
+
+                {/* Twitter Profile URL / Handle Field */}
+                <div className="space-y-1">
+                  <label 
+                    htmlFor="verification-twitter-handle-input"
+                    className="block text-[9px] font-mono uppercase font-bold text-zinc-400"
+                  >
+                    Twitter / X Profile URL or Handle <span className="text-cyan-400">*</span>
+                  </label>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-black/40 focus-within:ring-1 focus-within:ring-blue-400 transition-all">
+                    <span className="text-xs text-zinc-500">@</span>
+                    <input
+                      id="verification-twitter-handle-input"
+                      type="text"
+                      value={twitterUrl}
+                      onChange={(e) => setTwitterUrl(e.target.value)}
+                      placeholder="yourhandle or https://x.com/yourhandle"
+                      className="w-full bg-transparent text-xs text-white placeholder:text-zinc-600 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  {twitterUrl && (
+                    <p className="text-[9px] text-zinc-500 truncate">
+                      Canonical URL: {normalizeSocialUrl(twitterUrl, 'twitter')}
+                    </p>
+                  )}
+                  {formErrors.twitter && (
+                    <p className="text-[10px] text-rose-400">{formErrors.twitter}</p>
+                  )}
                 </div>
               </div>
-              {linkedAccounts.vercel ? (
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Linked</span>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => handleLinkAccount('vercel')}
-                  disabled={isVerifying}
-                  className="h-9 px-4 bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-100 dark:hover:bg-zinc-100 active:scale-95 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
-                >
-                  Connect
-                </button>
-              )}
-            </div>
 
-            {/* TON Wallet Link */}
-            <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-white/5 rounded-2xl transition-all">
-              <div className="flex items-center gap-3.5">
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${linkedAccounts.wallet ? 'bg-blue-500/10 text-blue-500' : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-400 dark:text-white/30'}`}>
-                  <Wallet className="h-5 w-5" />
+              {/* Instagram Card */}
+              <div 
+                id="verification-instagram-card"
+                className="p-4 rounded-2xl bg-white/5 space-y-3 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                      isInstagramConnected ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-zinc-400'
+                    }`}>
+                      <Instagram className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-white uppercase tracking-wider">Instagram</h4>
+                      <p className="text-[10px] text-zinc-400">Official artist visual account</p>
+                    </div>
+                  </div>
+
+                  {isInstagramConnected ? (
+                    <div 
+                      id="instagram-connected-badge"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-wider"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>Connected</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      id="connect-instagram-btn"
+                      onClick={() => handleConnect('instagram')}
+                      disabled={connectingProvider === 'instagram'}
+                      className="h-9 px-4 rounded-xl bg-pink-600 hover:bg-pink-500 text-white text-[10px] font-black uppercase tracking-wider transition-all disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-pink-400 focus:outline-none flex items-center gap-1.5"
+                    >
+                      {connectingProvider === 'instagram' ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <span>Connect</span>
+                      )}
+                    </button>
+                  )}
                 </div>
-                <div>
-                  <h4 className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-wider">TON Wallet</h4>
-                  <p className="text-[10px] font-bold text-zinc-400 dark:text-white/30 uppercase tracking-widest">Web3 Identity</p>
+
+                {/* Instagram Profile URL / Handle Field */}
+                <div className="space-y-1">
+                  <label 
+                    htmlFor="verification-instagram-handle-input"
+                    className="block text-[9px] font-mono uppercase font-bold text-zinc-400"
+                  >
+                    Instagram Profile URL or Handle <span className="text-cyan-400">*</span>
+                  </label>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-black/40 focus-within:ring-1 focus-within:ring-pink-400 transition-all">
+                    <span className="text-xs text-zinc-500">@</span>
+                    <input
+                      id="verification-instagram-handle-input"
+                      type="text"
+                      value={instagramUrl}
+                      onChange={(e) => setInstagramUrl(e.target.value)}
+                      placeholder="yourhandle or https://instagram.com/yourhandle"
+                      className="w-full bg-transparent text-xs text-white placeholder:text-zinc-600 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  {instagramUrl && (
+                    <p className="text-[9px] text-zinc-500 truncate">
+                      Canonical URL: {normalizeSocialUrl(instagramUrl, 'instagram')}
+                    </p>
+                  )}
+                  {formErrors.instagram && (
+                    <p className="text-[10px] text-rose-400">{formErrors.instagram}</p>
+                  )}
                 </div>
               </div>
-              {linkedAccounts.wallet ? (
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Linked</span>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => handleLinkAccount('wallet')}
-                  disabled={isVerifying}
-                  className="h-9 px-4 bg-blue-600 hover:bg-blue-500 dark:bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] active:scale-95 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
-                >
-                  Connect
-                </button>
+            </div>
+
+            {/* Form Actions */}
+            <div className="space-y-3 pt-2">
+              <button
+                type="submit"
+                id="submit-verification-request-btn"
+                disabled={!canSubmit || isSubmitting}
+                className={`w-full h-14 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-cyan-400 focus:outline-none ${
+                  canSubmit && !isSubmitting
+                    ? 'bg-cyan-400 hover:bg-cyan-300 text-zinc-950 shadow-lg shadow-cyan-400/20 active:scale-[0.99] cursor-pointer'
+                    : 'bg-white/5 text-zinc-500 cursor-not-allowed'
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" /> Submitting Application...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" /> Submit for Moderator Review
+                  </>
+                )}
+              </button>
+
+              {!canSubmit && (
+                <p className="text-[10px] text-center text-zinc-500 font-medium">
+                  Connect Twitter/X and Instagram, and confirm profile links to enable submission
+                </p>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Footer actions */}
-        <div className="space-y-4">
-          <button 
-            onClick={handleCompleteVerification}
-            disabled={!canVerify || isVerifying}
-            className={`w-full h-14 rounded-2xl text-xs font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2 ${
-              canVerify 
-                ? 'bg-blue-600 hover:bg-blue-500 dark:bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white shadow-lg shadow-blue-600/10' 
-                : 'bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-white/20 cursor-not-allowed'
-            }`}
-          >
-            {isVerifying ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> Processing Identity...</>
-            ) : (
-              <><ShieldCheck className="h-4 w-4" /> Finalize Verification Key</>
-            )}
-          </button>
-        </div>
+          </form>
+        )}
       </div>
     </div>
   );

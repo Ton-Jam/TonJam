@@ -48,18 +48,20 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
           </button>
           <div className="flex gap-1">
             <button
+              type="button"
               onClick={() => scroll("left")}
-              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none"
+              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B6BFF]"
               aria-label="Previous collections"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
+              <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
             <button
+              type="button"
               onClick={() => scroll("right")}
-              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none"
+              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B6BFF]"
               aria-label="Next collections"
             >
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           </div>
         </div>

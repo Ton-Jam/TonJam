@@ -73,7 +73,7 @@ export const MoodAlignmentSection: React.FC = () => {
       <div 
         ref={scrollRef}
         {...handlers}
-        className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 px-4 sm:px-6 lg:px-8 w-full overscroll-x-contain select-none"
+        className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full overscroll-x-contain select-none"
         style={{ overscrollBehaviorX: 'contain' }}
       >
         {MOODS.map((mood) => {
@@ -102,13 +102,15 @@ export const MoodAlignmentSection: React.FC = () => {
 
       {/* Curated Dynamic Playlist Section (Renders when a mood is selected) */}
       {selectedMood && (
-        <MoodPlaylist
-          selectedMood={selectedMood}
-          onClear={() => setSelectedMood(null)}
-          tracks={curatedMoodTracks}
-          onPlayTrack={playTrack}
-          onPlayAll={playAll}
-        />
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <MoodPlaylist
+            selectedMood={selectedMood}
+            onClear={() => setSelectedMood(null)}
+            tracks={curatedMoodTracks}
+            onPlayTrack={playTrack}
+            onPlayAll={playAll}
+          />
+        </div>
       )}
     </motion.section>
   );

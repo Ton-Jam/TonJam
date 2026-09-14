@@ -14,6 +14,8 @@ import { useNFT } from '@/contexts/NFTContext';
 import { useAudio } from '@/contexts/AudioContext';
 import { TON_LOGO, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { NFTItem, Track } from '@/types';
+import { getPlaceholderImage } from '@/lib/utils';
+import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 
 interface RecentlyMintedNFTsProps {
@@ -147,10 +149,10 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
   if (!recentNFTs || recentNFTs.length === 0) {
     return (
       <div className={`space-y-3 ${className}`}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
           <h2 className="text-base sm:text-lg font-black text-white">{title}</h2>
         </div>
-        <div className="flex gap-3.5 overflow-x-auto no-scrollbar py-2">
+        <div className="flex gap-3.5 overflow-x-auto no-scrollbar py-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="min-w-[165px] max-w-[165px] h-[220px] bg-[#0A113A]/40 rounded-2xl animate-pulse" />
           ))}
@@ -162,7 +164,7 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
   return (
     <div className={`space-y-3.5 ${className}`}>
       {/* SECTION HEADER WITH SCROLL CONTROLS */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#00B4D8] animate-ping" />
           <h2 className="text-base sm:text-lg font-black text-white">{title}</h2>
@@ -194,7 +196,7 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
       <div
         ref={scrollContainerRef}
         {...handlers}
-        className="flex gap-3.5 overflow-x-auto no-scrollbar pb-2 pt-0.5 scroll-smooth snap-x snap-mandatory overscroll-x-contain select-none"
+        className="flex gap-3.5 overflow-x-auto no-scrollbar pb-2 pt-0.5 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full scroll-smooth snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ overscrollBehaviorX: 'contain' }}
       >
         {recentNFTs.map((nft, idx) => {
@@ -215,10 +217,10 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
             >
               {/* ARTWORK & PLAY OVERLAY */}
               <div className="relative aspect-square rounded-xl overflow-hidden bg-black/40 shadow-lg">
-                <img
+                <LazyArtworkImage
                   src={nft.imageUrl || nft.coverUrl}
+                  fallbackSrc={getPlaceholderImage(`nft-${nft.id}`)}
                   alt={nft.title}
-                  loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
 
@@ -271,14 +273,11 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
                 className="flex items-center gap-2 pt-1 mt-0.5 group/creator cursor-pointer hover:opacity-90 transition-opacity"
                 title={`View ${creator.name}'s profile`}
               >
-                <img
+                <LazyArtworkImage
                   src={creator.avatarUrl}
+                  fallbackSrc={`https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(creator.name)}`}
                   alt={creator.name}
-                  loading="lazy"
                   className="w-5 h-5 rounded-full object-cover shrink-0 ring-1 ring-white/10 group-hover/creator:ring-[#5B6BFF]/60 transition-all"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(creator.name)}`;
-                  }}
                 />
                 <div className="flex items-center gap-1 min-w-0 flex-1">
                   <span className="text-[10px] font-semibold text-[#9AA0AE] group-hover/creator:text-[#5B6BFF] truncate transition-colors">

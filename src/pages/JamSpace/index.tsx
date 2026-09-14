@@ -49,7 +49,7 @@ import {
 const JamSpaceMain: React.FC = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
-  const { addNotification } = useAudio();
+  const { addNotification, currentTrack } = useAudio();
   const [isOnline, setIsOnline] = useState(true);
 
   // Core state from custom hook
@@ -188,11 +188,12 @@ const JamSpaceMain: React.FC = () => {
                 <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
                   <button
                     onClick={() => jamData.setShowNotifications(true)}
-                    className="relative p-3 bg-slate-900/60 hover:bg-slate-900 text-slate-300 hover:text-[#0052FF] transition-colors cursor-pointer rounded-[10px]"
+                    aria-label="View notifications"
+                    className="relative p-3 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-[#00B4D8] transition-colors cursor-pointer rounded-xl border-none"
                   >
                     <Bell className="w-4 h-4" />
                     {jamData.notifications.some(n => !n.read) && (
-                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                      <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#00B4D8] animate-pulse" />
                     )}
                   </button>
                 </div>
@@ -231,10 +232,10 @@ const JamSpaceMain: React.FC = () => {
                 {/* Dynamic Posts Stream with custom empty states */}
                 <div className="space-y-6">
                   {jamData.posts.length === 0 ? (
-                    <div className="bg-slate-900 border border-white/[0.03] rounded-[10px] p-12 text-center text-slate-500">
-                      <FolderOpen className="w-12 h-12 text-slate-700 mx-auto mb-3" />
-                      <h4 className="text-sm font-extrabold text-white uppercase tracking-wider">No matching signals</h4>
-                      <p className="text-xs text-slate-600 mt-1 max-w-sm mx-auto leading-relaxed">
+                    <div className="bg-white/[0.03] rounded-2xl p-10 sm:p-12 text-center text-zinc-400 border-none">
+                      <FolderOpen className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
+                      <h4 className="text-sm font-bold text-white uppercase tracking-wider">No matching signals</h4>
+                      <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto leading-relaxed">
                         The spectrum in this filter looks quiet. Clear your search parameters or start a new broadcast.
                       </p>
                     </div>
@@ -343,16 +344,20 @@ const JamSpaceMain: React.FC = () => {
           </div>
         )}
 
-      {/* FLOATING ACTION BUTTON (FAB) FOR COMPOSING */}
+      {/* MOBILE FLOATING ACTION BUTTON (FAB) - Positioned safely above mini-player and bottom nav, hidden on desktop */}
       <motion.button
         id="floating-create-post-btn"
+        type="button"
         onClick={() => setIsComposeOpen(true)}
-        className="fixed bottom-6 right-6 px-5 py-3.5 bg-gradient-to-r from-[#0052FF] to-blue-600 hover:from-blue-600 hover:to-[#0052FF] text-white rounded-full shadow-[0_8px_30px_rgb(0,82,255,0.4)] hover:shadow-[0_8px_35px_rgb(0,82,255,0.6)] z-40 cursor-pointer flex items-center gap-2 font-bold text-xs uppercase tracking-wider border-none"
-        whileHover={{ scale: 1.05, y: -2 }}
+        aria-label="Create new JamSpace post"
+        className={`lg:hidden fixed ${
+          currentTrack ? 'bottom-36' : 'bottom-20'
+        } right-4 sm:right-6 min-h-[44px] min-w-[44px] px-4 py-2.5 bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-black font-bold text-xs uppercase tracking-wider rounded-full shadow-lg shadow-[#00B4D8]/25 z-40 cursor-pointer flex items-center justify-center gap-2 border-none transition-all duration-300 active:scale-95`}
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        <Plus className="w-4 h-4 stroke-[3px]" />
-        <span>Create Post</span>
+        <Plus className="w-4 h-4 stroke-[2.5] shrink-0" />
+        <span className="font-bold">Post</span>
       </motion.button>
 
       {/* CREATE POST MODAL OVERLAY */}

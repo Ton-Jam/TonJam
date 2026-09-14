@@ -19,7 +19,7 @@ export const MusicNews: React.FC = () => {
         {MOCK_NEWS.map((news) => (
           <motion.div
             key={news.id}
-            className="bg-slate-900 border border-white/[0.03] rounded-[10px] overflow-hidden flex flex-col sm:flex-row"
+            className="bg-white/[0.03] hover:bg-white/[0.05] rounded-2xl overflow-hidden flex flex-col sm:flex-row border-none transition-colors"
             whileHover={{ y: -2 }}
           >
             <img
@@ -36,14 +36,14 @@ export const MusicNews: React.FC = () => {
                 <h4 className="text-sm font-bold text-white tracking-tight leading-snug line-clamp-2">
                   {news.title}
                 </h4>
-                <p className="text-xs text-slate-400 line-clamp-2 font-medium">
+                <p className="text-xs text-zinc-400 line-clamp-2 font-normal">
                   {news.summary}
                 </p>
               </div>
 
-              <div className="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-white/[0.02] mt-2">
+              <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-2 mt-2">
                 <span>{news.timestamp}</span>
-                <button className="flex items-center gap-1 text-[#0052FF] font-bold hover:underline cursor-pointer">
+                <button className="flex items-center gap-1 text-[#00B4D8] font-bold hover:underline cursor-pointer border-none bg-transparent">
                   <span>Read Article</span>
                   <ExternalLink className="w-3 h-3" />
                 </button>

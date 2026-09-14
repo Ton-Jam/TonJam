@@ -3,7 +3,7 @@ import { Web3MusicNews } from "@/components/home/Web3MusicNews";
 
 export const Web3NewsSection: React.FC = () => {
   return (
-    <section className="w-full text-left">
+    <section className="w-full px-4 sm:px-6 lg:px-8 text-left">
       <Web3MusicNews />
     </section>
   );

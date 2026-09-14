@@ -94,7 +94,7 @@ export const NewDropsSection: React.FC = () => {
       <div 
         ref={genreScrollRef}
         {...genreHandlers}
-        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {availableGenres.map((genre) => {
@@ -120,7 +120,7 @@ export const NewDropsSection: React.FC = () => {
       <div 
         ref={scrollRef}
         {...handlers}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory min-h-[220px] overscroll-x-contain select-none"
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory min-h-[220px] overscroll-x-contain select-none"
         style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         <AnimatePresence mode="popLayout">

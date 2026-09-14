@@ -34,7 +34,11 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({
           <button
             key={filter.id}
             onClick={() => onFilterChange(filter.id)}
-            className="relative px-4 py-2 shrink-0 rounded-[12px] text-[10px] font-bold uppercase tracking-widest cursor-pointer transition-colors duration-200 overflow-hidden"
+            className={`relative px-4 py-2 shrink-0 rounded-full text-[10px] font-bold uppercase tracking-widest cursor-pointer transition-colors duration-200 overflow-hidden border ${
+              isActive
+                ? 'border-[#c0c0c0]/40'
+                : 'border-[#c0c0c0]/25 hover:border-[#c0c0c0]/40'
+            }`}
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
             {isActive && (

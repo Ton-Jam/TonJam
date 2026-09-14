@@ -3,7 +3,7 @@ import { Disc } from "lucide-react";
 
 export const HomeFooter: React.FC = () => {
   return (
-    <footer className="pt-8 pb-4 text-center space-y-2 border-none">
+    <footer className="w-full px-4 sm:px-6 lg:px-8 pt-8 pb-4 text-center space-y-2 border-none">
       <p className="text-[9px] uppercase tracking-[0.25em] text-zinc-500 font-black">
         TonJam Decentralized Music Marketplace
       </p>

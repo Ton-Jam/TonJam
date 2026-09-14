@@ -30,7 +30,7 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
       {/* Scroll Left Button */}
       <button
         onClick={() => scroll("left")}
-        className="absolute left-0 z-10 w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800/40 text-zinc-400 hover:text-white flex items-center justify-center transition-colors shadow-lg pointer-events-auto md:hidden"
+        className="absolute left-0 z-10 w-8 h-8 rounded-full bg-zinc-900 border border-[#c0c0c0]/30 text-zinc-400 hover:text-white flex items-center justify-center transition-colors shadow-lg pointer-events-auto md:hidden"
         aria-label="Scroll left"
       >
         <ChevronLeft className="w-4 h-4" />
@@ -39,19 +39,24 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
       {/* Chips Area */}
       <div
         ref={containerRef}
-        className="flex gap-2 overflow-x-auto py-2 no-scrollbar scroll-smooth w-full px-1 scroll-padding"
+        role="group"
+        aria-label="NFT category filters"
+        className="flex gap-2 overflow-x-auto py-2 no-scrollbar scroll-smooth w-full px-0 scroll-padding"
       >
         {categories.map((cat) => {
           const isActive = cat === activeCategory;
           return (
             <motion.button
               key={cat}
+              type="button"
               whileTap={{ scale: 0.95 }}
               onClick={() => onSelectCategory(cat)}
-              className={`px-4 py-2 rounded-[10px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 shrink-0 select-none border-[2px] ${
+              aria-pressed={isActive}
+              aria-label={`Filter by ${cat}`}
+              className={`px-4 py-2 rounded-[10px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 shrink-0 select-none border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0088CC] focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950 ${
                 isActive
-                  ? "bg-[#0088CC] text-white border-[#0088CC] shadow-[0_0_15px_rgba(0,136,204,0.4)] font-black"
-                  : "bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-[#0088CC]/20 border-white/10"
+                  ? "bg-[#0088CC] text-white border-[#c0c0c0]/50 shadow-[0_0_15px_rgba(0,136,204,0.4)] font-black"
+                  : "bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-[#0088CC]/20 border-[#c0c0c0]/25"
               }`}
             >
               {cat}
@@ -63,7 +68,7 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
       {/* Scroll Right Button */}
       <button
         onClick={() => scroll("right")}
-        className="absolute right-0 z-10 w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800/40 text-zinc-400 hover:text-white flex items-center justify-center transition-colors shadow-lg pointer-events-auto md:hidden"
+        className="absolute right-0 z-10 w-8 h-8 rounded-full bg-zinc-900 border border-[#c0c0c0]/30 text-zinc-400 hover:text-white flex items-center justify-center transition-colors shadow-lg pointer-events-auto md:hidden"
         aria-label="Scroll right"
       >
         <ChevronRight className="w-4 h-4" />

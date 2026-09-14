@@ -14,6 +14,7 @@ import { PriceSparkline } from './PriceSparkline';
 import SendNFTModal from './SendNFTModal';
 import SellNFTModal from './SellNFTModal';
 import SkeletonCard from './SkeletonCard';
+import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import ConfirmationModal from './ConfirmationModal';
 import NFTPurchaseConfirmationDialog from './NFTPurchaseConfirmationDialog';
 import NFTOptionsModal from './NFTOptionsModal';
@@ -552,7 +553,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             aria-label={`View NFT ${nft.title}`}
           >
             <div 
-              className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm"
+              className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm border border-[#c0c0c0]/25"
               onClick={(e) => { e.stopPropagation(); handlePreviewToggle(e); }}
             >
               {!isRowImageLoaded && (
@@ -561,17 +562,18 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   <img src={TON_LOGO} alt="TON" className="w-4 h-4 opacity-20 animate-blockchain-glow" />
                 </div>
               )}
-              <img 
+              <LazyArtworkImage 
                 src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
+                fallbackSrc={getPlaceholderImage(`nft-${nft.id}`)}
                 alt={nft.title} 
                 onLoad={() => setIsRowImageLoaded(true)}
+                fadeIn={false}
                 className={cn(
                   "w-full h-full object-cover transition-all duration-300 group-hover:scale-105",
                   isRowImageLoaded ? "opacity-100" : "opacity-0"
                 )} 
-                onError={(e) => { 
+                onError={() => { 
                   setIsRowImageLoaded(true);
-                  e.currentTarget.src = getPlaceholderImage(`nft-${nft.id}`); 
                 }}
               />
               <div className={`absolute inset-0 flex items-center justify-center bg-black/45 transition-opacity ${isActive || isPlayingPreview ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -605,10 +607,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                 <span>{formattedPrice} TON</span>
               </div>
               <motion.button 
+                type="button"
                 onClick={handleActionClick}
                 disabled={!isOwner && isAuctionEnded}
+                aria-label={isOwner ? (nft.listingType ? `Manage ${nft.title}` : `Sell ${nft.title}`) : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Auction ended' : `Place bid on ${nft.title}`) : `Buy ${nft.title} for ${formattedPrice} TON`)}
                 className={cn(
-                  "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white",
+                  "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950",
                   isOwner 
                     ? 'bg-white/10 text-white' 
                     : (isAuctionEnded ? 'bg-white/5 text-white/20' : 'bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/20')
@@ -652,7 +656,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             aria-label={`View NFT ${nft.title}`}
           >
             {/* Artwork - 1:1 Square with Spotify-style Floating Action Button */}
-            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-neutral-900/60 shadow-md">
+            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-neutral-900/60 shadow-md border border-[#c0c0c0]/25">
               {!isImageLoaded && (
                 <div className="absolute inset-0 bg-neutral-900 overflow-hidden flex flex-col items-center justify-center z-0 select-none">
                   <div className="absolute inset-0 animate-shimmer pointer-events-none" />
@@ -662,18 +666,18 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   </div>
                 </div>
               )}
-              <img
+              <LazyArtworkImage
                 src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
-                loading="lazy"
+                fallbackSrc={getPlaceholderImage(`nft-${nft.id}`)}
                 onLoad={() => setIsImageLoaded(true)}
+                fadeIn={false}
                 className={cn(
                   "w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
                   isImageLoaded ? "opacity-100" : "opacity-0"
                 )}
                 alt={nft.title}
-                onError={(e) => { 
+                onError={() => { 
                   setIsImageLoaded(true);
-                  e.currentTarget.src = getPlaceholderImage(`nft-${nft.id}`); 
                 }}
               />
 
@@ -685,9 +689,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   : "opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0"
               )}>
                 <button 
-                  className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 hover:scale-105 active:scale-95 transition-all"
+                  type="button"
+                  className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 hover:scale-105 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
                   onClick={handlePreviewToggle}
-                  aria-label={isPlayingPreview || (isActive && isPlaying) ? "Pause" : "Play preview"}
+                  aria-label={isPlayingPreview || (isActive && isPlaying) ? `Pause preview for ${nft.title}` : `Play preview for ${nft.title}`}
                 >
                   {isPlayingPreview || (isActive && isPlaying) ? (
                     <Pause className="h-4 w-4 fill-current" />

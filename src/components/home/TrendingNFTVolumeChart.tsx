@@ -25,6 +25,7 @@ import {
 import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
+import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import { TON_LOGO } from '@/constants';
 
 type Timeframe = '24h' | '7d' | '30d';
@@ -305,8 +306,9 @@ export const TrendingNFTVolumeChart: React.FC = () => {
                     </span>
 
                     <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-950">
-                      <img 
+                      <LazyArtworkImage 
                         src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
+                        fallbackSrc={getPlaceholderImage(`nft-${nft.id}`)}
                         alt={nft.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                       />

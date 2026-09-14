@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import LazyArtworkImage from "@/components/common/LazyArtworkImage";
 
 export interface SponsoredPromo {
   id: string;
@@ -73,9 +74,9 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
         </span>
       </div>
 
-      <div className="w-full px-0 sm:px-4 md:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div 
-          className="relative rounded-none sm:rounded-2xl overflow-hidden bg-zinc-950 h-[175px] sm:h-[190px] w-full"
+          className="relative rounded-2xl overflow-hidden bg-zinc-950 h-[175px] sm:h-[190px] lg:h-[210px] w-full"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={() => setIsPaused(true)}
@@ -93,11 +94,10 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
                 transition={{ duration: 0.35, ease: "easeOut" }}
                 className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 pr-16 sm:pr-24"
               >
-                <img 
+                <LazyArtworkImage 
                   src={item.artwork} 
                   alt="" 
                   className="absolute inset-0 w-full h-full object-cover opacity-40 scale-105 transition-transform duration-700" 
-                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
                 

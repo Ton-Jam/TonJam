@@ -137,14 +137,14 @@ const ExploreList: React.FC = () => {
   const sentinelRef = useInfiniteScroll(loadMore);
 
   return (
-    <div className="animate-in fade-in duration-700 px-4 md:px-4 pb-4">
+    <div className="animate-in fade-in duration-500 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 text-left">
       {/* Sticky Header with Explicit Back Navigation */}
-      <div className="sticky top-0 left-0 right-0 z-[60] bg-background/95 backdrop-blur-3xl -mx-4 px-4 md:-mx-4 md:px-4 pt-4 pb-4 mb-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 flex-1">
+      <div className="sticky top-0 left-0 right-0 z-40 bg-black/95 backdrop-blur-md pt-2 pb-4 mb-6">
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 flex-1">
             <BackButton 
-              className="p-4 rounded-full bg-muted/50 hover:bg-muted transition-all"
-              iconClassName="h-4 w-4 text-zinc-700"
+              className="p-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] text-white transition-all shrink-0"
+              iconClassName="h-4 w-4 text-white"
             />
             
             {isSearchActive ? (
@@ -153,28 +153,32 @@ const ExploreList: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={`Search in ${type}...`}
-                className="w-full bg-muted/50 py-3 pl-4 pr-4 text-xs outline-none border-2 border-blue-500 focus:border-blue-500 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 rounded-full text-foreground"
+                className="w-full bg-white/[0.06] focus:bg-white/[0.1] py-2.5 px-4 text-sm outline-none transition-all placeholder:text-zinc-500 rounded-full text-white"
                 autoFocus
               />
             ) : (
-              <h1 className="text-base md:text-[21px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground leading-none">
+              <h1 className="text-lg sm:text-xl font-black tracking-tight uppercase text-white leading-none">
                 {title}
               </h1>
             )}
           </div>
           
-          <button onClick={() => setIsSearchActive(!isSearchActive)} className="p-4 rounded-full bg-muted/50 hover:bg-muted transition-all">
-            {isSearchActive ? <X className="h-4 w-4 text-foreground" /> : <Search className="h-4 w-4 text-foreground" />}
+          <button 
+            onClick={() => setIsSearchActive(!isSearchActive)} 
+            className="p-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] text-white transition-all shrink-0"
+            aria-label={isSearchActive ? "Close search" : "Open search"}
+          >
+            {isSearchActive ? <X className="h-4 w-4" /> : <Search className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
       {/* Vertical Grid Content */}
-      <div className={`grid gap-4 pb-4 ${
+      <div className={`grid gap-3 sm:gap-4 pb-6 ${
         type === 'nfts' || type === 'users' 
-          ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' 
+          ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5' 
           : type === 'artists' || type === 'playlists'
-            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
             : 'grid-cols-1'
       }`}>
         {filteredItems.map((item, idx) => (

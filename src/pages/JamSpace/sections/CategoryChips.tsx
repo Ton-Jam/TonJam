@@ -14,19 +14,19 @@ export const CategoryChips: React.FC<CategoryChipsProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">🏷️ Filter Channels</h3>
+        <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-400">Filter Channels</h3>
       </div>
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
         {categories.map((cat) => {
           const isActive = cat === activeCategory;
           return (
             <button
               key={cat}
               onClick={() => onSelectCategory(cat)}
-              className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-[10px] cursor-pointer transition-all border-[2px] ${
+              className={`flex-shrink-0 snap-start h-8 px-3.5 text-xs font-medium rounded-full cursor-pointer transition-all border select-none active:scale-95 ${
                 isActive
-                  ? 'bg-[#0088CC] border-[#0088CC] text-white shadow-[0_0_15px_rgba(0,136,204,0.4)]'
-                  : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white hover:bg-[#0088CC]/20'
+                  ? 'bg-[#00B4D8] text-black font-semibold shadow-md shadow-[#00B4D8]/20 border-[#c0c0c0]/40'
+                  : 'bg-white/[0.05] text-zinc-400 hover:text-white hover:bg-white/[0.09] border-[#c0c0c0]/25'
               }`}
             >
               {cat}
@@ -37,3 +37,4 @@ export const CategoryChips: React.FC<CategoryChipsProps> = ({
     </div>
   );
 };
+

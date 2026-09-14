@@ -69,7 +69,7 @@ export const FavoriteArtistUpdatesSection: React.FC = () => {
       <div 
         ref={scrollRef}
         {...handlers}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ overscrollBehaviorX: 'contain' }}
       >
         {followedArtists.map((art) => (

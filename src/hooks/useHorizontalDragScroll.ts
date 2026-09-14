@@ -42,7 +42,7 @@ export function useHorizontalDragScroll<T extends HTMLElement = HTMLDivElement>(
     // Reset hasMoved after a short delay so click handlers can check it
     setTimeout(() => {
       hasMovedRef.current = false;
-    }, 50);
+    }, 120);
   };
 
   const onClickCapture = (e: React.MouseEvent) => {

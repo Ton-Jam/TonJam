@@ -26,7 +26,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
         {events.map((ev) => (
           <motion.div
             key={ev.id}
-            className="bg-blue-950 border border-white/5 rounded-[12px] p-4 flex gap-4 items-center justify-between"
+            className="bg-white/[0.03] hover:bg-white/[0.05] rounded-2xl p-4 flex gap-4 items-center justify-between border-none transition-colors"
             whileHover={{ scale: 1.01 }}
           >
             <div className="flex gap-4 items-center min-w-0">
@@ -34,28 +34,28 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
                 <img
                   src={ev.imageUrl}
                   alt={ev.title}
-                  className="w-16 h-16 object-cover rounded-[10px] bg-slate-950"
+                  className="w-16 h-16 object-cover rounded-xl bg-white/[0.02]"
                 />
                 <div className="absolute top-0 right-0 p-1">
-                  <div className="bg-blue-600 w-2 h-2 rounded-full shadow-[0_0_8px_rgb(37,99,235)]" />
+                  <div className="bg-[#00B4D8] w-2 h-2 rounded-full shadow-[0_0_8px_rgba(0,180,216,0.8)]" />
                 </div>
               </div>
               <div className="space-y-1.5 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-pink-400 bg-pink-400/10 px-2 py-0.5 rounded-full border border-pink-400/20">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-pink-400 bg-pink-400/15 px-2 py-0.5 rounded-full border-none">
                     {ev.type}
                   </span>
                 </div>
-                <h4 className="text-[13px] font-black text-white tracking-tight truncate uppercase leading-tight">
+                <h4 className="text-[13px] font-bold text-white tracking-tight truncate uppercase leading-tight">
                   {ev.title}
                 </h4>
-                <div className="flex items-center gap-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                <div className="flex items-center gap-3 text-[10px] text-zinc-400 font-medium uppercase tracking-wider">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-pink-400" />
                     {ev.date}
                   </span>
                   <span className="flex items-center gap-1 truncate max-w-[100px]">
-                    <MapPin className="w-3 h-3 text-blue-400" />
+                    <MapPin className="w-3 h-3 text-[#00B4D8]" />
                     {ev.location}
                   </span>
                 </div>
@@ -65,15 +65,16 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
             <div className="flex flex-col items-end gap-2 shrink-0">
               <button
                 onClick={() => onToggleEvent(ev.id)}
-                className={`w-10 h-10 flex items-center justify-center rounded-full cursor-pointer transition-all ${
+                aria-label={ev.interested ? "Interested in event" : "Mark interest"}
+                className={`w-10 h-10 flex items-center justify-center rounded-full cursor-pointer transition-all border-none ${
                   ev.interested
                     ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
-                    : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                    : 'bg-white/5 text-zinc-400 hover:bg-white/10'
                 }`}
               >
                 <Heart className={`w-4 h-4 ${ev.interested ? 'fill-current' : ''}`} />
               </button>
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{ev.interestedCount.toLocaleString()} </span>
+              <span className="text-[9px] font-medium text-zinc-400 uppercase tracking-widest">{ev.interestedCount.toLocaleString()}</span>
             </div>
           </motion.div>
         ))}

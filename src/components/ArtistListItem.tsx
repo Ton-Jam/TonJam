@@ -33,11 +33,11 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
 
   return (
     <div 
-      className="group flex flex-col gap-4 p-4 rounded-[4px] bg-foreground/[0.02] border border-white/5 hover:bg-muted/5 hover:border-white/10 transition-all duration-300 cursor-pointer w-full"
+      className="group flex flex-col gap-4 p-4 rounded-[4px] bg-foreground/[0.02] border border-[#c0c0c0]/25 hover:bg-muted/5 hover:border-[#c0c0c0]/40 transition-all duration-300 cursor-pointer w-full"
       onClick={handleCardClick}
     >
       <div className="flex items-center gap-4">
-        <div className="relative w-16 h-16 rounded-[4px] overflow-hidden flex-shrink-0 shadow-lg border border-white/10">
+        <div className="relative w-16 h-16 rounded-[4px] overflow-hidden flex-shrink-0 shadow-lg border border-[#c0c0c0]/25">
           <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
         </div>
         
@@ -62,9 +62,9 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
         <div className="flex items-center gap-3">
           <button 
             onClick={handleFollowClick}
-            className={`px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-[9px] font-black uppercase tracking-widest
+            className={`px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-[9px] font-black uppercase tracking-widest border border-[#c0c0c0]/30
               ${isFollowing 
-                ? 'bg-muted/50 text-muted-foreground/80 hover:bg-muted border border-border' 
+                ? 'bg-muted/50 text-muted-foreground/80 hover:bg-muted' 
                 : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
               }
             `}

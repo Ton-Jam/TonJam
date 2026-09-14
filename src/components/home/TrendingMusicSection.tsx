@@ -23,6 +23,7 @@ import { useNFT } from '@/contexts/NFTContext';
 import { TON_LOGO, MOCK_TRACKS } from '@/constants';
 import { Track, NFTItem } from '@/types';
 import confetti from 'canvas-confetti';
+import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 import { toast } from 'sonner';
 
@@ -246,7 +247,7 @@ export const TrendingMusicSection: React.FC = () => {
           <div 
             ref={scrollRef1}
             {...handlers1}
-            className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none" 
+            className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none" 
             style={{ overscrollBehaviorX: 'contain' }}
           >
             {popularTracks.map((track, idx) => {
@@ -263,14 +264,11 @@ export const TrendingMusicSection: React.FC = () => {
                 >
                   {/* Image & Overlay Rank Badge */}
                   <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/40">
-                    <img
+                    <LazyArtworkImage
                       src={track.coverUrl || (track as any).imageUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80'}
+                      fallbackSrc="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80"
                       alt={track.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80';
-                      }}
-                      referrerPolicy="no-referrer"
                     />
 
                     {/* Rank Badge */}
@@ -360,7 +358,7 @@ export const TrendingMusicSection: React.FC = () => {
           <div 
             ref={scrollRef2}
             {...handlers2}
-            className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none" 
+            className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none" 
             style={{ overscrollBehaviorX: 'contain' }}
           >
             {topCollections.map((col) => (
@@ -373,14 +371,11 @@ export const TrendingMusicSection: React.FC = () => {
               >
                 {/* Collection Cover Image */}
                 <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black/40">
-                  <img
+                  <LazyArtworkImage
                     src={col.coverUrl}
+                    fallbackSrc="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80"
                     alt={col.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80';
-                    }}
-                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 

@@ -5,6 +5,7 @@ import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink, Maximize2 } from 'lucide-react';
 import { Collection } from '@/types';
+import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 
 interface BubbleNode extends d3.SimulationNodeDatum {
   id: string;
@@ -281,7 +282,7 @@ export const NFTExplorer: React.FC = () => {
   }, [collections]);
 
   return (
-    <div className="bg-[#0A1128] rounded-2xl p-6 relative overflow-hidden">
+    <div className="bg-[#0A1128] rounded-2xl p-4 sm:p-6 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -311,8 +312,9 @@ export const NFTExplorer: React.FC = () => {
             <div className="absolute bottom-4 left-4 right-4 md:right-auto md:w-80 bg-slate-900/90 backdrop-blur-md rounded-xl p-4 shadow-2xl animate-fade-in z-20">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">
-                  <img 
+                  <LazyArtworkImage 
                     src={selectedCollection.coverUrl} 
+                    fallbackSrc="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80"
                     alt={selectedCollection.name} 
                     className="w-10 h-10 rounded-lg object-cover bg-slate-800"
                   />

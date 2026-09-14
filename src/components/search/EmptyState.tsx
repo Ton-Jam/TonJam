@@ -27,15 +27,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.3 }}
-        className="py-12 px-6 rounded-[12px] bg-[#0c133a] text-center flex flex-col items-center justify-center space-y-4 max-w-lg mx-auto"
+        className="py-12 px-6 rounded-2xl bg-white/[0.03] text-center flex flex-col items-center justify-center space-y-4 max-w-lg mx-auto select-none"
       >
-        <div className="w-14 h-14 rounded-full bg-[#132354] flex items-center justify-center text-[#00B4D8]">
+        <div className="w-14 h-14 rounded-full bg-white/[0.06] flex items-center justify-center text-[#00B4D8]">
           <Sparkles className="w-6 h-6 animate-pulse" />
         </div>
         
         <div className="space-y-1.5">
           <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white">Your Wave is Waiting</h3>
-          <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest max-w-sm leading-relaxed">
+          <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest max-w-sm leading-relaxed">
             Search songs, albums, verified creators, collections, and live TON auction signals.
           </p>
         </div>
@@ -44,7 +44,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           <Button
             size="sm"
             onClick={onTriggerTrending}
-            className="text-[9px] font-bold uppercase tracking-widest bg-[#00B4D8] text-[#050A24] hover:bg-[#00B4D8]/85 rounded-[8px] h-8 px-4"
+            className="text-[9px] font-bold uppercase tracking-widest bg-[#00B4D8] text-black hover:bg-[#00B4D8]/85 rounded-full h-8 px-4"
           >
             Explore Trending Music
           </Button>
@@ -55,59 +55,37 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
-      className="py-16 px-6 rounded-[12px] bg-[#0c133a] text-center flex flex-col items-center justify-center space-y-6 max-w-lg mx-auto"
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.25 }}
+      className="min-h-[50vh] w-full flex flex-col items-center justify-center text-center px-4 py-16 select-none"
     >
-      <div className="w-14 h-14 rounded-full bg-[#132354] flex items-center justify-center text-red-400">
-        <Search className="w-6 h-6" />
+      <div className="w-14 h-14 rounded-full bg-white/[0.04] flex items-center justify-center text-zinc-400 mb-4">
+        <Search className="w-6 h-6 stroke-[1.75]" />
       </div>
 
-      <div className="space-y-1.5">
-        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white">No Results Found</h3>
-        <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest max-w-sm leading-relaxed">
-          We scanned all audio contracts and social channels but found no match for <span className="text-[#00B4D8] font-black">"{query}"</span>.
+      <div className="space-y-1.5 max-w-md">
+        <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight">
+          {query ? `No results found for "${query}"` : 'No results found'}
+        </h3>
+        <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+          Please check your spelling or try searching for another track, artist, album, playlist, or collectible.
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2 justify-center w-full">
-        {onNavigateArtists && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onNavigateArtists}
-            className="text-[8px] font-mono font-bold uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 rounded-[8px] h-8 px-3"
-          >
-            <User className="w-3.5 h-3.5 mr-1.5 text-[#00B4D8]" />
-            Browse Artists
-          </Button>
-        )}
-
-        {onNavigateNFTs && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onNavigateNFTs}
-            className="text-[8px] font-mono font-bold uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 rounded-[8px] h-8 px-3"
-          >
-            <Gem className="w-3.5 h-3.5 mr-1.5 text-[#00B4D8]" />
-            Browse NFTs
-          </Button>
-        )}
-
-        {onClearQuery && (
+      {onClearQuery && (
+        <div className="mt-5">
           <Button
             size="sm"
             onClick={onClearQuery}
-            className="text-[8px] font-mono font-bold uppercase tracking-widest bg-[#00B4D8] text-[#050A24] hover:bg-[#00B4D8]/85 rounded-[8px] h-8 px-3"
+            className="text-xs font-medium bg-white/[0.06] hover:bg-white/[0.1] text-white hover:text-white rounded-full h-9 px-4 border-none transition-all active:scale-95"
           >
-            <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin-slow" />
-            Reset Query
+            <RefreshCw className="w-3.5 h-3.5 mr-1.5 text-zinc-400" />
+            Clear Search
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </motion.div>
   );
 };

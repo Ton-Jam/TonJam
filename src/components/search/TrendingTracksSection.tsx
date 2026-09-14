@@ -20,6 +20,7 @@ import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { useAudio } from '@/contexts/AudioContext';
 import { Track, NFTItem } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
+import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 
 export interface TrendingTrackItem {
@@ -285,7 +286,7 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
       <div
         ref={scrollContainerRef}
         {...handlers}
-        className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-4 sm:px-6 lg:px-8 select-none w-full snap-x snap-mandatory overscroll-x-contain"
+        className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 select-none w-full snap-x snap-mandatory overscroll-x-contain"
         style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
       >
         {loading ? (
@@ -328,13 +329,11 @@ export const TrendingTracksSection: React.FC<TrendingTracksSectionProps> = ({
               >
                 {/* Image Section & Badges */}
                 <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-950">
-                  <img
+                  <LazyArtworkImage
                     src={item.coverUrl}
+                    fallbackSrc={getPlaceholderImage(item.title)}
                     alt={item.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    onError={(e) => {
-                      e.currentTarget.src = getPlaceholderImage(item.title);
-                    }}
                   />
 
                   {/* Top Left Rank Badge */}

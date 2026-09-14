@@ -383,10 +383,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                         filters.setSelectedGenres!(['All']);
                       }}
                       className={cn(
-                        "px-2.5 py-1 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
+                        "px-2.5 py-1 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border shadow-none",
                         (filters.selectedGenres?.includes('All') || !filters.selectedGenres || filters.selectedGenres.length === 0)
-                          ? "bg-blue-600 text-white" 
-                          : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
+                          ? "bg-blue-600 text-white border-[#c0c0c0]/40" 
+                          : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border-[#c0c0c0]/25"
                       )}
                     >
                       All
@@ -406,10 +406,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                             }
                           }}
                           className={cn(
-                            "px-2.5 py-1 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
+                            "px-2.5 py-1 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border shadow-none",
                             isSelected 
-                              ? "bg-blue-600 text-white" 
-                              : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
+                              ? "bg-blue-600 text-white border-[#c0c0c0]/40" 
+                              : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border-[#c0c0c0]/25"
                           )}
                         >
                           {genre.name}
@@ -442,10 +442,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                             }
                           }}
                           className={cn(
-                            "px-2.5 py-1 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
+                            "px-2.5 py-1 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border shadow-none",
                             isSelected 
-                              ? "bg-purple-600 text-white" 
-                              : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
+                              ? "bg-purple-600 text-white border-[#c0c0c0]/40" 
+                              : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border-[#c0c0c0]/25"
                           )}
                         >
                           {mood.name}

@@ -674,18 +674,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             <Separator orientation="vertical" className="h-6 bg-border/40 mx-0.5 hidden lg:block" />
 
-            {/* Task Center Badge */}
-            <button 
-              onClick={() => navigate('/tasks')} 
-              className={`items-center gap-1.5 sm:gap-3 px-1.5 sm:px-3 py-1 rounded-[4px] transition-colors hover:bg-transparent flex-shrink-0 ${!isHome ? 'hidden md:flex' : 'hidden min-[380px]:flex'}`}
-            >
-               <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[26px] h-[26px] sm:w-[32px] sm:h-[32px] object-contain" />
-               {tonBalance !== null && (
-                  <span className="text-[9px] font-black tracking-tighter text-blue-500 opacity-60 hidden min-[440px]:inline">{tonBalance.toFixed(2)} TON</span>
-               )}
-            </button>
+            {/* Task Center Badge - Home Screen Header Only */}
+            {isHome && (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      onClick={() => navigate('/tasks')} 
+                      className="flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-2.5 py-1 rounded-full transition-all hover:bg-white/5 active:scale-95 flex-shrink-0 cursor-pointer"
+                      aria-label="Tasks & Rewards"
+                    >
+                       <img src={TJ_COIN_ICON} alt="TonJam Coin" className="w-[26px] h-[26px] sm:w-[30px] sm:h-[30px] object-contain transition-transform hover:scale-105" />
+                       {tonBalance !== null && (
+                          <span className="text-[9px] font-bold tracking-tight text-amber-400/90 hidden min-[440px]:inline">{tonBalance.toFixed(2)} TON</span>
+                       )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Tasks & Rewards</TooltipContent>
+                </Tooltip>
 
-            <Separator orientation="vertical" className="h-6 bg-border/40 mx-0.5 hidden sm:block" />
+                <Separator orientation="vertical" className="h-6 bg-border/40 mx-0.5 hidden sm:block" />
+              </>
+            )}
 
             <div className="flex items-center gap-0.5 sm:gap-1">
               {!isMarketplace && !isDiscover && !isLibrary && !isTrendingNFTs && (

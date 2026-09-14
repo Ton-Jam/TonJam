@@ -4,6 +4,7 @@ import { Verified, UserPlus, UserCheck, MoreHorizontal } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { cn, getPlaceholderImage } from '@/lib/utils';
+import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -59,14 +60,19 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
           className="w-full artist-card-custom-style"
         >
           <Card onClick={handleCardClick} className={cn("group p-2 flex items-center gap-4 cursor-pointer bg-transparent border-none shadow-none transition-all", className)}>
-            <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="w-12 h-12 rounded-full object-cover" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }} />
+            <LazyArtworkImage 
+              src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
+              fallbackSrc={getPlaceholderImage(`artist-${artist.uid}`)}
+              alt={artist.name} 
+              className="w-12 h-12 rounded-full object-cover border border-[#c0c0c0]/25" 
+            />
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-[12px] truncate uppercase">{artist.name}</h3>
               <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{artist.followers.toLocaleString()} LISTENERS</p>
             </div>
             <Button 
               className={cn(
-                  "rounded-full transition-all",
+                  "rounded-full transition-all border border-[#c0c0c0]/30",
                   isFollowing 
                     ? "bg-muted/50 text-muted-foreground hover:bg-muted/80" 
                     : "bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]"
@@ -94,17 +100,17 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
     >
       <div 
         style={{ width: cardTokens.artist.avatarSize, height: cardTokens.artist.avatarSize }}
-        className="relative rounded-full overflow-hidden bg-background transition-all mb-2 flex-shrink-0"
+        className="relative rounded-full overflow-hidden bg-background transition-all mb-2 flex-shrink-0 border border-[#c0c0c0]/25"
       >
-        <img 
+        <LazyArtworkImage 
           src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
+          fallbackSrc={getPlaceholderImage(`artist-${artist.uid}`)}
           alt={artist.name} 
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-          onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }}
         />
         {onMoreClick && (
           <button
-             className="absolute top-1.5 right-1.5 p-1 bg-black/60 rounded-full text-white/80 hover:text-white transition-all"
+             className="absolute top-1.5 right-1.5 p-1 bg-black/60 rounded-full text-white/80 hover:text-white transition-all border border-[#c0c0c0]/25"
              onClick={(e) => { e.stopPropagation(); onMoreClick(artist); }}
           >
             <MoreHorizontal className="h-3 w-3" />
@@ -129,7 +135,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
           size="sm"
           onClick={handleFollowClick}
           style={{ height: cardTokens.artist.followButtonHeight }}
-          className="w-full text-[8px] uppercase tracking-widest font-black rounded-full"
+          className="w-full text-[8px] uppercase tracking-widest font-black rounded-full border border-[#c0c0c0]/30"
         >
           {isFollowing ? 'UNFOLLOW' : 'FOLLOW'}
         </Button>

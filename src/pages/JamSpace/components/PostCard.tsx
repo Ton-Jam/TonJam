@@ -201,40 +201,42 @@ export const PostCard: React.FC<PostCardProps> = ({
     if (!post.attachments || post.attachments.length === 0) return null;
 
     return (
-      <div className="space-y-2 mt-3">
+      <div className="space-y-2.5 mt-3.5">
         {post.attachments.map((att, idx) => {
           if (att.type === 'track') {
             const isThisTrackPlaying = currentTrack?.id === att.id && isPlaying;
             return (
               <div 
                 key={idx}
-                className="flex items-center justify-between p-3 bg-slate-950/40 border border-white/[0.02] rounded-[10px]"
+                className="flex items-center justify-between p-3.5 bg-white/[0.03] hover:bg-white/[0.05] rounded-xl transition-colors border-none"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="relative group shrink-0">
                     <img 
                       src={post.user.avatar} 
                       alt="Cover" 
-                      className="w-10 h-10 rounded-[10px] object-cover" 
+                      className="w-11 h-11 rounded-lg object-cover" 
                     />
                     <button
                       onClick={() => isThisTrackPlaying ? togglePlay() : handlePlayAttachment(att)}
-                      className="absolute inset-0 bg-slate-950/60 rounded-[10px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
+                      aria-label={isThisTrackPlaying ? 'Pause track' : 'Play track'}
+                      className="absolute inset-0 bg-black/60 rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
                     >
-                      {isThisTrackPlaying ? <Pause className="w-5 h-5 text-white" /> : <Play className="w-5 h-5 text-white" />}
+                      {isThisTrackPlaying ? <Pause className="w-5 h-5 text-white" /> : <Play className="w-5 h-5 text-white fill-current" />}
                     </button>
                   </div>
                   <div className="min-w-0">
-                    <h5 className="text-xs font-bold text-white truncate">{att.title}</h5>
-                    <p className="text-[10px] text-slate-500 font-medium truncate">{att.artist || post.user.name}</p>
+                    <h5 className="text-xs sm:text-sm font-semibold text-white truncate">{att.title}</h5>
+                    <p className="text-[11px] text-zinc-400 font-medium truncate">{att.artist || post.user.name}</p>
                   </div>
                 </div>
 
                 <button
                   onClick={() => isThisTrackPlaying ? togglePlay() : handlePlayAttachment(att)}
-                  className="p-2 bg-[#0052FF]/10 text-[#0052FF] hover:bg-[#0052FF] hover:text-white rounded-[10px] transition-colors cursor-pointer"
+                  aria-label={isThisTrackPlaying ? 'Pause track' : 'Play track'}
+                  className="p-2.5 bg-[#00B4D8]/15 text-[#00B4D8] hover:bg-[#00B4D8] hover:text-black rounded-lg transition-colors cursor-pointer border-none"
                 >
-                  {isThisTrackPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                  {isThisTrackPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
                 </button>
               </div>
             );
@@ -244,33 +246,33 @@ export const PostCard: React.FC<PostCardProps> = ({
             return (
               <div 
                 key={idx}
-                className="flex flex-col sm:flex-row items-stretch border border-white/[0.03] bg-slate-950/50 rounded-[10px] overflow-hidden"
+                className="flex flex-col sm:flex-row items-stretch bg-white/[0.03] hover:bg-white/[0.05] rounded-xl overflow-hidden border-none transition-colors"
               >
                 <img 
                   src={att.url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80'} 
                   alt="NFT Graphic"
-                  className="w-full sm:w-28 h-28 object-cover"
+                  className="w-full sm:w-28 h-28 object-cover shrink-0"
                 />
-                <div className="p-4 flex-1 flex flex-col justify-between">
+                <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
                   <div className="space-y-1">
-                    <span className="text-[9px] font-mono uppercase bg-purple-600/15 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/20 font-extrabold">
+                    <span className="text-[9px] font-mono uppercase bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full font-bold inline-block">
                       TON MUSIC NFT
                     </span>
-                    <h5 className="text-sm font-bold text-white tracking-tight leading-snug">{att.title}</h5>
-                    <p className="text-xs text-slate-400 font-medium">{att.artist}</p>
+                    <h5 className="text-xs sm:text-sm font-bold text-white tracking-tight leading-snug">{att.title}</h5>
+                    <p className="text-xs text-zinc-400 font-medium">{att.artist}</p>
                   </div>
 
-                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/[0.02]">
+                  <div className="flex items-center justify-between mt-3 pt-2">
                     <div>
-                      <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">PRICE</span>
-                      <span className="text-sm font-extrabold text-emerald-400 font-mono">{att.price}</span>
+                      <span className="text-[9px] text-zinc-400 uppercase font-bold tracking-wider block">PRICE</span>
+                      <span className="text-xs sm:text-sm font-extrabold text-emerald-400 font-mono">{att.price}</span>
                     </div>
 
                     <a
                       href={att.url ? '#/marketplace' : '#'}
-                      className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#0052FF] text-white hover:bg-[#0052FF]/90 rounded-[10px] flex items-center gap-1"
+                      className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#00B4D8] text-black hover:bg-[#00B4D8]/90 rounded-lg flex items-center gap-1.5 border-none transition-colors"
                     >
-                      <span>Vibe Drop</span>
+                      <span>Inspect</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
@@ -285,7 +287,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                 key={idx}
                 src={att.url} 
                 alt="Post Media" 
-                className="w-full max-h-[300px] object-cover rounded-[10px] border border-white/[0.03] mt-2"
+                className="w-full max-h-[360px] object-cover rounded-xl mt-2 border-none"
               />
             );
           }
@@ -302,8 +304,8 @@ export const PostCard: React.FC<PostCardProps> = ({
     const hasVoted = post.poll.votedIndex !== undefined;
 
     return (
-      <div className="bg-slate-950/40 border border-white/[0.02] rounded-[10px] p-4 mt-3 space-y-2">
-        <h5 className="text-xs font-bold text-slate-300 uppercase tracking-wider">{post.poll.question}</h5>
+      <div className="bg-white/[0.03] rounded-xl p-4 mt-3.5 space-y-2.5 border-none">
+        <h5 className="text-xs font-bold text-zinc-200 uppercase tracking-wider">{post.poll.question}</h5>
         <div className="space-y-2 pt-1">
           {post.poll.options.map((opt, oIdx) => {
             const pct = post.poll!.totalVotes > 0 ? Math.round((opt.votes / post.poll!.totalVotes) * 100) : 0;
@@ -314,7 +316,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                 key={oIdx}
                 disabled={hasVoted}
                 onClick={() => onVote(post.id, oIdx)}
-                className="relative w-full overflow-hidden p-3 bg-slate-900 border border-white/[0.02] rounded-[10px] text-left hover:bg-slate-800/50 cursor-pointer disabled:cursor-default disabled:hover:bg-slate-900 flex justify-between items-center group"
+                className="relative w-full overflow-hidden p-3 bg-white/[0.04] rounded-lg text-left hover:bg-white/[0.07] cursor-pointer disabled:cursor-default disabled:hover:bg-white/[0.04] flex justify-between items-center group border-none transition-colors"
               >
                 {/* Simulated progress filler */}
                 {hasVoted && (
@@ -322,17 +324,17 @@ export const PostCard: React.FC<PostCardProps> = ({
                     initial={{ width: 0 }}
                     animate={{ width: `${pct}%` }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
-                    className="absolute inset-y-0 left-0 bg-[#0052FF]/10 z-0"
+                    className="absolute inset-y-0 left-0 bg-[#00B4D8]/20 z-0"
                   />
                 )}
 
                 <div className="relative z-10 flex items-center gap-2 font-semibold text-xs text-white">
-                  {hasVoted && isUserChoice && <Check className="w-4 h-4 text-[#0052FF] stroke-[3px]" />}
-                  <span className={isUserChoice ? 'text-[#0052FF] font-bold' : ''}>{opt.text}</span>
+                  {hasVoted && isUserChoice && <Check className="w-4 h-4 text-[#00B4D8] stroke-[3px]" />}
+                  <span className={isUserChoice ? 'text-[#00B4D8] font-bold' : ''}>{opt.text}</span>
                 </div>
 
                 {hasVoted && (
-                  <span className="relative z-10 text-xs font-mono font-bold text-slate-400">
+                  <span className="relative z-10 text-xs font-mono font-bold text-zinc-400">
                     {pct}%
                   </span>
                 )}
@@ -340,7 +342,7 @@ export const PostCard: React.FC<PostCardProps> = ({
             );
           })}
         </div>
-        <div className="text-[10px] font-mono text-slate-500 flex justify-between">
+        <div className="text-[10px] font-mono text-zinc-400 flex justify-between pt-1">
           <span>{post.poll.totalVotes.toLocaleString()} Votes</span>
           {hasVoted && <span>Poll Locked</span>}
         </div>
@@ -353,49 +355,49 @@ export const PostCard: React.FC<PostCardProps> = ({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
-      className={`jamspace-post-card bg-transparent border-b border-white/[0.04] py-5 px-1 text-white flex flex-col relative transition-opacity duration-300 ${isReported ? 'opacity-70' : 'opacity-100'}`}
+      className={`jamspace-post-card bg-white/[0.025] hover:bg-white/[0.04] p-4 sm:p-5 rounded-2xl text-white flex flex-col relative transition-colors duration-200 border-none ${isReported ? 'opacity-70' : 'opacity-100'}`}
     >
       {/* Header with Pinned info */}
       {post.isPinned && (
-        <div className="flex items-center gap-1.5 text-primary text-[10px] font-extrabold uppercase tracking-widest mb-3 pb-2 border-b border-white/[0.02]">
+        <div className="flex items-center gap-1.5 text-[#00B4D8] text-[10px] font-extrabold uppercase tracking-widest mb-3 pb-2.5">
           <Pin className="w-3.5 h-3.5 fill-current" />
           <span>Pinned Announcement</span>
         </div>
       )}
 
       {/* User Row */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <img 
             src={post.user.avatar} 
             alt={post.user.name} 
-            className="w-10 h-10 rounded-full object-cover border border-white/10"
+            className="w-10 h-10 rounded-full object-cover shrink-0 select-none"
           />
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-white tracking-tight hover:underline cursor-pointer">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+              <span className="text-sm sm:text-[15px] font-semibold text-white tracking-tight hover:underline cursor-pointer truncate max-w-[160px] sm:max-w-none">
                 {post.user.name}
               </span>
               {post.user.isVerified && (
-                <span className="w-3.5 h-3.5 rounded-full bg-[#0052FF] text-white flex items-center justify-center text-[8px] font-bold select-none">
+                <span className="w-3.5 h-3.5 rounded-full bg-[#00B4D8] text-black flex items-center justify-center text-[8px] font-extrabold select-none shrink-0" title="Verified Creator">
                   ✓
                 </span>
               )}
               {post.user.role === 'artist' && (
-                <span className="text-[9px] font-mono font-bold bg-slate-950 text-[#0052FF] px-1.5 py-0.5 rounded border border-[#0052FF]/20">
+                <span className="text-[9px] font-mono font-bold bg-[#00B4D8]/15 text-[#00B4D8] px-1.5 py-0.5 rounded-md shrink-0 uppercase tracking-wider">
                   ARTIST
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-              <span>{post.user.username}</span>
-              <span>•</span>
-              <span>{post.timestamp}</span>
+            <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-medium truncate mt-0.5">
+              <span className="truncate max-w-[120px] sm:max-w-none">{post.user.username}</span>
+              <span className="text-zinc-600 shrink-0">•</span>
+              <span className="shrink-0 text-zinc-400">{post.timestamp}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           {isReported && (
             <motion.span
               initial={{ opacity: 0, scale: 0.85 }}
@@ -403,16 +405,17 @@ export const PostCard: React.FC<PostCardProps> = ({
               className="flex items-center gap-1 text-[10px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full select-none"
             >
               <Flag className="w-2.5 h-2.5 fill-amber-400/30" />
-              <span>Reported</span>
+              <span className="hidden xs:inline">Reported</span>
             </motion.span>
           )}
 
           <div className="relative">
             <button 
               onClick={() => setShowMoreMenu(!showMoreMenu)}
-              className="text-slate-500 hover:text-white p-1 rounded-full cursor-pointer transition-colors"
+              aria-label="More options"
+              className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white rounded-full cursor-pointer transition-colors hover:bg-white/[0.06] border-none"
             >
-              <MoreHorizontal className="w-5 h-5" />
+              <MoreHorizontal className="w-4 h-4" />
             </button>
 
             <AnimatePresence>
@@ -421,7 +424,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                   initial={{ opacity: 0, scale: 0.95, y: -5 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -5 }}
-                  className="absolute right-0 top-8 z-20 w-40 bg-slate-950 border border-white/[0.08] rounded-[10px] shadow-2xl py-1.5 overflow-hidden"
+                  className="absolute right-0 top-9 z-20 w-40 bg-[#151C2A] rounded-xl shadow-2xl py-1.5 overflow-hidden border-none"
                 >
                   {isReported ? (
                     <div className="w-full flex items-center gap-2 px-3 py-2 text-xs text-amber-400/80 font-medium select-none">
@@ -431,7 +434,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                   ) : (
                     <button
                       onClick={handleReport}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer text-left font-medium"
+                      className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer text-left font-medium border-none bg-transparent"
                     >
                       <Flag className="w-3.5 h-3.5" />
                       <span>Report Post</span>
@@ -445,7 +448,7 @@ export const PostCard: React.FC<PostCardProps> = ({
       </div>
 
       {/* Content Text */}
-      <p className="text-sm text-slate-200 mt-3 whitespace-pre-wrap leading-relaxed font-sans font-medium">
+      <p className="text-sm sm:text-[15px] text-zinc-100 mt-3 whitespace-pre-wrap leading-relaxed font-sans font-normal break-words">
         {post.content}
       </p>
 
@@ -456,11 +459,14 @@ export const PostCard: React.FC<PostCardProps> = ({
       {renderPoll()}
 
       {/* Bottom action toolbar */}
-      <div className="flex items-center justify-between mt-4 pt-3 text-slate-400">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between mt-4 pt-2.5 text-zinc-400 gap-2 select-none">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button 
             onClick={() => onLike(post.id)}
-            className={`flex items-center gap-1.5 text-xs font-bold transition-all hover:text-red-500 cursor-pointer ${post.isLiked ? 'text-red-500' : ''}`}
+            aria-label={post.isLiked ? 'Unlike' : 'Like'}
+            className={`flex items-center gap-1.5 py-1.5 px-2.5 rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer text-xs font-semibold ${
+              post.isLiked ? 'text-red-500 hover:text-red-400' : 'text-zinc-400 hover:text-red-400'
+            }`}
           >
             <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-current' : ''}`} />
             <span>{post.likes}</span>
@@ -469,42 +475,51 @@ export const PostCard: React.FC<PostCardProps> = ({
           {/* 'View Replies' button that expands nested comments from Firestore */}
           <button 
             onClick={() => setShowComments(!showComments)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white px-2.5 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.08] transition-all cursor-pointer select-none"
+            aria-label={showComments ? 'Hide replies' : 'View replies'}
+            className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-white/[0.04] hover:bg-white/[0.08] transition-colors cursor-pointer text-xs font-semibold text-zinc-300 hover:text-white border-none"
           >
-            <MessageSquare className="w-3.5 h-3.5 text-[#0052FF]" />
-            <span>{showComments ? 'Hide Replies' : 'View Replies'}</span>
+            <MessageSquare className="w-3.5 h-3.5 text-[#00B4D8]" />
+            <span className="hidden xs:inline">{showComments ? 'Hide' : 'Replies'}</span>
+            <span className="xs:hidden">💬</span>
             {allReplies.length > 0 && (
-              <span className="text-[11px] font-mono font-medium text-slate-400">
+              <span className="text-[11px] font-mono font-medium text-zinc-400">
                 ({allReplies.length})
               </span>
             )}
             {showComments ? (
-              <ChevronUp className="w-3 h-3 text-slate-400" />
+              <ChevronUp className="w-3 h-3 text-zinc-400" />
             ) : (
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <ChevronDown className="w-3 h-3 text-zinc-400" />
             )}
           </button>
 
           <button 
             onClick={() => onRepost(post.id)}
-            className={`flex items-center gap-1.5 text-xs font-bold transition-all hover:text-emerald-500 cursor-pointer ${post.isReposted ? 'text-emerald-500' : ''}`}
+            aria-label={post.isReposted ? 'Undo repost' : 'Repost'}
+            className={`flex items-center gap-1.5 py-1.5 px-2.5 rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer text-xs font-semibold ${
+              post.isReposted ? 'text-emerald-400 hover:text-emerald-300' : 'text-zinc-400 hover:text-emerald-400'
+            }`}
           >
-            <Repeat2 className="w-4.5 h-4.5" />
+            <Repeat2 className="w-4 h-4" />
             <span>{post.reposts}</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           <button 
             onClick={handleShare}
-            className="flex items-center gap-1.5 text-xs font-bold transition-all hover:text-indigo-400 cursor-pointer"
+            aria-label="Share post"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.04] text-zinc-400 hover:text-cyan-400 transition-colors cursor-pointer border-none"
           >
             <Share2 className="w-4 h-4" />
           </button>
 
           <button 
             onClick={() => onBookmark(post.id)}
-            className={`flex items-center gap-1.5 text-xs font-bold transition-all hover:text-amber-500 cursor-pointer ${post.isBookmarked ? 'text-amber-500' : ''}`}
+            aria-label={post.isBookmarked ? 'Remove bookmark' : 'Bookmark post'}
+            className={`w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer border-none ${
+              post.isBookmarked ? 'text-amber-400 hover:text-amber-300' : 'text-zinc-400 hover:text-amber-400'
+            }`}
           >
             <Bookmark className={`w-4 h-4 ${post.isBookmarked ? 'fill-current' : ''}`} />
           </button>
@@ -521,34 +536,34 @@ export const PostCard: React.FC<PostCardProps> = ({
             className="overflow-hidden mt-3 pt-2 space-y-3"
           >
             {isLoadingComments && allReplies.length === 0 ? (
-              <div className="flex items-center justify-center py-4 text-xs text-slate-400 gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-[#0052FF]" />
+              <div className="flex items-center justify-center py-4 text-xs text-zinc-400 gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-[#00B4D8]" />
                 <span>Loading replies...</span>
               </div>
             ) : allReplies.length === 0 ? (
-              <div className="text-center py-3 text-xs text-slate-500 font-medium">
+              <div className="text-center py-3 text-xs text-zinc-500 font-medium">
                 No replies yet. Be the first to leave a comment!
               </div>
             ) : (
-              <div className="space-y-2.5 pb-1">
+              <div className="space-y-2 pb-1">
                 {allReplies.map((reply) => (
-                  <div key={reply.id} className="flex gap-3 bg-slate-950/40 p-3 rounded-[10px]">
+                  <div key={reply.id} className="flex gap-2.5 sm:gap-3 bg-white/[0.03] p-3 rounded-xl border-none">
                     <img 
                       src={reply.user.avatar} 
                       alt={reply.user.name} 
-                      className="w-7 h-7 rounded-full object-cover shrink-0"
+                      className="w-8 h-8 rounded-full object-cover shrink-0 select-none" 
                     />
                     <div className="flex-1 space-y-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-white truncate">{reply.user.name}</span>
+                      <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+                        <span className="text-xs font-semibold text-white truncate">{reply.user.name}</span>
                         {reply.user.isVerified && (
-                          <span className="w-3 h-3 rounded-full bg-[#0052FF] text-white flex items-center justify-center text-[7px] font-bold select-none shrink-0">
+                          <span className="w-3 h-3 rounded-full bg-[#00B4D8] text-black flex items-center justify-center text-[7px] font-extrabold select-none shrink-0">
                             ✓
                           </span>
                         )}
-                        <span className="text-[10px] text-slate-500 font-medium ml-1 shrink-0">{reply.timestamp}</span>
+                        <span className="text-[10px] text-zinc-500 font-medium shrink-0">{reply.timestamp}</span>
                       </div>
-                      <p className="text-xs text-slate-300 font-medium font-sans leading-relaxed break-words">
+                      <p className="text-xs text-zinc-300 font-normal font-sans leading-relaxed break-words">
                         {reply.content}
                       </p>
                     </div>
@@ -563,14 +578,14 @@ export const PostCard: React.FC<PostCardProps> = ({
                 placeholder="Write a reply..." 
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                className="flex-1 bg-slate-950 rounded-[10px] px-3 py-2 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#0052FF] transition-all"
+                className="flex-1 bg-white/[0.04] rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:bg-white/[0.07] transition-all border-none"
               />
               <button 
                 type="submit" 
                 disabled={!commentText.trim()}
                 title="Post comment"
                 aria-label="Post comment"
-                className="w-8 h-8 bg-[#0052FF] hover:bg-[#0046DA] disabled:opacity-40 text-white rounded-[10px] flex items-center justify-center shrink-0 cursor-pointer transition-all active:scale-95"
+                className="w-8 h-8 bg-[#00B4D8] hover:bg-[#00B4D8]/90 disabled:opacity-40 text-black rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-all active:scale-95 border-none shadow-md shadow-[#00B4D8]/20"
               >
                 <Send className="w-3.5 h-3.5" />
               </button>

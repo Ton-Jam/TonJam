@@ -31,6 +31,7 @@ import { getPlaceholderImage } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import useDebounce from '@/hooks/use-debounce';
 import { SearchResults } from '@/components/search/SearchResults';
+import { SearchResultsSkeleton, FullDiscoverSkeleton } from '@/components/search/Skeletons';
 import QRScanner from '@/components/QRScanner';
 
 interface SpotifyCategory {
@@ -65,6 +66,17 @@ const FILTER_PILLS = [
   { id: 'nfts', label: 'NFTs' }
 ];
 
+const QUICK_VIBES = [
+  { label: '⚡ High Energy', query: 'Electronic' },
+  { label: '🏎️ Phonk Drift', query: 'Phonk' },
+  { label: '🌙 Chill & Lo-Fi', query: 'Ambient' },
+  { label: '💎 Web3 NFTs', query: 'NFT' },
+  { label: '🔥 Top Charts', query: 'Top' },
+  { label: '🎹 Synthwave', query: 'Synthwave' },
+  { label: '🌍 Afro-TON', query: 'Afro-TON' },
+  { label: '🎤 Hip Hop', query: 'Hip Hop' }
+];
+
 export const Discover: React.FC = () => {
   const navigate = useNavigate();
   const {
@@ -77,6 +89,7 @@ export const Discover: React.FC = () => {
     clearRecentlyPlayed,
     currentTrack,
     isPlaying,
+    isLoading = false,
     playTrack,
     playAll,
     followedUserIds = [],
@@ -330,12 +343,12 @@ export const Discover: React.FC = () => {
     <div className="min-h-screen bg-black text-white pb-32 relative select-none w-full max-w-full overflow-x-hidden">
       
       {/* Sticky Spotify-Style Search Header */}
-      <div className="sticky top-0 z-40 bg-black pt-4 pb-3 px-4 md:px-8 space-y-3">
+      <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md pt-3 sm:pt-4 pb-3 px-4 sm:px-6 lg:px-8 space-y-2.5">
         
         {/* Main Search Input Bar */}
-        <div className="flex items-center gap-3 w-full">
-          <div className={`relative flex-1 flex items-center border rounded-full px-4 py-3 transition-colors shadow-md ${query ? 'bg-transparent border-white/20' : 'bg-[#F5F5F7] hover:bg-white focus-within:bg-white border-slate-300/80'}`}>
-            <Search className={`w-5 h-5 shrink-0 mr-3 ${query ? 'text-slate-400' : 'text-slate-500'}`} />
+        <div className="w-full">
+          <div className="relative w-full flex items-center bg-white/[0.04] hover:bg-white/[0.07] focus-within:bg-white/[0.09] rounded-xl px-4 py-3 sm:py-3.5 min-h-[48px] transition-all">
+            <Search className={`w-5 h-5 shrink-0 mr-3 transition-colors ${query ? 'text-[#00B4D8]' : 'text-zinc-400'}`} />
             <input
               type="text"
               value={query}
@@ -343,18 +356,20 @@ export const Discover: React.FC = () => {
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
               placeholder="What do you want to listen to?"
-              className={`w-full bg-transparent border-none outline-none text-sm font-semibold placeholder-slate-500 ${query ? 'text-white' : 'text-slate-900'}`}
+              className="w-full bg-transparent border-none outline-none text-sm font-medium placeholder:text-zinc-500 text-white leading-relaxed"
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck="false"
+              aria-label="Search TonJam"
             />
             
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1 shrink-0 ml-2">
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className={`p-1 rounded-full transition-colors ${query ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
+                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                  aria-label="Clear search query"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -362,16 +377,18 @@ export const Discover: React.FC = () => {
 
               <button
                 onClick={toggleVoiceSearch}
-                className={`p-1 transition-colors ${isVoiceListening ? 'text-[#00B4D8] animate-pulse' : query ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
+                className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg transition-all active:scale-95 ${isVoiceListening ? 'text-[#00B4D8] animate-pulse bg-white/10' : 'text-zinc-400 hover:text-white hover:bg-white/10'}`}
                 title="Voice search"
+                aria-label="Voice search"
               >
                 {isVoiceListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </button>
 
               <button
                 onClick={() => setShowScanner(true)}
-                className={`p-1 rounded-full transition-colors ${query ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
+                className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
                 title="Scan QR code"
+                aria-label="Scan QR code"
               >
                 <QrCode className="w-4 h-4" />
               </button>
@@ -379,19 +396,19 @@ export const Discover: React.FC = () => {
           </div>
         </div>
 
-        {/* Filter Pills (Always accessible when searching or filtered) */}
-        {(query.trim() || activeFilter !== 'all') && (
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-1">
+        {/* Filter Pills or Quick Vibes */}
+        {(query.trim() || activeFilter !== 'all') ? (
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-1 w-full">
             {FILTER_PILLS.map((pill) => {
               const isActive = activeFilter === pill.id;
               return (
                 <button
                   key={pill.id}
                   onClick={() => setActiveFilter(pill.id)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all border-[2px] ${
+                  className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none border ${
                     isActive
-                      ? 'bg-[#0088CC] text-white border-[#0088CC] font-bold shadow-md shadow-[#0088CC]/30'
-                      : 'bg-white/10 text-white border-white/10 hover:bg-[#0088CC]/20'
+                      ? 'bg-[#0088CC] text-white shadow-md shadow-[#0088CC]/30 font-bold border-[#c0c0c0]/40'
+                      : 'bg-white/[0.06] text-zinc-300 hover:bg-white/[0.1] hover:text-white border-[#c0c0c0]/25'
                   }`}
                 >
                   {pill.label}
@@ -399,51 +416,70 @@ export const Discover: React.FC = () => {
               );
             })}
           </div>
+        ) : (
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-0.5 pb-1 w-full">
+            {QUICK_VIBES.map((vibe) => (
+              <button
+                key={vibe.query}
+                onClick={() => handleSelectSearchTerm(vibe.query)}
+                className="px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-[#c0c0c0]/25"
+              >
+                {vibe.label}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
       {/* Main Canvas Body */}
-      <div className="w-full max-w-7xl mx-auto px-4 md:px-8 pt-4 space-y-10">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 space-y-8 sm:space-y-10">
 
         {/* CONDITIONAL CONTENT: Search Results VS Spotify Search Home */}
-        {debouncedQuery.trim() !== '' ? (
-          <SearchResults
-            query={debouncedQuery}
-            activeFilter={activeFilter}
-            results={filteredResults}
-            onPlayTrack={playTrack}
-            followedUserIds={followedUserIds}
-            onToggleFollow={toggleFollowUser}
-            onClearQuery={() => setQuery('')}
-          />
+        {query.trim() !== '' ? (
+          (query !== debouncedQuery || isLoading) ? (
+            <SearchResultsSkeleton activeFilter={activeFilter} />
+          ) : (
+            <SearchResults
+              query={debouncedQuery}
+              activeFilter={activeFilter}
+              results={filteredResults}
+              onPlayTrack={playTrack}
+              followedUserIds={followedUserIds}
+              onToggleFollow={toggleFollowUser}
+              onClearQuery={() => setQuery('')}
+            />
+          )
+        ) : (isLoading && allTracks.length === 0) ? (
+          <FullDiscoverSkeleton />
         ) : (
           <div className="space-y-10">
 
-            {/* 1. Recent Searches (Spotify Style) */}
+            {/* 1. Recent Searches */}
             {searchHistory.length > 0 && (
               <section className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-bold text-white tracking-tight">Recent Searches</h3>
                   <button
                     onClick={handleClearAllHistory}
-                    className="text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                    className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
                   >
                     Clear all
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar pb-1">
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                   {searchHistory.map((term) => (
                     <div
                       key={`recent-${term}`}
                       onClick={() => handleSelectSearchTerm(term)}
-                      className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#0c143d] hover:bg-[#121d57] cursor-pointer transition-colors shrink-0 group"
+                      className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] cursor-pointer transition-all shrink-0 group select-none"
                     >
-                      <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" />
-                      <span className="text-xs font-medium text-slate-200 group-hover:text-white">{term}</span>
+                      <Search className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+                      <span className="text-xs font-medium text-zinc-200 group-hover:text-white">{term}</span>
                       <button
                         onClick={(e) => handleRemoveSearchTerm(term, e)}
-                        className="p-0.5 text-slate-400 hover:text-white rounded-full transition-colors ml-1"
+                        className="p-0.5 text-zinc-400 hover:text-white rounded-full transition-colors ml-0.5"
+                        aria-label={`Remove ${term} from history`}
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -455,19 +491,17 @@ export const Discover: React.FC = () => {
 
             {/* 2. Recently Played Section (Last 5 tracks from AudioProvider listening history) */}
             {last5RecentlyPlayed.length > 0 && (
-              <section className="space-y-4" id="recently-played-feed-section">
+              <section className="space-y-3.5" id="recently-played-feed-section">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-[#00B4D8]" />
-                      <h3 className="text-lg font-bold text-white tracking-tight">Recently Played</h3>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4.5 h-4.5 text-[#00B4D8]" />
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Recently Played</h3>
                   </div>
                   <div className="flex items-center gap-3">
                     {typeof clearRecentlyPlayed === 'function' && (
                       <button
                         onClick={clearRecentlyPlayed}
-                        className="text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                        className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
                         title="Clear recent playback history"
                       >
                         Clear
@@ -482,7 +516,7 @@ export const Discover: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4 sm:mx-0 sm:px-0 scroll-smooth">
+                <div className="-mx-3 flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-3 sm:mx-0 sm:px-0 scroll-smooth">
                   {last5RecentlyPlayed.map((track) => {
                     const isCurrentPlaying = currentTrack?.id === track.id && isPlaying;
                     const isLiked = likedTrackIds.includes(track.id);
@@ -490,11 +524,11 @@ export const Discover: React.FC = () => {
                     return (
                       <motion.div
                         key={`recent-played-${track.id}`}
-                        whileHover={{ y: -4 }}
+                        whileHover={{ y: -3 }}
                         onClick={() => playTrack(track)}
-                        className="w-[160px] shrink-0 bg-[#0c143d] rounded-[14px] p-3 flex flex-col justify-between cursor-pointer group transition-all"
+                        className="w-[145px] sm:w-[160px] shrink-0 bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3 flex flex-col justify-between cursor-pointer group transition-all select-none"
                       >
-                        <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950 mb-3">
+                        <div className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900 mb-2.5">
                           <img
                             src={track.coverUrl || getPlaceholderImage(track.title)}
                             alt={track.title}
@@ -532,14 +566,15 @@ export const Discover: React.FC = () => {
                                 toggleLikeTrack(track.id);
                               }}
                               className={`p-0.5 transition-colors shrink-0 ${
-                                isLiked ? 'text-rose-500' : 'text-slate-500 hover:text-white opacity-0 group-hover:opacity-100'
+                                isLiked ? 'text-rose-500' : 'text-zinc-500 hover:text-white opacity-0 group-hover:opacity-100'
                               }`}
                               title={isLiked ? "Unlike" : "Like"}
+                              aria-label={isLiked ? "Unlike track" : "Like track"}
                             >
                               <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
                             </button>
                           </div>
-                          <p className="text-[10px] text-slate-400 truncate">{track.artist}</p>
+                          <p className="text-[10px] text-zinc-400 truncate">{track.artist}</p>
                         </div>
                       </motion.div>
                     );
@@ -548,20 +583,20 @@ export const Discover: React.FC = () => {
               </section>
             )}
 
-            {/* 3. Browse All Categories (Spotify Famous Colored Tile Grid) */}
-            <section className="space-y-4">
-              <h3 className="text-lg font-bold text-white tracking-tight">Browse All</h3>
+            {/* 3. Browse All Categories */}
+            <section className="space-y-3.5">
+              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Browse All</h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
                 {SPOTIFY_CATEGORIES.map((category) => (
                   <motion.div
                     key={category.id}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleSelectSearchTerm(category.query)}
-                    className={`relative ${category.gradient} rounded-[14px] p-4 overflow-hidden aspect-[16/10] cursor-pointer shadow-lg group transition-all`}
+                    className={`relative ${category.gradient} rounded-2xl p-3.5 sm:p-4 overflow-hidden aspect-[16/10] cursor-pointer shadow-md group transition-all select-none`}
                   >
-                    <h4 className="text-base sm:text-lg font-black text-white tracking-tight uppercase max-w-[65%] leading-tight z-10 relative">
+                    <h4 className="text-sm sm:text-base font-black text-white tracking-tight uppercase max-w-[70%] leading-tight z-10 relative">
                       {category.title}
                     </h4>
 
@@ -569,7 +604,7 @@ export const Discover: React.FC = () => {
                     <img
                       src={category.imgUrl}
                       alt={category.title}
-                      className="absolute bottom-0 right-0 w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-[6px] shadow-2xl translate-x-3 translate-y-3 rotate-[20deg] group-hover:scale-105 group-hover:rotate-[15deg] transition-all duration-300 pointer-events-none"
+                      className="absolute bottom-0 right-0 w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg shadow-2xl translate-x-2.5 translate-y-2.5 rotate-[18deg] group-hover:scale-105 group-hover:rotate-[14deg] transition-all duration-300 pointer-events-none"
                     />
                   </motion.div>
                 ))}
@@ -578,10 +613,10 @@ export const Discover: React.FC = () => {
 
             {/* 3. Recommended For You ("Made For You") */}
             {recommendedTracks.length > 0 && (
-              <section className="space-y-4">
+              <section className="space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-bold text-white tracking-tight">Recommended for You</h3>
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Recommended for You</h3>
                   </div>
                   <button
                     onClick={() => navigate('/explore/tracks?title=Recommended+for+You&filter=recommended')}
@@ -591,15 +626,15 @@ export const Discover: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4 sm:mx-0 sm:px-0 scroll-smooth">
+                <div className="-mx-3 flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-3 sm:mx-0 sm:px-0 scroll-smooth">
                   {recommendedTracks.map((track) => (
                     <motion.div
                       key={`rec-track-${track.id}`}
-                      whileHover={{ y: -4 }}
+                      whileHover={{ y: -3 }}
                       onClick={() => playTrack(track)}
-                      className="w-[155px] shrink-0 bg-[#0c143d] rounded-[14px] p-3 flex flex-col justify-between cursor-pointer group transition-all"
+                      className="w-[145px] sm:w-[155px] shrink-0 bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3 flex flex-col justify-between cursor-pointer group transition-all select-none"
                     >
-                      <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950 mb-3">
+                      <div className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900 mb-2.5">
                         <img
                           src={track.coverUrl || getPlaceholderImage(track.title)}
                           alt={track.title}
@@ -616,7 +651,7 @@ export const Discover: React.FC = () => {
                         <h4 className="text-xs font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
                           {track.title}
                         </h4>
-                        <p className="text-[10px] text-slate-400 truncate mt-0.5">{track.artist}</p>
+                        <p className="text-[10px] text-zinc-400 truncate mt-0.5">{track.artist}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -626,13 +661,11 @@ export const Discover: React.FC = () => {
 
             {/* AI-Powered Discovery Feed Section */}
             {(isLoadingAi || (aiFeed && recommendedTracksWithAi.length > 0)) && (
-              <section className="space-y-4">
+              <section className="space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-[#00B4D8]" />
-                      <h3 className="text-lg font-bold text-white tracking-tight">AI Discovery</h3>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4.5 h-4.5 text-[#00B4D8]" />
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">AI Discovery</h3>
                   </div>
                   
                   <button
@@ -645,28 +678,28 @@ export const Discover: React.FC = () => {
                 </div>
 
                 {isLoadingAi ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="animate-pulse bg-[#0c143d] rounded-[14px] p-4 h-24 flex gap-4">
-                        <div className="w-16 h-16 bg-white/5 rounded-[10px]" />
+                      <div key={i} className="animate-pulse bg-white/[0.03] rounded-2xl p-4 h-24 flex gap-3.5">
+                        <div className="w-16 h-16 bg-white/5 rounded-xl shrink-0" />
                         <div className="flex-1 space-y-2 py-1">
-                          <div className="h-4 bg-white/5 rounded w-1/3" />
-                          <div className="h-3 bg-white/5 rounded w-1/4" />
-                          <div className="h-3 bg-white/5 rounded w-5/6" />
+                          <div className="h-3.5 bg-white/5 rounded w-1/3" />
+                          <div className="h-2.5 bg-white/5 rounded w-1/4" />
+                          <div className="h-2.5 bg-white/5 rounded w-5/6" />
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {recommendedTracksWithAi.map((track) => (
                       <motion.div
                         key={`ai-rec-${track.id}`}
-                        whileHover={{ y: -2, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+                        whileHover={{ y: -2 }}
                         onClick={() => playTrack(track)}
-                        className="bg-[#0c143d] rounded-[14px] p-4 flex gap-4 cursor-pointer group transition-all"
+                        className="bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3.5 sm:p-4 flex gap-3.5 cursor-pointer group transition-all select-none"
                       >
-                        <div className="relative w-16 h-16 rounded-[10px] overflow-hidden bg-slate-950 shrink-0">
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-zinc-900 shrink-0">
                           <img
                             src={track.coverUrl || getPlaceholderImage(track.title)}
                             alt={track.title}
@@ -681,13 +714,13 @@ export const Discover: React.FC = () => {
 
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                           <div>
-                            <h4 className="text-sm font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
+                            <h4 className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
                               {track.title}
                             </h4>
-                            <p className="text-xs text-slate-400 truncate">{track.artist}</p>
+                            <p className="text-[11px] text-zinc-400 truncate mt-0.5">{track.artist}</p>
                           </div>
                           {track.aiReason && (
-                            <p className="text-[11px] text-slate-300 font-medium line-clamp-2 mt-1 italic leading-snug">
+                            <p className="text-[11px] text-zinc-300 font-medium line-clamp-2 mt-1 italic leading-snug">
                               "{track.aiReason}"
                             </p>
                           )}
@@ -699,13 +732,13 @@ export const Discover: React.FC = () => {
               </section>
             )}
 
-            {/* 4. Top Charts / Trending Tracks (Spotify Numbered List) */}
+            {/* 4. Top Charts / Trending Tracks */}
             {topTrendingTracks.length > 0 && (
-              <section className="space-y-4">
+              <section className="space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-rose-400" />
-                    <h3 className="text-lg font-bold text-white tracking-tight">Top Charts</h3>
+                    <TrendingUp className="w-4.5 h-4.5 text-rose-400" />
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Top Charts</h3>
                   </div>
                   <button
                     onClick={() => navigate('/explore/tracks?title=Top+Charts&filter=trending')}
@@ -715,44 +748,49 @@ export const Discover: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   {topTrendingTracks.map((track, idx) => {
                     const isLiked = likedTrackIds.includes(track.id);
+                    const isCurrentPlaying = currentTrack?.id === track.id && isPlaying;
                     return (
                       <motion.div
                         key={`top-chart-${track.id}`}
-                        whileHover={{ x: 4, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+                        whileHover={{ x: 2 }}
                         onClick={() => playTrack(track)}
-                        className="p-3 rounded-[14px] bg-[#0c143d] flex items-center justify-between cursor-pointer group transition-all"
+                        className={`p-2.5 sm:p-3 rounded-2xl ${isCurrentPlaying ? 'bg-[#00B4D8]/10' : 'bg-white/[0.03]'} hover:bg-white/[0.06] flex items-center justify-between cursor-pointer group transition-all select-none`}
                       >
-                        <div className="flex items-center gap-4 min-w-0">
-                          <span className={`text-sm font-extrabold w-5 text-center shrink-0 ${
-                            idx === 0 ? 'text-amber-400 text-base' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-amber-600' : 'text-slate-500'
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                          <span className={`text-xs sm:text-sm font-extrabold w-4 sm:w-5 text-center shrink-0 ${
+                            isCurrentPlaying ? 'text-[#00B4D8]' : idx === 0 ? 'text-amber-400 font-black' : idx === 1 ? 'text-zinc-300' : idx === 2 ? 'text-amber-600' : 'text-zinc-500'
                           }`}>
-                            #{idx + 1}
+                            {isCurrentPlaying ? '▶' : `#${idx + 1}`}
                           </span>
 
-                          <div className="relative w-12 h-12 rounded-[10px] overflow-hidden shrink-0 bg-slate-950">
+                          <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shrink-0 bg-zinc-900">
                             <img
                               src={track.coverUrl || getPlaceholderImage(track.title)}
                               alt={track.title}
                               className="w-full h-full object-cover"
                             />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
-                              <Play className="w-5 h-5 text-white fill-current" />
+                            <div className={`absolute inset-0 bg-black/40 ${isCurrentPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} flex items-center justify-center transition-all`}>
+                              {isCurrentPlaying ? (
+                                <Pause className="w-4 h-4 text-[#00B4D8] fill-current" />
+                              ) : (
+                                <Play className="w-4 h-4 text-white fill-current" />
+                              )}
                             </div>
                           </div>
 
                           <div className="truncate">
-                            <h4 className="text-sm font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
+                            <h4 className={`text-xs sm:text-sm font-bold truncate transition-colors ${isCurrentPlaying ? 'text-[#00B4D8]' : 'text-white group-hover:text-[#00B4D8]'}`}>
                               {track.title}
                             </h4>
-                            <p className="text-xs text-slate-400 truncate">{track.artist}</p>
+                            <p className="text-[10px] sm:text-xs text-zinc-400 truncate mt-0.5">{track.artist}</p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4 shrink-0 pr-1">
-                          <span className="text-xs font-mono text-slate-400 hidden sm:inline">
+                        <div className="flex items-center gap-3 sm:gap-4 shrink-0 pr-1">
+                          <span className="text-[11px] font-mono text-zinc-500 hidden sm:inline">
                             {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
                           </span>
 
@@ -761,7 +799,8 @@ export const Discover: React.FC = () => {
                               e.stopPropagation();
                               if (setOptionsTrack) setOptionsTrack(track);
                             }}
-                            className="p-1.5 text-slate-400 hover:text-white transition-colors"
+                            className="p-1.5 text-zinc-400 hover:text-white transition-colors"
+                            aria-label="Track options"
                           >
                             <MoreVertical className="w-4 h-4" />
                           </button>
@@ -775,9 +814,9 @@ export const Discover: React.FC = () => {
 
             {/* 5. Popular Artists */}
             {popularArtists.length > 0 && (
-              <section className="space-y-4">
+              <section className="space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-white tracking-tight">Popular Artists</h3>
+                  <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Popular Artists</h3>
                   <button
                     onClick={() => navigate('/explore/artists?title=Popular+Artists')}
                     className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors flex items-center gap-1 cursor-pointer"
@@ -786,17 +825,17 @@ export const Discover: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
                   {popularArtists.map((artist) => {
                     const isFollowing = followedUserIds.includes(artist.uid);
                     return (
                       <motion.div
                         key={`pop-artist-${artist.uid}`}
-                        whileHover={{ y: -4 }}
+                        whileHover={{ y: -3 }}
                         onClick={() => navigate(`/artist/${artist.uid}`)}
-                        className="bg-[#0c143d] rounded-[14px] p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
+                        className="bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3.5 sm:p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all select-none"
                       >
-                        <div className="relative h-24 w-24 rounded-full overflow-hidden shadow-lg bg-slate-950">
+                        <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden shadow-md bg-zinc-900">
                           <img
                             src={artist.avatarUrl || getPlaceholderImage(artist.name)}
                             alt={artist.name}
@@ -808,7 +847,7 @@ export const Discover: React.FC = () => {
                           <h4 className="text-xs font-bold text-white group-hover:text-[#00B4D8] transition-colors truncate">
                             {artist.name}
                           </h4>
-                          <p className="text-[10px] text-slate-400 capitalize truncate mt-0.5">
+                          <p className="text-[10px] text-zinc-400 capitalize truncate mt-0.5">
                             {artist.genre || 'Artist'}
                           </p>
                         </div>
@@ -819,7 +858,7 @@ export const Discover: React.FC = () => {
                             e.stopPropagation();
                             toggleFollowUser(artist.uid);
                           }}
-                          className="w-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white hover:bg-white/20 rounded-full h-8"
+                          className="w-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white hover:bg-white/20 rounded-full h-7 sm:h-8"
                         >
                           {isFollowing ? 'Following' : 'Follow'}
                         </Button>
@@ -832,9 +871,9 @@ export const Discover: React.FC = () => {
 
             {/* 6. Featured Playlists */}
             {allUserPlaylists.length > 0 && (
-              <section className="space-y-4">
+              <section className="space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-white tracking-tight">Featured Playlists</h3>
+                  <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Featured Playlists</h3>
                   <button
                     onClick={() => navigate('/explore/playlists?title=Featured+Playlists&filter=curated')}
                     className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors flex items-center gap-1 cursor-pointer"
@@ -843,15 +882,15 @@ export const Discover: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                   {allUserPlaylists.slice(0, 4).map((playlist) => (
                     <motion.div
                       key={`feat-playlist-${playlist.id}`}
-                      whileHover={{ y: -4 }}
+                      whileHover={{ y: -3 }}
                       onClick={() => navigate(`/playlist/${playlist.id}`)}
-                      className="bg-[#0c143d] rounded-[14px] p-3.5 cursor-pointer group transition-all"
+                      className="bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3 sm:p-3.5 cursor-pointer group transition-all select-none"
                     >
-                      <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950 mb-3">
+                      <div className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900 mb-2.5">
                         <img
                           src={playlist.coverUrl || getPlaceholderImage(playlist.title)}
                           alt={playlist.title}
@@ -867,7 +906,7 @@ export const Discover: React.FC = () => {
                       <h4 className="text-xs font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
                         {playlist.title}
                       </h4>
-                      <p className="text-[10px] text-slate-400 truncate mt-0.5">by {playlist.creator}</p>
+                      <p className="text-[10px] text-zinc-400 truncate mt-0.5">by {playlist.creator}</p>
                     </motion.div>
                   ))}
                 </div>

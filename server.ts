@@ -1779,13 +1779,18 @@ async function startServer() {
     // OAuth Routes
     app.get('/api/auth/:provider/url', (req, res) => {
         const { provider } = req.params;
-        const clientId = process.env[`${provider.toUpperCase()}_CLIENT_ID`];
-        const redirectUri = process.env[`${provider.toUpperCase()}_REDIRECT_URI`];
+        const normalizedProvider = provider.toLowerCase() === 'x' ? 'twitter' : provider.toLowerCase();
+        const clientId = process.env[`${normalizedProvider.toUpperCase()}_CLIENT_ID`] || 
+                         process.env[`${provider.toUpperCase()}_CLIENT_ID`] || 
+                         'tonjam_auth_client';
+        const redirectUri = process.env[`${normalizedProvider.toUpperCase()}_REDIRECT_URI`] || 
+                           process.env[`${provider.toUpperCase()}_REDIRECT_URI`] || 
+                           `${getBaseUrl(req)}/api/auth/${provider}/callback`;
         
         let authUrl = '';
         let scope = '';
 
-        switch (provider) {
+        switch (normalizedProvider) {
             case 'spotify':
                 authUrl = 'https://accounts.spotify.com/authorize';
                 scope = 'user-read-email';
@@ -1803,8 +1808,8 @@ async function startServer() {
         }
 
         const params = new URLSearchParams({
-            client_id: clientId!,
-            redirect_uri: redirectUri!,
+            client_id: clientId,
+            redirect_uri: redirectUri,
             response_type: 'code',
             scope: scope,
             state: Math.random().toString(36).substring(7) // Security

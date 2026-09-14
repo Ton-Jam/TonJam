@@ -6,6 +6,7 @@ import { Track, Artist, Album, Playlist, NFTItem, UserProfile } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from './EmptyState';
+import { SearchResultsSkeleton } from './Skeletons';
 
 interface SearchResultsProps {
   query: string;
@@ -22,6 +23,7 @@ interface SearchResultsProps {
   followedUserIds: string[];
   onToggleFollow: (id: string) => void;
   onClearQuery?: () => void;
+  isLoading?: boolean;
 }
 
 export const SearchResults: React.FC<SearchResultsProps> = ({
@@ -31,14 +33,19 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   onPlayTrack,
   followedUserIds,
   onToggleFollow,
-  onClearQuery
+  onClearQuery,
+  isLoading = false
 }) => {
   const navigate = useNavigate();
 
+  if (isLoading) {
+    return <SearchResultsSkeleton activeFilter={activeFilter} />;
+  }
+
   const renderSectionHeader = (title: string, icon: React.ReactNode) => (
-    <div className="flex items-center gap-2 pb-1 mb-3">
+    <div className="flex items-center gap-2 pb-1 mb-2.5">
       {icon}
-      <h3 className="text-xs font-bold uppercase tracking-wider text-white">{title}</h3>
+      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300">{title}</h3>
     </div>
   );
 
@@ -75,13 +82,13 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   const isTopResultTrack = results.tracks.length > 0;
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-6 sm:space-y-8 pb-20">
       {/* Spotify Signature "Top Result" + Top Songs side-by-side or stacked */}
       {activeFilter === 'all' && topResult && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           
           {/* Top Result Card */}
-          <div className="lg:col-span-5 space-y-3">
+          <div className="lg:col-span-5 space-y-2.5">
             {renderSectionHeader('Top Result', <BadgeCheck className="w-4 h-4 text-[#00B4D8]" />)}
             
             <motion.div
@@ -93,10 +100,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                   navigate(`/artist/${results.artists[0].uid}`);
                 }
               }}
-              className="relative p-6 rounded-[14px] bg-[#0c143d] hover:bg-[#101b52] transition-colors cursor-pointer group flex flex-col justify-between min-h-[220px]"
+              className="relative p-5 sm:p-6 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors cursor-pointer group flex flex-col justify-between min-h-[200px] sm:min-h-[220px] select-none"
             >
               <div>
-                <div className="relative w-20 h-20 rounded-[10px] overflow-hidden mb-4 shadow-lg bg-slate-950">
+                <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-xl overflow-hidden mb-3.5 shadow-md bg-zinc-900">
                   <img
                     src={
                       isTopResultTrack
@@ -109,7 +116,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 </div>
 
                 <div className="space-y-1 pr-12">
-                  <h3 className="text-xl font-extrabold text-white tracking-tight line-clamp-1 group-hover:text-[#00B4D8] transition-colors">
+                  <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight line-clamp-1 group-hover:text-[#00B4D8] transition-colors">
                     {isTopResultTrack ? results.tracks[0].title : results.artists[0].name}
                   </h3>
                   
@@ -117,17 +124,17 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     <span className="px-2 py-0.5 rounded-full bg-white/10 text-[9px] font-bold uppercase tracking-wider text-white">
                       {isTopResultTrack ? 'Song' : 'Artist'}
                     </span>
-                    <p className="text-xs text-slate-400 truncate">
+                    <p className="text-xs text-zinc-400 truncate">
                       {isTopResultTrack ? results.tracks[0].artist : (results.artists[0].genre || 'Featured Artist')}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Floating Spotify Green/Cyan Play Button */}
-              <div className="absolute bottom-6 right-6 opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all shadow-xl">
-                <div className="w-12 h-12 rounded-full bg-[#00B4D8] text-black flex items-center justify-center pl-0.5">
-                  <Play className="w-6 h-6 fill-current" />
+              {/* Floating Spotify Cyan Play Button */}
+              <div className="absolute bottom-5 right-5 sm:bottom-6 sm:right-6 opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all shadow-xl">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#00B4D8] text-black flex items-center justify-center pl-0.5 shadow-lg">
+                  <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
                 </div>
               </div>
             </motion.div>
@@ -135,23 +142,23 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
           {/* Top 4 Songs right next to Top Result */}
           {results.tracks.length > 0 && (
-            <div className="lg:col-span-7 space-y-3">
+            <div className="lg:col-span-7 space-y-2.5">
               {renderSectionHeader('Songs', <Music className="w-4 h-4 text-emerald-400" />)}
               
-              <div className="space-y-1.5">
+              <div className="space-y-1 sm:space-y-1.5">
                 {results.tracks.slice(0, 4).map((track, idx) => (
                   <motion.div
                     key={`top-song-${track.id}`}
-                    whileHover={{ x: 3, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+                    whileHover={{ x: 2 }}
                     onClick={() => onPlayTrack(track)}
-                    className="p-2.5 rounded-[10px] bg-[#0c143d] flex items-center justify-between cursor-pointer group transition-all"
+                    className="p-2 sm:p-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-between cursor-pointer group transition-all select-none"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-xs font-bold text-slate-500 w-4 text-center shrink-0">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                      <span className="text-xs font-bold text-zinc-500 w-4 text-center shrink-0">
                         {idx + 1}
                       </span>
                       
-                      <div className="relative w-10 h-10 rounded-[6px] overflow-hidden shrink-0 bg-slate-950">
+                      <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-zinc-900">
                         <img
                           src={track.coverUrl || getPlaceholderImage(track.title)}
                           alt={track.title}
@@ -166,12 +173,12 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                         <h4 className="text-xs font-bold text-white tracking-wide truncate group-hover:text-[#00B4D8] transition-colors">
                           {track.title}
                         </h4>
-                        <p className="text-[10px] text-slate-400 truncate">{track.artist}</p>
+                        <p className="text-[10px] text-zinc-400 truncate mt-0.5">{track.artist}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 shrink-0 pr-2">
-                      <span className="text-[10px] font-mono text-slate-500">
+                    <div className="flex items-center gap-3 shrink-0 pr-1 sm:pr-2">
+                      <span className="text-[10px] font-mono text-zinc-500">
                         {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
                       </span>
                     </div>
@@ -185,18 +192,18 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
       {/* Tracks Full List (when filter is 'tracks') */}
       {activeFilter === 'tracks' && results.tracks.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {renderSectionHeader('Songs', <Music className="w-4 h-4 text-emerald-400" />)}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
             {results.tracks.map((track) => (
               <motion.div
                 key={`search-track-full-${track.id}`}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+                whileHover={{ y: -1 }}
                 onClick={() => onPlayTrack(track)}
-                className="p-3 rounded-[10px] bg-[#0c143d] flex items-center justify-between cursor-pointer group transition-all"
+                className="p-2.5 sm:p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-between cursor-pointer group transition-all select-none"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative w-11 h-11 rounded-[6px] overflow-hidden shrink-0 bg-slate-950">
+                  <div className="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-zinc-900">
                     <img
                       src={track.coverUrl || getPlaceholderImage(track.title)}
                       alt={track.title}
@@ -210,12 +217,12 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     <h4 className="text-xs font-bold text-white tracking-wide truncate group-hover:text-[#00B4D8] transition-colors">
                       {track.title}
                     </h4>
-                    <p className="text-[10px] text-slate-400 truncate">{track.artist}</p>
+                    <p className="text-[10px] text-zinc-400 truncate mt-0.5">{track.artist}</p>
                   </div>
                 </div>
 
-                <div className="text-right shrink-0">
-                  <p className="text-[10px] font-mono text-slate-500">
+                <div className="text-right shrink-0 pr-1">
+                  <p className="text-[10px] font-mono text-zinc-500">
                     {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
                   </p>
                 </div>
@@ -227,17 +234,17 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
       {/* Artists Match */}
       {showArtists && results.artists.length > 0 && (activeFilter === 'artists' || results.artists.length > 1) && (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {renderSectionHeader('Artists', <User className="w-4 h-4 text-cyan-400" />)}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
             {results.artists.map((artist) => (
               <motion.div
                 key={`search-artist-${artist.uid}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/artist/${artist.uid}`)}
-                className="bg-[#0c143d] rounded-[14px] p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all"
+                className="bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3.5 sm:p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all select-none"
               >
-                <div className="relative h-20 w-20 rounded-full overflow-hidden shadow-md bg-slate-950">
+                <div className="relative h-20 w-20 rounded-full overflow-hidden shadow-md bg-zinc-900">
                   <img
                     src={artist.avatarUrl || getPlaceholderImage(artist.name)}
                     alt={artist.name}
@@ -248,7 +255,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                   <h4 className="text-xs font-bold text-white group-hover:text-[#00B4D8] transition-colors truncate">
                     {artist.name}
                   </h4>
-                  <p className="text-[10px] text-slate-400 capitalize">
+                  <p className="text-[10px] text-zinc-400 capitalize">
                     {artist.genre || 'Artist'}
                   </p>
                 </div>
@@ -271,27 +278,27 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
       {/* Albums Match */}
       {showAlbums && results.albums.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {renderSectionHeader('Albums', <Disc className="w-4 h-4 text-pink-400" />)}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {results.albums.map((album) => (
               <motion.div
                 key={`search-album-${album.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/album/${album.id}`)}
-                className="bg-[#0c143d] rounded-[14px] p-3.5 cursor-pointer group transition-all"
+                className="bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3 sm:p-3.5 cursor-pointer group transition-all select-none"
               >
-                <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950">
+                <div className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900">
                   <img
                     src={album.coverUrl || getPlaceholderImage(album.title)}
                     alt={album.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
                   />
                 </div>
-                <h4 className="text-xs font-bold text-white truncate mt-2.5 group-hover:text-[#00B4D8] transition-colors">
+                <h4 className="text-xs font-bold text-white truncate mt-2 group-hover:text-[#00B4D8] transition-colors">
                   {album.title}
                 </h4>
-                <p className="text-[10px] text-slate-400 truncate">{album.artist}</p>
+                <p className="text-[10px] text-zinc-400 truncate">{album.artist}</p>
               </motion.div>
             ))}
           </div>
@@ -300,27 +307,27 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
       {/* Playlists Match */}
       {showPlaylists && results.playlists.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {renderSectionHeader('Playlists', <ListMusic className="w-4 h-4 text-amber-400" />)}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {results.playlists.map((playlist) => (
               <motion.div
                 key={`search-playlist-${playlist.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/playlist/${playlist.id}`)}
-                className="bg-[#0c143d] rounded-[14px] p-3.5 cursor-pointer group transition-all"
+                className="bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3 sm:p-3.5 cursor-pointer group transition-all select-none"
               >
-                <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950">
+                <div className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900">
                   <img
                     src={playlist.coverUrl || getPlaceholderImage(playlist.title)}
                     alt={playlist.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
                   />
                 </div>
-                <h4 className="text-xs font-bold text-white truncate mt-2.5 group-hover:text-[#00B4D8] transition-colors">
+                <h4 className="text-xs font-bold text-white truncate mt-2 group-hover:text-[#00B4D8] transition-colors">
                   {playlist.title}
                 </h4>
-                <p className="text-[10px] text-slate-400 truncate">by {playlist.creator}</p>
+                <p className="text-[10px] text-zinc-400 truncate">by {playlist.creator}</p>
               </motion.div>
             ))}
           </div>
@@ -329,24 +336,24 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
       {/* NFTs Grid */}
       {showNFTs && results.nfts.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {renderSectionHeader('Music Collectibles & NFTs', <Gem className="w-4 h-4 text-purple-400" />)}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {results.nfts.map((nft) => (
               <motion.div
                 key={`search-nft-${nft.id}`}
                 whileHover={{ y: -3 }}
                 onClick={() => navigate(`/nft/${nft.id}`)}
-                className="bg-[#0c143d] rounded-[14px] p-3.5 flex flex-col justify-between cursor-pointer group transition-all"
+                className="bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between cursor-pointer group transition-all select-none"
               >
-                <div className="relative aspect-square rounded-[10px] overflow-hidden bg-slate-950">
+                <div className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900">
                   <img
                     src={nft.imageUrl || nft.coverUrl || getPlaceholderImage(nft.title)}
                     alt={nft.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
-                <div className="mt-2.5 truncate">
+                <div className="mt-2 truncate">
                   <h4 className="text-xs font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
                     {nft.title}
                   </h4>

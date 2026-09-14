@@ -130,22 +130,44 @@ const LibraryPage: React.FC = () => {
               </div>
             )}
 
-            {/* Grid vs List View Toggle */}
-            <div className="flex items-center gap-2 self-end md:self-auto">
-              <div className="bg-slate-900 border border-white/5 rounded-[10px] p-1 flex items-center">
+            {/* Grid vs List View Toggle with AnimatePresence & layoutId */}
+            <div className="flex items-center gap-2 self-end md:self-auto" role="group" aria-label="View layout options">
+              <div className="bg-slate-900 border border-white/5 rounded-[10px] p-1 flex items-center relative">
                 <button
+                  type="button"
+                  id="library-view-grid-btn"
                   onClick={() => setViewLayout('grid')}
-                  className={`p-1.5 rounded-md cursor-pointer transition-colors ${viewLayout === 'grid' ? 'bg-[#0052FF] text-white' : 'text-slate-500 hover:text-white'}`}
+                  aria-pressed={viewLayout === 'grid'}
+                  aria-label="Switch to grid layout"
+                  className={`relative p-1.5 rounded-md cursor-pointer transition-colors z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052FF] focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900 ${viewLayout === 'grid' ? 'text-white' : 'text-slate-500 hover:text-white'}`}
                   title="Grid Layout"
                 >
-                  <LayoutGrid className="w-4 h-4" />
+                  {viewLayout === 'grid' && (
+                    <motion.div
+                      layoutId="library-view-toggle-indicator"
+                      className="absolute inset-0 bg-[#0052FF] rounded-md -z-10 shadow-sm"
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
+                    />
+                  )}
+                  <LayoutGrid className="w-4 h-4 relative z-10" aria-hidden="true" />
                 </button>
                 <button
+                  type="button"
+                  id="library-view-list-btn"
                   onClick={() => setViewLayout('list')}
-                  className={`p-1.5 rounded-md cursor-pointer transition-colors ${viewLayout === 'list' ? 'bg-[#0052FF] text-white' : 'text-slate-500 hover:text-white'}`}
+                  aria-pressed={viewLayout === 'list'}
+                  aria-label="Switch to list layout"
+                  className={`relative p-1.5 rounded-md cursor-pointer transition-colors z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052FF] focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900 ${viewLayout === 'list' ? 'text-white' : 'text-slate-500 hover:text-white'}`}
                   title="List Layout"
                 >
-                  <List className="w-4 h-4" />
+                  {viewLayout === 'list' && (
+                    <motion.div
+                      layoutId="library-view-toggle-indicator"
+                      className="absolute inset-0 bg-[#0052FF] rounded-md -z-10 shadow-sm"
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
+                    />
+                  )}
+                  <List className="w-4 h-4 relative z-10" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -168,8 +190,8 @@ const LibraryPage: React.FC = () => {
                   }}
                   className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full cursor-pointer transition-all border ${
                     isActive 
-                      ? 'bg-[#0052FF] text-white border-transparent shadow-lg shadow-[#0052FF]/20' 
-                      : 'bg-slate-900 text-slate-400 hover:text-white border-white/5 hover:bg-slate-850'
+                      ? 'bg-[#0052FF] text-white border-[#c0c0c0]/40 shadow-lg shadow-[#0052FF]/20' 
+                      : 'bg-slate-900 text-slate-400 hover:text-white border-[#c0c0c0]/25 hover:bg-slate-850'
                   }`}
                 >
                   {chip}

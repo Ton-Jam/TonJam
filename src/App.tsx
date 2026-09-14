@@ -57,17 +57,16 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <TonConnectUIProvider manifestUrl={manifestUrl}>
         <Router>
-          <ToastProvider>
-            <ModalProvider>
-              <ThemeProvider>
-                <I18nProvider>
-                  <TooltipProvider>
-                    <AuthProvider>
-                      <UserProvider>
-                        <WalletProvider>
-                          <TonPriceProvider>
-                            <GramPriceProvider>
-                              <AudioProvider>
+          <ThemeProvider>
+            <I18nProvider>
+              <TooltipProvider>
+                <ToastProvider>
+                  <AuthProvider>
+                    <UserProvider>
+                      <WalletProvider>
+                        <TonPriceProvider>
+                          <GramPriceProvider>
+                            <AudioProvider>
                               <KeyboardShortcutListener />
                               <LibraryProvider>
                                 <ArtistProvider>
@@ -77,13 +76,15 @@ export default function App() {
                                         <NotificationProvider>
                                           <TaskProvider>
                                             <TJProvider>
-                                              <AppRouter />
+                                              <ModalProvider>
+                                                <AppRouter />
 
-                                              <Toaster
-                                                richColors
-                                                position="top-center"
-                                                closeButton
-                                              />
+                                                <Toaster
+                                                  richColors
+                                                  position="top-center"
+                                                  closeButton
+                                                />
+                                              </ModalProvider>
                                             </TJProvider>
                                           </TaskProvider>
                                         </NotificationProvider>
@@ -93,16 +94,15 @@ export default function App() {
                                 </ArtistProvider>
                               </LibraryProvider>
                             </AudioProvider>
-                            </GramPriceProvider>
-                          </TonPriceProvider>
-                        </WalletProvider>
-                      </UserProvider>
-                    </AuthProvider>
-                  </TooltipProvider>
-                </I18nProvider>
-              </ThemeProvider>
-            </ModalProvider>
-          </ToastProvider>
+                          </GramPriceProvider>
+                        </TonPriceProvider>
+                      </WalletProvider>
+                    </UserProvider>
+                  </AuthProvider>
+                </ToastProvider>
+              </TooltipProvider>
+            </I18nProvider>
+          </ThemeProvider>
         </Router>
       </TonConnectUIProvider>
     </QueryClientProvider>

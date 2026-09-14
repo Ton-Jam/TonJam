@@ -34,8 +34,8 @@ export const FanFeed: React.FC<FanFeedProps> = ({
       </div>
 
       {fanPosts.length === 0 ? (
-        <div className="bg-slate-900 border border-white/[0.03] rounded-[10px] p-6 text-center text-slate-500 text-xs font-medium uppercase tracking-wider">
-          <Music className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+        <div className="bg-white/[0.03] rounded-2xl p-6 text-center text-zinc-400 text-xs font-medium uppercase tracking-wider border-none">
+          <Music className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
           No recent fan activity signals in this grid block
         </div>
       ) : (

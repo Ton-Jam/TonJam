@@ -339,7 +339,7 @@ const ArtistProfile: React.FC = () => {
         {!isOwnProfile && (
           <button 
             onClick={handleFollowToggle} 
-            className={`px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 ${
+            className={`px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 border border-[#c0c0c0]/30 ${
               isFollowing 
                 ? "bg-white/10 text-white hover:bg-white/20" 
                 : "bg-[#0052FF] text-white hover:bg-[#1a66ff] shadow-[0_4px_16px_rgba(0,82,255,0.4)]"
@@ -354,14 +354,14 @@ const ArtistProfile: React.FC = () => {
           <>
             <button 
               onClick={() => setShowTipModal(true)}
-              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
+              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105 border border-[#c0c0c0]/25"
             >
               <Zap className="w-3.5 h-3.5 fill-current" /> Tip TON
             </button>
 
             <button 
               onClick={() => setShowWalletQRModal(true)}
-              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-[#0098EA]/15 hover:bg-[#0098EA]/25 text-[#0098EA] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
+              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-[#0098EA]/15 hover:bg-[#0098EA]/25 text-[#0098EA] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105 border border-[#c0c0c0]/25"
               title="Generate TON Wallet Tip QR Code"
             >
               <QrCode className="w-3.5 h-3.5" /> Tip QR
@@ -369,7 +369,7 @@ const ArtistProfile: React.FC = () => {
 
             <button 
               onClick={() => setShowCollabModal(true)}
-              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-white/[0.08] hover:bg-white/[0.15] text-cyan-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
+              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-white/[0.08] hover:bg-white/[0.15] text-cyan-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105 border border-[#c0c0c0]/25"
             >
               <Gem className="w-3.5 h-3.5 text-cyan-300" /> Collab
             </button>
@@ -378,7 +378,7 @@ const ArtistProfile: React.FC = () => {
           <>
             <button 
               onClick={() => setShowWalletQRModal(true)}
-              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-[#0098EA]/15 hover:bg-[#0098EA]/25 text-[#0098EA] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
+              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-[#0098EA]/15 hover:bg-[#0098EA]/25 text-[#0098EA] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105 border border-[#c0c0c0]/25"
               title="Generate My TON Wallet Tip QR Code"
             >
               <QrCode className="w-3.5 h-3.5" /> My Wallet QR
@@ -386,7 +386,7 @@ const ArtistProfile: React.FC = () => {
 
             <button 
               onClick={() => navigate("/mint")}
-              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
+              className="px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105 border border-[#c0c0c0]/25"
             >
               <Sparkles className="w-3.5 h-3.5" /> Mint Music NFT
             </button>
@@ -397,7 +397,7 @@ const ArtistProfile: React.FC = () => {
       {/* 3. PROFILE STATS ROW (Matching Profile Hub) */}
       <div className="px-6 sm:px-10 md:px-12 py-2">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-[#101A3B] rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
+          <div className="bg-[#101A3B] border border-[#c0c0c0]/25 rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
             <div className="flex items-center justify-between gap-1.5 mb-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider leading-none text-slate-400">
                 Monthly Listeners
@@ -413,7 +413,7 @@ const ArtistProfile: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-[#101A3B] rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
+          <div className="bg-[#101A3B] border border-[#c0c0c0]/25 rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
             <div className="flex items-center justify-between gap-1.5 mb-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider leading-none text-slate-400">
                 Total Streams
@@ -429,7 +429,7 @@ const ArtistProfile: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-[#101A3B] rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
+          <div className="bg-[#101A3B] border border-[#c0c0c0]/25 rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
             <div className="flex items-center justify-between gap-1.5 mb-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider leading-none text-slate-400">
                 NFT Music Drops
@@ -445,7 +445,7 @@ const ArtistProfile: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-[#101A3B] rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
+          <div className="bg-[#101A3B] border border-[#c0c0c0]/25 rounded-[12px] p-3.5 flex flex-col justify-between transition-all duration-200 shadow-md">
             <div className="flex items-center justify-between gap-1.5 mb-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider leading-none text-slate-400">
                 Fan Power & TJ

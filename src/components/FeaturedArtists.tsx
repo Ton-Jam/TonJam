@@ -5,6 +5,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { getPlaceholderImage } from '@/lib/utils';
+import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import { useNavigate } from 'react-router-dom';
 import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 
@@ -39,7 +40,7 @@ const FeaturedArtists: React.FC = () => {
       <div 
         ref={scrollRef}
         {...handlers}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-3 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-3 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ overscrollBehaviorX: 'contain' }}
       >
         {featuredArtists.map((artist) => {
@@ -54,13 +55,18 @@ const FeaturedArtists: React.FC = () => {
               key={artist.uid}
               whileHover={{ y: -3 }}
               whileTap={{ scale: 0.98 }}
-              className="w-[240px] sm:w-[260px] shrink-0 snap-start bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-4 transition-all group relative overflow-hidden cursor-pointer flex flex-col justify-between select-none"
+              className="w-[240px] sm:w-[260px] shrink-0 snap-start bg-white/[0.03] hover:bg-white/[0.06] border border-[#c0c0c0]/25 rounded-2xl p-4 transition-all group relative overflow-hidden cursor-pointer flex flex-col justify-between select-none"
               onClick={() => navigate(`/artist/${artist.uid}`)}
             >
               <div className="flex items-center justify-between gap-3 mb-3.5 relative z-10">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <Avatar className="w-11 h-11 shadow-lg shrink-0">
-                    <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="object-cover w-full h-full" />
+                  <Avatar className="w-11 h-11 shadow-lg shrink-0 border border-[#c0c0c0]/25">
+                    <LazyArtworkImage 
+                      src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
+                      fallbackSrc={getPlaceholderImage(`artist-${artist.uid}`)}
+                      alt={artist.name} 
+                      className="object-cover w-full h-full" 
+                    />
                   </Avatar>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1">
@@ -79,7 +85,7 @@ const FeaturedArtists: React.FC = () => {
                     e.stopPropagation();
                     toggleFollowUser(artist.uid);
                   }}
-                  className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all shrink-0 cursor-pointer border-none ${
+                  className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all shrink-0 cursor-pointer border border-[#c0c0c0]/30 ${
                     followedUserIds.includes(artist.uid)
                       ? 'bg-blue-500/20 text-blue-400'
                       : 'bg-white/10 hover:bg-white hover:text-black text-white'
@@ -112,7 +118,12 @@ const FeaturedArtists: React.FC = () => {
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="relative w-8 h-8 shrink-0">
-                          <img src={track.coverUrl} className="w-full h-full rounded-lg object-cover shadow-sm" />
+                          <LazyArtworkImage 
+                            src={track.coverUrl} 
+                            fallbackSrc={getPlaceholderImage(`track-${track.id}`)}
+                            alt={track.title}
+                            className="w-full h-full rounded-lg object-cover shadow-sm" 
+                          />
                         </div>
                         <div className="min-w-0">
                           <div className="text-[10px] font-bold uppercase tracking-tight truncate text-white/90 leading-tight">{track.title}</div>

@@ -34,8 +34,8 @@ export const ArtistPosts: React.FC<ArtistPostsProps> = ({
       </div>
 
       {artistPosts.length === 0 ? (
-        <div className="bg-slate-900 border border-white/[0.03] rounded-[10px] p-6 text-center text-slate-500 text-xs font-medium uppercase tracking-wider">
-          <Radio className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+        <div className="bg-white/[0.03] rounded-2xl p-6 text-center text-zinc-400 text-xs font-medium uppercase tracking-wider border-none">
+          <Radio className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
           Silence... no creators are actively transmitting in this segment
         </div>
       ) : (

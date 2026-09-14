@@ -80,8 +80,10 @@ export const TopSellers: React.FC<TopSellersProps> = ({
                 </div>
 
                 <button
+                  type="button"
                   onClick={(e) => toggleFollow(seller.id, e)}
-                  className={`px-3 py-1.5 rounded-[6px] text-[8px] font-black uppercase tracking-widest transition-all ${
+                  aria-label={isFollowing ? `Unfollow ${seller.name}` : `Follow ${seller.name}`}
+                  className={`px-3 py-1.5 rounded-[6px] text-[8px] font-black uppercase tracking-widest transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2BE08C] ${
                     isFollowing
                       ? "bg-[#00B4D8]/10 text-[#00B4D8]"
                       : "bg-zinc-900 text-white hover:bg-zinc-800 border border-zinc-800/40"

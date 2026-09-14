@@ -26,43 +26,43 @@ export const SuggestedCommunities: React.FC<SuggestedCommunitiesProps> = ({
         {communities.map((comm) => (
           <motion.div
             key={comm.id}
-            className="bg-slate-900 border border-white/[0.03] rounded-[10px] overflow-hidden flex flex-col justify-between"
+            className="bg-white/[0.03] hover:bg-white/[0.05] rounded-2xl overflow-hidden flex flex-col justify-between border-none transition-colors"
             whileHover={{ y: -2 }}
           >
             <div>
-              <div className="relative h-24 bg-slate-950">
+              <div className="relative h-24 bg-white/[0.02]">
                 <img
                   src={comm.imageUrl}
                   alt={comm.name}
                   className="w-full h-full object-cover opacity-80"
                 />
-                <span className="absolute top-2 left-2 px-2 py-0.5 text-[8px] font-extrabold bg-[#0052FF] text-white rounded-[10px] uppercase tracking-wider">
+                <span className="absolute top-2 left-2 px-2 py-0.5 text-[8px] font-extrabold bg-[#00B4D8] text-black rounded-md uppercase tracking-wider">
                   {comm.category}
                 </span>
               </div>
 
               <div className="p-4 space-y-1.5">
-                <h4 className="text-xs font-extrabold text-white tracking-tight line-clamp-1 leading-snug">
+                <h4 className="text-xs font-bold text-white tracking-tight line-clamp-1 leading-snug">
                   {comm.name}
                 </h4>
-                <p className="text-[10px] text-slate-400 leading-relaxed font-sans line-clamp-3">
+                <p className="text-[11px] text-zinc-400 leading-relaxed font-sans line-clamp-3 font-normal">
                   {comm.description}
                 </p>
               </div>
             </div>
 
-            <div className="px-4 pb-4 pt-2 border-t border-white/[0.02] flex items-center justify-between">
-              <div className="flex items-center gap-1 text-[10px] text-slate-500 font-mono">
-                <Users className="w-3.5 h-3.5 text-slate-400" />
+            <div className="px-4 pb-4 pt-2 flex items-center justify-between">
+              <div className="flex items-center gap-1 text-[10px] text-zinc-400 font-mono">
+                <Users className="w-3.5 h-3.5 text-zinc-400" />
                 <span>{comm.memberCount.toLocaleString()}</span>
               </div>
 
               <button
                 onClick={() => onToggleCommunity(comm.id)}
-                className={`px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-[10px] cursor-pointer transition-colors flex items-center gap-1 ${
+                className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg cursor-pointer transition-colors flex items-center gap-1 border-none ${
                   comm.joined
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    : 'bg-[#0052FF] text-white hover:bg-[#0052FF]/95'
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : 'bg-[#00B4D8] text-black hover:bg-[#00B4D8]/90'
                 }`}
               >
                 {comm.joined ? (
@@ -73,7 +73,7 @@ export const SuggestedCommunities: React.FC<SuggestedCommunitiesProps> = ({
                 ) : (
                   <>
                     <Plus className="w-3.5 h-3.5" />
-                    <span>JOIN CLUB</span>
+                    <span>JOIN</span>
                   </>
                 )}
               </button>

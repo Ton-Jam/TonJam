@@ -89,7 +89,7 @@ const Marketplace: React.FC = () => {
   // Render Skeletons when Loading
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen bg-[#07091E] text-white p-4 sm:p-8 space-y-8 select-none font-sans pb-28">
+      <div className="w-full min-h-screen bg-[#07091E] text-white px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl mx-auto space-y-8 select-none font-sans pb-28">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-zinc-900">
           <div className="space-y-1 text-left">
             <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2">
@@ -118,14 +118,14 @@ const Marketplace: React.FC = () => {
   // Render Offline State
   if (isOffline) {
     return (
-      <div className="w-full min-h-screen bg-[#07091E] flex items-center justify-center p-4">
+      <div className="w-full min-h-screen bg-[#07091E] flex items-center justify-center px-4 py-8">
         <EmptyState type="offline" onRetry={() => window.location.reload()} />
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#07091E] text-white p-4 sm:p-8 select-none font-sans pb-28 text-left">
+    <div className="w-full min-h-screen bg-[#07091E] text-white px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl mx-auto select-none font-sans pb-28 text-left">
       
       {/* Top Header Controls (Decoupled & Integrated) */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-zinc-900/60 mb-6">
@@ -141,9 +141,11 @@ const Marketplace: React.FC = () => {
 
         {/* Flat Compact Search Input inside Marketplace page to filter the 300 tracks */}
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" aria-hidden="true" />
           <Input
             type="text"
+            id="marketplace-search-input"
+            aria-label="Search music and creators in marketplace"
             placeholder="Search music, creators..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

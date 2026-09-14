@@ -54,6 +54,10 @@ const AdminDashboard: React.FC = () => {
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
   const [reviewerNotesMap, setReviewerNotesMap] = useState<Record<string, string>>({});
 
+  const pendingVerificationsCount = useMemo(() => {
+    return verificationRequests.filter(req => req.status === 'pending').length;
+  }, [verificationRequests]);
+
   const [allSponsorships, setAllSponsorships] = useState<SponsoredContent[]>([]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [updatingUserUid, setUpdatingUserUid] = useState<string | null>(null);
@@ -361,9 +365,14 @@ const AdminDashboard: React.FC = () => {
               </button>
               <button 
                 onClick={() => setActiveTab('verifications')}
-                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'verifications' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'verifications' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Verifications
+                {pendingVerificationsCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full text-[8px] bg-amber-500/20 text-amber-400 font-bold leading-none">
+                    {pendingVerificationsCount}
+                  </span>
+                )}
               </button>
               <button 
                 onClick={() => setActiveTab('treasury')}
@@ -467,14 +476,25 @@ const AdminDashboard: React.FC = () => {
         )}
         {activeTab === 'overview' && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
           {[
             { label: 'Total Volume', value: `${platformStats.totalVolume} TON`, icon: <TrendingUp className="h-4 w-4" />, color: 'blue' },
             { label: 'Revenue (Fees)', value: `${platformStats.totalFees} TON`, icon: <Coins className="h-4 w-4" />, color: 'green' },
             { label: 'Total Streams', value: platformStats.streamCount.toLocaleString(), icon: <Activity className="h-4 w-4" />, color: 'purple' },
             { label: 'NFT Transactions', value: platformStats.saleCount.toLocaleString(), icon: <Shield className="h-4 w-4" />, color: 'amber' },
+            { 
+              label: 'Pending Verifications', 
+              value: pendingVerificationsCount.toLocaleString(), 
+              icon: <UserCheck className="h-4 w-4" />, 
+              color: pendingVerificationsCount > 0 ? 'amber' : 'blue',
+              action: () => setActiveTab('verifications')
+            },
           ].map((stat, i) => (
-            <div key={i} className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-4">
+            <div 
+              key={i} 
+              onClick={stat.action}
+              className={`glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-4 ${stat.action ? 'cursor-pointer hover:bg-foreground/[0.04] transition-all' : ''}`}
+            >
               <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center mb-4 bg-${stat.color}-500/10 text-${stat.color}-500`}>
                 {stat.icon}
               </div>
@@ -756,7 +776,21 @@ const AdminDashboard: React.FC = () => {
 
         {activeTab === 'verifications' && (
           <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-6 mb-4">
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">Artist Verification Requests</h2>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-sm font-bold text-foreground uppercase tracking-widest">Artist Verification Requests</h2>
+                <p className="text-[10px] text-muted-foreground mt-1">Review and manage pending artist verification submissions.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-1 bg-amber-500/10 text-amber-500 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                  <Clock className="w-3 h-3" />
+                  {pendingVerificationsCount} Pending
+                </div>
+                <div className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-[10px] font-bold uppercase tracking-widest">
+                  {verificationRequests.length} Total
+                </div>
+              </div>
+            </div>
             <div className="space-y-4">
               {verificationRequests.length > 0 ? (
                 verificationRequests.map((req) => (

@@ -18,7 +18,7 @@ interface HorizontalSectionProps {
 export const HorizontalSection = ({ title, onViewAll, children, className }: HorizontalSectionProps) => {
   return (
     <section className={cn("my-[24px]", className)}>
-      <div className="px-4 mb-[12px] flex items-end justify-between">
+      <div className="mb-[12px] flex items-end justify-between">
         <div className="flex flex-col">
           <SectionTitle>{title}</SectionTitle>
         </div>
@@ -31,7 +31,7 @@ export const HorizontalSection = ({ title, onViewAll, children, className }: Hor
           </button>
         )}
       </div>
-      <div className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-4 px-4 -mx-4 pb-4">
+      <div className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-4 pb-4">
         {React.Children.map(children, (child) => (
           <div className="snap-start flex-shrink-0">
             {child}

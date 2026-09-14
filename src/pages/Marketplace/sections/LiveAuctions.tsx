@@ -74,22 +74,24 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
                 </div>
 
                 <button
+                  type="button"
                   onClick={(e) => toggleWatch(auc.id, e)}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-[4px] bg-zinc-950/80 border border-zinc-800/40 text-zinc-300 hover:text-[#FF3A5C] flex items-center justify-center transition-colors"
-                  aria-label="Watch auction"
+                  className="absolute top-2 right-2 w-7 h-7 rounded-[4px] bg-zinc-950/80 border border-zinc-800/40 text-zinc-300 hover:text-[#FF3A5C] flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF3A5C]"
+                  aria-label={isWatched ? `Remove ${auc.nft.title} from watchlist` : `Watch ${auc.nft.title} auction`}
                 >
-                  <Heart className={`w-3.5 h-3.5 ${isWatched ? "fill-[#FF3A5C] text-[#FF3A5C]" : ""}`} />
+                  <Heart className={`w-3.5 h-3.5 ${isWatched ? "fill-[#FF3A5C] text-[#FF3A5C]" : ""}`} aria-hidden="true" />
                 </button>
 
                 {/* Hover Play Button (Spotify style) */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       playTrack(auc.nft as any);
                     }}
-                    className="w-12 h-12 rounded-full bg-white text-zinc-950 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95"
-                    aria-label="Play preview"
+                    className="w-12 h-12 rounded-full bg-white text-zinc-950 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+                    aria-label={isCurrentPlaying ? `Pause preview for ${auc.nft.title}` : `Play preview for ${auc.nft.title}`}
                   >
                     {isCurrentPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
                   </button>
@@ -118,11 +120,13 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
                 </div>
 
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onPlaceBid(auc);
                   }}
-                  className="px-3.5 py-1.5 rounded-[6px] bg-white text-zinc-950 font-black text-[9px] uppercase tracking-wider hover:bg-zinc-200 transition-colors"
+                  aria-label={`Place bid on ${auc.nft.title}`}
+                  className="px-3.5 py-1.5 rounded-[6px] bg-white text-zinc-950 font-black text-[9px] uppercase tracking-wider hover:bg-zinc-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
                 >
                   Place Bid
                 </button>
