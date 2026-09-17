@@ -333,10 +333,11 @@ export default function ListenerActivityFeed({ tracks }: ListenerActivityFeedPro
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
-            className={`py-1.5 text-[8.5px] font-black uppercase tracking-widest rounded-xl transition-all text-center cursor-pointer ${
+            aria-pressed={activeFilter === filter}
+            className={`py-1.5 text-[8.5px] font-black uppercase tracking-widest rounded-xl transition-all text-center cursor-pointer border ${
               activeFilter === filter
-                ? 'bg-purple-600 text-white font-black'
-                : 'text-white/40 hover:bg-white/5 hover:text-white'
+                ? 'bg-purple-600 text-white font-black border-[#c0c0c0]/40'
+                : 'text-white/40 hover:bg-white/5 hover:text-white border-[#c0c0c0]/25'
             }`}
           >
             {filter}

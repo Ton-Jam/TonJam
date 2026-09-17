@@ -88,6 +88,7 @@ const FilterPills: React.FC<FilterPillsProps> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={(e) => handlePillClick(category, e)}
+              aria-pressed={isSelected}
               className={cn(
                 "pill relative z-10 overflow-hidden",
                 isSelected && "active"

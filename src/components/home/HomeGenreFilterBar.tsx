@@ -28,8 +28,8 @@ export const HomeGenreFilterBar: React.FC = () => {
               onClick={() => handleSelectGenre(genre)}
               className={`shrink-0 snap-start px-4 py-2 rounded-full text-xs uppercase tracking-wider font-bold transition-all duration-200 cursor-pointer outline-none border ${
                 isSelected
-                  ? "bg-primary text-black font-black shadow-sm border-[#c0c0c0]/40"
-                  : "bg-white/[0.05] text-zinc-400 hover:text-white hover:bg-white/[0.09] border-[#c0c0c0]/25"
+                  ? "bg-primary text-white font-black shadow-sm border-[#c0c0c0]/40"
+                  : "bg-white/[0.05] text-zinc-400 hover:text-white hover:bg-white/[0.09] border-[#c0c0c0]/25 hover:border-[#ffffff]"
               }`}
             >
               {genre === "All" ? "All Genres" : genre}

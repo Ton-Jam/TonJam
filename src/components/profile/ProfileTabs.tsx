@@ -42,7 +42,12 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onChangeTab
             key={tab.id}
             id={`tab-trigger-${tab.id}`}
             onClick={() => onChangeTab(tab.id)}
-            className="relative px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052FF] cursor-pointer whitespace-nowrap shrink-0 z-10"
+            aria-pressed={isActive}
+            className={`relative px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052FF] cursor-pointer whitespace-nowrap shrink-0 z-10 border ${
+              isActive
+                ? 'border-[#c0c0c0]/40'
+                : 'border-[#c0c0c0]/25 hover:border-[#c0c0c0]/40'
+            }`}
           >
             {/* Animated Tab Indicator (Flat pill background, no borders) */}
             {isActive && (

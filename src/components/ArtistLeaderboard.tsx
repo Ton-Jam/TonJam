@@ -277,15 +277,16 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
               </button>
 
               {/* Time Period Selector */}
-              <div className="flex bg-white/[0.04] p-1 rounded-xl">
+              <div className="flex bg-white/[0.04] p-1 rounded-xl gap-1">
                 {(['all_time', 'this_month', 'this_week'] as TimePeriod[]).map((period) => (
                   <button
                     key={period}
                     onClick={() => setTimePeriod(period)}
-                    className={`px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer outline-none ${
+                    aria-pressed={timePeriod === period}
+                    className={`px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer outline-none border ${
                       timePeriod === period
-                        ? 'bg-primary text-background shadow-md'
-                        : 'text-zinc-400 hover:text-white'
+                        ? 'bg-primary text-white shadow-md border-[#c0c0c0]/40'
+                        : 'text-zinc-400 hover:text-white border-[#c0c0c0]/25'
                     }`}
                   >
                     {period === 'all_time' ? 'All-Time' : period === 'this_month' ? '30 Days' : '7 Days'}
@@ -297,7 +298,7 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
 
           {/* Metric Selector Tabs & Search */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-            <div className="flex bg-white/[0.03] p-1 rounded-xl overflow-x-auto">
+            <div className="flex bg-white/[0.03] p-1 rounded-xl overflow-x-auto gap-1">
               {[
                 { id: 'all', label: 'Overview', icon: Sparkles },
                 { id: 'sales', label: 'NFT Sales', icon: Disc },
@@ -310,10 +311,11 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
                   <button
                     key={tab.id}
                     onClick={() => setActiveMetric(tab.id as MetricCategory)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer outline-none whitespace-nowrap ${
+                    aria-pressed={isActive}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer outline-none whitespace-nowrap border ${
                       isActive
-                        ? 'bg-white/10 text-white shadow-sm'
-                        : 'text-zinc-400 hover:text-zinc-200'
+                        ? 'bg-white/10 text-white shadow-sm border-[#c0c0c0]/40'
+                        : 'text-zinc-400 hover:text-zinc-200 border-[#c0c0c0]/25'
                     }`}
                   >
                     <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-primary' : 'text-zinc-500'}`} />

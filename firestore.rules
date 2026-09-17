@@ -526,5 +526,31 @@ service cloud.firestore {
         allow create: if isSignedIn();
       }
     }
+
+    // 📺 LIVE VIDEO STREAMS & REAL-TIME INTERACTION
+    match /liveStreams/{streamId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().artistId));
+
+      match /messages/{messageId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow update, delete: if isAdmin() || (isSignedIn() && isOwner(existing().userId));
+      }
+
+      match /tips/{tipId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow update, delete: if isAdmin();
+      }
+
+      match /songRequests/{requestId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow update, delete: if isSignedIn();
+      }
+    }
   }
 }

@@ -405,7 +405,8 @@ export const Discover: React.FC = () => {
                 <button
                   key={pill.id}
                   onClick={() => setActiveFilter(pill.id)}
-                  className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none border ${
+                  aria-pressed={isActive}
+                  className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none border cursor-pointer ${
                     isActive
                       ? 'bg-[#0088CC] text-white shadow-md shadow-[#0088CC]/30 font-bold border-[#c0c0c0]/40'
                       : 'bg-white/[0.06] text-zinc-300 hover:bg-white/[0.1] hover:text-white border-[#c0c0c0]/25'

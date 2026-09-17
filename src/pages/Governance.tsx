@@ -388,7 +388,8 @@ const Governance: React.FC = () => {
                <button
                  key={tab}
                  onClick={() => setActiveTab(tab as any)}
-                 className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 border border-transparent' : 'bg-transparent text-muted-foreground border border-[#C0C0C0]/25 hover:bg-white/5 hover:border-[#C0C0C0]/50'}`}
+                 aria-pressed={activeTab === tab}
+                 className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer border ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 border-[#c0c0c0]/40' : 'bg-transparent text-muted-foreground border-[#c0c0c0]/25 hover:bg-white/5 hover:border-[#c0c0c0]/40'}`}
                >
                  {tab}
                </button>

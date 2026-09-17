@@ -15,13 +15,10 @@ export const RecentSales: React.FC<RecentSalesProps> = ({
   return (
     <div className="w-full text-left" id="marketplace-recent-sales">
       <div className="space-y-0.5 mb-4">
-        <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
+        <h2 className="text-base sm:text-lg font-semibold uppercase tracking-wider text-white flex items-center gap-2">
           <Clock className="w-5 h-5 text-zinc-400" />
           Recent Sales Timeline
         </h2>
-        <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-          Live stream of settled secondary transactions on TON
-        </p>
       </div>
 
       <div className="space-y-2 max-h-[360px] overflow-y-auto no-scrollbar pr-1">

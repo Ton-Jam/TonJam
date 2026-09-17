@@ -22,7 +22,7 @@ export const ContinueListeningSection: React.FC = () => {
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Disc className="w-4 h-4 text-primary animate-spin" style={{ animationDuration: '6s' }} />
-          <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white">
             Jump Back In
           </h2>
         </div>

@@ -141,7 +141,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       className={cn("group relative cursor-pointer bg-transparent p-0 transition-all duration-300 flex flex-col justify-between", className)}
     >
       {/* Image Container - 1:1 Aspect Ratio */}
-      <div className="relative aspect-square rounded-[6px] overflow-hidden bg-neutral-900 shadow-md mb-2 flex-shrink-0">
+      <div className="relative aspect-square rounded-[3px] overflow-hidden bg-neutral-900 border border-white/12 mb-2 flex-shrink-0">
         {renderCover()}
         <div className="absolute inset-0 flex items-center justify-center gap-2">
           <button 

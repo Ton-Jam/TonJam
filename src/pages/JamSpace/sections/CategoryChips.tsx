@@ -23,6 +23,7 @@ export const CategoryChips: React.FC<CategoryChipsProps> = ({
             <button
               key={cat}
               onClick={() => onSelectCategory(cat)}
+              aria-pressed={isActive}
               className={`flex-shrink-0 snap-start h-8 px-3.5 text-xs font-medium rounded-full cursor-pointer transition-all border select-none active:scale-95 ${
                 isActive
                   ? 'bg-[#00B4D8] text-black font-semibold shadow-md shadow-[#00B4D8]/20 border-[#c0c0c0]/40'

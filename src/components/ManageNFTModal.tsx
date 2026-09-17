@@ -135,7 +135,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                             const date = new Date(Date.now() + parseInt(d) * 24 * 60 * 60 * 1000);
                             setNewEndDate(date.toISOString().slice(0, 16));
                           }}
-                          className={`flex-1 py-1.5 rounded-[4px] text-[8px] font-bold transition-all ${duration === d ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                          className={`flex-1 py-1.5 rounded-[4px] text-[8px] font-bold transition-all ${duration === d ? 'bg-amber-600 text-white shadow-sm' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
                           {d}D
                         </button>

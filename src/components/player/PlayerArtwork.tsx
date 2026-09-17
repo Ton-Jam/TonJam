@@ -56,7 +56,7 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
   };
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-center my-2 select-none">
+    <div className="relative w-full flex flex-col items-center justify-center my-1 sm:my-2 select-none">
       {/* Blurred background image behind the artwork */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none rounded-3xl opacity-35 filter blur-3xl scale-125">
         <img
@@ -84,7 +84,7 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
         whileTap={{ scale: 0.99 }}
         animate={{ scale: isZoomed ? 1.1 : 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="relative w-[84vw] max-w-[380px] sm:max-w-[420px] max-h-[46vh] aspect-square rounded-lg overflow-hidden shadow-2xl bg-[#0A113A] group cursor-pointer"
+        className="relative w-[68vw] max-w-[260px] sm:max-w-[320px] md:max-w-[360px] max-h-[34vh] sm:max-h-[38vh] aspect-square rounded-lg overflow-hidden shadow-2xl bg-[#0A113A] group cursor-pointer"
       >
         {/* Static artwork container (no rotation) */}
         <div className="w-full h-full relative flex items-center justify-center">

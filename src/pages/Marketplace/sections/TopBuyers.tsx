@@ -15,13 +15,10 @@ export const TopBuyers: React.FC<TopBuyersProps> = ({
   return (
     <div className="w-full text-left" id="marketplace-top-buyers">
       <div className="space-y-0.5 mb-4">
-        <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
+        <h2 className="text-base sm:text-lg font-semibold uppercase tracking-wider text-white flex items-center gap-2">
           <Wallet className="w-5 h-5 text-amber-500" />
           Top Collectors Leaderboard
         </h2>
-        <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-          The biggest on-chain supporters of independent sound on TON
-        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

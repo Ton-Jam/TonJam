@@ -305,10 +305,11 @@ export const FollowersFollowing: React.FC = () => {
       <div className="flex items-center gap-2 bg-[#0e163d]/60 p-1.5 rounded-2xl border border-white/5 max-w-md">
         <button
           onClick={() => handleTabChange('followers')}
-          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 ${
+          aria-pressed={activeTab === 'followers'}
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 border ${
             activeTab === 'followers'
-              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 border-[#c0c0c0]/40'
+              : 'text-slate-400 hover:text-white hover:bg-white/5 border-[#c0c0c0]/25'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -320,10 +321,11 @@ export const FollowersFollowing: React.FC = () => {
 
         <button
           onClick={() => handleTabChange('following')}
-          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 ${
+          aria-pressed={activeTab === 'following'}
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 border ${
             activeTab === 'following'
-              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 border-[#c0c0c0]/40'
+              : 'text-slate-400 hover:text-white hover:bg-white/5 border-[#c0c0c0]/25'
           }`}
         >
           <UserCheck className="w-4 h-4" />
@@ -355,10 +357,11 @@ export const FollowersFollowing: React.FC = () => {
             <button
               key={filter}
               onClick={() => setRoleFilter(filter)}
-              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all cursor-pointer shrink-0 border-none ${
+              aria-pressed={roleFilter === filter}
+              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all cursor-pointer shrink-0 border ${
                 roleFilter === filter
-                  ? 'bg-[#0088CC] text-white shadow-[0_0_12px_rgba(0,136,204,0.4)]'
-                  : 'bg-[#050a24] text-slate-400 hover:text-white hover:bg-[#0088CC]/20'
+                  ? 'bg-[#0088CC] text-white shadow-[0_0_12px_rgba(0,136,204,0.4)] border-[#c0c0c0]/40'
+                  : 'bg-[#050a24] text-slate-400 hover:text-white hover:bg-[#0088CC]/20 border-[#c0c0c0]/25'
               }`}
             >
               {filter}
@@ -387,7 +390,7 @@ export const FollowersFollowing: React.FC = () => {
                   <img
                     src={user.avatarUrl}
                     alt={user.name}
-                    className="w-12 h-12 rounded-2xl object-cover border border-white/10 group-hover:scale-105 transition-transform"
+                    className="w-12 h-12 rounded-full object-cover border border-white/10 group-hover:scale-105 transition-transform"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300';
                     }}

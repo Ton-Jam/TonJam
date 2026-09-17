@@ -756,7 +756,7 @@ const TrackDetail: React.FC = () => {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`text-[11px] font-bold uppercase tracking-[0.22em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-foreground' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
+                      className={`text-[11px] font-bold uppercase tracking-[0.22em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-white' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
                     >
                       {tab === 'exclusive' ? 'exclusive perks' : tab}
                       {activeTab === tab && (

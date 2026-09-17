@@ -69,7 +69,7 @@ export const DiscographyTab: React.FC<DiscographyTabProps> = ({
           </p>
         </div>
 
-        {/* Filter Pills (Dark Glass, No Border Lines) */}
+        {/* Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
           {[
             { id: "all", label: "All Releases" },
@@ -82,10 +82,11 @@ export const DiscographyTab: React.FC<DiscographyTabProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setFilter(tab.id as any)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap outline-none border-none ${
+                aria-pressed={isActive}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap outline-none border ${
                   isActive 
-                    ? "bg-white text-black shadow-lg" 
-                    : "bg-white/[0.04] text-neutral-400 hover:text-white hover:bg-white/[0.08]"
+                    ? "bg-[#0088CC] text-white shadow-lg border-[#c0c0c0]/40" 
+                    : "bg-white/[0.04] text-neutral-400 hover:text-white hover:bg-white/[0.08] border-[#c0c0c0]/25"
                 }`}
               >
                 {tab.label}

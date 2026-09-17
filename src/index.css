@@ -29,14 +29,105 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #000000;
+  --font-family-sans: 'Poppins', sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Color Tokens */
+  --color-bg-primary: #050505;
+  --color-bg-secondary: #0A0A0A;
+  --background: #050505;
   --foreground: #FFFFFF;
   --primary: #00B4D8;
   --primary-foreground: #FFFFFF;
-  --surface: #000000;
-  --elevated: #000000;
-  --border-subtle: rgba(192, 192, 192, 0.25);
-  --radius: 10px;
+  --surface: #050505;
+  --elevated: #0A0A0A;
+
+  /* Border Tokens */
+  --border-subtle: 1px solid rgba(255, 255, 255, 0.12);
+  --border-visible: 1px solid rgba(255, 255, 255, 0.18);
+  --border-header: 1px solid rgba(255, 255, 255, 0.10);
+
+  /* Radius Tokens */
+  --radius-xs: 4px;
+  --radius-sm: 5px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius: 6px;
+
+  /* Card Tokens */
+  --card-background: transparent;
+  --card-border: 1px solid rgba(255, 255, 255, 0.12);
+  --card-radius: 3px;
+  --card-hover-border: rgba(255, 255, 255, 0.18);
+  --card-hover-background: rgba(255, 255, 255, 0.025);
+
+  /* Filter Tokens */
+  --filter-background: transparent;
+  --filter-border: 1px solid rgba(255, 255, 255, 0.12);
+  --filter-radius: 5px;
+  --filter-text: rgba(255, 255, 255, 0.72);
+  --filter-active-border: 1px solid rgba(255, 255, 255, 0.18);
+
+  /* Button Tokens */
+  --button-radius: 5px;
+  --button-border: 1px solid rgba(255, 255, 255, 0.12);
+
+  /* Input Tokens */
+  --input-background: transparent;
+  --input-border: 1px solid rgba(255, 255, 255, 0.12);
+  --input-radius: 6px;
+  --input-focus-border: rgba(0, 136, 204, 0.65);
+
+  /* Header Tokens */
+  --header-background: transparent;
+  --header-border: transparent;
+  --header-scrolled-background: rgba(5, 5, 5, 0.88);
+  --header-scrolled-border: 1px solid rgba(255, 255, 255, 0.10);
+  --header-blur: 12px;
+
+  /* Glass / Backdrop Tokens */
+  --glass-background: rgba(5, 5, 5, 0.88);
+  --glass-blur: 12px;
+
+  /* Spacing Tokens */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Content Edge Padding */
+  --content-padding-mobile: 16px;
+  --content-padding-desktop: 24px;
+
+  /* Header Height */
+  --header-height-mobile: 56px;
+  --header-height-desktop: 64px;
+
+  /* Icon Sizes */
+  --icon-xs: 14px;
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+
+  /* Avatar Radii */
+  --avatar-radius: 9999px;
+
+  /* Motion Tokens */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 250ms ease;
+
+  /* Opacity Tokens */
+  --opacity-primary: 1;
+  --opacity-secondary: 0.72;
+  --opacity-muted: 0.55;
+  --opacity-subtle: 0.40;
 }
 
 @theme {
@@ -54,14 +145,21 @@
   --color-input: var(--border-subtle);
   
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-ui: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --radius-button: 10px;
-  --radius-card: 10px;
-  --radius-input: 10px;
-  --radius-avatar: 999px;
-  --radius-modal: 16px;
-  --radius-sheet: 20px;
+  --radius-xs: 3px;
+  --radius-sm: 3px;
+  --radius-md: 3px;
+  --radius-lg: 6px;
+  --radius-button: 5px;
+  --radius-card: 3px;
+  --radius-input: 6px;
+  --radius-filter: 5px;
+  --radius-avatar: 9999px;
+  --radius-modal: 8px;
+  --radius-sheet: 8px;
 }
 
 
@@ -162,6 +260,102 @@
     box-shadow: none !important;
   }
   
+  html,
+  body,
+  #root,
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-weight: 400;
+  }
+
+  /* Global normalization of typography weights to 400, 500, 600 */
+  .font-black,
+  .font-extrabold,
+  .font-bold,
+  .font-semibold {
+    font-weight: 600 !important;
+  }
+  .font-medium {
+    font-weight: 500 !important;
+  }
+  .font-normal {
+    font-weight: 400 !important;
+  }
+  .font-light {
+    font-weight: 400 !important;
+  }
+  b, strong {
+    font-weight: 600;
+  }
+
+  h1 {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 640px) {
+    h1 {
+      font-size: 28px;
+      line-height: 36px;
+    }
+  }
+
+  h2 {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 18px;
+    line-height: 26px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  @media (min-width: 640px) {
+    h2 {
+      font-size: 20px;
+      line-height: 28px;
+    }
+  }
+
+  h3 {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  h4, h5, h6 {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 15px;
+    line-height: 22px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  p {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  input, textarea, select {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  input::placeholder, textarea::placeholder {
+    font-weight: 400;
+  }
+
   html {
     @apply font-sans;
     background-color: #000000 !important;
@@ -432,12 +626,169 @@
 
 @layer components {
   /* =========================================================
-     TONJAM TYPOGRAPHY SYSTEM UTILITIES
+     TONJAM — EXACT GLOBAL TYPOGRAPHY TOKENS
      ========================================================= */
 
+  /* Display / Page Title */
+  .text-page-title,
+  .page-title {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 640px) {
+    .text-page-title,
+    .page-title {
+      font-size: 28px;
+      line-height: 36px;
+    }
+  }
+
+  /* Section Heading */
+  .text-section-title,
+  .section-title {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 18px;
+    line-height: 26px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  @media (min-width: 640px) {
+    .text-section-title,
+    .section-title {
+      font-size: 20px;
+      line-height: 28px;
+    }
+  }
+
+  /* Subsection Heading */
+  .text-subsection-title {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  /* Card Title */
+  .text-card-title,
+  .card-title {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  @media (min-width: 640px) {
+    .text-card-title,
+    .card-title {
+      font-size: 15px;
+      line-height: 22px;
+    }
+  }
+
+  /* Body */
+  .text-body {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* Body Small */
+  .text-body-sm,
+  .card-subtitle,
+  .section-subtitle {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* Metadata */
+  .text-meta,
+  .artist-name {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* Label */
+  .text-label,
+  .micro-label,
+  .market-label {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  /* Navigation */
+  .text-nav,
+  .nav-label {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  /* Filter / Chip Text */
+  .text-filter,
+  .tab-label {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  @media (min-width: 640px) {
+    .text-filter,
+    .tab-label {
+      font-size: 13px;
+      line-height: 20px;
+    }
+  }
+
+  /* Button Text */
+  .text-button,
+  .btn-primary {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  /* Input Text */
+  .text-input,
+  .input-text {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* Caption */
+  .text-caption {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
   .tonjam-hero {
-    font-family: var(--font-display);
-    @apply text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight uppercase text-foreground;
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    @apply text-2xl sm:text-4xl lg:text-5xl font-medium tracking-tight leading-tight uppercase text-foreground;
   }
 
   /* Support for Poppins as UI font across the app */
@@ -449,79 +800,38 @@
   }
 
   .tonjam-hero-lg {
-    font-family: var(--font-display);
-    @apply text-3xl sm:text-5xl lg:text-6xl font-black tracking-tighter leading-none uppercase text-foreground;
-  }
-
-  .page-title {
-    font-family: var(--font-display);
-    @apply text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-tight text-foreground;
-  }
-
-  .section-title {
-    font-family: var(--font-display);
-    @apply text-sm sm:text-base md:text-lg font-black uppercase tracking-tight text-foreground;
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    @apply text-3xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-none uppercase text-foreground;
   }
 
   .nft-title {
-    font-family: var(--font-display);
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
     font-size: 14px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
-  .market-label {
-    @apply text-[10px] font-bold uppercase tracking-[0.22em] opacity-55;
+    font-weight: 500;
+    letter-spacing: 0;
   }
 
   .market-value {
-    font-family: var(--font-display);
-    @apply text-sm font-bold tracking-[-0.02em];
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    @apply text-sm font-medium tracking-[-0.02em];
   }
 
   .market-big-value {
-    font-family: var(--font-display);
-    @apply text-2xl font-black tracking-[-0.04em];
-  }
-
-  .btn-primary {
-    @apply text-[12px] font-bold uppercase tracking-[0.12em];
-  }
-
-  .nav-label {
-    @apply text-[11px] font-semibold tracking-[0.02em];
-  }
-
-  .micro-label {
-    @apply text-[10px] font-bold uppercase tracking-[0.22em] opacity-60;
-  }
-
-  .section-subtitle {
-    @apply text-sm font-medium opacity-70;
-  }
-
-  .card-title {
-    @apply text-[14px] font-semibold leading-snug;
-  }
-
-  .card-subtitle {
-    @apply text-[12px] font-medium opacity-70;
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    @apply text-2xl font-medium tracking-[-0.02em];
   }
 
   .track-title {
-    @apply text-sm font-semibold;
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
   }
-
-  .artist-name {
-    @apply text-xs font-medium opacity-75;
-  }
-
-  .tab-label {
-    @apply text-xs font-bold uppercase tracking-[0.14em];
-  }
-
-  .input-text {
-    @apply text-sm font-medium;
+  @media (min-width: 640px) {
+    .track-title {
+      font-size: 15px;
+      line-height: 22px;
+    }
   }
 
   .text-gradient {
@@ -535,11 +845,15 @@
   }
 
   .glass-card {
-    @apply bg-white/[0.05] border border-white/[0.08] rounded-xl transition-all duration-300;
+    border-radius: 3px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: none !important;
+    background: transparent !important;
   }
 
   .glass-card:hover {
-    @apply bg-white/[0.1] border-white/[0.15] shadow-xl shadow-black/40 scale-[1.01];
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: none !important;
   }
 
   .glass-input {
@@ -547,7 +861,7 @@
   }
 
   .glass-button {
-    @apply bg-primary hover:bg-primary/90 text-primary-foreground active:scale-95 transition-all rounded-full px-6 py-2.5 text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20;
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground active:scale-95 transition-all rounded-full px-6 py-2.5 text-xs font-semibold uppercase tracking-widest shadow-lg shadow-primary/20;
   }
 
   .page-container {
@@ -671,6 +985,36 @@ body {
 .list-section-silver p,
 .list-section-silver span {
   color: #c0c0c0 !important;
+}
+
+/* =========================================================
+   GLOBAL NON-PRIMARY BUTTONS HOVER BORDER TRANSITION TO #ffffff
+   ========================================================= */
+
+/* Ensure smooth transition for all button border colors */
+button,
+[role="button"],
+.pill,
+.filter-btn,
+[data-slot="button"],
+[data-slot="badge"] {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+@media (hover: hover) {
+  /* Non-primary buttons, outlines, ghosts, secondary variants, and neutral action buttons */
+  button:not([data-variant="primary"]):not([data-variant="default"]):not(.btn-primary):not(.bg-primary):not(.bg-blue-600):not(.bg-blue-500):not(.bg-cyan-500):not(.bg-gradient-to-r):hover,
+  [data-slot="button"]:not([data-variant="primary"]):not([data-variant="default"]):hover,
+  [data-variant="secondary"]:hover,
+  [data-variant="outline"]:hover,
+  [data-variant="ghost"]:hover,
+  .btn-secondary:hover,
+  .btn-outline:hover,
+  .btn-ghost:hover {
+    border-color: #ffffff !important;
+  }
 }
 
 /* Custom Code Theme & Variables Overrides */
@@ -838,7 +1182,7 @@ body {
   padding: 0.32rem 0.75rem !important;
   border-radius: 50px !important;
   font-size: 0.72rem !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   cursor: pointer !important;
   transition: all 0.3s ease !important;
   white-space: nowrap !important;
@@ -859,7 +1203,7 @@ body {
 /* Hover/Focus State for Desktop */
 @media (hover: hover) {
   .pill:hover:not(.active) {
-    border-color: rgba(192, 192, 192, 0.4) !important;
+    border-color: #ffffff !important;
     background: linear-gradient(135deg, #1e293b, #1e3a8a) !important;
     color: #ffffff !important;
     transform: translateY(-2px);

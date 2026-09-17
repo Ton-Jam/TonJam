@@ -509,7 +509,12 @@ export const UserProfile: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className="relative px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors duration-200 focus:outline-none cursor-pointer whitespace-nowrap shrink-0 z-10"
+                aria-pressed={isActive}
+                className={`relative px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors duration-200 focus:outline-none cursor-pointer whitespace-nowrap shrink-0 z-10 border ${
+                  isActive
+                    ? 'border-[#c0c0c0]/40'
+                    : 'border-[#c0c0c0]/25 bg-white/[0.03] hover:bg-white/[0.06]'
+                }`}
               >
                 {isActive && (
                   <motion.div

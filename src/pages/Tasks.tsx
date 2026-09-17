@@ -699,12 +699,13 @@ const Tasks: React.FC = () => {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
+                  aria-pressed={isActive}
                   className="relative p-0 cursor-pointer outline-none shrink-0"
                 >
-                  <span className={`px-4 py-2 rounded-full text-xs font-black tracking-widest uppercase transition-all duration-300 inline-block text-center border-[2px] ${
+                  <span className={`px-4 py-2 rounded-full text-xs font-black tracking-widest uppercase transition-all duration-300 inline-block text-center border ${
                     isActive 
-                      ? "bg-primary text-background border-primary shadow-md shadow-primary/25" 
-                      : "bg-surface hover:bg-hover text-text-muted border-white/5"
+                      ? "bg-primary text-white border-[#c0c0c0]/40 shadow-md shadow-primary/25" 
+                      : "bg-surface hover:bg-hover text-text-muted border-[#c0c0c0]/25"
                   }`}>
                     {cat}
                   </span>

@@ -114,10 +114,11 @@ export const NFTSection: React.FC<NFTSectionProps> = ({
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+              aria-pressed={activeFilter === filter}
+              className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border ${
                 activeFilter === filter 
-                  ? 'bg-[#0088CC] text-white shadow-[0_0_15px_rgba(0,136,204,0.4)]' 
-                  : 'text-slate-400 hover:text-white hover:bg-[#0088CC]/20'
+                  ? 'bg-[#0088CC] text-white shadow-[0_0_15px_rgba(0,136,204,0.4)] border-[#c0c0c0]/40' 
+                  : 'text-slate-400 hover:text-white hover:bg-[#0088CC]/20 border-[#c0c0c0]/25'
               }`}
             >
               {filter}

@@ -199,9 +199,12 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     whileHover={{ scale: 1.02, x: 2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setActiveFilter(cat.id)}
+                    aria-pressed={activeFilter === cat.id}
                     className={cn(
-                      "relative py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer whitespace-nowrap border-2 border-blue-500 overflow-hidden",
-                      activeFilter === cat.id ? "bg-blue-600 text-white" : "bg-transparent text-blue-500 hover:bg-blue-600/10"
+                      "relative py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer whitespace-nowrap border overflow-hidden",
+                      activeFilter === cat.id 
+                        ? "bg-blue-600 text-white border-[#c0c0c0]/40 shadow-lg shadow-blue-600/20" 
+                        : "bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border-[#c0c0c0]/25"
                     )}
                   >
                     {activeFilter === cat.id && (
@@ -242,11 +245,12 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     whileHover={{ scale: 1.02, x: 2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSortOption(opt.id)}
+                    aria-pressed={sortOption === opt.id}
                     className={cn(
-                      "relative py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer border-2 border-blue-500 overflow-hidden",
+                      "relative py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-2 justify-center cursor-pointer border overflow-hidden",
                       sortOption === opt.id 
-                        ? "bg-blue-600 text-white" 
-                        : "bg-transparent text-blue-500 hover:bg-blue-600/10"
+                        ? "bg-blue-600 text-white border-[#c0c0c0]/40 shadow-md shadow-blue-600/20" 
+                        : "bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border-[#c0c0c0]/25"
                     )}
                   >
                     {sortOption === opt.id && (
@@ -328,11 +332,12 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => filters.setRarity!(rarity)}
+                      aria-pressed={filters.rarity === rarity}
                       className={cn(
-                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-2 border-blue-500",
+                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border",
                         filters.rarity === rarity 
-                          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/15" 
-                          : "bg-transparent text-blue-500 hover:bg-blue-600/10"
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/15 border-[#c0c0c0]/40" 
+                          : "bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border-[#c0c0c0]/25"
                       )}
                     >
                       {rarity}
@@ -355,11 +360,12 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => filters.setStatus!(status)}
+                      aria-pressed={filters.status === status}
                       className={cn(
-                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-2 border-blue-500",
+                        "py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border",
                         filters.status === status 
-                          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/15" 
-                          : "bg-transparent text-blue-500 hover:bg-blue-600/10"
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/15 border-[#c0c0c0]/40" 
+                          : "bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border-[#c0c0c0]/25"
                       )}
                     >
                       {status}

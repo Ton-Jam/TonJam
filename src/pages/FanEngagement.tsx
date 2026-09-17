@@ -90,10 +90,11 @@ export const FanEngagement: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex-1 min-w-[160px] py-3 px-4 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all ${
+              aria-pressed={isActive}
+              className={`flex-1 min-w-[160px] py-3 px-4 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer border ${
                 isActive
-                  ? "bg-[#0098EA] text-white shadow-lg shadow-[#0098EA]/25"
-                  : "text-[#9AA0AE] hover:text-white hover:bg-white/5"
+                  ? "bg-[#0098EA] text-white shadow-lg shadow-[#0098EA]/25 border-[#c0c0c0]/40"
+                  : "text-[#9AA0AE] hover:text-white hover:bg-white/5 border-[#c0c0c0]/25"
               }`}
             >
               <Icon className="w-4 h-4" />

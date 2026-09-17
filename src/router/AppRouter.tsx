@@ -86,6 +86,9 @@ const FanEngagement = lazyWithRetry(() => import('@/pages/FanEngagement'));
 const Referrals = lazyWithRetry(() => import('@/pages/Referrals'));
 const CollectionScreen = lazyWithRetry(() => import('@/pages/CollectionScreen'));
 const SpaceRoom = lazyWithRetry(() => import('@/pages/SpaceRoom'));
+const LivestreamHub = lazyWithRetry(() => import('@/pages/Livestream').then(m => ({ default: m.LivestreamHub })));
+const LivestreamViewer = lazyWithRetry(() => import('@/pages/Livestream/LivestreamViewer').then(m => ({ default: m.LivestreamViewer })));
+const LiveStudio = lazyWithRetry(() => import('@/pages/Livestream/LiveStudio').then(m => ({ default: m.LiveStudio })));
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
@@ -206,6 +209,10 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
                   <Route path="/discover" element={<PageWrapper><Discover /></PageWrapper>} />
                   <Route path="/jamspace" element={<PageWrapper><JamSpace /></PageWrapper>} />
+                  <Route path="/livestream" element={<PageWrapper><LivestreamHub /></PageWrapper>} />
+                  <Route path="/live" element={<PageWrapper><LivestreamHub /></PageWrapper>} />
+                  <Route path="/live/:id" element={<PageWrapper><LivestreamViewer /></PageWrapper>} />
+                  <Route path="/live-studio" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin', 'collector']}><LiveStudio /></ProtectedRoute></PageWrapper>} />
                   <Route path="/space-room" element={<PageWrapper><SpaceRoom /></PageWrapper>} />
                   <Route path="/space/:id" element={<PageWrapper><SpaceRoom /></PageWrapper>} />
                   <Route path="/marketplace" element={<PageWrapper><Marketplace /></PageWrapper>} />

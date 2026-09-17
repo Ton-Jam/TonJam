@@ -700,7 +700,7 @@ export const LivestreamChat: React.FC<LivestreamChatProps> = ({
             onClick={() => setActiveTab('tips')}
             className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'tips'
-                ? 'bg-amber-500 text-slate-950 shadow-md font-bold'
+                ? 'bg-amber-500 text-white shadow-md font-bold'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
             }`}
           >

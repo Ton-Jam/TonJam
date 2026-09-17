@@ -63,13 +63,10 @@ export const MarketplaceStatistics: React.FC<MarketplaceStatisticsProps> = ({ st
   return (
     <div className="w-full text-left" id="marketplace-statistics">
       <div className="space-y-0.5 mb-4">
-        <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
+        <h2 className="text-base sm:text-lg font-semibold uppercase tracking-wider text-white flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-[#5B6BFF]" />
           Marketplace Statistics
         </h2>
-        <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-          Comprehensive real-time on-chain data overview
-        </p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -80,7 +77,7 @@ export const MarketplaceStatistics: React.FC<MarketplaceStatisticsProps> = ({ st
             className="bg-zinc-950 border border-zinc-900 rounded-[10px] p-3 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between gap-1.5 mb-3">
-              <span className="text-[8px] font-black text-zinc-500 uppercase tracking-wider truncate">
+              <span className="text-[8px] font-semibold text-zinc-500 uppercase tracking-wider truncate">
                 {item.title}
               </span>
               <div className="p-1 rounded-[4px] bg-zinc-900 border border-zinc-800">
@@ -89,7 +86,7 @@ export const MarketplaceStatistics: React.FC<MarketplaceStatisticsProps> = ({ st
             </div>
 
             <div className="space-y-0.5">
-              <span className="text-sm font-black text-white font-mono block">
+              <span className="text-sm font-semibold text-white font-mono block">
                 {item.value}
               </span>
               <span className="text-[8px] font-bold text-zinc-500 block uppercase tracking-wide">

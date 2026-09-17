@@ -109,13 +109,10 @@ export const ArtistAnalyticsSection: React.FC<ArtistAnalyticsSectionProps> = ({ 
             <span className="p-1.5 rounded-lg bg-[#0052FF]/20 text-[#0052FF]">
               <BarChart2 className="w-4 h-4" />
             </span>
-            <h3 className="text-base font-black text-white uppercase tracking-tight">
+            <h3 className="text-base font-semibold text-white uppercase tracking-tight">
               Artist Growth & Telemetry Analytics
             </h3>
           </div>
-          <p className="text-xs text-slate-400 font-medium">
-            Realtime performance metrics for streams, TON NFT sales, and follower expansion.
-          </p>
         </div>
 
         {/* Timeframe Buttons */}
@@ -124,7 +121,7 @@ export const ArtistAnalyticsSection: React.FC<ArtistAnalyticsSectionProps> = ({ 
             <button
               key={tf}
               onClick={() => setTimeframe(tf)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 timeframe === tf
                   ? 'bg-[#0052FF] text-white shadow-[0_0_12px_rgba(0,82,255,0.4)]'
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -142,17 +139,17 @@ export const ArtistAnalyticsSection: React.FC<ArtistAnalyticsSectionProps> = ({ 
         <div className="bg-[#101A3B]/80 border border-white/5 p-5 rounded-2xl shadow-lg relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#0052FF]/10 rounded-full blur-xl group-hover:bg-[#0052FF]/20 transition-all" />
           <div className="flex justify-between items-start mb-3">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
               <Play className="w-3 h-3 text-[#0052FF] fill-current" />
               Total Streams
             </span>
-            <span className="flex items-center gap-0.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-0.5 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
               <TrendingUp className="w-3 h-3" />
               +18.4%
             </span>
           </div>
           <div className="space-y-1">
-            <h4 className="text-2xl font-black font-mono tracking-tight text-white">
+            <h4 className="text-2xl font-semibold font-mono tracking-tight text-white">
               {totalStreamsCount.toLocaleString()}
             </h4>
             <p className="text-[11px] text-slate-400 font-medium">
@@ -165,17 +162,17 @@ export const ArtistAnalyticsSection: React.FC<ArtistAnalyticsSectionProps> = ({ 
         <div className="bg-[#101A3B]/80 border border-white/5 p-5 rounded-2xl shadow-lg relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all" />
           <div className="flex justify-between items-start mb-3">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
               <Gem className="w-3 h-3 text-emerald-400" />
               NFT Sales Volume
             </span>
-            <span className="flex items-center gap-0.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-0.5 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
               <TrendingUp className="w-3 h-3" />
               +32.1%
             </span>
           </div>
           <div className="space-y-1">
-            <h4 className="text-2xl font-black font-mono tracking-tight text-emerald-400">
+            <h4 className="text-2xl font-semibold font-mono tracking-tight text-emerald-400">
               268.0 TON
             </h4>
             <p className="text-[11px] text-slate-400 font-medium">
@@ -188,17 +185,17 @@ export const ArtistAnalyticsSection: React.FC<ArtistAnalyticsSectionProps> = ({ 
         <div className="bg-[#101A3B]/80 border border-white/5 p-5 rounded-2xl shadow-lg relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition-all" />
           <div className="flex justify-between items-start mb-3">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
               <Users className="w-3 h-3 text-purple-400" />
               Total Followers
             </span>
-            <span className="flex items-center gap-0.5 text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-0.5 text-[10px] font-semibold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
               <TrendingUp className="w-3 h-3" />
               +14.2%
             </span>
           </div>
           <div className="space-y-1">
-            <h4 className="text-2xl font-black font-mono tracking-tight text-purple-300">
+            <h4 className="text-2xl font-semibold font-mono tracking-tight text-purple-300">
               {followerCount.toLocaleString()}
             </h4>
             <p className="text-[11px] text-slate-400 font-medium">

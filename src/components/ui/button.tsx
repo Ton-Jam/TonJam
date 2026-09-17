@@ -7,14 +7,14 @@ import { colors, radius, typography, spacing } from "@/design"
 
 // Consume design system tokens explicitly for custom style attributes if needed
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
   {
     variants: {
       variant: {
         primary: "hover:opacity-90",
-        secondary: "hover:opacity-90",
-        ghost: "hover:bg-white/[0.04]",
-        outline: "hover:bg-white/[0.02]",
+        secondary: "border border-white/12 hover:border-[#ffffff] hover:opacity-95",
+        ghost: "border border-transparent hover:border-[#ffffff] hover:bg-white/[0.04]",
+        outline: "border border-white/12 hover:border-[#ffffff] hover:bg-white/[0.02]",
         destructive: "hover:opacity-90",
         success: "hover:opacity-90",
         default: "hover:opacity-90",
@@ -71,7 +71,6 @@ function Button({
         return {
           backgroundColor: colors.dark.transparent,
           color: colors.dark.textPrimary,
-          border: `1px solid ${colors.dark.border}`,
         };
       case "destructive":
         return {

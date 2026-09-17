@@ -58,7 +58,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait', classNa
         tabIndex={0}
         aria-label={`View profile of ${user.name}`}
       >
-        <div className="relative w-14 h-14 rounded-[4px] overflow-hidden border border-[#c0c0c0]/25">
+        <div className="relative w-14 h-14 rounded-full overflow-hidden border border-[#c0c0c0]/25 flex-shrink-0">
           <img src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} alt={user.name} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
@@ -97,7 +97,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait', classNa
         aria-label={`View profile of ${user.name}`}
       >
         <div className="flex items-center gap-2">
-          <div className="relative w-16 h-16 rounded-[4px] overflow-hidden border border-[#c0c0c0]/25">
+          <div className="relative w-16 h-16 rounded-full overflow-hidden border border-[#c0c0c0]/25 flex-shrink-0">
             <img src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} alt={user.name} className="w-full h-full object-cover" />
           </div>
           <div className="min-w-0">

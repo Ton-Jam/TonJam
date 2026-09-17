@@ -33,7 +33,7 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
     <div className="w-full relative" id="marketplace-live-auctions">
       <div className="flex items-center justify-between mb-4">
         <div className="space-y-0.5 text-left">
-          <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
+          <h2 className="text-base sm:text-lg font-semibold uppercase tracking-wider text-white flex items-center gap-2">
             <Zap className="w-5 h-5 text-[#FF3A5C] fill-current animate-pulse" />
             Live Auctions
           </h2>

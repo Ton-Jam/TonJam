@@ -60,7 +60,7 @@ export const MoodAlignmentSection: React.FC = () => {
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary shrink-0 animate-pulse" />
-          <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white">
             Mood & Energy Alignment
           </h2>
         </div>
@@ -87,12 +87,12 @@ export const MoodAlignmentSection: React.FC = () => {
               onClick={() => setSelectedMood(selectedMood === mood.id ? null : mood.id)}
               className={`flex flex-col items-center justify-center p-3 rounded-2xl w-[90px] sm:w-[100px] shrink-0 transition-all duration-300 outline-none cursor-pointer border-none text-center ${
                 isSelected 
-                  ? `bg-gradient-to-br ${mood.color} text-black font-black` 
+                  ? `bg-gradient-to-br ${mood.color} text-white font-black` 
                   : 'bg-zinc-900/80 hover:bg-zinc-800 text-white'
               }`}
             >
-              <MoodIcon className={`w-5 h-5 mb-1.5 ${isSelected ? 'text-black' : mood.textAccent}`} />
-              <span className={`text-[11px] font-black tracking-tight ${isSelected ? 'text-black' : 'text-zinc-200'}`}>
+              <MoodIcon className={`w-5 h-5 mb-1.5 ${isSelected ? 'text-white' : mood.textAccent}`} />
+              <span className={`text-[11px] font-black tracking-tight ${isSelected ? 'text-white' : 'text-zinc-200'}`}>
                 {mood.name}
               </span>
             </motion.button>

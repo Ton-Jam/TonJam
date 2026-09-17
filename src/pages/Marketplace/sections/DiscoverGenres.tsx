@@ -15,13 +15,10 @@ export const DiscoverGenres: React.FC<DiscoverGenresProps> = ({
   return (
     <div className="w-full text-left" id="marketplace-discover-genres">
       <div className="space-y-0.5 mb-4">
-        <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
+        <h2 className="text-base sm:text-lg font-semibold uppercase tracking-wider text-white flex items-center gap-2">
           <Disc className="w-5 h-5 text-[#00B4D8] animate-spin-slow" />
           Discover Genres
         </h2>
-        <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-          Explore curated music NFT ecosystems by auditory style
-        </p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">

@@ -405,10 +405,11 @@ export const CollectionScreen: React.FC = () => {
                 setSelectedCollectionId(c.id);
                 navigate(`/collection/${c.id}`);
               }}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+              aria-pressed={isSelected}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
                 isSelected 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
-                  : 'bg-[#0e163d]/70 text-slate-300 hover:bg-[#121c4e] hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 border-[#c0c0c0]/40' 
+                  : 'bg-[#0e163d]/70 text-slate-300 hover:bg-[#121c4e] hover:text-white border-[#c0c0c0]/25'
               }`}
             >
               <img src={c.coverUrl} alt={c.name} className="w-4 h-4 rounded-full object-cover" />

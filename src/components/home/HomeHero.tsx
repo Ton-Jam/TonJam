@@ -30,12 +30,9 @@ export const HomeHero: React.FC = () => {
         {/* Left: Greeting & Welcome Copy in flexbox wrapper with items-center and justify-start */}
         <div className="flex items-center justify-start min-w-0 flex-1">
           <div className="space-y-0.5 min-w-0">
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-white truncate">
+            <h1 className="text-base sm:text-lg font-semibold tracking-tight text-white truncate">
               {greeting}, {userProfile?.username || "Listener"}
             </h1>
-            <p className="text-xs text-zinc-400 font-medium truncate">
-              Stream curated tracks & discover new Web3 releases
-            </p>
           </div>
         </div>
 

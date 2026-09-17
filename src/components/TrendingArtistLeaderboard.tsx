@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'motion/react';
-import { Button as MTButton } from "@material-tailwind/react";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -213,28 +212,20 @@ export const TrendingArtistLeaderboard: React.FC<TrendingArtistLeaderboardProps>
 
         {/* Custom Toggle Selection with zero borders */}
         <div className="flex bg-white/[0.03] p-1 rounded-full w-fit gap-2">
-          <MTButton
+          <button
+            type="button"
             onClick={() => setMetricTab('plays')}
-            variant={metricTab === 'plays' ? "filled" : "outlined"}
-            color="blue"
-            className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap"
-            placeholder=""
-            onPointerEnterCapture={() => {}}
-            onPointerLeaveCapture={() => {}}
+            className={`rounded-full px-6 py-2 text-[10px] lowercase font-medium tracking-widest transition-all whitespace-nowrap cursor-pointer ${metricTab === 'plays' ? 'bg-blue-600 text-white font-bold' : 'text-zinc-400 hover:text-white'}`}
           >
             Track Plays
-          </MTButton>
-          <MTButton
+          </button>
+          <button
+            type="button"
             onClick={() => setMetricTab('nft-sales')}
-            variant={metricTab === 'nft-sales' ? "filled" : "outlined"}
-            color="blue"
-            className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap"
-            placeholder=""
-            onPointerEnterCapture={() => {}}
-            onPointerLeaveCapture={() => {}}
+            className={`rounded-full px-6 py-2 text-[10px] lowercase font-medium tracking-widest transition-all whitespace-nowrap cursor-pointer ${metricTab === 'nft-sales' ? 'bg-blue-600 text-white font-bold' : 'text-zinc-400 hover:text-white'}`}
           >
             Sales Volume
-          </MTButton>
+          </button>
         </div>
       </div>
 
@@ -273,13 +264,13 @@ export const TrendingArtistLeaderboard: React.FC<TrendingArtistLeaderboardProps>
 
                   {/* Avatar with gradient accents */}
                   <div className="relative flex-shrink-0">
-                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl border-none shadow-md">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12 rounded-full border-none shadow-md">
                       <AvatarImage 
                         src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
-                        className="object-cover"
+                        className="object-cover rounded-full"
                         referrerPolicy="no-referrer"
                       />
-                      <AvatarFallback className="bg-zinc-800 text-white font-extrabold text-xs">
+                      <AvatarFallback className="bg-zinc-800 text-white font-extrabold text-xs rounded-full">
                         {artist.name.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>

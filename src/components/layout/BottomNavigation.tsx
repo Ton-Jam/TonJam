@@ -128,7 +128,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                     y: isActive ? -1 : 0,
                   }}
                   transition={{ duration: 0.2 }}
-                  className={`${isActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-200'} transition-colors`}
+                  className={`${isActive ? 'text-blue-400' : 'text-white/90 group-hover:text-white'} transition-colors`}
                 >
                   <Icon className="w-5 h-5" />
                 </motion.div>
@@ -148,8 +148,8 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               {/* Text label */}
               <span
                 className={`
-                  text-[9px] font-bold uppercase tracking-widest mt-1 transition-colors pointer-events-none
-                  ${isActive ? 'text-blue-400 font-black' : 'text-slate-400'}
+                  text-[9px] font-medium uppercase tracking-widest mt-1 transition-colors pointer-events-none
+                  ${isActive ? 'text-blue-400 font-bold' : 'text-white/90 group-hover:text-white'}
                 `}
               >
                 {tab.label}

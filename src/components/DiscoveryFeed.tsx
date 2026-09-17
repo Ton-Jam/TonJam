@@ -38,9 +38,12 @@ const DiscoveryFeed: React.FC = () => {
       <section className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
         <button
           onClick={() => setSelectedGenre(null)}
+          aria-pressed={!selectedGenre}
           className={cn(
-            "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
-            !selectedGenre ? "bg-blue-600 text-white" : "bg-white/5 text-muted-foreground hover:bg-white/10"
+            "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border cursor-pointer",
+            !selectedGenre 
+              ? "bg-blue-600 text-white border-[#c0c0c0]/40" 
+              : "bg-white/5 text-muted-foreground hover:bg-white/10 border-[#c0c0c0]/25"
           )}
         >
           All Trends
@@ -49,9 +52,12 @@ const DiscoveryFeed: React.FC = () => {
           <button
             key={genre}
             onClick={() => setSelectedGenre(genre)}
+            aria-pressed={selectedGenre === genre}
             className={cn(
-              "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
-              selectedGenre === genre ? "bg-blue-600 text-white" : "bg-white/5 text-muted-foreground hover:bg-white/10"
+              "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border cursor-pointer",
+              selectedGenre === genre 
+                ? "bg-blue-600 text-white border-[#c0c0c0]/40" 
+                : "bg-white/5 text-muted-foreground hover:bg-white/10 border-[#c0c0c0]/25"
             )}
           >
             {genre}

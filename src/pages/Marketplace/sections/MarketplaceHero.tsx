@@ -85,11 +85,11 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
       <div className="flex-1 space-y-4 sm:space-y-6 z-10 text-left w-full md:max-w-[55%]">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-[#5B6BFF]/10 text-[#5B6BFF] border border-[#5B6BFF]/20 select-none">
           <Sparkles className="w-3.5 h-3.5" />
-          <span className="text-[10px] font-black uppercase tracking-widest">Featured NFT Track</span>
+          <span className="text-[10px] font-semibold uppercase tracking-widest">Featured NFT Track</span>
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white leading-tight">
+          <h1 className="text-2xl sm:text-4xl font-semibold uppercase tracking-tight text-white leading-tight">
             {featuredNFT.title}
           </h1>
           
@@ -99,11 +99,11 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
               alt={featuredNFT.artist}
               className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700/60"
             />
-            <span className="text-xs font-bold text-zinc-300 hover:text-white transition-colors cursor-pointer uppercase tracking-wider">
+            <span className="text-xs font-semibold text-zinc-300 hover:text-white transition-colors cursor-pointer uppercase tracking-wider">
               {featuredNFT.artist}
             </span>
             {featuredNFT.artistVerified && (
-              <span className="w-3 h-3 rounded-full bg-blue-500 text-white flex items-center justify-center text-[7px] font-black" title="Verified Artist">✓</span>
+              <span className="w-3 h-3 rounded-full bg-blue-500 text-white flex items-center justify-center text-[7px] font-semibold" title="Verified Artist">✓</span>
             )}
           </div>
         </div>

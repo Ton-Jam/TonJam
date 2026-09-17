@@ -771,10 +771,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {user && !isLibrary ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link to="/profile" className={`flex items-center gap-2 p-1 min-w-[36px] min-h-[36px] justify-center rounded-[4px] hover:bg-muted transition-all ${isProfile ? 'ring-1 ring-blue-500/30' : ''}`}>
-                      <Avatar className="w-8 h-8 rounded-[4px] flex-shrink-0">
-                        <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt="" className="object-cover" />
-                        <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-[4px] text-[10px] font-bold">
+                    <Link to="/profile" className={`flex items-center gap-2 p-1 min-w-[36px] min-h-[36px] justify-center rounded-full hover:bg-muted transition-all ${isProfile ? 'ring-1 ring-blue-500/30' : ''}`}>
+                      <Avatar className="w-8 h-8 rounded-full flex-shrink-0">
+                        <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt="" className="object-cover rounded-full" />
+                        <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-full text-[10px] font-bold">
                           {user.displayName ? user.displayName.slice(0, 2).toUpperCase() : '??'}
                         </AvatarFallback>
                       </Avatar>
@@ -1001,9 +1001,9 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
         onClick={onNavigate}
         className="flex items-center gap-3 p-3 mb-6 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-all group"
       >
-        <Avatar className="w-10 h-10 rounded-lg">
-          <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt="" className="object-cover" />
-          <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-lg text-xs font-bold">
+        <Avatar className="w-10 h-10 rounded-full">
+          <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt="" className="object-cover rounded-full" />
+          <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-full text-xs font-bold">
             {user.displayName ? user.displayName.slice(0, 2).toUpperCase() : '??'}
           </AvatarFallback>
         </Avatar>
@@ -1170,13 +1170,13 @@ function MobileNavItem({ to, icon: Icon, label, onClick }: { to: string; icon: a
       onClick={onClick}
       className={({ isActive }) => `
         flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full min-h-[48px] py-1 select-none active:scale-95
-        ${isActive ? 'text-blue-500 font-bold' : 'text-zinc-400 hover:text-zinc-200'}
+        ${isActive ? 'text-blue-500 font-bold' : 'text-white/90 hover:text-white'}
       `}
     >
       {({ isActive }) => (
         <>
-          <Icon className={`h-5 w-5 transition-transform ${isActive ? 'text-blue-500 scale-110' : 'text-zinc-400'}`} strokeWidth={isActive ? 2.5 : 2} />
-          <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isActive ? 'text-blue-500' : 'text-zinc-400'}`}>{label}</span>
+          <Icon className={`h-5 w-5 transition-transform ${isActive ? 'text-blue-500 scale-110' : 'text-white/90 group-hover:text-white'}`} strokeWidth={isActive ? 2.5 : 2} />
+          <span className={`text-[9px] font-medium uppercase tracking-wider transition-colors ${isActive ? 'text-blue-500 font-bold' : 'text-white/90'}`}>{label}</span>
         </>
       )}
     </NavLink>

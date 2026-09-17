@@ -65,6 +65,7 @@ export const NotificationFilters: React.FC<NotificationFiltersProps> = ({
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
             onClick={() => onChangeFilter(filter.id)}
+            aria-pressed={isActive}
             className={`
               flex items-center gap-1.5 px-4 py-2 rounded-full
               text-xs font-black tracking-wide uppercase transition-all duration-300

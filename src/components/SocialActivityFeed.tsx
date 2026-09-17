@@ -156,10 +156,10 @@ export const SocialActivityFeed: React.FC = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
-          <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
+          <span className="text-[10px] font-mono font-semibold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
             <Activity className="w-3.5 h-3.5 animate-pulse" /> Live Streaming Activity
           </span>
-          <h3 className="text-base font-black uppercase tracking-[0.15em] text-white">
+          <h3 className="text-base font-semibold uppercase tracking-[0.15em] text-white">
             Ledger Broadcast
           </h3>
         </div>

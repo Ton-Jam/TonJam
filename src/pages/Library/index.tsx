@@ -188,6 +188,7 @@ const LibraryPage: React.FC = () => {
                       setShowImporter(false);
                     }
                   }}
+                  aria-pressed={isActive}
                   className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full cursor-pointer transition-all border ${
                     isActive 
                       ? 'bg-[#0052FF] text-white border-[#c0c0c0]/40 shadow-lg shadow-[#0052FF]/20' 

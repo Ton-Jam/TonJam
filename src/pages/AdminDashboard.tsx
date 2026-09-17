@@ -335,37 +335,37 @@ const AdminDashboard: React.FC = () => {
             <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-[4px]">
               <button 
                 onClick={() => setActiveTab('overview')}
-                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'overview' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'overview' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Overview
               </button>
               <button 
                 onClick={() => setActiveTab('withdrawals')}
-                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'withdrawals' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'withdrawals' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Withdrawals
               </button>
               <button 
                 onClick={() => setActiveTab('sponsorships')}
-                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'sponsorships' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'sponsorships' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Sponsorships
               </button>
               <button 
                 onClick={() => setActiveTab('tasks')}
-                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'tasks' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'tasks' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Tasks
               </button>
               <button 
                 onClick={() => setActiveTab('users')}
-                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'users' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'users' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Users
               </button>
               <button 
                 onClick={() => setActiveTab('verifications')}
-                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'verifications' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'verifications' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Verifications
                 {pendingVerificationsCount > 0 && (
@@ -376,13 +376,13 @@ const AdminDashboard: React.FC = () => {
               </button>
               <button 
                 onClick={() => setActiveTab('treasury')}
-                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'treasury' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'treasury' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Treasury
               </button>
               <button 
                 onClick={() => setActiveTab('mockmaker')}
-                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'mockmaker' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'mockmaker' ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Mock Maker
               </button>

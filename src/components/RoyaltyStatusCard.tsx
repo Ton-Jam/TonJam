@@ -396,7 +396,7 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
                   timeframe === tf 
-                    ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/20" 
+                    ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/30" 
                     : "text-white/50 hover:text-white hover:bg-white/5"
                 )}
               >

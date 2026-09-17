@@ -142,7 +142,7 @@ export const Web3MusicNews: React.FC<Web3MusicNewsProps> = ({ className = '' }) 
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg sm:text-xl font-black text-white tracking-tight flex items-center gap-1.5">
+              <h2 className="text-lg sm:text-xl font-semibold text-white tracking-tight flex items-center gap-1.5">
                 Web3 Music News
                 <Sparkles className="w-4 h-4 text-blue-400 shrink-0" />
               </h2>
@@ -151,12 +151,9 @@ export const Web3MusicNews: React.FC<Web3MusicNewsProps> = ({ className = '' }) 
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                 </span>
-                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">Search Grounded</span>
+                <span className="text-[9px] font-semibold uppercase tracking-widest text-emerald-400">Search Grounded</span>
               </div>
             </div>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
-              Live industry headlines, blockchain audio streaming & artist announcements verified with Google Search
-            </p>
           </div>
         </div>
 

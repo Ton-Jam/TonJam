@@ -217,10 +217,11 @@ export default function DailyStreamsChart({ tracks }: DailyStreamsChartProps) {
         <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-0.5 -mx-1 px-1">
           <button
             onClick={() => setSelectedTrackId('all')}
-            className={`px-2 py-1 rounded-md text-[7px] font-black uppercase tracking-widest transition-all shrink-0 cursor-pointer ${
+            aria-pressed={selectedTrackId === 'all'}
+            className={`px-2 py-1 rounded-md text-[7px] font-black uppercase tracking-widest transition-all shrink-0 cursor-pointer border ${
               selectedTrackId === 'all'
-                ? 'bg-cyan-500 text-black font-extrabold'
-                : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+                ? 'bg-cyan-500 text-black font-extrabold border-[#c0c0c0]/40'
+                : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white border-[#c0c0c0]/25'
             }`}
           >
             All
@@ -229,10 +230,11 @@ export default function DailyStreamsChart({ tracks }: DailyStreamsChartProps) {
             <button
               key={track.id}
               onClick={() => setSelectedTrackId(track.id)}
-              className={`px-2 py-1 rounded-md text-[7px] font-black uppercase tracking-widest transition-all shrink-0 flex items-center gap-1 cursor-pointer max-w-[100px] ${
+              aria-pressed={selectedTrackId === track.id}
+              className={`px-2 py-1 rounded-md text-[7px] font-black uppercase tracking-widest transition-all shrink-0 flex items-center gap-1 cursor-pointer max-w-[100px] border ${
                 selectedTrackId === track.id
-                  ? 'bg-purple-600 text-white font-extrabold'
-                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+                  ? 'bg-purple-600 text-white font-extrabold border-[#c0c0c0]/40'
+                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white border-[#c0c0c0]/25'
               }`}
             >
               <Music className="w-2 h-2 shrink-0" />

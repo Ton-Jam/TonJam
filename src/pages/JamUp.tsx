@@ -367,10 +367,11 @@ export default function JamUp() {
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`relative px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all ${
+                aria-pressed={isActive}
+                className={`relative px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer border ${
                   isActive 
-                    ? 'text-white' 
-                    : 'text-muted-foreground hover:text-foreground bg-muted/20'
+                    ? 'text-white border-[#c0c0c0]/40' 
+                    : 'text-muted-foreground hover:text-foreground bg-muted/20 border-[#c0c0c0]/25'
                 }`}
               >
                 {isActive && (

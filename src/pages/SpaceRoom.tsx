@@ -943,8 +943,9 @@ export const SpaceRoom: React.FC = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
-                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all ${
-                  activeTab === tab.key ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'
+                aria-pressed={activeTab === tab.key}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all border ${
+                  activeTab === tab.key ? 'bg-blue-600 text-white shadow-lg border-[#c0c0c0]/40' : 'text-slate-400 hover:text-white border-[#c0c0c0]/25'
                 }`}
               >
                 <tab.icon className="w-3.5 h-3.5" />
@@ -1787,10 +1788,11 @@ export const SpaceRoom: React.FC = () => {
                     <button
                       key={f}
                       onClick={() => setParticipantFilter(f)}
-                      className={`py-1.5 rounded-lg transition-all cursor-pointer text-center ${
+                      aria-pressed={participantFilter === f}
+                      className={`py-1.5 rounded-lg transition-all cursor-pointer text-center border ${
                         participantFilter === f
-                          ? 'bg-emerald-500 text-slate-950 font-black shadow-md'
-                          : 'text-slate-400 hover:text-white'
+                          ? 'bg-emerald-500 text-white font-black shadow-md border-[#c0c0c0]/40'
+                          : 'text-slate-400 hover:text-white border-[#c0c0c0]/25'
                       }`}
                     >
                       {f === 'all' ? `All (${allParticipantsList.length})` : f === 'speakers' ? `Stage (${allSpeakers.length})` : `VIPs (${allParticipantsList.filter(p => p.isVip).length})`}

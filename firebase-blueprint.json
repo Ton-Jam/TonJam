@@ -496,6 +496,102 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "nftId", "targetPrice", "condition", "status", "createdAt"]
+    },
+    "LiveStreamSession": {
+      "title": "LiveStreamSession",
+      "description": "Artist live video broadcast session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "artistId": { "type": "string" },
+        "artistName": { "type": "string" },
+        "artistAvatar": { "type": "string" },
+        "artistHandle": { "type": "string" },
+        "artistAddress": { "type": "string" },
+        "artistVerified": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["live", "ended", "scheduled"] },
+        "category": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "thumbnailUrl": { "type": "string" },
+        "videoSourceType": { "type": "string" },
+        "streamVideoUrl": { "type": "string" },
+        "viewerCount": { "type": "number" },
+        "peakViewers": { "type": "number" },
+        "totalTipsTon": { "type": "number" },
+        "totalTipsGram": { "type": "number" },
+        "totalTipsTJ": { "type": "number" },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "endedAt": { "type": "string", "format": "date-time" },
+        "nftGated": { "type": "boolean" },
+        "requiredNftCollection": { "type": "string" },
+        "requiredNftName": { "type": "string" },
+        "quality": { "type": "string" }
+      },
+      "required": ["id", "title", "artistId", "status"]
+    },
+    "LiveStreamChatMessage": {
+      "title": "LiveStreamChatMessage",
+      "description": "Live chat message with NFT holder badges and privileges",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "streamId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userAvatar": { "type": "string" },
+        "userAddress": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["chat", "tip", "qa", "nft_drop", "system", "pinned"] },
+        "tipAmount": { "type": "number" },
+        "tipCurrency": { "type": "string" },
+        "highestTierBadge": { "type": "string" },
+        "privileges": { "type": "object" },
+        "isHost": { "type": "boolean" },
+        "isArtist": { "type": "boolean" },
+        "isPinned": { "type": "boolean" }
+      },
+      "required": ["id", "streamId", "userId", "text", "timestamp"]
+    },
+    "LiveStreamTip": {
+      "title": "LiveStreamTip",
+      "description": "Crypto tip sent during a live stream",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "streamId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderAvatar": { "type": "string" },
+        "senderAddress": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "enum": ["TON", "GRAM", "JAM"] },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "streamId", "senderId", "amount", "currency", "timestamp"]
+    },
+    "LiveStreamSongRequest": {
+      "title": "LiveStreamSongRequest",
+      "description": "Song request submitted by viewers / VIP NFT holders",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "streamId": { "type": "string" },
+        "requesterId": { "type": "string" },
+        "requesterName": { "type": "string" },
+        "requesterAvatar": { "type": "string" },
+        "songTitle": { "type": "string" },
+        "artistName": { "type": "string" },
+        "tipAmount": { "type": "number" },
+        "currency": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "playing", "completed", "declined"] },
+        "isVipPriority": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "streamId", "requesterId", "songTitle", "status", "createdAt"]
     }
   },
   "firestore": {
@@ -646,6 +742,22 @@
     "/proposals/{id}/votes/{voteId}": {
       "schema": "Vote",
       "description": "Votes for a proposal"
+    },
+    "/liveStreams/{streamId}": {
+      "schema": "LiveStreamSession",
+      "description": "Live streaming broadcast sessions"
+    },
+    "/liveStreams/{streamId}/messages/{messageId}": {
+      "schema": "LiveStreamChatMessage",
+      "description": "Real-time chat messages during livestream"
+    },
+    "/liveStreams/{streamId}/tips/{tipId}": {
+      "schema": "LiveStreamTip",
+      "description": "Crypto tips sent to streamer"
+    },
+    "/liveStreams/{streamId}/songRequests/{requestId}": {
+      "schema": "LiveStreamSongRequest",
+      "description": "Song requests from viewers"
     }
   }
 }

@@ -98,8 +98,9 @@ const LimitedNFTs: React.FC = () => {
                <button
                  key={type}
                  onClick={() => setFilterType(type as any)}
+                 aria-pressed={filterType === type}
                  className={cn(
-                   "px-6 h-12 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border",
+                   "px-6 h-12 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border cursor-pointer",
                    filterType === type 
                      ? "bg-[#0088CC] text-white border-[#c0c0c0]/40 shadow-lg shadow-[#0088CC]/30" 
                      : "bg-transparent text-silver border-[#c0c0c0]/25 hover:bg-[#0088CC]/20 hover:text-white"

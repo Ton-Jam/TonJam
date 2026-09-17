@@ -73,11 +73,11 @@ export const NewDropsSection: React.FC = () => {
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-          <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white">
             New Drops
           </h2>
           {selectedGenre !== 'All' && (
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/20 text-primary">
+            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/20 text-primary">
               {selectedGenre}
             </span>
           )}

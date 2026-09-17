@@ -37,7 +37,7 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
       onClick={handleCardClick}
     >
       <div className="flex items-center gap-4">
-        <div className="relative w-16 h-16 rounded-[4px] overflow-hidden flex-shrink-0 shadow-lg border border-[#c0c0c0]/25">
+        <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border border-[#c0c0c0]/25">
           <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
         </div>
         

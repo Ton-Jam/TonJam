@@ -68,7 +68,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
         <button
           key={tf}
           onClick={() => onChange(tf)}
-          className={`px-3 py-1 text-[9px] font-bold uppercase tracking-widest rounded-full transition-all ${value === tf ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`}
+          className={`px-3 py-1 text-[9px] font-bold uppercase tracking-widest rounded-full transition-all ${value === tf ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           {tf}
         </button>

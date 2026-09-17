@@ -904,40 +904,44 @@ export default function NFTLaunchpad() {
         <div className="flex gap-1.5 p-1.5 bg-neutral-900 rounded-2xl w-full sm:w-auto overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('upcoming')}
-            className={`py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 shrink-0 ${
+            aria-pressed={activeTab === 'upcoming'}
+            className={`py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 shrink-0 border cursor-pointer ${
               activeTab === 'upcoming' 
-                ? 'bg-[#0098EA] text-black shadow-lg' 
-                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
+                ? 'bg-[#0098EA] text-white shadow-lg border-[#c0c0c0]/40' 
+                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04] border-[#c0c0c0]/25'
             }`}
           >
             Upcoming Drops
           </button>
           <button
             onClick={() => setActiveTab('live')}
-            className={`py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 shrink-0 ${
+            aria-pressed={activeTab === 'live'}
+            className={`py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 shrink-0 border cursor-pointer ${
               activeTab === 'live' 
-                ? 'bg-[#0098EA] text-black shadow-lg' 
-                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
+                ? 'bg-[#0098EA] text-white shadow-lg border-[#c0c0c0]/40' 
+                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04] border-[#c0c0c0]/25'
             }`}
           >
             Live Drops ({drops.filter(d => new Date(d.releaseDate).getTime() <= Date.now() || d.status === 'live').length})
           </button>
           <button
             onClick={() => setActiveTab('my-whitelists')}
-            className={`py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 shrink-0 ${
+            aria-pressed={activeTab === 'my-whitelists'}
+            className={`py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 shrink-0 border cursor-pointer ${
               activeTab === 'my-whitelists' 
-                ? 'bg-[#0098EA] text-black shadow-lg' 
-                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
+                ? 'bg-[#0098EA] text-white shadow-lg border-[#c0c0c0]/40' 
+                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04] border-[#c0c0c0]/25'
             }`}
           >
             My Whitelists ({userWhitelistedDrops.length})
           </button>
           <button
             onClick={() => setActiveTab('studio')}
-            className={`py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 shrink-0 flex items-center gap-1.5 ${
+            aria-pressed={activeTab === 'studio'}
+            className={`py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 shrink-0 flex items-center gap-1.5 border cursor-pointer ${
               activeTab === 'studio' 
-                ? 'bg-[#0098EA] text-black shadow-lg' 
-                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
+                ? 'bg-[#0098EA] text-white shadow-lg border-[#c0c0c0]/40' 
+                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04] border-[#c0c0c0]/25'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />

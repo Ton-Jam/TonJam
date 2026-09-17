@@ -66,10 +66,10 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
   return (
     <section className="space-y-3 text-left w-full">
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        <h2 className="text-xs font-black uppercase tracking-widest text-zinc-400">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
           Featured Spotlights & Launches
         </h2>
-        <span className="text-[10px] font-bold text-primary tracking-wider uppercase">
+        <span className="text-[10px] font-semibold text-primary tracking-wider uppercase">
           TON Sponsored
         </span>
       </div>
@@ -102,10 +102,10 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
                 
                 <div className="relative z-10 space-y-1 min-w-0">
-                  <Badge variant="default" className="text-[8px] uppercase tracking-widest bg-primary text-black font-black px-2 py-0.5 rounded-md border-none">
+                  <Badge variant="default" className="text-[8px] uppercase tracking-widest bg-primary text-black font-semibold px-2 py-0.5 rounded-md border-none">
                     {item.badge}
                   </Badge>
-                  <h3 className="text-base sm:text-lg font-black text-white mt-1 leading-tight tracking-tight truncate">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mt-1 leading-tight tracking-tight truncate">
                     {item.title}
                   </h3>
                   <p className="text-xs text-zinc-300 line-clamp-1 max-w-sm sm:max-w-md">

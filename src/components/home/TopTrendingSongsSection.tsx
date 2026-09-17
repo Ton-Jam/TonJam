@@ -19,7 +19,7 @@ export const TopTrendingSongsSection: React.FC = () => {
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-emerald-400" />
-          <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white">
             Top Trending Songs
           </h2>
         </div>

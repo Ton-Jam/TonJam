@@ -150,7 +150,7 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
     return (
       <div className={`space-y-3 ${className}`}>
         <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
-          <h2 className="text-base sm:text-lg font-black text-white">{title}</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-white">{title}</h2>
         </div>
         <div className="flex gap-3.5 overflow-x-auto no-scrollbar py-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full">
           {[1, 2, 3, 4].map((i) => (
@@ -167,8 +167,8 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#00B4D8] animate-ping" />
-          <h2 className="text-base sm:text-lg font-black text-white">{title}</h2>
-          <span className="text-[10px] font-black text-[#00B4D8] uppercase tracking-wider bg-[#00B4D8]/10 px-2 py-0.5 rounded-full">
+          <h2 className="text-base sm:text-lg font-semibold text-white">{title}</h2>
+          <span className="text-[10px] font-semibold text-[#00B4D8] uppercase tracking-wider bg-[#00B4D8]/10 px-2 py-0.5 rounded-full">
             Live Mints
           </span>
         </div>

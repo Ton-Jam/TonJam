@@ -78,10 +78,10 @@ const MoodPlaylist: React.FC<MoodPlaylistProps> = ({
               <button
                 onClick={() => onPlayAll(tracks)}
                 className={`h-8 font-black text-[10px] uppercase tracking-widest px-4 rounded-full cursor-pointer border-none flex items-center gap-1.5 shadow-md transition-opacity hover:opacity-90 bg-gradient-to-r ${
-                  selectedMood === 'chill' ? 'from-[#00F2FE] to-[#4FACFE] text-slate-950' :
-                  selectedMood === 'energetic' ? 'from-[#FF0844] to-[#FFB199] text-slate-950' :
-                  selectedMood === 'focus' ? 'from-[#00CDAC] to-[#8DDAD3] text-slate-950' :
-                  selectedMood === 'happy' ? 'from-[#FAD961] to-[#F76B1C] text-slate-950' :
+                  selectedMood === 'chill' ? 'from-[#00F2FE] to-[#4FACFE] text-white' :
+                  selectedMood === 'energetic' ? 'from-[#FF0844] to-[#FFB199] text-white' :
+                  selectedMood === 'focus' ? 'from-[#00CDAC] to-[#8DDAD3] text-white' :
+                  selectedMood === 'happy' ? 'from-[#FAD961] to-[#F76B1C] text-white' :
                   'from-[#B352E4] to-[#761AC2] text-white'
                 }`}
               >

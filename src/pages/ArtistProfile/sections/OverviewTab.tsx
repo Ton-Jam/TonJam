@@ -273,30 +273,33 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
             <button
               onClick={() => setDiscographyFilter("popular")}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+              aria-pressed={discographyFilter === "popular"}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer border ${
                 discographyFilter === "popular"
-                  ? "bg-white text-black"
-                  : "bg-white/[0.04] text-neutral-300 hover:bg-white/[0.08] hover:text-white"
+                  ? "bg-[#0088CC] text-white border-[#c0c0c0]/40"
+                  : "bg-white/[0.04] text-neutral-300 hover:bg-white/[0.08] hover:text-white border-[#c0c0c0]/25"
               }`}
             >
               Popular releases
             </button>
             <button
               onClick={() => setDiscographyFilter("albums")}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+              aria-pressed={discographyFilter === "albums"}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer border ${
                 discographyFilter === "albums"
-                  ? "bg-white text-black"
-                  : "bg-white/[0.04] text-neutral-300 hover:bg-white/[0.08] hover:text-white"
+                  ? "bg-[#0088CC] text-white border-[#c0c0c0]/40"
+                  : "bg-white/[0.04] text-neutral-300 hover:bg-white/[0.08] hover:text-white border-[#c0c0c0]/25"
               }`}
             >
               Albums
             </button>
             <button
               onClick={() => setDiscographyFilter("singles")}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+              aria-pressed={discographyFilter === "singles"}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer border ${
                 discographyFilter === "singles"
-                  ? "bg-white text-black"
-                  : "bg-white/[0.04] text-neutral-300 hover:bg-white/[0.08] hover:text-white"
+                  ? "bg-[#0088CC] text-white border-[#c0c0c0]/40"
+                  : "bg-white/[0.04] text-neutral-300 hover:bg-white/[0.08] hover:text-white border-[#c0c0c0]/25"
               }`}
             >
               Singles & EPs

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Button as MTButton } from "@material-tailwind/react";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -110,16 +109,12 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                   value={time}
                   asChild
                 >
-                  <MTButton
-                    variant={activeTab === time ? "filled" : "outlined"}
-                    color="blue"
-                    className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap"
-                    placeholder=""
-                    onPointerEnterCapture={() => {}}
-                    onPointerLeaveCapture={() => {}}
+                  <button
+                    type="button"
+                    className={`rounded-full px-6 py-2 text-[10px] lowercase font-medium tracking-widest transition-all whitespace-nowrap cursor-pointer ${activeTab === time ? 'bg-blue-600 text-white font-bold' : 'text-zinc-400 hover:text-white'}`}
                   >
                     {time}
-                  </MTButton>
+                  </button>
                 </TabsTrigger>
               ))}
             </TabsList>

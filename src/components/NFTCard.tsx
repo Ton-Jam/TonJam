@@ -553,7 +553,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             aria-label={`View NFT ${nft.title}`}
           >
             <div 
-              className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm border border-[#c0c0c0]/25"
+              className="relative w-12 h-12 rounded-[3px] overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/12"
               onClick={(e) => { e.stopPropagation(); handlePreviewToggle(e); }}
             >
               {!isRowImageLoaded && (
@@ -656,7 +656,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             aria-label={`View NFT ${nft.title}`}
           >
             {/* Artwork - 1:1 Square with Spotify-style Floating Action Button */}
-            <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-neutral-900/60 shadow-md border border-[#c0c0c0]/25">
+            <div className="relative aspect-square w-full rounded-[3px] overflow-hidden bg-neutral-900/60 border border-white/12">
               {!isImageLoaded && (
                 <div className="absolute inset-0 bg-neutral-900 overflow-hidden flex flex-col items-center justify-center z-0 select-none">
                   <div className="absolute inset-0 animate-shimmer pointer-events-none" />

@@ -52,18 +52,15 @@ export const LibraryHero: React.FC<LibraryHeroProps> = ({
 
         <div className="space-y-1">
           <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 justify-center sm:justify-start">
-            <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest font-bold">TonJam Protocol Client</span>
+            <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest font-semibold">TonJam Protocol Client</span>
             <div className="flex items-center gap-1 justify-center text-amber-400">
               <Sparkles className="w-3.5 h-3.5 fill-current" />
-              <span className="text-[8px] font-black uppercase tracking-wider">Premium Node unlocked</span>
+              <span className="text-[8px] font-semibold uppercase tracking-wider">Premium Node unlocked</span>
             </div>
           </div>
           <h1 className="page-title">
             {greeting}, {userName || 'Collector'}
           </h1>
-          <p className="text-xs text-muted-foreground leading-normal max-w-md">
-            Welcome to your decentralized acoustic collection space. All licenses, stream caches, and smart contracts are fully verified.
-          </p>
         </div>
       </div>
 

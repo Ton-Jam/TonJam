@@ -41,7 +41,7 @@ const AnimatedPrice: React.FC<{ price: string }> = ({ price }) => {
         ]
       } : {}}
       transition={{ duration: 1.5, ease: "easeInOut" }}
-      className="text-sm font-black text-white font-mono leading-none inline-block origin-left"
+      className="text-sm font-semibold text-white font-mono leading-none inline-block origin-left"
     >
       {price} TON
     </motion.span>
@@ -343,11 +343,11 @@ export const BidDashboard: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center justify-between w-full md:w-auto">
           <div>
-            <span className="text-[9px] font-black text-blue-500 uppercase tracking-[0.25em] flex items-center gap-1.5">
+            <span className="text-[9px] font-semibold text-blue-500 uppercase tracking-[0.25em] flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
               LIVE TRANSACTIONS RELAY
             </span>
-            <h2 className="text-xl font-black uppercase tracking-tighter mt-1">Real-time Bid Dashboard</h2>
+            <h2 className="text-xl font-semibold uppercase tracking-tight mt-1">Real-time Bid Dashboard</h2>
           </div>
 
           <motion.button
@@ -380,7 +380,7 @@ export const BidDashboard: React.FC = () => {
               >
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span>
-                  New bid of <span className="text-white font-black">{recentBidEvent.price} TON</span> placed on &quot;{recentBidEvent.title}&quot; by {formatAddress(recentBidEvent.bidder)}!
+                  New bid of <span className="text-white font-semibold">{recentBidEvent.price} TON</span> placed on &quot;{recentBidEvent.title}&quot; by {formatAddress(recentBidEvent.bidder)}!
                 </span>
               </motion.div>
             )}
@@ -391,7 +391,7 @@ export const BidDashboard: React.FC = () => {
             whileTap={{ scale: 0.95 }}
             onClick={handleManualRefresh}
             disabled={isChecking}
-            className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer"
+            className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-colors cursor-pointer"
             title="Refresh Bid Signals"
           >
             <motion.div
@@ -442,11 +442,11 @@ export const BidDashboard: React.FC = () => {
                       className="w-12 h-12 rounded-xl object-cover"
                     />
                     <div className="min-w-0">
-                      <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-1">
+                      <span className="text-[8px] font-semibold text-blue-500 uppercase tracking-widest flex items-center gap-1">
                         <Sparkles className="w-2.5 h-2.5" />
                         SPOTLIGHT #{index + 1}
                       </span>
-                      <h3 className="font-black uppercase tracking-tight text-[12px] text-white truncate m-0">
+                      <h3 className="font-semibold uppercase tracking-tight text-[12px] text-white truncate m-0">
                         {nft.title}
                       </h3>
                       <p className="text-[10px] font-bold text-muted-foreground truncate m-0">
@@ -459,7 +459,7 @@ export const BidDashboard: React.FC = () => {
                 <div className="bg-white/5 p-4 rounded-xl space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-[7px] font-black text-muted-foreground uppercase tracking-widest block">
+                      <span className="text-[7px] font-semibold text-muted-foreground uppercase tracking-widest block">
                         HIGH BID
                       </span>
                       <div className="flex items-center gap-1.5 mt-0.5">
@@ -469,7 +469,7 @@ export const BidDashboard: React.FC = () => {
                     </div>
                     {highOffer && (
                       <div className="text-right">
-                        <span className="text-[7px] font-black text-muted-foreground uppercase tracking-widest block">
+                        <span className="text-[7px] font-semibold text-muted-foreground uppercase tracking-widest block">
                           LEAD BIDDER
                         </span>
                         <span className="text-[10px] font-bold text-blue-400 font-mono block mt-0.5">
@@ -482,7 +482,7 @@ export const BidDashboard: React.FC = () => {
 
                 {/* Outbid Warning Badge */}
                 {isOutbid && (
-                  <div className="bg-rose-500/10 text-rose-400 p-3 rounded-xl flex items-center gap-2 text-[9px] font-black uppercase tracking-wider">
+                  <div className="bg-rose-500/10 text-rose-400 p-3 rounded-xl flex items-center gap-2 text-[9px] font-semibold uppercase tracking-wider">
                     <AlertCircle className="w-3.5 h-3.5 text-rose-500 animate-pulse flex-shrink-0" />
                     <span>Outbid! Raise your bid or arm the Auto-Bid level below</span>
                   </div>
@@ -496,7 +496,7 @@ export const BidDashboard: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <Cpu className={cn("w-3.5 h-3.5", autoBids[nft.id]?.enabled ? "text-emerald-400 stroke-[2.5px]" : "text-muted-foreground/60")} />
-                      <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
+                      <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Auto-Bid Protocol
                       </span>
                     </div>
@@ -505,7 +505,7 @@ export const BidDashboard: React.FC = () => {
                       type="button"
                       onClick={() => handleToggleAutoBid(nft.id, !(autoBids[nft.id]?.enabled))}
                       className={cn(
-                        "text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md transition-all cursor-pointer",
+                        "text-[8px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-md transition-all cursor-pointer",
                         autoBids[nft.id]?.enabled
                           ? "bg-emerald-500/10 text-emerald-400 animate-pulse"
                           : "bg-white/5 text-muted-foreground hover:bg-white/10"

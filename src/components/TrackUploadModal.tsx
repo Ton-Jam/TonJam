@@ -540,14 +540,14 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                       <button 
                         type="button"
                         onClick={() => setFormData({...formData, isNFT: false})}
-                        className={`flex-1 py-2 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${!formData.isNFT ? 'bg-blue-600 text-foreground' : 'bg-muted/50 text-muted-foreground'}`}
+                        className={`flex-1 py-2 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${!formData.isNFT ? 'bg-blue-600 text-white' : 'bg-muted/50 text-muted-foreground'}`}
                       >
                         Streaming
                       </button>
                       <button 
                         type="button"
                         onClick={() => setFormData({...formData, isNFT: true})}
-                        className={`flex-1 py-2 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${formData.isNFT ? 'bg-amber-500 text-background' : 'bg-muted/50 text-muted-foreground'}`}
+                        className={`flex-1 py-2 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${formData.isNFT ? 'bg-amber-600 text-white' : 'bg-muted/50 text-muted-foreground'}`}
                       >
                         NFT Asset
                       </button>

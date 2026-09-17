@@ -159,7 +159,7 @@ export const ListenStreakIndicator: React.FC<ListenStreakIndicatorProps> = ({
                   >
                     <Flame className="w-8 h-8 sm:w-10 sm:h-10 text-orange-400 drop-shadow-[0_0_12px_rgba(249,115,22,0.8)]" />
                   </motion.div>
-                  <span className="text-[9px] font-black uppercase text-amber-300 tracking-wider mt-0.5">
+                  <span className="text-[9px] font-semibold uppercase text-amber-300 tracking-wider mt-0.5">
                     Active
                   </span>
                 </div>
@@ -171,7 +171,7 @@ export const ListenStreakIndicator: React.FC<ListenStreakIndicatorProps> = ({
 
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-orange-500/20 text-orange-300 border border-orange-500/30 flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-widest bg-orange-500/20 text-orange-300 border border-orange-500/30 flex items-center gap-1">
                   <Sparkles className="w-3 h-3 text-amber-400" />
                   Listen Streak
                 </span>
@@ -181,10 +181,10 @@ export const ListenStreakIndicator: React.FC<ListenStreakIndicatorProps> = ({
               </div>
 
               <div className="flex items-baseline gap-2">
-                <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white font-mono">
+                <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white font-mono">
                   {streakData.currentStreak}
                 </h2>
-                <span className="text-sm font-bold text-slate-300 uppercase tracking-widest">
+                <span className="text-sm font-semibold text-slate-300 uppercase tracking-widest">
                   {streakData.currentStreak === 1 ? 'Day' : 'Days'} Consecutive
                 </span>
               </div>
@@ -300,14 +300,11 @@ export const ListenStreakIndicator: React.FC<ListenStreakIndicatorProps> = ({
       {/* NFT Badge Rewards Section */}
       <div className="space-y-4">
         <div className="flex items-end justify-between">
-          <div>
-            <h3 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+            <div>
+            <h3 className="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
               <Award className="w-5 h-5 text-amber-400" />
               Streak NFT Badge Rewards
             </h3>
-            <p className="text-xs text-slate-400">
-              Maintain your daily listening loop to mint exclusive collectible NFT badges on TON
-            </p>
           </div>
 
           <span className="text-xs font-mono font-bold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-lg border border-amber-400/20">

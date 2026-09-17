@@ -69,7 +69,7 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-            <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white">
               Trending Artists Leaderboard
             </h2>
           </div>
@@ -82,23 +82,25 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
         </div>
         
         {/* Metric Toggle Buttons */}
-        <div className="flex bg-white/[0.04] p-1 rounded-xl w-full">
+        <div className="flex bg-white/[0.04] p-1 rounded-xl w-full gap-1">
           <button
             onClick={() => setTrendingMetric('sales')}
-            className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-black rounded-lg transition-all cursor-pointer border-none outline-none ${
+            aria-pressed={trendingMetric === 'sales'}
+            className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-semibold rounded-lg transition-all cursor-pointer outline-none border ${
               trendingMetric === 'sales'
-                ? "bg-primary text-black"
-                : "text-zinc-400 hover:text-white bg-transparent"
+                ? "bg-primary text-black border-[#c0c0c0]/40"
+                : "text-zinc-400 hover:text-white bg-transparent border-[#c0c0c0]/25"
             }`}
           >
             NFT Sales Volume
           </button>
           <button
             onClick={() => setTrendingMetric('growth')}
-            className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-black rounded-lg transition-all cursor-pointer border-none outline-none ${
+            aria-pressed={trendingMetric === 'growth'}
+            className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-semibold rounded-lg transition-all cursor-pointer outline-none border ${
               trendingMetric === 'growth'
-                ? "bg-primary text-black"
-                : "text-zinc-400 hover:text-white bg-transparent"
+                ? "bg-primary text-black border-[#c0c0c0]/40"
+                : "text-zinc-400 hover:text-white bg-transparent border-[#c0c0c0]/25"
             }`}
           >
             Follower Growth
@@ -151,10 +153,10 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
                   </div>
 
                   <div className="min-w-0 text-left">
-                    <h4 className="text-[12px] font-black text-white group-hover:text-primary transition-colors truncate">
+                    <h4 className="text-[12px] font-semibold text-white group-hover:text-primary transition-colors truncate">
                       {artist.name}
                     </h4>
-                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest truncate">
+                    <p className="text-[9px] font-medium text-zinc-500 uppercase tracking-widest truncate">
                       {artist.genre || 'Creator'}
                     </p>
                   </div>

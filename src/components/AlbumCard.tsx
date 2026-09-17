@@ -28,7 +28,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index, className = '' }) =
       style={{ width: cardTokens.album.width, borderRadius: cardTokens.global.borderRadius }}
       className={`group relative cursor-pointer bg-transparent p-0 transition-all duration-300 flex flex-col justify-between ${className}`}
     >
-      <div className="relative aspect-square rounded-[6px] overflow-hidden mb-3 bg-neutral-900 shadow-md flex-shrink-0">
+      <div className="relative aspect-square rounded-[3px] overflow-hidden mb-3 bg-neutral-900 border border-white/12 flex-shrink-0">
         {album.coverUrl ? (
           <img
             src={album.coverUrl}

@@ -103,6 +103,7 @@ import confetti from "canvas-confetti";
 import { getPlaceholderImage, cn } from "@/lib/utils";
 import { PriceSparkline } from "@/components/PriceSparkline";
 import { RecentBidsList } from "@/components/RecentBidsList";
+import { RecentBidsSidebar } from "@/components/RecentBidsSidebar";
 import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
 import { QuickBid } from "@/components/QuickBid";
 import { NFTBidTracker } from "@/components/NFTBidTracker";
@@ -990,6 +991,13 @@ const NFTDetail: React.FC = () => {
               ))}
             </div>
 
+            {/* Real-time Recent Bids Sidebar Component */}
+            <RecentBidsSidebar 
+              nft={localNft} 
+              onPlaceBid={() => handleAction()} 
+              isAuction={isAuction} 
+            />
+
             {/* Blockchain-specific Metadata & Owner Provenance History */}
             <NFTBlockchainMetadata nft={localNft} />
 
@@ -1629,7 +1637,7 @@ const NFTDetail: React.FC = () => {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
-                  className={`pb-4 text-[10px] font-bold uppercase tracking-[0.4em] transition-all relative ${activeTab === tab ? "text-blue-500" : "text-muted-foreground/50 hover:text-foreground"}`}
+                  className={`pb-4 text-[10px] font-bold uppercase tracking-[0.4em] transition-all relative ${activeTab === tab ? "text-white" : "text-muted-foreground/50 hover:text-foreground"}`}
                 >
                   {tab === "exclusive" ? "Holder Perks" : tab === "activity" ? "Activity" : tab}
                   {activeTab === tab && (

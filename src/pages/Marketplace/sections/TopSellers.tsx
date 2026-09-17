@@ -25,7 +25,7 @@ export const TopSellers: React.FC<TopSellersProps> = ({
   return (
     <div className="w-full text-left" id="marketplace-top-sellers">
       <div className="space-y-0.5 mb-4">
-        <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
+        <h2 className="text-base sm:text-lg font-semibold uppercase tracking-wider text-white flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-[#2BE08C]" />
           Top Sellers Leaderboard
         </h2>

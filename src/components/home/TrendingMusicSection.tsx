@@ -197,7 +197,7 @@ export const TrendingMusicSection: React.FC = () => {
             onClick={() => setActiveTab('all')}
             className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer border-none outline-none ${
               activeTab === 'all'
-                ? 'bg-primary text-background shadow-md'
+                ? 'bg-primary text-white shadow-md'
                 : 'text-zinc-400 hover:text-white bg-transparent'
             }`}
           >
@@ -207,7 +207,7 @@ export const TrendingMusicSection: React.FC = () => {
             onClick={() => setActiveTab('tracks')}
             className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer border-none outline-none ${
               activeTab === 'tracks'
-                ? 'bg-primary text-background shadow-md'
+                ? 'bg-primary text-white shadow-md'
                 : 'text-zinc-400 hover:text-white bg-transparent'
             }`}
           >
@@ -217,7 +217,7 @@ export const TrendingMusicSection: React.FC = () => {
             onClick={() => setActiveTab('collections')}
             className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer border-none outline-none ${
               activeTab === 'collections'
-                ? 'bg-primary text-background shadow-md'
+                ? 'bg-primary text-white shadow-md'
                 : 'text-zinc-400 hover:text-white bg-transparent'
             }`}
           >

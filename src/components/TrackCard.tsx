@@ -374,7 +374,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
             role="button"
             tabIndex={0}
           >
-            <div className="relative w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm border border-[#c0c0c0]/25">
+            <div className="relative w-11 h-11 rounded-[3px] overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/12">
               <LazyArtworkImage 
                 src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
                 fallbackSrc={getPlaceholderImage(`track-${track.id}`)}
@@ -448,7 +448,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
             )}
 
             <div 
-              className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm border border-[#c0c0c0]/25"
+              className="relative w-12 h-12 rounded-[3px] overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/12"
               onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
             >
               <LazyArtworkImage 
@@ -480,12 +480,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center gap-4 text-[12px] text-zinc-400">
-              <span className="hidden sm:inline font-mono text-[11px]">
-                {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
-              </span>
-              <MoreOptionsButton />
-            </div>
+            <MoreOptionsButton />
           </motion.div>
         </ContextMenuTrigger>
         <ContextMenuContentRefined />
@@ -526,7 +521,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
           aria-label={`View track: ${track.title} by ${track.artist}`}
         >
           {/* Artwork - 1:1 Square with Floating Play Button */}
-          <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-neutral-900/60 shadow-md border border-[#c0c0c0]/25">
+          <div className="relative aspect-square w-full rounded-[3px] overflow-hidden bg-neutral-900/60 border border-white/12">
             <LazyArtworkImage 
               src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
               fallbackSrc={getPlaceholderImage(`track-${track.id}`)}

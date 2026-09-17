@@ -1,6 +1,6 @@
 export const cardTokens = {
   global: {
-    borderRadius: '6px',
+    borderRadius: '3px',
     padding: '12px',
     gapBetweenCards: '12px',
     gapBetweenSections: '24px',
