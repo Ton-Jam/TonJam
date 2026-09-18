@@ -202,6 +202,7 @@ export const LiveStudio: React.FC = () => {
         artistAddress,
         artistVerified: true,
         category,
+        status: 'live',
         tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean),
         thumbnailUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1200',
         videoSourceType: videoSource,

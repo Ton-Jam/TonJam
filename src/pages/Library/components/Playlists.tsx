@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Disc, Pin, Trash2, Library, FolderHeart } from 'lucide-react';
+import { Plus, Disc, Pin, Trash2, Library, FolderHeart, ArrowDownToLine } from 'lucide-react';
 import { motion, LayoutGroup } from 'motion/react';
 import { LibraryPlaylist } from '../types';
 
@@ -8,6 +8,7 @@ interface PlaylistsProps {
   onCreatePlaylist: (title: string) => void;
   onDeletePlaylist: (id: string) => void;
   onTogglePin: (id: string) => void;
+  onImportSpotify?: () => void;
   layout?: 'grid' | 'list';
 }
 
@@ -16,6 +17,7 @@ export const Playlists: React.FC<PlaylistsProps> = ({
   onCreatePlaylist,
   onDeletePlaylist,
   onTogglePin,
+  onImportSpotify,
   layout = 'list'
 }) => {
   const [isCreating, setIsCreating] = useState(false);
@@ -37,13 +39,26 @@ export const Playlists: React.FC<PlaylistsProps> = ({
           <Disc className="w-4 h-4 text-pink-500" />
           <h2 className="section-title">Playlists</h2>
         </div>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="text-xs font-bold text-[#0052FF] flex items-center gap-1 hover:underline cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Playlist</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {onImportSpotify && (
+            <button
+              type="button"
+              onClick={onImportSpotify}
+              className="text-xs font-medium text-[#0088CC] flex items-center gap-1.5 hover:text-[#38bdf8] transition-colors cursor-pointer"
+            >
+              <ArrowDownToLine className="w-3.5 h-3.5" />
+              <span>Import Spotify</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsCreating(true)}
+            className="text-xs font-bold text-[#0052FF] flex items-center gap-1 hover:underline cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Playlist</span>
+          </button>
+        </div>
       </div>
 
       {isCreating && (

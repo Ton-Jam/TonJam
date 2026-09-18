@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '@/components/layout/ToastProvider';
 import { 
   Database, RefreshCw, CheckCircle2, Music, ListMusic, Plus, 
-  AlertCircle, Sparkles, ChevronRight, Check, X, ShieldAlert, Key 
+  AlertCircle, Sparkles, ChevronRight, Check, X, ShieldAlert, Key, Link2 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { ImportSpotifyPlaylistModal } from './ImportSpotifyPlaylistModal';
 
 interface LibraryImporterProps {
   importTracks: (tracks: { title: string; artist: string; album?: string; coverUrl?: string; duration?: number }[]) => void;
@@ -143,6 +144,7 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
 
   // OAuth developer credentials instruction view
   const [showSpotifyCredentialsGuide, setShowSpotifyCredentialsGuide] = useState(false);
+  const [showSpotifyUrlModal, setShowSpotifyUrlModal] = useState(false);
 
   // Read persisted connection stats
   useEffect(() => {
@@ -502,14 +504,24 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
             <div className="flex flex-col gap-3">
               <div className="flex gap-2.5">
                 <button
+                  type="button"
                   onClick={handleConnectSpotifyReal}
                   className="flex-1 py-2.5 bg-[#1DB954] hover:bg-[#1ed760] text-black text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Key className="w-4 h-4" /> Connect Spotify
                 </button>
                 <button
+                  type="button"
+                  onClick={() => setShowSpotifyUrlModal(true)}
+                  className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  title="Paste Spotify Playlist Link"
+                >
+                  <Link2 className="w-4 h-4 text-[#0088CC]" /> Link
+                </button>
+                <button
+                  type="button"
                   onClick={handleConnectSpotifyDemo}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1"
+                  className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1"
                   title="Connect via simulated sandbox account"
                 >
                   <Sparkles className="w-4 h-4" /> Sandbox
@@ -847,6 +859,13 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
           <span className="text-[10px] text-slate-400 uppercase tracking-widest font-extrabold">All Pipelines Online</span>
         </div>
       </div>
+
+      {/* IMPORT SPOTIFY PLAYLIST MODAL */}
+      <ImportSpotifyPlaylistModal
+        isOpen={showSpotifyUrlModal}
+        onClose={() => setShowSpotifyUrlModal(false)}
+        onImportPlaylist={importPlaylistWithTracks}
+      />
 
     </div>
   );

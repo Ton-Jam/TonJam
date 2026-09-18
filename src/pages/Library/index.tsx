@@ -18,6 +18,7 @@ import { ListeningHistory } from './components/ListeningHistory';
 import { EmptyState } from './components/EmptyState';
 import { CardSkeleton, StatsSkeleton, RowSkeleton } from './components/Skeletons';
 import { LibraryImporter } from './components/LibraryImporter';
+import { ImportSpotifyPlaylistModal } from './components/ImportSpotifyPlaylistModal';
 import { RoyaltiesDashboard } from './components/RoyaltiesDashboard';
 import { ArtistProfile } from '@/components/ArtistProfile';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -35,6 +36,7 @@ const LibraryPage: React.FC = () => {
   const { testingTracks, injectTestingTracks, clearTestingTracks, isTestingTracksInjected } = useLibrary();
   const [viewLayout, setViewLayout] = useState<'grid' | 'list'>('list');
   const [showImporter, setShowImporter] = useState(false);
+  const [isSpotifyModalOpen, setIsSpotifyModalOpen] = useState(false);
   const [selectedArtistProfileId, setSelectedArtistProfileId] = useState<string>('dj-krupy');
   const [nftSearchQuery, setNftSearchQuery] = useState('');
 
@@ -82,8 +84,7 @@ const LibraryPage: React.FC = () => {
         data.createPlaylist(`New Node Compilation #${Date.now().toString().slice(-4)}`);
         break;
       case 'import-playlist':
-        data.setActiveChip('Import');
-        setShowImporter(true);
+        setIsSpotifyModalOpen(true);
         break;
       default:
         break;
@@ -375,6 +376,7 @@ const LibraryPage: React.FC = () => {
                       onCreatePlaylist={data.createPlaylist}
                       onDeletePlaylist={data.deletePlaylist}
                       onTogglePin={data.togglePinPlaylist}
+                      onImportSpotify={() => setIsSpotifyModalOpen(true)}
                       layout={viewLayout}
                     />
                   </div>
@@ -482,6 +484,18 @@ const LibraryPage: React.FC = () => {
             </AnimatePresence>
           )}
         </div>
+      <ImportSpotifyPlaylistModal
+        isOpen={isSpotifyModalOpen}
+        onClose={() => setIsSpotifyModalOpen(false)}
+        onImportPlaylist={data.importPlaylistWithTracks}
+        onViewPlaylists={() => {
+          data.setActiveChip('Playlists');
+          setShowImporter(false);
+          setTimeout(() => {
+            document.getElementById('playlists-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }}
+      />
     </PageLayout>
   );
 };
