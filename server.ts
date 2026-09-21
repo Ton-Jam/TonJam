@@ -2193,6 +2193,23 @@ async function startServer() {
         }
     });
 
+    // Get Spotify playlist details proxy
+    app.get('/api/spotify/playlist-details', async (req, res) => {
+        const token = req.query.token as string;
+        const playlistId = req.query.playlistId as string;
+        if (!token || !playlistId) return res.status(400).json({ error: 'Token and playlistId are required' });
+
+        try {
+            const response = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            res.json(response.data);
+        } catch (error: any) {
+            console.error('Spotify Playlist Details Proxy Error:', error.response?.data || error.message);
+            res.status(500).json({ error: 'Failed to fetch Spotify playlist details' });
+        }
+    });
+
     // Get Spotify playlist tracks proxy
     app.get('/api/spotify/playlist-tracks', async (req, res) => {
         const token = req.query.token as string;

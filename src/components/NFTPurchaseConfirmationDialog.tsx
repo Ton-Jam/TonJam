@@ -15,6 +15,7 @@ import { NFTItem } from '@/types';
 import { useTonPrice } from '@/contexts/TonPriceContext';
 import { useGramPrice } from '@/contexts/GramPriceContext';
 import { cn, getPlaceholderImage } from '@/lib/utils';
+import NFTAudioPreviewPlayer from './NFTAudioPreviewPlayer';
 
 export interface NFTPurchaseConfirmationDialogProps {
   isOpen: boolean;
@@ -157,6 +158,16 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
               {nftCreator}
             </p>
           </div>
+        </div>
+
+        {/* 30-Second Audio Snippet Preview */}
+        <div className="mt-3">
+          <NFTAudioPreviewPlayer 
+            nft={nft} 
+            variant="compact"
+            title={nftTitle}
+            artist={nftCreator}
+          />
         </div>
 
         {/* Breakdown of Cost */}

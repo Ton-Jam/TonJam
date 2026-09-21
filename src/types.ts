@@ -1,4 +1,6 @@
 
+import type { Timestamp } from 'firebase/firestore';
+
 export interface Achievement {
   id: string;
   title: string;
@@ -600,6 +602,40 @@ export interface WithdrawalRequest {
   status: 'pending' | 'completed' | 'failed';
   timestamp: string;
   txHash?: string;
+}
+
+export interface MissionTemplate {
+  type:
+    | "listen_new_track"
+    | "follow_artist"
+    | "like_track"
+    | "explore_nft";
+
+  title: string;
+  description: string;
+
+  defaultTarget: number;
+  defaultReward: number;
+
+  enabled: boolean;
+
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+export interface DailyMission {
+  id: string;
+  title: string;
+  description: string;
+  reward: number;
+  type: string;
+  target: number;
+  progress: number;
+  completed: boolean;
+  claimed?: boolean;
+  expiresAt: number | string;
+  iconName?: string;
+  category?: 'Daily' | 'Streaming' | 'Social' | 'NFT' | 'Community';
 }
 
 export interface Task {

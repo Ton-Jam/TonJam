@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Sparkles, Flame, Sliders } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import NFTCard from "@/components/NFTCard";
 import { NFTItem } from "@/types";
 
@@ -29,11 +29,11 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
   };
 
   return (
-    <div className="w-full relative" id="marketplace-featured-music-nfts">
-      <div className="flex items-center justify-between mb-4">
-        <div className="space-y-0.5 text-left">
-          <h2 className="text-base sm:text-lg font-semibold uppercase tracking-wider text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#2BE08C]" />
+    <div className="w-full relative text-left" id="marketplace-featured-music-nfts">
+      <div className="flex items-center justify-between mb-3">
+        <div className="space-y-0.5">
+          <h2 className="text-sm sm:text-base font-semibold uppercase tracking-wider text-[#F5F7FA] flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#0088CC]" />
             {title}
           </h2>
         </div>
@@ -42,21 +42,21 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(`/explore/nfts?title=${encodeURIComponent(title)}&filter=top_nfts`)}
-            className="text-xs font-bold text-[#0098EA] hover:text-[#0098EA]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
+            className="text-xs font-semibold text-[#0088CC] hover:text-[#0088CC]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
           >
             More <ChevronRight className="w-3.5 h-3.5" />
           </button>
           <div className="flex gap-1">
             <button
               onClick={() => scroll("left")}
-              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none"
+              className="w-7 h-7 rounded-[3px] bg-white/5 text-white/60 hover:text-white flex items-center justify-center transition-colors border-none focus:outline-none shadow-none"
               aria-label="Previous tracks"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => scroll("right")}
-              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none"
+              className="w-7 h-7 rounded-[3px] bg-white/5 text-white/60 hover:text-white flex items-center justify-center transition-colors border-none focus:outline-none shadow-none"
               aria-label="Next tracks"
             >
               <ChevronRight className="w-3.5 h-3.5" />
@@ -68,7 +68,7 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
       {/* Horizontal List of NFT Cards */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory scroll-smooth w-full"
+        className="flex gap-3 overflow-x-auto pb-3 scrollbar-none snap-x snap-mandatory scroll-smooth w-full"
       >
         {nfts.map((nft) => (
           <NFTCard

@@ -15,6 +15,7 @@ import { NFTCollection, LiveAuction, LeaderboardUser, RecentSale, GenreCategory,
 export const useMarketplace = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("default");
   const [isLoading, setIsLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [isWalletConnected, setIsWalletConnected] = useState(true); // default true for demo or integration
@@ -100,8 +101,30 @@ export const useMarketplace = () => {
         break;
     }
 
+    // Apply sorting logic
+    switch (sortBy) {
+      case "price_asc":
+        result = result.sort((a, b) => parseFloat(a.price || "0") - parseFloat(b.price || "0"));
+        break;
+      case "price_desc":
+        result = result.sort((a, b) => parseFloat(b.price || "0") - parseFloat(a.price || "0"));
+        break;
+      case "recent":
+        result = [...result].reverse();
+        break;
+      case "trending":
+      case "popular":
+        result = result.sort((a, b) => ((b as any).playCount || 0) - ((a as any).playCount || 0));
+        break;
+      case "volume":
+        result = result.sort((a, b) => parseFloat(b.price || "0") - parseFloat(a.price || "0"));
+        break;
+      default:
+        break;
+    }
+
     return result;
-  }, [searchTerm, activeCategory]);
+  }, [searchTerm, activeCategory, sortBy]);
 
   // Retrieve featured NFT for the Hero
   const featuredNFT = useMemo(() => {
@@ -134,6 +157,7 @@ export const useMarketplace = () => {
   const handleResetFilters = () => {
     setSearchTerm("");
     setActiveCategory("All");
+    setSortBy("default");
   };
 
   return {
@@ -141,6 +165,8 @@ export const useMarketplace = () => {
     setSearchTerm,
     activeCategory,
     setActiveCategory,
+    sortBy,
+    setSortBy,
     isLoading,
     isOffline,
     isWalletConnected,

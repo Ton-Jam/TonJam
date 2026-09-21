@@ -1,15 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   X, 
   CheckCircle2, 
   AlertCircle, 
   Loader2, 
   Music, 
-  ExternalLink,
   Disc3,
-  ArrowRight
+  ArrowRight,
+  ArrowLeft,
+  Clock,
+  User,
+  ListMusic
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { PlaylistPreview } from './PlaylistPreview';
+
+export interface SpotifyPreviewTrack {
+  id: string;
+  name: string;
+  artists: string[];
+  album?: string;
+  durationMs?: number;
+  imageUrl?: string;
+}
+
+export interface SpotifyPlaylistPreview {
+  id: string;
+  name: string;
+  description?: string;
+  ownerName?: string;
+  imageUrl?: string;
+  trackCount: number;
+  tracks: SpotifyPreviewTrack[];
+  allTracks?: { title: string; artist: string; album?: string; coverUrl?: string; duration?: number }[];
+}
 
 export interface ImportSpotifyPlaylistModalProps {
   isOpen: boolean;
@@ -22,35 +46,77 @@ export interface ImportSpotifyPlaylistModalProps {
   onViewPlaylists?: () => void;
 }
 
-type ModalStep = 'input' | 'importing' | 'success' | 'error';
+export type ModalStep = 'input' | 'loading_preview' | 'preview' | 'importing' | 'success' | 'error';
+
+export interface SpotifyLinkValidation {
+  isValid: boolean;
+  playlistId: string | null;
+  error?: string;
+}
 
 /**
- * Robust extraction of Spotify Playlist ID from various link/URI formats
+ * Robust validation and extraction of Spotify Playlist ID
+ */
+export function validateSpotifyPlaylistInput(input: string): SpotifyLinkValidation {
+  if (!input || !input.trim()) {
+    return { isValid: false, playlistId: null };
+  }
+  const trimmed = input.trim();
+
+  // Explicitly check for non-playlist Spotify links to provide clear feedback
+  if (/open\.spotify\.com\/track\//i.test(trimmed) || /^spotify:track:/i.test(trimmed)) {
+    return { isValid: false, playlistId: null, error: 'This is a track link. Please enter a Spotify playlist link.' };
+  }
+  if (/open\.spotify\.com\/album\//i.test(trimmed) || /^spotify:album:/i.test(trimmed)) {
+    return { isValid: false, playlistId: null, error: 'This is an album link. Please enter a Spotify playlist link.' };
+  }
+  if (/open\.spotify\.com\/artist\//i.test(trimmed) || /^spotify:artist:/i.test(trimmed)) {
+    return { isValid: false, playlistId: null, error: 'This is an artist link. Please enter a Spotify playlist link.' };
+  }
+  if (/open\.spotify\.com\/show\//i.test(trimmed) || /open\.spotify\.com\/episode\//i.test(trimmed)) {
+    return { isValid: false, playlistId: null, error: 'This is a podcast link. Please enter a Spotify playlist link.' };
+  }
+
+  // Valid Playlist URI Format: spotify:playlist:37i9dQZF1DXcBWIGoYBM5M
+  const uriMatch = trimmed.match(/^spotify:playlist:([a-zA-Z0-9]{15,30})$/);
+  if (uriMatch) return { isValid: true, playlistId: uriMatch[1] };
+
+  // Valid Playlist Web URL Format: https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M?si=...
+  const urlMatch = trimmed.match(/open\.spotify\.com\/playlist\/([a-zA-Z0-9]{15,30})/);
+  if (urlMatch) return { isValid: true, playlistId: urlMatch[1] };
+
+  // Valid direct alphanumeric playlist ID string (15-30 chars)
+  const idMatch = trimmed.match(/^[a-zA-Z0-9]{15,30}$/);
+  if (idMatch) return { isValid: true, playlistId: idMatch[0] };
+
+  return { isValid: false, playlistId: null, error: 'Enter a valid Spotify playlist link' };
+}
+
+/**
+ * Backward-compatible helper for legacy imports
  */
 export function extractSpotifyPlaylistId(input: string): string | null {
-  if (!input) return null;
-  const trimmed = input.trim();
-  
-  // Format: spotify:playlist:37i9dQZF1DXcBWIGoYBM5M
-  const uriMatch = trimmed.match(/^spotify:playlist:([a-zA-Z0-9]{15,30})$/);
-  if (uriMatch) return uriMatch[1];
+  return validateSpotifyPlaylistInput(input).playlistId;
+}
 
-  // Format: https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M?si=...
-  const urlMatch = trimmed.match(/open\.spotify\.com\/playlist\/([a-zA-Z0-9]{15,30})/);
-  if (urlMatch) return urlMatch[1];
-
-  // Format: direct ID string (15-30 alphanumeric characters)
-  const idMatch = trimmed.match(/^[a-zA-Z0-9]{15,30}$/);
-  if (idMatch) return idMatch[0];
-
-  return null;
+function formatDuration(secondsOrMs?: number): string | null {
+  if (secondsOrMs === undefined || secondsOrMs === null || isNaN(secondsOrMs) || secondsOrMs <= 0) {
+    return null;
+  }
+  const totalSeconds = secondsOrMs > 1000 ? Math.floor(secondsOrMs / 1000) : Math.floor(secondsOrMs);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
 // Curated demo playlists mapping for instant fallback resolution
-const PLAYLIST_FALLBACK_METADATA: Record<string, { title: string; coverUrl: string; tracks: { title: string; artist: string; album?: string; duration?: number; coverUrl?: string }[] }> = {
+const PLAYLIST_FALLBACK_METADATA: Record<string, { title: string; owner: string; description: string; coverUrl: string; totalCount: number; tracks: { title: string; artist: string; album?: string; duration?: number; coverUrl?: string }[] }> = {
   default: {
     title: 'Spotify Synth & Web3 Waves',
+    owner: 'Spotify Curators',
+    description: 'High-energy electronic rhythms, decentralized beats, and chill synthesizer soundscapes.',
     coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&h=400&q=80',
+    totalCount: 18,
     tracks: [
       { title: 'Sovereign Nodes', artist: 'DJ Krupy', album: 'TON Genesis', duration: 198 },
       { title: 'Neon Horizon', artist: 'Satoshi Sync', album: 'Future Ledger', duration: 225 },
@@ -73,21 +139,26 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
   const [urlInput, setUrlInput] = useState('');
   const [step, setStep] = useState<ModalStep>('input');
   const [errorMessage, setErrorMessage] = useState('');
+  const [previewData, setPreviewData] = useState<SpotifyPlaylistPreview | null>(null);
+  
+  // Import progress state
   const [progressCount, setProgressCount] = useState(0);
   const [totalTracksCount, setTotalTracksCount] = useState(0);
-  const [importedPlaylistName, setImportedPlaylistName] = useState('');
 
+  // In-session cache for preview requests
+  const previewCacheRef = useRef<Map<string, SpotifyPlaylistPreview>>(new Map());
+  const activeRequestIdRef = useRef<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Reset state when opening/closing
+  // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
       setUrlInput('');
       setStep('input');
       setErrorMessage('');
+      setPreviewData(null);
       setProgressCount(0);
       setTotalTracksCount(0);
-      setImportedPlaylistName('');
       setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
@@ -97,7 +168,7 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
   // Handle ESC key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen && step !== 'importing') {
+      if (e.key === 'Escape' && isOpen && step !== 'importing' && step !== 'loading_preview') {
         onClose();
       }
     };
@@ -105,75 +176,171 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, step, onClose]);
 
-  if (!isOpen) return null;
-
-  const playlistId = extractSpotifyPlaylistId(urlInput);
+  const validation = validateSpotifyPlaylistInput(urlInput);
   const isInputFilled = urlInput.trim().length > 0;
-  const isValidUrl = playlistId !== null;
+  const isValidUrl = validation.isValid;
+  const playlistId = validation.playlistId;
 
-  const handleImport = async () => {
-    if (!isValidUrl || !playlistId || step === 'importing') return;
+  /**
+   * Fetch playlist metadata for Preview Mode
+   */
+  const handleFetchPreview = useCallback(async () => {
+    if (!isValidUrl || !playlistId || step === 'loading_preview' || step === 'importing') return;
+
+    const requestId = ++activeRequestIdRef.current;
+    setStep('loading_preview');
+    setErrorMessage('');
+
+    // Check in-session cache first
+    const cached = previewCacheRef.current.get(playlistId);
+    if (cached) {
+      setPreviewData(cached);
+      setStep('preview');
+      return;
+    }
+
+    try {
+      const savedToken = localStorage.getItem('tonjam_spotify_token');
+      let previewResult: SpotifyPlaylistPreview | null = null;
+
+      // If a real Spotify token is stored, attempt direct Spotify API proxy
+      if (savedToken && savedToken !== 'demo-token') {
+        try {
+          // Attempt playlist details endpoint first
+          const detailsRes = await fetch(`/api/spotify/playlist-details?token=${encodeURIComponent(savedToken)}&playlistId=${encodeURIComponent(playlistId)}`);
+          if (detailsRes.ok) {
+            const data = await detailsRes.json();
+            const tracksSample: SpotifyPreviewTrack[] = (data.tracks?.items || []).slice(0, 5).map((item: any) => ({
+              id: item.track?.id || Math.random().toString(),
+              name: item.track?.name || 'Untitled Track',
+              artists: (item.track?.artists || []).map((a: any) => a.name) || ['Unknown Artist'],
+              album: item.track?.album?.name || '',
+              durationMs: item.track?.duration_ms || 180000,
+              imageUrl: item.track?.album?.images?.[0]?.url || data.images?.[0]?.url
+            }));
+
+            const allResolvedTracks = (data.tracks?.items || []).map((item: any) => ({
+              title: item.track?.name || 'Untitled Track',
+              artist: (item.track?.artists || []).map((a: any) => a.name).join(', ') || 'Unknown Artist',
+              album: item.track?.album?.name || 'Spotify Album',
+              coverUrl: item.track?.album?.images?.[0]?.url || data.images?.[0]?.url,
+              duration: Math.round((item.track?.duration_ms || 180000) / 1000)
+            }));
+
+            previewResult = {
+              id: playlistId,
+              name: data.name || `Spotify Playlist #${playlistId.slice(0, 6)}`,
+              description: data.description || '',
+              ownerName: data.owner?.display_name || 'Spotify',
+              imageUrl: data.images?.[0]?.url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&h=400&q=80',
+              trackCount: data.tracks?.total || allResolvedTracks.length,
+              tracks: tracksSample,
+              allTracks: allResolvedTracks
+            };
+          }
+        } catch (apiErr) {
+          console.warn('Live Spotify details request fallback:', apiErr);
+        }
+      }
+
+      // If previewResult could not be fetched from live API, generate high-fidelity preview dataset
+      if (!previewResult) {
+        // Small realistic network delay for smooth UX
+        await new Promise((resolve) => setTimeout(resolve, 350));
+        
+        // Ensure this response matches active request
+        if (requestId !== activeRequestIdRef.current) return;
+
+        const fallback = PLAYLIST_FALLBACK_METADATA.default;
+        const totalCount = fallback.totalCount;
+        const sampleTracks: SpotifyPreviewTrack[] = fallback.tracks.slice(0, 5).map((t, idx) => ({
+          id: `sample-${idx}`,
+          name: t.title,
+          artists: [t.artist],
+          album: t.album,
+          durationMs: (t.duration || 200) * 1000,
+          imageUrl: fallback.coverUrl
+        }));
+
+        previewResult = {
+          id: playlistId,
+          name: `${fallback.title} (${playlistId.slice(0, 4).toUpperCase()})`,
+          description: fallback.description,
+          ownerName: fallback.owner,
+          imageUrl: fallback.coverUrl,
+          trackCount: totalCount,
+          tracks: sampleTracks,
+          allTracks: [...fallback.tracks]
+        };
+      }
+
+      if (requestId === activeRequestIdRef.current && previewResult) {
+        previewCacheRef.current.set(playlistId, previewResult);
+        setPreviewData(previewResult);
+        setStep('preview');
+      }
+    } catch (err: any) {
+      if (requestId === activeRequestIdRef.current) {
+        console.error('Spotify preview error:', err);
+        setErrorMessage(
+          err?.message || 'Check the Spotify playlist link and try again.'
+        );
+        setStep('input');
+      }
+    }
+  }, [isValidUrl, playlistId, step]);
+
+  /**
+   * Confirms import using reviewed preview metadata
+   */
+  const handleConfirmImport = async () => {
+    if (!previewData || step === 'importing') return;
 
     setStep('importing');
     setErrorMessage('');
     setProgressCount(0);
 
     try {
-      const savedToken = localStorage.getItem('tonjam_spotify_token');
-      let playlistTitle = 'Spotify Curated Playlist';
-      let coverUrl = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&h=400&q=80';
-      let tracksList: { title: string; artist: string; album?: string; coverUrl?: string; duration?: number }[] = [];
-
-      // If a real Spotify token is present in browser session, attempt fetching from server
-      if (savedToken && savedToken !== 'demo-token') {
-        try {
-          const res = await fetch(`/api/spotify/playlist-tracks?token=${encodeURIComponent(savedToken)}&playlistId=${encodeURIComponent(playlistId)}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.items && data.items.length > 0) {
-              tracksList = data.items.map((item: any) => ({
-                title: item.track?.name || 'Untitled Track',
-                artist: item.track?.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist',
-                album: item.track?.album?.name || 'Spotify Album',
-                coverUrl: item.track?.album?.images?.[0]?.url || coverUrl,
-                duration: Math.round((item.track?.duration_ms || 180000) / 1000)
-              }));
-              playlistTitle = `Spotify Playlist #${playlistId.slice(0, 6)}`;
-            }
-          }
-        } catch (err) {
-          console.warn('Direct Spotify fetch failed, using fallback dataset', err);
-        }
-      }
-
-      // If tracksList is still empty, resolve using standard high-fidelity catalog
-      if (tracksList.length === 0) {
-        const fallback = PLAYLIST_FALLBACK_METADATA.default;
-        playlistTitle = `${fallback.title} (${playlistId.slice(0, 4).toUpperCase()})`;
-        coverUrl = fallback.coverUrl;
-        tracksList = [...fallback.tracks];
-      }
+      const playlistTitle = previewData.name;
+      const coverUrl = previewData.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&h=400&q=80';
+      
+      let tracksList = previewData.allTracks && previewData.allTracks.length > 0 
+        ? [...previewData.allTracks] 
+        : previewData.tracks.map((t) => ({
+            title: t.name,
+            artist: t.artists.join(', '),
+            album: t.album || 'Spotify Album',
+            coverUrl: t.imageUrl || coverUrl,
+            duration: t.durationMs ? Math.round(t.durationMs / 1000) : 200
+          }));
 
       const total = tracksList.length;
       setTotalTracksCount(total);
-      setImportedPlaylistName(playlistTitle);
 
-      // Simulate smooth track resolution progress steps
+      // Smooth track progress increments
       for (let i = 1; i <= total; i++) {
-        await new Promise((resolve) => setTimeout(resolve, Math.max(120, Math.floor(1200 / total))));
+        await new Promise((resolve) => setTimeout(resolve, Math.max(100, Math.floor(1100 / total))));
         setProgressCount(i);
       }
 
-      // Commit to Library state
+      // Commit to Library state via parent callback
       onImportPlaylist(playlistTitle, coverUrl, tracksList);
       setStep('success');
     } catch (err: any) {
-      console.error('Spotify import error:', err);
+      console.error('Spotify import confirmation error:', err);
       setErrorMessage(
         err?.message || 'Check the Spotify playlist link and try again.'
       );
       setStep('error');
     }
+  };
+
+  const handleBackToInput = () => {
+    setStep('input');
+    setErrorMessage('');
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
   };
 
   const handleDone = () => {
@@ -195,6 +362,8 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
     }, 50);
   };
 
+  if (!isOpen) return null;
+
   return (
     <div
       role="dialog"
@@ -202,7 +371,7 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
       aria-labelledby="import-spotify-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs"
       onClick={(e) => {
-        if (e.target === e.currentTarget && step !== 'importing') {
+        if (e.target === e.currentTarget && step !== 'importing' && step !== 'loading_preview') {
           onClose();
         }
       }}
@@ -212,7 +381,7 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.98 }}
         transition={{ duration: 0.15 }}
-        className="w-full max-w-[420px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.12)] rounded-[8px] p-4 sm:p-5 text-white flex flex-col gap-4 relative shadow-none"
+        className="w-full max-w-[440px] max-h-[90vh] overflow-y-auto bg-[#0A0A0A] border border-[rgba(255,255,255,0.12)] rounded-[8px] p-4 sm:p-5 text-white flex flex-col gap-4 relative shadow-none"
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
@@ -227,10 +396,12 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
                 id="import-spotify-title"
                 className="text-[18px] sm:text-[20px] leading-[26px] sm:leading-[28px] font-medium text-white tracking-tight"
               >
-                Import Spotify Playlist
+                {step === 'preview' ? 'Preview Playlist' : 'Import Spotify Playlist'}
               </h2>
               <p className="text-[13px] leading-[20px] text-[rgba(245,247,250,0.72)] mt-0.5">
-                Import a Spotify playlist into your TonJam Library.
+                {step === 'preview' 
+                  ? 'Review the playlist before adding it to your Library.'
+                  : 'Import a Spotify playlist into your TonJam Library.'}
               </p>
             </div>
           </div>
@@ -238,7 +409,7 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
           <button
             type="button"
             onClick={onClose}
-            disabled={step === 'importing'}
+            disabled={step === 'importing' || step === 'loading_preview'}
             aria-label="Close modal"
             className="text-[rgba(245,247,250,0.55)] hover:text-white p-1 rounded-[6px] hover:bg-white/5 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
@@ -268,11 +439,13 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
                     onChange={(e) => {
                       setUrlInput(e.target.value);
                       if (errorMessage) setErrorMessage('');
+                      // Clear stale preview when URL changes
+                      if (previewData) setPreviewData(null);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && isValidUrl) {
                         e.preventDefault();
-                        handleImport();
+                        handleFetchPreview();
                       }
                     }}
                     placeholder="Paste Spotify playlist link"
@@ -298,7 +471,14 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
                 {isInputFilled && !isValidUrl && (
                   <div className="flex items-center gap-1.5 text-[12px] text-rose-400 pt-0.5">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>Please enter a valid Spotify playlist link or ID</span>
+                    <span>{validation.error || 'Please enter a valid Spotify playlist link or ID'}</span>
+                  </div>
+                )}
+
+                {errorMessage && (
+                  <div className="p-2.5 rounded-[6px] bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[12px] flex items-center gap-2 mt-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{errorMessage}</span>
                   </div>
                 )}
               </div>
@@ -316,20 +496,85 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
                 <button
                   type="button"
                   disabled={!isValidUrl}
-                  onClick={handleImport}
+                  onClick={handleFetchPreview}
                   className={`px-4 py-2 rounded-[6px] text-[13px] leading-[20px] font-medium text-white transition-all ${
                     isValidUrl
                       ? 'bg-[#0088CC] hover:bg-[#0077b5] cursor-pointer'
                       : 'bg-[#0088CC]/40 text-white/50 cursor-not-allowed'
                   }`}
                 >
-                  Import Playlist
+                  Preview Playlist
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 2: IMPORTING / PROGRESS STATE */}
+          {/* STEP 2: LOADING PREVIEW STATE */}
+          {step === 'loading_preview' && (
+            <div className="py-6 space-y-4">
+              <div className="flex flex-col items-center justify-center text-center space-y-3">
+                <Loader2 className="w-6 h-6 animate-spin text-[#0088CC]" />
+                <div className="space-y-1">
+                  <p className="text-[14px] font-medium text-white">
+                    Fetching playlist…
+                  </p>
+                  <p className="text-[12px] text-[rgba(245,247,250,0.6)]">
+                    Retrieving playlist metadata and track sample
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end pt-2">
+                <button
+                  type="button"
+                  disabled
+                  className="px-4 py-2 rounded-[6px] text-[13px] leading-[20px] font-medium text-white/70 bg-[#0088CC]/60 flex items-center gap-2 cursor-not-allowed"
+                >
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Loading…</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: PREVIEW STATE */}
+          {step === 'preview' && previewData && (
+            <div className="space-y-4">
+              <PlaylistPreview playlist={previewData} />
+
+              {/* Actions */}
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  type="button"
+                  onClick={handleBackToInput}
+                  className="px-3.5 py-2 rounded-[6px] text-[13px] leading-[20px] font-medium text-[rgba(245,247,250,0.72)] hover:text-white bg-transparent hover:bg-white/5 transition-colors cursor-pointer flex items-center gap-1.5"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-3.5 py-2 rounded-[6px] text-[13px] leading-[20px] font-medium text-[rgba(245,247,250,0.72)] hover:text-white bg-transparent hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleConfirmImport}
+                    className="px-4 py-2 rounded-[6px] text-[13px] leading-[20px] font-medium text-white bg-[#0088CC] hover:bg-[#0077b5] transition-colors cursor-pointer"
+                  >
+                    Import Playlist
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: IMPORTING / PROGRESS STATE */}
           {step === 'importing' && (
             <div className="py-4 space-y-4">
               <div className="space-y-1.5">
@@ -367,7 +612,7 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
             </div>
           )}
 
-          {/* STEP 3: SUCCESS STATE */}
+          {/* STEP 5: SUCCESS STATE */}
           {step === 'success' && (
             <div className="space-y-4 py-1">
               <div className="p-3 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.08)] flex items-center gap-3">
@@ -407,7 +652,7 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
             </div>
           )}
 
-          {/* STEP 4: ERROR STATE */}
+          {/* STEP 6: ERROR STATE */}
           {step === 'error' && (
             <div className="space-y-4 py-1">
               <div className="p-3 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.08)] flex items-start gap-3">

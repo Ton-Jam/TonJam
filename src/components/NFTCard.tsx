@@ -214,18 +214,26 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         console.error("Error stopping previous preview:", err);
       }
     }
+    if ((window as any).__activeNFTPreviewStop) {
+      try {
+        (window as any).__activeNFTPreviewStop();
+      } catch (err) {
+        console.error("Error stopping previous preview:", err);
+      }
+    }
 
     // Pause primary audio if playing
     if (isPlaying) {
       togglePlay().catch((err) => console.error("Error pausing main audio:", err));
     }
 
-    const audioUrl = nft.audioUrl || associatedTrack?.audioUrl || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+    const audioUrl = nft.audioUrl || associatedTrack?.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
     const audio = new Audio(audioUrl);
     audioRef.current = audio;
 
     // Register active preview stop callback globally
     (window as any)._activePreviewStop = stopPreview;
+    (window as any).__activeNFTPreviewStop = stopPreview;
 
     const playPromise = audio.play();
     if (playPromise !== undefined) {
@@ -442,29 +450,29 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   );
 
   const ContextMenuContentRefined = () => (
-    <ContextMenuContent className="bg-[#0A0A0B] border-white/5 text-white shadow-2xl min-w-[200px] p-1 rounded-xl backdrop-blur-3xl">
-      <ContextMenuLabel className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">NFT Options</ContextMenuLabel>
-      <ContextMenuSeparator className="bg-white/5" />
-      <ContextMenuItem onClick={handlePlayClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
+    <ContextMenuContent className="bg-[#0A0A0B] border border-white/12 text-white min-w-[200px] p-1 rounded-[3px]">
+      <ContextMenuLabel className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/50 py-2.5 px-3">NFT Options</ContextMenuLabel>
+      <ContextMenuSeparator className="bg-white/10" />
+      <ContextMenuItem onClick={handlePlayClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        <span className="text-[10px] font-black uppercase tracking-widest">Play Track</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider">Play Track</span>
       </ContextMenuItem>
-      <ContextMenuItem onClick={handleQuickViewClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
+      <ContextMenuItem onClick={handleQuickViewClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
         <Eye className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">Quick View</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider">Quick View</span>
       </ContextMenuItem>
-      <ContextMenuItem onClick={() => setIs3DModalOpen(true)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
+      <ContextMenuItem onClick={() => setIs3DModalOpen(true)} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
         <RotateCw className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">3D Holographic Stage</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider">3D Holographic Stage</span>
       </ContextMenuItem>
-      <ContextMenuItem onClick={handleHistoryClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
+      <ContextMenuItem onClick={handleHistoryClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
         <History className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">Ledger History</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider">Ledger History</span>
       </ContextMenuItem>
-      <ContextMenuSeparator className="bg-white/5" />
-      <ContextMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
+      <ContextMenuSeparator className="bg-white/10" />
+      <ContextMenuItem onClick={handleShare} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
         <Share2 className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">Share NFT</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider">Share NFT</span>
       </ContextMenuItem>
     </ContextMenuContent>
   );
@@ -498,7 +506,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     if (supply === 1 || editionLower === 'unique' || nft.edition === 'Unique') {
       return {
         label: '1/1 UNIQUE',
-        className: 'bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 text-white font-extrabold uppercase border border-white/20 shadow-lg animate-pulse',
+        className: 'bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 text-white font-extrabold uppercase border border-white/20 animate-pulse',
         icon: 'Star'
       };
     }
@@ -506,7 +514,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     if (supply <= 10) {
       return {
         label: `LIMIT: ${supply} (ULTRA)`,
-        className: 'bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold uppercase border border-orange-400/20 shadow-md',
+        className: 'bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold uppercase border border-orange-400/20',
         icon: 'Gem'
       };
     }
@@ -514,7 +522,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     if (supply <= 100) {
       return {
         label: `LIMIT: ${supply}`,
-        className: 'bg-slate-900/90 text-amber-500 font-bold uppercase border border-amber-500/20 shadow-sm',
+        className: 'bg-slate-900/90 text-amber-500 font-bold uppercase border border-amber-500/20',
         icon: 'Sparkles'
       };
     }
@@ -540,7 +548,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
-            className={`flex items-center gap-3.5 p-1.5 rounded-lg group bg-transparent transition-colors cursor-pointer w-full select-none ${className}`}
+            className={`flex items-center gap-3 p-1.5 rounded-[3px] group bg-transparent hover:bg-white/5 transition-colors cursor-pointer w-full select-none ${className}`}
             onClick={handleCardClick}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -553,13 +561,13 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             aria-label={`View NFT ${nft.title}`}
           >
             <div 
-              className="relative w-12 h-12 rounded-[3px] overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/12"
+              className="relative w-12 h-12 rounded-[3px] overflow-hidden flex-shrink-0 bg-[#101010] border border-white/12"
               onClick={(e) => { e.stopPropagation(); handlePreviewToggle(e); }}
             >
               {!isRowImageLoaded && (
                 <div className="absolute inset-0 bg-neutral-800/80 overflow-hidden flex items-center justify-center z-0">
                   <div className="absolute inset-0 animate-shimmer-fast" />
-                  <img src={TON_LOGO} alt="TON" className="w-4 h-4 opacity-20 animate-blockchain-glow" />
+                  <img src={TON_LOGO} alt="TON" className="w-4 h-4 opacity-20" />
                 </div>
               )}
               <LazyArtworkImage 
@@ -569,16 +577,16 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                 onLoad={() => setIsRowImageLoaded(true)}
                 fadeIn={false}
                 className={cn(
-                  "w-full h-full object-cover transition-all duration-300 group-hover:scale-105",
+                  "w-full h-full object-cover transition-transform duration-300 group-hover:scale-103",
                   isRowImageLoaded ? "opacity-100" : "opacity-0"
                 )} 
                 onError={() => { 
                   setIsRowImageLoaded(true);
                 }}
               />
-              <div className={`absolute inset-0 flex items-center justify-center bg-black/45 transition-opacity ${isActive || isPlayingPreview ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+              <div className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity ${isActive || isPlayingPreview ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                 {isPlayingPreview || (isActive && isPlaying) ? (
-                  <Pause className="h-4 w-4 fill-current text-blue-400" />
+                  <Pause className="h-4 w-4 fill-current text-[#0088CC]" />
                 ) : (
                   <Play className="h-4 w-4 text-white fill-current ml-0.5" />
                 )}
@@ -586,11 +594,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             </div>
 
             <div className="flex-1 min-w-0">
-              <h4 className={`text-[13px] font-medium leading-tight truncate ${isActive ? 'text-blue-400 font-semibold' : 'text-white/95'}`}>
+              <h4 className={`text-[13px] font-medium leading-tight truncate ${isActive ? 'text-[#0088CC] font-semibold' : 'text-[#F5F7FA]'}`}>
                 {nft.title}
               </h4>
               <p 
-                className="text-[11px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
+                className="text-[11px] text-white/60 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
@@ -601,25 +609,25 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-[12px] font-medium text-white/80 font-mono">
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1 text-[11px] font-medium text-white/80 font-mono">
                 <img src={TON_LOGO} className="w-3 h-3 opacity-80" alt="TON" />
                 <span>{formattedPrice} TON</span>
               </div>
-              <motion.button 
+              <button 
                 type="button"
                 onClick={handleActionClick}
                 disabled={!isOwner && isAuctionEnded}
                 aria-label={isOwner ? (nft.listingType ? `Manage ${nft.title}` : `Sell ${nft.title}`) : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Auction ended' : `Place bid on ${nft.title}`) : `Buy ${nft.title} for ${formattedPrice} TON`)}
                 className={cn(
-                  "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950",
+                  "cursor-pointer transition-colors rounded-[3px] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-[#0088CC]",
                   isOwner 
-                    ? 'bg-white/10 text-white' 
-                    : (isAuctionEnded ? 'bg-white/5 text-white/20' : 'bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/20')
+                    ? 'bg-white/10 hover:bg-white/20 text-white' 
+                    : (isAuctionEnded ? 'bg-white/5 text-white/20' : 'bg-[#0088CC] hover:bg-[#0077b3]')
                 )}
               >
                 {isOwner ? (nft.listingType ? 'Manage' : 'Sell') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Ended' : 'Bid') : 'Buy')}
-              </motion.button>
+              </button>
               <MoreOptionsButton />
             </div>
           </motion.div>
@@ -635,13 +643,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         <ContextMenuTrigger>
           <motion.div
             layout
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -3 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ y: -2 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              "group relative cursor-pointer p-0 bg-transparent transition-all duration-200 flex flex-col w-[155px] shrink-0 select-none",
+              "group relative cursor-pointer p-0 bg-transparent transition-all duration-200 flex flex-col w-[150px] shrink-0 select-none",
               className
             )}
             onClick={handleCardClick}
@@ -655,14 +662,14 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             tabIndex={0}
             aria-label={`View NFT ${nft.title}`}
           >
-            {/* Artwork - 1:1 Square with Spotify-style Floating Action Button */}
-            <div className="relative aspect-square w-full rounded-[3px] overflow-hidden bg-neutral-900/60 border border-white/12">
+            {/* Artwork - 1:1 Square with Floating Play Button (3px radius) */}
+            <div className="relative aspect-square w-full rounded-[3px] overflow-hidden bg-[#101010] border border-white/12">
               {!isImageLoaded && (
                 <div className="absolute inset-0 bg-neutral-900 overflow-hidden flex flex-col items-center justify-center z-0 select-none">
                   <div className="absolute inset-0 animate-shimmer pointer-events-none" />
-                  <div className="flex flex-col items-center gap-1 opacity-25 animate-blockchain-glow">
-                    <img src={TON_LOGO} alt="TON" className="w-6 h-6 drop-shadow-sm" />
-                    <span className="text-[8px] font-mono font-bold tracking-widest text-cyan-400 uppercase">SYNCING</span>
+                  <div className="flex flex-col items-center gap-1 opacity-25">
+                    <img src={TON_LOGO} alt="TON" className="w-5 h-5" />
+                    <span className="text-[8px] font-mono font-medium tracking-wider text-cyan-400 uppercase">SYNC</span>
                   </div>
                 </div>
               )}
@@ -672,7 +679,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                 onLoad={() => setIsImageLoaded(true)}
                 fadeIn={false}
                 className={cn(
-                  "w-full h-full object-cover transition-all duration-500 group-hover:scale-105",
+                  "w-full h-full object-cover transition-transform duration-300 group-hover:scale-103",
                   isImageLoaded ? "opacity-100" : "opacity-0"
                 )}
                 alt={nft.title}
@@ -683,37 +690,37 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
 
               {/* Floating Play / Preview Action Button */}
               <div className={cn(
-                "absolute bottom-2 right-2 transition-all duration-200",
+                "absolute bottom-1.5 right-1.5 transition-all duration-200",
                 (isActive || isPlayingPreview)
                   ? "opacity-100 translate-y-0" 
-                  : "opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0"
+                  : "opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"
               )}>
                 <button 
                   type="button"
-                  className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 hover:scale-105 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+                  className="w-8 h-8 rounded-full bg-[#0088CC] hover:bg-[#0077b3] text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white cursor-pointer"
                   onClick={handlePreviewToggle}
                   aria-label={isPlayingPreview || (isActive && isPlaying) ? `Pause preview for ${nft.title}` : `Play preview for ${nft.title}`}
                 >
                   {isPlayingPreview || (isActive && isPlaying) ? (
-                    <Pause className="h-4 w-4 fill-current" />
+                    <Pause className="h-3.5 w-3.5 fill-current" />
                   ) : (
-                    <Play className="h-4 w-4 fill-current ml-0.5" />
+                    <Play className="h-3.5 w-3.5 fill-current ml-0.5" />
                   )}
                 </button>
               </div>
             </div>
 
             {/* Clean NFT Meta */}
-            <div className="flex flex-col w-full min-w-0 mt-2.5">
+            <div className="flex flex-col w-full min-w-0 mt-2">
               <h3 className={cn(
-                "text-[13px] font-semibold tracking-tight truncate w-full transition-colors",
-                isActive ? 'text-blue-400' : 'text-white/95 group-hover:text-white'
+                "text-[13px] font-medium tracking-tight truncate w-full transition-colors",
+                isActive ? 'text-[#0088CC]' : 'text-[#F5F7FA] group-hover:text-white'
               )}>
                 {nft.title}
               </h3>
               
               <p 
-                className="text-[11px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors cursor-pointer"
+                className="text-[11px] font-normal text-white/60 truncate w-full mt-0.5 hover:text-white transition-colors cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
@@ -724,7 +731,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               </p>
 
               {/* Price Row */}
-              <div className="flex items-center gap-1 mt-1 text-[11px] font-medium text-white/70 font-mono">
+              <div className="flex items-center gap-1 mt-1 text-[11px] font-medium text-white/80 font-mono">
                 <img src={TON_LOGO} className="w-3 h-3 opacity-75 shrink-0" alt="TON" />
                 <span>{formattedPrice} TON</span>
               </div>

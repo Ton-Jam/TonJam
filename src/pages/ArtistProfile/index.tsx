@@ -337,16 +337,36 @@ const ArtistProfile: React.FC = () => {
 
         {/* Follow / Following Pill */}
         {!isOwnProfile && (
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleFollowToggle} 
-            className={`px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 border border-[#c0c0c0]/30 ${
+            className={`px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider cursor-pointer shadow-sm border border-[#c0c0c0]/30 transition-colors duration-500 ease-in-out flex items-center gap-2 ${
               isFollowing 
                 ? "bg-white/10 text-white hover:bg-white/20" 
-                : "bg-[#0052FF] text-white hover:bg-[#1a66ff] shadow-[0_4px_16px_rgba(0,82,255,0.4)]"
+                : "bg-[#0052FF] text-white hover:bg-[#1a66ff]"
             }`}
           >
-            {isFollowing ? "Following" : "Follow Artist"}
-          </button>
+            <motion.span
+              key={isFollowing ? "following" : "follow"}
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="flex items-center gap-1.5"
+            >
+              {isFollowing ? (
+                <>
+                  <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Following</span>
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Follow Artist</span>
+                </>
+              )}
+            </motion.span>
+          </motion.button>
         )}
 
         {/* Action Pills */}

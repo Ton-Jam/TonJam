@@ -272,7 +272,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
         {/* Filter Pills & Navigation Actions */}
         <div className="flex items-center gap-2 shrink-0">
           {showFilters && (
-            <div className="hidden md:flex items-center gap-1 bg-card/60 p-1 rounded-xl border border-[#c0c0c0]/25">
+            <div className="hidden md:flex items-center gap-1 bg-[#0A0A0A] p-1 rounded-[3px] border border-white/12">
               {[
                 { id: 'volume', label: 'Volume', icon: Zap },
                 { id: 'active', label: 'NFTs', icon: Disc },
@@ -285,10 +285,10 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                   <button
                     key={tab.id}
                     onClick={() => setSortMetric(tab.id as SortMetric)}
-                    className={`flex items-center gap-1 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer whitespace-nowrap border ${
+                    className={`flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-[3px] transition-colors cursor-pointer whitespace-nowrap border ${
                       isActive
-                        ? 'bg-blue-600 text-white shadow-sm border-[#c0c0c0]/40'
-                        : 'text-zinc-400 hover:text-white hover:bg-white/5 border-[#c0c0c0]/25'
+                        ? 'bg-[#0088CC] text-white border-[#0088CC]'
+                        : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
                     }`}
                   >
                     <Icon className="w-3 h-3" />
@@ -304,14 +304,14 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
               <button
                 onClick={scrollLeft}
                 aria-label="Scroll Left"
-                className="w-7 h-7 rounded-lg bg-card/80 hover:bg-white/10 text-zinc-300 hover:text-white flex items-center justify-center border border-[#c0c0c0]/25 transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-[3px] bg-white/5 hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center border-none transition-colors cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={scrollRight}
                 aria-label="Scroll Right"
-                className="w-7 h-7 rounded-lg bg-card/80 hover:bg-white/10 text-zinc-300 hover:text-white flex items-center justify-center border border-[#c0c0c0]/25 transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-[3px] bg-white/5 hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center border-none transition-colors cursor-pointer"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -320,7 +320,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 
           <button 
             onClick={() => navigate("/artists")} 
-            className="text-xs font-bold text-primary flex items-center outline-none cursor-pointer border-none bg-transparent ml-1"
+            className="text-xs font-semibold text-[#0088CC] hover:text-[#0088CC]/80 flex items-center outline-none cursor-pointer border-none bg-transparent ml-1"
           >
             All <ChevronRight className="w-3.5 h-3.5" />
           </button>
@@ -342,10 +342,10 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setSortMetric(tab.id as SortMetric)}
-                className={`flex items-center gap-1 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`flex items-center gap-1 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-[3px] transition-colors cursor-pointer whitespace-nowrap shrink-0 border ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-sm border border-[#c0c0c0]/40'
-                    : 'bg-card/60 text-zinc-400 hover:text-white border border-[#c0c0c0]/25'
+                    ? 'bg-[#0088CC] text-white border-[#0088CC]'
+                    : 'bg-[#0A0A0A] text-white/60 hover:text-white border-white/12'
                 }`}
               >
                 <Icon className="w-3 h-3" />
@@ -360,7 +360,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
       {variant === 'scroll' ? (
         <div 
           ref={scrollContainerRef}
-          className="flex gap-3.5 overflow-x-auto no-scrollbar pb-3 w-full scroll-smooth"
+          className="flex gap-3 overflow-x-auto no-scrollbar pb-2 w-full scroll-smooth"
         >
           {topCreators.map((creator) => {
             const isFollowed = followedUserIds.includes(creator.uid);
@@ -368,33 +368,33 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 
             const isTop3 = (creator.rank || 99) <= 3;
             const rankBg = creator.rank === 1
-              ? 'bg-amber-500 text-black font-black'
+              ? 'bg-amber-500 text-black font-semibold'
               : creator.rank === 2
-                ? 'bg-cyan-400 text-black font-black'
+                ? 'bg-[#0088CC] text-white font-semibold'
                 : creator.rank === 3
-                  ? 'bg-purple-400 text-black font-black'
-                  : 'bg-card/80 text-zinc-400 font-bold';
+                  ? 'bg-purple-400 text-black font-semibold'
+                  : 'bg-white/10 text-white/60 font-semibold';
 
             return (
               <motion.div
                 key={`scroll-artist-${creator.id}`}
-                whileHover={{ y: -3 }}
+                whileHover={{ y: -2 }}
                 onClick={() => navigate(`/artist/${creator.uid}`)}
-                className="w-[210px] sm:w-[230px] shrink-0 bg-card/60 backdrop-blur-md rounded-2xl p-4 transition-all flex flex-col justify-between space-y-3 cursor-pointer group relative overflow-hidden shadow-lg hover:bg-card/80 border border-[#c0c0c0]/25"
+                className="w-[200px] sm:w-[220px] shrink-0 bg-[#0A0A0A] rounded-[3px] p-3 transition-colors flex flex-col justify-between space-y-2.5 cursor-pointer group relative overflow-hidden border border-white/12 hover:border-white/20"
               >
                 {/* Top Row: Rank Badge & Follow Action */}
                 <div className="flex items-center justify-between z-10">
-                  <div className={`px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider flex items-center gap-1 ${rankBg}`}>
+                  <div className={`px-1.5 py-0.5 rounded-[3px] text-[8px] uppercase tracking-wider flex items-center gap-1 ${rankBg}`}>
                     {isTop3 && <Crown className="w-3 h-3 shrink-0" />}
                     <span>#{creator.rank}</span>
                   </div>
 
                   <button
                     onClick={(e) => handleFollowClick(e, creator.uid)}
-                    className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer border border-[#c0c0c0]/30 ${
+                    className={`px-2.5 py-0.5 rounded-[3px] text-[8px] font-semibold uppercase tracking-wider flex items-center gap-1 transition-colors duration-300 cursor-pointer ${
                       isFollowed
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : 'bg-white/10 hover:bg-white text-white hover:text-black'
+                        ? 'bg-[#0088CC] text-white'
+                        : 'bg-white/10 hover:bg-white/20 text-white/80 hover:text-white'
                     }`}
                   >
                     {isFollowed ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
@@ -403,16 +403,16 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                 </div>
 
                 {/* Avatar & Creator Info */}
-                <div className="flex flex-col items-center text-center space-y-2 z-10 pt-1">
+                <div className="flex flex-col items-center text-center space-y-1.5 z-10 pt-0.5">
                   <div className="relative">
                     <img
                       src={creator.avatar}
                       alt={creator.name}
-                      className="w-16 h-16 rounded-full bg-zinc-900 object-cover group-hover:scale-105 transition-transform shadow-md border border-[#c0c0c0]/25"
+                      className="w-14 h-14 rounded-full bg-[#101010] object-cover group-hover:scale-103 transition-transform border border-white/10"
                       loading="lazy"
                     />
                     {creator.isVerified && (
-                      <span className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-black shadow-sm">
+                      <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-[#0088CC] text-white flex items-center justify-center text-[8px] font-bold border border-[#0A0A0A]">
                         ✓
                       </span>
                     )}
@@ -420,7 +420,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 
                   <div className="space-y-0.5 w-full">
                     <div className="flex items-center justify-center gap-1 max-w-full">
-                      <h3 className="text-xs font-black text-white uppercase tracking-tight truncate group-hover:text-cyan-400 transition-colors">
+                      <h3 className="text-xs font-semibold text-[#F5F7FA] uppercase tracking-tight truncate group-hover:text-[#0088CC] transition-colors">
                         {creator.name}
                       </h3>
                       <ArtistVerificationBadge
@@ -431,21 +431,21 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                         showLabel={false}
                       />
                     </div>
-                    <p className="text-[10px] font-mono text-zinc-400 truncate">@{creator.username}</p>
+                    <p className="text-[9px] font-mono text-white/50 truncate">@{creator.username}</p>
                   </div>
                 </div>
 
                 {/* Volume & Activity Box */}
-                <div className="w-full bg-white/5 rounded-xl p-2.5 space-y-1 z-10">
+                <div className="w-full bg-[#101010] rounded-[3px] p-2 space-y-1 z-10 border border-white/5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider">Volume Traded</span>
-                    <span className="text-[8px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-1 py-0.2 rounded">+3.8%</span>
+                    <span className="text-[8px] font-medium text-white/50 uppercase tracking-wider">Volume Traded</span>
+                    <span className="text-[8px] font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-1 py-0.2 rounded-[2px]">+3.8%</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs font-black text-cyan-400">
-                    <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5 shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0088CC] font-mono">
+                    <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5 shrink-0 opacity-80" />
                     <span>{creator.volumeTON.toLocaleString()} TON</span>
                   </div>
-                  <div className="flex items-center justify-between text-[9px] font-bold text-zinc-400 uppercase tracking-wider pt-0.5">
+                  <div className="flex items-center justify-between text-[8px] font-medium text-white/50 uppercase tracking-wider pt-0.5">
                     <span>{creator.activeNFTsCount} Listed</span>
                     <span>•</span>
                     <span>{formatNumber(creator.totalStreams)} Plays</span>
@@ -456,10 +456,10 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                 {creator.topTrack && (
                   <button
                     onClick={(e) => handleTogglePlayTrack(e, creator.topTrack)}
-                    className="w-full py-1.5 px-2 rounded-lg bg-blue-600/15 hover:bg-blue-600/30 text-blue-400 hover:text-white transition-all flex items-center justify-between text-[9px] font-black uppercase tracking-wider z-10 cursor-pointer"
+                    className="w-full py-1 px-2 rounded-[3px] bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-colors flex items-center justify-between text-[8px] font-semibold uppercase tracking-wider z-10 cursor-pointer border border-white/5"
                   >
-                    <span className="truncate max-w-[130px]">{creator.topTrack.title}</span>
-                    {isPlayingThisTrack ? <Pause className="w-3 h-3 shrink-0" /> : <Play className="w-3 h-3 shrink-0 ml-1" />}
+                    <span className="truncate max-w-[120px]">{creator.topTrack.title}</span>
+                    {isPlayingThisTrack ? <Pause className="w-3 h-3 shrink-0 text-[#0088CC]" /> : <Play className="w-3 h-3 shrink-0 ml-1" />}
                   </button>
                 )}
               </motion.div>
@@ -468,48 +468,48 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
         </div>
       ) : (
         /* GRID VIEW FALLBACK */
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {topCreators.map((creator) => {
             const isFollowed = followedUserIds.includes(creator.uid);
             return (
               <motion.div
                 key={`grid-artist-${creator.id}`}
-                whileHover={{ y: -3 }}
+                whileHover={{ y: -2 }}
                 onClick={() => navigate(`/artist/${creator.uid}`)}
-                className="bg-card/60 hover:bg-card rounded-2xl p-4 flex flex-col items-center text-center justify-between space-y-3 transition-all border border-[#c0c0c0]/25 group cursor-pointer"
+                className="bg-[#0A0A0A] hover:bg-[#101010] rounded-[3px] p-3 flex flex-col items-center text-center justify-between space-y-2.5 transition-colors border border-white/12 hover:border-white/20 group cursor-pointer"
               >
                 <div className="relative">
                   <img
                     src={creator.avatar}
                     alt={creator.name}
-                    className="w-16 h-16 rounded-full bg-zinc-900 object-cover shadow-md border border-[#c0c0c0]/25"
+                    className="w-14 h-14 rounded-full bg-[#101010] object-cover border border-white/10"
                     loading="lazy"
                   />
-                  <span className="absolute -top-1 -left-1 w-6 h-6 rounded-full bg-zinc-900 text-blue-400 flex items-center justify-center text-[10px] font-mono font-black border border-[#c0c0c0]/25">
+                  <span className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-[#101010] text-[#0088CC] flex items-center justify-center text-[9px] font-mono font-bold border border-white/12">
                     #{creator.rank}
                   </span>
                   {creator.isVerified && (
-                    <span className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-black">
+                    <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-[#0088CC] text-white flex items-center justify-center text-[8px] font-bold border border-[#0A0A0A]">
                       ✓
                     </span>
                   )}
                 </div>
 
                 <div className="space-y-0.5 w-full">
-                  <span className="text-xs font-black text-white uppercase block truncate group-hover:text-blue-400 transition-colors">
+                  <span className="text-xs font-semibold text-[#F5F7FA] uppercase block truncate group-hover:text-[#0088CC] transition-colors">
                     {creator.name}
                   </span>
-                  <span className="text-[10px] font-mono text-zinc-400 block truncate">
+                  <span className="text-[9px] font-mono text-white/50 block truncate">
                     @{creator.username}
                   </span>
                 </div>
 
-                <div className="w-full bg-white/5 rounded-xl p-2 space-y-1 text-center border border-[#c0c0c0]/15">
-                  <div className="text-xs font-black text-emerald-400 flex items-center justify-center gap-1">
-                    <img src={TON_LOGO} alt="TON" className="w-3 h-3" />
+                <div className="w-full bg-[#101010] rounded-[3px] p-2 space-y-1 text-center border border-white/5">
+                  <div className="text-xs font-semibold text-[#0088CC] font-mono flex items-center justify-center gap-1">
+                    <img src={TON_LOGO} alt="TON" className="w-3 h-3 opacity-80" />
                     <span>{creator.volumeTON.toLocaleString()} TON</span>
                   </div>
-                  <div className="flex items-center justify-between text-[9px] font-bold text-zinc-400 uppercase tracking-wider px-1">
+                  <div className="flex items-center justify-between text-[8px] font-medium text-white/50 uppercase tracking-wider px-0.5">
                     <span>{creator.activeNFTsCount} NFTs</span>
                     <span>{formatNumber(creator.followersCount)} Fans</span>
                   </div>
@@ -517,10 +517,10 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 
                 <button
                   onClick={(e) => handleFollowClick(e, creator.uid)}
-                  className={`w-full py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1 transition-all border border-[#c0c0c0]/30 ${
+                  className={`w-full py-1 rounded-[3px] text-[8px] font-semibold uppercase tracking-wider flex items-center justify-center gap-1 transition-colors duration-300 ${
                     isFollowed
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : 'bg-white text-black hover:bg-zinc-200'
+                      ? 'bg-[#0088CC] text-white'
+                      : 'bg-white/10 text-white hover:bg-white/20'
                   }`}
                 >
                   {isFollowed ? (

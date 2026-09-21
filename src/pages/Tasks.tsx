@@ -33,6 +33,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { fadeIn, slideUp, staggerChildren } from "@/motion";
 import { useAudio } from "@/contexts/AudioContext";
+import { useTJ } from "@/contexts/TJContext";
 import { TJ_COIN_ICON } from "@/constants";
 
 // TYPES & INTERFACES FOR REWARDS SCREEN
@@ -86,6 +87,18 @@ const Tasks: React.FC = () => {
     transactions,
     firestoreUsers,
   } = useAudio();
+
+  const {
+    dailyMissions: realDailyMissions,
+    timeUntilReset,
+    claimDailyMissionReward,
+    dailyStreak,
+    dailyCompletedCount,
+    allDailyCompleted,
+    hasClaimedDailyBonus,
+    claimDailyBonus,
+    dailyBonusReward,
+  } = useTJ();
 
   // 1. DYNAMIC TJ BALANCE TICKER STATE
   const realBalance = userProfile?.tjBalance || 125430;
@@ -272,20 +285,46 @@ const Tasks: React.FC = () => {
     localStorage.setItem("tonjam_interactive_missions_v1", JSON.stringify(missions));
   }, [missions]);
 
+  // Map live realDailyMissions into the UI Mission structure
+  const mappedDailyMissions: Mission[] = useMemo(() => {
+    return realDailyMissions.map((dm) => ({
+      id: dm.id,
+      title: dm.title,
+      description: dm.description,
+      reward: `+${dm.reward} TJ`,
+      category: "Daily" as const,
+      progress: dm.progress,
+      total: dm.target,
+      state: dm.claimed
+        ? ("completed" as const)
+        : dm.completed
+        ? ("claimable" as const)
+        : ("active" as const),
+      rewardValue: dm.reward,
+      iconName: (dm.iconName || "flame") as any,
+    }));
+  }, [realDailyMissions]);
+
+  // Combined missions list
+  const allMissions = useMemo(() => {
+    const nonDaily = missions.filter((m) => m.category !== "Daily");
+    return [...mappedDailyMissions, ...nonDaily];
+  }, [mappedDailyMissions, missions]);
+
   // CATEGORY FILTERED VIEW
   const filteredMissions = useMemo(() => {
-    if (activeCategory === "All") return missions;
-    return missions.filter((m) => m.category === activeCategory);
-  }, [missions, activeCategory]);
+    if (activeCategory === "All") return allMissions;
+    return allMissions.filter((m) => m.category === activeCategory);
+  }, [allMissions, activeCategory]);
 
   // FEATURED MISSION (From Section 4)
   const featuredMission = useMemo(() => {
-    return missions.find((m) => m.id === "m6") || missions[0];
-  }, [missions]);
+    return allMissions.find((m) => m.id === "m6") || allMissions[0];
+  }, [allMissions]);
 
   // QUICK STATS COUNTERS (From Section 3)
-  const totalTJEarned = useMemo(() => missions.filter(m => m.state === "completed").reduce((sum, m) => sum + m.rewardValue, 0) + 125430, [missions]);
-  const tasksCompletedCount = useMemo(() => missions.filter(m => m.state === "completed").length, [missions]);
+  const totalTJEarned = useMemo(() => allMissions.filter(m => m.state === "completed").reduce((sum, m) => sum + m.rewardValue, 0) + 125430, [allMissions]);
+  const tasksCompletedCount = useMemo(() => allMissions.filter(m => m.state === "completed").length, [allMissions]);
 
   // REFERRAL CODE SYSTEM (From Section 7)
   const referralCode = "TONJAM-KRUPY-Z99";
@@ -329,8 +368,23 @@ const Tasks: React.FC = () => {
 
   // MISSION ACTIONS & INTERACTION TRIGGERS
   const handleMissionClick = (mission: Mission) => {
-    // Navigate or increment progress dynamically to satisfy the "gamified and addictive" gameplay
     if (mission.state === "completed" || mission.state === "claimable") return;
+
+    if (mission.id.startsWith("daily-")) {
+      const lower = mission.title.toLowerCase();
+      if (lower.includes("stream") || lower.includes("track")) {
+        navigate("/");
+      } else if (lower.includes("follow") || lower.includes("creator") || lower.includes("artist")) {
+        navigate("/social");
+      } else if (lower.includes("nft") || lower.includes("explore")) {
+        navigate("/marketplace");
+      } else if (lower.includes("space") || lower.includes("room")) {
+        navigate("/spaces");
+      } else {
+        navigate("/");
+      }
+      return;
+    }
 
     if (mission.category === "Streaming") {
       navigate("/");
@@ -355,7 +409,7 @@ const Tasks: React.FC = () => {
         )
       );
 
-      // Trigger a beautiful notification
+      // Trigger a notification
       const newEvent: ActivityEvent = {
         id: `activity-${Date.now()}`,
         message: `Progress updated for "${mission.title}"`,
@@ -366,7 +420,7 @@ const Tasks: React.FC = () => {
     }
   };
 
-  const handleClaimReward = (mission: Mission, e: React.MouseEvent) => {
+  const handleClaimReward = async (mission: Mission, e: React.MouseEvent) => {
     e.stopPropagation();
     if (mission.state !== "claimable") return;
 
@@ -377,6 +431,11 @@ const Tasks: React.FC = () => {
       origin: { y: 0.7 },
       colors: ["#5B6BFF", "#00B4D8", "#2BE08C", "#F5D547"]
     });
+
+    if (mission.id.startsWith("daily-")) {
+      await claimDailyMissionReward(mission.id);
+      return;
+    }
 
     // Update state to completed
     setMissions((p) =>
@@ -527,25 +586,30 @@ const Tasks: React.FC = () => {
           {/* Subtle Ambient Glow */}
           <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
 
-          <div className="flex items-center justify-between gap-4 mb-5">
+          <div className="flex items-center justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-button bg-primary/10 flex items-center justify-center">
                 <Flame className="w-6 h-6 text-primary fill-primary/20" />
               </div>
               <div className="text-left">
                 <span className="text-caption uppercase">
-                  Streak Multiplier
+                  Daily Streak
                 </span>
                 <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                  Current Streak: <span className="text-verified font-extrabold">7 Days</span>
+                  Current Streak: <span className="text-verified font-extrabold">{dailyStreak} Days</span>
                 </h3>
               </div>
             </div>
 
-            <div className="text-right">
-              <Badge variant="verified" className="text-[11px] px-2.5 py-1">
-                7 / 30
+            <div className="text-right flex flex-col items-end gap-0.5">
+              <Badge variant="verified" className="text-[11px] px-2.5 py-0.5">
+                {dailyCompletedCount} / {realDailyMissions.length} Missions
               </Badge>
+              {timeUntilReset && (
+                <span className="text-[10px] text-text-muted flex items-center gap-1 font-mono">
+                  <Clock className="w-3 h-3 text-text-muted" /> {timeUntilReset}
+                </span>
+              )}
             </div>
           </div>
 
@@ -561,7 +625,7 @@ const Tasks: React.FC = () => {
                     isActive 
                       ? "bg-primary text-background shadow-md shadow-primary/20" 
                       : isToday 
-                        ? "bg-primary/20 border border-primary/40 text-primary font-bold" 
+                        ? "bg-primary/20 text-primary font-bold" 
                         : "bg-background text-text-muted/40"
                   }`}
                 >
@@ -570,6 +634,33 @@ const Tasks: React.FC = () => {
               );
             })}
           </div>
+
+          {allDailyCompleted && (
+            <div className="mt-4 pt-3 flex items-center justify-between bg-primary/10 p-3 rounded-card">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-verified" />
+                <div className="text-left">
+                  <p className="text-xs font-bold text-text-primary">All Daily Missions Completed!</p>
+                  <p className="text-[10px] text-text-muted">Claim your daily completion bonus</p>
+                </div>
+              </div>
+              {hasClaimedDailyBonus ? (
+                <Badge variant="verified" className="text-[10px] py-1">Bonus Claimed</Badge>
+              ) : (
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={() => {
+                    confetti({ particleCount: 150, spread: 90 });
+                    claimDailyBonus();
+                  }}
+                  className="h-7 text-[10px] px-3 font-bold"
+                >
+                  Claim +{dailyBonusReward} TJ
+                </Button>
+              )}
+            </div>
+          )}
         </motion.div>
 
 

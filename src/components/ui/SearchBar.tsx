@@ -15,7 +15,7 @@ export function SearchBar({ className, onSearch, onChange, style, ...props }: Se
 
   const inputStyle: React.CSSProperties = {
     backgroundColor: colors.dark.surface,
-    borderColor: colors.dark.border,
+    borderColor: 'rgba(192, 192, 192, 0.24)',
     borderRadius: radius.input,
     fontFamily: typography.fontFamily.primary,
     ...style,

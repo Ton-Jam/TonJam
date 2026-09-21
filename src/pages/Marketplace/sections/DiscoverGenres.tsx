@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "motion/react";
 import { Disc } from "lucide-react";
 import { GenreCategory } from "../types";
 
@@ -14,40 +13,38 @@ export const DiscoverGenres: React.FC<DiscoverGenresProps> = ({
 }) => {
   return (
     <div className="w-full text-left" id="marketplace-discover-genres">
-      <div className="space-y-0.5 mb-4">
-        <h2 className="text-base sm:text-lg font-semibold uppercase tracking-wider text-white flex items-center gap-2">
-          <Disc className="w-5 h-5 text-[#00B4D8] animate-spin-slow" />
+      <div className="space-y-0.5 mb-3">
+        <h2 className="text-sm sm:text-base font-semibold uppercase tracking-wider text-[#F5F7FA] flex items-center gap-2">
+          <Disc className="w-4 h-4 text-[#0088CC]" />
           Discover Genres
         </h2>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
         {genres.map((gen) => (
-          <motion.div
+          <div
             key={gen.id}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
             onClick={() => onSelectGenre(gen)}
-            className={`relative h-24 rounded-[10px] bg-gradient-to-br ${gen.colorClass} border border-white/[0.03] p-4 flex flex-col justify-between overflow-hidden cursor-pointer select-none`}
+            className="relative h-20 rounded-[3px] bg-[#0A0A0A] border border-white/12 p-3 flex flex-col justify-between overflow-hidden cursor-pointer select-none transition-colors hover:border-white/20 shadow-none"
           >
             {/* Ambient Background Disc Graphic */}
-            <div className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-15 rotate-45 pointer-events-none">
+            <div className="absolute right-[-8px] bottom-[-8px] w-14 h-14 opacity-10 pointer-events-none">
               <Disc className="w-full h-full text-white" />
             </div>
 
             <div className="z-10">
-              <span className="text-xs sm:text-sm font-black text-white uppercase tracking-tight block">
+              <span className="text-xs sm:text-sm font-semibold text-[#F5F7FA] uppercase tracking-tight block">
                 {gen.name}
               </span>
-              <span className="text-[8px] font-bold text-white/60 uppercase tracking-widest block mt-0.5">
+              <span className="text-[8px] font-medium text-white/50 uppercase tracking-wider block mt-0.5">
                 {gen.count}
               </span>
             </div>
             
-            <span className="text-[8px] font-black uppercase tracking-widest bg-black/30 border border-white/5 w-fit px-2 py-0.5 rounded-[4px] text-white/80 self-end">
+            <span className="text-[8px] font-semibold uppercase tracking-wider text-[#0088CC] self-end z-10">
               Explore →
             </span>
-          </motion.div>
+          </div>
         ))}
       </div>
     </div>

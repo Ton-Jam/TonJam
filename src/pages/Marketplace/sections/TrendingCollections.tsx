@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "motion/react";
-import { ChevronLeft, ChevronRight, Award, Layers, Users, TrendingUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, Layers } from "lucide-react";
 import { NFTCollection } from "../types";
 import { useGramPrice } from "@/contexts/GramPriceContext";
 
@@ -29,11 +28,11 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
   };
 
   return (
-    <div className="w-full relative" id="marketplace-trending-collections">
-      <div className="flex items-center justify-between mb-4">
-        <div className="space-y-0.5 text-left">
-          <h2 className="text-base sm:text-lg font-semibold uppercase tracking-wider text-white flex items-center gap-2">
-            <Layers className="w-5 h-5 text-[#5B6BFF]" />
+    <div className="w-full relative text-left" id="marketplace-trending-collections">
+      <div className="flex items-center justify-between mb-3">
+        <div className="space-y-0.5">
+          <h2 className="text-sm sm:text-base font-semibold uppercase tracking-wider text-[#F5F7FA] flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[#0088CC]" />
             Trending Collections
           </h2>
         </div>
@@ -42,7 +41,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/explore/playlists?title=Trending+Collections&filter=curated')}
-            className="text-xs font-bold text-[#0098EA] hover:text-[#0098EA]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
+            className="text-xs font-semibold text-[#0088CC] hover:text-[#0088CC]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
           >
             More <ChevronRight className="w-3.5 h-3.5" />
           </button>
@@ -50,7 +49,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
             <button
               type="button"
               onClick={() => scroll("left")}
-              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B6BFF]"
+              className="w-7 h-7 rounded-[3px] bg-white/5 text-white/60 hover:text-white flex items-center justify-center transition-colors border-none focus:outline-none"
               aria-label="Previous collections"
             >
               <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
@@ -58,7 +57,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
             <button
               type="button"
               onClick={() => scroll("right")}
-              className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B6BFF]"
+              className="w-7 h-7 rounded-[3px] bg-white/5 text-white/60 hover:text-white flex items-center justify-center transition-colors border-none focus:outline-none"
               aria-label="Next collections"
             >
               <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -70,56 +69,54 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
       {/* Horizontal Carousel List */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory scroll-smooth w-full"
+        className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory scroll-smooth w-full"
       >
         {collections.map((col) => (
-          <motion.div
+          <div
             key={col.id}
-            whileHover={{ y: -4 }}
-            whileTap={{ scale: 0.98 }}
             onClick={() => onSelectCollection(col)}
-            className="min-w-[260px] max-w-[260px] bg-zinc-950 border border-zinc-900 rounded-[10px] overflow-hidden p-3 cursor-pointer select-none snap-start flex flex-col justify-between"
+            className="min-w-[240px] max-w-[240px] bg-[#0A0A0A] border border-white/12 rounded-[3px] overflow-hidden p-3 cursor-pointer select-none snap-start flex flex-col justify-between transition-colors hover:border-white/20"
           >
             {/* Collection Cover Image */}
-            <div className="aspect-square w-full rounded-[10px] overflow-hidden bg-zinc-900 relative mb-3">
+            <div className="aspect-square w-full rounded-[3px] overflow-hidden bg-[#101010] border border-white/10 relative mb-2.5">
               <img
                 src={col.imageUrl}
                 alt={col.name}
-                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-300 hover:scale-103"
                 loading="lazy"
               />
-              <div className="absolute top-2 right-2 px-2 py-0.5 rounded-[4px] bg-zinc-950/80 text-[8px] font-black text-white border border-zinc-800/40 uppercase tracking-widest font-mono">
+              <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-[3px] bg-black/70 text-[8px] font-medium text-white border border-white/10 uppercase tracking-wider font-mono">
                 {col.itemCount} Items
               </div>
             </div>
 
             {/* Collection Meta */}
-            <div className="text-left space-y-1.5">
+            <div className="text-left space-y-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black text-white uppercase truncate block max-w-[85%]">{col.name}</span>
+                <span className="text-xs font-semibold text-[#F5F7FA] truncate block max-w-[85%]">{col.name}</span>
                 {col.verified && (
-                  <span className="w-3.5 h-3.5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[8px] font-black" title="Verified Creator">✓</span>
+                  <span className="w-3.5 h-3.5 rounded-full bg-[#0088CC] text-white flex items-center justify-center text-[8px] font-bold" title="Verified Creator">✓</span>
                 )}
               </div>
 
               <div className="flex items-center gap-1">
-                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Creator:</span>
-                <span className="text-[9px] font-black text-zinc-300 uppercase tracking-wider truncate max-w-[65%]">{col.creator}</span>
+                <span className="text-[9px] font-normal text-white/50">Creator:</span>
+                <span className="text-[9px] font-medium text-white/70 truncate max-w-[65%]">{col.creator}</span>
               </div>
             </div>
 
             {/* Price / Volume Metrics */}
-            <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-zinc-900/60">
+            <div className="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-white/10">
               <div>
-                <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block mb-0.5">Floor Price</span>
-                <span className="text-[11px] font-black text-white font-mono">{convertPrice(col.floorPrice)}</span>
+                <span className="text-[8px] font-medium text-white/50 uppercase tracking-wider block">Floor Price</span>
+                <span className="text-[11px] font-semibold text-[#F5F7FA] font-mono">{convertPrice(col.floorPrice)}</span>
               </div>
               <div className="text-right">
-                <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block mb-0.5">Vol. Volume</span>
-                <span className="text-[11px] font-black text-[#00B4D8] font-mono">{convertPrice(col.volume)}</span>
+                <span className="text-[8px] font-medium text-white/50 uppercase tracking-wider block">Volume</span>
+                <span className="text-[11px] font-semibold text-[#0088CC] font-mono">{convertPrice(col.volume)}</span>
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     </div>

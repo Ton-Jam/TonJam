@@ -17,8 +17,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   searchTerm
 }) => {
   const containerVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+    hidden: { opacity: 0, y: 6 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
   };
 
   switch (type) {
@@ -28,21 +28,21 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex flex-col items-center justify-center text-center p-8 bg-zinc-900/40 border border-zinc-800/40 rounded-[10px] min-h-[300px]"
+          className="flex flex-col items-center justify-center text-center p-8 bg-[#0A0A0A] border border-white/12 rounded-[3px] min-h-[280px]"
         >
-          <div className="p-4 bg-blue-500/10 rounded-full text-blue-400 mb-4">
-            <Wallet className="w-8 h-8" />
+          <div className="p-3 bg-[#0088CC]/10 rounded-[3px] text-[#0088CC] mb-3">
+            <Wallet className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-white uppercase tracking-wider mb-2">
+          <h3 className="text-sm font-semibold text-[#F5F7FA] uppercase tracking-wider mb-1.5">
             Wallet Not Connected
           </h3>
-          <p className="text-xs text-zinc-400 max-w-sm mb-6 leading-relaxed">
+          <p className="text-xs text-white/60 max-w-sm mb-5 leading-relaxed">
             Connect your TON Wallet to unlock bidding, listing, trading, and instant settlement features of the TonJam Music NFT ecosystem.
           </p>
           {onConnectWallet && (
             <Button
               onClick={onConnectWallet}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-[10px] text-xs px-6 py-2 uppercase tracking-wider"
+              className="bg-[#0088CC] hover:bg-[#0077b3] text-white font-medium rounded-[3px] text-xs px-5 py-2 uppercase tracking-wider shadow-none"
             >
               Connect TON Wallet
             </Button>
@@ -56,23 +56,23 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex flex-col items-center justify-center text-center p-8 bg-zinc-900/40 border border-zinc-800/40 rounded-[10px] min-h-[300px]"
+          className="flex flex-col items-center justify-center text-center p-8 bg-[#0A0A0A] border border-white/12 rounded-[3px] min-h-[280px]"
         >
-          <div className="p-4 bg-rose-500/10 rounded-full text-rose-400 mb-4">
-            <WifiOff className="w-8 h-8" />
+          <div className="p-3 bg-rose-500/10 rounded-[3px] text-rose-400 mb-3">
+            <WifiOff className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-white uppercase tracking-wider mb-2">
+          <h3 className="text-sm font-semibold text-[#F5F7FA] uppercase tracking-wider mb-1.5">
             Connection Lost
           </h3>
-          <p className="text-xs text-zinc-400 max-w-sm mb-6 leading-relaxed">
+          <p className="text-xs text-white/60 max-w-sm mb-5 leading-relaxed">
             You are currently offline. Bidding, transactions, and real-time prices cannot be synchronized without an internet connection.
           </p>
           {onRetry && (
             <Button
               onClick={onRetry}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-[10px] text-xs px-6 py-2 uppercase tracking-wider flex items-center gap-2"
+              className="bg-white/10 hover:bg-white/20 text-white font-medium rounded-[3px] text-xs px-5 py-2 uppercase tracking-wider flex items-center gap-2 shadow-none border-none"
             >
-              <RefreshCw className="w-4 h-4" /> Try Reconnecting
+              <RefreshCw className="w-3.5 h-3.5" /> Try Reconnecting
             </Button>
           )}
         </motion.div>
@@ -84,16 +84,16 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex flex-col items-center justify-center text-center p-8 bg-zinc-900/40 border border-zinc-800/40 rounded-[10px] min-h-[250px]"
+          className="flex flex-col items-center justify-center text-center p-8 bg-[#0A0A0A] border border-white/12 rounded-[3px] min-h-[220px]"
         >
-          <div className="p-4 bg-amber-500/10 rounded-full text-amber-400 mb-4">
-            <HelpCircle className="w-8 h-8" />
+          <div className="p-3 bg-amber-500/10 rounded-[3px] text-amber-400 mb-3">
+            <HelpCircle className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-white uppercase tracking-wider mb-2">
+          <h3 className="text-sm font-semibold text-[#F5F7FA] uppercase tracking-wider mb-1.5">
             No Live Auctions
           </h3>
-          <p className="text-xs text-zinc-400 max-w-sm mb-4 leading-relaxed">
-            There are currently no active bidding events happening right now. Be sure to check back soon or host your own auction!
+          <p className="text-xs text-white/60 max-w-sm leading-relaxed">
+            There are currently no active bidding events happening right now. Be sure to check back soon or host your own auction.
           </p>
         </motion.div>
       );
@@ -104,15 +104,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex flex-col items-center justify-center text-center p-8 bg-zinc-900/40 border border-zinc-800/40 rounded-[10px] min-h-[250px]"
+          className="flex flex-col items-center justify-center text-center p-8 bg-[#0A0A0A] border border-white/12 rounded-[3px] min-h-[220px]"
         >
-          <div className="p-4 bg-zinc-500/10 rounded-full text-zinc-400 mb-4">
-            <Inbox className="w-8 h-8" />
+          <div className="p-3 bg-white/5 rounded-[3px] text-white/50 mb-3">
+            <Inbox className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-white uppercase tracking-wider mb-2">
+          <h3 className="text-sm font-semibold text-[#F5F7FA] uppercase tracking-wider mb-1.5">
             No Collections Found
           </h3>
-          <p className="text-xs text-zinc-400 max-w-sm mb-4 leading-relaxed">
+          <p className="text-xs text-white/60 max-w-sm leading-relaxed">
             No trending collections matched your current criteria. Broaden your filters to see more.
           </p>
         </motion.div>
@@ -125,17 +125,17 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex flex-col items-center justify-center text-center p-8 bg-zinc-900/40 border border-zinc-800/40 rounded-[10px] min-h-[300px]"
+          className="flex flex-col items-center justify-center text-center p-8 bg-[#0A0A0A] border border-white/12 rounded-[3px] min-h-[280px]"
         >
-          <div className="p-4 bg-zinc-500/10 rounded-full text-zinc-400 mb-4">
-            <Search className="w-8 h-8" />
+          <div className="p-3 bg-white/5 rounded-[3px] text-white/50 mb-3">
+            <Search className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-white uppercase tracking-wider mb-2">
+          <h3 className="text-sm font-semibold text-[#F5F7FA] uppercase tracking-wider mb-1.5">
             No NFTs Found
           </h3>
-          <p className="text-xs text-zinc-400 max-w-sm mb-4 leading-relaxed">
+          <p className="text-xs text-white/60 max-w-sm mb-5 leading-relaxed">
             {searchTerm ? (
-              <>We couldn't find any Music NFTs matching <span className="text-blue-400 font-mono">"{searchTerm}"</span>. Try checking spelling or using broader search terms.</>
+              <>We couldn't find any Music NFTs matching <span className="text-[#0088CC] font-mono">"{searchTerm}"</span>. Try checking spelling or using broader search terms.</>
             ) : (
               "No Music NFTs are currently listed matching your selected filters. Try adjusting your category search."
             )}
@@ -144,7 +144,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             <Button
               onClick={onRetry}
               variant="outline"
-              className="border-zinc-800 hover:bg-zinc-800 text-white font-bold rounded-[10px] text-xs px-6 py-2 uppercase tracking-wider"
+              className="border-white/12 hover:bg-white/10 text-[#F5F7FA] font-medium rounded-[3px] text-xs px-5 py-2 uppercase tracking-wider shadow-none"
             >
               Reset Filters
             </Button>

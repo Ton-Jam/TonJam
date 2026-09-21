@@ -89,26 +89,26 @@ const Marketplace: React.FC = () => {
   // Render Skeletons when Loading
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen bg-[#07091E] text-white px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl mx-auto space-y-8 select-none font-sans pb-28">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-zinc-900">
+      <div className="w-full min-h-screen bg-[#050505] text-[#F5F7FA] px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl mx-auto space-y-6 select-none font-sans pb-28">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
           <div className="space-y-1 text-left">
-            <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-[#5B6BFF] animate-pulse" />
+            <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-[#F5F7FA] flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#0088CC]" />
               TonJam Marketplace
             </h1>
-            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
-              Premium decentralized Web3 audio trading floor
+            <p className="text-[10px] text-white/50 font-medium uppercase tracking-wider">
+              Decentralized Web3 audio collectibles on TON
             </p>
           </div>
         </div>
 
         <HeroSkeleton />
-        <div className="space-y-4">
-          <div className="h-6 w-48 bg-zinc-800 rounded animate-pulse" />
+        <div className="space-y-3">
+          <div className="h-5 w-40 bg-white/5 rounded-[4px] animate-pulse" />
           <CarouselSkeleton />
         </div>
-        <div className="space-y-4">
-          <div className="h-6 w-48 bg-zinc-800 rounded animate-pulse" />
+        <div className="space-y-3">
+          <div className="h-5 w-40 bg-white/5 rounded-[4px] animate-pulse" />
           <CardGridSkeleton />
         </div>
       </div>
@@ -118,30 +118,30 @@ const Marketplace: React.FC = () => {
   // Render Offline State
   if (isOffline) {
     return (
-      <div className="w-full min-h-screen bg-[#07091E] flex items-center justify-center px-4 py-8">
+      <div className="w-full min-h-screen bg-[#050505] flex items-center justify-center px-4 py-8">
         <EmptyState type="offline" onRetry={() => window.location.reload()} />
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#07091E] text-white px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl mx-auto select-none font-sans pb-28 text-left">
+    <div className="w-full min-h-screen bg-[#050505] text-[#F5F7FA] px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl mx-auto select-none font-sans pb-28 text-left">
       
-      {/* Top Header Controls (Decoupled & Integrated) */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-zinc-900/60 mb-6">
-        <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-[#5B6BFF]" />
+      {/* Top Header Controls */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-white/10 mb-5">
+        <div className="space-y-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-[#F5F7FA] flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-[#0088CC]" />
             TonJam NFT Marketplace
           </h1>
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+          <p className="text-[10px] text-white/50 font-medium uppercase tracking-wider">
             Trading digital collectibles of master audio recordings on TON
           </p>
         </div>
 
-        {/* Flat Compact Search Input inside Marketplace page to filter the 300 tracks */}
+        {/* Flat Compact Search Input */}
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" aria-hidden="true" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" aria-hidden="true" />
           <Input
             type="text"
             id="marketplace-search-input"
@@ -149,13 +149,13 @@ const Marketplace: React.FC = () => {
             placeholder="Search music, creators..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-zinc-950/80 hover:bg-zinc-900 border-zinc-900 text-xs font-semibold pl-9 pr-4 py-2 rounded-[10px] text-white focus:border-zinc-700/60 focus:ring-0 transition-colors"
+            className="w-full bg-[#0A0A0A] hover:bg-[#101010] border-white/12 text-xs font-normal pl-9 pr-4 py-1.5 rounded-[6px] text-[#F5F7FA] focus:border-[#0088CC] focus:ring-0 transition-colors"
           />
         </div>
       </div>
 
       {/* Main Grid Content & Modules */}
-      <div className="space-y-10">
+      <div className="space-y-8">
         
         {/* 1. Marketplace Hero (Featured Launch) */}
         {!searchTerm && (

@@ -8,7 +8,7 @@ function Input({ className, type, style, ...props }: React.ComponentProps<"input
     borderRadius: radius.input,
     fontFamily: typography.fontFamily.primary,
     backgroundColor: colors.dark.surface,
-    borderColor: colors.dark.border,
+    borderColor: 'rgba(192, 192, 192, 0.24)',
     color: colors.dark.textPrimary,
     ...style,
   }

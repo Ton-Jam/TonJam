@@ -3,6 +3,7 @@ import { X, ExternalLink, Disc, Layers, Loader2, Verified } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { NFTItem } from '@/types';
 import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
+import NFTAudioPreviewPlayer from '@/components/NFTAudioPreviewPlayer';
 
 interface NFTQuickViewModalProps {
   nft: NFTItem;
@@ -124,6 +125,16 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                 <p className="text-xs text-muted-foreground/80 leading-relaxed">
                   {nft.description || "No description provided for this asset."}
                 </p>
+              </div>
+
+              {/* 30-Second Audio Snippet Preview */}
+              <div className="mb-3">
+                <NFTAudioPreviewPlayer 
+                  nft={nft} 
+                  variant="compact"
+                  title={nft.title}
+                  artist={nft.artist || nft.creator}
+                />
               </div>
 
               {/* Traits Grid */}

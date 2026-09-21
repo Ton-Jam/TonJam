@@ -11,6 +11,7 @@ import {
   BadgeCheck, 
   MoreVertical, 
   Clock, 
+  History,
   Sparkles, 
   Compass, 
   QrCode, 
@@ -345,30 +346,33 @@ export const Discover: React.FC = () => {
       {/* Sticky Spotify-Style Search Header */}
       <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md pt-3 sm:pt-4 pb-3 px-4 sm:px-6 lg:px-8 space-y-2.5">
         
-        {/* Main Search Input Bar */}
-        <div className="w-full">
-          <div className="relative w-full flex items-center bg-white/[0.04] hover:bg-white/[0.07] focus-within:bg-white/[0.09] rounded-xl px-4 py-3 sm:py-3.5 min-h-[48px] transition-all">
+        {/* Main Search Input Bar with round border radius and visible input section */}
+        <div className="w-full relative">
+          <div className="relative w-full flex items-center bg-white/[0.05] hover:bg-white/[0.08] focus-within:bg-white/[0.1] rounded-full px-4 py-2.5 sm:py-3 min-h-[48px] border border-white/20 focus-within:border-[#0088CC] transition-all shadow-none">
             <Search className={`w-5 h-5 shrink-0 mr-3 transition-colors ${query ? 'text-[#00B4D8]' : 'text-zinc-400'}`} />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-              placeholder="What do you want to listen to?"
-              className="w-full bg-transparent border-none outline-none text-sm font-medium placeholder:text-zinc-500 text-white leading-relaxed"
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck="false"
-              aria-label="Search TonJam"
-            />
+            
+            <div className="flex-1 flex items-center min-w-0 h-full">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setTimeout(() => setIsFocused(false), 250)}
+                placeholder="What do you want to listen to?"
+                className="w-full bg-transparent border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus:ring-0 focus:outline-none focus:border-none text-sm font-medium placeholder:text-zinc-400 placeholder:opacity-100 text-white leading-relaxed p-0 shadow-none !shadow-none"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
+                aria-label="Search TonJam"
+              />
+            </div>
             
             <div className="flex items-center gap-1 shrink-0 ml-2">
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-zinc-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
                   aria-label="Clear search query"
                 >
                   <X className="w-4 h-4" />
@@ -377,7 +381,7 @@ export const Discover: React.FC = () => {
 
               <button
                 onClick={toggleVoiceSearch}
-                className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg transition-all active:scale-95 ${isVoiceListening ? 'text-[#00B4D8] animate-pulse bg-white/10' : 'text-zinc-400 hover:text-white hover:bg-white/10'}`}
+                className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full transition-all active:scale-95 ${isVoiceListening ? 'text-[#00B4D8] animate-pulse bg-white/10' : 'text-zinc-400 hover:text-white hover:bg-white/10'}`}
                 title="Voice search"
                 aria-label="Voice search"
               >
@@ -386,7 +390,7 @@ export const Discover: React.FC = () => {
 
               <button
                 onClick={() => setShowScanner(true)}
-                className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-zinc-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
                 title="Scan QR code"
                 aria-label="Scan QR code"
               >
@@ -394,6 +398,140 @@ export const Discover: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Interactive Search Focus Overlay - Shows only when Search Bar is clicked/focused */}
+          <AnimatePresence>
+            {isFocused && !query.trim() && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18 }}
+                className="absolute left-0 right-0 top-full mt-2 z-50 bg-[#0a0a0c] border border-white/15 rounded-2xl p-4 shadow-2xl space-y-4 max-h-[75vh] overflow-y-auto"
+                onMouseDown={(e) => e.preventDefault()} // Prevents blur before click registers
+              >
+                {/* 1. Recent Search Queries */}
+                {searchHistory.length > 0 && (
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-300">
+                        <History className="w-3.5 h-3.5 text-[#00B4D8]" />
+                        <span>Recent Searches</span>
+                      </div>
+                      <button
+                        onClick={handleClearAllHistory}
+                        className="text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors"
+                      >
+                        Clear all
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {searchHistory.map((term) => (
+                        <div
+                          key={`focus-recent-${term}`}
+                          onClick={() => {
+                            handleSelectSearchTerm(term);
+                            setIsFocused(false);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 cursor-pointer transition-all text-xs font-medium text-zinc-200 hover:text-white select-none group"
+                        >
+                          <Search className="w-3 h-3 text-zinc-400 group-hover:text-white" />
+                          <span>{term}</span>
+                          <button
+                            onClick={(e) => handleRemoveSearchTerm(term, e)}
+                            className="p-0.5 text-zinc-500 hover:text-white rounded-full transition-colors ml-0.5"
+                            aria-label={`Remove ${term}`}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Recently Searched / Played Tracks (Appears on Search Bar Click) */}
+                {last5RecentlyPlayed.length > 0 && (
+                  <div className="space-y-2.5 pt-2 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-300">
+                        <Clock className="w-3.5 h-3.5 text-[#00B4D8]" />
+                        <span>Recently Played Tracks</span>
+                      </div>
+                      {typeof clearRecentlyPlayed === 'function' && (
+                        <button
+                          onClick={clearRecentlyPlayed}
+                          className="text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {last5RecentlyPlayed.map((track) => {
+                        const isCurrentPlaying = currentTrack?.id === track.id && isPlaying;
+                        return (
+                          <div
+                            key={`focus-recent-track-${track.id}`}
+                            onClick={() => {
+                              playTrack(track);
+                              setIsFocused(false);
+                            }}
+                            className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/8 hover:border-white/20 cursor-pointer transition-all group"
+                          >
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-zinc-900 shrink-0">
+                              <img
+                                src={track.coverUrl || getPlaceholderImage(track.title)}
+                                alt={track.title}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-all ${
+                                isCurrentPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                              }`}>
+                                {isCurrentPlaying ? (
+                                  <Pause className="w-4 h-4 text-[#00B4D8] fill-current" />
+                                ) : (
+                                  <Play className="w-4 h-4 text-white fill-current" />
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="truncate flex-1">
+                              <h4 className="text-xs font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
+                                {track.title}
+                              </h4>
+                              <p className="text-[10px] text-zinc-400 truncate">{track.artist}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Quick Vibe Searches */}
+                <div className="space-y-2 pt-2 border-t border-white/10">
+                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Popular Tags</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {QUICK_VIBES.map((vibe) => (
+                      <button
+                        key={`focus-vibe-${vibe.query}`}
+                        onClick={() => {
+                          handleSelectSearchTerm(vibe.query);
+                          setIsFocused(false);
+                        }}
+                        className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/[0.04] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                      >
+                        {vibe.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Filter Pills or Quick Vibes */}
@@ -455,136 +593,7 @@ export const Discover: React.FC = () => {
         ) : (
           <div className="space-y-10">
 
-            {/* 1. Recent Searches */}
-            {searchHistory.length > 0 && (
-              <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-white tracking-tight">Recent Searches</h3>
-                  <button
-                    onClick={handleClearAllHistory}
-                    className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
-                  >
-                    Clear all
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                  {searchHistory.map((term) => (
-                    <div
-                      key={`recent-${term}`}
-                      onClick={() => handleSelectSearchTerm(term)}
-                      className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] cursor-pointer transition-all shrink-0 group select-none"
-                    >
-                      <Search className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
-                      <span className="text-xs font-medium text-zinc-200 group-hover:text-white">{term}</span>
-                      <button
-                        onClick={(e) => handleRemoveSearchTerm(term, e)}
-                        className="p-0.5 text-zinc-400 hover:text-white rounded-full transition-colors ml-0.5"
-                        aria-label={`Remove ${term} from history`}
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* 2. Recently Played Section (Last 5 tracks from AudioProvider listening history) */}
-            {last5RecentlyPlayed.length > 0 && (
-              <section className="space-y-3.5" id="recently-played-feed-section">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4.5 h-4.5 text-[#00B4D8]" />
-                    <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Recently Played</h3>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {typeof clearRecentlyPlayed === 'function' && (
-                      <button
-                        onClick={clearRecentlyPlayed}
-                        className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
-                        title="Clear recent playback history"
-                      >
-                        Clear
-                      </button>
-                    )}
-                    <button
-                      onClick={() => navigate('/library')}
-                      className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors flex items-center gap-1 cursor-pointer"
-                    >
-                      Library <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="-mx-3 flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-3 sm:mx-0 sm:px-0 scroll-smooth">
-                  {last5RecentlyPlayed.map((track) => {
-                    const isCurrentPlaying = currentTrack?.id === track.id && isPlaying;
-                    const isLiked = likedTrackIds.includes(track.id);
-
-                    return (
-                      <motion.div
-                        key={`recent-played-${track.id}`}
-                        whileHover={{ y: -3 }}
-                        onClick={() => playTrack(track)}
-                        className="w-[145px] sm:w-[160px] shrink-0 bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3 flex flex-col justify-between cursor-pointer group transition-all select-none"
-                      >
-                        <div className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900 mb-2.5">
-                          <img
-                            src={track.coverUrl || getPlaceholderImage(track.title)}
-                            alt={track.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-all ${
-                            isCurrentPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                          }`}>
-                            <div className="w-10 h-10 rounded-full bg-[#00B4D8] text-black flex items-center justify-center pl-0.5 shadow-xl transform scale-90 group-hover:scale-100 transition-all">
-                              {isCurrentPlaying ? (
-                                <Pause className="w-5 h-5 fill-current" />
-                              ) : (
-                                <Play className="w-5 h-5 fill-current" />
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Sound wave / live indicator when active */}
-                          {isCurrentPlaying && (
-                            <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-[#00B4D8]/90 text-black text-[9px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md">
-                              <span className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
-                              Playing
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between gap-1">
-                            <h4 className="text-xs font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors flex-1">
-                              {track.title}
-                            </h4>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleLikeTrack(track.id);
-                              }}
-                              className={`p-0.5 transition-colors shrink-0 ${
-                                isLiked ? 'text-rose-500' : 'text-zinc-500 hover:text-white opacity-0 group-hover:opacity-100'
-                              }`}
-                              title={isLiked ? "Unlike" : "Like"}
-                              aria-label={isLiked ? "Unlike track" : "Like track"}
-                            >
-                              <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
-                            </button>
-                          </div>
-                          <p className="text-[10px] text-zinc-400 truncate">{track.artist}</p>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* 3. Browse All Categories */}
+            {/* 1. Browse All Categories */}
             <section className="space-y-3.5">
               <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Browse All</h3>
 

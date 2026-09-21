@@ -83,6 +83,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Virtuoso } from 'react-virtuoso';
 import BuyNFTModal from "@/components/BuyNFTModal";
 import SellNFTModal from "@/components/SellNFTModal";
+import NFTAudioPreviewPlayer from "@/components/NFTAudioPreviewPlayer";
 import BidModal from "@/components/BidModal";
 import PlaceOfferModal from "@/components/PlaceOfferModal";
 import BidAcceptanceModal from "@/components/BidAcceptanceModal";
@@ -169,6 +170,13 @@ const NFTDetail: React.FC = () => {
       incrementViews();
       sessionStorage.setItem(hasViewedKey, "true");
     }
+
+    // Trigger daily mission progress for exploring an NFT
+    window.dispatchEvent(
+      new CustomEvent('tonjam_mission_event', {
+        detail: { type: 'explore_nft', entityId: localNft.id, amount: 1 },
+      })
+    );
 
     // 2. Setup real-time listener for views to show live updates
     const unsub = onSnapshot(doc(db, "nfts", localNft.id), (doc) => {
@@ -1225,6 +1233,16 @@ const NFTDetail: React.FC = () => {
                 allNFTs={allNFTs} 
                 collections={collections} 
                 transactions={transactions} 
+              />
+            </div>
+
+            {/* 30-Second Audio Snippet Preview (Listen Before You Buy) */}
+            <div className="mb-4">
+              <NFTAudioPreviewPlayer 
+                nft={localNft} 
+                variant="full"
+                title={localNft.title}
+                artist={localNft.artist || localNft.creator}
               />
             </div>
 

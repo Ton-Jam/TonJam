@@ -2470,6 +2470,24 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     syncWallet();
   }, [tonAddress, evmAddress, userProfile.walletAddress]);
 
+  // Synchronize local userProfile tjBalance when missions are claimed
+  useEffect(() => {
+    const handleRewardClaimed = (e: Event) => {
+      const customEvent = e as CustomEvent<{ amount: number }>;
+      if (customEvent.detail?.amount) {
+        setUserProfile((prev) => ({
+          ...prev,
+          tjBalance: (prev.tjBalance || 0) + customEvent.detail.amount,
+          jamBalance: (prev.jamBalance || 0) + customEvent.detail.amount,
+        }));
+      }
+    };
+    window.addEventListener('tonjam_tj_reward_claimed', handleRewardClaimed);
+    return () => {
+      window.removeEventListener('tonjam_tj_reward_claimed', handleRewardClaimed);
+    };
+  }, []);
+
   const recordTransaction = async (
     txData: Omit<Transaction, "id" | "timestamp" | "status">,
   ) => {
@@ -3228,6 +3246,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     setActiveJamRoom(room);
     addNotification(`Joined Jam Room: ${room.name}`, "success");
     if (room.currentTrack) playTrack(room.currentTrack);
+    window.dispatchEvent(
+      new CustomEvent('tonjam_mission_event', {
+        detail: { type: 'join_jam_space', entityId: roomId, amount: 1 },
+      })
+    );
   };
 
   const leaveJamRoom = () => {
@@ -3443,6 +3466,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           trackId: track.id,
           trackTitle: track.title,
         });
+
+        // Dispatch daily mission event for streaming a track
+        window.dispatchEvent(
+          new CustomEvent('tonjam_mission_event', {
+            detail: { type: 'listen_new_track', entityId: track.id, amount: 1 },
+          })
+        );
       } catch (err) {
         console.error("Audio initialization error:", err);
         addNotification("Failed to initialize audio protocol", "error");
@@ -3844,6 +3874,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         addNotification("Track removed from favorites", "info", 3000, `"${trackTitle}" by ${trackArtist}`);
       } else {
         addNotification("Track added to favorites", "success", 3000, `"${trackTitle}" by ${trackArtist}`);
+        window.dispatchEvent(
+          new CustomEvent('tonjam_mission_event', {
+            detail: { type: 'like_track', entityId: trackId, amount: 1 },
+          })
+        );
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `tracks/${trackId}`);
@@ -3918,6 +3953,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         addNotification("Unfollowed user", "info");
       } else {
         addNotification("Followed user", "success");
+        window.dispatchEvent(
+          new CustomEvent('tonjam_mission_event', {
+            detail: { type: 'follow_artist', entityId: userId, amount: 1 },
+          })
+        );
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `users/${userId}`);

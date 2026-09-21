@@ -1,32 +1,29 @@
-import React, { Suspense, lazy, useState, useCallback } from "react";
-import { HomeSectionSkeleton } from "@/components/home/HomeSkeleton";
+import React, { useState, useCallback } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { HomePullToRefresh } from "@/components/home/HomePullToRefresh";
 
-// Core immediate components
+// Home section components
 import { HomeHero } from "@/components/home/HomeHero";
 import { HomeGenreFilterBar } from "@/components/home/HomeGenreFilterBar";
 import { SponsoredPromoCarousel } from "@/components/home/SponsoredPromoCarousel";
 import { ContinueListeningSection } from "@/components/home/ContinueListeningSection";
-
-// Lazy-loaded components for optimal performance & chunking
-const MoodAlignmentSection = lazy(() => import("@/components/home/MoodAlignmentSection"));
-const NewDropsSection = lazy(() => import("@/components/home/NewDropsSection"));
-const TrendingMusicSection = lazy(() => import("@/components/home/TrendingMusicSection").then(m => ({ default: m.TrendingMusicSection })));
-const TopTrendingSongsSection = lazy(() => import("@/components/home/TopTrendingSongsSection"));
-const FeaturedArtistsSection = lazy(() => import("@/components/home/FeaturedArtistsSection"));
-const TrendingArtistsLeaderboardSection = lazy(() => import("@/components/home/TrendingArtistsLeaderboardSection"));
-const TrendingNFTMusicSection = lazy(() => import("@/components/home/TrendingNFTMusicSection"));
-const NFTExplorerSection = lazy(() => import("@/components/home/NFTExplorerSection"));
-const MarketplacePicksSection = lazy(() => import("@/components/home/MarketplacePicksSection"));
-const LiveSpacesSection = lazy(() => import("@/components/home/LiveSpacesSection"));
-const RecommendedForYouSection = lazy(() => import("@/components/home/RecommendedForYouSection"));
-const FavoriteArtistUpdatesSection = lazy(() => import("@/components/home/FavoriteArtistUpdatesSection"));
-const CommunityActivitySection = lazy(() => import("@/components/home/CommunityActivitySection"));
-const EarnTJSection = lazy(() => import("@/components/home/EarnTJSection"));
-const Web3NewsSection = lazy(() => import("@/components/home/Web3NewsSection"));
-const RecentlyMintedSection = lazy(() => import("@/components/home/RecentlyMintedSection"));
-const HomeFooter = lazy(() => import("@/components/home/HomeFooter"));
+import { MoodAlignmentSection } from "@/components/home/MoodAlignmentSection";
+import { NewDropsSection } from "@/components/home/NewDropsSection";
+import { TrendingMusicSection } from "@/components/home/TrendingMusicSection";
+import { TopTrendingSongsSection } from "@/components/home/TopTrendingSongsSection";
+import { FeaturedArtistsSection } from "@/components/home/FeaturedArtistsSection";
+import { TrendingArtistsLeaderboardSection } from "@/components/home/TrendingArtistsLeaderboardSection";
+import { TrendingNFTMusicSection } from "@/components/home/TrendingNFTMusicSection";
+import { NFTExplorerSection } from "@/components/home/NFTExplorerSection";
+import { MarketplacePicksSection } from "@/components/home/MarketplacePicksSection";
+import { LiveSpacesSection } from "@/components/home/LiveSpacesSection";
+import { RecommendedForYouSection } from "@/components/home/RecommendedForYouSection";
+import { FavoriteArtistUpdatesSection } from "@/components/home/FavoriteArtistUpdatesSection";
+import { CommunityActivitySection } from "@/components/home/CommunityActivitySection";
+import { EarnTJSection } from "@/components/home/EarnTJSection";
+import { Web3NewsSection } from "@/components/home/Web3NewsSection";
+import { RecentlyMintedSection } from "@/components/home/RecentlyMintedSection";
+import { HomeFooter } from "@/components/home/HomeFooter";
 
 export const HomePage: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -87,121 +84,87 @@ export const HomePage: React.FC = () => {
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 5. Mood Alignment */}
-          <Suspense fallback={<HomeSectionSkeleton type="horizontal-cards" count={5} />}>
-            <MoodAlignmentSection />
-          </Suspense>
+          <MoodAlignmentSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 8. New Drops */}
-          <Suspense fallback={<HomeSectionSkeleton type="horizontal-cards" count={5} />}>
-            <NewDropsSection />
-          </Suspense>
+          <NewDropsSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 9. Trending Music */}
-          <Suspense fallback={<HomeSectionSkeleton type="horizontal-cards" count={5} />}>
-            <TrendingMusicSection />
-          </Suspense>
+          <TrendingMusicSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 10. Top Trending Songs */}
-          <Suspense fallback={<HomeSectionSkeleton type="vertical-rows" count={5} />}>
-            <TopTrendingSongsSection />
-          </Suspense>
+          <TopTrendingSongsSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 11. Featured Artists */}
-          <Suspense fallback={<HomeSectionSkeleton type="horizontal-cards" count={4} />}>
-            <FeaturedArtistsSection />
-          </Suspense>
+          <FeaturedArtistsSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 12. Trending Artists Leaderboard */}
-          <Suspense fallback={<HomeSectionSkeleton type="vertical-rows" count={5} />}>
-            <TrendingArtistsLeaderboardSection />
-          </Suspense>
+          <TrendingArtistsLeaderboardSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 13. Trending NFT Music */}
-          <Suspense fallback={<HomeSectionSkeleton type="horizontal-cards" count={4} />}>
-            <TrendingNFTMusicSection />
-          </Suspense>
+          <TrendingNFTMusicSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 14. NFT Explorer */}
-          <Suspense fallback={<HomeSectionSkeleton type="banner" />}>
-            <NFTExplorerSection />
-          </Suspense>
+          <NFTExplorerSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 15. Top Marketplace Picks */}
-          <Suspense fallback={<HomeSectionSkeleton type="horizontal-cards" count={4} />}>
-            <MarketplacePicksSection />
-          </Suspense>
+          <MarketplacePicksSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 16. Live Audio Spaces */}
-          <Suspense fallback={<HomeSectionSkeleton type="vertical-rows" count={3} />}>
-            <LiveSpacesSection />
-          </Suspense>
+          <LiveSpacesSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 17. Recommended For You */}
-          <Suspense fallback={<HomeSectionSkeleton type="horizontal-cards" count={5} />}>
-            <RecommendedForYouSection />
-          </Suspense>
+          <RecommendedForYouSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 18. Favorite Artist Updates */}
-          <Suspense fallback={<HomeSectionSkeleton type="horizontal-cards" count={4} />}>
-            <FavoriteArtistUpdatesSection />
-          </Suspense>
+          <FavoriteArtistUpdatesSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 19. Community Activity */}
-          <Suspense fallback={<HomeSectionSkeleton type="vertical-rows" count={4} />}>
-            <CommunityActivitySection />
-          </Suspense>
+          <CommunityActivitySection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 20. Earn TJ */}
-          <Suspense fallback={<HomeSectionSkeleton type="banner" />}>
-            <EarnTJSection />
-          </Suspense>
+          <EarnTJSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 21. Web3 Music News */}
-          <Suspense fallback={<HomeSectionSkeleton type="vertical-rows" count={3} />}>
-            <Web3NewsSection />
-          </Suspense>
+          <Web3NewsSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 22. Recently Minted NFTs */}
-          <Suspense fallback={<HomeSectionSkeleton type="horizontal-cards" count={4} />}>
-            <RecentlyMintedSection />
-          </Suspense>
+          <RecentlyMintedSection />
 
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800/60 to-transparent my-2 sm:my-3" />
 
           {/* 23. Home Footer */}
-          <Suspense fallback={null}>
-            <HomeFooter />
-          </Suspense>
+          <HomeFooter />
         </div>
       </HomePullToRefresh>
     </PageLayout>

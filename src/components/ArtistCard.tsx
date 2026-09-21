@@ -72,7 +72,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
             </div>
             <Button 
               className={cn(
-                  "rounded-full transition-all border border-[#c0c0c0]/30",
+                  "rounded-full transition-colors duration-500 ease-in-out border border-[#c0c0c0]/30",
                   isFollowing 
                     ? "bg-muted/50 text-muted-foreground hover:bg-muted/80" 
                     : "bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]"
@@ -135,7 +135,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
           size="sm"
           onClick={handleFollowClick}
           style={{ height: cardTokens.artist.followButtonHeight }}
-          className="w-full text-[8px] uppercase tracking-widest font-black rounded-full border border-[#c0c0c0]/30"
+          className="w-full text-[8px] uppercase tracking-widest font-black rounded-full border border-[#c0c0c0]/30 transition-colors duration-500 ease-in-out"
         >
           {isFollowing ? 'UNFOLLOW' : 'FOLLOW'}
         </Button>

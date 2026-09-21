@@ -22,7 +22,7 @@ export const colors = {
     white: '#FFFFFF',
     black: '#050505',
     gold: '#FFD700',
-    silver: 'rgba(255, 255, 255, 0.12)',
+    silver: 'rgba(192, 192, 192, 0.24)',
     bronze: '#CD7F32',
   },
   light: {

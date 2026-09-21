@@ -14,6 +14,7 @@ import {
   Sparkles,
   Users,
   UserCheck,
+  UserPlus,
   Disc,
   Layers,
   Gem,
@@ -346,16 +347,36 @@ export const UserProfile: React.FC = () => {
           <div className="flex items-center gap-2 pt-2">
             {!isOwnProfile ? (
               <>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleFollow}
-                  className={`px-6 py-2.5 rounded-full font-extrabold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-lg active:scale-95 ${
+                  className={`px-6 py-2.5 rounded-full font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg transition-colors duration-500 ease-in-out flex items-center gap-1.5 ${
                     isFollowing
                       ? 'bg-white/10 hover:bg-white/20 text-white'
-                      : 'bg-[#0052FF] hover:bg-[#1a66ff] text-white shadow-[0_4px_16px_rgba(0,82,255,0.4)]'
+                      : 'bg-[#0052FF] hover:bg-[#1a66ff] text-white'
                   }`}
                 >
-                  {isFollowing ? 'Following' : 'Follow User'}
-                </button>
+                  <motion.span
+                    key={isFollowing ? "following" : "follow"}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className="flex items-center gap-1.5"
+                  >
+                    {isFollowing ? (
+                      <>
+                        <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Following</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span>{user.role === 'artist' ? 'Follow Artist' : 'Follow User'}</span>
+                      </>
+                    )}
+                  </motion.span>
+                </motion.button>
                 <button
                   onClick={() => setIsQRModalOpen(true)}
                   className="p-2.5 bg-white/5 hover:bg-white/10 text-white rounded-full transition-all cursor-pointer shadow-md"

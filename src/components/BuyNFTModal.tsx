@@ -35,6 +35,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import LoadingOverlay from './LoadingOverlay';
 import NFTPurchaseConfirmationDialog from './NFTPurchaseConfirmationDialog';
+import NFTAudioPreviewPlayer from './NFTAudioPreviewPlayer';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface BuyNFTModalProps {
@@ -197,6 +198,14 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
                     <p className="text-[10px] text-muted-foreground uppercase">{nft.creator}</p>
                   </div>
               </div>
+
+              {/* 30-Second Audio Snippet Preview */}
+              <NFTAudioPreviewPlayer 
+                nft={nft} 
+                variant="compact"
+                title={nft.title}
+                artist={nft.artist || nft.creator}
+              />
 
               <ScrollArea className="max-h-[220px] pr-4 -mr-4">
                 <div className="space-y-4 list-section-silver">
