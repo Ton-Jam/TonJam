@@ -31,6 +31,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DailyMissions } from "@/components/DailyMissions";
 import { fadeIn, slideUp, staggerChildren } from "@/motion";
 import { useAudio } from "@/contexts/AudioContext";
 import { useTJ } from "@/contexts/TJContext";
@@ -98,6 +99,7 @@ const Tasks: React.FC = () => {
     hasClaimedDailyBonus,
     claimDailyBonus,
     dailyBonusReward,
+    isSyncing,
   } = useTJ();
 
   // 1. DYNAMIC TJ BALANCE TICKER STATE
@@ -663,6 +665,23 @@ const Tasks: React.FC = () => {
           )}
         </motion.div>
 
+        {/* SECTION 3: DAILY MISSIONS */}
+        <motion.div variants={slideUp}>
+          <DailyMissions 
+            missions={realDailyMissions}
+            timeUntilReset={timeUntilReset}
+            isLoading={isSyncing}
+            onMissionClick={(m) => {
+              if (m.type === 'listen_new_track') {
+                navigate('/discover');
+              } else if (m.type === 'follow_artist') {
+                navigate('/discover');
+              } else if (m.type === 'explore_nft') {
+                navigate('/marketplace');
+              }
+            }}
+          />
+        </motion.div>
 
         <motion.div 
           variants={staggerChildren()}

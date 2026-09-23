@@ -32,21 +32,18 @@
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
-        "name": { "type": "string" },
+        "displayName": { "type": "string" },
+        "username": { "type": "string" },
+        "photoURL": { "type": "string" },
         "email": { "type": "string", "format": "email" },
-        "walletAddress": { "type": "string" },
         "role": { "type": "string", "enum": ["user", "artist", "admin"] },
-        "avatar": { "type": "string" },
-        "bio": { "type": "string" },
         "isVerifiedArtist": { "type": "boolean" },
-        "verificationStatus": { "type": "string", "enum": ["unverified", "pending", "verified"] },
-        "xp": { "type": "number" },
-        "collectorTier": { "type": "string", "enum": ["Bronze", "Silver", "Gold", "Platinum", "Legend"] },
-        "badges": { "type": "array", "items": { "type": "string" } },
-        "fanEngagementScore": { "type": "number" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "tjBalance": { "type": "number" },
+        "tjPoints": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["uid", "name", "email"]
+      "required": ["uid", "displayName", "role", "isVerifiedArtist", "tjBalance", "tjPoints", "createdAt", "updatedAt"]
     },
     "ArtistVerificationRequest": {
       "title": "ArtistVerificationRequest",

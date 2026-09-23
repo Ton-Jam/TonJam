@@ -346,12 +346,12 @@ export const Discover: React.FC = () => {
       {/* Sticky Spotify-Style Search Header */}
       <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md pt-3 sm:pt-4 pb-3 px-4 sm:px-6 lg:px-8 space-y-2.5">
         
-        {/* Main Search Input Bar with round border radius and visible input section */}
+        {/* Main Search Input Bar with grey background, round border radius and borderless input */}
         <div className="w-full relative">
-          <div className="relative w-full flex items-center bg-white/[0.05] hover:bg-white/[0.08] focus-within:bg-white/[0.1] rounded-full px-4 py-2.5 sm:py-3 min-h-[48px] border border-white/20 focus-within:border-[#0088CC] transition-all shadow-none">
+          <div className="relative w-full flex items-center bg-[#222226] hover:bg-[#2a2a30] focus-within:bg-[#2a2a30] rounded-full px-4 py-2.5 sm:py-3 min-h-[48px] border border-white/20 focus-within:border-[#0088CC] transition-all shadow-none">
             <Search className={`w-5 h-5 shrink-0 mr-3 transition-colors ${query ? 'text-[#00B4D8]' : 'text-zinc-400'}`} />
             
-            <div className="flex-1 flex items-center min-w-0 h-full">
+            <div className="flex-1 flex items-center min-w-0 h-full border-0 !border-none outline-none !outline-none ring-0 !ring-0">
               <input
                 type="text"
                 value={query}
@@ -359,7 +359,7 @@ export const Discover: React.FC = () => {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 250)}
                 placeholder="What do you want to listen to?"
-                className="w-full bg-transparent border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus:ring-0 focus:outline-none focus:border-none text-sm font-medium placeholder:text-zinc-400 placeholder:opacity-100 text-white leading-relaxed p-0 shadow-none !shadow-none"
+                className="search-bar-input w-full bg-transparent border-0 !border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus:ring-0 focus:outline-none focus:border-none text-sm font-medium placeholder:text-zinc-400 placeholder:opacity-100 text-white leading-relaxed p-0 shadow-none !shadow-none"
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="off"

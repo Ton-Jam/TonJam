@@ -54,7 +54,7 @@ export function SearchBar({
             setIsSearchOpen(true);
           }}
           onFocus={() => setIsSearchOpen(true)}
-          className={`w-full ${searchQuery ? 'bg-transparent border-white/20' : 'bg-zinc-900/60'} text-white pl-4 pr-10 py-1.5 rounded-md text-xs placeholder:text-zinc-500 focus:outline-none whitespace-nowrap overflow-hidden text-ellipsis ${inputClassName}`}
+          className={`w-full bg-[#222226] text-white pl-4 pr-10 py-1.5 rounded-full text-xs placeholder:text-zinc-400 border-0 !border-none focus:outline-none focus:ring-0 whitespace-nowrap overflow-hidden text-ellipsis ${inputClassName}`}
           autoFocus={autoFocus}
           autoComplete="off"
           autoCorrect="off"

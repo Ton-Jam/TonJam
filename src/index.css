@@ -498,8 +498,37 @@
     background: linear-gradient(135deg, #33C7E5 0%, #00B4D8 100%) !important;
   }
 
-  /* Focus styling for inputs with subtle silver border */
-  .dark input:focus,
+  /* Borderless inputs inside search bars and transparent fields */
+  .search-bar-input,
+  input.search-bar-input,
+  .dark input.search-bar-input,
+  .dark .search-bar-input,
+  .dark input[type="text"].border-0,
+  .dark input[type="search"],
+  .border-0 input,
+  [class*="rounded-full"] input {
+    border: none !important;
+    border-width: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+  .search-bar-input:focus,
+  input.search-bar-input:focus,
+  .dark input.search-bar-input:focus,
+  .dark .search-bar-input:focus,
+  .dark input[type="text"].border-0:focus,
+  .border-0 input:focus,
+  [class*="rounded-full"] input:focus {
+    border: none !important;
+    border-width: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  /* Focus styling for standard bordered form inputs with subtle silver border */
+  .dark input:not(.search-bar-input):not(.border-0):not([class*="bg-transparent"]):focus,
   .dark textarea:focus,
   .dark select:focus {
     border-color: rgba(192, 192, 192, 0.45) !important;

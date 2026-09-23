@@ -97,12 +97,12 @@ export const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
   };
 
   return (
-    <div className="relative w-full flex items-center bg-[#F5F5F7] dark:bg-white/[0.05] border border-slate-300/80 dark:border-white/20 focus-within:border-[#0088CC] rounded-full px-1 py-0.5 shadow-none transition-colors">
+    <div className="relative w-full flex items-center bg-[#e4e4e7] dark:bg-[#222226] border border-slate-300/80 dark:border-white/20 focus-within:border-[#0088CC] rounded-full px-1 py-0.5 shadow-none transition-colors">
       <div className="pl-3.5 text-slate-500 dark:text-zinc-400">
         <Search className="w-4 h-4" />
       </div>
 
-      <div className="flex-1 relative h-10 flex items-center border-0 !border-none">
+      <div className="flex-1 relative h-10 flex items-center border-0 !border-0 !border-none outline-none !outline-none ring-0 !ring-0">
         <input
           type="text"
           value={value}
@@ -110,7 +110,7 @@ export const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
           onFocus={onFocus}
           onBlur={onBlur}
           placeholder={isFocused ? "Search tracks, artists, NFTs..." : ""}
-          className="w-full h-full bg-transparent border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus:ring-0 focus:outline-none focus:border-none text-slate-900 dark:text-white placeholder:text-zinc-400 text-xs font-medium pl-3 pr-10 shadow-none"
+          className="w-full h-full bg-transparent border-0 !border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus:ring-0 focus:outline-none focus:border-none text-slate-900 dark:text-white placeholder:text-zinc-400 text-xs font-medium pl-3 pr-10 shadow-none !shadow-none"
           aria-label="Search TonJam"
         />
 

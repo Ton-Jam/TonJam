@@ -476,7 +476,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   trendingTopics={trendingTopics}
                   placeholder={getSearchPlaceholder()}
                   className={cn("flex-1 relative transition-all duration-500", isLibrary ? "max-w-none" : "max-w-xl")}
-                  inputClassName={`border border-border/40 bg-muted/20 rounded-[4px] py-1.5 pl-4 pr-10 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-muted-foreground/30`}
+                  inputClassName={`border-0 !border-none bg-[#222226] hover:bg-[#2a2a30] focus:bg-[#2a2a30] rounded-full py-1.5 pl-4 pr-10 text-xs font-medium text-white focus:outline-none focus:ring-0 transition-all placeholder:text-zinc-400`}
                   autoFocus={isHeaderSearchOpen && isLibrary}
                 >
                   {!safeSearchQuery.trim() ? (

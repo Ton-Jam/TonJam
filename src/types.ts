@@ -542,11 +542,26 @@ export interface ArtistVerificationRequest {
 
 export interface User {
   uid: string;
-  username: string;
-  name: string;
+
+  displayName: string;
+  username?: string;
+  photoURL?: string;
+  email?: string;
+
+  role: "user" | "artist" | "admin";
+
+  isVerifiedArtist: boolean;
+
+  tjBalance: number;
+  tjPoints: number;
+
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+
+  name?: string;
   avatar?: string;
   verified?: boolean;
-  followers: number;
+  followers?: number;
   walletAddress?: string;
 }
 
