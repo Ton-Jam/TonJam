@@ -7,7 +7,6 @@ import { BottomNavigation, TabId } from './BottomNavigation';
 import { MiniPlayer } from './MiniPlayer';
 import { FloatingActions } from './FloatingActions';
 import { BottomSheet } from './BottomSheet';
-import OfflineIndicator from '@/components/OfflineIndicator';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -142,9 +141,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             onTabChange={onTabChange}
             isHidden={isNavHidden}
           />
-
-          {/* Offline Connectivity Status Indicator */}
-          <OfflineIndicator />
     </div>
   );
 };

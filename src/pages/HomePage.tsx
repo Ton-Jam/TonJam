@@ -3,8 +3,6 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { HomePullToRefresh } from "@/components/home/HomePullToRefresh";
 
 // 1. Transparent Header is provided by Layout
-// 2. Greeting
-import { HomeHero } from "@/components/home/HomeHero";
 // 3. Category/Filter Chips
 import { HomeGenreFilterBar } from "@/components/home/HomeGenreFilterBar";
 // 4. Made for You
@@ -61,9 +59,6 @@ export const HomePage: React.FC = () => {
             className="absolute top-[900px] right-0 w-[350px] h-[350px] bg-primary/5 rounded-full pointer-events-none -z-10"
             style={{ filter: "blur(100px)", transform: "translateZ(0)" }}
           />
-
-          {/* 2. Greeting */}
-          <HomeHero />
 
           {/* 3. Category / Filter Chips */}
           <HomeGenreFilterBar
