@@ -38,10 +38,10 @@ const SponsoredFeedCard: React.FC<SponsoredFeedCardProps> = ({
           {description}
         </p>
         
-        <div className="pt-2">
+        <div className="pt-1">
           <button
             onClick={onClick}
-            className="h-7 bg-[#00B4D8] hover:bg-[#009bba] text-[#050A24] font-black text-[9px] uppercase tracking-widest px-3.5 rounded-full cursor-pointer leading-none border-none"
+            className="min-h-[44px] min-w-[44px] bg-[#00B4D8] hover:bg-[#009bba] text-[#050A24] font-black text-[9.5px] uppercase tracking-widest px-4 rounded-full cursor-pointer border-none inline-flex items-center justify-center active:scale-95 transition-transform"
           >
             {ctaText}
           </button>

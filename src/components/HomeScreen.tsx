@@ -88,16 +88,16 @@ const HomeScreen: React.FC = () => {
 
   // 10 mock Collections
   const mockCollections: NFTCollection[] = [
-    { id: "col-1", name: "Genesis Beats Vol. 1", artist: "DJ Krupy", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20genesis%20beats%20neon%20orange?width=300&height=300&nologo=true", floorPrice: "12.5", mintedCount: 420, totalLimit: 500 },
-    { id: "col-2", name: "Neon Nights Dubstep", artist: "Byte Beat", coverUrl: "https://image.pollinations.ai/prompt/dubstep%20music%20album%20cover%20neon%20green%20laser%20retro?width=300&height=300&nologo=true", floorPrice: "4.8", mintedCount: 180, totalLimit: 300 },
-    { id: "col-3", name: "Deep Abyssal Audio", artist: "Echo Phase", coverUrl: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true", floorPrice: "8.0", mintedCount: 95, totalLimit: 120 },
-    { id: "col-4", name: "Dreamweaver Velvet", artist: "Luna Ray", coverUrl: "https://image.pollinations.ai/prompt/dreamy%20pink%20clouds%20golden%20moon%20synthesizer%20art?width=300&height=300&nologo=true", floorPrice: "15.0", mintedCount: 220, totalLimit: 250 },
-    { id: "col-5", name: "Ghost City Records", artist: "City Ghost", coverUrl: "https://image.pollinations.ai/prompt/futuristic%20rainy%20alley%20lofi%20synthwave%20album%20cover?width=300&height=300&nologo=true", floorPrice: "3.2", mintedCount: 390, totalLimit: 400 },
-    { id: "col-6", name: "Golden Horizon Lofi", artist: "Retro Vibes", coverUrl: "https://image.pollinations.ai/prompt/golden%20hour%20sunrise%20retro%20car%20lofi%20beats%20cover?width=300&height=300&nologo=true", floorPrice: "2.9", mintedCount: 140, totalLimit: 200 },
-    { id: "col-7", name: "Decentralized Amapiano", artist: "Major Sound", coverUrl: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=300&height=300&nologo=true", floorPrice: "9.5", mintedCount: 75, totalLimit: 100 },
-    { id: "col-8", name: "Cyber Punk Rap Vault", artist: "Lil Crypto", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20rapper%20gold%20teeth%20hologram%20neon%20art?width=300&height=300&nologo=true", floorPrice: "24.0", mintedCount: 11, totalLimit: 50 },
-    { id: "col-9", name: "Web3 Bass Boosters", artist: "Dr. Osc", coverUrl: "https://image.pollinations.ai/prompt/subwoofer%20exploding%20with%20cosmic%20purple%20nebula%20cover?width=300&height=300&nologo=true", floorPrice: "6.0", mintedCount: 190, totalLimit: 250 },
-    { id: "col-10", name: "Interstellar Anthem", artist: "Cosmic Key", coverUrl: "https://image.pollinations.ai/prompt/galaxy%20retro%20organ%20scifi%20music%20album%20art?width=300&height=300&nologo=true", floorPrice: "18.5", mintedCount: 45, totalLimit: 80 }
+    { id: "col-1", name: "Genesis Beats", artist: "DJ Krupy", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20genesis%20beats%20neon%20orange?width=300&height=300&nologo=true", floorPrice: "12.5", mintedCount: 420, totalLimit: 500 },
+    { id: "col-2", name: "Neon Nights", artist: "Byte Beat", coverUrl: "https://image.pollinations.ai/prompt/dubstep%20music%20album%20cover%20neon%20green%20laser%20retro?width=300&height=300&nologo=true", floorPrice: "4.8", mintedCount: 180, totalLimit: 300 },
+    { id: "col-3", name: "Deep Abyssal", artist: "Echo Phase", coverUrl: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true", floorPrice: "8.0", mintedCount: 95, totalLimit: 120 },
+    { id: "col-4", name: "Dreamweaver", artist: "Luna Ray", coverUrl: "https://image.pollinations.ai/prompt/dreamy%20pink%20clouds%20golden%20moon%20synthesizer%20art?width=300&height=300&nologo=true", floorPrice: "15.0", mintedCount: 220, totalLimit: 250 },
+    { id: "col-5", name: "Ghost City", artist: "City Ghost", coverUrl: "https://image.pollinations.ai/prompt/futuristic%20rainy%20alley%20lofi%20synthwave%20album%20cover?width=300&height=300&nologo=true", floorPrice: "3.2", mintedCount: 390, totalLimit: 400 },
+    { id: "col-6", name: "Golden Horizon", artist: "Retro Vibes", coverUrl: "https://image.pollinations.ai/prompt/golden%20hour%20sunrise%20retro%20car%20lofi%20beats%20cover?width=300&height=300&nologo=true", floorPrice: "2.9", mintedCount: 140, totalLimit: 200 },
+    { id: "col-7", name: "Amapiano Wave", artist: "Major Sound", coverUrl: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=300&height=300&nologo=true", floorPrice: "9.5", mintedCount: 75, totalLimit: 100 },
+    { id: "col-8", name: "Cyber Rap", artist: "Lil Crypto", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20rapper%20gold%20teeth%20hologram%20neon%20art?width=300&height=300&nologo=true", floorPrice: "24.0", mintedCount: 11, totalLimit: 50 },
+    { id: "col-9", name: "Bass Boosters", artist: "Dr. Osc", coverUrl: "https://image.pollinations.ai/prompt/subwoofer%20exploding%20with%20cosmic%20purple%20nebula%20cover?width=300&height=300&nologo=true", floorPrice: "6.0", mintedCount: 190, totalLimit: 250 },
+    { id: "col-10", name: "Interstellar", artist: "Cosmic Key", coverUrl: "https://image.pollinations.ai/prompt/galaxy%20retro%20organ%20scifi%20music%20album%20art?width=300&height=300&nologo=true", floorPrice: "18.5", mintedCount: 45, totalLimit: 80 }
   ];
 
   // Sponsored feeds
@@ -368,15 +368,20 @@ const HomeScreen: React.FC = () => {
               )
             ))}
           </AnimatePresence>
-          <div className="absolute bottom-3 right-5 z-10 flex gap-1">
+          <div className="absolute bottom-2 right-4 z-10 flex gap-0.5 items-center">
             {sponsoredPromos.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setPromoIndex(idx)}
-                className={`w-1.5 h-1.5 rounded-full transition-all border-none p-0 ${
-                  idx === promoIndex ? "bg-[#0098EA] w-4" : "bg-white/20"
-                }`}
-              />
+                aria-label={`Promo slide ${idx + 1}`}
+                className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border-none bg-transparent p-0 cursor-pointer"
+              >
+                <span
+                  className={`h-1.5 rounded-full transition-all block ${
+                    idx === promoIndex ? "bg-[#0098EA] w-4" : "bg-white/20 w-1.5"
+                  }`}
+                />
+              </button>
             ))}
           </div>
         </div>
@@ -389,8 +394,12 @@ const HomeScreen: React.FC = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-white">Trending NFT Collections</h2>
-          <button onClick={() => navigate("/marketplace")} className="text-xs font-bold text-[#0098EA] border-none bg-transparent">
-            All <ChevronRight className="w-3.5 h-3.5 inline" />
+          <button
+            onClick={() => navigate("/marketplace")}
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#0098EA] border-none bg-transparent cursor-pointer"
+            aria-label="View all trending NFT collections"
+          >
+            All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
           </button>
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
@@ -428,7 +437,7 @@ const HomeScreen: React.FC = () => {
               <Button
                 size="sm"
                 onClick={() => playTrack(track)}
-                className="w-full h-7 text-[8px] font-black uppercase tracking-widest bg-white/5 text-[#9AA0AE] border-none"
+                className="w-full min-h-[44px] text-[9px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 text-[#9AA0AE] hover:text-white border-none flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
               >
                 Play
               </Button>
@@ -463,7 +472,7 @@ const HomeScreen: React.FC = () => {
                 </div>
                 <button
                   onClick={() => toggleFollow(art.id)}
-                  className={`w-full h-6 text-[8px] font-black uppercase tracking-widest rounded-md border-none ${
+                  className={`w-full min-h-[44px] text-[9px] font-black uppercase tracking-widest rounded-xl border-none cursor-pointer flex items-center justify-center transition-all active:scale-95 ${
                     hasFollowed ? "bg-white/5 text-[#9AA0AE]" : "bg-[#5B6BFF] text-white"
                   }`}
                 >
@@ -506,9 +515,9 @@ const HomeScreen: React.FC = () => {
               confetti({ particleCount: 15, spread: 30 });
             }}
             disabled={recommendationsLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 rounded-xl hover:bg-indigo-500/20 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-none disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3.5 min-h-[44px] min-w-[44px] bg-indigo-500/10 text-indigo-400 rounded-xl hover:bg-indigo-500/20 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-none disabled:opacity-50 active:scale-95"
           >
-            <Sparkles className={`w-3 h-3 ${recommendationsLoading ? 'animate-spin' : ''}`} />
+            <Sparkles className={`w-3.5 h-3.5 ${recommendationsLoading ? 'animate-spin' : ''}`} />
             Recalibrate
           </button>
         </div>
@@ -557,7 +566,7 @@ const HomeScreen: React.FC = () => {
                   <Button
                     size="sm"
                     onClick={() => playTrack(track)}
-                    className="w-full h-6 text-[8.5px] font-black bg-white/5 border-none text-[#9AA0AE] hover:text-white"
+                    className="w-full min-h-[44px] text-[9px] font-black bg-white/5 hover:bg-white/10 border-none text-[#9AA0AE] hover:text-white flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
                   >
                     Listen
                   </Button>
@@ -576,7 +585,7 @@ const HomeScreen: React.FC = () => {
                   <Button
                     size="sm"
                     onClick={() => confetti({ particleCount: 15 })}
-                    className="w-full h-6 text-[8.5px] font-black bg-white/5 border-none text-[#00B4D8] hover:text-white"
+                    className="w-full min-h-[44px] text-[9px] font-black bg-white/5 hover:bg-white/10 border-none text-[#00B4D8] hover:text-white flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
                   >
                     Bid
                   </Button>
@@ -612,10 +621,11 @@ const HomeScreen: React.FC = () => {
           {trendingArtists.filter(a => artistFollowStates[a.id]).map(art => (
             <div
               key={art.id}
-              className="w-[100px] shrink-0 flex flex-col items-center p-2 rounded-2xl bg-[#0A113A]/30"
+              onClick={() => navigate(`/artist/${art.id}`)}
+              className="w-[100px] shrink-0 flex flex-col items-center p-2 rounded-2xl bg-[#0A113A]/30 cursor-pointer min-h-[44px] hover:bg-[#0A113A]/50 transition-colors"
             >
-              <div className="w-12 h-12 rounded-full overflow-hidden">
-                <img src={art.avatar} alt="" className="w-full h-full" />
+              <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center">
+                <img src={art.avatar} alt="" className="w-full h-full object-cover" />
               </div>
               <h4 className="text-[11px] font-bold mt-1 text-white truncate max-w-[80px]">{art.name}</h4>
               <span className="text-[8px] text-[#2BE08C]">Just Active</span>
@@ -645,7 +655,7 @@ const HomeScreen: React.FC = () => {
           <Button
             size="sm"
             onClick={loadMore}
-            className="w-full h-8 text-[9px] bg-white/[0.02] text-[#9AA0AE] border-none"
+            className="w-full min-h-[44px] text-[10px] font-black bg-white/[0.04] hover:bg-white/[0.08] text-[#9AA0AE] hover:text-white border-none flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
           >
             Load Older Stream Activities
           </Button>

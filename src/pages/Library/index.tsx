@@ -26,7 +26,8 @@ import { PageLayout } from '@/components/layout/PageLayout';
 
 import { 
   Sparkles, Heart, Download, Zap, Disc, Clock, Search, List, LayoutGrid, 
-  Settings, Database, BarChart3, ListMusic, History, SlidersHorizontal, Sun, Moon 
+  Settings, Database, BarChart3, ListMusic, History, SlidersHorizontal, Sun, Moon,
+  WifiOff, HardDrive
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -131,8 +132,36 @@ const LibraryPage: React.FC = () => {
               </div>
             )}
 
-            {/* Grid vs List View Toggle with AnimatePresence & layoutId */}
-            <div className="flex items-center gap-2 self-end md:self-auto" role="group" aria-label="View layout options">
+            {/* Controls: Offline Service Worker Cache Toggle & Layout Toggle */}
+            <div className="flex items-center gap-2 self-end md:self-auto" role="group" aria-label="Library view and filter controls">
+              {/* Offline Service Worker Cache Storage Filter Toggle */}
+              <button
+                type="button"
+                id="library-offline-cache-toggle-btn"
+                onClick={data.toggleOfflineMode}
+                aria-pressed={data.isOfflineOnly}
+                aria-label="Filter to only display tracks cached in service worker storage"
+                className={`min-h-[44px] min-w-[44px] px-3.5 py-1.5 rounded-[10px] text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all border-none ${
+                  data.isOfflineOnly
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-950/40 ring-2 ring-emerald-400/30'
+                    : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+                title={data.isOfflineOnly ? "Offline mode active: Showing only tracks cached in service worker" : "Toggle Offline filter (Service Worker storage)"}
+              >
+                <div className="relative flex items-center justify-center">
+                  <WifiOff className="w-4 h-4" />
+                  {data.isOfflineOnly && (
+                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-300 animate-ping" />
+                  )}
+                </div>
+                <span>Offline</span>
+                <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md ${
+                  data.isOfflineOnly ? 'bg-emerald-700/60 text-white' : 'bg-slate-800 text-slate-400'
+                }`}>
+                  {data.cachedTrackCount}
+                </span>
+              </button>
+
               <div className="bg-slate-900 border border-white/5 rounded-[10px] p-1 flex items-center relative">
                 <button
                   type="button"
@@ -202,6 +231,61 @@ const LibraryPage: React.FC = () => {
             })}
           </div>
         </div>
+
+        {/* Offline Service Worker Cache Mode Status Banner */}
+        {data.isOfflineOnly && (
+          <div className="bg-gradient-to-r from-emerald-950/60 via-emerald-900/30 to-slate-950 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl shadow-emerald-950/20 border-none">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                <WifiOff className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                    Offline Cache Filter Active
+                  </h3>
+                  <span className="text-[10px] font-mono font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full">
+                    Service Worker Storage
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Displaying {data.tracks.length} track{data.tracks.length === 1 ? '' : 's'} available in offline browser storage. Streamable without internet connection.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={data.toggleOfflineMode}
+              className="min-h-[44px] px-3.5 py-2 text-xs font-bold text-slate-300 hover:text-white hover:bg-white/[0.04] rounded-xl transition-all border-none bg-transparent cursor-pointer self-start sm:self-auto"
+            >
+              Disable Offline Mode
+            </button>
+          </div>
+        )}
+
+        {/* Empty state when in offline mode and no tracks are cached */}
+        {data.isOfflineOnly && data.tracks.length === 0 && !data.isLoading && (
+          <div className="bg-[#0B112C] rounded-2xl p-8 text-center space-y-4 max-w-md mx-auto shadow-xl border-none">
+            <div className="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto">
+              <WifiOff className="w-7 h-7" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-black text-white">No Offline Tracks Cached</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                You don't have any tracks currently cached in the service worker storage. Download tracks to enjoy them offline without an internet link.
+              </p>
+            </div>
+            <div className="pt-2 flex justify-center gap-2">
+              <button
+                type="button"
+                onClick={data.toggleOfflineMode}
+                className="min-h-[44px] px-5 py-2.5 bg-[#0052FF] hover:bg-[#1a66ff] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all border-none cursor-pointer"
+              >
+                Show All Tracks
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* MAIN DYNAMIC CONTENT STREAM */}
         <div className="space-y-12">

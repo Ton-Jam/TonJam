@@ -49,7 +49,7 @@ const ContinueListeningCard: React.FC<ContinueListeningCardProps> = ({
           onPlay();
         }}
         aria-label="Play track"
-        className="w-10 h-10 rounded-full bg-[#0179f4] hover:bg-[#0179f4]/90 text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-md shadow-[#0179f4]/30 shrink-0 cursor-pointer border-none z-10"
+        className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-[#0179f4] hover:bg-[#0179f4]/90 text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-md shadow-[#0179f4]/30 shrink-0 cursor-pointer border-none z-10"
       >
         <Play className="w-4 h-4 fill-white text-white ml-0.5" />
       </button>

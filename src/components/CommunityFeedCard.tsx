@@ -54,15 +54,20 @@ const CommunityFeedCard: React.FC<CommunityFeedCardProps> = ({
 
   return (
     <div className="flex items-start justify-between gap-3 text-xs pb-3 border-b border-white/[0.02] last:border-b-0 last:pb-0 text-left animate-none">
-      <div className="flex items-start gap-2.5 min-w-0">
-        <Avatar 
-          className="w-8 h-8 rounded-full shrink-0 border border-white/5 bg-[#050A24] flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity animate-none"
+      <div className="flex items-start gap-1 min-w-0">
+        <button
           onClick={handleProfileClick}
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center p-0 border-none bg-transparent cursor-pointer shrink-0"
+          aria-label={`View ${username}'s profile`}
         >
-          <AvatarImage src={avatar} alt={username} className="object-cover" />
-          <AvatarFallback className="text-[10px] font-black text-white bg-[#5B6BFF]">{initials}</AvatarFallback>
-        </Avatar>
-        <div className="min-w-0">
+          <Avatar 
+            className="w-8 h-8 rounded-full border border-white/5 bg-[#050A24] flex items-center justify-center hover:opacity-80 transition-opacity animate-none pointer-events-none"
+          >
+            <AvatarImage src={avatar} alt={username} className="object-cover" />
+            <AvatarFallback className="text-[10px] font-black text-white bg-[#5B6BFF]">{initials}</AvatarFallback>
+          </Avatar>
+        </button>
+        <div className="min-w-0 pt-2">
           <p className="text-[11.5px] leading-tight text-[#9AA0AE]">
             <span 
               className="font-extrabold text-white cursor-pointer hover:text-blue-400 transition-colors"

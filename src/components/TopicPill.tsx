@@ -14,7 +14,7 @@ const TopicPill: React.FC<TopicPillProps> = ({ label, onClick, isActive = false 
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       aria-pressed={isActive}
-      className="shrink-0 outline-none p-0 cursor-pointer border-none bg-transparent"
+      className="shrink-0 outline-none p-0 cursor-pointer border-none bg-transparent min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
     >
       <div className={`px-3.5 py-2 rounded-full text-xs font-black tracking-widest uppercase transition-all border ${
         isActive

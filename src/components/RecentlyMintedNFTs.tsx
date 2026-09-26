@@ -174,20 +174,20 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
         </div>
 
         {/* Scroll action buttons */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
             onClick={() => handleScroll('left')}
-            className="w-7 h-7 rounded-full bg-[#0A113A]/80 hover:bg-[#121c54] text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-[#0A113A]/80 hover:bg-[#121c54] text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer border-none"
             aria-label="Scroll left"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => handleScroll('right')}
-            className="w-7 h-7 rounded-full bg-[#0A113A]/80 hover:bg-[#121c54] text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-[#0A113A]/80 hover:bg-[#121c54] text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer border-none"
             aria-label="Scroll right"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -240,13 +240,13 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
                 {/* Quick Play Preview Button Overlay */}
                 <button
                   onClick={(e) => handlePlayPreview(e, nft)}
-                  className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#5B6BFF] hover:bg-[#4a58eb] text-white flex items-center justify-center shadow-lg transition-transform active:scale-95 cursor-pointer opacity-90 group-hover:opacity-100"
+                  className="absolute bottom-2 right-2 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-[#5B6BFF] hover:bg-[#4a58eb] text-white flex items-center justify-center shadow-lg transition-transform active:scale-95 cursor-pointer opacity-95 group-hover:opacity-100 border-none"
                   aria-label={isThisTrackPlaying ? "Pause audio preview" : "Play audio preview"}
                 >
                   {isThisTrackPlaying ? (
-                    <Pause className="w-3.5 h-3.5 fill-current" />
+                    <Pause className="w-4 h-4 fill-current" />
                   ) : (
-                    <Play className="w-3.5 h-3.5 fill-current translate-x-0.5" />
+                    <Play className="w-4 h-4 fill-current translate-x-0.5" />
                   )}
                 </button>
               </div>
@@ -270,7 +270,7 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
               {/* CREATOR FOOTER AREA */}
               <div
                 onClick={(e) => handleCreatorClick(e, creator.uid)}
-                className="flex items-center gap-2 pt-1 mt-0.5 group/creator cursor-pointer hover:opacity-90 transition-opacity"
+                className="flex items-center gap-2 pt-1 mt-0.5 min-h-[44px] group/creator cursor-pointer hover:opacity-90 transition-opacity"
                 title={`View ${creator.name}'s profile`}
               >
                 <LazyArtworkImage

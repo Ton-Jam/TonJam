@@ -38,7 +38,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onClick }) =
       whileTap={{ scale: 0.92 }}
       onClick={handleTap}
       className="
-        relative w-10 h-10 rounded-full 
+        relative w-11 h-11 min-w-[44px] min-h-[44px] rounded-full 
         flex items-center justify-center 
         bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12]
         transition-colors cursor-pointer 

@@ -222,14 +222,14 @@ export const LatestMarketActivity: React.FC = () => {
                     <span className="text-[10px] text-[#9AA0AE] shrink-0 font-semibold">Buyer:</span>
                     <button
                       onClick={(e) => handleCopyAddress(e, tx.buyerAddress, tx.id)}
-                      className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-slate-200 text-[10px] font-mono transition-colors border-none"
+                      className="relative min-h-[44px] min-w-[44px] flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 active:scale-95 text-slate-200 text-[10px] font-mono transition-all border-none cursor-pointer"
                       title="Click to copy buyer address"
                     >
                       <span>{tx.buyerName || tx.buyerAddress}</span>
                       {copiedId === tx.id ? (
-                        <Check className="w-2.5 h-2.5 text-emerald-400" />
+                        <Check className="w-3 h-3 text-emerald-400" />
                       ) : (
-                        <Copy className="w-2.5 h-2.5 text-[#9AA0AE] opacity-60" />
+                        <Copy className="w-3 h-3 text-[#9AA0AE] opacity-60" />
                       )}
                     </button>
                   </div>

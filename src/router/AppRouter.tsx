@@ -12,28 +12,33 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, limit, query } from 'firebase/firestore';
 import { seedDatabase } from '@/services/seedService';
 import { resolveEndedAuctions } from '@/services/auctionService';
+import HomePage from '@/pages/HomePage';
 
 // Resilient lazy import helper for dynamic module loading with automatic retry & reload recovery
 const lazyWithRetry = (componentImport: () => Promise<any>) =>
   lazy(async () => {
-    const pageHasAlreadyBeenRefreshed = JSON.parse(
-      window.sessionStorage.getItem('page_has_been_refreshed') || 'false'
-    );
     try {
-      const component = await componentImport();
-      window.sessionStorage.setItem('page_has_been_refreshed', 'false');
-      return component;
+      return await componentImport();
     } catch (error) {
-      if (!pageHasAlreadyBeenRefreshed) {
-        window.sessionStorage.setItem('page_has_been_refreshed', 'true');
-        window.location.reload();
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        return await componentImport();
+      } catch (retryError) {
+        const pageHasAlreadyBeenRefreshed = JSON.parse(
+          window.sessionStorage.getItem('page_has_been_refreshed') || 'false'
+        );
+        if (!pageHasAlreadyBeenRefreshed) {
+          window.sessionStorage.setItem('page_has_been_refreshed', 'true');
+          window.location.reload();
+        }
+        throw retryError;
       }
-      throw error;
     }
   });
 
-// Lazy imports
-const Home = lazyWithRetry(() => import('@/pages/HomePage'));
+// Root landing page is directly imported for instant zero-fetch initialization
+const Home = HomePage;
+const HomeFeed = HomePage;
 const Discover = lazyWithRetry(() => import('@/pages/Discover'));
 const JamSpace = lazyWithRetry(() => import('@/pages/JamSpace'));
 const Marketplace = lazyWithRetry(() => import('@/pages/Marketplace'));
@@ -78,7 +83,6 @@ const DJKrupy = lazyWithRetry(() => import('@/pages/DJKrupy'));
 const FollowersFollowing = lazyWithRetry(() => import('@/pages/FollowersFollowing'));
 const AlbumDetails = lazyWithRetry(() => import('@/pages/AlbumDetails'));
 const Governance = lazyWithRetry(() => import('@/pages/Governance'));
-const HomeFeed = lazyWithRetry(() => import('@/pages/HomePage'));
 const UIKitShowcase = lazyWithRetry(() => import('@/pages/UIKitShowcase'));
 const Dashboard = lazyWithRetry(() => import('@/pages/Dashboard'));
 const ArtistOnboarding = lazyWithRetry(() => import('@/pages/ArtistOnboarding'));
@@ -242,11 +246,12 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/upload" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><UploadTrack /></ProtectedRoute></PageWrapper>} />
                   <Route path="/create-album" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><CreateAlbum /></ProtectedRoute></PageWrapper>} />
                   <Route path="/album/create" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><CreateAlbum /></ProtectedRoute></PageWrapper>} />
-                  <Route path="/mint" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><MintNFT /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/mint" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin', 'collector']}><MintNFT /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/mint-nft" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin', 'collector']}><MintNFT /></ProtectedRoute></PageWrapper>} />
                   <Route path="/my-nfts" element={<PageWrapper><ProtectedRoute><MyNFTs /></ProtectedRoute></PageWrapper>} />
                   <Route path="/favorite-tracks" element={<PageWrapper><ProtectedRoute><FavoriteTracks /></ProtectedRoute></PageWrapper>} />
                   <Route path="/favorite-artists" element={<PageWrapper><ProtectedRoute><FavoriteArtists /></ProtectedRoute></PageWrapper>} />
-                  <Route path="/artist-minting" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistMinting /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/artist-minting" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin', 'collector']}><MintNFT /></ProtectedRoute></PageWrapper>} />
                   <Route path="/library" element={<PageWrapper><ProtectedRoute><Library /></ProtectedRoute></PageWrapper>} />
                   <Route path="/library/downloads" element={<PageWrapper><ProtectedRoute><DownloadedTracks /></ProtectedRoute></PageWrapper>} />
                   <Route path="/library/recently-played" element={<PageWrapper><ProtectedRoute><RecentlyPlayedTracks /></ProtectedRoute></PageWrapper>} />

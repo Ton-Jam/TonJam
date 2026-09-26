@@ -54,7 +54,7 @@ const NFTCollectionCard: React.FC<NFTCollectionCardProps> = ({
         </div>
         <button
           onClick={onMint}
-          className="h-6 text-[8px] font-black uppercase tracking-widest px-2.5 bg-[#5B6BFF] text-white hover:bg-[#4856ea] rounded-md cursor-pointer border-none"
+          className="relative min-h-[44px] min-w-[44px] text-[8.5px] font-black uppercase tracking-widest px-3.5 bg-[#5B6BFF] text-white hover:bg-[#4856ea] active:scale-95 rounded-full cursor-pointer border-none shadow-none inline-flex items-center justify-center transition-transform"
         >
           Collect
         </button>

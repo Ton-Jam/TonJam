@@ -49,7 +49,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           <button
             type="button"
             onClick={handleBack}
-            className="p-2 -ml-2 rounded-full text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none shrink-0"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] -ml-2 rounded-full text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none shrink-0 bg-transparent"
             aria-label="Go back"
           >
             <ArrowLeftIcon className="w-5 h-5" strokeWidth={2.5} />

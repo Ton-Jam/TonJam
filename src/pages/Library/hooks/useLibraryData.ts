@@ -2,6 +2,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAudio } from '@/contexts/AudioContext';
 import { useToast } from '@/components/layout/ToastProvider';
 import { 
+  cacheTrackInServiceWorker, 
+  removeTrackFromServiceWorker, 
+  getCachedTrackIdsSet, 
+  syncInitialOfflineTracks 
+} from '@/services/serviceWorkerCacheService';
+import { 
   LibraryTrack, LibraryArtist, LibraryAlbum, LibraryNFT, LibraryPlaylist, 
   HistoryEvent, QueueItem, LibraryAnalytics 
 } from '../types';
@@ -54,6 +60,55 @@ export const useLibraryData = () => {
   const [analytics, setAnalytics] = useState<LibraryAnalytics>(MOCK_LIBRARY_ANALYTICS);
   const [downloadQuality, setDownloadQuality] = useState<'High' | 'Lossless' | 'Dolby Atmos'>('Lossless');
 
+  // Service Worker Offline Filtering Toggle
+  const [isOfflineOnly, setIsOfflineOnly] = useState<boolean>(() => {
+    return localStorage.getItem('tonjam_library_offline_only') === 'true';
+  });
+  const [cachedTrackIds, setCachedTrackIds] = useState<Set<string>>(new Set());
+
+  // Initialize and synchronize with Service Worker CacheStorage
+  useEffect(() => {
+    let isMounted = true;
+    const syncCache = async () => {
+      // Ensure initial downloaded tracks are in service worker cache
+      await syncInitialOfflineTracks(tracks);
+      const ids = await getCachedTrackIdsSet();
+      if (isMounted) {
+        setCachedTrackIds(ids);
+      }
+    };
+
+    syncCache();
+
+    const handleCacheUpdated = () => {
+      getCachedTrackIdsSet().then(ids => {
+        if (isMounted) setCachedTrackIds(ids);
+      });
+    };
+
+    window.addEventListener('tonjam_sw_cache_updated', handleCacheUpdated);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('tonjam_sw_cache_updated', handleCacheUpdated);
+    };
+  }, [tracks]);
+
+  const toggleOfflineMode = () => {
+    setIsOfflineOnly(prev => {
+      const next = !prev;
+      localStorage.setItem('tonjam_library_offline_only', String(next));
+      if (next) {
+        toast.info(
+          'Offline Mode Enabled',
+          'Showing tracks stored in Service Worker Cache.'
+        );
+      } else {
+        toast.info('Offline Mode Disabled', 'Showing full online library.');
+      }
+      return next;
+    });
+  };
+
   // Trigger fake initial loading for beautiful skeletons
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -105,47 +160,59 @@ export const useLibraryData = () => {
         track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         track.artist.toLowerCase().includes(searchQuery.toLowerCase());
       
+      // If offline toggle is active, only show tracks cached in service worker storage
+      if (isOfflineOnly) {
+        const isCached = cachedTrackIds.has(track.id) || track.isDownloaded || track.isOfflineAvailable;
+        if (!isCached) return false;
+      }
+
       if (activeChip === 'All') return matchesSearch;
       if (activeChip === 'Tracks') return matchesSearch;
       if (activeChip === 'Favorites') return matchesSearch && track.isLiked;
-      if (activeChip === 'Downloads' || activeChip === 'Offline') return matchesSearch && track.isDownloaded;
+      if (activeChip === 'Downloads' || activeChip === 'Offline') return matchesSearch && (track.isDownloaded || cachedTrackIds.has(track.id));
       return false;
     });
-  }, [tracks, activeChip, searchQuery]);
+  }, [tracks, activeChip, searchQuery, isOfflineOnly, cachedTrackIds]);
 
   const filteredPlaylists = useMemo(() => {
     return playlists.filter(playlist => {
       const matchesSearch = playlist.title.toLowerCase().includes(searchQuery.toLowerCase());
+      if (isOfflineOnly && !playlist.isDownloaded) return false;
       if (activeChip === 'All') return matchesSearch;
       if (activeChip === 'Playlists') return matchesSearch;
       if (activeChip === 'Favorites') return matchesSearch && playlist.isPinned;
       if (activeChip === 'Downloads' || activeChip === 'Offline') return matchesSearch && playlist.isDownloaded;
       return false;
     });
-  }, [playlists, activeChip, searchQuery]);
+  }, [playlists, activeChip, searchQuery, isOfflineOnly]);
 
   const filteredAlbums = useMemo(() => {
     return albums.filter(album => {
       const matchesSearch = 
         album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         album.artist.toLowerCase().includes(searchQuery.toLowerCase());
+      if (isOfflineOnly && !album.isDownloaded) return false;
       if (activeChip === 'All') return matchesSearch;
       if (activeChip === 'Albums') return matchesSearch;
       if (activeChip === 'Favorites') return matchesSearch && album.isLiked;
       if (activeChip === 'Downloads' || activeChip === 'Offline') return matchesSearch && album.isDownloaded;
       return false;
     });
-  }, [albums, activeChip, searchQuery]);
+  }, [albums, activeChip, searchQuery, isOfflineOnly]);
 
   const filteredArtists = useMemo(() => {
     return artists.filter(artist => {
       const matchesSearch = artist.name.toLowerCase().includes(searchQuery.toLowerCase());
+      if (isOfflineOnly) {
+        const hasCachedTrack = tracks.some(t => t.artistId === artist.id && (cachedTrackIds.has(t.id) || t.isDownloaded));
+        if (!hasCachedTrack) return false;
+      }
       if (activeChip === 'All') return matchesSearch;
       if (activeChip === 'Artists') return matchesSearch;
       if (activeChip === 'Favorites') return matchesSearch && artist.isFollowed;
       return false;
     });
-  }, [artists, activeChip, searchQuery]);
+  }, [artists, activeChip, searchQuery, isOfflineOnly, tracks, cachedTrackIds]);
 
   const filteredNfts = useMemo(() => {
     return nfts.filter(nft => {
@@ -153,11 +220,15 @@ export const useLibraryData = () => {
         nft.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         nft.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
         nft.collectionName.toLowerCase().includes(searchQuery.toLowerCase());
+      if (isOfflineOnly) {
+        const isCached = cachedTrackIds.has(nft.id) || (nft as any).isDownloaded;
+        if (!isCached) return false;
+      }
       if (activeChip === 'All') return matchesSearch;
       if (activeChip === 'NFT Music' || activeChip === 'Collections') return matchesSearch;
       return false;
     });
-  }, [nfts, activeChip, searchQuery]);
+  }, [nfts, activeChip, searchQuery, isOfflineOnly, cachedTrackIds]);
 
   // Actions
   const toggleLikeTrack = (id: string) => {
@@ -180,11 +251,19 @@ export const useLibraryData = () => {
         const nextState = !track.isDownloaded;
         if (nextState) {
           toast.info(
-            'Downloading track...',
-            `Downloading "${track.title}" in ${downloadQuality} quality.`
+            'Caching audio track...',
+            `Storing "${track.title}" in Service Worker Cache.`
           );
-          // Simulate download finished in 1.5s
-          setTimeout(() => {
+          // Store in Service Worker CacheStorage
+          setTimeout(async () => {
+            await cacheTrackInServiceWorker({
+              id: track.id,
+              title: track.title,
+              artist: track.artist,
+              audioUrl: track.coverUrl,
+              quality: downloadQuality
+            });
+
             setTracks(current => current.map(t => t.id === id ? { 
               ...t, 
               isDownloaded: true, 
@@ -192,14 +271,16 @@ export const useLibraryData = () => {
               downloadQuality: downloadQuality,
               isOfflineAvailable: true 
             } : t));
+            
             toast.success(
-              'Download Complete',
-              `"${track.title}" is now available offline.`
+              'Download Cached',
+              `"${track.title}" is now available offline in Service Worker storage.`
             );
-          }, 1500);
+          }, 800);
           return track;
         } else {
-          toast.success('Removed Download', `"${track.title}" has been deleted from your device storage.`);
+          removeTrackFromServiceWorker(track.id);
+          toast.success('Removed Download', `"${track.title}" deleted from Service Worker cache.`);
           return { ...track, isDownloaded: false, downloadSize: undefined, isOfflineAvailable: false };
         }
       }
@@ -311,6 +392,13 @@ export const useLibraryData = () => {
     sortBy,
     setSortBy,
     
+    // Offline Service Worker Cache Mode
+    isOfflineOnly,
+    setIsOfflineOnly,
+    toggleOfflineMode,
+    cachedTrackIds,
+    cachedTrackCount: tracks.filter(t => cachedTrackIds.has(t.id) || t.isDownloaded || t.isOfflineAvailable).length,
+
     // Data lists
     tracks: filteredTracks,
     rawTracks: tracks,

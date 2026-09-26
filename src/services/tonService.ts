@@ -43,8 +43,8 @@ const TONCENTER_API_KEY = ''; // Optional: Add your API key here
 const TON_ENDPOINT = 'https://testnet.toncenter.com/api/v2/jsonRPC';
 
 // Contract Addresses (Placeholders - would be replaced after deployment)
-export const TONJAM_COLLECTION_ADDRESS = localStorage.getItem('tonjam_collection_address') || "EQCA14o1-VWhS2asq9V5xYI--9664654_--_--_--_--_--_--";
-export const TONJAM_MARKETPLACE_ADDRESS = localStorage.getItem('tonjam_marketplace_address') || "EQCNZ_MARKETPLACE_ADDRESS_PLACEHOLDER_123456789";
+export const TONJAM_COLLECTION_ADDRESS = (typeof window !== 'undefined' ? localStorage.getItem('tonjam_collection_address') : null) || "EQCA14o1-VWhS2asq9V5xYI--9664654_--_--_--_--_--_--";
+export const TONJAM_MARKETPLACE_ADDRESS = (typeof window !== 'undefined' ? localStorage.getItem('tonjam_marketplace_address') : null) || "EQCNZ_MARKETPLACE_ADDRESS_PLACEHOLDER_123456789";
 
 /**
  * Fetches Jetton balance for a given wallet address

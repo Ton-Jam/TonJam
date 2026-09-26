@@ -14,7 +14,7 @@ export const BackButton: React.FC<BackButtonProps> = ({ className, ariaLabel = "
   return (
     <button 
       onClick={() => navigate(-1)} 
-      className={`p-2 rounded-full hover:bg-white/10 text-foreground transition-all active:scale-95 flex items-center justify-center ${className}`}
+      className={`min-w-[44px] min-h-[44px] p-2 rounded-full hover:bg-white/10 text-foreground transition-all active:scale-95 flex items-center justify-center border-none bg-transparent cursor-pointer ${className}`}
       aria-label={ariaLabel}
     >
       <ArrowLeftIcon className={`${iconClassName}`} strokeWidth={2.5} />

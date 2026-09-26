@@ -97,7 +97,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               onClick={() => onTabChange(tab.id)}
               onMouseDown={(e) => triggerRipple(tab.id, e)}
               onTouchStart={(e) => triggerRipple(tab.id, e)}
-              className="flex flex-col items-center justify-center flex-1 h-full relative cursor-pointer group overflow-hidden"
+              className="flex flex-col items-center justify-center flex-1 h-full min-h-[44px] min-w-[44px] relative cursor-pointer group overflow-hidden border-none bg-transparent"
               aria-label={tab.label}
             >
               {/* Native-like Ripple Container */}

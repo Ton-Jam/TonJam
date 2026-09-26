@@ -75,11 +75,11 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       }}
     >
       {/* Left section: Back button or Logo + Title */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {onBack ? (
           <button
             onClick={onBack}
-            className="p-2 rounded-lg hover:bg-white/5 active:scale-95 transition-all text-white"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 active:scale-95 transition-all text-white border-none bg-transparent cursor-pointer"
             aria-label="Go back"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -102,11 +102,11 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       </div>
 
       {/* Right Actions Slot & Interactive Buttons */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         {showSearch && (
           <button
             onClick={onSearchClick}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 active:scale-95 transition-all"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-white rounded-lg hover:bg-white/5 active:scale-95 transition-all border-none bg-transparent cursor-pointer"
             aria-label="Search"
           >
             <Search className="w-5 h-5" />
@@ -116,7 +116,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         {showWallet && (
           <button
             onClick={onWalletClick}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 active:scale-95 transition-all"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-white rounded-lg hover:bg-white/5 active:scale-95 transition-all border-none bg-transparent cursor-pointer"
             aria-label="Wallet"
           >
             <Wallet className="w-5 h-5" />
@@ -130,7 +130,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         {isArtistVerified && (
           <button
             onClick={() => navigate('/artist-dashboard')}
-            className="px-2.5 py-1.5 bg-[#0052FF] hover:bg-[#1a66ff] active:scale-95 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all shadow-md cursor-pointer ml-1"
+            className="px-2.5 min-h-[44px] bg-[#0052FF] hover:bg-[#1a66ff] active:scale-95 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all shadow-md cursor-pointer ml-1 border-none"
             title="Artist Dashboard"
             aria-label="Artist Dashboard"
           >
@@ -144,7 +144,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         {avatarUrl && (
           <button
             onClick={onAvatarClick}
-            className="ml-1 active:scale-95 transition-transform"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center ml-0.5 active:scale-95 transition-transform border-none bg-transparent cursor-pointer"
             aria-label="Profile"
           >
             <div className="w-8 h-8 rounded-full overflow-hidden bg-[#1E2230]">

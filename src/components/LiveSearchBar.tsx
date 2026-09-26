@@ -37,14 +37,14 @@ export const LiveSearchBar: React.FC = () => {
 
   return (
     <div className="relative w-full max-w-lg" ref={searchRef}>
-      <div className="relative">
-        <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+      <div className="relative flex items-center rounded-full border border-blue-500/30 hover:border-blue-500/50 focus-within:border-blue-500/60 bg-muted/20 px-3.5 py-2 transition-all">
+        <MagnifyingGlassIcon className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
         <input
           type="text"
           value={queryText}
           onChange={(e) => setQueryText(e.target.value)}
           placeholder="Search database..."
-          className="w-full bg-muted/20 border border-border/40 rounded-full py-2 pl-10 pr-4 text-sm"
+          className="w-full bg-transparent border-0 !border-none outline-none py-0.5 pl-1 pr-4 text-sm focus:ring-0 focus:outline-none"
         />
       </div>
       

@@ -589,17 +589,31 @@ export const Discover: React.FC = () => {
         {/* CONDITIONAL CONTENT: Search Results VS Spotify Search Home */}
         {query.trim() !== '' ? (
           (query !== debouncedQuery || isLoading) ? (
-            <SearchResultsSkeleton activeFilter={activeFilter} />
+            <motion.div
+              key="search-skeleton"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <SearchResultsSkeleton activeFilter={activeFilter} />
+            </motion.div>
           ) : (
-            <SearchResults
-              query={debouncedQuery}
-              activeFilter={activeFilter}
-              results={filteredResults}
-              onPlayTrack={playTrack}
-              followedUserIds={followedUserIds}
-              onToggleFollow={toggleFollowUser}
-              onClearQuery={() => setQuery('')}
-            />
+            <motion.div
+              key={`search-results-${debouncedQuery}-${activeFilter}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              <SearchResults
+                query={debouncedQuery}
+                activeFilter={activeFilter}
+                results={filteredResults}
+                onPlayTrack={playTrack}
+                followedUserIds={followedUserIds}
+                onToggleFollow={toggleFollowUser}
+                onClearQuery={() => setQuery('')}
+              />
+            </motion.div>
           )
         ) : (isLoading && allTracks.length === 0) ? (
           <FullDiscoverSkeleton />

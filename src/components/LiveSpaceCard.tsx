@@ -37,7 +37,7 @@ const LiveSpaceCard: React.FC<LiveSpaceCardProps> = ({
 
       <button
         onClick={onJoin}
-        className="h-8 bg-[#FF3A5C] hover:bg-[#e02d4d] text-white font-bold text-[10px] uppercase tracking-widest px-4 rounded-full cursor-pointer border-none"
+        className="min-h-[44px] min-w-[44px] bg-[#FF3A5C] hover:bg-[#e02d4d] text-white font-bold text-[10px] uppercase tracking-widest px-4 rounded-full cursor-pointer border-none flex items-center justify-center active:scale-95 transition-transform"
       >
         Join
       </button>

@@ -65,7 +65,7 @@ const RewardPreviewCard: React.FC<RewardPreviewCardProps> = ({
         <span className="text-[10px] text-[#9AA0AE]">Next up: Stream 5 Tracks for +50 TJ</span>
         <button
           onClick={onViewTasks}
-          className="h-8 bg-[#5B6BFF] hover:bg-[#4856ea] text-white font-bold text-[10px] uppercase tracking-widest px-4 rounded-full cursor-pointer border-none"
+          className="min-h-[44px] min-w-[44px] bg-[#5B6BFF] hover:bg-[#4856ea] text-white font-bold text-[10px] uppercase tracking-widest px-4 rounded-full cursor-pointer border-none inline-flex items-center justify-center active:scale-95 transition-transform"
         >
           View Tasks
         </button>

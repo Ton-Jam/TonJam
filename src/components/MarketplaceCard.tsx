@@ -45,8 +45,7 @@ const MarketplaceCard: React.FC<MarketplaceCardProps> = ({
         </div>
         <button
           onClick={onBid}
-          style={{ height: cardTokens.marketplace.buyButtonHeight }}
-          className="text-[8.5px] font-black uppercase tracking-widest px-3 bg-[#5B6BFF] hover:bg-[#4856ea] text-white rounded-full cursor-pointer border-none flex items-center justify-center"
+          className="min-h-[44px] min-w-[44px] text-[8.5px] font-black uppercase tracking-widest px-3.5 bg-[#5B6BFF] hover:bg-[#4856ea] text-white rounded-full cursor-pointer border-none flex items-center justify-center active:scale-95 transition-transform"
         >
           Bid
         </button>
