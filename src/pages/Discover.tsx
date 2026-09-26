@@ -348,9 +348,9 @@ export const Discover: React.FC = () => {
       {/* Search Content Input Area */}
       <div className="pt-2 pb-3 px-4 sm:px-6 lg:px-8 space-y-2.5">
         
-        {/* Main Search Input Bar - Clean Black Canvas Style */}
+        {/* Main Search Input Bar - High border radius with subtle blue border */}
         <div className="w-full relative">
-          <div className="relative w-full flex items-center bg-white/[0.04] hover:bg-white/[0.06] focus-within:bg-white/[0.06] rounded-full px-4 py-2.5 sm:py-3 min-h-[48px] border-0 !border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus-within:ring-0 transition-colors shadow-none !shadow-none">
+          <div className="relative w-full flex items-center bg-white/[0.04] hover:bg-white/[0.06] focus-within:bg-white/[0.06] rounded-full px-4 py-2.5 sm:py-3 min-h-[48px] border border-blue-500/30 hover:border-blue-500/50 focus-within:border-blue-500/60 outline-none ring-0 transition-colors shadow-none">
             <Search className={`w-5 h-5 shrink-0 mr-3 transition-colors ${query ? 'text-white' : 'text-[#b3b3b3]'}`} />
             
             <div className="flex-1 flex items-center min-w-0 h-full border-0 !border-none outline-none !outline-none ring-0 !ring-0">

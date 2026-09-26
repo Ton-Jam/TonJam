@@ -257,7 +257,7 @@
     border-top: 1px solid rgba(192, 192, 192, 0.28) !important;
   }
 
-  /* Subtle silver border for all input sections across the global TonJam app */
+  /* Borderless design for all inputs, textareas, and select elements across the global TonJam app */
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
   textarea,
   select,
@@ -266,8 +266,8 @@
   [data-slot="input-group"],
   .input-section,
   .search-input-wrapper {
-    border: 1px solid rgba(192, 192, 192, 0.24) !important;
-    border-color: rgba(192, 192, 192, 0.24) !important;
+    border: none !important;
+    border-color: transparent !important;
   }
 
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):focus,
@@ -276,9 +276,10 @@
   [data-slot="input"]:focus,
   [data-slot="textarea"]:focus,
   [data-slot="input-group"]:focus-within {
-    border: 1px solid rgba(192, 192, 192, 0.45) !important;
-    border-color: rgba(192, 192, 192, 0.45) !important;
+    border: none !important;
+    border-color: transparent !important;
     outline: none !important;
+    box-shadow: none !important;
   }
 
   /* Remove shadow effects from components for a clean flat aesthetic */
@@ -527,11 +528,12 @@
     background: transparent !important;
   }
 
-  /* Focus styling for standard bordered form inputs with subtle silver border */
+  /* Focus styling for inputs, textareas, and selects */
   .dark input:not(.search-bar-input):not(.border-0):not([class*="bg-transparent"]):focus,
   .dark textarea:focus,
   .dark select:focus {
-    border-color: rgba(192, 192, 192, 0.45) !important;
+    border: none !important;
+    border-color: transparent !important;
     background-color: #000000 !important;
   }
 

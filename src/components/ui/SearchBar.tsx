@@ -13,22 +13,23 @@ export function SearchBar({ className, onSearch, onChange, style, ...props }: Se
     if (onSearch) onSearch(e.target.value);
   };
 
-  const inputStyle: React.CSSProperties = {
+  const containerStyle: React.CSSProperties = {
     backgroundColor: colors.dark.surface,
-    borderColor: 'rgba(192, 192, 192, 0.24)',
-    borderRadius: radius.input,
+    borderRadius: '9999px',
     fontFamily: typography.fontFamily.primary,
     ...style,
   };
 
   return (
-    <div className="relative w-full">
-      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-text-muted" />
+    <div 
+      style={containerStyle}
+      className="relative w-full rounded-full border border-blue-500/30 hover:border-blue-500/50 focus-within:border-blue-500/60 transition-all flex items-center px-3.5 shadow-none"
+    >
+      <Search className="size-4 text-text-muted shrink-0 mr-2" />
       <input
         type="text"
-        style={inputStyle}
         className={cn(
-          "w-full pl-10 pr-4 py-2.5 border text-xs font-semibold text-text-primary placeholder-text-muted focus:outline-none focus:border-primary/50 transition-all",
+          "w-full bg-transparent border-0 !border-none outline-none ring-0 focus:outline-none focus:ring-0 text-xs font-semibold text-text-primary placeholder-text-muted transition-all py-2.5",
           className
         )}
         onChange={handleChange}

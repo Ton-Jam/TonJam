@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { APP_LOGO } from '@/constants';
 import { NotificationBell } from '@/components/NotificationBell';
 import { useAudio } from '@/contexts/AudioContext';
+import PWAInstallButton from '@/components/PWAInstallButton';
 
 interface GlobalHeaderProps {
   title?: string;
@@ -140,6 +141,8 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         )}
 
         {rightActionSlot}
+
+        <PWAInstallButton />
 
         {avatarUrl && (
           <button

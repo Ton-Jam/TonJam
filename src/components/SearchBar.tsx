@@ -44,7 +44,8 @@ export function SearchBar({
 
   return (
     <div className={`relative ${className}`} ref={containerRef}>
-      <form onSubmit={handleSearch} className="relative w-full">
+      <form onSubmit={handleSearch} className="relative w-full flex items-center rounded-full border border-blue-500/30 hover:border-blue-500/50 focus-within:border-blue-500/60 bg-[#222226] px-3.5 py-1.5 transition-all">
+        <Search className="w-4 h-4 text-zinc-400 mr-2 shrink-0" />
         <input
           type="text"
           placeholder={placeholder}
@@ -54,7 +55,7 @@ export function SearchBar({
             setIsSearchOpen(true);
           }}
           onFocus={() => setIsSearchOpen(true)}
-          className={`w-full bg-[#222226] text-white pl-4 pr-10 py-1.5 rounded-full text-xs placeholder:text-zinc-400 border-0 !border-none focus:outline-none focus:ring-0 whitespace-nowrap overflow-hidden text-ellipsis ${inputClassName}`}
+          className={`w-full bg-transparent text-white pl-1 pr-8 py-0.5 text-xs placeholder:text-zinc-400 border-0 !border-none focus:outline-none focus:ring-0 whitespace-nowrap overflow-hidden text-ellipsis ${inputClassName}`}
           autoFocus={autoFocus}
           autoComplete="off"
           autoCorrect="off"
