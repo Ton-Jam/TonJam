@@ -54,6 +54,7 @@ import { db, auth, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { uploadAvatar } from '@/services/storageService';
 import RoyaltySplitManager from '@/components/RoyaltySplitManager';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { CollaboratorManager } from '@/components/CollaboratorManager';
 import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react';
 
@@ -325,17 +326,9 @@ const Settings: React.FC = () => {
   );
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pb-36 sm:pb-32 md:pb-24 pt-6 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2.5 mb-1.5">
-            <div className="w-1.5 h-6 bg-blue-500 rounded-full" />
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">Settings</h1>
-          </div>
-          <p className="text-xs font-medium text-muted-foreground">Manage your profile, audio preferences, wallet, and security</p>
-        </div>
-
+    <div className="w-full pb-36 sm:pb-32 md:pb-24 animate-in fade-in duration-500">
+      <PageHeader title="Settings" showBack={true} />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-4 space-y-6">
         {/* Quick User Summary Badge */}
         {userProfile && (
           <div className="flex items-center gap-3 bg-white/[0.03] border border-white/5 p-2 rounded-2xl backdrop-blur-md self-start sm:self-auto">
@@ -353,7 +346,6 @@ const Settings: React.FC = () => {
             )}
           </div>
         )}
-      </div>
 
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
@@ -1128,6 +1120,7 @@ const Settings: React.FC = () => {
           artistName={userProfile?.name || 'New Artist'} 
         />
       )}
+      </div>
     </div>
   );
 };

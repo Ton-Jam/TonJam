@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, 
@@ -25,6 +26,7 @@ import { toast } from 'sonner';
 import { addComment, reportPost } from '@/services/socialService';
 import { db, OperationType, handleFirestoreError } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { MOCK_ARTISTS } from '@/constants';
 
 interface PostCardProps {
   post: Post;
@@ -43,7 +45,26 @@ export const PostCard: React.FC<PostCardProps> = ({
   onBookmark,
   onVote
 }) => {
-  const { playTrack, currentTrack, isPlaying, togglePlay, addNotification, userProfile } = useAudio();
+  const navigate = useNavigate();
+  const { playTrack, currentTrack, isPlaying, togglePlay, addNotification, userProfile, artists } = useAudio();
+
+  const handleAuthorClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const isArtist = post.user.role === 'artist' || post.user.isVerified;
+    const matchedArtist = MOCK_ARTISTS.find(a => 
+      a.uid === post.user.id || 
+      a.name.toLowerCase() === post.user.name?.toLowerCase()
+    ) || artists?.find(a => 
+      a.uid === post.user.id || 
+      a.name.toLowerCase() === post.user.name?.toLowerCase()
+    );
+    if (isArtist || matchedArtist) {
+      const artistId = matchedArtist?.uid || post.user.id || post.user.name.toLowerCase().replace(/\s+/g, '-');
+      navigate(`/artist/${artistId}`);
+    } else {
+      navigate(`/user/${post.user.id}`);
+    }
+  };
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [localReplies, setLocalReplies] = useState<Reply[]>(post.replies || []);
@@ -227,7 +248,19 @@ export const PostCard: React.FC<PostCardProps> = ({
                   </div>
                   <div className="min-w-0">
                     <h5 className="text-xs sm:text-sm font-semibold text-white truncate">{att.title}</h5>
-                    <p className="text-[11px] text-zinc-400 font-medium truncate">{att.artist || post.user.name}</p>
+                    <p 
+                      className="text-[11px] text-zinc-400 font-medium truncate hover:text-white cursor-pointer transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const artistName = att.artist || post.user.name;
+                        const matched = MOCK_ARTISTS.find(a => a.name.toLowerCase() === artistName.toLowerCase()) ||
+                                      artists?.find(a => a.name.toLowerCase() === artistName.toLowerCase());
+                        const artistId = matched?.uid || artistName.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/artist/${artistId}`);
+                      }}
+                    >
+                      {att.artist || post.user.name}
+                    </p>
                   </div>
                 </div>
 
@@ -251,15 +284,33 @@ export const PostCard: React.FC<PostCardProps> = ({
                 <img 
                   src={att.url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80'} 
                   alt="NFT Graphic"
-                  className="w-full sm:w-28 h-28 object-cover shrink-0"
+                  className="w-full sm:w-28 h-28 object-cover shrink-0 cursor-pointer"
+                  onClick={() => navigate(`/nft/${att.id || 'n1'}`)}
                 />
                 <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
                   <div className="space-y-1">
                     <span className="text-[9px] font-mono uppercase bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full font-bold inline-block">
                       TON MUSIC NFT
                     </span>
-                    <h5 className="text-xs sm:text-sm font-bold text-white tracking-tight leading-snug">{att.title}</h5>
-                    <p className="text-xs text-zinc-400 font-medium">{att.artist}</p>
+                    <h5 
+                      className="text-xs sm:text-sm font-bold text-white tracking-tight leading-snug cursor-pointer hover:text-[#00B4D8] transition-colors"
+                      onClick={() => navigate(`/nft/${att.id || 'n1'}`)}
+                    >
+                      {att.title}
+                    </h5>
+                    <p 
+                      className="text-xs text-zinc-400 font-medium hover:text-white cursor-pointer transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const artistName = att.artist || post.user.name;
+                        const matched = MOCK_ARTISTS.find(a => a.name.toLowerCase() === artistName.toLowerCase()) ||
+                                      artists?.find(a => a.name.toLowerCase() === artistName.toLowerCase());
+                        const artistId = matched?.uid || artistName.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/artist/${artistId}`);
+                      }}
+                    >
+                      {att.artist}
+                    </p>
                   </div>
 
                   <div className="flex items-center justify-between mt-3 pt-2">
@@ -268,13 +319,14 @@ export const PostCard: React.FC<PostCardProps> = ({
                       <span className="text-xs sm:text-sm font-extrabold text-emerald-400 font-mono">{att.price}</span>
                     </div>
 
-                    <a
-                      href={att.url ? '#/marketplace' : '#'}
-                      className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#00B4D8] text-black hover:bg-[#00B4D8]/90 rounded-lg flex items-center gap-1.5 border-none transition-colors"
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/nft/${att.id || 'n1'}`)}
+                      className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#00B4D8] text-black hover:bg-[#00B4D8]/90 rounded-lg flex items-center gap-1.5 border-none transition-colors cursor-pointer"
                     >
                       <span>Inspect</span>
                       <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -371,11 +423,15 @@ export const PostCard: React.FC<PostCardProps> = ({
           <img 
             src={post.user.avatar} 
             alt={post.user.name} 
-            className="w-10 h-10 rounded-full object-cover shrink-0 select-none"
+            className="w-10 h-10 rounded-full object-cover shrink-0 select-none cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={handleAuthorClick}
           />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
-              <span className="text-sm sm:text-[15px] font-semibold text-white tracking-tight hover:underline cursor-pointer truncate max-w-[160px] sm:max-w-none">
+              <span 
+                className="text-sm sm:text-[15px] font-semibold text-white tracking-tight hover:underline cursor-pointer truncate max-w-[160px] sm:max-w-none"
+                onClick={handleAuthorClick}
+              >
                 {post.user.name}
               </span>
               {post.user.isVerified && (

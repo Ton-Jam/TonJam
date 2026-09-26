@@ -173,7 +173,16 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                         <h4 className="text-xs font-bold text-white tracking-wide truncate group-hover:text-[#00B4D8] transition-colors">
                           {track.title}
                         </h4>
-                        <p className="text-[10px] text-zinc-400 truncate mt-0.5">{track.artist}</p>
+                        <p 
+                          className="text-[10px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const targetId = track.artistId || track.artist.toLowerCase().replace(/\s+/g, '-');
+                            navigate(`/artist/${targetId}`);
+                          }}
+                        >
+                          {track.artist}
+                        </p>
                       </div>
                     </div>
 
@@ -217,7 +226,16 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     <h4 className="text-xs font-bold text-white tracking-wide truncate group-hover:text-[#00B4D8] transition-colors">
                       {track.title}
                     </h4>
-                    <p className="text-[10px] text-zinc-400 truncate mt-0.5">{track.artist}</p>
+                    <p 
+                      className="text-[10px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const targetId = track.artistId || track.artist.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/artist/${targetId}`);
+                      }}
+                    >
+                      {track.artist}
+                    </p>
                   </div>
                 </div>
 
@@ -357,7 +375,18 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                   <h4 className="text-xs font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
                     {nft.title}
                   </h4>
-                  <p className="text-[10px] font-mono text-[#00B4D8] font-bold mt-0.5">{nft.price} TON</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <span 
+                      className="text-[10px] text-zinc-400 hover:text-white truncate cursor-pointer transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/artist/${nft.creator.toLowerCase().replace(/\s+/g, '-')}`);
+                      }}
+                    >
+                      {nft.creator}
+                    </span>
+                    <span className="text-[10px] font-mono text-[#00B4D8] font-bold shrink-0 ml-1">{nft.price} TON</span>
+                  </div>
                 </div>
               </motion.div>
             ))}

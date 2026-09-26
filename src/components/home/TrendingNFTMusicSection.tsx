@@ -5,7 +5,7 @@ export const TrendingNFTMusicSection: React.FC = () => {
   return (
     <section className="w-full text-left">
       <TrendingTracksSection 
-        title="Trending NFT Audio Artifacts"
+        title="Trending Music NFTs"
         subtitle="High-performing Web3 audio artifacts synced directly from TON marketplace"
       />
     </section>

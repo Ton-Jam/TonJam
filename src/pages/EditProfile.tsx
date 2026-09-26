@@ -9,6 +9,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 import { cleanUpdateData } from '@/lib/firebase';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -213,24 +214,9 @@ const EditProfile: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground py-4 px-3 sm:py-8 sm:px-6">
-      <div className="w-full max-w-xl mx-auto space-y-6">
-        {/* Header Navigation */}
-        <div className="flex items-center gap-3">
-          <Button 
-            type="button" 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate('/profile')}
-            className="rounded-full text-white/65 hover:text-white hover:bg-white/5 transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-base sm:text-lg font-black uppercase tracking-wider text-white">Edit Profile</h1>
-            <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-0.5">Customize your digital identification</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-background text-foreground pb-12">
+      <PageHeader title="Edit Profile" showBack={true} />
+      <div className="w-full max-w-xl mx-auto px-4 sm:px-6 pt-2 space-y-6">
 
         <form onSubmit={handleSave} className="space-y-6 bg-card/60 backdrop-blur-md p-4 sm:p-6 rounded-2xl border border-white/5">
           

@@ -73,8 +73,8 @@ export const ProfileStats: React.FC<ProfileStatsProps> = ({ profile }) => {
         <div
           key={stat.id}
           onClick={() => stat.path && navigate(stat.path)}
-          className={`bg-[#101A3B] border border-white/5 rounded-[12px] p-3.5 flex flex-col justify-between hover:bg-[#15234f] transition-all duration-200 ${
-            stat.path ? 'cursor-pointer hover:border-blue-500/30' : ''
+          className={`bg-[#101A3B] rounded-[12px] p-3.5 flex flex-col justify-between hover:bg-[#15234f] transition-all duration-200 shadow-md ${
+            stat.path ? 'cursor-pointer hover:bg-[#17285a]' : ''
           }`}
         >
           <div className="flex items-center justify-between gap-1.5 mb-1.5">
@@ -96,3 +96,5 @@ export const ProfileStats: React.FC<ProfileStatsProps> = ({ profile }) => {
     </div>
   );
 };
+
+export default ProfileStats;

@@ -1,62 +1,70 @@
 import React from 'react';
-import { Users, BadgeCheck, Star } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Users } from 'lucide-react';
 import { LibraryArtist } from '../types';
+import ArtistCard from '@/components/ArtistCard';
+import { Artist } from '@/types';
 
 interface ArtistsProps {
   artists: LibraryArtist[];
+  layout?: 'grid' | 'list';
 }
 
-export const Artists: React.FC<ArtistsProps> = ({ artists }) => {
+export const Artists: React.FC<ArtistsProps> = ({ artists, layout = 'grid' }) => {
+  // Convert LibraryArtist to Artist interface for standard ArtistCard component
+  const mappedArtists: Artist[] = React.useMemo(() => {
+    return artists.map((a) => ({
+      uid: a.id,
+      name: a.name,
+      avatarUrl: a.avatarUrl,
+      followers: a.followersCount,
+      verified: a.verified,
+      isVerifiedArtist: a.verified,
+      genre: a.genres?.[0] || 'Artist',
+      monthlyListeners: Math.round(a.followersCount * 2.8)
+    }));
+  }, [artists]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-emerald-500" />
-          <h2 className="section-title">Followed Sonic Entities</h2>
+          <Users className="w-4 h-4 text-[#0052FF]" />
+          <h2 className="section-title">Followed Artists & Creators</h2>
         </div>
-        <span className="text-[10px] text-muted-foreground font-mono font-medium">Verified creator nodes</span>
+        <span className="text-[10px] text-muted-foreground font-mono font-medium">
+          {artists.length} creators connected
+        </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {artists.map((artist) => (
-          <motion.div
-            key={artist.id}
-            whileHover={{ scale: 1.02 }}
-            className="bg-white/[0.02] dark:bg-white/[0.02] bg-black/[0.02] border border-black/5 dark:border-white/5 p-4 rounded-[10px] flex flex-col items-center text-center group transition-all"
-          >
-            {/* Round Avatar matching streaming design */}
-            <div className="relative w-20 h-20 rounded-full overflow-hidden mb-3.5 bg-slate-800 border-2 border-transparent group-hover:border-[#0052FF]/30 transition-all">
-              <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              {artist.verified && (
-                <div className="absolute bottom-0 right-0 p-1 bg-[#0052FF] text-white rounded-full border-2 border-[#050A24]" title="Verified Creator">
-                  <BadgeCheck className="w-3.5 h-3.5" />
-                </div>
-              )}
+      {artists.length === 0 ? (
+        <div className="py-12 text-center text-slate-500 text-xs">
+          No followed artists yet. Explore and follow creators in the Discovery feed.
+        </div>
+      ) : layout === 'list' ? (
+        <div className="space-y-2.5">
+          {mappedArtists.map((artist) => (
+            <ArtistCard
+              key={artist.uid}
+              artist={artist}
+              variant="row"
+              className="w-full"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {mappedArtists.map((artist) => (
+            <div key={artist.uid} className="flex justify-center">
+              <ArtistCard
+                artist={artist}
+                variant="default"
+              />
             </div>
-
-            <div className="space-y-1 w-full">
-              <div className="flex items-center justify-center gap-1">
-                <h4 className="text-xs font-extrabold text-foreground truncate max-w-[120px] group-hover:text-primary transition-colors">
-                  {artist.name}
-                </h4>
-              </div>
-              <p className="text-[10px] text-muted-foreground font-mono font-bold uppercase tracking-wider">
-                {(artist.followersCount).toLocaleString()} fans
-              </p>
-              
-              {/* Genre badges list */}
-              <div className="flex flex-wrap gap-1 justify-center pt-1.5">
-                {artist.genres.slice(0, 2).map((genre) => (
-                  <span key={genre} className="text-[8px] font-bold uppercase tracking-wider bg-white/5 px-1.5 py-0.5 rounded-full text-muted-foreground">
-                    {genre}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
+
+export default Artists;

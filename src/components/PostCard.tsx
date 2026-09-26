@@ -220,10 +220,21 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     e.stopPropagation();
     if (post.userId === userProfile.uid) {
       navigate('/profile');
-    } else if (post.isVerified || MOCK_ARTISTS.some(a => a.uid === post.userId)) {
-      navigate(`/artist/${post.userId}`);
     } else {
-      navigate(`/user/${post.userId}`);
+      const matchedArtist = MOCK_ARTISTS.find(a => 
+        a.uid === post.userId || 
+        a.name.toLowerCase() === post.userName?.toLowerCase()
+      ) || artists?.find(a => 
+        a.uid === post.userId || 
+        a.name.toLowerCase() === post.userName?.toLowerCase()
+      );
+      if (matchedArtist) {
+        navigate(`/artist/${matchedArtist.uid}`);
+      } else if (post.isVerified) {
+        navigate(`/artist/${post.userId}`);
+      } else {
+        navigate(`/user/${post.userId}`);
+      }
     }
   };
 
@@ -413,7 +424,16 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   </div>
                   <div className="flex-1 min-w-0">
                     <h5 className="text-[10px] font-black uppercase tracking-tighter text-blue-400 truncate">{track.title}</h5>
-                    <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-0.5 opacity-60 truncate">{track.artist}</p>
+                    <p 
+                      className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-0.5 opacity-60 truncate hover:text-white cursor-pointer transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const targetId = track.artistId || track.artist?.toLowerCase().replace(/\s+/g, '-');
+                        navigate(`/artist/${targetId}`);
+                      }}
+                    >
+                      {track.artist}
+                    </p>
                   </div>
                   <Button 
                     variant="ghost" 

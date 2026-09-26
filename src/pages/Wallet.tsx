@@ -26,6 +26,7 @@ import { doc, getDoc, updateDoc, increment, serverTimestamp } from 'firebase/fir
 import { db, auth } from '@/lib/firebase';
 import { TON_LOGO, JAM_PRICE_USD, TJ_COIN_ICON } from '@/constants';
 import { SecureUserNFTDashboard } from '@/components/SecureUserNFTDashboard';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { toast } from 'sonner';
 
 const TON_PRICE_USD = 5.30;
@@ -229,19 +230,21 @@ const Wallet: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-full px-0 sm:px-4 md:px-6 space-y-6 animate-in fade-in duration-700 pb-12">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-4 sm:px-0">
-        <div>
-          <div className="flex items-center gap-4 mb-4">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-            <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.5em]">Financial Protocol</span>
+    <div className="w-full max-w-full pb-12 animate-in fade-in duration-700">
+      <PageHeader title="Wallet" showBack={true} />
+      <div className="w-full max-w-full px-4 sm:px-6 md:px-8 space-y-6 pt-2">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+              <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.4em]">Financial Protocol</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">Balances & Assets</h2>
           </div>
-          <h1 className="text-[32px] font-bold text-foreground tracking-tighter uppercase">My Wallet</h1>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {/* Currency Toggle */}
-          <div className="bg-muted/50 p-1 rounded-xl flex items-center gap-1">
+          
+          <div className="flex items-center gap-3">
+            {/* Currency Toggle */}
+            <div className="bg-muted/50 p-1 rounded-xl flex items-center gap-1">
             <button
               onClick={() => setCurrencyMode('CRYPTO')}
               className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
@@ -264,7 +267,7 @@ const Wallet: React.FC = () => {
             </button>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Multi-Chain Connections Panel */}
       <section className="bg-muted/35 px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] space-y-4">
@@ -958,6 +961,7 @@ const Wallet: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

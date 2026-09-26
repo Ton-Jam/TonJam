@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronUp, ChevronDown, UserPlus, UserCheck } from 'lucide-react';
+import { ChevronUp, ChevronDown, UserPlus, UserCheck, Verified } from 'lucide-react';
 import { UserProfile } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import { useAudio } from '@/contexts/AudioContext';
@@ -48,8 +48,8 @@ const ChartArtistCard: React.FC<ChartArtistCardProps> = ({ artist, rank }) => {
       <div className="flex-1 min-w-0">
         <h4 className="text-[10px] font-bold text-foreground uppercase tracking-[0.05em] truncate group-hover:text-primary transition-colors flex items-center gap-1">
           {artist.name}
-          {artist.isVerifiedArtist && (
-             <div className="w-1.5 h-1.5 bg-primary rounded-full ml-1 flex-shrink-0"></div>
+          {(artist.isVerifiedArtist || (artist as any).isVerified || (artist as any).verified) && (
+            <Verified className="w-3 h-3 text-blue-400 fill-current flex-shrink-0" />
           )}
         </h4>
         <div className="flex items-center gap-2 mt-2 min-w-0">

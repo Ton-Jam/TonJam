@@ -24,6 +24,7 @@ import NotificationSettings from './NotificationSettings';
 import { useAudio } from '@/contexts/AudioContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 export const NotificationScreen: React.FC = () => {
   const { 
@@ -273,76 +274,26 @@ export const NotificationScreen: React.FC = () => {
 
       {/* STICKY HEADER */}
       <div className="sticky top-0 z-20 w-full bg-[#050A24]/95 backdrop-blur-xl flex flex-col shrink-0">
-        
-        {/* TOP RAIL */}
-        <div className="flex items-center justify-between px-4 py-3 sm:py-4">
-          <div className="flex items-center gap-3">
-            {showSettings ? (
-              <button 
-                onClick={() => setShowSettings(false)}
-                className="h-9 w-9 flex items-center justify-center rounded-full text-slate-300 hover:text-white transition-colors bg-white/[0.06] active:scale-95"
-                title="Back to notifications"
-              >
-                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-[#0052FF]/20 flex items-center justify-center text-[#0088CC] shrink-0">
-                <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-            )}
-            <div>
-              <h1 className="page-title leading-none">
-                {showSettings ? 'Notification Settings' : 'Notifications'}
-              </h1>
-              {!showSettings && (
-                <div className="flex items-center gap-2 mt-1">
-                  {unreadCount > 0 ? (
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full">
-                      {unreadCount} unread
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-semibold text-slate-400">
-                      All caught up
-                    </span>
-                  )}
-                  <span className="text-[9px] font-semibold text-slate-500">
-                    {notifications.length} total
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* DYNAMIC HEADER ACTIONS */}
-          <div className="flex items-center gap-2">
-            {!showSettings && unreadCount > 0 && (
+        <PageHeader
+          title={showSettings ? 'Notification Settings' : 'Notifications'}
+          showBack={true}
+          onBack={showSettings ? () => setShowSettings(false) : () => navigate(-1)}
+          rightContent={
+            !showSettings && unreadCount > 0 ? (
               <button
                 onClick={() => {
                   markAllAsRead();
                   toast.success('All marked as read');
                 }}
-                className="h-9 px-3.5 text-slate-200 hover:text-white flex items-center gap-1.5 bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 rounded-full transition-all cursor-pointer"
+                className="p-2 -mr-2 text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 rounded-full transition-all cursor-pointer border-none outline-none flex items-center justify-center"
                 title="Mark all as read"
+                aria-label="Mark all as read"
               >
-                <CheckCheck className="w-4 h-4 text-emerald-400" />
-                <span className="text-[10px] font-black uppercase tracking-wider hidden xs:inline">Mark Read</span>
+                <CheckCheck className="w-5 h-5 text-[#00B4D8]" />
               </button>
-            )}
-
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className={cn(
-                "h-9 w-9 flex items-center justify-center rounded-full transition-all cursor-pointer active:scale-95",
-                showSettings 
-                  ? "bg-[#0088CC] text-white shadow-lg shadow-[#0088CC]/30" 
-                  : "bg-white/[0.06] text-slate-300 hover:text-white hover:bg-white/[0.12]"
-              )}
-              title="Notification Settings"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+            ) : null
+          }
+        />
 
         {/* SEARCH & FILTERS */}
         <AnimatePresence>

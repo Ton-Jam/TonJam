@@ -37,6 +37,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
   }
 
   const isFollowing = followedUserIds.includes(artist.uid);
+  const isVerified = Boolean(artist.verified || (artist as any).isVerified || (artist as any).isVerifiedArtist);
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,7 +68,10 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
               className="w-12 h-12 rounded-full object-cover border border-[#c0c0c0]/25" 
             />
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-[12px] truncate uppercase">{artist.name}</h3>
+              <div className="flex items-center gap-1">
+                <h3 className="font-bold text-[12px] truncate uppercase">{artist.name}</h3>
+                {isVerified && <Verified className="w-3.5 h-3.5 text-blue-400 fill-current flex-shrink-0" />}
+              </div>
               <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{artist.followers.toLocaleString()} LISTENERS</p>
             </div>
             <Button 
@@ -123,7 +127,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
           <h3 className="text-[12px] font-bold text-foreground truncate max-w-[100px] uppercase tracking-tight">
             {artist.name}
           </h3>
-          {artist.verified && <Verified className="w-3 h-3 text-blue-400 fill-current flex-shrink-0" />}
+          {isVerified && <Verified className="w-3.5 h-3.5 text-blue-400 fill-current flex-shrink-0" />}
         </div>
         
         <p className="text-[10px] text-muted-foreground truncate mb-2 uppercase tracking-wider font-semibold">

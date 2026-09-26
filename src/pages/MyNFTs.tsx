@@ -6,11 +6,18 @@ import EmptyNFTState from '@/components/EmptyNFTState';
 import ManageNFTModal from '@/components/ManageNFTModal';
 import NFTFolderModal from '@/components/NFTFolderModal';
 import CollectionGallery from '@/components/CollectionGallery';
-import { Sparkles, Gavel, LayoutGrid, List } from 'lucide-react';
+import { Sparkles, Gavel, LayoutGrid, List, SlidersHorizontal } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { PageHeader } from '@/components/layout/PageHeader';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const MyNFTs: React.FC = () => {
   const navigate = useNavigate();
@@ -45,7 +52,35 @@ const MyNFTs: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
-      <main className="px-5 py-6 sm:px-8 w-full max-w-full space-y-6">
+      <PageHeader
+        title="My NFTs"
+        showBack={true}
+        rightContent={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-2 -mr-2 rounded-full text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none"
+                title="Filter / View Mode"
+                aria-label="Filter"
+              >
+                <SlidersHorizontal className="w-5 h-5 text-[#00B4D8]" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-neutral-900 text-white min-w-[140px] shadow-2xl rounded-xl border-none">
+              <DropdownMenuItem onClick={() => setActiveTab('owned')} className="p-2.5 text-xs font-semibold hover:bg-white/10 cursor-pointer text-slate-200 hover:text-white">
+                Collection
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveTab('bids')} className="p-2.5 text-xs font-semibold hover:bg-white/10 cursor-pointer text-slate-200 hover:text-white">
+                Active Bids
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveTab('folders')} className="p-2.5 text-xs font-semibold hover:bg-white/10 cursor-pointer text-slate-200 hover:text-white">
+                Folders
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
+      />
+      <main className="px-5 py-3 sm:px-8 w-full max-w-full space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <Tabs 
             value={activeTab} 

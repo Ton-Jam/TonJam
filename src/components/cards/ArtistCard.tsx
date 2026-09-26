@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Play, CheckCircle2, UserPlus, UserCheck, Music } from 'lucide-react';
+import { Play, Verified, UserPlus, UserCheck, Music } from 'lucide-react';
 import { ArtistPlaceholder } from '../placeholders/ArtistPlaceholder';
 import { useAudio } from '@/contexts/AudioContext';
 
@@ -53,7 +53,7 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({
   const finalGenre = artist?.genre || '';
   const finalCountry = artist?.country || '';
   const isOnline = artist?.isOnline || false;
-  const isVerified = artist?.isVerified || false;
+  const isVerified = Boolean(artist?.isVerified || (artist as any)?.verified || (artist as any)?.isVerifiedArtist);
 
   const resolvedArtist: ArtistData = artist || {
     id: 'compat',
@@ -141,7 +141,7 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({
           {finalName}
         </h4>
         {isVerified && (
-          <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 fill-current shrink-0" />
+          <Verified className="w-3.5 h-3.5 text-blue-500 fill-current shrink-0" />
         )}
       </div>
 

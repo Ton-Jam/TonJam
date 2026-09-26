@@ -6,6 +6,7 @@ import { useTonAddress } from '@tonconnect/ui-react';
 import { JAM_PRICE_USD } from '@/constants';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import StakeNFTModal from '@/components/StakeNFTModal';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { useNavigate } from 'react-router-dom';
 
 const Staking: React.FC = () => {
@@ -125,27 +126,29 @@ const Staking: React.FC = () => {
   };
 
   return (
-    <div className="px-4 pb-4 lg:px-4 lg:pb-4 space-y-4 animate-in fade-in duration-700 mb-4 w-full max-w-full">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-            <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.5em]">DeFi Protocol</span>
-          </div>
-          <h1 className="text-[32px] md:text-[56px] font-black text-foreground tracking-tighter uppercase leading-none">
-            JAM <span className="text-blue-500">Staking</span>
-          </h1>
-          <p className="text-sm font-bold text-muted-foreground/50 uppercase tracking-[0.3em] mt-4">Lock your tokens to secure the network and earn rewards</p>
-        </div>
-        
-        <div className="flex items-center gap-4 bg-neutral-500/10 p-4 rounded-2xl border border-neutral-500/20">
-          <TrendingUp className="h-5 w-5 text-blue-500" />
+    <div className="pb-12 animate-in fade-in duration-700 w-full max-w-full">
+      <PageHeader title="Earn $TJ" showBack={true} />
+      <div className="px-4 sm:px-6 md:px-8 pt-2 space-y-4">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <p className="text-[8px] font-bold text-blue-500/40 uppercase tracking-widest mb-4">Current APR</p>
-            <p className="text-xl font-black text-foreground tracking-tighter">15.0%</p>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+              <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.4em]">DeFi Protocol</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight uppercase">
+              JAM <span className="text-blue-500">Staking</span>
+            </h2>
+            <p className="text-xs font-semibold text-muted-foreground mt-1">Lock your tokens to secure the network and earn rewards</p>
           </div>
-        </div>
-      </header>
+          
+          <div className="flex items-center gap-3 bg-neutral-500/10 p-3 rounded-2xl">
+            <TrendingUp className="h-5 w-5 text-blue-500" />
+            <div>
+              <p className="text-[9px] font-bold text-blue-500/60 uppercase tracking-widest">Current APR</p>
+              <p className="text-lg font-black text-foreground">15.0%</p>
+            </div>
+          </div>
+        </header>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -579,6 +582,7 @@ const Staking: React.FC = () => {
           onClose={() => setSelectedNftForModal(null)}
         />
       )}
+      </div>
     </div>
   );
 };

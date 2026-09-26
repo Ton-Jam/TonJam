@@ -64,7 +64,22 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const [tonConnectUI] = useTonConnectUI();
   const { convertPrice, localCurrencyEnabled } = useGramPrice();
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const { playTrack, currentTrack, isPlaying, togglePlay, setOptionsTrack, userProfile, setAnthem, addNotification, collections, seek, progress } = useAudio();
+  const { playTrack, currentTrack, isPlaying, togglePlay, setOptionsTrack, userProfile, setAnthem, addNotification, collections, seek, progress, artists } = useAudio();
+
+  const handleArtistClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const matched = MOCK_ARTISTS.find(a => 
+      a.name.toLowerCase() === nft.creator?.toLowerCase() || 
+      a.uid?.toLowerCase() === nft.creator?.toLowerCase()
+    ) || artists?.find(a => 
+      a.name.toLowerCase() === nft.creator?.toLowerCase() || 
+      a.uid?.toLowerCase() === nft.creator?.toLowerCase()
+    );
+    const targetId = matched?.uid || nft.creator?.toLowerCase().replace(/\s+/g, '-');
+    if (targetId) {
+      navigate(`/artist/${targetId}`);
+    }
+  };
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [previewSeconds, setPreviewSeconds] = useState(30);
@@ -438,6 +453,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       )}
 
       <DropdownMenuSeparator className="bg-white/5" />
+      <DropdownMenuItem onClick={handleArtistClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
+        <User className="h-4 w-4" />
+        <span className="text-[10px] font-bold uppercase tracking-widest">View Artist</span>
+      </DropdownMenuItem>
       <DropdownMenuItem onClick={() => navigate(`/nft/${nft.id}`)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <ExternalLink className="h-4 w-4" />
         <span className="text-[10px] font-bold uppercase tracking-widest">View Details</span>
@@ -456,6 +475,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       <ContextMenuItem onClick={handlePlayClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         <span className="text-[10px] font-semibold uppercase tracking-wider">Play Track</span>
+      </ContextMenuItem>
+      <ContextMenuItem onClick={handleArtistClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
+        <User className="h-4 w-4" />
+        <span className="text-[10px] font-semibold uppercase tracking-wider">View Artist</span>
       </ContextMenuItem>
       <ContextMenuItem onClick={handleQuickViewClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
         <Eye className="h-4 w-4" />
@@ -599,11 +622,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               </h4>
               <p 
                 className="text-[11px] text-white/60 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
-                  if (artist) navigate(`/artist/${artist.uid}`);
-                }}
+                onClick={handleArtistClick}
               >
                 {nft.creator}
               </p>
@@ -721,11 +740,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               
               <p 
                 className="text-[11px] font-normal text-white/60 truncate w-full mt-0.5 hover:text-white transition-colors cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
-                  if (artist) navigate(`/artist/${artist.uid}`);
-                }}
+                onClick={handleArtistClick}
               >
                 {nft.creator}
               </p>

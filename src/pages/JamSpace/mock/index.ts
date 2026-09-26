@@ -248,6 +248,7 @@ export const MOCK_SPACES: Space[] = [
     title: 'Amapiano Global Takeover & NFT Utility Discussion',
     host: MOCK_USERS.krupy,
     listenerCount: 1240,
+    memberCount: 4850,
     speakerAvatars: [
       'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
       'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=150&q=80',
@@ -262,6 +263,7 @@ export const MOCK_SPACES: Space[] = [
     title: 'Sound Design 101: Synthesis & Stem Royalties',
     host: MOCK_USERS.neon_voyager,
     listenerCount: 520,
+    memberCount: 2130,
     speakerAvatars: [
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80'
@@ -275,6 +277,7 @@ export const MOCK_SPACES: Space[] = [
     title: 'Sonic Alchemy Live Stream Listening Session',
     host: MOCK_USERS.beat_architect,
     listenerCount: 0,
+    memberCount: 1420,
     speakerAvatars: [
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80'
     ],

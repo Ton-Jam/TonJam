@@ -4,10 +4,11 @@ import { motion } from 'motion/react';
 interface ProfileTabsProps {
   activeTab: string;
   onChangeTab: (tabId: string) => void;
+  tabs?: { id: string; label: string }[];
 }
 
-export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onChangeTab }) => {
-  const tabs = [
+export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onChangeTab, tabs: customTabs }) => {
+  const defaultTabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'analytics', label: 'Artist Analytics' },
     { id: 'tracks', label: 'Tracks' },
@@ -17,6 +18,8 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onChangeTab
     { id: 'following', label: 'Following' },
     { id: 'about', label: 'About' },
   ];
+
+  const tabs = customTabs || defaultTabs;
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -43,13 +46,13 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onChangeTab
             id={`tab-trigger-${tab.id}`}
             onClick={() => onChangeTab(tab.id)}
             aria-pressed={isActive}
-            className={`relative px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052FF] cursor-pointer whitespace-nowrap shrink-0 z-10 border ${
+            className={`relative px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052FF] cursor-pointer whitespace-nowrap shrink-0 z-10 ${
               isActive
-                ? 'border-[#c0c0c0]/40'
-                : 'border-[#c0c0c0]/25 hover:border-[#c0c0c0]/40'
+                ? 'bg-[#0052FF] text-white shadow-lg shadow-blue-500/20'
+                : 'bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.08]'
             }`}
           >
-            {/* Animated Tab Indicator (Flat pill background, no borders) */}
+            {/* Animated Tab Indicator */}
             {isActive && (
               <motion.div
                 layoutId="activeTabPill"

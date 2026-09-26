@@ -40,7 +40,10 @@ export const useArtistProfile = () => {
     playTrack, 
     playAll, 
     followedUserIds, 
-    toggleFollowUser 
+    toggleFollowUser,
+    artists = [],
+    allTracks = [],
+    allNFTs = []
   } = useAudio();
 
   const [artist, setArtist] = useState<Artist | null>(null);
@@ -77,9 +80,51 @@ export const useArtistProfile = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    // Find the artist by id or fallback to the first mock artist
-    const targetId = id || "dj-krupy";
-    const foundArtist = MOCK_ARTISTS.find(a => a.uid === targetId) || MOCK_ARTISTS[0];
+    const targetId = id ? decodeURIComponent(id).trim() : "dj-krupy";
+    const lowerTarget = targetId.toLowerCase();
+    
+    // Combine context artists and MOCK_ARTISTS
+    const allKnown = [...(artists || []), ...MOCK_ARTISTS];
+    
+    let foundArtist = allKnown.find(a => 
+      a.uid?.toLowerCase() === lowerTarget ||
+      a.username?.replace('@', '').toLowerCase() === lowerTarget ||
+      a.name?.toLowerCase() === lowerTarget ||
+      a.name?.toLowerCase().replace(/\s+/g, '-') === lowerTarget
+    );
+
+    // If still not found and target was supplied, generate dynamic profile
+    if (!foundArtist && targetId) {
+      const displayName = targetId
+        .replace(/[-_]/g, ' ')
+        .split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+
+      foundArtist = {
+        uid: targetId,
+        name: displayName,
+        username: `@${targetId.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+        walletAddress: `UQ${targetId.slice(0, 4)}...8888`,
+        avatarUrl: `https://image.pollinations.ai/prompt/${encodeURIComponent(displayName)}%20artist%20portrait%20photography%20studio?width=600&height=600&nologo=true`,
+        followers: 12400,
+        verified: true,
+        isVerifiedArtist: true,
+        genre: 'Afrobeats',
+        bio: `${displayName} is an active creator and recording artist on TonJam, minting exclusive music NFT releases and streaming live on the TON blockchain.`,
+        bannerUrl: "/default_tonjam_banner.jpg",
+        bannerImageUrl: "/default_tonjam_banner.jpg",
+        socials: { 
+          x: `https://x.com/${targetId.toLowerCase().replace(/[^a-z0-9]/g, '')}`, 
+          telegram: `https://t.me/${targetId.toLowerCase().replace(/[^a-z0-9]/g, '')}` 
+        },
+        earnings: { streaming: 320.0, nftSales: 1450.0, total: 1770.0 }
+      };
+    }
+
+    if (!foundArtist) {
+      foundArtist = MOCK_ARTISTS[0];
+    }
     
     if (foundArtist) {
       setArtist(foundArtist);
@@ -95,21 +140,43 @@ export const useArtistProfile = () => {
       setMissions(getArtistMissions());
       setAnalytics(getMockAnalytics());
 
-      // Filter global tracks & NFTs
-      const artistTracks = MOCK_TRACKS.filter(t => t.artistId === foundArtist.uid);
-      setTracks(artistTracks.length > 0 ? artistTracks : MOCK_TRACKS.slice(0, 8));
+      // Filter tracks from audioContext and mock
+      const candidateTracks = (allTracks && allTracks.length > 0) ? allTracks : MOCK_TRACKS;
+      const artistTracks = candidateTracks.filter(t => 
+        t.artistId?.toLowerCase() === foundArtist!.uid.toLowerCase() ||
+        t.artist?.toLowerCase() === foundArtist!.name.toLowerCase()
+      );
+      
+      setTracks(artistTracks.length > 0 ? artistTracks : candidateTracks.slice(0, 5));
 
-      const artistNFTs = MOCK_NFTS.filter(n => n.creator === foundArtist.name);
-      setNfts(artistNFTs.length > 0 ? artistNFTs : MOCK_NFTS.slice(0, 6));
+      // Filter NFTs from audioContext and mock
+      const candidateNFTs = (allNFTs && allNFTs.length > 0) ? allNFTs : MOCK_NFTS;
+      let artistNFTs = candidateNFTs.filter(n => 
+        n.creator?.toLowerCase() === foundArtist!.name.toLowerCase() ||
+        n.creator?.toLowerCase() === foundArtist!.uid.toLowerCase()
+      );
+
+      // Ensure at least 3 releases are always visible for the user to view/explore
+      if (artistNFTs.length === 0) {
+        artistNFTs = candidateNFTs.slice(0, 3).map((nft, idx) => ({
+          ...nft,
+          id: `nft-${foundArtist!.uid}-${idx + 1}`,
+          creator: foundArtist!.name,
+          title: `${foundArtist!.name} - ${nft.title || 'Genesis Single Drop'}`,
+          edition: `1 of ${25 * (idx + 1)}`
+        }));
+      }
+
+      setNfts(artistNFTs);
     }
     
     // Simulate slight delay to trigger skeletons elegantly
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 600);
+    }, 400);
 
     return () => clearTimeout(timer);
-  }, [id]);
+  }, [id, artists, allTracks, allNFTs]);
 
   // Actions
   const handleFollowToggle = useCallback(() => {

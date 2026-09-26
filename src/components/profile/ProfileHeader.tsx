@@ -1,220 +1,360 @@
 import React, { useState } from 'react';
-import { BadgeCheck, Globe, Calendar, Music, ShieldCheck, Settings, Sparkles, ArrowLeft, LayoutDashboard, QrCode } from 'lucide-react';
+import { 
+  BadgeCheck, 
+  Globe, 
+  Calendar, 
+  Music, 
+  ShieldCheck, 
+  Settings, 
+  Sparkles, 
+  ArrowLeft, 
+  LayoutDashboard, 
+  QrCode, 
+  Share2, 
+  UserPlus, 
+  UserCheck, 
+  Zap, 
+  Upload, 
+  Coins, 
+  Edit3,
+  Camera,
+  MoreVertical
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { ProfileData } from './ProfileTypes';
+import { UserProfile as UserProfileType } from '@/types';
 import { ProfileQRCodeModal } from './ProfileQRCodeModal';
+import { ArtistVerificationBadge } from '@/components/ArtistVerificationBadge';
+import { PageHeader } from '@/components/layout/PageHeader';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ProfileHeaderProps {
-  profile: ProfileData;
-  onOpenSettings: () => void;
-  onEditCover: () => void;
-  onEditAvatar: () => void;
+  profile?: ProfileData;
+  user?: UserProfileType;
+  onOpenSettings?: () => void;
+  onEditCover?: () => void;
+  onEditAvatar?: () => void;
   onEditProfile?: () => void;
   isOwnProfile?: boolean;
+  isFollowing?: boolean;
+  onFollow?: () => void;
+  onShare?: () => void;
+  onTipArtist?: () => void;
+  followersCount?: number;
+  followingCount?: number;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   profile,
+  user,
   onOpenSettings,
   onEditCover,
   onEditAvatar,
   onEditProfile,
-  isOwnProfile = true
+  isOwnProfile = true,
+  isFollowing = false,
+  onFollow,
+  onShare,
+  onTipArtist,
+  followersCount,
+  followingCount,
 }) => {
   const navigate = useNavigate();
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
+  // Unify data from either user or profile
+  const displayName = user?.name || profile?.name || 'TonJam Explorer';
+  const username = user?.username || profile?.username || (displayName || 'user').toLowerCase().replace(/\s+/g, '');
+  const avatarUrl = user?.avatar || profile?.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=500&h=500&q=80';
+  const bannerUrl = user?.bannerUrl || profile?.bannerUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1400&h=500&q=80';
+  const bio = user?.bio || profile?.bio || '';
+  const walletAddress = user?.walletAddress || profile?.walletAddress || '';
+  const isVerifiedArtist = Boolean(
+    user?.isVerifiedArtist || 
+    user?.isVerified || 
+    user?.role === 'artist' || 
+    profile?.isArtistVerified || 
+    profile?.isSpotifyVerified
+  );
+
+  const followers = followersCount ?? (user?.followers ?? profile?.followers ?? 0);
+  const following = followingCount ?? (user?.following ?? profile?.following ?? 0);
+
+  const handleShareClick = () => {
+    if (onShare) {
+      onShare();
+    } else {
+      setIsQRModalOpen(true);
+    }
+  };
+
+  const handleEditProfileClick = () => {
+    if (onEditProfile) {
+      onEditProfile();
+    } else {
+      navigate('/edit-profile');
+    }
+  };
+
   return (
-    <div className="relative w-full bg-[#050A24] text-white">
-      {/* Cover Image Container */}
-      <div className="relative w-full h-32 sm:h-40 md:h-48 overflow-hidden bg-slate-950">
-        <img 
-          src={profile.bannerUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&h=400&q=80'} 
-          alt="Profile cover" 
-          className="w-full h-full object-cover"
+    <div className="relative w-full text-white overflow-hidden">
+      {/* 1. Spotify-Style Ambient Backdrop Blur (No Boxed Card) */}
+      <div className="absolute inset-0 h-64 sm:h-80 md:h-96 w-full pointer-events-none overflow-hidden -z-10">
+        <img
+          src={bannerUrl}
+          alt=""
+          className="w-full h-full object-cover blur-2xl opacity-25 scale-110 transform-gpu"
           referrerPolicy="no-referrer"
         />
-        {/* Flat darken overlay */}
-        <div className="absolute inset-0 bg-black/35" />
-        
-        {/* Top Floating Back Button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer z-10"
-          title="Back"
-          aria-label="Go Back"
-        >
-          <ArrowLeft className="w-5 h-5 text-slate-300 hover:text-white" />
-        </button>
-        
-        {/* Top Floating Settings, Dashboard, Edit Profile & Share QR Buttons */}
-        <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
-          <button
-            onClick={() => setIsQRModalOpen(true)}
-            className="p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer flex items-center justify-center"
-            title="Share Profile QR Code"
-            aria-label="Share Profile QR Code"
-          >
-            <QrCode className="w-5 h-5 text-blue-400 hover:text-blue-300" />
-          </button>
-          {isOwnProfile && (
-            <>
-              {onEditProfile && (
-                <button
-                  onClick={onEditProfile}
-                  className="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white text-xs font-bold uppercase tracking-wider rounded-full transition-all cursor-pointer shadow-md"
-                  title="Edit Profile"
-                >
-                  Edit Profile
-                </button>
-              )}
-              {profile.isArtistVerified && (
-                <button
-                  onClick={() => navigate('/artist-dashboard')}
-                  className="px-3 py-1.5 bg-[#0052FF] hover:bg-[#1a66ff] active:scale-95 text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1.5 transition-all cursor-pointer shadow-lg"
-                  title="Artist Dashboard"
-                >
-                  <LayoutDashboard className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Dashboard</span>
-                </button>
-              )}
-              <button
-                onClick={onOpenSettings}
-                className="p-2.5 bg-[#050A24]/70 hover:bg-[#050A24] active:scale-95 text-white rounded-full transition-all cursor-pointer"
-                title="Profile Settings"
-                aria-label="Settings"
-              >
-                <Settings className="w-5 h-5 text-slate-300 hover:text-white" />
-              </button>
-            </>
-          )}
-        </div>
-        
-        {isOwnProfile && (
-          <button
-            onClick={onEditCover}
-            className="absolute bottom-4 right-4 px-3 py-1.5 bg-[#050A24]/60 hover:bg-[#050A24]/90 text-xs font-semibold rounded-full tracking-wider uppercase backdrop-blur-sm transition-all cursor-pointer z-10"
-          >
-            Change Cover
-          </button>
-        )}
+        {/* Soft atmospheric gradient flowing seamlessly into dark background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050A24]/40 via-[#050A24]/75 to-[#050A24]" />
+        <div className="absolute -top-12 left-1/4 w-80 h-80 bg-[#0052FF]/20 rounded-full blur-3xl pointer-events-none" />
       </div>
 
-      {/* Profile Details Container */}
-      <div className="px-4 sm:px-6 relative pb-6">
-        
-        {/* Avatar Overlap */}
-        <div className="relative -mt-12 sm:-mt-16 mb-4 flex items-end justify-between">
-          <div className="relative group">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-[3px] border-[#050A24] bg-slate-900 shadow-none">
-              <img 
-                src={profile.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=500&h=500&q=80'} 
-                alt={profile.name} 
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-            {isOwnProfile && (
+      {/* 2. Top Transparent Glass Navigation Bar */}
+      <PageHeader
+        title="Profile"
+        showBack={true}
+        transparent={true}
+        sticky={false}
+        rightContent={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <button
-                onClick={onEditAvatar}
-                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
+                className="p-2 text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 rounded-full transition-all cursor-pointer border-none outline-none flex items-center justify-center"
+                title="Profile Options"
+                aria-label="Profile Options"
               >
-                <span className="text-xs font-bold text-white uppercase tracking-wider">Change</span>
+                <MoreVertical className="w-5 h-5" />
               </button>
-            )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-neutral-900 text-white min-w-[160px] shadow-2xl rounded-xl border-none">
+              <DropdownMenuItem
+                onClick={handleShareClick}
+                className="flex items-center gap-2 p-2.5 text-xs font-semibold hover:bg-white/10 cursor-pointer text-slate-200 hover:text-white"
+              >
+                <Share2 className="w-4 h-4 text-[#00B4D8]" />
+                <span>Share Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setIsQRModalOpen(true)}
+                className="flex items-center gap-2 p-2.5 text-xs font-semibold hover:bg-white/10 cursor-pointer text-slate-200 hover:text-white"
+              >
+                <QrCode className="w-4 h-4 text-[#00B4D8]" />
+                <span>Show QR Code</span>
+              </DropdownMenuItem>
+              {isOwnProfile && onOpenSettings && (
+                <DropdownMenuItem
+                  onClick={onOpenSettings}
+                  className="flex items-center gap-2 p-2.5 text-xs font-semibold hover:bg-white/10 cursor-pointer text-slate-200 hover:text-white"
+                >
+                  <Settings className="w-4 h-4 text-[#00B4D8]" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
+      />
+
+      {/* 3. Spotify-Inspired Music Profile Hero Content */}
+      <div className="px-4 sm:px-8 pt-4 pb-6 flex flex-col md:flex-row items-center md:items-end gap-6 sm:gap-8">
+        
+        {/* Large Profile Image */}
+        <div className="relative group shrink-0">
+          <div className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full overflow-hidden shadow-2xl bg-slate-900 ring-4 ring-[#0052FF]/30 transition-transform duration-300 group-hover:scale-105">
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
           </div>
 
-          {/* Badges Column on Right */}
-          <div className="flex flex-col items-end gap-1.5 pt-2">
-            {profile.isSpotifyVerified && (
-              <div 
-                className="flex items-center gap-1.5 px-3 py-1 bg-emerald-950/40 text-emerald-400 rounded-full text-[10px] font-bold uppercase tracking-wider"
-                title="Spotify Verified Artist"
-              >
-                <Music className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Spotify Verified</span>
+          {isOwnProfile && onEditAvatar && (
+            <button
+              onClick={onEditAvatar}
+              className="absolute inset-0 rounded-full flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm"
+              title="Change Profile Photo"
+            >
+              <div className="flex flex-col items-center gap-1">
+                <Camera className="w-5 h-5 text-white" />
+                <span className="text-[10px] font-bold text-white uppercase tracking-wider">Change</span>
               </div>
-            )}
-            {profile.isArtistVerified && (
-              <div 
-                className="flex items-center gap-1.5 px-3 py-1 bg-[#0052FF]/10 text-[#0052FF] rounded-full text-[10px] font-bold uppercase tracking-wider"
-                title="Verified NFT Music Creator"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>NFT Creator</span>
-              </div>
-            )}
-            {profile.isTonVerified && (
-              <div 
-                className="flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 text-blue-400 rounded-full text-[10px] font-bold uppercase tracking-wider"
-                title="TON Verified Address"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                <span>TON Verified</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Name and Handle */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase font-sans">
-              {profile.name}
-            </h1>
-            <BadgeCheck className="w-5.5 h-5.5 text-[#0052FF] fill-current" />
-          </div>
-          
-          <div className="text-xs sm:text-sm font-mono text-slate-400">
-            @{profile.username}
-          </div>
-        </div>
-
-        {/* Genre / Bio / Country Details */}
-        <div className="mt-4 space-y-3 max-w-xl">
-          {profile.genre && (
-            <div className="inline-block px-2.5 py-0.5 bg-slate-800/60 rounded-md text-[10px] font-bold uppercase tracking-wider text-slate-300">
-              {profile.genre}
-            </div>
+            </button>
           )}
+        </div>
 
-          {/* Biography (3 Lines Max limit) */}
-          {profile.bio && (
-            <p className="text-sm text-slate-300 leading-relaxed font-sans line-clamp-3">
-              {profile.bio}
+        {/* Profile Info & Actions Column */}
+        <div className="flex-1 text-center md:text-left space-y-3 min-w-0">
+          
+          {/* Identity Subheader: Role Badge */}
+          <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[#0098EA] bg-[#0052FF]/15 px-3 py-1 rounded-full">
+              {isVerifiedArtist ? 'Verified Artist' : 'Music Collector'}
+            </span>
+
+            {profile?.isSpotifyVerified && (
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/40 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <Music className="w-3 h-3" /> Spotify Connected
+              </span>
+            )}
+
+            {walletAddress && (
+              <span className="text-[10px] font-mono text-slate-300 bg-white/5 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-[#0098EA]" />
+                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+              </span>
+            )}
+          </div>
+
+          {/* Display Name with Verified Badge */}
+          <div className="flex items-center justify-center md:justify-start gap-2.5 flex-wrap">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-white leading-none">
+              {displayName}
+            </h1>
+            {isVerifiedArtist && (
+              <ArtistVerificationBadge
+                isVerified={true}
+                artistName={displayName}
+                size="lg"
+                showLabel={false}
+              />
+            )}
+          </div>
+
+          {/* Username & Social Stats */}
+          <div className="flex items-center justify-center md:justify-start gap-3 text-xs sm:text-sm text-slate-400 font-medium flex-wrap">
+            <span className="font-mono text-slate-300">@{username}</span>
+            <span className="text-slate-600">•</span>
+            <button
+              onClick={() => navigate('/followers')}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              <strong className="text-white font-mono">{followers.toLocaleString()}</strong> Followers
+            </button>
+            <span className="text-slate-600">•</span>
+            <button
+              onClick={() => navigate('/following')}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              <strong className="text-white font-mono">{following.toLocaleString()}</strong> Following
+            </button>
+          </div>
+
+          {/* Bio Snippet */}
+          {bio && (
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans max-w-xl line-clamp-2">
+              {bio}
             </p>
           )}
 
-          {/* Location and Joined Date Row */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 font-medium">
-            {profile.country && (
-              <div className="flex items-center gap-1">
-                <Globe className="w-3.5 h-3.5 text-slate-500" />
-                <span>{profile.country}</span>
-              </div>
+          {/* Primary Action Buttons Row */}
+          <div className="pt-2 flex items-center justify-center md:justify-start gap-2.5 flex-wrap">
+            {!isOwnProfile ? (
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={onFollow}
+                  className={`px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-wider cursor-pointer shadow-lg transition-colors duration-300 flex items-center gap-1.5 ${
+                    isFollowing
+                      ? 'bg-white/10 hover:bg-white/20 text-white'
+                      : 'bg-[#0052FF] hover:bg-[#1a66ff] text-white shadow-blue-500/25'
+                  }`}
+                >
+                  {isFollowing ? (
+                    <>
+                      <UserCheck className="w-4 h-4 text-emerald-400" />
+                      <span>Following</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      <span>{isVerifiedArtist ? 'Follow Artist' : 'Follow'}</span>
+                    </>
+                  )}
+                </motion.button>
+
+                {isVerifiedArtist && onTipArtist && (
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={onTipArtist}
+                    className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider rounded-full shadow-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Zap className="w-4 h-4 fill-current" />
+                    <span>Tip TON</span>
+                  </motion.button>
+                )}
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleEditProfileClick}
+                  className="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md flex items-center gap-1.5 active:scale-95"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Edit Profile</span>
+                </button>
+
+                {/* Verified Artist Owner Entry Points */}
+                {isVerifiedArtist && (
+                  <>
+                    <button
+                      onClick={() => navigate('/artist-dashboard')}
+                      className="px-5 py-2.5 bg-[#0052FF] hover:bg-[#1a66ff] text-white rounded-full font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg flex items-center gap-1.5 active:scale-95 shadow-blue-500/25"
+                      title="Artist Dashboard"
+                    >
+                      <LayoutDashboard className="w-3.5 h-3.5" />
+                      <span>Artist Dashboard</span>
+                    </button>
+                    <button
+                      onClick={() => navigate('/upload')}
+                      className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md hidden sm:flex items-center gap-1.5 active:scale-95"
+                      title="Upload New Music"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload</span>
+                    </button>
+                    <button
+                      onClick={() => navigate('/mint')}
+                      className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md hidden sm:flex items-center gap-1.5 active:scale-95"
+                      title="Mint Music NFT"
+                    >
+                      <Coins className="w-3.5 h-3.5 text-[#0098EA]" />
+                      <span>Mint</span>
+                    </button>
+                  </>
+                )}
+              </>
             )}
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-slate-500" />
-              <span>Joined {profile.memberSince}</span>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Share QR Code Modal */}
-      <ProfileQRCodeModal 
+      {/* QR Code Modal */}
+      <ProfileQRCodeModal
         isOpen={isQRModalOpen}
         onClose={() => setIsQRModalOpen(false)}
         profile={{
-          name: profile.name,
-          username: profile.username,
-          avatar: profile.avatar,
-          role: profile.isArtistVerified ? 'Artist' : profile.isSpotifyVerified ? 'Spotify Artist' : 'Fan / Listener',
-          bio: profile.bio,
-          isVerified: Boolean(profile.isArtistVerified || profile.isSpotifyVerified),
-          uid: profile.uid
+          name: displayName,
+          username: username,
+          avatar: avatarUrl,
+          role: isVerifiedArtist ? 'Verified Artist' : 'Music Collector',
+          bio: bio,
+          isVerified: isVerifiedArtist,
+          uid: user?.uid || profile?.uid || 'user'
         }}
       />
     </div>
   );
 };
+
+export default ProfileHeader;

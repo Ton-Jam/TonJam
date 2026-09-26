@@ -6,6 +6,7 @@ import TrackCard from '@/components/TrackCard';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import PlaylistCoverGenerator from '@/components/PlaylistCoverGenerator';
 import PlaylistOptionsModal from '@/components/PlaylistOptionsModal';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { MOCK_TRACKS } from '@/constants';
 import { AnimatePresence } from 'motion/react';
 
@@ -188,6 +189,22 @@ const PlaylistDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen pb-4 relative overflow-hidden bg-background">
+      <PageHeader
+        title="Playlist"
+        showBack={true}
+        rightContent={
+          id !== 'liked-songs' ? (
+            <button 
+              onClick={() => setIsOptionsModalOpen(true)}
+              className="p-2 -mr-2 rounded-full text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none"
+              aria-label="Playlist options"
+              title="Playlist options"
+            >
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+          ) : null
+        }
+      />
       {/* Dynamic Background with Blur */}
       {playlist.coverUrl && (
         <div 
@@ -195,19 +212,11 @@ const PlaylistDetail: React.FC = () => {
           style={{ backgroundImage: `url(${playlist.coverUrl})` }}
         />
       )}
-      <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-transparent to-background/90" />
+      <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-transparent to-background/90 pointer-events-none" />
       <div className="absolute inset-0 bg-background/50 pointer-events-none" />
 
-      <div className="relative z-10 p-4 md:p-8 pt-12 md:pt-16">
+      <div className="relative z-10 p-4 md:p-8 pt-2">
         <div className="flex flex-col md:flex-row gap-6 mb-8 items-center md:items-end relative">
-          {id !== 'liked-songs' && (
-            <button 
-              onClick={() => setIsOptionsModalOpen(true)}
-              className="absolute top-0 right-0 md:top-4 md:right-4 p-2 rounded-full hover:bg-blue-500/10 transition-colors text-blue-500 z-20"
-            >
-              <MoreHorizontal className="w-6 h-6" />
-            </button>
-          )}
           
           {/* Cover Image / Collage */}
           <div className={`relative group w-48 h-48 md:w-64 md:h-64 flex-shrink-0 rounded-xl overflow-hidden bg-neutral-900 mx-auto md:mx-0 ${playlist.title === 'Discover Weekly' ? '' : 'shadow-[0_20px_40px_rgba(0,0,0,0.6)]'}`}>

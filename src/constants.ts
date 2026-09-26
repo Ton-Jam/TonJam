@@ -21,6 +21,62 @@ export const MOODS = [
 
 export const MOCK_TRACKS: Track[] = [
   { 
+    id: 'track-tiwa-1', 
+    songId: 'song-tiwa-1',
+    title: "Somebody's Son", 
+    artist: 'Tiwa Savage', 
+    artistId: 'tiwa-savage', 
+    coverUrl: 'https://image.pollinations.ai/prompt/tiwa%20savage%20somebodys%20son%20afrobeats%20single%20cover?width=600&height=600&nologo=true', 
+    audioUrl: 'https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3', 
+    duration: 218, 
+    genre: 'Afrobeats', 
+    mood: 'Happy',
+    isNFT: true, 
+    artistVerified: true, 
+    price: '4.5', 
+    playCount: 124500, 
+    likes: 18400, 
+    releaseDate: '2024-01-10',
+    createdAt: '2024-01-10T00:00:00Z'
+  },
+  { 
+    id: 'track-tiwa-2', 
+    songId: 'song-tiwa-2',
+    title: 'Koroba', 
+    artist: 'Tiwa Savage', 
+    artistId: 'tiwa-savage', 
+    coverUrl: 'https://image.pollinations.ai/prompt/afrobeats%20tiwa%20savage%20koroba%20music%20cover?width=600&height=600&nologo=true', 
+    audioUrl: 'https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3', 
+    duration: 195, 
+    genre: 'Afrobeats', 
+    mood: 'Energetic',
+    isNFT: true, 
+    artistVerified: true, 
+    price: '3.0',
+    playCount: 98200, 
+    likes: 14200, 
+    releaseDate: '2024-02-14',
+    createdAt: '2024-02-14T00:00:00Z'
+  },
+  { 
+    id: 'track-tiwa-3', 
+    songId: 'song-tiwa-3',
+    title: 'All Over', 
+    artist: 'Tiwa Savage', 
+    artistId: 'tiwa-savage', 
+    coverUrl: 'https://image.pollinations.ai/prompt/tiwa%20savage%20all%20over%20vibrant%20african%20colors%20cover?width=600&height=600&nologo=true', 
+    audioUrl: 'https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3', 
+    duration: 210, 
+    genre: 'Afrobeats', 
+    mood: 'Happy',
+    isNFT: false, 
+    artistVerified: true, 
+    playCount: 84300, 
+    likes: 11900, 
+    releaseDate: '2024-03-01',
+    createdAt: '2024-03-01T00:00:00Z'
+  },
+  { 
     id: '1', 
     songId: 'song-1',
     title: 'Solar Pulse', 
@@ -505,6 +561,40 @@ export const MOCK_USER: UserProfile = {
 
 export const MOCK_NFTS: NFTItem[] = [
   { 
+    id: 'nft-tiwa-1', 
+    trackId: 'track-tiwa-1', 
+    title: "Somebody's Son: Queen Genesis #001", 
+    owner: 'UQTiwaSavage_x8y2_9999', 
+    creator: 'Tiwa Savage', 
+    price: '15', 
+    imageUrl: 'https://image.pollinations.ai/prompt/music%20nft%20tiwa%20savage%20gold%20african%20queen%20crown%20mythic?width=600&height=600&nologo=true', 
+    edition: '1 of 25',
+    listingType: 'fixed',
+    description: 'Exclusive Genesis NFT release by Tiwa Savage. Grants VIP backstage pass to live performances.',
+    traits: [
+      { trait_type: 'Bitrate', value: 'FLAC' },
+      { trait_type: 'Genre', value: 'Afrobeats' },
+      { trait_type: 'Rarity', value: 'Mythic' }
+    ]
+  },
+  { 
+    id: 'nft-tiwa-2', 
+    trackId: 'track-tiwa-2', 
+    title: 'Koroba: Rhythm Monolith #012', 
+    owner: 'UQTiwaSavage_x8y2_9999', 
+    creator: 'Tiwa Savage', 
+    price: '8', 
+    imageUrl: 'https://image.pollinations.ai/prompt/music%20nft%20koroba%20tiwa%20savage%20neon%20african%20patterns?width=600&height=600&nologo=true', 
+    edition: '1 of 50',
+    listingType: 'fixed',
+    description: 'Exclusive music collectible for Koroba on TonJam.',
+    traits: [
+      { trait_type: 'Bitrate', value: '320kbps' },
+      { trait_type: 'Genre', value: 'Afrobeats' },
+      { trait_type: 'Rarity', value: 'Rare' }
+    ]
+  },
+  { 
     id: 'n1', 
     trackId: '1', 
     title: 'Solar Pulse: Genesis Edition #001', 
@@ -657,6 +747,27 @@ export const MOCK_ARTISTS: Artist[] = [
     events: [
       { id: 'e-krupy-1', artistId: 'dj-krupy', title: 'Solar Pulse Genesis', date: '2024-12-25', time: '22:00', venue: 'GRAM Digital Arena', location: 'Metaverse', ticketUrl: 'https://tonjam.io/tickets/krupy' }
     ]
+  },
+  {
+    uid: 'tiwa-savage',
+    name: 'Tiwa Savage',
+    username: '@tiwasavage',
+    walletAddress: 'UQTiwaSavage_x8y2_9999',
+    avatarUrl: 'https://image.pollinations.ai/prompt/tiwa%20savage%20afrobeats%20queen%20portrait%20photography%20studio?width=600&height=600&nologo=true',
+    followers: 12400,
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Afrobeats',
+    bio: "Queen of Afrobeats. Bringing soulful melodies and trailblazing West African soundscapes to TonJam and the TON blockchain.",
+    bannerUrl: "/default_tonjam_banner.jpg",
+    bannerImageUrl: "/default_tonjam_banner.jpg",
+    socials: { x: 'https://x.com/tiwasavage', instagram: 'https://instagram.com/tiwasavage' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQTiwaSavage_x8y2_9999', percentage: 0.10, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQTiwaSavage_x8y2_9999', percentage: 0.15, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 640.0, nftSales: 2400.0, total: 3040.0 },
+    events: []
   },
   { 
     uid: 'a1', 

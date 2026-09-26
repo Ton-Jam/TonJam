@@ -18,13 +18,13 @@ export const VisitorActions: React.FC<VisitorActionsProps> = ({
   const [isSupportOpen, setIsSupportOpen] = useState(false);
 
   return (
-    <div className="flex flex-wrap items-center gap-2.5 w-full bg-[#101A3B]/40 p-4 border border-white/5 rounded-[16px] backdrop-blur-sm justify-between">
+    <div className="flex flex-wrap items-center gap-2.5 w-full bg-[#101A3B]/40 p-4 rounded-[16px] backdrop-blur-sm justify-between">
       <div className="flex items-center gap-2.5">
         <FollowButton artistName={profile.name} />
         
         <button
           onClick={() => setIsSupportOpen(true)}
-          className="px-4 py-2 bg-[#0052FF]/10 hover:bg-[#0052FF]/20 text-[#0052FF] rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-2"
+          className="px-4 py-2 bg-[#0052FF]/15 hover:bg-[#0052FF]/25 text-[#00B4D8] rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-2"
         >
           <Heart className="w-4 h-4 fill-current text-[#0052FF]" />
           <span>Support</span>
@@ -51,6 +51,7 @@ export const VisitorActions: React.FC<VisitorActionsProps> = ({
 
       <SupportArtist
         artistName={profile.name}
+        avatarUrl={profile.avatar}
         isOpen={isSupportOpen}
         onClose={() => setIsSupportOpen(false)}
       />

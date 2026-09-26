@@ -45,6 +45,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { BackButton } from "@/components/BackButton";
 import { useAudio } from "@/contexts/AudioContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -748,6 +749,21 @@ export default function ArtistDashboard() {
         <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600 rounded-full" />
       </div>
 
+      <PageHeader
+        title="Artist Dashboard"
+        showBack={true}
+        rightContent={
+          <button
+            onClick={() => navigate("/upload")}
+            className="p-2 -mr-2 rounded-full text-[#00B4D8] hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none"
+            title="Upload Track"
+            aria-label="Upload Track"
+          >
+            <Upload className="w-5 h-5" />
+          </button>
+        }
+      />
+
       <div className="relative z-10 w-full max-w-full p-2 sm:p-4 space-y-4">
         
         {/* Banner Section */}
@@ -773,7 +789,6 @@ export default function ArtistDashboard() {
             >
                 <Upload className="w-3.5 h-3.5" /> Upload Track
             </button>
-            <BackButton />
           </div>
         </div>
 

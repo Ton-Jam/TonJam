@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 import { useToast } from '@/components/layout/ToastProvider';
-import { BackButton } from '@/components/BackButton';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 interface ProfileUser {
   id: string;
@@ -276,33 +276,11 @@ export const FollowersFollowing: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050a24] text-white p-4 sm:p-6 lg:p-8 space-y-6">
-      
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <BackButton />
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-400" />
-              <span>Community Connections</span>
-            </h1>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Explore your network of artists, producers, and lossless audio collectors
-            </p>
-          </div>
-        </div>
-
-        {/* Total stats pill */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-xs font-mono font-bold bg-[#0e163d] px-3 py-1.5 rounded-xl border border-white/5 text-slate-300">
-            Total: <strong className="text-blue-400">{filteredList.length}</strong> Users
-          </span>
-        </div>
-      </div>
-
-      {/* Main Tabs Header */}
-      <div className="flex items-center gap-2 bg-[#0e163d]/60 p-1.5 rounded-2xl border border-white/5 max-w-md">
+    <div className="min-h-screen bg-[#050a24] text-white pb-12">
+      <PageHeader title={activeTab === 'followers' ? 'Followers' : 'Following'} showBack={true} />
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 pt-2">
+        {/* Main Tabs Header */}
+        <div className="flex items-center gap-2 bg-[#0e163d]/60 p-1.5 rounded-2xl max-w-md">
         <button
           onClick={() => handleTabChange('followers')}
           aria-pressed={activeTab === 'followers'}
@@ -523,7 +501,7 @@ export const FollowersFollowing: React.FC = () => {
           </button>
         )}
       </div>
-
+      </div>
     </div>
   );
 };

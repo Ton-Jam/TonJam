@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLibrary } from '@/contexts/LibraryContext';
 import { useToast } from '@/components/layout/ToastProvider';
@@ -30,6 +31,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 const LibraryPage: React.FC = () => {
+  const navigate = useNavigate();
   const { userProfile } = useAuth();
   const data = useLibraryData();
   const toast = useToast();
@@ -55,36 +57,33 @@ const LibraryPage: React.FC = () => {
     'NFT Music', 'Royalties', 'Recently Played', 'History', 'Analytics', 'Import', 'Testing'
   ];
 
-  // Map quick action clicks to direct active chip filters
+  // Map quick action clicks to dedicated screens or actions
   const handleQuickAction = (actionId: string) => {
     switch (actionId) {
       case 'liked':
-        data.setActiveChip('All');
-        setShowImporter(false);
-        // Soft scroll to liked songs section if All is chosen
-        setTimeout(() => {
-          document.getElementById('liked-songs-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
+        navigate('/favorite-tracks');
         break;
       case 'downloads':
       case 'offline':
-        data.setActiveChip('Downloads');
-        setShowImporter(false);
+        navigate('/library/downloads');
+        break;
+      case 'recently-played':
+      case 'history':
+        navigate('/library/recently-played');
+        break;
+      case 'my-nfts':
+      case 'nfts':
+        navigate('/library/my-nfts');
+        break;
+      case 'import-playlist':
+        navigate('/library/imported-playlists');
         break;
       case 'queue':
-      case 'recently-played':
         data.setActiveChip('Recently Played');
-        setShowImporter(false);
-        break;
-      case 'history':
-        data.setActiveChip('History');
         setShowImporter(false);
         break;
       case 'create-playlist':
         data.createPlaylist(`New Node Compilation #${Date.now().toString().slice(-4)}`);
-        break;
-      case 'import-playlist':
-        setIsSpotifyModalOpen(true);
         break;
       default:
         break;
@@ -98,6 +97,7 @@ const LibraryPage: React.FC = () => {
           <QuickActions 
             likedCount={data.likedCount}
             downloadCount={data.downloadCount}
+            nftCount={data.nftCount}
             onSelectAction={handleQuickAction}
           />
         )}
@@ -392,7 +392,7 @@ const LibraryPage: React.FC = () => {
                 {/* 8. ARTISTS */}
                 {(data.activeChip === 'All' || data.activeChip === 'Artists' || data.activeChip === 'Favorites') && (
                   <div id="artists-section" className="space-y-8">
-                    <Artists artists={data.artists} />
+                    <Artists artists={data.artists} layout={viewLayout} />
                     <div className="pt-4">
                       <ArtistProfile artistId={selectedArtistProfileId} onArtistChange={setSelectedArtistProfileId} />
                     </div>

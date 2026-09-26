@@ -37,6 +37,7 @@ import FeaturedAuctionCard from '@/components/FeaturedAuctionCard';
 import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem } from '@/types';
 import { cn } from '@/lib/utils';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 
 const ActiveAuctionLeaderboard: React.FC<{ auctions: NFTItem[] }> = ({ auctions }) => {
@@ -352,8 +353,9 @@ const AuctionScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
-      {/* Immersive Header */}
-      <header className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden">
+      <PageHeader title="Place Bid" showBack={true} />
+      {/* Immersive Hero Section */}
+      <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src={featuredAuction?.imageUrl || 'https://image.pollinations.ai/prompt/abstract%20cyberpunk%20blue%20neon%20background?width=1920&height=1080&nologo=true'} 
@@ -443,7 +445,7 @@ const AuctionScreen: React.FC = () => {
             )}
           </motion.div>
         </div>
-      </header>
+      </div>
 
       {/* Main Controls */}
       <div className="w-full relative z-20">

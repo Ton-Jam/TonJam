@@ -7,6 +7,7 @@ import { Track } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import { MOCK_TRACKS } from '@/constants';
 import { FloorPriceChart } from '@/components/FloorPriceChart';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { fetchFloorPriceHistory } from '@/services/nftService';
 import { CollectionSummaryCards } from '@/components/marketplace/CollectionSummaryCards';
 
@@ -114,7 +115,8 @@ const AlbumDetails = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
+      <PageHeader title="Album" showBack={true} />
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-2">
         {/* Album Info */}
         <div className="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
           <motion.div 

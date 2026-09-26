@@ -24,16 +24,16 @@ const FeaturedArtists: React.FC = () => {
   return (
     <div className="space-y-4 pt-2 w-full">
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        <h2 className="text-lg font-black tracking-tight text-white">
-          Featured Artists
+        <h2 className="text-lg sm:text-xl font-black tracking-tight text-white">
+          Popular Artists
         </h2>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white"
+          className="text-xs font-semibold text-[#0088CC] hover:text-white"
           onClick={() => navigate('/artists')}
         >
-          View All <ChevronRight className="w-3 h-3 ml-1" />
+          See All <ChevronRight className="w-3.5 h-3.5 ml-1" />
         </Button>
       </div>
 
@@ -55,12 +55,12 @@ const FeaturedArtists: React.FC = () => {
               key={artist.uid}
               whileHover={{ y: -3 }}
               whileTap={{ scale: 0.98 }}
-              className="w-[240px] sm:w-[260px] shrink-0 snap-start bg-white/[0.03] hover:bg-white/[0.06] border border-[#c0c0c0]/25 rounded-2xl p-4 transition-all group relative overflow-hidden cursor-pointer flex flex-col justify-between select-none"
+              className="w-[240px] sm:w-[260px] shrink-0 snap-start bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-4 transition-all group relative overflow-hidden cursor-pointer flex flex-col justify-between select-none border-0"
               onClick={() => navigate(`/artist/${artist.uid}`)}
             >
               <div className="flex items-center justify-between gap-3 mb-3.5 relative z-10">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <Avatar className="w-11 h-11 shadow-lg shrink-0 border border-[#c0c0c0]/25">
+                  <Avatar className="w-11 h-11 shadow-lg shrink-0 border-0">
                     <LazyArtworkImage 
                       src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
                       fallbackSrc={getPlaceholderImage(`artist-${artist.uid}`)}

@@ -34,6 +34,7 @@ import useDebounce from '@/hooks/use-debounce';
 import { SearchResults } from '@/components/search/SearchResults';
 import { SearchResultsSkeleton, FullDiscoverSkeleton } from '@/components/search/Skeletons';
 import QRScanner from '@/components/QRScanner';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 interface SpotifyCategory {
   id: string;
@@ -342,14 +343,15 @@ export const Discover: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pb-32 relative select-none w-full max-w-full overflow-x-hidden">
+      <PageHeader title="Search" showBack={true} />
       
-      {/* Sticky Spotify-Style Search Header */}
-      <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md pt-3 sm:pt-4 pb-3 px-4 sm:px-6 lg:px-8 space-y-2.5">
+      {/* Search Content Input Area */}
+      <div className="pt-2 pb-3 px-4 sm:px-6 lg:px-8 space-y-2.5">
         
-        {/* Main Search Input Bar with grey background, round border radius and borderless input */}
+        {/* Main Search Input Bar - Clean Black Canvas Style */}
         <div className="w-full relative">
-          <div className="relative w-full flex items-center bg-[#222226] hover:bg-[#2a2a30] focus-within:bg-[#2a2a30] rounded-full px-4 py-2.5 sm:py-3 min-h-[48px] border border-white/20 focus-within:border-[#0088CC] transition-all shadow-none">
-            <Search className={`w-5 h-5 shrink-0 mr-3 transition-colors ${query ? 'text-[#00B4D8]' : 'text-zinc-400'}`} />
+          <div className="relative w-full flex items-center bg-white/[0.04] hover:bg-white/[0.06] focus-within:bg-white/[0.06] rounded-full px-4 py-2.5 sm:py-3 min-h-[48px] border-0 !border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus-within:ring-0 transition-colors shadow-none !shadow-none">
+            <Search className={`w-5 h-5 shrink-0 mr-3 transition-colors ${query ? 'text-white' : 'text-[#b3b3b3]'}`} />
             
             <div className="flex-1 flex items-center min-w-0 h-full border-0 !border-none outline-none !outline-none ring-0 !ring-0">
               <input
@@ -358,8 +360,8 @@ export const Discover: React.FC = () => {
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 250)}
-                placeholder="What do you want to listen to?"
-                className="search-bar-input w-full bg-transparent border-0 !border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus:ring-0 focus:outline-none focus:border-none text-sm font-medium placeholder:text-zinc-400 placeholder:opacity-100 text-white leading-relaxed p-0 shadow-none !shadow-none"
+                placeholder="What do you want to play?"
+                className="search-bar-input w-full bg-transparent border-0 !border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus:ring-0 focus:outline-none focus:border-none text-sm sm:text-[15px] font-normal placeholder:text-[#b3b3b3] placeholder:opacity-100 text-white leading-relaxed p-0 shadow-none !shadow-none"
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="off"
@@ -371,8 +373,9 @@ export const Discover: React.FC = () => {
             <div className="flex items-center gap-1 shrink-0 ml-2">
               {query && (
                 <button
+                  type="button"
                   onClick={() => setQuery('')}
-                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-zinc-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
                   aria-label="Clear search query"
                 >
                   <X className="w-4 h-4" />
@@ -380,8 +383,9 @@ export const Discover: React.FC = () => {
               )}
 
               <button
+                type="button"
                 onClick={toggleVoiceSearch}
-                className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full transition-all active:scale-95 ${isVoiceListening ? 'text-[#00B4D8] animate-pulse bg-white/10' : 'text-zinc-400 hover:text-white hover:bg-white/10'}`}
+                className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full transition-all active:scale-95 cursor-pointer ${isVoiceListening ? 'text-[#00B4D8] animate-pulse bg-white/10' : 'text-[#b3b3b3] hover:text-white hover:bg-white/10'}`}
                 title="Voice search"
                 aria-label="Voice search"
               >
@@ -389,8 +393,9 @@ export const Discover: React.FC = () => {
               </button>
 
               <button
+                type="button"
                 onClick={() => setShowScanner(true)}
-                className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-zinc-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
                 title="Scan QR code"
                 aria-label="Scan QR code"
               >
@@ -399,7 +404,7 @@ export const Discover: React.FC = () => {
             </div>
           </div>
 
-          {/* Interactive Search Focus Overlay - Shows only when Search Bar is clicked/focused */}
+          {/* Interactive Search Focus Overlay */}
           <AnimatePresence>
             {isFocused && !query.trim() && (
               <motion.div
@@ -407,20 +412,21 @@ export const Discover: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18 }}
-                className="absolute left-0 right-0 top-full mt-2 z-50 bg-[#0a0a0c] border border-white/15 rounded-2xl p-4 shadow-2xl space-y-4 max-h-[75vh] overflow-y-auto"
-                onMouseDown={(e) => e.preventDefault()} // Prevents blur before click registers
+                className="absolute left-0 right-0 top-full mt-2 z-50 bg-[#181818] rounded-2xl p-4 shadow-2xl space-y-4 max-h-[75vh] overflow-y-auto"
+                onMouseDown={(e) => e.preventDefault()}
               >
                 {/* 1. Recent Search Queries */}
                 {searchHistory.length > 0 && (
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-300">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
                         <History className="w-3.5 h-3.5 text-[#00B4D8]" />
                         <span>Recent Searches</span>
                       </div>
                       <button
+                        type="button"
                         onClick={handleClearAllHistory}
-                        className="text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors"
+                        className="text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                       >
                         Clear all
                       </button>
@@ -434,13 +440,14 @@ export const Discover: React.FC = () => {
                             handleSelectSearchTerm(term);
                             setIsFocused(false);
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 hover:border-white/25 cursor-pointer transition-all text-xs font-medium text-zinc-200 hover:text-white select-none group"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#242424] hover:bg-[#2e2e2e] cursor-pointer transition-all text-xs font-medium text-zinc-200 hover:text-white select-none group"
                         >
                           <Search className="w-3 h-3 text-zinc-400 group-hover:text-white" />
                           <span>{term}</span>
                           <button
+                            type="button"
                             onClick={(e) => handleRemoveSearchTerm(term, e)}
-                            className="p-0.5 text-zinc-500 hover:text-white rounded-full transition-colors ml-0.5"
+                            className="p-0.5 text-zinc-500 hover:text-white rounded-full transition-colors ml-0.5 cursor-pointer"
                             aria-label={`Remove ${term}`}
                           >
                             <X className="w-3 h-3" />
@@ -451,18 +458,20 @@ export const Discover: React.FC = () => {
                   </div>
                 )}
 
-                {/* 2. Recently Searched / Played Tracks (Appears on Search Bar Click) */}
+                {/* 2. Recently Searched / Played Tracks */}
                 {last5RecentlyPlayed.length > 0 && (
-                  <div className="space-y-2.5 pt-2 border-t border-white/10">
+                  <div className="space-y-2.5 pt-2">
+                    <div className="h-px bg-white/[0.08] mb-3" />
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-300">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
                         <Clock className="w-3.5 h-3.5 text-[#00B4D8]" />
-                        <span>Recently Played Tracks</span>
+                        <span>Recently Played</span>
                       </div>
                       {typeof clearRecentlyPlayed === 'function' && (
                         <button
+                          type="button"
                           onClick={clearRecentlyPlayed}
-                          className="text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors"
+                          className="text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                         >
                           Clear
                         </button>
@@ -479,9 +488,9 @@ export const Discover: React.FC = () => {
                               playTrack(track);
                               setIsFocused(false);
                             }}
-                            className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/8 hover:border-white/20 cursor-pointer transition-all group"
+                            className="flex items-center gap-3 p-2 rounded-xl bg-[#242424]/60 hover:bg-[#2a2a2a] cursor-pointer transition-all group"
                           >
-                            <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-zinc-900 shrink-0">
+                            <div className="relative w-10 h-10 rounded-[4px] overflow-hidden bg-zinc-900 shrink-0">
                               <img
                                 src={track.coverUrl || getPlaceholderImage(track.title)}
                                 alt={track.title}
@@ -499,7 +508,7 @@ export const Discover: React.FC = () => {
                             </div>
 
                             <div className="truncate flex-1">
-                              <h4 className="text-xs font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors">
+                              <h4 className="text-xs font-medium text-white truncate group-hover:text-[#00B4D8] transition-colors">
                                 {track.title}
                               </h4>
                               <p className="text-[10px] text-zinc-400 truncate">{track.artist}</p>
@@ -512,17 +521,19 @@ export const Discover: React.FC = () => {
                 )}
 
                 {/* 3. Quick Vibe Searches */}
-                <div className="space-y-2 pt-2 border-t border-white/10">
-                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Popular Tags</span>
+                <div className="space-y-2 pt-2">
+                  <div className="h-px bg-white/[0.08] mb-3" />
+                  <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Popular Tags</span>
                   <div className="flex flex-wrap gap-1.5">
                     {QUICK_VIBES.map((vibe) => (
                       <button
+                        type="button"
                         key={`focus-vibe-${vibe.query}`}
                         onClick={() => {
                           handleSelectSearchTerm(vibe.query);
                           setIsFocused(false);
                         }}
-                        className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/[0.04] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                        className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#242424] hover:bg-[#2e2e2e] text-zinc-300 hover:text-white transition-colors cursor-pointer"
                       >
                         {vibe.label}
                       </button>
@@ -541,13 +552,14 @@ export const Discover: React.FC = () => {
               const isActive = activeFilter === pill.id;
               return (
                 <button
+                  type="button"
                   key={pill.id}
                   onClick={() => setActiveFilter(pill.id)}
                   aria-pressed={isActive}
-                  className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none border cursor-pointer ${
+                  className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none cursor-pointer ${
                     isActive
-                      ? 'bg-[#0088CC] text-white shadow-md shadow-[#0088CC]/30 font-bold border-[#c0c0c0]/40'
-                      : 'bg-white/[0.06] text-zinc-300 hover:bg-white/[0.1] hover:text-white border-[#c0c0c0]/25'
+                      ? 'bg-white text-black font-bold shadow-sm'
+                      : 'bg-[#242424] text-zinc-300 hover:bg-[#2e2e2e] hover:text-white'
                   }`}
                 >
                   {pill.label}
@@ -559,9 +571,10 @@ export const Discover: React.FC = () => {
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-0.5 pb-1 w-full">
             {QUICK_VIBES.map((vibe) => (
               <button
+                type="button"
                 key={vibe.query}
                 onClick={() => handleSelectSearchTerm(vibe.query)}
-                className="px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-[#c0c0c0]/25"
+                className="px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none bg-[#242424] hover:bg-[#2e2e2e] text-zinc-300 hover:text-white cursor-pointer"
               >
                 {vibe.label}
               </button>

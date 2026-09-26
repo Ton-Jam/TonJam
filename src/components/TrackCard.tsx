@@ -159,8 +159,12 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const handleArtistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (track.artistId) {
-      navigate(`/artist/${track.artistId}`);
+    const targetArtistId = track.artistId || 
+      artists.find(a => a.name.toLowerCase() === track.artist?.toLowerCase())?.uid ||
+      MOCK_ARTISTS.find(a => a.name.toLowerCase() === track.artist?.toLowerCase())?.uid ||
+      track.artist?.toLowerCase().replace(/\s+/g, '-');
+    if (targetArtistId) {
+      navigate(`/artist/${targetArtistId}`);
     }
   };
 
@@ -236,7 +240,13 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const handleViewArtist = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (track.artistId) navigate(`/artist/${track.artistId}`);
+    const targetArtistId = track.artistId || 
+      artists.find(a => a.name.toLowerCase() === track.artist?.toLowerCase())?.uid ||
+      MOCK_ARTISTS.find(a => a.name.toLowerCase() === track.artist?.toLowerCase())?.uid ||
+      track.artist?.toLowerCase().replace(/\s+/g, '-');
+    if (targetArtistId) {
+      navigate(`/artist/${targetArtistId}`);
+    }
   };
 
   const TrackMenuContent = () => (

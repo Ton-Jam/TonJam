@@ -84,13 +84,20 @@ export interface Reply {
 export interface Space {
   id: string;
   title: string;
+  name?: string;
   host: User;
+  ownerId?: string;
   listenerCount: number;
+  memberCount?: number;
   speakerAvatars: string[];
   isLive: boolean;
   scheduledTime?: string;
   description: string;
   speakers: string[];
+  visibility?: 'public' | 'private';
+  coverUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface NFTDiscussion {

@@ -33,6 +33,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DailyMissions } from "@/components/DailyMissions";
 import { fadeIn, slideUp, staggerChildren } from "@/motion";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useAudio } from "@/contexts/AudioContext";
 import { useTJ } from "@/contexts/TJContext";
 import { TJ_COIN_ICON } from "@/constants";
@@ -537,22 +538,20 @@ const Tasks: React.FC = () => {
       variants={fadeIn}
       className="min-h-screen bg-background text-text-primary pb-32 overflow-x-hidden selection:bg-primary/30"
     >
+      <PageHeader title="Earn $TJ" showBack={true} />
       
       {/* BACKGROUND DECORATIVE GLOWS */}
       <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-primary/10 to-transparent blur-[160px] pointer-events-none -z-10" />
       <div className="absolute top-[600px] right-[-150px] w-[350px] h-[350px] bg-verified/5 blur-[120px] pointer-events-none -z-10" />
 
-      <div className="w-full max-w-full px-4 sm:px-6 md:px-8 pt-6 space-y-6">
+      <div className="w-full max-w-full px-4 sm:px-6 md:px-8 pt-2 space-y-6">
 
         {/* SECTION 1: EARN TJ HEADER */}
         <motion.div 
           variants={slideUp}
-          className="text-center space-y-3 pt-4"
+          className="text-center space-y-3 pt-2"
         >
           <div className="space-y-1">
-            <h1 className="text-page-title text-text-primary">
-              Earn TJ
-            </h1>
             <p className="text-caption">
               Complete missions and earn rewards.
             </p>

@@ -90,7 +90,7 @@ const Marketplace: React.FC = () => {
   if (isLoading) {
     return (
       <div className="w-full min-h-screen bg-[#050505] text-[#F5F7FA] px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl mx-auto space-y-6 select-none font-sans pb-28">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
           <div className="space-y-1 text-left">
             <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-[#F5F7FA] flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[#0088CC]" />
@@ -128,7 +128,7 @@ const Marketplace: React.FC = () => {
     <div className="w-full min-h-screen bg-[#050505] text-[#F5F7FA] px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl mx-auto select-none font-sans pb-28 text-left">
       
       {/* Top Header Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-white/10 mb-5">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 mb-5">
         <div className="space-y-0.5">
           <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-[#F5F7FA] flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-[#0088CC]" />

@@ -34,11 +34,13 @@ import { Leaderboard } from './sections/Leaderboard';
 
 // Import our shared components
 import { CreatePostModal } from './components/CreatePostModal';
+import { CreateJamSpaceModal } from './components/CreateJamSpaceModal';
 import { NotificationsPanel } from './components/NotificationsPanel';
 import { PostCard } from './components/PostCard';
 import { JamSpaceHeader } from './components/JamSpaceHeader';
 import { JamSpaceQuickCompose } from './components/JamSpaceQuickCompose';
 import { PageLayout } from '@/components/layout/PageLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { 
   HeroSkeleton, 
   LiveSpacesSkeleton, 
@@ -57,6 +59,7 @@ const JamSpaceMain: React.FC = () => {
 
   // Modal & Drawer triggers
   const [isComposeOpen, setIsComposeOpen] = useState(false);
+  const [isCreateSpaceOpen, setIsCreateSpaceOpen] = useState(false);
   const [isNewsOpen, setIsNewsOpen] = useState(false);
 
   const categories = [
@@ -67,6 +70,24 @@ const JamSpaceMain: React.FC = () => {
   const handleCreatePostSubmit = (content: string, attachments?: any[], pollOptions?: string[]) => {
     jamData.handleCreatePost(content, attachments, pollOptions);
     addNotification('Post shared with the community!', 'success');
+  };
+
+  const handleCreateSpaceSubmit = async (data: {
+    name: string;
+    description: string;
+    visibility: 'public' | 'private';
+    coverUrl?: string;
+  }) => {
+    const newSpace = await jamData.handleCreateSpace(
+      data.name,
+      data.description,
+      data.visibility,
+      data.coverUrl
+    );
+    addNotification(`JamSpace "${data.name}" is now live!`, 'success');
+    if (newSpace?.id) {
+      navigate(`/space/${newSpace.id}`);
+    }
   };
 
   const toggleConnection = () => {
@@ -80,33 +101,22 @@ const JamSpaceMain: React.FC = () => {
   };
 
   return (
-    <PageLayout containerClassName="space-y-8 relative" topSpacing="default">
-        {/* Top Header Controls (Integrated Ribbon functions) */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-              {isOnline ? 'Network Synchronized' : 'Offline Mode'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => jamData.setIsDarkMode(!jamData.isDarkMode)}
-              className="p-2 bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors"
-              title="Toggle Theme"
-            >
-              {jamData.isDarkMode ? <Sparkles className="w-4 h-4" /> : <RefreshCw className="w-4 h-4" />}
-            </button>
-            <button 
-              onClick={toggleConnection}
-              className="p-2 bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors"
-              title={isOnline ? "Go Offline" : "Go Online"}
-            >
-              {isOnline ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
+    <div className="min-h-screen bg-black text-white pb-32">
+      <PageHeader 
+        title="JamSpace" 
+        showBack={false}
+        rightContent={
+          <button 
+            onClick={() => setIsComposeOpen(true)}
+            className="p-2 rounded-full text-[#00B4D8] bg-[#0088CC]/10 hover:bg-[#0088CC]/20 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none"
+            aria-label="Create Post"
+            title="Create Post"
+          >
+            <Plus className="w-5 h-5" strokeWidth={2.5} />
+          </button>
+        }
+      />
+      <PageLayout containerClassName="space-y-8 relative pt-2" topSpacing="none">
 
         {/* Skeletons vs Normal view loading toggle */}
         {jamData.isLoading ? (
@@ -137,13 +147,7 @@ const JamSpaceMain: React.FC = () => {
             {/* 2. QUICK ACTIONS */}
             <QuickActions 
               onStartPost={() => setIsComposeOpen(true)}
-              onCreateSpace={() => {
-                jamData.handleCreateSpace(
-                  'Community Soundstage #' + Math.floor(Math.random() * 900 + 100),
-                  'An impromptu listening session Hosted by Direct Creator'
-                );
-                addNotification('Live voice room established!', 'success');
-              }}
+              onCreateSpace={() => setIsCreateSpaceOpen(true)}
               onJoinSpace={() => {
                 const live = jamData.spaces.find(s => s.isLive);
                 if (live) jamData.handleJoinSpace(live.id);
@@ -220,6 +224,7 @@ const JamSpaceMain: React.FC = () => {
                 <LiveSpaces 
                   spaces={jamData.spaces}
                   activeSpace={jamData.activeSpace}
+                  onCreateSpace={() => setIsCreateSpaceOpen(true)}
                   onJoinSpace={(spaceId) => {
                     jamData.handleJoinSpace(spaceId);
                     navigate(`/space/${spaceId}`);
@@ -371,6 +376,17 @@ const JamSpaceMain: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* CREATE JAMSPACE MODAL OVERLAY */}
+      <AnimatePresence>
+        {isCreateSpaceOpen && (
+          <CreateJamSpaceModal 
+            isOpen={isCreateSpaceOpen}
+            onClose={() => setIsCreateSpaceOpen(false)}
+            onSubmit={handleCreateSpaceSubmit}
+          />
+        )}
+      </AnimatePresence>
+
       {/* NOTIFICATIONS DRAWERS */}
       <AnimatePresence>
         {jamData.showNotifications && (
@@ -384,6 +400,7 @@ const JamSpaceMain: React.FC = () => {
         )}
       </AnimatePresence>
     </PageLayout>
+    </div>
   );
 };
 

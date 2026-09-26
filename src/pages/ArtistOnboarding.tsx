@@ -5,6 +5,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { uploadFile, uploadAudio, uploadCover } from '@/services/storageService';
 import { Track, NFTItem } from '@/types';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { MOCK_USER, APP_LOGO } from '@/constants';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -214,12 +215,12 @@ const ArtistOnboarding: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-4 pb-4 px-4 md:px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-background text-foreground pb-12">
+      <PageHeader title="Artist Verification" showBack={true} />
+      <div className="max-w-2xl mx-auto px-4 md:px-4 pt-2">
         <header className="mb-4 text-center">
-          <h1 className="text-[26px] md:text-[32px] font-bold uppercase tracking-tighter mb-4">Artist Protocol Initialization</h1>
           <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">Step {step} of 3</p>
-          <div className="flex items-center justify-center gap-4 mt-4">
+          <div className="flex items-center justify-center gap-4 mt-2">
             <div className={`h-1 w-16 rounded-full transition-colors ${step >= 1 ? 'bg-blue-500' : 'bg-muted'}`}></div>
             <div className={`h-1 w-16 rounded-full transition-colors ${step >= 2 ? 'bg-blue-500' : 'bg-muted'}`}></div>
             <div className={`h-1 w-16 rounded-full transition-colors ${step >= 3 ? 'bg-blue-500' : 'bg-muted'}`}></div>

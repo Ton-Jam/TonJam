@@ -172,7 +172,7 @@ export const TrendingMusicSection: React.FC = () => {
   const { scrollRef: scrollRef2, handlers: handlers2 } = useHorizontalDragScroll<HTMLDivElement>();
 
   return (
-    <div className="space-y-5 text-left my-2">
+    <section className="space-y-5 text-left my-2">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <div>
@@ -185,9 +185,9 @@ export const TrendingMusicSection: React.FC = () => {
               {liveVolumeCounter.toLocaleString()} TON Vol
             </span>
           </div>
-          <h2 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
+          <h2 className="text-section-title font-bold text-white flex items-center gap-2">
             <Flame className="w-5 h-5 text-amber-400 fill-amber-400/20" />
-            Trending Music
+            Trending on TonJam
           </h2>
         </div>
 
@@ -440,7 +440,7 @@ export const TrendingMusicSection: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 };
 

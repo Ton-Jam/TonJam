@@ -46,6 +46,7 @@ import { useTokenGating } from '@/hooks/useTokenGating';
 import CommentsSection from '@/components/CommentsSection';
 import ReactionsSection from '@/components/ReactionsSection';
 import AudioVisualizer from '@/components/AudioVisualizer';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 const TrackDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -366,57 +367,40 @@ const TrackDetail: React.FC = () => {
         <div className="absolute inset-0 bg-background/40" />
       </div>
 
-      <div className="relative z-10 w-full max-w-full px-4 md:px-4 pt-4">
-        {/* Header Navigation */}
+      <PageHeader
+        title="Track Details"
+        showBack={true}
+        rightContent={
+          <button 
+            onClick={() => setOptionsTrack(track)}
+            className="p-2 rounded-full text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none" 
+            aria-label="Track Options"
+            title="Track Options"
+          >
+            <MoreHorizontal className="w-5 h-5" />
+          </button>
+        }
+      />
+
+      <div className="relative z-10 w-full max-w-full px-4 md:px-4 pt-2">
+        {/* Artist Link Area */}
         <div className="flex items-center justify-between mb-4">
           <div 
-            className="flex items-center gap-4 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer group"
             onClick={() => navigate(`/artist/${track.artistId}`)}
           >
             <div className="relative">
-              <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 100, 100)} className="w-10 h-10 rounded-full object-cover" alt="" />
+              <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 100, 100)} className="w-9 h-9 rounded-full object-cover" alt="" />
               {track.artistVerified && (
                 <div className="absolute -bottom-0.5 -right-0.5 bg-background rounded-full p-0.5 border border-background">
-                  <Verified className="h-4 w-4 text-blue-500 fill-white" />
+                  <Verified className="h-3.5 w-3.5 text-blue-500 fill-white" />
                 </div>
               )}
             </div>
             <div>
-              <p className="text-blue-500 font-bold text-[11px] uppercase tracking-[0.2em] group-hover:text-blue-400 transition-colors">{track.artist}</p>
-              <p className="text-[9px] text-foreground/30 uppercase font-medium tracking-widest">Verified Node</p>
+              <p className="text-blue-500 font-bold text-xs uppercase tracking-wider group-hover:text-blue-400 transition-colors">{track.artist}</p>
+              <p className="text-[9px] text-foreground/40 uppercase font-medium tracking-widest">Verified Artist</p>
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => {
-                const shareData = {
-                  title: track.title,
-                  text: `Check out ${track.title} by ${track.artist} on TonJam!`,
-                  url: window.location.href
-                };
-                if (navigator.share) {
-                  navigator.share(shareData).catch((err) => {
-                    if (err.name !== 'AbortError') {
-                      console.error('Error sharing:', err);
-                    }
-                  });
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  addNotification('Track link copied to neural buffer', 'success');
-                }
-              }}
-              className="p-4 rounded-full bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
-              aria-label="Share track"
-            >
-              <Share2 className="h-4 w-4" />
-            </button>
-            <button 
-              onClick={() => setOptionsTrack(track)}
-              className="p-4 rounded-full bg-muted/50 text-muted-foreground hover:text-foreground transition-all" 
-              aria-label="More options"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </button>
           </div>
         </div>
 

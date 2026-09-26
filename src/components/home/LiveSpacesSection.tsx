@@ -26,8 +26,8 @@ export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spac
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Radio className="w-4 h-4 text-[#FF3A5C] animate-pulse" />
-          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white">
-            Live Audio Spaces
+          <h2 className="text-lg sm:text-xl font-black tracking-tight text-white">
+            JamSpace Community
           </h2>
         </div>
         <div className="flex items-center gap-2">

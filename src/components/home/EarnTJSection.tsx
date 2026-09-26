@@ -4,7 +4,6 @@ import { motion } from "motion/react";
 import { Flame, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAudio } from "@/contexts/AudioContext";
-import { TJ_COIN_ICON } from "@/constants";
 
 export const EarnTJSection: React.FC = () => {
   const navigate = useNavigate();
@@ -47,11 +46,10 @@ export const EarnTJSection: React.FC = () => {
 
         {/* Live Coins Balance */}
         <div className="flex items-center gap-1.5 bg-white/5 px-2.5 sm:px-3 py-1.5 rounded-full shrink-0">
-          <img src={TJ_COIN_ICON} alt="TJ" className="w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain" />
           <span className="text-xs font-mono font-semibold text-white">
             {parseFloat(String(userProfile?.jamBalance || '0')).toLocaleString()}
           </span>
-          <span className="text-[8px] sm:text-[9px] font-semibold text-zinc-400 ml-0.5">JAM</span>
+          <span className="text-[8px] sm:text-[9px] font-semibold text-zinc-400 ml-0.5">TJ</span>
         </div>
       </div>
 

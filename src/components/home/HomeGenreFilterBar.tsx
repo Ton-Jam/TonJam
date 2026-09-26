@@ -1,14 +1,30 @@
 import React from "react";
 import { motion } from "motion/react";
-import { useLibrary } from "@/contexts/LibraryContext";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
-export const HomeGenreFilterBar: React.FC = () => {
-  const { selectedGenre, setSelectedGenre, availableGenres } = useLibrary();
+export const CATEGORIES = ["All", "Music", "Playlists", "NFTs", "Artists"] as const;
+export type HomeCategory = (typeof CATEGORIES)[number];
+
+interface HomeGenreFilterBarProps {
+  activeCategory?: string;
+  onSelectCategory?: (category: string) => void;
+}
+
+export const HomeGenreFilterBar: React.FC<HomeGenreFilterBarProps> = ({
+  activeCategory = "All",
+  onSelectCategory,
+}) => {
+  const [internalCategory, setInternalCategory] = React.useState("All");
+  const currentCategory = onSelectCategory ? activeCategory : internalCategory;
+
   const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
-  const handleSelectGenre = (genre: string) => {
-    setSelectedGenre(genre);
+  const handleSelect = (category: string) => {
+    if (onSelectCategory) {
+      onSelectCategory(category);
+    } else {
+      setInternalCategory(category);
+    }
   };
 
   return (
@@ -19,20 +35,20 @@ export const HomeGenreFilterBar: React.FC = () => {
         className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ scrollBehavior: "smooth", overscrollBehaviorX: "contain" }}
       >
-        {availableGenres.map((genre) => {
-          const isSelected = (selectedGenre || "All") === genre;
+        {CATEGORIES.map((category) => {
+          const isSelected = currentCategory === category;
           return (
             <motion.button
-              key={genre}
+              key={category}
               whileTap={{ scale: 0.95 }}
-              onClick={() => handleSelectGenre(genre)}
-              className={`shrink-0 snap-start px-4 py-2 rounded-full text-xs uppercase tracking-wider font-bold transition-all duration-200 cursor-pointer outline-none border ${
+              onClick={() => handleSelect(category)}
+              className={`shrink-0 snap-start px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer outline-none border-0 ${
                 isSelected
-                  ? "bg-primary text-white font-black shadow-sm border-[#c0c0c0]/40"
-                  : "bg-white/[0.05] text-zinc-400 hover:text-white hover:bg-white/[0.09] border-[#c0c0c0]/25 hover:border-[#ffffff]"
+                  ? "bg-[#0088CC] text-white shadow-md shadow-[#0088CC]/20"
+                  : "bg-white/[0.06] text-zinc-400 hover:text-white hover:bg-white/[0.1]"
               }`}
             >
-              {genre === "All" ? "All Genres" : genre}
+              {category}
             </motion.button>
           );
         })}
@@ -42,3 +58,4 @@ export const HomeGenreFilterBar: React.FC = () => {
 };
 
 export default HomeGenreFilterBar;
+

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { BackButton } from "@/components/BackButton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { NFTChart } from "@/components/NFTChart";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +29,7 @@ import {
   Image as ImageIcon,
   FileText,
   Lock,
+  Heart,
   Share2,
   Send,
   Twitter,
@@ -56,6 +58,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useModal } from "@/components/layout/ModalProvider";
@@ -85,6 +88,10 @@ import BuyNFTModal from "@/components/BuyNFTModal";
 import SellNFTModal from "@/components/SellNFTModal";
 import NFTAudioPreviewPlayer from "@/components/NFTAudioPreviewPlayer";
 import BidModal from "@/components/BidModal";
+import { BidNFTModal } from "@/components/nft/BidNFTModal";
+import { NFTPriceCard } from "@/components/nft/NFTPriceCard";
+import { NFTActivity } from "@/components/nft/NFTActivity";
+import { NFTDetailHero } from "@/components/nft/NFTDetailHero";
 import PlaceOfferModal from "@/components/PlaceOfferModal";
 import BidAcceptanceModal from "@/components/BidAcceptanceModal";
 import ManageNFTModal from "@/components/ManageNFTModal";
@@ -133,6 +140,7 @@ const NFTDetail: React.FC = () => {
 
   const [floorPriceTrend, setFloorPriceTrend] = useState<{ date: string; price: number }[]>([]);
   const [isLoadingTrend, setIsLoadingTrend] = useState(true);
+  const [isFavorited, setIsFavorited] = useState<boolean>(false);
 
   useEffect(() => {
     const loadTrend = async () => {
@@ -888,754 +896,60 @@ const NFTDetail: React.FC = () => {
           </p>
         </div>
       )}
-      <div className="relative z-10 w-full max-w-full px-4 md:px-4 pt-4">
-        <div className="flex justify-end items-center mb-4">
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-4 px-4 py-4 bg-white/5 rounded-full border border-white/10">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-              <span className="text-[9px] font-bold text-foreground/80 uppercase tracking-widest">
-                On-Chain Verified
-              </span>
-            </div>
-            <button
-              onClick={handleShare}
-              className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-full border border-white/10 text-muted-foreground hover:text-blue-400 hover:border-blue-400/50 transition-all"
-              title="Share Protocol"
-            >
-              <Share2 className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setShowPriceAlertModal(true)}
-              className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-full border border-white/10 text-muted-foreground hover:text-amber-400 hover:border-amber-400/50 transition-all"
-              title="Price Alert"
-            >
-              <Bell className="h-4 w-4" />
-            </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-full border border-white/10 text-muted-foreground hover:text-foreground hover:border-white/30 transition-all"
-                  title="More Options"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-neutral-900 border-white/10 text-white min-w-[160px]">
-                <DropdownMenuItem 
-                  onClick={() => setShowReportModal(true)}
-                  className="flex items-center gap-2 p-3 text-[10px] font-black uppercase tracking-widest focus:bg-rose-500/10 focus:text-rose-500 cursor-pointer"
-                >
-                  <Flag className="h-3.5 w-3.5" /> Report Artifact
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+      <PageHeader
+        title="NFT Details"
+        showBack={true}
+        rightContent={
+          <button
+            onClick={handleShare}
+            className="p-2 rounded-full text-[#00B4D8] hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none"
+            title="Share NFT"
+            aria-label="Share NFT"
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
+        }
+      />
+      <div className="relative z-10 w-full max-w-full px-4 md:px-4 pt-2">
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-4 items-start">
-          {/* Left Column: Artwork & Technical Specs */}
-          <div className="lg:col-span-5 space-y-4">
-            <Interactive3DViewer
-              imageUrl={localNft.imageUrl || getPlaceholderImage(`nft-${localNft.id}`)}
-              title={localNft.title}
-              isActive={isActive}
-              isPlaying={isPlaying}
-              handlePlayClick={handlePlayClick}
-              edition={localNft.edition}
-              minted={localNft.minted}
-              supply={localNft.supply}
-              isAuction={isAuction}
-              auctionTimerComponent={
-                <AuctionCountdownTimer 
-                  nft={localNft} 
-                  variant="default" 
-                  className="bg-background border border-transparent shadow-2xl" 
-                />
-              }
-            />
+        {/* Dedicated NFT Hero Component */}
+        <NFTDetailHero
+          nft={localNft}
+          associatedTrack={associatedTrack}
+          isAuction={isAuction}
+          highestOfferPrice={highestOfferPrice}
+          onShare={handleShare}
+          isOwner={isOwner}
+        />
 
-            {/* Hardware-style Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {[
-                {
-                  label: "BPM",
-                  val: associatedTrack?.bpm || "128",
-                  icon: Activity,
-                  color: "text-blue-500",
-                },
-                {
-                  label: "KEY",
-                  val: associatedTrack?.key || "C#m",
-                  icon: MusicIcon,
-                  color: "text-purple-500",
-                },
-                {
-                  label: "BIT",
-                  val: associatedTrack?.bitrate || "FLAC",
-                  icon: Zap,
-                  color: "text-emerald-500",
-                },
-                {
-                  label: "RANK",
-                  val: "#12",
-                  icon: Award,
-                  color: "text-amber-500",
-                },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="bg-white/5 p-3 rounded-[4px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
-                      {stat.label}
-                    </p>
-                    <stat.icon className={`h-3 w-3 ${stat.color} opacity-40`} />
-                  </div>
-                  <p className="text-sm font-bold text-foreground tracking-tighter font-mono">
-                    {stat.val}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Real-time Recent Bids Sidebar Component */}
-            <RecentBidsSidebar 
-              nft={localNft} 
-              onPlaceBid={() => handleAction()} 
-              isAuction={isAuction} 
-            />
-
-            {/* Blockchain-specific Metadata & Owner Provenance History */}
-            <NFTBlockchainMetadata nft={localNft} />
-
-            {/* Historical Floor Price Trend (30 Days) */}
-            <FloorPriceChart data={floorPriceTrend} title="Floor Price Trend (30 Days)" />
-
-            {/* Advanced Market Activity Chart */}
-            <MarketActivityChart 
-              history={localNft.history} 
-              offers={localNft.offers} 
-              currentPrice={localNft.price} 
-            />
-          </div>
-
-          {/* Right Column: Identity & Action */}
-          <div className="lg:col-span-7 flex flex-col">
-            <header className="mb-4">
-              <div className="flex flex-wrap items-center gap-4 mb-4">
-                <div
-                  className="flex items-center gap-4 cursor-pointer group/creator"
-                  onClick={() => {
-                    const artist = MOCK_ARTISTS.find(
-                      (a) => a.name === localNft.creator,
-                    );
-                    if (artist) openModal('artistProfile', artist.name, { artistId: artist.uid });
-                  }}
-                >
-                  <div className="relative w-10 h-10">
-                    <img
-                      src={
-                        MOCK_ARTISTS.find((a) => a.name === localNft.creator)
-                          ?.avatarUrl ||
-                        getPlaceholderImage(`artist-${localNft.creator}`)
-                      }
-                      className="w-full h-full rounded-full object-cover"
-                      alt=""
-                    />
-                    {MOCK_ARTISTS.find((a) => a.name === localNft.creator)
-                      ?.verified && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-background flex items-center justify-center">
-                        <Check className="h-2 w-2 text-white" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                      Creator
-                    </span>
-                    <span className="text-xs font-bold text-foreground uppercase tracking-tight group-hover:text-blue-500 transition-colors flex items-center gap-1">
-                      {localNft.creator}
-                      {MOCK_ARTISTS.find((a) => a.name === localNft.creator)?.verified && (
-                        <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
-                          <Check className="h-2 w-2 text-white" />
-                        </div>
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="w-px h-8 bg-muted"></div>
-
-                <div
-                  className="flex items-center gap-4 cursor-pointer group/owner"
-                  onClick={() => {
-                    if (localNft.owner === userProfile.walletAddress) {
-                      navigate("/profile");
-                    } else {
-                      const artist = MOCK_ARTISTS.find(
-                        (a) =>
-                          a.walletAddress === localNft.owner ||
-                          a.name === localNft.owner,
-                      );
-                      if (artist) navigate(`/artist/${artist.uid}`);
-                    }
-                  }}
-                >
-                  <div className="relative w-10 h-10">
-                    <div className="w-full h-full rounded-full bg-muted/50 flex items-center justify-center transition-all group-hover/owner:bg-muted">
-                      {MOCK_ARTISTS.find(
-                        (a) =>
-                          a.walletAddress === localNft.owner ||
-                          a.name === localNft.owner,
-                      ) ? (
-                        <img
-                          src={
-                            MOCK_ARTISTS.find(
-                              (a) =>
-                                a.walletAddress === localNft.owner ||
-                                a.name === localNft.owner,
-                            )?.avatarUrl
-                          }
-                          className="w-full h-full rounded-full object-cover"
-                          alt=""
-                        />
-                      ) : (
-                        <User className="h-5 w-5 text-muted-foreground group-hover/owner:text-foreground" />
-                      )}
-                    </div>
-                    {(MOCK_ARTISTS.find(
-                      (a) =>
-                        a.walletAddress === localNft.owner ||
-                        a.name === localNft.owner,
-                    )?.verified ||
-                      (localNft.owner === userProfile.walletAddress &&
-                        userProfile.isVerified)) && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-background flex items-center justify-center">
-                        <Check className="h-2 w-2 text-white" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                      Current Owner
-                    </span>
-                    <span className="text-xs font-bold text-muted-foreground/80 uppercase tracking-tight group-hover:text-foreground transition-colors flex items-center gap-1">
-                      {isOwner
-                        ? "You (Vault)"
-                        : localNft.owner
-                          ? (
-                            <div 
-                               className="flex items-center gap-1 px-2 py-0.5 rounded cursor-pointer hover:bg-white/10 transition-colors border border-white/5"
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 if (localNft.owner === userProfile.walletAddress) {
-                                   navigate("/profile");
-                                 } else {
-                                   const artist = MOCK_ARTISTS.find(
-                                     (a) =>
-                                       a.walletAddress === localNft.owner ||
-                                       a.name === localNft.owner,
-                                   );
-                                   if (artist) navigate(`/artist/${artist.uid}`);
-                                 }
-                               }}
-                            >
-                                <span className="font-mono text-blue-400/80">{`${localNft.owner.slice(0, 6)}...${localNft.owner.slice(-4)}`}</span>
-                            </div>
-                          )
-                          : "Unknown"}
-                      {((MOCK_ARTISTS.find(
-                        (a) =>
-                          a.walletAddress === localNft.owner ||
-                          a.name === localNft.owner,
-                      )?.verified ||
-                        (localNft.owner === userProfile.walletAddress &&
-                          userProfile.isVerified)) && (
-                        <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
-                          <Check className="h-2 w-2 text-white" />
-                        </div>
-                      ))}
-                    </span>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-6 text-[8px] uppercase tracking-widest"
-                      >
-                        Holders
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      {["Wallet 1", "Wallet 2", "Wallet 3"].map((h) => (
-                        <DropdownMenuItem
-                          key={h}
-                          className="text-[8px] uppercase"
-                        >
-                          {h}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-
-              <h1 className="text-[18px] sm:text-[24px] md:text-[36px] font-bold tracking-tighter uppercase text-foreground leading-[1] mb-2">
-                {localNft.title}
-              </h1>
-
-              <ReactionsSection targetId={localNft.id} targetType="nft" />
-
-              <div className="flex items-center justify-between py-2 sm:py-4 mt-1 sm:mt-2">
-                <div className="flex items-center gap-4">
-                  <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">
-                    Protocol ID
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] font-mono text-blue-500/60 uppercase tracking-widest">
-                    {localNft.id.toUpperCase()}
-                  </span>
-                  {localNft.views !== undefined && (
-                    <div className="flex items-center gap-1.5 ml-4 px-2 py-0.5 bg-white/5 rounded-full border border-white/5">
-                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                      <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                        {localNft.views.toLocaleString()} Protocol Accesses
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-4">
-                  {localNft.contractAddress && (
-                    <a
-                      href={`https://tonviewer.com/${localNft.contractAddress}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-blue-400 transition-colors"
-                    >
-                      Explorer <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
-                  <button
-                    onClick={handleShare}
-                    className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-blue-400 transition-colors cursor-pointer"
-                  >
-                    Share <Share2 className="h-3.5 w-3.5 text-blue-400" />
-                  </button>
-                </div>
-              </div>
-            </header>
-
-            {/* Summary Stat Cards block with total volume, owners, and items */}
-            <div className="mb-6">
-              <CollectionSummaryCards 
-                nft={localNft} 
-                allNFTs={allNFTs} 
-                collections={collections} 
-                transactions={transactions} 
+        {/* Pricing Section */}
+        <div className="mt-6 mb-6">
+          <NFTPriceCard
+                nft={localNft}
+                isAuction={isAuction}
+                isAuctionEnded={isAuctionEnded}
+                highestOfferPrice={highestOfferPrice}
+                isOwner={isOwner}
+                isPlacingBid={isPlacingBid}
+                userOffer={userOffer}
+                onAction={handleAction}
+                onOffer={() => setShowOfferModal(true)}
+                onCancelListing={handleCancelListing}
+                onCancelBid={handleCancelBid}
+                onStake={() => setShowStakeModal(true)}
+                onTip={() => setIsTipping(true)}
+                onPriceAlert={() => setShowPriceAlertModal(true)}
+                onShare={handleShare}
+                onManage={() => setShowManageModal(true)}
+                onSell={() => setShowListModal(true)}
+                onSend={() => setShowSendModal(true)}
+                priceAlertEnabled={priceAlertEnabled}
+                priceAlertPercent={priceAlertPercent}
+                onTogglePriceAlert={handleTogglePriceAlert}
+                onPercentChange={handlePercentChange}
+                onSimulateDrop={handleSimulateDrop}
+                showGlow={showGlow}
               />
-            </div>
-
-            {/* 30-Second Audio Snippet Preview (Listen Before You Buy) */}
-            <div className="mb-4">
-              <NFTAudioPreviewPlayer 
-                nft={localNft} 
-                variant="full"
-                title={localNft.title}
-                artist={localNft.artist || localNft.creator}
-              />
-            </div>
-
-            {/* Pricing Section - Hardware Style */}
-            <div className={cn(
-              "bg-white/5 rounded-[4px] p-4 sm:p-8 mb-4 border border-white/10 relative overflow-hidden group transition-all duration-300",
-              showGlow && "bid-container-glow"
-            )}>
-              <div className="absolute top-0 right-0 p-8 opacity-[0.05] rotate-12 pointer-events-none group-hover:rotate-[30deg] transition-transform duration-1000">
-                <Zap className="h-64 w-64 text-blue-500" />
-              </div>
-
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 relative z-10">
-                <div className="space-y-2 sm:space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isAuction ? "bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]" : "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"}`}
-                    ></div>
-                    <span className="text-[8px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
-                      {isAuction ? "Current Highest Bid" : "Valuation Protocol"}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline gap-2 sm:gap-3">
-                    <motion.span 
-                      key={isAuction ? (highestOfferPrice > 0 ? highestOfferPrice : (localNft.startingBid || localNft.price)) : localNft.price}
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="text-[32px] sm:text-[48px] md:text-[64px] font-black text-foreground tracking-tighter leading-none inline-block"
-                    >
-                      {isAuction
-                        ? highestOfferPrice > 0
-                          ? highestOfferPrice
-                          : localNft.startingBid || localNft.price
-                        : localNft.price}
-                    </motion.span>
-                    <span className="text-[14px] sm:text-[18px] font-black text-blue-500 uppercase tracking-tighter">
-                      GRAM
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <p className="text-[8px] sm:text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest px-2.5 py-1 sm:px-3 sm:py-1.5 bg-white/5 rounded-full border border-white/5">
-                      ≈ ${(parseFloat(localNft.price) * 5.2).toLocaleString()}{" "}
-                      USD
-                    </p>
-                    <div className="h-px w-6 sm:w-8 bg-white/10"></div>
-                    <p className="text-[8px] sm:text-[9px] font-bold text-emerald-500 uppercase tracking-widest">
-                      +12.4% Vol
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4 self-stretch md:self-end">
-                  <PriceSparkline basePrice={parseFloat(localNft.price) || 0} history={localNft.history} />
-
-                  {isAuction && (
-                    <div className="bg-white/5 p-2 rounded-[4px] border border-white/10 flex items-center justify-between gap-4 shadow-lg text-[10px]">
-                      <div className="flex flex-col items-start">
-                        <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                          Highest Bid
-                        </span>
-                        <span className="text-[10px] font-black tracking-tighter text-foreground">
-                          {highestOfferPrice} GRAM
-                        </span>
-                      </div>
-                      <AuctionCountdownTimer nft={localNft} variant="compact" className="items-end" />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 sm:flex sm:flex-row gap-2 relative z-10">
-                {isOwner ? (
-                  <>
-                    <button
-                      onClick={() =>
-                        localNft.listingType
-                          ? setShowManageModal(true)
-                          : setShowListModal(true)
-                      }
-                      className="py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-[4px] font-black text-[10px] uppercase tracking-[0.2em]"
-                    >
-                      {localNft.listingType ? "Manage" : "Sell"}
-                    </button>
-                    <button
-                      onClick={() => setShowManageModal(true)}
-                      className="py-2 bg-white/5 hover:bg-zinc-800 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all border border-white/10"
-                    >
-                      Settings
-                    </button>
-                    <button
-                      onClick={() => setShowSendModal(true)}
-                      className="py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-1.5 border border-white/10"
-                    >
-                      <Send className="h-3 w-3" /> Send
-                    </button>
-                    <button
-                      onClick={() => setShowStakeModal(true)}
-                      className={`py-2 px-3 rounded-[4px] font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                        localNft.isStaked
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.2)] hover:bg-emerald-500/30"
-                          : "bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white border border-purple-400/30 shadow-lg shadow-purple-500/20"
-                      }`}
-                    >
-                      <Lock className="h-3.5 w-3.5 text-amber-300 animate-pulse" />
-                      {localNft.isStaked ? "Staked" : "Stake"}
-                    </button>
-                    {localNft.listingType && (
-                      <button
-                        onClick={handleCancelListing}
-                        className="py-2 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[4px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all border border-white/10 hover:border-red-500/20"
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <motion.button
-                      onClick={handleAction}
-                      disabled={isPlacingBid || (isAuction && isAuctionEnded)}
-                      whileHover={!(isAuction && isAuctionEnded) && !isPlacingBid ? { scale: 1.03, y: -1, boxShadow: "0 10px 20px rgba(59, 130, 246, 0.4)" } : undefined}
-                      whileTap={!(isAuction && isAuctionEnded) && !isPlacingBid ? { scale: 0.97 } : undefined}
-                      className={cn(
-                        "flex-[2] py-2.5 cursor-pointer transition-all bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-lg border border-[#C0C0C0]/50 hover:brightness-110 shadow-lg hover:shadow-blue-500/20 font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-2",
-                        (isAuction && isAuctionEnded) && "opacity-50 grayscale cursor-not-allowed"
-                      )}
-                    >
-                      {isPlacingBid ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (isAuction && isAuctionEnded) ? (
-                        "Auction Expired"
-                      ) : isAuction ? (
-                        <>
-                          <Gavel className="h-3.5 w-3.5" /> Place Bid
-                        </>
-                      ) : (
-                        "Acquire Asset"
-                      )}
-                    </motion.button>
-                    <motion.button
-                      onClick={() => setShowOfferModal(true)}
-                      whileHover={{ scale: 1.03, y: -1, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
-                      whileTap={{ scale: 0.97 }}
-                      className="flex-1 py-2.5 bg-white/5 text-foreground rounded-lg font-bold text-[10px] uppercase tracking-[0.3em] transition-all border border-white/10 flex items-center justify-center gap-1.5"
-                    >
-                      <Handshake className="h-3.5 w-3.5" /> Make Offer
-                    </motion.button>
-                    {userOffer && (
-                      <button
-                        onClick={handleCancelBid}
-                        className="flex-1 py-3 bg-white/5 hover:bg-red-500/10 text-red-500 rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-red-500/20"
-                      >
-                        Retract
-                      </button>
-                    )}
-                  </>
-                )}
-                <button
-                  onClick={() => setShowStakeModal(true)}
-                  className={`flex-1 py-3 rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-2 border cursor-pointer ${
-                    localNft.isStaked
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                      : "bg-purple-600/20 text-purple-300 border-purple-500/30 hover:bg-purple-600/30"
-                  }`}
-                >
-                  <Lock className="h-3.5 w-3.5 text-amber-400" /> {localNft.isStaked ? "Staked Yield" : "Stake"}
-                </button>
-                <button
-                  onClick={() => setIsTipping(true)}
-                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
-                >
-                  <Coins className="h-3.5 w-3.5 text-blue-400" /> Support
-                </button>
-                <button
-                  onClick={() => setShowPriceAlertModal(true)}
-                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3"
-                >
-                  <Bell className="h-3.5 w-3.5 text-amber-400" /> Alert
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
-                >
-                  <Share2 className="h-3.5 w-3.5 text-blue-400" /> Share
-                </button>
-              </div>
-
-              {/* Quick Social Deep Link Share Bar */}
-              {localNft && (
-                <div className="mt-3 p-3 bg-white/[0.02] rounded-xl border border-white/5 flex flex-wrap items-center justify-between gap-2.5">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Share2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                    <span className="text-[10px] font-black uppercase tracking-wider text-zinc-300 truncate">
-                      Share Deep Link
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <button
-                      onClick={() => {
-                        const text = `Check out this digital collectible "${localNft.title}" by ${localNft.artist} on TonJam!`;
-                        const shareUrl = `${window.location.origin}/#/nft/${localNft.id}`;
-                        window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`, '_blank');
-                      }}
-                      className="px-2.5 py-1.5 bg-[#24A1DE]/15 hover:bg-[#24A1DE]/25 text-[#24A1DE] rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all active:scale-95"
-                      title="Share on Telegram"
-                    >
-                      <Send className="w-3 h-3" /> Telegram
-                    </button>
-                    <button
-                      onClick={() => {
-                        const text = `Check out this digital collectible "${localNft.title}" by ${localNft.artist} on @TonJam! 💎🎵`;
-                        const shareUrl = `${window.location.origin}/#/nft/${localNft.id}`;
-                        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
-                      }}
-                      className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all active:scale-95"
-                      title="Share on X / Twitter"
-                    >
-                      <Twitter className="w-3 h-3 text-[#1DA1F2]" /> X / Twitter
-                    </button>
-                    <button
-                      onClick={handleShare}
-                      className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all active:scale-95"
-                      title="QR Code & More Social Channels"
-                    >
-                      <QrCode className="w-3 h-3" /> QR / Broadcast
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {localNft && (
-                <NFTBidTracker nft={localNft} className="mt-4" />
-              )}
-
-              {isAuction && !isOwner && !isAuctionEnded && (
-                <div className="mt-4">
-                  <QuickBid 
-                    nft={localNft} 
-                    onBidPlaced={() => {
-                      setShowGlow(true);
-                      setTimeout(() => setShowGlow(false), 1200);
-                    }}
-                  />
-                </div>
-              )}
-
-              {/* Tip Selection Modal */}
-              <AnimatePresence>
-                {isTipping && (
-                  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => setIsTipping(false)}
-                      className="absolute inset-0 bg-background/80"
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                      className="relative w-full max-w-sm bg-card rounded-[4px] p-4 overflow-hidden"
-                    >
-                      {/* Hardware style scanline */}
-                      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
-
-                      <div className="relative z-10">
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                            <Coins className="h-5 w-5 text-blue-500" />
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">
-                              Tip Creator
-                            </h3>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                              Support {localNft.creator}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          {[0.1, 0.5, 1, 5].map((amount) => (
-                            <button
-                              key={amount}
-                              onClick={() => handleTip(amount)}
-                              className="group relative py-4 bg-muted/50 hover:bg-muted rounded-[4px] transition-all active:scale-95"
-                            >
-                              <div className="flex flex-col items-center">
-                                <span className="text-xl font-bold text-foreground group-hover:text-blue-400 transition-colors">
-                                  {amount}
-                                </span>
-                                <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                                  GRAM
-                                </span>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-
-                        <button
-                          onClick={() => setIsTipping(false)}
-                          className="w-full py-4 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-foreground transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </motion.div>
-                  </div>
-                )}
-              </AnimatePresence>
-
-              {/* Price Alert Control panel - Styled premium, no border lines */}
-              <div id="price-alert-panel" className="mt-6 pt-5 bg-white/[0.02] rounded-[4px] p-4 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "p-2 rounded-full flex items-center justify-center transition-all duration-300",
-                      priceAlertEnabled ? "bg-blue-500/10 text-blue-400" : "bg-white/5 text-muted-foreground/40"
-                    )}>
-                      {priceAlertEnabled ? (
-                        <Bell className="h-4 w-4" />
-                      ) : (
-                        <BellOff className="h-4 w-4" />
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-white uppercase tracking-[0.25em]">
-                        Price Alert Protocol
-                      </h4>
-                      <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-0.5">
-                        Monitor floor drops & receive instant push signals
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    {priceAlertEnabled && (
-                      <button
-                        onClick={handleSimulateDrop}
-                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-[4px] font-bold text-[8px] uppercase tracking-widest transition-all cursor-pointer flex items-center gap-1"
-                        id="simulate-drop-btn"
-                        title="Simulate a sudden floor drop to test your alerts"
-                      >
-                        <TrendingDown className="h-3 w-3" /> Simulate Drop
-                      </button>
-                    )}
-                    
-                    <button
-                      onClick={handleTogglePriceAlert}
-                      className={cn(
-                        "px-4 py-1.5 rounded-[4px] font-black text-[9px] uppercase tracking-widest transition-all cursor-pointer focus:outline-none",
-                        priceAlertEnabled 
-                          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-500" 
-                          : "bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-white"
-                      )}
-                      id="price-alert-toggle-btn"
-                    >
-                      {priceAlertEnabled ? "Active Alert" : "Enable Alert"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Drop Percentage Selector */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 items-center">
-                  <div className="flex flex-col">
-                    <span className="text-[7.5px] font-black text-muted-foreground uppercase tracking-[0.3em]">
-                      Trigger Delta
-                    </span>
-                    <span className="text-[10px] font-mono text-zinc-400 mt-0.5">
-                      Notify me when floor drops by {priceAlertPercent}% or more.
-                    </span>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-1.5 justify-start sm:justify-end">
-                    {[5, 10, 15, 25, 40].map((percent) => (
-                      <button
-                        key={percent}
-                        onClick={() => handlePercentChange(percent)}
-                        className={cn(
-                          "px-2.5 py-1 text-[9px] font-mono font-bold rounded-[3px] transition-all cursor-pointer focus:outline-none",
-                           priceAlertPercent === percent
-                            ? "bg-blue-600 text-white font-black"
-                            : "bg-white/5 text-muted-foreground hover:text-white hover:bg-white/8"
-                        )}
-                      >
-                        {percent}%
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* AI Lore / Origin Narrative - Removed */}
@@ -1954,120 +1268,12 @@ const NFTDetail: React.FC = () => {
                 )}
 
                 {activeTab === "activity" && (
-                  <motion.div
-                    key="activity"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="bg-white/[0.02] border border-border rounded-[4px] p-6 lg:p-8 space-y-8"
-                  >
-                    <div className="mb-6">
-                      <NFTChart data={salesData} />
-                    </div>
-
-                    <div className="relative pl-6 sm:pl-0">
-                      {/* Vertical line - hidden on small screens if we wanted it to be centered, but let's make it left-aligned */}
-                      <div className="absolute left-[31px] sm:left-[35px] top-0 bottom-0 w-px bg-white/10" />
-
-                      <div className="nft-history-list h-[500px]">
-                        {localNft.history && localNft.history.length > 0 ? (
-                          <Virtuoso
-                            style={{ height: '100%', width: '100%' }}
-                            data={[...(localNft.history || [])].sort(
-                              (a, b) =>
-                                new Date(b.date).getTime() -
-                                new Date(a.date).getTime()
-                            )}
-                            itemContent={(i, h) => (
-                              <div className="pb-8">
-                                <motion.div
-                                  initial={{ opacity: 0, y: 10 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: i < 10 ? i * 0.1 : 0 }}
-                                  className="relative flex items-start gap-6 sm:gap-8 group"
-                                >
-                                  <div className="relative z-10 flex-shrink-0 mt-1">
-                                    <div
-                                      className={cn(
-                                        "w-10 h-10 rounded-full flex items-center justify-center border-4 border-background transition-all shadow-xl",
-                                        h.event === "Minted"
-                                          ? "bg-blue-500 shadow-blue-500/20"
-                                          : h.event === "Transfer"
-                                            ? "bg-purple-500 shadow-purple-500/20"
-                                            : h.event === "Sold"
-                                              ? "bg-emerald-500 shadow-emerald-500/20"
-                                              : "bg-zinc-500 shadow-zinc-500/20",
-                                      )}
-                                    >
-                                      {h.event === "Minted" ? (
-                                        <Wand2 className="h-4 w-4 text-white" />
-                                      ) : h.event === "Transfer" ? (
-                                        <ArrowRightLeft className="h-4 w-4 text-white" />
-                                      ) : (
-                                        <Handshake className="h-4 w-4 text-white" />
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  <div className="flex-1 bg-white/[0.03] border border-white/5 rounded-[4px] p-3 hover:bg-white/[0.05] transition-colors relative overflow-hidden group-hover:border-white/10">
-                                    <div className="absolute top-0 right-0 p-2 opacity-5 rotate-12 scale-150 pointer-events-none transition-transform group-hover:scale-110">
-                                      {h.event === "Minted" ? (
-                                        <Wand2 className="w-16 h-16" />
-                                      ) : (
-                                        <Handshake className="w-16 h-16" />
-                                      )}
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 relative z-10">
-                                      <div className="space-y-0.5">
-                                        <div className="flex items-center gap-2">
-                                          <h4 className="text-xs font-black text-foreground uppercase tracking-widest">
-                                            {h.event}
-                                          </h4>
-                                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider bg-white/5 px-1.5 py-0.5 rounded-[4px]">
-                                            {h.date}
-                                          </span>
-                                        </div>
-                                        <div className="flex items-center gap-1 pt-1 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                                          From
-                                          <span className="font-mono text-primary">
-                                            {h.from === "Vault"
-                                              ? "GENESIS"
-                                              : `@${(h.from || "").slice(0, 6)}`}
-                                          </span>
-                                          <ArrowRight className="w-2.5 h-2.5" />
-                                          To
-                                          <span className="font-mono text-primary">
-                                            @{(h.to || "").slice(0, 6)}
-                                          </span>
-                                        </div>
-                                      </div>
-                                      {h.price && (
-                                        <div className="flex items-center gap-1.5 bg-background/50 rounded-[4px] px-2 py-1">
-                                          <span className="text-xs font-black text-foreground tracking-tighter tabular-nums">
-                                            {h.price}
-                                          </span>
-                                          <span className="text-[9px] font-black text-blue-500 uppercase tracking-tighter">
-                                            GRAM
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </motion.div>
-                              </div>
-                            )}
-                          />
-                        ) : (
-                          <div className="py-12 flex flex-col items-center justify-center text-center bg-white/[0.02] border border-white/5 rounded-2xl ml-16 sm:ml-[4.5rem]">
-                            <History className="w-8 h-8 text-muted-foreground/30 mb-3" />
-                            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                              No transaction history
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
+                  <NFTActivity
+                    nft={localNft}
+                    salesData={salesData}
+                    isAuction={isAuction}
+                    highestOfferPrice={highestOfferPrice}
+                  />
                 )}
 
                 {activeTab === "offers" && (
@@ -2242,7 +1448,7 @@ const NFTDetail: React.FC = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="p-8 bg-background/40 border border-border rounded-[4px] flex flex-col items-center justify-center text-center space-y-4"
+                        className="p-8 bg-background/40 rounded-2xl flex flex-col items-center justify-center text-center space-y-4"
                       >
                         <Lock className="h-12 w-12 text-muted-foreground/50" />
                         <div>
@@ -2263,8 +1469,6 @@ const NFTDetail: React.FC = () => {
                 )}
               </AnimatePresence>
             </div>
-          </div>
-        </div>
 
         {/* More from Creator Section */}
         {moreFromCreator.length > 0 && (
@@ -2283,7 +1487,7 @@ const NFTDetail: React.FC = () => {
               </div>
               <button
                 onClick={() => navigate(`/artist/${localNft.creator}`)}
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center h-10 group"
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center h-10 group"
               >
                 VIEW ALL{" "}
                 <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
@@ -2339,7 +1543,7 @@ const NFTDetail: React.FC = () => {
                 </div>
                 <button
                   onClick={() => navigate("/explore/nfts?title=Related Vibes")}
-                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center h-10 group"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center h-10 group"
                 >
                   EXPLORE GENRE{" "}
                   <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
@@ -2369,8 +1573,9 @@ const NFTDetail: React.FC = () => {
         <SellNFTModal nft={localNft} onClose={() => setShowListModal(false)} />
       )}
       {showBidModal && (
-        <BidModal 
+        <BidNFTModal 
           nft={localNft} 
+          isOpen={showBidModal}
           onClose={() => setShowBidModal(false)} 
           onBidPlaced={() => {
             setShowGlow(true);

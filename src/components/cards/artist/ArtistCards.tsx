@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
-  CheckCircle2, Users, MessageSquare, UserPlus, UserCheck, Play, 
+  Verified, Users, MessageSquare, UserPlus, UserCheck, Play, 
   BarChart3, Sparkles, ShieldCheck, Star, Music, Heart 
 } from 'lucide-react';
 import { ArtistPlaceholder } from '../../placeholders/ArtistPlaceholder';
@@ -77,7 +77,9 @@ export const ArtistCard: React.FC<{
       <div className="flex flex-col items-center min-w-0">
         <div className="flex items-center justify-center gap-1 w-full">
           <span className="text-[13px] font-black text-white truncate max-w-[85%]">{artist.name}</span>
-          {artist.isVerified && <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 fill-current shrink-0" />}
+          {(artist.isVerified || (artist as any).verified || (artist as any).isVerifiedArtist) && (
+            <Verified className="w-3.5 h-3.5 text-blue-500 fill-current shrink-0" />
+          )}
         </div>
         <p className="text-[10px] text-[#9AA0AE] font-mono mt-0.5 truncate w-full">{artist.username}</p>
       </div>
@@ -148,7 +150,9 @@ export const FeaturedArtistCard: React.FC<{
             </span>
             <div className="flex items-center gap-1.5">
               <h3 className="text-xl font-black text-white leading-none truncate uppercase tracking-tight">{artist.name}</h3>
-              {artist.isVerified && <CheckCircle2 className="w-4 h-4 text-blue-500 fill-current shrink-0" />}
+              {(artist.isVerified || (artist as any).verified || (artist as any).isVerifiedArtist) && (
+                <Verified className="w-4 h-4 text-blue-500 fill-current shrink-0" />
+              )}
             </div>
             {artist.bio && <p className="text-xs text-[#9AA0AE] mt-1.5 truncate max-w-sm">{artist.bio}</p>}
           </div>
@@ -216,7 +220,9 @@ export const TopArtistCard: React.FC<{
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1">
           <h4 className="text-[13px] font-bold text-white truncate">{artist.name}</h4>
-          {artist.isVerified && <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 fill-current shrink-0" />}
+          {(artist.isVerified || (artist as any).verified || (artist as any).isVerifiedArtist) && (
+            <Verified className="w-3.5 h-3.5 text-blue-500 fill-current shrink-0" />
+          )}
         </div>
         <p className="text-[10px] text-[#9AA0AE] font-mono mt-0.5">{artist.followersCount.toLocaleString()} fans</p>
       </div>
@@ -256,7 +262,12 @@ export const SuggestedArtistCard: React.FC<{
           <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover" />
         </div>
         <div className="text-center min-w-0">
-          <h4 className="text-[13px] font-bold text-white truncate">{artist.name}</h4>
+          <div className="flex items-center justify-center gap-1">
+            <h4 className="text-[13px] font-bold text-white truncate">{artist.name}</h4>
+            {(artist.isVerified || (artist as any).verified || (artist as any).isVerifiedArtist) && (
+              <Verified className="w-3.5 h-3.5 text-blue-500 fill-current shrink-0" />
+            )}
+          </div>
           <p className="text-[10px] text-[#9AA0AE] truncate mt-0.5">{artist.followersCount.toLocaleString()} fans</p>
         </div>
       </div>

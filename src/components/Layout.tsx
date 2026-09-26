@@ -38,7 +38,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTonPrice } from '@/contexts/TonPriceContext';
 import { useWallet } from '@/contexts/WalletContext';
 import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import MiniPlayer from './player/MiniPlayer';
 import PlayerScreen from './player/PlayerScreen';
@@ -215,14 +215,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const activeArtist = useMemo(() => artists.find(a => a.uid === artistId), [artists, artistId]);
   
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
-  const { scrollY } = useScroll();
   
   useEffect(() => {
     setIsHeaderHidden(false);
     setIsMobileNavHidden(false);
+    setIsScrolled(typeof window !== 'undefined' ? window.scrollY > 15 : false);
   }, [location.pathname]);
-  const headerOpacity = useTransform(scrollY, [0, 50], [0, 1]);
   const [isMobileNavHidden, setIsMobileNavHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const lastScrollYRef = useRef(0);
@@ -300,6 +300,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       const currentScrollY = window.scrollY;
       const prevScrollY = lastScrollYRef.current;
       
+      setIsScrolled(currentScrollY > 15);
+
       if (currentScrollY > prevScrollY && currentScrollY > 40) {
         setIsHeaderHidden(true); // Roll up header on scroll down
         setIsMobileNavHidden(true); // Hide bottom nav on scroll down
@@ -373,433 +375,90 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         Skip to content
       </a>
 
-      {/* Header */}
-      {!isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isLoginPage && !isDiscover && !isArtistProfile && (
+      {/* Header - Only for Home Screen */}
+      {isHome && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isLoginPage && (
         <motion.header 
-          className={`fixed top-0 left-0 right-0 z-40 px-2.5 sm:px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} bg-black border-none`}
+          className={cn(
+            "fixed top-0 left-0 right-0 z-40 h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between transition-all duration-300 ease-out border-none",
+            "lg:left-64",
+            isHeaderHidden ? "-translate-y-full" : "translate-y-0",
+            isScrolled
+              ? "bg-[#060B18]/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.45)]"
+              : "bg-[#060B18]/30 backdrop-blur-md"
+          )}
         >
-          {/* Background with blur and seamless backdrop */}
-          <motion.div 
-            className="absolute inset-0 bg-black -z-10"
-          />
-          
-          <div className={`flex items-center min-w-0 ${headerTitle ? 'justify-center flex-1' : 'gap-2 sm:gap-4 flex-1'}`}>
-            {isHome ? (
-              !headerTitle && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={() => setIsMobileSidebarOpen(true)}
-                      className="lg:hidden p-2 rounded-[4px] bg-muted/30 hover:bg-muted transition-all flex-shrink-0"
-                      aria-label="Open sidebar"
-                    >
-                      <motion.img 
-                        layoutId="app-logo"
-                        src={APP_LOGO} 
-                        alt="TonJam Logo" 
-                        className="w-8 h-8 object-contain" 
-                      />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">Open Navigation</TooltipContent>
-                </Tooltip>
-              )
-            ) : isArtistProfile && isCompact && activeArtist ? (
-                <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-3 pl-2 min-w-0"
+          {/* LEFT: TonJam Logo & Brand */}
+          <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button 
+                  onClick={() => {
+                    if (window.innerWidth < 1024) {
+                      setIsMobileSidebarOpen(true);
+                    } else {
+                      navigate('/');
+                    }
+                  }}
+                  className="flex items-center gap-2 p-1 -ml-1 rounded-full hover:bg-white/5 active:scale-95 transition-all flex-shrink-0 cursor-pointer border-none outline-none group"
+                  aria-label="TonJam Home"
                 >
-                    <Avatar className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0">
-                        <AvatarImage src={activeArtist.avatarUrl} alt={activeArtist.name} />
-                        <AvatarFallback>{activeArtist.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <span className="font-black tracking-tighter uppercase truncate">{activeArtist.name}</span>
-                </motion.div>
-            ) : (
-              <div className={`flex items-center min-w-0 ${headerTitle ? 'w-full justify-center relative' : 'gap-1.5 sm:gap-2'}`}>
-                {!headerTitle && (
-                  <BackButton 
-                    className={`p-2 rounded-[4px] bg-transparent hover:bg-white/5 transition-all flex-shrink-0 ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}
-                    ariaLabel="Go back"
-                  />
-                )}
-                <div className={`${headerTitle ? 'flex' : 'lg:hidden'} flex-col justify-center items-center min-w-0`}>
-                  <span className={cn(
-                    "font-bold uppercase tracking-widest truncate transition-all duration-300",
-                    headerTitle ? "text-sm" : "text-[11px] sm:text-[12px] tracking-tighter max-w-[85px] min-[360px]:max-w-[110px] sm:max-w-[150px]"
-                  )}>
-                    {headerTitle || (isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : isPostDetail ? 'Post' : isWallet ? 'Wallet' : isSearch ? 'Search' : isSettings ? 'Settings' : isProfile ? (userProfile?.name || userProfile?.username || 'User') : isDiscover ? 'Discover' : isTasks ? 'Tasks' : isGovernance ? 'Governance' : isAdmin ? 'Admin' : (location.pathname.split('/')[1] || '').replace('-', ' ')))}
-                  </span>
-                </div>
-                {headerTitle && !isHome && (
-                  <BackButton 
-                    className="absolute left-0 p-2 rounded-[4px] bg-transparent hover:bg-white/5 transition-all text-foreground flex-shrink-0"
-                    ariaLabel="Go back"
-                  />
-                )}
-              </div>
-            )}
-
-            <div className={cn(
-                "hidden lg:flex items-center gap-4 flex-1 ml-4 overflow-hidden",
-                isHeaderSearchOpen && isLibrary && "flex absolute inset-0 bg-background z-50 px-4"
-              )}>
-                {isHeaderSearchOpen && isLibrary && (
-                  <button 
-                    onClick={() => setIsHeaderSearchOpen(false)}
-                    className="p-2 mr-2 rounded-full hover:bg-muted"
-                  >
-                    <XMarkIcon className="h-5 w-5" />
-                  </button>
-                )}
-                {!isHeaderSearchOpen && (
-                  <div className="flex items-center gap-3">
-                     <div className="w-1 h-6 bg-blue-600 rounded-full" />
-                     <span className="font-bold text-xs uppercase tracking-tighter">
-                       {isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : 'Details')}
-                     </span>
+                  <div className="relative w-8 h-8 flex items-center justify-center rounded-full bg-[#0088CC]/10 group-hover:bg-[#0088CC]/20 transition-colors">
+                    <motion.img 
+                      layoutId="app-logo"
+                      src={APP_LOGO} 
+                      alt="TonJam Logo" 
+                      className="w-7 h-7 object-contain drop-shadow-[0_2px_8px_rgba(0,180,216,0.35)]" 
+                    />
                   </div>
-                )}
-                
-                {!isHeaderSearchOpen && <Separator orientation="vertical" className="h-4 bg-border/40" />}
-
-                <SearchBar
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  isSearchOpen={isSearchOpen}
-                  setIsSearchOpen={setIsSearchOpen}
-                  handleSearch={handleSearch}
-                  handleSuggestionClick={handleSuggestionClick}
-                  recentSearches={recentSearches}
-                  removeRecentSearch={removeRecentSearch}
-                  trendingTopics={trendingTopics}
-                  placeholder={getSearchPlaceholder()}
-                  className={cn("flex-1 relative transition-all duration-500", isLibrary ? "max-w-none" : "max-w-xl")}
-                  inputClassName={`border-0 !border-none bg-[#222226] hover:bg-[#2a2a30] focus:bg-[#2a2a30] rounded-full py-1.5 pl-4 pr-10 text-xs font-medium text-white focus:outline-none focus:ring-0 transition-all placeholder:text-zinc-400`}
-                  autoFocus={isHeaderSearchOpen && isLibrary}
-                >
-                  {!safeSearchQuery.trim() ? (
-                    recentSearches && recentSearches.length > 0 ? (
-                      <div className="p-3 select-none">
-                        <div className="flex items-center justify-between mb-2.5 px-1">
-                          <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 text-blue-400">
-                            <History className="w-3.5 h-3.5" />
-                            Recent Searches
-                          </span>
-                          <button
-                            type="button"
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              setRecentSearches([]);
-                              localStorage.removeItem('tonjam_search_history');
-                              localStorage.removeItem('recentSearches');
-                            }}
-                            className="text-[9px] font-black uppercase tracking-wider text-red-400 hover:text-red-300 transition-colors cursor-pointer"
-                          >
-                            Clear All
-                          </button>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {recentSearches.map((term, idx) => (
-                            <div
-                              key={idx}
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                setSearchQuery(term);
-                                saveRecentSearch(term);
-                                navigate(`/discover?search=${encodeURIComponent(term)}`);
-                                setIsSearchOpen(false);
-                              }}
-                              className="flex items-center gap-1.5 bg-white/5 hover:bg-blue-600/20 hover:border-blue-500/30 border border-white/5 px-3 py-1.5 rounded-xl cursor-pointer transition-all group"
-                            >
-                              <span className="text-xs font-medium text-slate-200 group-hover:text-blue-300">{term}</span>
-                              <button
-                                type="button"
-                                onMouseDown={(e) => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  removeRecentSearch(term);
-                                }}
-                                className="text-slate-500 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null
-                  ) : filteredResults ? (
-                    <div className="max-h-[70vh] overflow-y-auto custom-scrollbar p-2 space-y-4">
-                      {filteredResults.tracks.length > 0 && (
-                        <div>
-                          <h4 className="px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-blue-500/50">Signals</h4>
-                          {filteredResults.tracks.map(track => (
-                            <button
-                              key={track.id}
-                              onClick={() => {
-                                saveRecentSearch(safeSearchQuery.trim());
-                                playTrack(track);
-                                setIsSearchOpen(false);
-                              }}
-                              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all text-left group"
-                            >
-                              <div className="w-8 h-8 rounded-sm overflow-hidden bg-muted flex-shrink-0">
-                                <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[10px] font-bold uppercase tracking-tighter truncate">{track.title}</p>
-                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {filteredResults.playlists.length > 0 && (
-                        <div>
-                          <h4 className="px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-purple-500/50">Nodes (Playlists)</h4>
-                          {filteredResults.playlists.map(playlist => (
-                            <button
-                              key={playlist.id}
-                              onClick={() => {
-                                saveRecentSearch(safeSearchQuery.trim());
-                                navigate(`/playlist/${playlist.id}`);
-                                setIsSearchOpen(false);
-                              }}
-                              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all text-left group"
-                            >
-                              <div className="w-8 h-8 rounded-sm bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                                <RectangleStackIcon className="h-4 w-4 text-purple-500" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[10px] font-bold uppercase tracking-tighter truncate">{playlist.title}</p>
-                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{playlist.trackIds?.length || 0} Layers</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {filteredResults.artists.length > 0 && (
-                        <div>
-                          <h4 className="px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-emerald-500/50">Entities</h4>
-                          {filteredResults.artists.map(artist => (
-                            <button
-                              key={artist.uid}
-                              onClick={() => {
-                                saveRecentSearch(safeSearchQuery.trim());
-                                navigate(`/artist/${artist.uid}`);
-                                setIsSearchOpen(false);
-                              }}
-                              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all text-left group"
-                            >
-                              <Avatar className="w-8 h-8 rounded-full">
-                                <AvatarImage src={artist.avatarUrl} className="object-cover" />
-                                <AvatarFallback>{artist.name[0]}</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[10px] font-bold uppercase tracking-tighter truncate">{artist.name}</p>
-                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{artist.followers?.toLocaleString()} Verified</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {filteredResults.nfts.length > 0 && (
-                        <div>
-                          <h4 className="px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-amber-500/50">Artifacts</h4>
-                          {filteredResults.nfts.map(nft => (
-                            <button
-                              key={nft.id}
-                              onClick={() => {
-                                saveRecentSearch(safeSearchQuery.trim());
-                                navigate(`/nft/${nft.id}`);
-                                setIsSearchOpen(false);
-                              }}
-                              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all text-left group"
-                            >
-                              <div className="w-8 h-8 rounded-sm overflow-hidden bg-muted flex-shrink-0 border border-amber-500/20">
-                                <img src={nft.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[10px] font-bold uppercase tracking-tighter truncate">{nft.title}</p>
-                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{nft.price} TON</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : null}
-                </SearchBar>
-              </div>
+                  <span className="font-black text-sm tracking-tight text-white select-none">
+                    TonJam
+                  </span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Open Navigation</TooltipContent>
+            </Tooltip>
           </div>
 
-          <div className={cn("items-center gap-1 sm:gap-1.5 flex-shrink-0 transition-all duration-300", headerTitle ? "hidden" : "flex")}>
-            {/* Global Filter Icon for Discovery/Marketplace/Library */}
-            {(isMarketplace || isDiscover || isLibrary || isJamspace) && (
+          {/* RIGHT: Notifications & Profile */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <NotificationBell />
+
+            {user ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link 
+                    to="/profile" 
+                    className="flex items-center gap-2 p-0.5 rounded-full transition-all hover:scale-105 active:scale-95 outline-none border-none"
+                    aria-label="Your Profile"
+                  >
+                    <Avatar className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-900 ring-1 ring-white/10">
+                      <AvatarImage 
+                        src={userProfile?.avatar || user.photoURL || ''} 
+                        alt={user.displayName || 'Profile'} 
+                        className="object-cover rounded-full" 
+                      />
+                      <AvatarFallback className="bg-[#0088CC]/20 text-[#00B4D8] rounded-full text-[10px] font-black">
+                        {user.displayName ? user.displayName.slice(0, 2).toUpperCase() : (userProfile?.username ? userProfile.username.slice(0, 2).toUpperCase() : 'TJ')}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Your Profile</TooltipContent>
+              </Tooltip>
+            ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button 
-                    onClick={() => setIsDiscoverFiltersOpen(true)}
-                    className={cn(
-                      "p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] transition-all flex items-center gap-2",
-                      isDiscoverFiltersOpen ? "text-blue-500 bg-blue-500/10" : "text-muted-foreground hover:bg-muted"
-                    )}
+                    onClick={() => navigate('/login')}
+                    className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 active:scale-95 text-zinc-300 hover:text-white transition-all border-none outline-none cursor-pointer"
+                    aria-label="Sign In"
                   >
-                    <AdjustmentsHorizontalIcon className="h-5 w-5" strokeWidth={2.5} />
+                    <UserIcon className="h-4 w-4" strokeWidth={2.2} />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>Signal Filters</TooltipContent>
+                <TooltipContent side="bottom">Sign In</TooltipContent>
               </Tooltip>
             )}
-
-            <Separator orientation="vertical" className="h-6 bg-border/40 mx-0.5 hidden sm:block" />
-
-            {/* GRAMS Price Ticker */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-muted/20">
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5 object-contain" />
-                <span className="text-[10px] font-black tracking-widest uppercase text-muted-foreground/70">GRAMS</span>
-              </div>
-              <span className="text-[11px] font-black tracking-tighter text-foreground flex items-center gap-1">
-                <img src={TON_LOGO} alt="TON" className="w-3 h-3 object-contain inline" />
-                {tonPriceLoading ? '...' : `$${tonPriceData?.toFixed(2)}`}
-              </span>
-            </div>
-
-            <Separator orientation="vertical" className="h-6 bg-border/40 mx-0.5 hidden lg:block" />
-
-            {/* Task Center Badge - Home Screen Header Only */}
-            {isHome && (
-              <>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={() => navigate('/tasks')} 
-                      className="flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-2.5 py-1 rounded-full transition-all hover:bg-white/5 active:scale-95 flex-shrink-0 cursor-pointer"
-                      aria-label="Tasks & Rewards"
-                    >
-                       <img src={TJ_COIN_ICON} alt="TonJam Coin" className="w-[26px] h-[26px] sm:w-[30px] sm:h-[30px] object-contain transition-transform hover:scale-105" />
-                       {tonBalance !== null && (
-                          <span className="text-[9px] font-bold tracking-tight text-amber-400/90 hidden min-[440px]:inline">{tonBalance.toFixed(2)} TON</span>
-                       )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">Tasks & Rewards</TooltipContent>
-                </Tooltip>
-
-                <Separator orientation="vertical" className="h-6 bg-border/40 mx-0.5 hidden sm:block" />
-              </>
-            )}
-
-            <div className="flex items-center gap-0.5 sm:gap-1">
-              {!isMarketplace && !isDiscover && !isLibrary && !isTrendingNFTs && (
-                <NotificationBell />
-              )}
-
-              {isLibrary ? (
-              <div className="flex items-center gap-0.5 sm:gap-1">
-                 <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button 
-                        onClick={() => setIsHeaderSearchOpen(!isHeaderSearchOpen)}
-                        className={`p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] transition-all flex items-center gap-2 ${isHeaderSearchOpen ? 'text-blue-500 bg-blue-500/10' : 'text-muted-foreground hover:bg-muted'}`}
-                      >
-                        <MagnifyingGlassIcon className="h-5 w-5" strokeWidth={2.5} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>Search Library</TooltipContent>
-                 </Tooltip>
-
-                 <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button 
-                        onClick={() => setIsCreatePlaylistModalOpen(true)}
-                        className="p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] hover:bg-muted transition-all text-muted-foreground"
-                      >
-                        <PlusIcon className="h-5 w-5" strokeWidth={2.5} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>New Playlist</TooltipContent>
-                 </Tooltip>
-              </div>
-            ) : (userAddress || isEvmConnected) ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={async () => {
-                        await disconnectWalletContext();
-                        navigate('/wallet');
-                      }}
-                      className={`p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] hover:bg-destructive/10 hover:text-destructive transition-all flex items-center gap-1.5 sm:gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
-                    >
-                      <WalletIcon className="h-5 w-5" strokeWidth={2.5} />
-                      <div className="hidden md:flex flex-col items-start leading-none gap-0.5">
-                        <span className="text-[7px] font-black uppercase tracking-widest opacity-60">Wallet</span>
-                        <span className="text-[9px] font-black tracking-tighter">
-                          {userAddress ? `${userAddress.slice(0, 4)}...${userAddress.slice(-4)}` : `${evmAddress?.slice(0, 4)}...${evmAddress?.slice(-4)}`}
-                        </span>
-                      </div>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Disconnect Wallet</TooltipContent>
-                </Tooltip>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={() => {
-                        navigate('/wallet');
-                      }}
-                      className={`p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] hover:bg-muted transition-all flex items-center gap-1.5 sm:gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
-                    >
-                      <WalletIcon className="h-5 w-5" strokeWidth={2.5} />
-                      <span className="hidden md:inline text-[9px] font-black uppercase tracking-widest">Connect</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Connect Wallet</TooltipContent>
-                </Tooltip>
-              )}
-              
-              <Separator orientation="vertical" className="h-4 bg-border/40 mx-0.5 hidden sm:block" />
-
-              {user && !isLibrary ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to="/profile" className={`flex items-center gap-2 p-1 min-w-[36px] min-h-[36px] justify-center rounded-full hover:bg-muted transition-all ${isProfile ? 'ring-1 ring-blue-500/30' : ''}`}>
-                      <Avatar className="w-8 h-8 rounded-full flex-shrink-0">
-                        <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt="" className="object-cover rounded-full" />
-                        <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-full text-[10px] font-bold">
-                          {user.displayName ? user.displayName.slice(0, 2).toUpperCase() : '??'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="hidden lg:flex flex-col leading-none">
-                        <span className="text-[7px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">Identity</span>
-                        <span className="text-[9px] font-bold tracking-tighter truncate max-w-[60px]">{user.displayName}</span>
-                      </div>
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>Your Profile</TooltipContent>
-                </Tooltip>
-              ) : !user && !isLibrary ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={() => navigate('/login')}
-                      className="p-2 sm:p-2.5 min-w-[36px] min-h-[36px] justify-center rounded-[4px] hover:bg-muted transition-all text-muted-foreground"
-                    >
-                      <UserIcon className="h-5 w-5" strokeWidth={2.5} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Sign In</TooltipContent>
-                </Tooltip>
-              ) : null}
-            </div>
           </div>
         </motion.header>
       )}
@@ -845,7 +504,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail || isDJKrupy || isArtistProfile || isProfile || isUserProfile || isSearch || isDiscover ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 ${isSearch ? 'overflow-visible' : 'overflow-x-clip'} ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
+      <main id="main-content" className={`transition-all w-full flex-1 ${isHome ? 'pt-14 sm:pt-16' : 'pt-0'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 ${isSearch ? 'overflow-visible' : 'overflow-x-clip'} ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
         <div className={`w-full max-w-full ${isSearch ? 'overflow-visible' : 'overflow-x-clip'}`}>
           {children}
         </div>

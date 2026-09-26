@@ -43,6 +43,10 @@ const UserProfile = lazyWithRetry(() => import('@/pages/UserProfile'));
 const ArtistProfile = lazyWithRetry(() => import('@/pages/ArtistProfile'));
 const ArtistDashboard = lazyWithRetry(() => import('@/pages/ArtistDashboard'));
 const Library = lazyWithRetry(() => import('@/pages/Library'));
+const DownloadedTracks = lazyWithRetry(() => import('@/pages/Library/DownloadedTracks'));
+const RecentlyPlayedTracks = lazyWithRetry(() => import('@/pages/Library/RecentlyPlayedTracks'));
+const MyNFTTracks = lazyWithRetry(() => import('@/pages/Library/MyNFTTracks'));
+const ImportedPlaylists = lazyWithRetry(() => import('@/pages/Library/ImportedPlaylists'));
 const Settings = lazyWithRetry(() => import('@/pages/Settings'));
 const Tasks = lazyWithRetry(() => import('@/pages/Tasks'));
 const NFTDetail = lazyWithRetry(() => import('@/pages/NFTDetail'));
@@ -244,6 +248,13 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/favorite-artists" element={<PageWrapper><ProtectedRoute><FavoriteArtists /></ProtectedRoute></PageWrapper>} />
                   <Route path="/artist-minting" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistMinting /></ProtectedRoute></PageWrapper>} />
                   <Route path="/library" element={<PageWrapper><ProtectedRoute><Library /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/library/downloads" element={<PageWrapper><ProtectedRoute><DownloadedTracks /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/library/recently-played" element={<PageWrapper><ProtectedRoute><RecentlyPlayedTracks /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/library/history" element={<PageWrapper><ProtectedRoute><RecentlyPlayedTracks /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/library/my-nfts" element={<PageWrapper><ProtectedRoute><MyNFTTracks /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/library/nfts" element={<PageWrapper><ProtectedRoute><MyNFTTracks /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/library/imported-playlists" element={<PageWrapper><ProtectedRoute><ImportedPlaylists /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/library/spotify" element={<PageWrapper><ProtectedRoute><ImportedPlaylists /></ProtectedRoute></PageWrapper>} />
                   <Route path="/wallet" element={<PageWrapper><ProtectedRoute><Wallet /></ProtectedRoute></PageWrapper>} />
                   <Route path="/staking" element={<PageWrapper><ProtectedRoute><Staking /></ProtectedRoute></PageWrapper>} />
                   <Route path="/playlist/:id" element={<PageWrapper><PlaylistDetail /></PageWrapper>} />

@@ -89,13 +89,13 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             <img
               src={APP_LOGO}
               alt="TonJam Logo"
-              className="w-8 h-8 object-contain"
+              className="w-8 h-8 object-contain animate-[spin_8s_linear_infinite]"
             />
           </div>
         )}
 
         {title && (
-          <span className="font-black text-sm uppercase tracking-widest text-white truncate max-w-[150px] sm:max-w-[200px]">
+          <span className="font-black text-[16px] uppercase tracking-widest text-white truncate max-w-[160px] sm:max-w-[220px] ml-1">
             {title}
           </span>
         )}

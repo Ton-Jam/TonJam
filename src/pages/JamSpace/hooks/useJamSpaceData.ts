@@ -6,6 +6,7 @@ import { MOCK_LIBRARY_TRACKS, MOCK_LIBRARY_NFTS } from '../../Library/mock';
 import { toast } from 'sonner';
 import { saveBookmarkToFirestore, removeBookmarkFromFirestore } from '../../../services/bookmarkService';
 import { likePost, unlikePost, repostPost, unrepostPost } from '../../../services/socialService';
+import { createSpaceInFirestore } from '../../../services/spaceService';
 
 export const useJamSpaceData = (currentUser?: { name?: string; email?: string; photoURL?: string; uid?: string }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -475,20 +476,56 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     }
   };
 
-  const handleCreateSpace = (title: string, description: string) => {
+  const handleCreateSpace = async (
+    title: string, 
+    description: string, 
+    visibility: 'public' | 'private' = 'public',
+    coverUrl?: string
+  ): Promise<Space> => {
+    const spaceId = `space-${Date.now()}`;
+    const ownerId = currentUser?.uid || user.id || 'current-user';
+
     const newSpace: Space = {
-      id: `s-${Date.now()}`,
+      id: spaceId,
       title,
+      name: title,
       description,
       host: user,
+      ownerId,
       listenerCount: 1,
+      memberCount: 1,
       speakerAvatars: [user.avatar],
       isLive: true,
-      speakers: [user.name]
+      speakers: [user.name],
+      visibility,
+      coverUrl: coverUrl || '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
-    setSpaces([newSpace, ...spaces]);
+    // Optimistically update spaces list and active space
+    setSpaces(prev => [newSpace, ...prev]);
     setActiveSpace(newSpace);
+
+    // Persist to Firestore if available
+    try {
+      const firestoreResult = await createSpaceInFirestore({
+        name: title,
+        description,
+        visibility,
+        coverUrl,
+        ownerId,
+        host: user
+      });
+
+      if (firestoreResult?.id) {
+        newSpace.id = firestoreResult.id;
+      }
+    } catch (err) {
+      console.error('[useJamSpaceData] Failed to persist space in Firestore:', err);
+    }
+
+    return newSpace;
   };
 
   const handleToggleCommunity = (communityId: string) => {

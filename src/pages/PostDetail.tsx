@@ -42,6 +42,7 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -220,16 +221,7 @@ const PostDetail: React.FC = () => {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background pb-24">
-        {/* Header Navigation */}
-        <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-white/[0.05] h-14 flex items-center px-4 gap-4">
-          <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-zinc-500 hover:text-white" onClick={() => navigate(-1)}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex flex-col">
-            <h1 className="text-xs font-black uppercase tracking-[0.2em]">Signal Thread</h1>
-            <span className="text-[10px] text-blue-500/50 font-black uppercase tracking-widest leading-none">Sector-Log View</span>
-          </div>
-        </div>
+        <PageHeader title="Post" showBack={true} />
 
         <div className="max-w-2xl mx-auto py-6 px-4">
           <motion.div
