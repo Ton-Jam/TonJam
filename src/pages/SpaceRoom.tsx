@@ -318,6 +318,7 @@ export const SpaceRoom: React.FC = () => {
   // Audio Controls & Room States
   const [isJoined, setIsJoined] = useState(false);
   const [showRoomSelector, setShowRoomSelector] = useState(false);
+  const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isHandRaised, setIsHandRaised] = useState(false);
   const [isRoomAudioMuted, setIsRoomAudioMuted] = useState(false);
@@ -749,9 +750,6 @@ export const SpaceRoom: React.FC = () => {
       // AudioContext fallback
     }
   };
-
-  // Leave Confirmation Modal State
-  const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false);
 
   const handleLeaveClick = () => {
     setShowLeaveConfirmModal(true);

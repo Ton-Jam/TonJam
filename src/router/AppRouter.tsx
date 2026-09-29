@@ -1,6 +1,5 @@
-import * as React from 'react';
-import { useState, useEffect, lazy } from 'react';
-import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, lazy } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ScrollToTop from '@/components/ScrollToTop';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -92,7 +91,9 @@ const NFTLaunchpad = lazyWithRetry(() => import('@/pages/NFTLaunchpad'));
 const FanEngagement = lazyWithRetry(() => import('@/pages/FanEngagement'));
 
 const Referrals = lazyWithRetry(() => import('@/pages/Referrals'));
-const CollectionScreen = lazyWithRetry(() => import('@/pages/CollectionScreen'));
+const Collections = lazyWithRetry(() => import('@/pages/Collections'));
+const CollectionDetails = lazyWithRetry(() => import('@/pages/CollectionDetails'));
+const CollectionScreen = CollectionDetails;
 const SpaceRoom = lazyWithRetry(() => import('@/pages/SpaceRoom'));
 const LivestreamHub = lazyWithRetry(() => import('@/pages/Livestream').then(m => ({ default: m.LivestreamHub })));
 const LivestreamViewer = lazyWithRetry(() => import('@/pages/Livestream/LivestreamViewer').then(m => ({ default: m.LivestreamViewer })));
@@ -230,10 +231,10 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/genesis-forge" element={<PageWrapper><GenesisScreen /></PageWrapper>} />
                   <Route path="/limited-editions" element={<PageWrapper><LimitedNFTs /></PageWrapper>} />
                   <Route path="/trending-nfts" element={<PageWrapper><TrendingNFTs /></PageWrapper>} />
-                  <Route path="/collection" element={<PageWrapper><CollectionScreen /></PageWrapper>} />
-                  <Route path="/collection/:id" element={<PageWrapper><CollectionScreen /></PageWrapper>} />
-                  <Route path="/collections" element={<PageWrapper><CollectionScreen /></PageWrapper>} />
+                  <Route path="/collections" element={<PageWrapper><Collections /></PageWrapper>} />
+                  <Route path="/collections/:collectionId" element={<PageWrapper><CollectionDetails /></PageWrapper>} />
                   <Route path="/nft/:id" element={<PageWrapper><NFTDetail /></PageWrapper>} />
+                  <Route path="/nft/:nftId" element={<PageWrapper><NFTDetail /></PageWrapper>} />
                   <Route path="/explore/:type" element={<PageWrapper><ExploreList /></PageWrapper>} />
                   <Route path="/profile" element={<PageWrapper><ProtectedRoute><Profile /></ProtectedRoute></PageWrapper>} />
                   <Route path="/edit-profile" element={<PageWrapper><ProtectedRoute><EditProfile /></ProtectedRoute></PageWrapper>} />

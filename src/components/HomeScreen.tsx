@@ -395,7 +395,7 @@ const HomeScreen: React.FC = () => {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-white">Trending NFT Collections</h2>
           <button
-            onClick={() => navigate("/marketplace")}
+            onClick={() => navigate("/collections")}
             className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#0098EA] border-none bg-transparent cursor-pointer"
             aria-label="View all trending NFT collections"
           >
@@ -406,13 +406,13 @@ const HomeScreen: React.FC = () => {
           {mockCollections.map(col => (
             <NFTCollectionCard
               key={col.id}
+              id={String(col.id)}
               name={col.name}
               artist={col.artist}
               coverUrl={col.coverUrl}
               floorPrice={col.floorPrice}
               mintedCount={col.mintedCount}
               totalLimit={col.totalLimit}
-              onMint={() => confetti({ particleCount: 20 })}
             />
           ))}
         </div>

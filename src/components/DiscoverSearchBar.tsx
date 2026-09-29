@@ -163,7 +163,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute top-full left-0 right-0 mt-2 p-3 bg-zinc-950 border border-border rounded-2xl z-50 shadow-2xl overflow-hidden"
+            className="absolute top-full left-0 right-0 mt-2 p-3 bg-zinc-950 rounded-[8px] z-50 shadow-2xl overflow-hidden"
           >
             {!query ? (
               <div className="space-y-4">
@@ -181,7 +181,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                         setQuery(item.label);
                         addToHistory(item.label);
                       }}
-                      className="flex items-center gap-2 p-[6px] rounded-xl bg-muted/50 border border-border/50 hover:bg-muted hover:border-border/80 transition-all group/btn"
+                      className="flex items-center gap-2 p-[6px] rounded-[6px] bg-muted/50 hover:bg-muted transition-all group/btn"
                     >
                       <item.icon className={`h-4 w-4 ${item.color} group-hover/btn:scale-110 transition-transform`} />
                       <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80 group-hover/btn:text-foreground">
@@ -215,7 +215,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                             setQuery(term);
                             addToHistory(term);
                           }}
-                          className="group flex items-center justify-between p-2 rounded-xl hover:bg-muted/50 transition-all cursor-pointer"
+                          className="group flex items-center justify-between p-2 rounded-[6px] hover:bg-muted/50 transition-all cursor-pointer"
                         >
                           <div className="flex items-center gap-2">
                             <Clock className="h-3 w-3 text-muted-foreground/40 group-hover:text-blue-400 transition-colors" />
@@ -223,7 +223,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                           </div>
                           <button
                             onClick={(e) => removeFromHistory(term, e)}
-                            className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-rose-500/10 text-muted-foreground/30 hover:text-rose-500 transition-all rounded-lg"
+                            className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-rose-500/10 text-muted-foreground/30 hover:text-rose-500 transition-all rounded-[4px]"
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -243,10 +243,10 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                       addToHistory(query);
                       setIsFocused(false);
                     }}
-                    className="flex items-center justify-between p-2 rounded-xl hover:bg-muted/50 transition-all group/item"
+                    className="flex items-center justify-between p-2 rounded-[6px] hover:bg-muted/50 transition-all group/item"
                   >
                     <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-muted/50 group-hover/item:bg-blue-500/10 transition-colors">
+                      <div className="p-2 rounded-[4px] bg-muted/50 group-hover/item:bg-blue-500/10 transition-colors">
                         {action.icon}
                       </div>
                       <div className="flex flex-col items-start">

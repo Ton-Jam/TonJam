@@ -21,19 +21,26 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index, className = '' }) =
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4, scale: cardTokens.animation.hoverScale }}
-      whileTap={{ scale: cardTokens.animation.tapScale }}
+      whileHover={{ y: -3, scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
       transition={{ delay: index * 0.05 }}
       onClick={() => navigate(`/album/${album.id}`)}
-      style={{ width: cardTokens.album.width, borderRadius: cardTokens.global.borderRadius }}
-      className={`group relative cursor-pointer bg-transparent p-0 transition-all duration-300 flex flex-col justify-between ${className}`}
+      style={{
+        width: 'var(--card-width, 168px)',
+        borderRadius: 'var(--card-radius, 12px)',
+        padding: 'var(--card-padding, 10px)',
+      }}
+      className={`group relative cursor-pointer p-[10px] rounded-[12px] bg-white/[0.02] hover:bg-white/[0.05] transition-all duration-300 flex flex-col justify-between w-[168px] shrink-0 select-none ${className}`}
     >
-      <div className="relative aspect-square rounded-[3px] overflow-hidden mb-3 bg-neutral-900 border border-white/12 flex-shrink-0">
+      <div 
+        className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 flex-shrink-0"
+        style={{ borderRadius: 'var(--card-image-radius, 10px)' }}
+      >
         {album.coverUrl ? (
           <img
             src={album.coverUrl}
             alt={album.title}
-            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -52,16 +59,31 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index, className = '' }) =
             <MoreHorizontal className="w-3.5 h-3.5" />
         </button>
       </div>
-      <div className="px-0.5 flex flex-col justify-between flex-grow">
+      <div 
+        className="flex flex-col w-full min-w-0 mt-[6px]"
+        style={{ marginTop: 'var(--card-content-gap, 6px)' }}
+      >
         <div>
-          <h3 style={{ fontSize: cardTokens.album.titleSize }} className="text-white font-black uppercase tracking-tighter truncate group-hover:text-blue-400 transition-colors leading-tight">
+          <h3 
+            className="text-white font-semibold text-[14px] leading-[20px] tracking-tight truncate group-hover:text-blue-400 transition-colors"
+            style={{
+              fontSize: 'var(--card-title-size, 14px)',
+              lineHeight: 'var(--card-title-line-height, 20px)',
+            }}
+          >
             {album.title}
           </h3>
-          <p style={{ fontSize: cardTokens.album.artistSize }} className="text-white/70 font-bold uppercase tracking-wide mt-0.5 truncate">
+          <p 
+            className="text-white/70 font-normal text-[12px] leading-[17px] mt-0.5 truncate"
+            style={{
+              fontSize: 'var(--card-meta-size, 12px)',
+              lineHeight: 'var(--card-meta-line-height, 17px)',
+            }}
+          >
             {album.artist}
           </p>
         </div>
-        <p className="text-white/40 text-[9px] font-bold uppercase tracking-widest mt-1.5">
+        <p className="text-white/40 text-[10px] font-mono mt-1">
           {album.trackIds?.length || 0} tracks
         </p>
       </div>

@@ -55,14 +55,22 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
     <motion.div 
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -3 }}
+      whileHover={{ y: -3, scale: 1.01 }}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
       onClick={handleCardClick}
-      className="group relative cursor-pointer p-0 bg-transparent transition-all duration-200 flex flex-col w-[155px] shrink-0 select-none"
+      style={{
+        width: 'var(--card-width, 168px)',
+        borderRadius: 'var(--card-radius, 12px)',
+        padding: 'var(--card-padding, 10px)',
+      }}
+      className="group relative cursor-pointer p-[10px] rounded-[12px] bg-white/[0.02] hover:bg-white/[0.05] transition-all duration-200 flex flex-col w-[168px] shrink-0 select-none"
     >
       {/* Artwork */}
-      <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-neutral-900/60 shadow-md">
+      <div 
+        className="relative aspect-square w-full rounded-[10px] overflow-hidden bg-neutral-900/60"
+        style={{ borderRadius: 'var(--card-image-radius, 10px)' }}
+      >
         <img 
           src={nft.imageUrl || 'https://via.placeholder.com/150'} 
           alt={nft.title} 
@@ -82,14 +90,35 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
       </div>
       
       {/* Content */}
-      <div className="flex flex-col w-full min-w-0 mt-2.5">
-        <h4 className="text-[13px] font-semibold tracking-tight text-white/95 truncate w-full group-hover:text-blue-400 transition-colors">
+      <div 
+        className="flex flex-col w-full min-w-0 mt-[6px]"
+        style={{ marginTop: 'var(--card-content-gap, 6px)' }}
+      >
+        <h4 
+          className="text-[14px] leading-[20px] font-semibold tracking-tight text-white/95 truncate w-full group-hover:text-blue-400 transition-colors"
+          style={{
+            fontSize: 'var(--card-title-size, 14px)',
+            lineHeight: 'var(--card-title-line-height, 20px)',
+          }}
+        >
           {nft.title}
         </h4>
-        <p className="text-[11px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors">
+        <p 
+          className="text-[12px] leading-[17px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors"
+          style={{
+            fontSize: 'var(--card-meta-size, 12px)',
+            lineHeight: 'var(--card-meta-line-height, 17px)',
+          }}
+        >
           {nft.creator || nft.artist}
         </p>
-        <div className="flex items-center gap-1 mt-1 text-[11px] font-medium text-white/70 font-mono">
+        <div 
+          className="flex items-center gap-1 mt-1 text-[12px] leading-[17px] font-medium text-white/80 font-mono"
+          style={{
+            fontSize: 'var(--card-meta-size, 12px)',
+            lineHeight: 'var(--card-meta-line-height, 17px)',
+          }}
+        >
           <span className="text-blue-400 font-bold">{nft.price}</span>
           <span className="text-white/40">TON</span>
         </div>

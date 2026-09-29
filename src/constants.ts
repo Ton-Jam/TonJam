@@ -1,5 +1,6 @@
 import { Track, NFTItem, Artist, Post, Playlist, Album, UserProfile } from './types';
 import { getPlaceholderImage } from './lib/utils';
+import { Zap, Moon, Waves, Sparkles, Factory, Coffee, Headphones, Guitar, Music, Piano } from 'lucide-react';
 
 // Official TonJam Brand Assets
 export const APP_LOGO = "https://i.postimg.cc/63GsZHzq/TonJam-icon.png"; 
@@ -447,8 +448,6 @@ Everything is clear in the neon light`
     createdAt: '2024-04-20T00:00:00Z'
   },
 ];
-
-import { Zap, Moon, Waves, Sparkles, Factory, Coffee, Headphones, Guitar, Music, Piano } from 'lucide-react';
 
 export const MOCK_ALBUMS: Album[] = [
   {

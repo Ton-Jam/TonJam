@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
-export const CATEGORIES = ["All", "Music", "Playlists", "NFTs", "Artists"] as const;
+export const CATEGORIES = ["All", "Music", "NFTs", "Artists"] as const;
 export type HomeCategory = (typeof CATEGORIES)[number];
 
 interface HomeGenreFilterBarProps {

@@ -67,7 +67,7 @@ const Marketplace: React.FC = () => {
   };
 
   const handleSelectCollection = (col: any) => {
-    navigate(`/album/${col.id}`);
+    navigate(`/collections/${col.id}`);
   };
 
   const handleSelectArtist = (art: any) => {

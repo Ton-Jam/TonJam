@@ -51,7 +51,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
     <div
       id={id}
       className={cn(
-        'w-full min-h-screen bg-black text-white font-sans overflow-x-hidden',
+        'w-full min-h-screen bg-transparent text-white font-sans overflow-x-hidden',
         bottomSpacingClasses[bottomSpacing],
         className
       )}

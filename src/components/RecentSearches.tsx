@@ -87,7 +87,7 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
   return (
     <div className={`w-full flex items-center justify-between gap-3 select-none py-1 ${className}`}>
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/15 rounded-lg shrink-0 mr-1">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/15 rounded-[4px] shrink-0 mr-1">
           <History className="w-3.5 h-3.5 text-blue-400 shrink-0" />
           <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">Recent Searches</span>
         </div>
@@ -101,7 +101,7 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.15 }}
               onClick={() => handleSelect(term)}
-              className="flex items-center gap-1.5 bg-[#132354] hover:bg-blue-600 active:bg-blue-700 px-3 py-1 rounded-full cursor-pointer transition-colors shrink-0 group shadow-sm"
+              className="flex items-center gap-1.5 bg-[#132354] hover:bg-blue-600 active:bg-blue-700 px-3 py-1 rounded-[6px] cursor-pointer transition-colors shrink-0 group shadow-sm"
             >
               <Search className="w-3 h-3 text-slate-400 group-hover:text-white shrink-0 transition-colors" />
               <span className="text-xs font-semibold text-slate-200 group-hover:text-white transition-colors">
@@ -110,7 +110,7 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
               <button
                 type="button"
                 onClick={(e) => handleRemove(e, term)}
-                className="text-slate-400 hover:text-red-300 p-0.5 rounded-full hover:bg-black/20 transition-colors ml-0.5"
+                className="text-slate-400 hover:text-red-300 p-0.5 rounded-[4px] hover:bg-black/20 transition-colors ml-0.5"
                 title="Remove search"
               >
                 <X className="w-3 h-3" />

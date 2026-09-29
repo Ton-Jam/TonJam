@@ -16,10 +16,21 @@ interface LibraryContextType {
 
 const LibraryContext = createContext<LibraryContextType | null>(null);
 
+const FALLBACK_LIBRARY_CONTEXT: LibraryContextType = {
+  testingTracks: [],
+  injectTestingTracks: () => ({ success: true, count: 0, message: '' }),
+  clearTestingTracks: () => ({ success: true, message: '' }),
+  isTestingTracksInjected: false,
+  recentlyPlayed: [],
+  selectedGenre: 'All',
+  setSelectedGenre: () => {},
+  availableGenres: ['All', 'Pop', 'Electronic', 'Hip Hop', 'Rock', 'Ambient', 'Synthwave', 'Lo-Fi'],
+};
+
 export const useLibrary = () => {
   const context = useContext(LibraryContext);
   if (!context) {
-    throw new Error('useLibrary must be used within a LibraryProvider');
+    return FALLBACK_LIBRARY_CONTEXT;
   }
   return context;
 };

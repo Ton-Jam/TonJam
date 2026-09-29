@@ -1,6 +1,6 @@
 "use client"
 
-import { useTheme } from "next-themes"
+import { useTheme } from "@/contexts/ThemeContext"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { HugeiconsIcon } from "@hugeicons/react"
 import CheckmarkCircle02Icon from "@hugeicons/core-free-icons/dist/esm/CheckmarkCircle02Icon"

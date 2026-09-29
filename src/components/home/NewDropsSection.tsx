@@ -73,7 +73,7 @@ export const NewDropsSection: React.FC = () => {
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-          <h2 className="text-lg sm:text-xl font-black tracking-tight text-white">
+          <h2 className="text-section-title font-bold text-white">
             New Releases
           </h2>
           {selectedGenre !== 'All' && (
@@ -132,7 +132,8 @@ export const NewDropsSection: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.2 }}
-                className="w-[140px] sm:w-[155px] shrink-0 snap-start"
+                className="w-[168px] shrink-0 snap-start"
+                style={{ width: 'var(--card-width, 168px)' }}
               >
                 <TrackCard 
                   track={track} 

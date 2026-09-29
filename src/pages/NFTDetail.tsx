@@ -120,7 +120,8 @@ import { CollectionSummaryCards } from '@/components/marketplace/CollectionSumma
 import { Interactive3DViewer } from "@/components/Interactive3DViewer";
 
 const NFTDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, nftId } = useParams<{ id?: string; nftId?: string }>();
+  const effectiveId = nftId || id;
   const navigate = useNavigate();
   const {
     addNotification,
@@ -135,8 +136,8 @@ const NFTDetail: React.FC = () => {
     userProfile,
   } = useAudio();
   const localNft = useMemo(() => {
-    return allNFTs.find((n) => n.id === id) || null;
-  }, [id, allNFTs]);
+    return allNFTs.find((n) => n.id === effectiveId) || null;
+  }, [effectiveId, allNFTs]);
 
   const [floorPriceTrend, setFloorPriceTrend] = useState<{ date: string; price: number }[]>([]);
   const [isLoadingTrend, setIsLoadingTrend] = useState(true);
@@ -614,27 +615,6 @@ const NFTDetail: React.FC = () => {
     );
   }, [localNft]);
 
-  const handleTip = (amount: number) => {
-    setIsTipping(false);
-
-    // Simulate transaction
-    addNotification(`Sending ${amount} GRAM to ${localNft?.creator}...`, "info");
-
-    setTimeout(() => {
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ["#3b82f6", "#ffffff", "#60a5fa"],
-      });
-
-      addNotification(
-        `You sent ${amount} GRAM to ${localNft?.creator}. Thank you for supporting the artist!`,
-        "success",
-      );
-    }, 1500);
-  };
-
   const moreFromCreator = useMemo(() => {
     if (!localNft) return [];
     return allNFTs
@@ -657,9 +637,29 @@ const NFTDetail: React.FC = () => {
         (a, b) => (b.offers?.length || 0) - (a.offers?.length || 0),
       );
     }
-
     return filtered.slice(0, 4);
   }, [localNft, associatedTrack, allNFTs, relatedSort]);
+
+  const handleTip = (amount: number) => {
+    setIsTipping(false);
+
+    // Simulate transaction
+    addNotification(`Sending ${amount} GRAM to ${localNft?.creator}...`, "info");
+
+    setTimeout(() => {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#3b82f6", "#ffffff", "#60a5fa"],
+      });
+
+      addNotification(
+        `You sent ${amount} GRAM to ${localNft?.creator}. Thank you for supporting the artist!`,
+        "success",
+      );
+    }, 1500);
+  };
 
   if (allNFTs.length === 0)
     return (

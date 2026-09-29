@@ -349,21 +349,6 @@ const JamSpaceMain: React.FC = () => {
           </div>
         )}
 
-      {/* MOBILE FLOATING ACTION BUTTON (FAB) - Positioned safely above mini-player and bottom nav, hidden on desktop */}
-      <motion.button
-        id="floating-create-post-btn"
-        type="button"
-        onClick={() => setIsComposeOpen(true)}
-        aria-label="Create new JamSpace post"
-        className={`lg:hidden fixed ${
-          currentTrack ? 'bottom-36' : 'bottom-20'
-        } right-4 sm:right-6 min-h-[44px] min-w-[44px] px-4 py-2.5 bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-black font-bold text-xs uppercase tracking-wider rounded-full shadow-lg shadow-[#00B4D8]/25 z-40 cursor-pointer flex items-center justify-center gap-2 border-none transition-all duration-300 active:scale-95`}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <Plus className="w-4 h-4 stroke-[2.5] shrink-0" />
-        <span className="font-bold">Post</span>
-      </motion.button>
 
       {/* CREATE POST MODAL OVERLAY */}
       <AnimatePresence>

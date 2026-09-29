@@ -85,13 +85,6 @@ const Settings: React.FC = () => {
     return localStorage.getItem('tonjam_font_size') || 'standard';
   });
 
-  const handleFontSizeChange = (newSize: string) => {
-    localStorage.setItem('tonjam_font_size', newSize);
-    setFontSizeState(newSize);
-    window.dispatchEvent(new Event('tonjam_font_size_changed'));
-    toast.success('Font proportions modified successfully');
-  };
-
   const { totalSizeMB, cachedCount, clearAllCache, isPurging } = useCacheManagement();
   const tonAddress = useTonAddress();
   
@@ -108,6 +101,13 @@ const Settings: React.FC = () => {
 
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'account');
+
+  const handleFontSizeChange = (newSize: string) => {
+    localStorage.setItem('tonjam_font_size', newSize);
+    setFontSizeState(newSize);
+    window.dispatchEvent(new Event('tonjam_font_size_changed'));
+    toast.success('Font proportions modified successfully');
+  };
 
   // Form State
   const [profile, setProfile] = useState({

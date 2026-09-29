@@ -22,7 +22,7 @@ export const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="absolute top-12 left-0 right-0 bg-[#0c133a] rounded-[12px] overflow-hidden shadow-2xl z-50 p-1"
+      className="absolute top-12 left-0 right-0 bg-[#0c133a] rounded-[6px] overflow-hidden shadow-2xl z-50 p-1"
     >
       <div className="space-y-0.5">
         {isSearching && (
@@ -42,7 +42,7 @@ export const SearchSuggestionList: React.FC<SearchSuggestionListProps> = ({
             <button
               key={`suggestion-${index}-${suggestion}`}
               onClick={() => onSelect(suggestion)}
-              className="w-full text-left px-4 py-3 rounded-[12px] hover:bg-white/5 active:scale-[0.99] transition-all flex items-center justify-between group cursor-pointer"
+              className="w-full text-left px-4 py-3 rounded-[6px] hover:bg-white/5 active:scale-[0.99] transition-all flex items-center justify-between group cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <Search className="w-4 h-4 text-slate-500 group-hover:text-white" />

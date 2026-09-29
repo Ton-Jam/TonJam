@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Share2, AlertOctagon, Wallet, ListPlus, Flame, Gift } from 'lucide-react';
 import { ArtistProfile } from '@/components/ArtistProfile';
+import { toast } from 'sonner';
 
 import { MintNFTModal } from '@/components/modal/MintNFTModal';
 
@@ -105,13 +106,13 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             </p>
             <div className="space-y-2 pt-1">
               <button 
-                onClick={() => { alert('Connected via TON Connect'); closeModal(); }}
+                onClick={() => { toast.success('Connected via TON Connect'); closeModal(); }}
                 className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 rounded-xl text-xs font-black uppercase tracking-widest text-white transition-all flex items-center justify-center gap-2 shadow-lg"
               >
                 <span>TON Connect UI</span>
               </button>
               <button 
-                onClick={() => { alert('Connected via EVM Wallet'); closeModal(); }}
+                onClick={() => { toast.success('Connected via EVM Wallet'); closeModal(); }}
                 className="w-full py-3 px-4 bg-[#1E2230] hover:bg-slate-700 rounded-xl text-xs font-black uppercase tracking-widest text-slate-300 transition-all flex items-center justify-center gap-2"
               >
                 <span>MetaMask / Injected EVM</span>
@@ -133,7 +134,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               {['Sonic Waves', 'Cyberpunk Beats', 'DeFi Chill Lounge'].map((pl, idx) => (
                 <button
                   key={idx}
-                  onClick={() => { alert(`Added to ${pl}`); closeModal(); }}
+                  onClick={() => { toast.success(`Added to ${pl}`); closeModal(); }}
                   className="w-full p-2.5 bg-[#1E2230] hover:bg-purple-950/40 hover:text-purple-300 rounded-xl text-left text-xs font-bold text-slate-200 transition-all"
                 >
                   {pl}
@@ -154,13 +155,13 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             </p>
             <div className="grid grid-cols-2 gap-2 pt-2">
               <button 
-                onClick={() => { alert('Tipped 1 TON!'); closeModal(); }}
+                onClick={() => { toast.success('Tipped 1 TON!'); closeModal(); }}
                 className="py-2.5 px-4 bg-emerald-500 hover:bg-emerald-600 rounded-xl text-xs font-bold text-white transition-all active:scale-95"
               >
                 Tip 1 TON
               </button>
               <button 
-                onClick={() => { alert('Tipped 5 TON!'); closeModal(); }}
+                onClick={() => { toast.success('Tipped 5 TON!'); closeModal(); }}
                 className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-xs font-bold text-white transition-all active:scale-95"
               >
                 Tip 5 TON
@@ -180,13 +181,13 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             </p>
             <div className="grid grid-cols-2 gap-2 pt-2">
               <button 
-                onClick={() => { alert('Bid Placed'); closeModal(); }}
+                onClick={() => { toast.success('Bid Placed'); closeModal(); }}
                 className="py-2.5 px-4 bg-rose-500 hover:bg-rose-600 rounded-xl text-xs font-bold text-white transition-all active:scale-95"
               >
                 Place Bid
               </button>
               <button 
-                onClick={() => { alert('Mint Sequence Initiated'); closeModal(); }}
+                onClick={() => { toast.success('Mint Sequence Initiated'); closeModal(); }}
                 className="py-2.5 px-4 bg-[#1E2230] hover:bg-slate-700 rounded-xl text-xs font-bold text-slate-300 transition-all active:scale-95"
               >
                 Mint NFT Edition
@@ -280,10 +281,15 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
+const FALLBACK_MODAL_CONTEXT: ModalContextType = {
+  openModal: () => {},
+  closeModal: () => {},
+};
+
 export const useModal = () => {
   const context = useContext(ModalContext);
   if (!context) {
-    throw new Error('useModal must be used within a ModalProvider');
+    return FALLBACK_MODAL_CONTEXT;
   }
   return context;
 };

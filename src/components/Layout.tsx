@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useI18n } from '@/contexts/I18nContext';
 import { getTonBalance } from '@/services/tonService';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { BackButton } from '@/components/BackButton';
@@ -360,6 +361,36 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     } as any;
   }, [optionsTrack, allNFTs]);
 
+  // $TJ Balance display for Home Header & pulse animation on update
+  const rawTjVal = userProfile?.tjBalance ?? userProfile?.jamBalance;
+  const [isTjPulsing, setIsTjPulsing] = useState(false);
+  const prevTjValRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (typeof rawTjVal === 'number') {
+      if (prevTjValRef.current !== undefined && prevTjValRef.current !== rawTjVal) {
+        setIsTjPulsing(true);
+        const timer = setTimeout(() => setIsTjPulsing(false), 1200);
+        prevTjValRef.current = rawTjVal;
+        return () => clearTimeout(timer);
+      }
+      prevTjValRef.current = rawTjVal;
+    }
+  }, [rawTjVal]);
+
+  const displayTj = useMemo(() => {
+    if (typeof rawTjVal === 'number' && rawTjVal > 0) {
+      if (rawTjVal >= 10000) {
+        return `${(rawTjVal / 1000).toFixed(0)}k TJ`;
+      }
+      if (rawTjVal >= 1000) {
+        return `${(rawTjVal / 1000).toFixed(1)}k TJ`;
+      }
+      return `${rawTjVal} TJ`;
+    }
+    return '$TJ';
+  }, [rawTjVal]);
+
   return (
     <TooltipProvider>
       {isLoginPage ? (
@@ -367,9 +398,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </main>
       ) : (
-        <div className="flex min-h-screen bg-black text-foreground transition-colors duration-300 relative">
+        <div className="flex min-h-screen bg-[#07111F] text-foreground transition-colors duration-300 relative">
           {/* Ambient Background Effects */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-black" />
+      <div 
+        className="fixed inset-0 z-0 pointer-events-none overflow-hidden" 
+        style={{
+          background: "radial-gradient(circle at 50% -10%, rgba(0, 152, 234, 0.12), transparent 42%), #07111F"
+        }}
+      />
 
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-2 focus:py-2 focus:rounded-md focus:font-bold">
         Skip to content
@@ -383,8 +419,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             "lg:left-64",
             isHeaderHidden ? "-translate-y-full" : "translate-y-0",
             isScrolled
-              ? "bg-[#060B18]/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.45)]"
-              : "bg-[#060B18]/30 backdrop-blur-md"
+              ? "bg-[#0A1628]/85 backdrop-blur-[18px] shadow-[0_8px_30px_rgba(0,0,0,0.45)]"
+              : "bg-[#0A1628]/55 backdrop-blur-[18px]"
           )}
         >
           {/* LEFT: TonJam Logo & Brand */}
@@ -419,16 +455,57 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Tooltip>
           </div>
 
-          {/* RIGHT: Notifications & Profile */}
+          {/* RIGHT: [ $TJ ] [ 🔔 ] [ Profile ] */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* $TJ Coin / Earn Control */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button
+                  type="button"
+                  onClick={() => navigate('/tasks')}
+                  animate={isTjPulsing ? {
+                    scale: [1, 1.08, 0.96, 1.04, 1],
+                    backgroundColor: [
+                      'rgba(255, 255, 255, 0.06)',
+                      'rgba(0, 180, 216, 0.25)',
+                      'rgba(0, 180, 216, 0.15)',
+                      'rgba(255, 255, 255, 0.06)'
+                    ]
+                  } : {}}
+                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-3 py-1.5 flex items-center gap-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] transition-all text-xs font-bold text-white border-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#0098EA] select-none shrink-0"
+                  aria-label="Open Earn TJ daily tasks"
+                >
+                  <motion.img
+                    src={TJ_COIN_ICON}
+                    alt="$TJ"
+                    animate={isTjPulsing ? { rotate: [0, -15, 15, -8, 0], scale: [1, 1.25, 1] } : {}}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                    className="w-4 h-4 sm:w-4.5 sm:h-4.5 object-contain shrink-0"
+                  />
+                  <span className={cn(
+                    "font-mono font-bold tracking-tight text-xs sm:text-sm transition-colors duration-300",
+                    isTjPulsing ? "text-cyan-200 drop-shadow-[0_0_8px_rgba(0,180,216,0.6)]" : "text-cyan-300"
+                  )}>
+                    {displayTj}
+                  </span>
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Open Earn TJ daily tasks</TooltipContent>
+            </Tooltip>
+
+            {/* Notifications */}
             <NotificationBell />
 
+            {/* Profile */}
             {user ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link 
                     to="/profile" 
-                    className="flex items-center gap-2 p-0.5 rounded-full transition-all hover:scale-105 active:scale-95 outline-none border-none"
+                    className="min-w-[40px] min-h-[40px] flex items-center justify-center p-0.5 rounded-full transition-all hover:scale-105 active:scale-95 outline-none border-none shrink-0"
                     aria-label="Your Profile"
                   >
                     <Avatar className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-900 ring-1 ring-white/10">
@@ -450,7 +527,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <TooltipTrigger asChild>
                   <button 
                     onClick={() => navigate('/login')}
-                    className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 active:scale-95 text-zinc-300 hover:text-white transition-all border-none outline-none cursor-pointer"
+                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 active:scale-95 text-zinc-300 hover:text-white transition-all border-none outline-none cursor-pointer shrink-0"
                     aria-label="Sign In"
                   >
                     <UserIcon className="h-4 w-4" strokeWidth={2.2} />
@@ -599,7 +676,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         >
           <nav 
             id="tonjam-mobile-nav-bar"
-            className="h-full w-full bg-black/95 backdrop-blur-xl border-t border-[#c0c0c0]/30 px-2 flex justify-around items-center" 
+            className="h-full w-full bg-[#0A1628]/85 backdrop-blur-[18px] border-t border-[#c0c0c0]/20 px-2 flex justify-around items-center" 
             aria-label="Mobile Navigation"
           >
             <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
@@ -629,8 +706,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     </TooltipProvider>
   );
 };
-
-import { useI18n } from '@/contexts/I18nContext';
 
 const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any; userProfile: any; signOut: () => void; onNavigate?: () => void }) => {
   const { isArtist, isAdmin } = useUserRole();

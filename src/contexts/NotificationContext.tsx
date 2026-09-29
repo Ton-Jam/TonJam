@@ -36,9 +36,35 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
+const FALLBACK_NOTIFICATION_CONTEXT: NotificationContextType = {
+  notifications: [],
+  preferences: {
+    userId: '',
+    directAlerts: true,
+    marketActivity: true,
+    dropsAndReleases: true,
+    socialSignals: true,
+    bidAlerts: true,
+    saleEvents: true,
+    revenueThreshold: 100,
+  },
+  unreadCount: 0,
+  markAsRead: () => {},
+  updatePreferences: () => {},
+  refreshNotifications: () => {},
+  addNotification: () => {},
+  requestPushPermission: async () => false,
+  priceAlerts: [],
+  addPriceAlert: async () => {},
+  removePriceAlert: async () => {},
+  activePriceDropModal: null,
+  closePriceDropModal: () => {},
+  simulatePriceDrop: () => {},
+};
+
 export const useNotification = () => {
   const context = useContext(NotificationContext);
-  if (!context) throw new Error('useNotification must be used within NotificationProvider');
+  if (!context) return FALLBACK_NOTIFICATION_CONTEXT;
   return context;
 };
 

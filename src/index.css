@@ -34,15 +34,43 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
 
+  /* Card dimensions */
+  --card-width: 168px;
+  --card-radius: 12px;
+  --card-image-radius: 10px;
+
+  /* Spacing */
+  --card-gap: 12px;
+  --card-padding: 10px;
+  --card-content-gap: 6px;
+
+  /* Image */
+  --card-image-size: 148px;
+  --card-image-ratio: 1 / 1;
+
+  /* Typography */
+  --card-title-size: 14px;
+  --card-title-line-height: 20px;
+  --card-meta-size: 12px;
+  --card-meta-line-height: 17px;
+
+  /* Actions */
+  --card-action-height: 34px;
+  --card-action-radius: 8px;
+
+  /* Borders */
+  --card-border-width: 1px;
+  --card-border-color: rgba(255,255,255,0.08);
+
   /* Color Tokens */
-  --color-bg-primary: #050505;
-  --color-bg-secondary: #0A0A0A;
-  --background: #050505;
+  --color-bg-primary: #07111F;
+  --color-bg-secondary: #0A1628;
+  --background: #07111F;
   --foreground: #FFFFFF;
   --primary: #00B4D8;
   --primary-foreground: #FFFFFF;
-  --surface: #050505;
-  --elevated: #0A0A0A;
+  --surface: #07111F;
+  --elevated: #0A1628;
 
   /* Border Tokens */
   --border-subtle: 1px solid rgba(255, 255, 255, 0.12);
@@ -59,7 +87,7 @@
   /* Card Tokens */
   --card-background: transparent;
   --card-border: 1px solid rgba(255, 255, 255, 0.12);
-  --card-radius: 3px;
+  --card-radius: 12px;
   --card-hover-border: rgba(255, 255, 255, 0.18);
   --card-hover-background: rgba(255, 255, 255, 0.025);
 
@@ -83,13 +111,13 @@
   /* Header Tokens */
   --header-background: transparent;
   --header-border: transparent;
-  --header-scrolled-background: rgba(5, 5, 5, 0.88);
+  --header-scrolled-background: rgba(10, 22, 40, 0.85);
   --header-scrolled-border: 1px solid rgba(255, 255, 255, 0.10);
-  --header-blur: 12px;
+  --header-blur: 18px;
 
   /* Glass / Backdrop Tokens */
-  --glass-background: rgba(5, 5, 5, 0.88);
-  --glass-blur: 12px;
+  --glass-background: rgba(10, 22, 40, 0.55);
+  --glass-blur: 18px;
 
   /* Spacing Tokens */
   --space-1: 4px;
@@ -393,8 +421,9 @@
   }
 
   body {
-    background-color: #000000 !important;
-    background: #000000 !important;
+    background-color: #07111F !important;
+    background: radial-gradient(circle at 50% -10%, rgba(0, 152, 234, 0.12), transparent 42%), #07111F !important;
+    background-attachment: fixed;
     color: #FFFFFF;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;

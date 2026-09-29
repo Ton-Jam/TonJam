@@ -14,6 +14,17 @@ export interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType | null>(null);
 
+const FALLBACK_WALLET_CONTEXT: WalletContextType = {
+  address: '',
+  wallet: null,
+  isConnected: false,
+  tonConnectUI: null as any,
+  connectWallet: () => {},
+  disconnectWallet: async () => {},
+  evmAddress: null,
+  isEvmConnected: false,
+};
+
 export const useWallet = () => {
   const context = useContext(WalletContext);
   if (!context) {

@@ -18,6 +18,15 @@ const PlaylistDetail: React.FC = () => {
   const { playlists, playTrack, allTracks, removeTrackFromPlaylist, deletePlaylist, updatePlaylist, reorderTrackInPlaylist, addNotification, likedTrackIds, userProfile, toggleLikeTrack, setHeaderTitle, playlistFolders, movePlaylistToFolder } = useAudio();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [isDeletePlaylistModalOpen, setIsDeletePlaylistModalOpen] = useState(false);
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
+  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [trackToRemove, setTrackToRemove] = useState<string | null>(null);
+  const [isLiked, setIsLiked] = useState(false);
+
   const playlist = useMemo(() => {
     if (id === 'liked-songs') {
       return {
@@ -51,15 +60,6 @@ const PlaylistDetail: React.FC = () => {
       setHeaderTitle('');
     };
   }, [playlist?.title, setHeaderTitle]);
-  
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-  const [isDeletePlaylistModalOpen, setIsDeletePlaylistModalOpen] = useState(false);
-  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
-  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
-  const [trackToRemove, setTrackToRemove] = useState<string | null>(null);
-  const [isLiked, setIsLiked] = useState(false);
 
   const playlistTracks = useMemo(() => {
     if (!playlist || !playlist.trackIds) return [];

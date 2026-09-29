@@ -29,6 +29,7 @@ import { Folder } from "lucide-react";
 export default function UploadTrackScreen() {
   const navigate = useNavigate();
   const { addNotification, addUserTrack, userProfile, setHeaderTitle } = useAudio();
+  const [tonConnectUI] = useTonConnectUI();
 
   React.useEffect(() => {
     setHeaderTitle('Forge Protocol');
@@ -361,9 +362,6 @@ export default function UploadTrackScreen() {
       setIsUploading(false);
     }
   };
-
-  const [tonConnectUI] = useTonConnectUI();
-  // ... (existing state)
 
   const handleMint = async () => {
     if (!audioFile || !coverFile || !title || !genre) {

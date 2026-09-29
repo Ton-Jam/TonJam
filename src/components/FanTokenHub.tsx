@@ -90,6 +90,7 @@ export const FanTokenHub: React.FC<FanTokenHubProps> = ({ artist }) => {
   const [selectedTriviaOption, setSelectedTriviaOption] = useState<number | null>(null);
   const [triviaSubmitted, setTriviaSubmitted] = useState(false);
   const [currentTriviaIdx, setCurrentTriviaIdx] = useState(0);
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
 
   const selectedTrivia = useMemo(() => {
     // Deterministic trivia selection per artist, or standard rotation
@@ -522,15 +523,15 @@ export const FanTokenHub: React.FC<FanTokenHubProps> = ({ artist }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {EXCLUSIVE_ITEMS.map((item, idx) => {
+          {EXCLUSIVE_ITEMS.map((item) => {
             const isUnlocked = unlockedContentIds.includes(item.id);
-            const [localCodeCopied, setLocalCodeCopied] = useState(false);
+            const isCodeCopied = copiedCodeId === item.id;
 
             const handleCopyToClipboard = (code: string) => {
               navigator.clipboard.writeText(code);
-              setLocalCodeCopied(true);
-              toast.success('Discout voucher copied successfully!');
-              setTimeout(() => setLocalCodeCopied(false), 2000);
+              setCopiedCodeId(item.id);
+              toast.success('Discount voucher copied successfully!');
+              setTimeout(() => setCopiedCodeId(null), 2000);
             };
 
             return (
@@ -598,7 +599,7 @@ export const FanTokenHub: React.FC<FanTokenHubProps> = ({ artist }) => {
                             className="p-1.5 bg-white/5 hover:bg-white/10 text-white rounded-lg cursor-pointer transition-all"
                             title="Copy discount code"
                           >
-                            {localCodeCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            {isCodeCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                           </button>
                         </div>
                       )}

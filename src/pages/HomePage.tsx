@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { HomePullToRefresh } from "@/components/home/HomePullToRefresh";
 
-// 1. Transparent Header is provided by Layout
+// 2. Greeting
 // 3. Category/Filter Chips
 import { HomeGenreFilterBar } from "@/components/home/HomeGenreFilterBar";
 // 4. Made for You
@@ -17,7 +17,9 @@ import { NewDropsSection } from "@/components/home/NewDropsSection";
 import { FeaturedArtistsSection } from "@/components/home/FeaturedArtistsSection";
 // 9. Trending Music NFTs
 import { TrendingNFTMusicSection } from "@/components/home/TrendingNFTMusicSection";
-// 10. JamSpace/Community Preview
+// 10. Playlists & Collections
+import { HomePlaylistsSection, HomeCollectionsSection } from "@/components/home/HomePlaylistsCollectionsSection";
+// 11. JamSpace/Community Preview
 import { LiveSpacesSection } from "@/components/home/LiveSpacesSection";
 
 // Existing Footer
@@ -43,60 +45,68 @@ export const HomePage: React.FC = () => {
       animate={true}
       maxWidth="full"
       noPadding={true}
-      className="bg-black relative selection:bg-primary/30 select-none overflow-x-clip"
+      className="bg-transparent relative selection:bg-primary/30 select-none overflow-x-clip"
       containerClassName="w-full"
       topSpacing="none"
       bottomSpacing="player"
     >
       <HomePullToRefresh onRefresh={handleRefresh}>
-        <div key={refreshKey} className="w-full space-y-7 sm:space-y-9 pt-1 sm:pt-2">
-          {/* Subtle ambient lighting glows */}
-          <div
-            className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-primary/10 rounded-full pointer-events-none -z-10"
-            style={{ filter: "blur(100px)", transform: "translateZ(0)" }}
-          />
-          <div
-            className="absolute top-[900px] right-0 w-[350px] h-[350px] bg-primary/5 rounded-full pointer-events-none -z-10"
-            style={{ filter: "blur(100px)", transform: "translateZ(0)" }}
-          />
+        <div key={refreshKey} className="w-full space-y-6 sm:space-y-8 pt-1 sm:pt-2">
+          {/* Greeting */}
+          <div className="px-4 sm:px-6 lg:px-8 text-left pt-1">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+              What’s up TON, Let’s Jam Up!
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-400 font-normal mt-0.5">
+              Discover music, artists and Music NFTs.
+            </p>
+          </div>
 
-          {/* 3. Category / Filter Chips */}
+          {/* Category / Filter Chips */}
           <HomeGenreFilterBar
             activeCategory={activeCategory}
             onSelectCategory={setActiveCategory}
           />
 
-          {/* 4. Made for You */}
-          {(activeCategory === "All" || activeCategory === "Music" || activeCategory === "Playlists") && (
+          {/* Made for You */}
+          {(activeCategory === "All" || activeCategory === "Music") && (
             <MadeForYouSection />
           )}
 
-          {/* 5. Recently Played */}
+          {/* Recently Played */}
           {(activeCategory === "All" || activeCategory === "Music") && (
             <RecentlyPlayedSection />
           )}
 
-          {/* 6. Trending on TonJam */}
+          {/* Trending on TonJam */}
           {(activeCategory === "All" || activeCategory === "Music" || activeCategory === "NFTs") && (
             <TrendingMusicSection />
           )}
 
-          {/* 7. New Releases */}
+          {/* New Releases */}
           {(activeCategory === "All" || activeCategory === "Music") && (
             <NewDropsSection />
           )}
 
-          {/* 8. Popular Artists */}
+          {/* Popular Artists */}
           {(activeCategory === "All" || activeCategory === "Artists") && (
             <FeaturedArtistsSection />
           )}
 
-          {/* 9. Trending Music NFTs */}
+          {/* Trending Music NFTs */}
           {(activeCategory === "All" || activeCategory === "NFTs") && (
             <TrendingNFTMusicSection />
           )}
 
-          {/* 10. JamSpace / Community Preview */}
+          {/* Playlists & Collections */}
+          {(activeCategory === "All" || activeCategory === "Music") && (
+            <HomePlaylistsSection />
+          )}
+          {(activeCategory === "All" || activeCategory === "NFTs") && (
+            <HomeCollectionsSection />
+          )}
+
+          {/* JamSpace / Community Preview */}
           {(activeCategory === "All" || activeCategory === "Music") && (
             <LiveSpacesSection />
           )}

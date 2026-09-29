@@ -4,6 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TJ_COIN_ICON } from '@/constants';
 import { Check, CheckCircle2, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { TJTaskProgress } from '@/components/TJTaskProgress';
 
 export interface DailyMissionsProps {
   missions?: DailyMission[];
@@ -29,6 +30,7 @@ export const DailyMissions: React.FC<DailyMissionsProps> = ({
           <Skeleton className="h-5 w-32 bg-zinc-800/80 rounded" />
           <Skeleton className="h-4 w-20 bg-zinc-800/80 rounded" />
         </div>
+        <TJTaskProgress isLoading={true} showCardWrapper={true} />
         <div className="space-y-2.5">
           {[1, 2, 3].map((idx) => (
             <div
@@ -62,6 +64,7 @@ export const DailyMissions: React.FC<DailyMissionsProps> = ({
             {title}
           </h3>
         </div>
+        <TJTaskProgress missions={[]} showCardWrapper={true} />
         <div className="p-6 text-center rounded-xl bg-surface space-y-1">
           <p className="text-xs font-semibold text-text-primary">
             No daily missions available
@@ -87,6 +90,13 @@ export const DailyMissions: React.FC<DailyMissionsProps> = ({
           </span>
         )}
       </div>
+
+      {/* Daily Task Completion Progress Bar */}
+      <TJTaskProgress
+        missions={missions}
+        isLoading={isLoading}
+        showCardWrapper={true}
+      />
 
       <div className="space-y-2.5">
         {missions.map((mission) => {

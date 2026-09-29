@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Heart, Bookmark, Eye, Layers, Clock } from 'lucide-react';
 import { NFTPlaceholder } from '../placeholders/NFTPlaceholder';
@@ -47,6 +48,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
   onBookmark,
   className = '',
 }) => {
+  const navigate = useNavigate();
   const [imgFailed, setImgFailed] = useState(false);
   const [isLikedState, setIsLikedState] = useState(nft?.isLiked || false);
   const [isBookmarkedState, setIsBookmarkedState] = useState(nft?.isBookmarked || false);
@@ -159,6 +161,22 @@ export const NFTCard: React.FC<NFTCardProps> = ({
           <span className="text-blue-400 font-bold">{nft.price}</span>
           <span className="text-white/40">TON</span>
         </div>
+
+        {/* Buy Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onCollect) {
+              onCollect(nft);
+            } else {
+              navigate(`/nft/${nft.id}`);
+            }
+          }}
+          className="w-full min-h-[36px] mt-2.5 py-1.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#0052FF] hover:bg-[#1a66ff] active:scale-[0.98] text-white transition-all duration-150 flex items-center justify-center text-center cursor-pointer border-none shadow-md shadow-blue-600/20 select-none"
+        >
+          {nft.isLiveAuction ? 'Bid' : (nft.mintStatus === 'sold_out' ? 'Sold' : 'Buy')}
+        </button>
       </div>
     </motion.div>
   );

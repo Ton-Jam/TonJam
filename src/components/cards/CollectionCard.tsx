@@ -1,31 +1,44 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { useNavigate } from 'react-router-dom';
+import MediaCard from '@/components/common/MediaCard';
+import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 
 interface CollectionCardProps {
+  id?: string;
   name: string;
-  itemCount: string;
+  itemCount: string | number;
   coverUrl: string;
   className?: string;
+  onClick?: () => void;
 }
 
-export const CollectionCard = ({ name, itemCount, coverUrl, className }: CollectionCardProps) => {
+export const CollectionCard = ({ id = "genesis-pass", name, itemCount, coverUrl, className, onClick }: CollectionCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      navigate(`/collections/${id}`);
+    }
+  };
+
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className={cn("relative w-36 h-36 rounded-xl overflow-hidden cursor-pointer", className)}
-    >
-      <img src={coverUrl} alt={name} className="w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050A24] to-transparent p-3 flex flex-col justify-end">
-        <h4 className="text-[14px] font-semibold text-white truncate">{name}</h4>
-        <p className="text-[11px] text-[#9AA0AE]">{itemCount} items</p>
-      </div>
-    </motion.div>
+    <MediaCard
+      type="collection"
+      className={className}
+      onClick={handleClick}
+      artwork={
+        <LazyArtworkImage
+          src={coverUrl}
+          alt={name}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      }
+      title={name}
+      subtitle={`${itemCount} items`}
+    />
   );
 };
+
+export default CollectionCard;

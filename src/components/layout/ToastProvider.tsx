@@ -108,10 +108,18 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
+const FALLBACK_TOAST_CONTEXT: ToastContextType = {
+  toast: () => {},
+  success: () => {},
+  warning: () => {},
+  error: () => {},
+  info: () => {},
+};
+
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
+    return FALLBACK_TOAST_CONTEXT;
   }
   return context;
 };

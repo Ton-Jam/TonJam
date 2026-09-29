@@ -69,14 +69,14 @@ const FILTER_PILLS = [
 ];
 
 const QUICK_VIBES = [
-  { label: '⚡ High Energy', query: 'Electronic' },
-  { label: '🏎️ Phonk Drift', query: 'Phonk' },
-  { label: '🌙 Chill & Lo-Fi', query: 'Ambient' },
-  { label: '💎 Web3 NFTs', query: 'NFT' },
-  { label: '🔥 Top Charts', query: 'Top' },
-  { label: '🎹 Synthwave', query: 'Synthwave' },
-  { label: '🌍 Afro-TON', query: 'Afro-TON' },
-  { label: '🎤 Hip Hop', query: 'Hip Hop' }
+  { label: 'High Energy', query: 'Electronic' },
+  { label: 'Phonk Drift', query: 'Phonk' },
+  { label: 'Chill & Lo-Fi', query: 'Ambient' },
+  { label: 'Web3 NFTs', query: 'NFT' },
+  { label: 'Top Charts', query: 'Top' },
+  { label: 'Synthwave', query: 'Synthwave' },
+  { label: 'Afro-TON', query: 'Afro-TON' },
+  { label: 'Hip Hop', query: 'Hip Hop' }
 ];
 
 export const Discover: React.FC = () => {
@@ -412,7 +412,7 @@ export const Discover: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18 }}
-                className="absolute left-0 right-0 top-full mt-2 z-50 bg-[#181818] rounded-2xl p-4 shadow-2xl space-y-4 max-h-[75vh] overflow-y-auto"
+                className="absolute left-0 right-0 top-full mt-2 z-50 bg-[#181818] rounded-[8px] p-4 shadow-2xl space-y-4 max-h-[75vh] overflow-y-auto"
                 onMouseDown={(e) => e.preventDefault()}
               >
                 {/* 1. Recent Search Queries */}
@@ -440,14 +440,14 @@ export const Discover: React.FC = () => {
                             handleSelectSearchTerm(term);
                             setIsFocused(false);
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#242424] hover:bg-[#2e2e2e] cursor-pointer transition-all text-xs font-medium text-zinc-200 hover:text-white select-none group"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[#242424] hover:bg-[#2e2e2e] cursor-pointer transition-all text-xs font-medium text-zinc-200 hover:text-white select-none group"
                         >
                           <Search className="w-3 h-3 text-zinc-400 group-hover:text-white" />
                           <span>{term}</span>
                           <button
                             type="button"
                             onClick={(e) => handleRemoveSearchTerm(term, e)}
-                            className="p-0.5 text-zinc-500 hover:text-white rounded-full transition-colors ml-0.5 cursor-pointer"
+                            className="p-0.5 text-zinc-500 hover:text-white rounded-[4px] transition-colors ml-0.5 cursor-pointer"
                             aria-label={`Remove ${term}`}
                           >
                             <X className="w-3 h-3" />
@@ -460,8 +460,7 @@ export const Discover: React.FC = () => {
 
                 {/* 2. Recently Searched / Played Tracks */}
                 {last5RecentlyPlayed.length > 0 && (
-                  <div className="space-y-2.5 pt-2">
-                    <div className="h-px bg-white/[0.08] mb-3" />
+                  <div className="space-y-2.5 pt-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
                         <Clock className="w-3.5 h-3.5 text-[#00B4D8]" />
@@ -488,7 +487,7 @@ export const Discover: React.FC = () => {
                               playTrack(track);
                               setIsFocused(false);
                             }}
-                            className="flex items-center gap-3 p-2 rounded-xl bg-[#242424]/60 hover:bg-[#2a2a2a] cursor-pointer transition-all group"
+                            className="flex items-center gap-3 p-2 rounded-[6px] bg-[#242424]/60 hover:bg-[#2a2a2a] cursor-pointer transition-all group"
                           >
                             <div className="relative w-10 h-10 rounded-[4px] overflow-hidden bg-zinc-900 shrink-0">
                               <img
@@ -521,8 +520,7 @@ export const Discover: React.FC = () => {
                 )}
 
                 {/* 3. Quick Vibe Searches */}
-                <div className="space-y-2 pt-2">
-                  <div className="h-px bg-white/[0.08] mb-3" />
+                <div className="space-y-2 pt-1">
                   <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Popular Tags</span>
                   <div className="flex flex-wrap gap-1.5">
                     {QUICK_VIBES.map((vibe) => (
@@ -533,7 +531,7 @@ export const Discover: React.FC = () => {
                           handleSelectSearchTerm(vibe.query);
                           setIsFocused(false);
                         }}
-                        className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#242424] hover:bg-[#2e2e2e] text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-[6px] text-xs font-medium bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white transition-colors cursor-pointer"
                       >
                         {vibe.label}
                       </button>
@@ -545,9 +543,10 @@ export const Discover: React.FC = () => {
           </AnimatePresence>
         </div>
 
-        {/* Filter Pills or Quick Vibes */}
-        {(query.trim() || activeFilter !== 'all') ? (
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-1 w-full">
+        {/* Refined Search Filters */}
+        <div className="space-y-2 pt-0.5 pb-1 w-full">
+          {/* Primary Type Filters */}
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar w-full py-0.5">
             {FILTER_PILLS.map((pill) => {
               const isActive = activeFilter === pill.id;
               return (
@@ -556,10 +555,10 @@ export const Discover: React.FC = () => {
                   key={pill.id}
                   onClick={() => setActiveFilter(pill.id)}
                   aria-pressed={isActive}
-                  className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none cursor-pointer ${
+                  className={`px-3.5 sm:px-4 py-1.5 rounded-[6px] text-xs font-semibold shrink-0 transition-all select-none cursor-pointer ${
                     isActive
                       ? 'bg-white text-black font-bold shadow-sm'
-                      : 'bg-[#242424] text-zinc-300 hover:bg-[#2e2e2e] hover:text-white'
+                      : 'bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white'
                   }`}
                 >
                   {pill.label}
@@ -567,20 +566,23 @@ export const Discover: React.FC = () => {
               );
             })}
           </div>
-        ) : (
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-0.5 pb-1 w-full">
-            {QUICK_VIBES.map((vibe) => (
-              <button
-                type="button"
-                key={vibe.query}
-                onClick={() => handleSelectSearchTerm(vibe.query)}
-                className="px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none bg-[#242424] hover:bg-[#2e2e2e] text-zinc-300 hover:text-white cursor-pointer"
-              >
-                {vibe.label}
-              </button>
-            ))}
-          </div>
-        )}
+
+          {/* Quick Vibes / Tags without Emojis */}
+          {!query.trim() && (
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full py-0.5">
+              {QUICK_VIBES.map((vibe) => (
+                <button
+                  type="button"
+                  key={vibe.query}
+                  onClick={() => handleSelectSearchTerm(vibe.query)}
+                  className="px-3 py-1 rounded-[6px] text-[11px] font-medium shrink-0 transition-all select-none bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white cursor-pointer"
+                >
+                  {vibe.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Main Canvas Body */}
@@ -631,7 +633,7 @@ export const Discover: React.FC = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleSelectSearchTerm(category.query)}
-                    className={`relative ${category.gradient} rounded-2xl p-3.5 sm:p-4 overflow-hidden aspect-[16/10] cursor-pointer shadow-md group transition-all select-none`}
+                    className={`relative ${category.gradient} rounded-[6px] p-3.5 sm:p-4 overflow-hidden aspect-[16/10] cursor-pointer shadow-md group transition-all select-none`}
                   >
                     <h4 className="text-sm sm:text-base font-black text-white tracking-tight uppercase max-w-[70%] leading-tight z-10 relative">
                       {category.title}
@@ -641,7 +643,7 @@ export const Discover: React.FC = () => {
                     <img
                       src={category.imgUrl}
                       alt={category.title}
-                      className="absolute bottom-0 right-0 w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg shadow-2xl translate-x-2.5 translate-y-2.5 rotate-[18deg] group-hover:scale-105 group-hover:rotate-[14deg] transition-all duration-300 pointer-events-none"
+                      className="absolute bottom-0 right-0 w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-[4px] shadow-2xl translate-x-2.5 translate-y-2.5 rotate-[18deg] group-hover:scale-105 group-hover:rotate-[14deg] transition-all duration-300 pointer-events-none"
                     />
                   </motion.div>
                 ))}
@@ -669,9 +671,9 @@ export const Discover: React.FC = () => {
                       key={`rec-track-${track.id}`}
                       whileHover={{ y: -3 }}
                       onClick={() => playTrack(track)}
-                      className="w-[145px] sm:w-[155px] shrink-0 bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3 flex flex-col justify-between cursor-pointer group transition-all select-none"
+                      className="w-[145px] sm:w-[155px] shrink-0 bg-white/[0.03] hover:bg-white/[0.06] rounded-[6px] p-3 flex flex-col justify-between cursor-pointer group transition-all select-none"
                     >
-                      <div className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900 mb-2.5">
+                      <div className="relative aspect-square rounded-[4px] overflow-hidden bg-zinc-900 mb-2.5">
                         <img
                           src={track.coverUrl || getPlaceholderImage(track.title)}
                           alt={track.title}
@@ -717,8 +719,8 @@ export const Discover: React.FC = () => {
                 {isLoadingAi ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="animate-pulse bg-white/[0.03] rounded-2xl p-4 h-24 flex gap-3.5">
-                        <div className="w-16 h-16 bg-white/5 rounded-xl shrink-0" />
+                      <div key={i} className="animate-pulse bg-white/[0.03] rounded-[6px] p-4 h-24 flex gap-3.5">
+                        <div className="w-16 h-16 bg-white/5 rounded-[4px] shrink-0" />
                         <div className="flex-1 space-y-2 py-1">
                           <div className="h-3.5 bg-white/5 rounded w-1/3" />
                           <div className="h-2.5 bg-white/5 rounded w-1/4" />
@@ -734,9 +736,9 @@ export const Discover: React.FC = () => {
                         key={`ai-rec-${track.id}`}
                         whileHover={{ y: -2 }}
                         onClick={() => playTrack(track)}
-                        className="bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3.5 sm:p-4 flex gap-3.5 cursor-pointer group transition-all select-none"
+                        className="bg-white/[0.03] hover:bg-white/[0.06] rounded-[6px] p-3.5 sm:p-4 flex gap-3.5 cursor-pointer group transition-all select-none"
                       >
-                        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-zinc-900 shrink-0">
+                        <div className="relative w-16 h-16 rounded-[4px] overflow-hidden bg-zinc-900 shrink-0">
                           <img
                             src={track.coverUrl || getPlaceholderImage(track.title)}
                             alt={track.title}
@@ -794,7 +796,7 @@ export const Discover: React.FC = () => {
                         key={`top-chart-${track.id}`}
                         whileHover={{ x: 2 }}
                         onClick={() => playTrack(track)}
-                        className={`p-2.5 sm:p-3 rounded-2xl ${isCurrentPlaying ? 'bg-[#00B4D8]/10' : 'bg-white/[0.03]'} hover:bg-white/[0.06] flex items-center justify-between cursor-pointer group transition-all select-none`}
+                        className={`p-2.5 sm:p-3 rounded-[6px] ${isCurrentPlaying ? 'bg-[#00B4D8]/10' : 'bg-white/[0.03]'} hover:bg-white/[0.06] flex items-center justify-between cursor-pointer group transition-all select-none`}
                       >
                         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                           <span className={`text-xs sm:text-sm font-extrabold w-4 sm:w-5 text-center shrink-0 ${
@@ -803,7 +805,7 @@ export const Discover: React.FC = () => {
                             {isCurrentPlaying ? '▶' : `#${idx + 1}`}
                           </span>
 
-                          <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shrink-0 bg-zinc-900">
+                          <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-[4px] overflow-hidden shrink-0 bg-zinc-900">
                             <img
                               src={track.coverUrl || getPlaceholderImage(track.title)}
                               alt={track.title}
@@ -870,7 +872,7 @@ export const Discover: React.FC = () => {
                         key={`pop-artist-${artist.uid}`}
                         whileHover={{ y: -3 }}
                         onClick={() => navigate(`/artist/${artist.uid}`)}
-                        className="bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3.5 sm:p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all select-none"
+                        className="bg-white/[0.03] hover:bg-white/[0.06] rounded-[6px] p-3.5 sm:p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all select-none"
                       >
                         <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden shadow-md bg-zinc-900">
                           <img
@@ -895,7 +897,7 @@ export const Discover: React.FC = () => {
                             e.stopPropagation();
                             toggleFollowUser(artist.uid);
                           }}
-                          className="w-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white hover:bg-white/20 rounded-full h-7 sm:h-8"
+                          className="w-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white hover:bg-white/20 rounded-[6px] h-7 sm:h-8"
                         >
                           {isFollowing ? 'Following' : 'Follow'}
                         </Button>
@@ -925,9 +927,9 @@ export const Discover: React.FC = () => {
                       key={`feat-playlist-${playlist.id}`}
                       whileHover={{ y: -3 }}
                       onClick={() => navigate(`/playlist/${playlist.id}`)}
-                      className="bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-3 sm:p-3.5 cursor-pointer group transition-all select-none"
+                      className="bg-white/[0.03] hover:bg-white/[0.06] rounded-[6px] p-3 sm:p-3.5 cursor-pointer group transition-all select-none"
                     >
-                      <div className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900 mb-2.5">
+                      <div className="relative aspect-square rounded-[4px] overflow-hidden bg-zinc-900 mb-2.5">
                         <img
                           src={playlist.coverUrl || getPlaceholderImage(playlist.title)}
                           alt={playlist.title}

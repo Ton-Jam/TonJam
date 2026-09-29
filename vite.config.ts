@@ -33,6 +33,19 @@ export default defineConfig(({ mode }) => {
       define: {
         global: 'globalThis',
       },
+      optimizeDeps: {
+        include: [
+          'react',
+          'react-dom',
+          'react/jsx-runtime',
+          'react/jsx-dev-runtime',
+          'react-router',
+          'react-router-dom',
+          '@tonconnect/ui-react',
+          'lucide-react',
+          'motion/react',
+        ],
+      },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, './src'),

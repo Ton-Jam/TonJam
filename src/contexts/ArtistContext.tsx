@@ -11,10 +11,17 @@ interface ArtistContextType {
 
 const ArtistContext = createContext<ArtistContextType | null>(null);
 
+const FALLBACK_ARTIST_CONTEXT: ArtistContextType = {
+  artists: MOCK_ARTISTS,
+  nfts: MOCK_NFTS,
+  getArtistById: (uid: string) => MOCK_ARTISTS.find((a) => a.uid === uid),
+  getArtistNFTs: (uid: string) => MOCK_NFTS.filter((n) => n.creator === uid || n.artist === uid),
+};
+
 export const useArtist = () => {
   const context = useContext(ArtistContext);
   if (!context) {
-    throw new Error('useArtist must be used within an ArtistProvider');
+    return FALLBACK_ARTIST_CONTEXT;
   }
   return context;
 };

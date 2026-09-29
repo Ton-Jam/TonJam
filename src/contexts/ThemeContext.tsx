@@ -63,11 +63,15 @@ export function ThemeProvider({
   )
 }
 
+const FALLBACK_THEME_CONTEXT: ThemeProviderState = {
+  theme: "dark",
+  setTheme: () => null,
+};
+
 export const useTheme = () => {
-  const context = useContext(ThemeProviderContext)
-
-  if (context === undefined)
-    throw new Error("useTheme must be used within a ThemeProvider")
-
-  return context
-}
+  const context = useContext(ThemeProviderContext);
+  if (context === undefined || context === null) {
+    return FALLBACK_THEME_CONTEXT;
+  }
+  return context;
+};

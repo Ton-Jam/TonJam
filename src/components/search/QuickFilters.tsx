@@ -35,21 +35,21 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({
             key={filter.id}
             onClick={() => onFilterChange(filter.id)}
             aria-pressed={isActive}
-            className={`relative px-4 py-2 shrink-0 rounded-full text-[10px] font-bold uppercase tracking-widest cursor-pointer transition-all duration-200 overflow-hidden border ${
+            className={`relative px-3.5 py-1.5 shrink-0 rounded-[6px] text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all duration-200 overflow-hidden outline-none ${
               isActive
-                ? 'border-[#c0c0c0]/40'
-                : 'border-[#c0c0c0]/25 hover:border-[#ffffff]'
+                ? 'bg-[#0088CC] text-white shadow-md shadow-[#0088CC]/20'
+                : 'bg-white/[0.06] text-slate-400 hover:text-white hover:bg-white/[0.1]'
             }`}
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
             {isActive && (
               <motion.div
                 layoutId="activeFilterPill"
-                className="absolute inset-0 bg-[#0088CC] shadow-[0_0_15px_rgba(0,136,204,0.4)] z-0"
+                className="absolute inset-0 bg-[#0088CC] -z-0 rounded-[6px]"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
-            <span className={`relative z-10 transition-colors ${isActive ? 'text-white' : 'text-slate-400 hover:text-white'}`}>
+            <span className="relative z-10 transition-colors">
               {filter.label}
             </span>
           </button>

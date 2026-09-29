@@ -302,10 +302,16 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+const FALLBACK_I18N: I18nContextType = {
+  language: 'en',
+  setLanguage: () => {},
+  t: (key: string) => translations['en']?.[key] || key,
+};
+
 export const useI18n = () => {
   const context = useContext(I18nContext);
   if (!context) {
-    throw new Error('useI18n must be used within an I18nProvider');
+    return FALLBACK_I18N;
   }
   return context;
 };

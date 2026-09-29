@@ -41,10 +41,30 @@ interface NFTContextType {
 
 const NFTContext = createContext<NFTContextType | null>(null);
 
+const FALLBACK_NFT_CONTEXT: NFTContextType = {
+  nfts: [],
+  setNfts: () => {},
+  isMinting: false,
+  mintingStatus: {},
+  setIsMinting: () => {},
+  updateMintingStatus: () => {},
+  removeMintingStatus: () => {},
+  clearCompletedMints: () => {},
+  addNFT: () => {},
+  updateNFT: () => {},
+  stakeNFT: async () => false,
+  unstakeNFT: async () => false,
+  claimNFTGovernanceRewards: async () => 0,
+  getNFTByTrackId: () => undefined,
+  getNFTsByOwner: () => [],
+  getNFTsByArtist: () => [],
+  getStakedNFTsByOwner: () => [],
+};
+
 export const useNFT = () => {
   const context = useContext(NFTContext);
   if (!context) {
-    throw new Error('useNFT must be used within an NFTProvider');
+    return FALLBACK_NFT_CONTEXT;
   }
   return context;
 };

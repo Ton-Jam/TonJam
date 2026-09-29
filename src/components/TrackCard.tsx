@@ -35,6 +35,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from 'motion/react';
 import { cardTokens } from '@/design';
+import MediaCard from '@/components/common/MediaCard';
 
 
 const CountdownTimer: React.FC<{ targetDate: string }> = ({ targetDate }) => {
@@ -501,13 +502,15 @@ const TrackCard: React.FC<TrackCardProps> = ({
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <motion.div 
-          layout
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          whileHover={{ y: -3 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ duration: 0.2 }}
+        <MediaCard
+          type="track"
+          isActive={isActive}
+          className={cn("snap-start", className)}
+          onClick={handleCardClickInner}
+          onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
+          role="button"
+          tabIndex={0}
+          aria-label={`View track: ${track.title} by ${track.artist}`}
           {...(enableSwipe ? {
             drag: "x" as const,
             dragConstraints: { left: 0, right: 0 },
@@ -520,65 +523,45 @@ const TrackCard: React.FC<TrackCardProps> = ({
               }
             }
           } : {})}
-          className={cn(
-            "group relative cursor-pointer p-0 bg-transparent transition-all duration-200 flex flex-col w-[155px] shrink-0 select-none",
-            className
-          )}
-          onClick={handleCardClickInner}
-          onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
-          role="button"
-          tabIndex={0}
-          aria-label={`View track: ${track.title} by ${track.artist}`}
-        >
-          {/* Artwork - 1:1 Square with Floating Play Button */}
-          <div className="relative aspect-square w-full rounded-[3px] overflow-hidden bg-neutral-900/60 border border-white/12">
-            <LazyArtworkImage 
-              src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
-              fallbackSrc={getPlaceholderImage(`track-${track.id}`)}
-              alt={track.title} 
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            
-            {/* Spotify-style Floating Action Button */}
-            <div className={cn(
-              "absolute bottom-2 right-2 transition-all duration-200",
-              isActive 
-                ? "opacity-100 translate-y-0" 
-                : "opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0"
-            )}>
-              <button 
-                className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 hover:scale-105 active:scale-95 transition-all"
-                onClick={handlePlay}
-                aria-label={isActive && isPlaying ? "Pause track" : "Play track"}
-              >
-                {isActive && isAudioLoading ? (
-                  <img src={TJ_COIN_ICON} className="h-4 w-4 animate-spin" alt="Loading" />
-                ) : isActive && isPlaying ? (
-                  <Pause className="h-4 w-4 fill-current" />
-                ) : (
-                  <Play className="h-4 w-4 fill-current ml-0.5" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Clean Track Meta */}
-          <div className="flex flex-col w-full min-w-0 mt-2.5">
-            <h3 className={cn(
-              "text-[13px] font-semibold tracking-tight truncate w-full transition-colors",
-              isActive ? 'text-blue-400' : 'text-white/95 group-hover:text-white'
-            )}>
-              {track.title}
-            </h3>
-            
-            <p 
-              className="text-[11px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors cursor-pointer"
-              onClick={handleArtistClick}
-            >
+          artwork={
+            <>
+              <LazyArtworkImage 
+                src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
+                fallbackSrc={getPlaceholderImage(`track-${track.id}`)}
+                alt={track.title} 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+              />
+              
+              {/* Spotify-style Floating Action Button */}
+              <div className={cn(
+                "absolute bottom-2 right-2 transition-all duration-200",
+                isActive 
+                  ? "opacity-100 translate-y-0" 
+                  : "opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0"
+              )}>
+                <button 
+                  className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 hover:scale-105 active:scale-95 transition-all"
+                  onClick={handlePlay}
+                  aria-label={isActive && isPlaying ? "Pause track" : "Play track"}
+                >
+                  {isActive && isAudioLoading ? (
+                    <img src={TJ_COIN_ICON} className="h-4 w-4 animate-spin" alt="Loading" />
+                  ) : isActive && isPlaying ? (
+                    <Pause className="h-4 w-4 fill-current" />
+                  ) : (
+                    <Play className="h-4 w-4 fill-current ml-0.5" />
+                  )}
+                </button>
+              </div>
+            </>
+          }
+          title={track.title}
+          subtitle={
+            <span onClick={handleArtistClick} className="cursor-pointer hover:text-white transition-colors">
               {track.artist}
-            </p>
-          </div>
-        </motion.div>
+            </span>
+          }
+        />
       </ContextMenuTrigger>
       <ContextMenuContentRefined />
     </ContextMenu>

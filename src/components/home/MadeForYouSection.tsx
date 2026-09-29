@@ -1,10 +1,11 @@
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Play, Pause, Sparkles, ChevronRight } from "lucide-react";
+import { Sparkles, ChevronRight } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import { CURATED_PLAYLISTS, MOCK_TRACKS } from "@/constants";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
-import LazyArtworkImage from "@/components/common/LazyArtworkImage";
+import PlaylistCard from "@/components/PlaylistCard";
+import { Playlist } from "@/types";
 import { triggerHaptic } from "@/lib/haptics";
 
 interface MadeForYouItem {
@@ -129,55 +130,28 @@ export const MadeForYouSection: React.FC = () => {
         style={{ scrollBehavior: "smooth", overscrollBehaviorX: "contain" }}
       >
         {items.map((item) => {
-          const itemTracks = (item.trackIds || [])
-            .map((id) => trackPool.find((t) => t.id === id))
-            .filter(Boolean);
-          const isItemActive =
-            isPlaying &&
-            currentTrack &&
-            itemTracks.some((t) => t?.id === currentTrack.id);
+          const playlistObj: Playlist = {
+            id: item.id,
+            title: item.title,
+            description: item.description,
+            coverUrl: item.coverUrl,
+            trackIds: item.trackIds || [],
+            creator: item.type === "playlist" ? "Curated by TonJam" : "Daily Mix",
+            trackCount: item.trackIds?.length || 5,
+          };
 
           return (
             <div
               key={item.id}
-              onClick={() => handleItemClick(item)}
-              className="w-[170px] sm:w-[190px] shrink-0 snap-start group cursor-pointer flex flex-col gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] transition-all duration-300 select-none border-0"
+              style={{ width: 'var(--card-width, 168px)' }}
+              className="w-[168px] shrink-0 snap-start"
             >
-              {/* Artwork container */}
-              <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-neutral-900 shadow-lg">
-                <LazyArtworkImage
-                  src={item.coverUrl}
-                  alt={item.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-
-                {/* Spotify-style play button affordance */}
-                <button
-                  onClick={(e) => handlePlayAffordance(e, item)}
-                  className={`absolute right-2.5 bottom-2.5 w-10 h-10 rounded-full bg-[#0088CC] text-white flex items-center justify-center shadow-lg shadow-black/50 transition-all duration-300 border-0 ${
-                    isItemActive
-                      ? "opacity-100 scale-100"
-                      : "opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105"
-                  }`}
-                  aria-label={isItemActive ? "Pause" : "Play"}
-                >
-                  {isItemActive ? (
-                    <Pause className="w-5 h-5 fill-current text-white" />
-                  ) : (
-                    <Play className="w-5 h-5 fill-current text-white ml-0.5" />
-                  )}
-                </button>
-              </div>
-
-              {/* Title & Description */}
-              <div className="space-y-1 text-left min-w-0">
-                <h3 className="text-sm font-bold text-white truncate tracking-tight group-hover:text-[#0088CC] transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-xs text-zinc-400 font-normal line-clamp-2 leading-relaxed">
-                  {item.description}
-                </p>
-              </div>
+              <PlaylistCard
+                playlist={playlistObj}
+                variant="default"
+                className="w-full"
+                onClick={() => handleItemClick(item)}
+              />
             </div>
           );
         })}

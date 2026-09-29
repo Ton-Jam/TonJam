@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 
 import { motion } from 'motion/react';
 import { cardTokens } from '@/design';
+import MediaCard from '@/components/common/MediaCard';
 
 
 interface PlaylistCardProps {
@@ -133,84 +134,73 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
 
   return (
     <>
-    <motion.div 
-      whileHover={{ y: -4, scale: cardTokens.animation.hoverScale }}
-      whileTap={{ scale: cardTokens.animation.tapScale }}
-      onClick={onClick} 
-      style={{ width: cardTokens.playlist.width, borderRadius: cardTokens.global.borderRadius }}
-      className={cn("group relative cursor-pointer bg-transparent p-0 transition-all duration-300 flex flex-col justify-between", className)}
-    >
-      {/* Image Container - 1:1 Aspect Ratio */}
-      <div className="relative aspect-square rounded-[3px] overflow-hidden bg-neutral-900 border border-white/12 mb-2 flex-shrink-0">
-        {renderCover()}
-        <div className="absolute inset-0 flex items-center justify-center gap-2">
-          <button 
-            onClick={handlePlay}
-            className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300"
-          >
-            <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
-          </button>
-          
-          {isOwner && (
+    <MediaCard
+      type="playlist"
+      onClick={onClick}
+      className={cn("snap-start", className)}
+      artwork={
+        <>
+          {renderCover()}
+          <div className="absolute inset-0 flex items-center justify-center gap-2">
             <button 
-              onClick={(e) => { e.stopPropagation(); setIsGeneratorOpen(true); }}
-              className="w-8 h-8 rounded-full bg-neutral-800/80 backdrop-blur-md flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300 delay-75 hover:bg-neutral-700"
-              title="Generate Cover"
+              onClick={handlePlay}
+              className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300"
             >
-              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+              <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
             </button>
-          )}
-        </div>
-      </div>
-      
-      {/* Generator Modal */}
-      <PlaylistCoverGenerator 
-        isOpen={isGeneratorOpen}
-        onClose={() => setIsGeneratorOpen(false)}
-        playlist={playlist}
-        tracks={playlistTracks.filter((t): t is NonNullable<typeof t> => !!t)}
-      />
-      
-      {/* Content Below Card */}
-      <div className="px-0.5 flex flex-col justify-between flex-grow">
-        <div>
-          <h3 style={{ fontSize: cardTokens.playlist.titleSize }} className="font-bold uppercase tracking-tight truncate text-foreground group-hover:text-primary transition-colors leading-tight">
-            {playlist.title}
-          </h3>
-          <p 
-            style={{ fontSize: cardTokens.playlist.descriptionSize }}
-            className="font-semibold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block mt-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);
-              if (artist) {
-                navigate(`/artist/${artist.uid}`);
-              } else if (playlist.creator === MOCK_USER.name) {
-                navigate('/profile');
-              }
-            }}
-          >
-            {playlist.creator}
-          </p>
-        </div>
-        
-        {/* Stats */}
-        <div className="flex items-center justify-between pt-1.5 mt-auto">
-          <span className="text-[8px] font-semibold text-foreground/30 uppercase tracking-widest">
+            
+            {isOwner && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); setIsGeneratorOpen(true); }}
+                className="w-8 h-8 rounded-full bg-neutral-800/80 backdrop-blur-md flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300 delay-75 hover:bg-neutral-700"
+                title="Generate Cover"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+              </button>
+            )}
+          </div>
+        </>
+      }
+      title={playlist.title}
+      subtitle={
+        <span
+          className="hover:text-white cursor-pointer inline-block"
+          onClick={(e) => {
+            e.stopPropagation();
+            const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);
+            if (artist) {
+              navigate(`/artist/${artist.uid}`);
+            } else if (playlist.creator === MOCK_USER.name) {
+              navigate('/profile');
+            }
+          }}
+        >
+          {playlist.creator}
+        </span>
+      }
+      meta={
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-[10px] font-medium text-zinc-400">
             {playlist.trackCount} Tracks
           </span>
 
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-5 w-5 rounded-[4px] hover:bg-black/5"
+            className="h-5 w-5 rounded-[4px] hover:bg-white/10"
             onClick={(e) => { e.stopPropagation(); setIsOptionsModalOpen(true); }}
           >
             <MoreVertical className="h-3 w-3 text-muted-foreground" />
           </Button>
         </div>
-      </div>
-    </motion.div>
+      }
+    />
+    <PlaylistCoverGenerator 
+      isOpen={isGeneratorOpen}
+      onClose={() => setIsGeneratorOpen(false)}
+      playlist={playlist}
+      tracks={playlistTracks.filter((t): t is NonNullable<typeof t> => !!t)}
+    />
     {isOptionsModalOpen && (
       <PlaylistOptionsModal
         playlist={playlist}

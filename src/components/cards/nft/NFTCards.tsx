@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Sparkles, Heart, Bookmark, Eye, Layers, Clock, ArrowUpRight, 
@@ -318,7 +319,9 @@ export const CollectionCard: React.FC<{
   collection?: CollectionData;
   isLoading?: boolean;
   className?: string;
-}> = ({ collection, isLoading, className = '' }) => {
+  onClick?: () => void;
+}> = ({ collection, isLoading, className = '', onClick }) => {
+  const navigate = useNavigate();
   const [imgFailed, setImgFailed] = useState(false);
 
   if (isLoading || !collection) {
@@ -332,9 +335,18 @@ export const CollectionCard: React.FC<{
 
   const preImages = collection.previewImages || [];
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      navigate(`/collections/${collection.id || 'genesis-pass'}`);
+    }
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
+      onClick={handleClick}
       className={`flex flex-col p-3 rounded-[10px] bg-[#0A113A] hover:bg-[#101A3B] transition-all cursor-pointer w-[190px] shrink-0 select-none ${className}`}
     >
       {/* 3 Grid Images layout representing a collection pack */}

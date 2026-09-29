@@ -40,7 +40,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
         {/* Action Controls */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => navigate('/explore/playlists?title=Trending+Collections&filter=curated')}
+            onClick={() => navigate('/collections')}
             className="text-xs font-semibold text-[#0088CC] hover:text-[#0088CC]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
           >
             More <ChevronRight className="w-3.5 h-3.5" />
@@ -75,17 +75,17 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
           <div
             key={col.id}
             onClick={() => onSelectCollection(col)}
-            className="min-w-[240px] max-w-[240px] bg-[#0A0A0A] border border-white/12 rounded-[3px] overflow-hidden p-3 cursor-pointer select-none snap-start flex flex-col justify-between transition-colors hover:border-white/20"
+            className="min-w-[240px] max-w-[240px] bg-[#0B112C] hover:bg-[#0E1638] rounded-[10px] overflow-hidden p-3 cursor-pointer select-none snap-start flex flex-col justify-between transition-all duration-300 shadow-lg shadow-black/30 border-none"
           >
             {/* Collection Cover Image */}
-            <div className="aspect-square w-full rounded-[3px] overflow-hidden bg-[#101010] border border-white/10 relative mb-2.5">
+            <div className="aspect-square w-full rounded-[8px] overflow-hidden bg-[#101010] relative mb-2.5">
               <img
                 src={col.imageUrl}
                 alt={col.name}
-                className="w-full h-full object-cover transition-transform duration-300 hover:scale-103"
+                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                 loading="lazy"
               />
-              <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-[3px] bg-black/70 text-[8px] font-medium text-white border border-white/10 uppercase tracking-wider font-mono">
+              <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-[4px] bg-black/75 backdrop-blur-md text-[8px] font-mono font-black text-white uppercase tracking-wider">
                 {col.itemCount} Items
               </div>
             </div>
@@ -93,27 +93,27 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
             {/* Collection Meta */}
             <div className="text-left space-y-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-semibold text-[#F5F7FA] truncate block max-w-[85%]">{col.name}</span>
+                <span className="text-xs font-black text-[#F5F7FA] truncate block max-w-[85%]">{col.name}</span>
                 {col.verified && (
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#0088CC] text-white flex items-center justify-center text-[8px] font-bold" title="Verified Creator">✓</span>
+                  <span className="w-3.5 h-3.5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[8px] font-bold" title="Verified Creator">✓</span>
                 )}
               </div>
 
               <div className="flex items-center gap-1">
-                <span className="text-[9px] font-normal text-white/50">Creator:</span>
-                <span className="text-[9px] font-medium text-white/70 truncate max-w-[65%]">{col.creator}</span>
+                <span className="text-[9px] font-normal text-slate-400">Creator:</span>
+                <span className="text-[9px] font-medium text-slate-300 truncate max-w-[65%]">{col.creator}</span>
               </div>
             </div>
 
             {/* Price / Volume Metrics */}
-            <div className="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-white/10">
+            <div className="grid grid-cols-2 gap-2 mt-3 pt-2">
               <div>
-                <span className="text-[8px] font-medium text-white/50 uppercase tracking-wider block">Floor Price</span>
-                <span className="text-[11px] font-semibold text-[#F5F7FA] font-mono">{convertPrice(col.floorPrice)}</span>
+                <span className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider block">Floor Price</span>
+                <span className="text-xs font-black text-cyan-400 font-mono">{convertPrice(col.floorPrice)}</span>
               </div>
               <div className="text-right">
-                <span className="text-[8px] font-medium text-white/50 uppercase tracking-wider block">Volume</span>
-                <span className="text-[11px] font-semibold text-[#0088CC] font-mono">{convertPrice(col.volume)}</span>
+                <span className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider block">Volume</span>
+                <span className="text-xs font-black text-white font-mono">{convertPrice(col.volume)}</span>
               </div>
             </div>
           </div>

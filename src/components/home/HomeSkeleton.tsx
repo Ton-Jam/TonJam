@@ -51,12 +51,28 @@ export const HomeSectionSkeleton: React.FC<{
         <div className="h-5 w-36 bg-zinc-900/70 rounded-lg animate-pulse" />
         <div className="h-4 w-12 bg-zinc-900/50 rounded-lg animate-pulse" />
       </div>
-      <div className="flex gap-4 overflow-hidden pb-2">
+      <div className="flex gap-3 overflow-hidden pb-2">
         {Array.from({ length: count }).map((_, i) => (
-          <div key={i} className="w-[155px] shrink-0 space-y-2.5">
-            <div className="w-[155px] h-[155px] rounded-2xl bg-zinc-900/60 animate-pulse" />
-            <div className="h-3.5 bg-zinc-900 rounded w-4/5 animate-pulse" />
-            <div className="h-2.5 bg-zinc-900/70 rounded w-3/5 animate-pulse" />
+          <div 
+            key={i} 
+            style={{
+              width: 'var(--card-width, 168px)',
+              borderRadius: 'var(--card-radius, 12px)',
+              padding: 'var(--card-padding, 10px)',
+            }}
+            className="w-[168px] shrink-0 p-[10px] rounded-[12px] bg-white/[0.02] flex flex-col"
+          >
+            <div 
+              style={{ borderRadius: 'var(--card-image-radius, 10px)' }}
+              className="w-full aspect-square rounded-[10px] bg-zinc-900/60 animate-pulse" 
+            />
+            <div 
+              style={{ marginTop: 'var(--card-content-gap, 6px)' }}
+              className="mt-[6px] space-y-1.5"
+            >
+              <div className="h-3.5 bg-zinc-900 rounded w-4/5 animate-pulse" />
+              <div className="h-2.5 bg-zinc-900/70 rounded w-3/5 animate-pulse" />
+            </div>
           </div>
         ))}
       </div>

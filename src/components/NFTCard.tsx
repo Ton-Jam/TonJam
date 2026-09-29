@@ -46,6 +46,7 @@ import { useTonConnectUI } from '@tonconnect/ui-react';
 import { buyNFT } from '@/services/tonService';
 import { motion } from 'motion/react';
 import { cardTokens } from '@/design';
+import MediaCard from '@/components/common/MediaCard';
 
 
 interface NFTCardProps {
@@ -635,17 +636,20 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               </div>
               <button 
                 type="button"
-                onClick={handleActionClick}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/nft/${nft.id}`);
+                }}
                 disabled={!isOwner && isAuctionEnded}
-                aria-label={isOwner ? (nft.listingType ? `Manage ${nft.title}` : `Sell ${nft.title}`) : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Auction ended' : `Place bid on ${nft.title}`) : `Buy ${nft.title} for ${formattedPrice} TON`)}
+                aria-label={isOwner ? `Owned by you: ${nft.title}` : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Auction ended' : `Place bid on ${nft.title}`) : `Buy ${nft.title} for ${formattedPrice} TON`)}
                 className={cn(
-                  "cursor-pointer transition-colors rounded-[3px] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-[#0088CC]",
+                  "cursor-pointer transition-colors rounded-lg min-h-[34px] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white border-none focus:outline-none focus-visible:ring-1 focus-visible:ring-[#0052FF]",
                   isOwner 
-                    ? 'bg-white/10 hover:bg-white/20 text-white' 
-                    : (isAuctionEnded ? 'bg-white/5 text-white/20' : 'bg-[#0088CC] hover:bg-[#0077b3]')
+                    ? 'bg-white/[0.08] hover:bg-white/[0.12] text-slate-300' 
+                    : (isAuctionEnded ? 'bg-white/[0.04] text-slate-500 cursor-not-allowed' : 'bg-[#0052FF] hover:bg-[#1a66ff]')
                 )}
               >
-                {isOwner ? (nft.listingType ? 'Manage' : 'Sell') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Ended' : 'Bid') : 'Buy')}
+                {isOwner ? 'Owned' : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Sold' : 'Bid') : 'Buy')}
               </button>
               <MoreOptionsButton />
             </div>
@@ -660,29 +664,22 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     <>
       <ContextMenu>
         <ContextMenuTrigger>
-          <motion.div
-            layout
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -2 }}
-            transition={{ duration: 0.2 }}
-            className={cn(
-              "group relative cursor-pointer p-0 bg-transparent transition-all duration-200 flex flex-col w-[150px] shrink-0 select-none",
-              className
-            )}
-            onClick={handleCardClick}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                navigate(`/nft/${nft.id}`);
-              }
-            }}
-            role="button"
-            tabIndex={0}
-            aria-label={`View NFT ${nft.title}`}
-          >
-            {/* Artwork - 1:1 Square with Floating Play Button (3px radius) */}
-            <div className="relative aspect-square w-full rounded-[3px] overflow-hidden bg-[#101010] border border-white/12">
+        <MediaCard
+          type="nft"
+          isActive={isActive}
+          className={cn("snap-start", className)}
+          onClick={handleCardClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              navigate(`/nft/${nft.id}`);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={`View NFT ${nft.title}`}
+          artwork={
+            <>
               {!isImageLoaded && (
                 <div className="absolute inset-0 bg-neutral-900 overflow-hidden flex flex-col items-center justify-center z-0 select-none">
                   <div className="absolute inset-0 animate-shimmer pointer-events-none" />
@@ -727,31 +724,58 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   )}
                 </button>
               </div>
+            </>
+          }
+          title={nft.title}
+          subtitle={
+            <span onClick={handleArtistClick} className="hover:text-white transition-colors cursor-pointer">
+              {nft.creator}
+            </span>
+          }
+          meta={
+            <div className="flex items-center gap-1 text-[12px] leading-[17px] font-medium text-white/80 font-mono">
+              <img src={TON_LOGO} className="w-3 h-3 opacity-75 shrink-0" alt="TON" />
+              <span>{formattedPrice} TON</span>
             </div>
-
-            {/* Clean NFT Meta */}
-            <div className="flex flex-col w-full min-w-0 mt-2">
-              <h3 className={cn(
-                "text-[13px] font-medium tracking-tight truncate w-full transition-colors",
-                isActive ? 'text-[#0088CC]' : 'text-[#F5F7FA] group-hover:text-white'
-              )}>
-                {nft.title}
-              </h3>
-              
-              <p 
-                className="text-[11px] font-normal text-white/60 truncate w-full mt-0.5 hover:text-white transition-colors cursor-pointer"
-                onClick={handleArtistClick}
-              >
-                {nft.creator}
-              </p>
-
-              {/* Price Row */}
-              <div className="flex items-center gap-1 mt-1 text-[11px] font-medium text-white/80 font-mono">
-                <img src={TON_LOGO} className="w-3 h-3 opacity-75 shrink-0" alt="TON" />
-                <span>{formattedPrice} TON</span>
-              </div>
-            </div>
-          </motion.div>
+          }
+          action={
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/nft/${nft.id}`);
+              }}
+              disabled={!isOwner && isAuctionEnded}
+              aria-label={
+                isOwner
+                  ? `Owned by you: ${nft.title}`
+                  : isAuctionEnded
+                  ? `Sold out: ${nft.title}`
+                  : `Buy ${nft.title} for ${formattedPrice} TON`
+              }
+              style={{
+                height: 'var(--card-action-height, 34px)',
+                borderRadius: 'var(--card-action-radius, 8px)',
+              }}
+              className={cn(
+                "w-full h-[34px] py-1 px-3 rounded-[8px] text-xs font-bold uppercase tracking-wider transition-all duration-150 flex items-center justify-center text-center cursor-pointer border-none select-none",
+                isOwner
+                  ? "bg-white/[0.08] hover:bg-white/[0.12] text-slate-300"
+                  : isAuctionEnded
+                  ? "bg-white/[0.04] text-slate-500 cursor-not-allowed"
+                  : "bg-[#0052FF] hover:bg-[#1a66ff] active:scale-[0.98] text-white shadow-md shadow-blue-600/20"
+              )}
+            >
+              {isOwner 
+                ? "Owned" 
+                : isAuctionEnded 
+                ? "Sold" 
+                : nft.listingType === 'auction' 
+                ? "Bid" 
+                : "Buy"}
+            </button>
+          }
+        />
         </ContextMenuTrigger>
         <ContextMenuContentRefined />
       </ContextMenu>

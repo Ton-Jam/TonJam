@@ -567,10 +567,28 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   );
 };
 
+const FALLBACK_TONJAM_NOTIF_CONTEXT: NotificationContextType = {
+  notifications: [],
+  unreadCount: 0,
+  preferences: DEFAULT_PREFERENCES,
+  isLoading: false,
+  isOffline: false,
+  error: null,
+  retryFetch: () => {},
+  markAsRead: async () => {},
+  markAllAsRead: async () => {},
+  deleteNotification: async () => {},
+  updatePreferences: () => {},
+  requestPushPermission: async () => false,
+  simulateNotification: () => {},
+  simulateBidUpdate: () => {},
+  simulateTrackDrop: () => {},
+};
+
 export const useTonJamNotifications = () => {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useTonJamNotifications must be used within a NotificationProvider');
+    return FALLBACK_TONJAM_NOTIF_CONTEXT;
   }
   return context;
 };
