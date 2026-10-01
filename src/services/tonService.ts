@@ -765,3 +765,6 @@ export const claimNFTStakingRewards = async (
     throw error;
   }
 };
+
+export * from './tonGasService';
+

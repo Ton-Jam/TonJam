@@ -1,16 +1,34 @@
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import React, { useState, useEffect, useMemo } from "react";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription, 
+  DialogFooter 
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Coins, TrendingDown, Mail, Smartphone, Globe, Zap, Percent } from "lucide-react";
+import { 
+  Bell, 
+  Coins, 
+  TrendingDown, 
+  Mail, 
+  Smartphone, 
+  Globe, 
+  Zap, 
+  Trash2, 
+  Check, 
+  Sparkles,
+  ArrowDownRight
+} from "lucide-react";
 import { NFTItem, PriceAlert } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAudio } from "@/contexts/AudioContext";
 import { useNotification } from "@/contexts/NotificationContext";
-import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { priceAlertService } from "@/services/priceAlertService";
 import { cn } from "@/lib/utils";
 
 interface PriceAlertModalProps {
@@ -19,16 +37,43 @@ interface PriceAlertModalProps {
   nft: NFTItem;
 }
 
-const PriceAlertModal: React.FC<PriceAlertModalProps> = ({ isOpen, onClose, nft }) => {
+export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({ isOpen, onClose, nft }) => {
   const { user } = useAuth();
   const { addNotification } = useAudio();
-  const { addPriceAlert, simulatePriceDrop } = useNotification();
+  const { addPriceAlert, removePriceAlert, simulatePriceDrop } = useNotification();
   
-  const currentPriceNum = parseFloat(nft.price || "0") || 10;
+  const currentPriceNum = useMemo(() => {
+    return parseFloat(nft.price?.replace(' TON', '').trim() || "0") || 10;
+  }, [nft.price]);
+
+  // Load any existing active alert for this user and NFT
+  const [existingAlert, setExistingAlert] = useState<PriceAlert | null>(null);
   const [targetPrice, setTargetPrice] = useState((currentPriceNum * 0.9).toFixed(2));
   const [condition, setCondition] = useState<'below' | 'above'>('below');
-  const [channels, setChannels] = useState<('app' | 'push' | 'email')[]>(['app']);
+  const [channels, setChannels] = useState<('app' | 'push' | 'email')[]>(['app', 'push']);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && nft.id) {
+      const active = priceAlertService.getAlertForNFT(user?.uid || 'guest_user', nft.id);
+      if (active) {
+        setExistingAlert(active);
+        setTargetPrice(active.targetPrice);
+        setCondition(active.condition || 'below');
+        setChannels(active.channels || ['app', 'push']);
+      } else {
+        setExistingAlert(null);
+        setTargetPrice((currentPriceNum * 0.9).toFixed(2));
+        setCondition('below');
+      }
+    }
+  }, [isOpen, nft.id, currentPriceNum, user?.uid]);
+
+  const targetPriceNum = parseFloat(targetPrice) || 0;
+  const potentialSavings = currentPriceNum > targetPriceNum ? currentPriceNum - targetPriceNum : 0;
+  const discountPercent = currentPriceNum > 0 
+    ? Math.max(0, Math.round(((currentPriceNum - targetPriceNum) / currentPriceNum) * 100))
+    : 0;
 
   const toggleChannel = (channel: 'app' | 'push' | 'email') => {
     setChannels(prev => 
@@ -39,59 +84,76 @@ const PriceAlertModal: React.FC<PriceAlertModalProps> = ({ isOpen, onClose, nft 
   };
 
   const applyDiscountPreset = (percent: number) => {
-    const discounted = currentPriceNum * (1 - percent / 100);
+    const discounted = Math.max(0.1, currentPriceNum * (1 - percent / 100));
     setTargetPrice(discounted.toFixed(2));
   };
 
   const handleSaveAlert = async () => {
+    if (!targetPrice || targetPriceNum <= 0) return;
     setIsSubmitting(true);
-    const alertId = `alert_${Date.now()}`;
+
+    const alertId = existingAlert?.id || `alert_${Date.now()}`;
     const alertData: PriceAlert = {
       id: alertId,
       userId: user?.uid || 'guest_user',
       nftId: nft.id,
       nftTitle: nft.title,
-      nftImageUrl: nft.imageUrl,
+      nftImageUrl: nft.imageUrl || nft.coverUrl || '',
       targetPrice: targetPrice,
       condition: condition,
       status: 'active',
       channels: channels,
-      createdAt: new Date().toISOString()
+      createdAt: existingAlert?.createdAt || new Date().toISOString()
     };
 
     try {
+      // 1. Save through priceAlertService (localStorage + Firestore)
+      await priceAlertService.saveAlert(alertData);
+
+      // 2. Sync into NotificationContext
       if (addPriceAlert) {
         await addPriceAlert(alertData);
       }
 
-      if (user?.uid) {
-        try {
-          const alertRef = doc(db, 'users', user.uid, 'priceAlerts', alertId);
-          await setDoc(alertRef, alertData);
-        } catch (dbErr) {
-          console.warn("Firestore sync fallback for price alert:", dbErr);
-        }
-      }
-
-      addNotification(`Price alert active for "${nft.title}" at ${targetPrice} TON`, "success");
+      addNotification(
+        `Price alert ${existingAlert ? 'updated' : 'activated'} for "${nft.title}" at ${targetPrice} TON`,
+        "success"
+      );
       onClose();
     } catch (err) {
-      console.error("Failed to set alert:", err);
-      addNotification("Price alert set locally.", "success");
+      console.error("Failed to save price alert:", err);
+      addNotification("Price alert saved locally.", "success");
       onClose();
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleDeleteAlert = async () => {
+    if (!existingAlert) return;
+    setIsSubmitting(true);
+    try {
+      await priceAlertService.deleteAlert(user?.uid || 'guest_user', existingAlert.id);
+      if (removePriceAlert) {
+        await removePriceAlert(existingAlert.id);
+      }
+      addNotification(`Price alert removed for "${nft.title}"`, "info");
+      onClose();
+    } catch (err) {
+      console.error("Failed to delete price alert:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleTestSimulation = () => {
-    const testDroppedPrice = (parseFloat(targetPrice) * 0.95).toFixed(2);
+    const simulatedDroppedPrice = (Math.max(0.5, targetPriceNum * 0.95)).toFixed(2);
     const alertData: PriceAlert = {
-      id: `test_alert_${Date.now()}`,
+      id: existingAlert?.id || `sim_alert_${Date.now()}`,
       userId: user?.uid || 'guest_user',
       nftId: nft.id,
       nftTitle: nft.title,
-      nftImageUrl: nft.imageUrl,
+      nftImageUrl: nft.imageUrl || nft.coverUrl || '',
       targetPrice: targetPrice,
       condition: 'below',
       status: 'active',
@@ -99,96 +161,137 @@ const PriceAlertModal: React.FC<PriceAlertModalProps> = ({ isOpen, onClose, nft 
       createdAt: new Date().toISOString()
     };
 
+    priceAlertService.saveAlert(alertData);
     if (addPriceAlert) {
       addPriceAlert(alertData);
     }
-    
+
     onClose();
-    
+
+    // Trigger instant simulated drop update through notification architecture
     setTimeout(() => {
       if (simulatePriceDrop) {
-        simulatePriceDrop(nft.id, testDroppedPrice);
+        simulatePriceDrop(nft.id, simulatedDroppedPrice);
+      } else {
+        priceAlertService.checkAndTriggerPriceAlerts(nft.id, parseFloat(simulatedDroppedPrice), nft);
       }
-    }, 300);
+    }, 350);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-[#0A113A] border-white/10 text-white max-h-[95vh] overflow-y-auto">
+      {/* Strict borderless design: no border lines */}
+      <DialogContent className="sm:max-w-[430px] bg-[#0A113A]/95 backdrop-blur-2xl text-white max-h-[95vh] overflow-y-auto rounded-3xl shadow-2xl shadow-cyan-500/10 p-5 sm:p-6 border-none select-none">
         <DialogHeader>
-          <div className="flex items-center gap-2 mb-2">
-            <Bell className="w-4 h-4 text-cyan-400" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400">Signal Monitoring</span>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/15 flex items-center justify-center text-cyan-400">
+                <Bell className="w-4 h-4 fill-current" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan-400">
+                Floor Tracker
+              </span>
+            </div>
+            {existingAlert && (
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                Active Alert
+              </span>
+            )}
           </div>
-          <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Set Price Alert</DialogTitle>
-          <DialogDescription className="text-zinc-400 text-[11px] uppercase tracking-widest font-bold">
-            Get notified instantly when floor price drops below target
+          <DialogTitle className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">
+            {existingAlert ? 'Manage Price Alert' : 'Set Price Alert'}
+          </DialogTitle>
+          <DialogDescription className="text-zinc-400 text-xs font-medium">
+            Get real-time updates when this Music NFT hits your target floor price.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-2 sm:py-4 space-y-4 sm:space-y-5">
-          {/* NFT Preview */}
-          <div className="flex items-center gap-4 p-3 bg-white/[0.03] rounded-2xl border border-white/10">
+        <div className="py-2 space-y-4">
+          {/* NFT Preview (borderless surface) */}
+          <div className="flex items-center gap-3.5 p-3.5 bg-white/[0.04] rounded-2xl">
             <img 
-              src={nft.imageUrl} 
+              src={nft.imageUrl || nft.coverUrl || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&fit=crop&q=80'} 
               alt={nft.title} 
-              className="w-14 h-14 rounded-xl object-cover border border-white/10 shrink-0"
+              className="w-14 h-14 rounded-xl object-cover shadow-md shrink-0"
             />
             <div className="min-w-0 flex-1">
-              <h4 className="text-sm font-black uppercase tracking-tight truncate">{nft.title}</h4>
+              <h4 className="text-sm font-black uppercase tracking-tight truncate text-white">
+                {nft.title}
+              </h4>
+              <p className="text-[11px] text-zinc-400 truncate">
+                by {nft.artist || nft.creator || 'TonJam Artist'}
+              </p>
               <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-mono font-bold mt-1">
                 <Coins className="w-3.5 h-3.5 text-emerald-400" />
-                Current Floor: {nft.price} TON
+                <span>Current Floor: {currentPriceNum} TON</span>
               </div>
             </div>
           </div>
 
-          {/* Condition Settings */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/10">
+          {/* Trigger Condition Selector (borderless surface) */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03]">
               <div className="space-y-0.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Alert Trigger</Label>
-                <div className="text-xs font-bold text-cyan-400 uppercase tracking-tight">
-                  {condition === 'below' ? 'Price drops below threshold' : 'Price rises above threshold'}
+                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  Alert Trigger
+                </Label>
+                <div className="text-xs font-bold text-cyan-300 uppercase tracking-tight flex items-center gap-1">
+                  <TrendingDown className={cn("w-3.5 h-3.5 text-cyan-400", condition === 'above' && "rotate-180")} />
+                  <span>{condition === 'below' ? 'Price drops below target' : 'Price rises above target'}</span>
                 </div>
               </div>
               <Button 
+                type="button"
                 variant="ghost" 
                 size="sm"
                 onClick={() => setCondition(prev => prev === 'below' ? 'above' : 'below')}
-                className="h-8 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest"
+                className="h-8 px-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-white border-none cursor-pointer"
               >
-                <TrendingDown className={cn("w-3.5 h-3.5 mr-1.5 text-cyan-400", condition === 'above' && "rotate-180")} />
                 Switch
               </Button>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="targetPrice" className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Target Threshold Price (TON)</Label>
-                <span className="text-[10px] font-mono text-zinc-500">Current: {currentPriceNum} TON</span>
+            {/* Target Price Input */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between px-0.5">
+                <Label htmlFor="targetPrice" className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  Target Price (TON)
+                </Label>
+                {discountPercent > 0 && condition === 'below' && (
+                  <span className="text-[10px] font-mono font-bold text-emerald-400 flex items-center gap-0.5">
+                    <ArrowDownRight className="w-3 h-3" />
+                    Save {potentialSavings.toFixed(2)} TON (-{discountPercent}%)
+                  </span>
+                )}
               </div>
               <div className="relative">
                 <Input
                   id="targetPrice"
                   type="number"
                   step="0.01"
+                  min="0.01"
                   value={targetPrice}
                   onChange={(e) => setTargetPrice(e.target.value)}
-                  className="bg-black/50 border-white/10 text-cyan-300 font-mono text-base font-bold h-12 rounded-2xl pl-10 focus:border-cyan-500"
+                  className="bg-black/40 text-cyan-300 font-mono text-base font-bold h-12 rounded-2xl pl-10 pr-4 focus:ring-2 focus:ring-cyan-500 border-none outline-none"
+                  placeholder="0.00"
                 />
-                <Coins className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400" />
+                <Coins className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
               </div>
 
-              {/* Discount Presets */}
-              <div className="flex items-center gap-2 pt-1">
+              {/* Quick Discount Presets */}
+              <div className="flex items-center gap-1.5 pt-1">
                 <span className="text-[9px] font-black uppercase text-zinc-500 tracking-wider">Presets:</span>
                 {[10, 20, 30, 50].map((pct) => (
                   <button
                     key={pct}
                     type="button"
                     onClick={() => applyDiscountPreset(pct)}
-                    className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 text-[10px] font-mono font-bold text-zinc-400 border border-white/5 transition-all"
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all border-none cursor-pointer",
+                      discountPercent === pct
+                        ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/20"
+                        : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-white"
+                    )}
                   >
                     -{pct}%
                   </button>
@@ -197,65 +300,91 @@ const PriceAlertModal: React.FC<PriceAlertModalProps> = ({ isOpen, onClose, nft 
             </div>
           </div>
 
-          {/* Notification Channels */}
-          <div className="space-y-2.5">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Alert Channels</Label>
-            <div className="grid grid-cols-1 gap-2">
+          {/* Notification Channels (borderless surfaces) */}
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-0.5">
+              Notification Channels
+            </Label>
+            <div className="space-y-1.5">
               {[
-                { id: 'app', label: 'App Popup Modal', icon: Globe, desc: 'Instant modal popup on price drop' },
-                { id: 'push', label: 'Push Notification', icon: Smartphone, desc: 'Direct broadcast to device' },
-                { id: 'email', label: 'Email Alert', icon: Mail, desc: 'Send to registered email node' },
-              ].map((channel) => (
-                <div 
-                  key={channel.id}
-                  onClick={() => toggleChannel(channel.id as any)}
-                  className={cn(
-                    "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer",
-                    channels.includes(channel.id as any) 
-                      ? "bg-cyan-500/10 border-cyan-500/30" 
-                      : "bg-white/[0.02] border-white/5 hover:bg-white/[0.04]"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "w-8 h-8 rounded-lg flex items-center justify-center",
-                      channels.includes(channel.id as any) ? "bg-cyan-500/20 text-cyan-400" : "bg-white/5 text-zinc-500"
-                    )}>
-                      <channel.icon className="w-4 h-4" />
+                { id: 'app', label: 'In-App Bell & Popups', icon: Globe, desc: 'Real-time alert modal & notification list' },
+                { id: 'push', label: 'Push Notification', icon: Smartphone, desc: 'Instant desktop / mobile browser alert' },
+                { id: 'email', label: 'Email Dispatch', icon: Mail, desc: 'Direct digest to account email address' },
+              ].map((channel) => {
+                const isChecked = channels.includes(channel.id as any);
+                return (
+                  <div 
+                    key={channel.id}
+                    onClick={() => toggleChannel(channel.id as any)}
+                    className={cn(
+                      "flex items-center justify-between p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none",
+                      isChecked 
+                        ? "bg-cyan-500/10 text-white" 
+                        : "bg-white/[0.02] text-zinc-400 hover:bg-white/[0.05]"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "w-8 h-8 rounded-xl flex items-center justify-center shrink-0",
+                        isChecked ? "bg-cyan-500/20 text-cyan-400" : "bg-white/5 text-zinc-500"
+                      )}>
+                        <channel.icon className="w-4 h-4" />
+                      </div>
+                      <div className="space-y-0.5 text-left">
+                        <div className="text-[11px] font-bold tracking-tight text-white">{channel.label}</div>
+                        <div className="text-[9px] text-zinc-400 leading-tight">{channel.desc}</div>
+                      </div>
                     </div>
-                    <div className="space-y-0.5 text-left">
-                      <div className="text-[10px] font-black uppercase tracking-tight">{channel.label}</div>
-                      <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest">{channel.desc}</div>
-                    </div>
+                    <Switch 
+                      checked={isChecked}
+                      onCheckedChange={() => toggleChannel(channel.id as any)}
+                    />
                   </div>
-                  <Switch 
-                    checked={channels.includes(channel.id as any)}
-                    onCheckedChange={() => toggleChannel(channel.id as any)}
-                  />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
 
+        {/* Modal Actions (no borders) */}
         <DialogFooter className="pt-2 flex-col sm:flex-col gap-2">
           <Button 
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-black uppercase tracking-widest h-12 rounded-2xl shadow-lg shadow-cyan-500/20 active:scale-95 transition-all"
+            type="button"
+            className="w-full bg-[#0088CC] hover:bg-[#0077b3] text-white font-black uppercase tracking-wider h-12 rounded-2xl shadow-lg shadow-[#0088CC]/25 active:scale-95 transition-all border-none cursor-pointer"
             onClick={handleSaveAlert}
-            disabled={isSubmitting || !targetPrice || parseFloat(targetPrice) <= 0}
+            disabled={isSubmitting || !targetPrice || targetPriceNum <= 0}
           >
-            {isSubmitting ? "Setting Price Alert..." : "Set Price Alert"}
+            {isSubmitting 
+              ? "Saving Price Alert..." 
+              : existingAlert 
+              ? "Update Price Alert" 
+              : "Set Price Alert"}
           </Button>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleTestSimulation}
-            className="w-full bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 font-black uppercase text-[10px] tracking-widest h-10 rounded-xl flex items-center justify-center gap-1.5"
-          >
-            <Zap className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Simulate Price Drop & Test Modal</span>
-          </Button>
+          <div className="flex items-center gap-2 w-full">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleTestSimulation}
+              className="flex-1 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 hover:text-emerald-300 font-bold uppercase text-[10px] tracking-wider h-10 rounded-xl flex items-center justify-center gap-1.5 border-none cursor-pointer"
+            >
+              <Zap className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Test Price Drop</span>
+            </Button>
+
+            {existingAlert && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleDeleteAlert}
+                className="px-3 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 hover:text-rose-300 font-bold text-[10px] uppercase tracking-wider h-10 rounded-xl flex items-center justify-center gap-1 border-none cursor-pointer"
+                title="Delete alert"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Remove</span>
+              </Button>
+            )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -263,4 +392,3 @@ const PriceAlertModal: React.FC<PriceAlertModalProps> = ({ isOpen, onClose, nft 
 };
 
 export default PriceAlertModal;
-

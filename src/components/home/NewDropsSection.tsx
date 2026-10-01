@@ -84,9 +84,9 @@ export const NewDropsSection: React.FC = () => {
         </div>
         <button 
           onClick={() => navigate(`/explore/tracks?title=New+Drops&filter=new${selectedGenre !== 'All' ? `&genre=${encodeURIComponent(selectedGenre)}` : ''}`)} 
-          className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors"
+          className="text-xs font-semibold text-[#0088CC] flex items-center gap-1 outline-none cursor-pointer border-0 bg-transparent hover:text-white transition-colors"
         >
-          More <ChevronRight className="w-3.5 h-3.5" />
+          See All <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
@@ -121,7 +121,7 @@ export const NewDropsSection: React.FC = () => {
         ref={scrollRef}
         {...handlers}
         className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory min-h-[220px] overscroll-x-contain select-none"
-        style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
+        style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
       >
         <AnimatePresence mode="popLayout">
           {filteredDrops.length > 0 ? (
@@ -133,7 +133,7 @@ export const NewDropsSection: React.FC = () => {
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.2 }}
                 className="w-[168px] shrink-0 snap-start"
-                style={{ width: 'var(--card-width, 168px)' }}
+                style={{ width: 'var(--card-width, 168px)', scrollSnapAlign: 'start' }}
               >
                 <TrackCard 
                   track={track} 

@@ -43,12 +43,12 @@ export const TrendingNFTMusicSection: React.FC = () => {
         ref={scrollRef}
         {...handlers}
         className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
-        style={{ scrollBehavior: "smooth", overscrollBehaviorX: "contain" }}
+        style={{ scrollBehavior: "smooth", overscrollBehaviorX: "contain", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
       >
         {displayNFTs.map((nft) => (
           <div
             key={nft.id}
-            style={{ width: 'var(--card-width, 168px)' }}
+            style={{ width: 'var(--card-width, 168px)', scrollSnapAlign: 'start' }}
             className="w-[168px] shrink-0 snap-start"
           >
             <NFTCard

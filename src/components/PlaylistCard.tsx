@@ -143,8 +143,10 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
           {renderCover()}
           <div className="absolute inset-0 flex items-center justify-center gap-2">
             <button 
+              type="button"
               onClick={handlePlay}
-              className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300"
+              aria-label={`Play ${playlist.title}`}
+              className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300 cursor-pointer"
             >
               <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
             </button>

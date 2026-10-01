@@ -110,3 +110,6 @@ export const GasFeeDisplay: React.FC<{
     </div>
   );
 };
+
+export { GasFeeEstimator } from './GasFeeEstimator';
+export default GasFeeDisplay;

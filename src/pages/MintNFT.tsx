@@ -12,6 +12,7 @@ import { useNFT } from '@/contexts/NFTContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { uploadToPinata, uploadJSONToPinata } from '@/services/storageService';
 import { mintTonJamNFT, TONJAM_COLLECTION_ADDRESS } from '@/services/tonService';
+import { GasFeeEstimator } from '@/components/GasFeeEstimator';
 import { createActivityPost } from '@/services/socialService';
 import { validateFile, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 import { Track, NFTItem, RoyaltySplitExtended, NFTTrait } from '@/types';
@@ -1456,12 +1457,11 @@ export const MintNFT: React.FC = () => {
                         {TONJAM_COLLECTION_ADDRESS}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Estimated Gas Fee:</span>
-                      <span className="font-mono text-emerald-400 font-bold">~0.08 TON</span>
-                    </div>
                   </div>
                 )}
+
+                {/* Real-time TON Gas Fee & Congestion Estimator */}
+                <GasFeeEstimator variant="compact" />
 
                 {/* Target Blockchain */}
                 <div className="space-y-1.5 pt-1">

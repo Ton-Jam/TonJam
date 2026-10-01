@@ -26,8 +26,17 @@ export const CollectionCard = ({ id = "genesis-pass", name, itemCount, coverUrl,
   return (
     <MediaCard
       type="collection"
+      role="button"
+      tabIndex={0}
+      aria-label={`View collection: ${name}`}
       className={className}
       onClick={handleClick}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
       artwork={
         <LazyArtworkImage
           src={coverUrl}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers, History, RotateCw } from 'lucide-react';
+import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers, History, RotateCw, Bell } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { useGramPrice } from '@/contexts/GramPriceContext';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
@@ -13,6 +13,7 @@ import { NFTTransactionHistoryModal } from './NFTTransactionHistoryModal';
 import { PriceSparkline } from './PriceSparkline';
 import SendNFTModal from './SendNFTModal';
 import SellNFTModal from './SellNFTModal';
+import PriceAlertModal from './PriceAlertModal';
 import SkeletonCard from './SkeletonCard';
 import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import ConfirmationModal from './ConfirmationModal';
@@ -118,6 +119,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isConfirmPurchaseOpen, setIsConfirmPurchaseOpen] = useState(false);
+  const [isPriceAlertOpen, setIsPriceAlertOpen] = useState(false);
 
   const [isHovered, setIsHovered] = useState(false);
   const [isEndingSoon, setIsEndingSoon] = useState(false);
@@ -179,7 +181,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   }
   const associatedTrack = MOCK_TRACKS.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
-  const isOwner = nft.owner === userProfile.walletAddress;
+  const isOwner = Boolean(userProfile?.walletAddress && nft.owner && nft.owner === userProfile.walletAddress);
   const isAnthem = userProfile.anthemId === nft.id;
 
   const nftCollection = collections?.find(c => c.nftIds?.includes(nft.id));
@@ -385,7 +387,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    handlePlayClick(e);
+    if (onAction) {
+      onAction(nft);
+    } else {
+      navigate(`/nft/${nft.id}`);
+    }
   };
 
   const handleShare = (e?: React.MouseEvent) => {
@@ -416,6 +422,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       <DropdownMenuItem onClick={handleHistoryClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <History className="h-4 w-4" />
         <span className="text-[10px] font-bold uppercase tracking-widest">Ledger History</span>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setIsPriceAlertOpen(true); }} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
+        <Bell className="h-4 w-4 text-cyan-400" />
+        <span className="text-[10px] font-bold uppercase tracking-widest">Price Alert</span>
       </DropdownMenuItem>
       
       {isOwner && (
@@ -492,6 +502,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       <ContextMenuItem onClick={handleHistoryClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
         <History className="h-4 w-4" />
         <span className="text-[10px] font-semibold uppercase tracking-wider">Ledger History</span>
+      </ContextMenuItem>
+      <ContextMenuItem onClick={() => setIsPriceAlertOpen(true)} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
+        <Bell className="h-4 w-4 text-cyan-400" />
+        <span className="text-[10px] font-semibold uppercase tracking-wider">Price Alert</span>
       </ContextMenuItem>
       <ContextMenuSeparator className="bg-white/10" />
       <ContextMenuItem onClick={handleShare} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
@@ -878,6 +892,14 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         recipientAddress={nft.owner}
         isProcessing={isPurchasing}
       />
+
+      {isPriceAlertOpen && (
+        <PriceAlertModal
+          nft={nft}
+          isOpen={isPriceAlertOpen}
+          onClose={() => setIsPriceAlertOpen(false)}
+        />
+      )}
     </>
   );
 };

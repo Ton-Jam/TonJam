@@ -74,6 +74,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { getPlaceholderImage } from "@/lib/utils";
 import { useAudioStore } from "@/store/audioStore";
 import { notificationService } from "@/services/notificationService";
+import { priceAlertService } from "@/services/priceAlertService";
 import { toast } from "sonner";
 import { useUserStore } from "@/store/userStore";
 import { triggerHaptic } from "@/lib/haptics";
@@ -1889,6 +1890,17 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
               }
             });
           }
+        }
+      }
+
+      // Check if price was updated and trigger price alerts for subscribed collectors
+      if (cleanUpdates.price) {
+        const numericNewPrice = parseFloat(String(cleanUpdates.price).replace(' TON', '').trim());
+        if (!isNaN(numericNewPrice) && numericNewPrice > 0) {
+          const targetNft = allNFTs.find((n) => n.id === nftId) || (currentNftData as NFTItem);
+          priceAlertService.checkAndTriggerPriceAlerts(nftId, numericNewPrice, targetNft).catch((err) => {
+            console.warn('[AudioContext] Error evaluating price alerts on NFT update:', err);
+          });
         }
       }
 

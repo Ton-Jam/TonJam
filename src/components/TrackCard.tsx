@@ -82,6 +82,9 @@ interface TrackCardProps {
   className?: string;
   isLoading?: boolean;
   enableSwipe?: boolean;
+  onClick?: (e?: React.MouseEvent) => void;
+  onPlay?: (track: Track) => void;
+  onLike?: (track: Track) => void;
 }
 
 const TrackCard: React.FC<TrackCardProps> = ({ 
@@ -92,7 +95,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
   onRemove,
   className = '', 
   isLoading = false,
-  enableSwipe = false
+  enableSwipe = false,
+  onClick,
+  onPlay,
+  onLike
 }) => {
   const navigate = useNavigate();
   const { 
@@ -193,7 +199,11 @@ const TrackCard: React.FC<TrackCardProps> = ({
       addNotification(`This track is exclusive to ${track.tokenGating.tokenSymbol} holders.`, 'warning');
       return;
     }
-    playTrack(track);
+    if (onPlay) {
+      onPlay(track);
+    } else {
+      playTrack(track);
+    }
   };
 
   const handleOptions = (e: React.MouseEvent) => {
@@ -222,6 +232,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
   const handleToggleLike = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     toggleLikeTrack(track.id);
+    onLike?.(track);
   };
 
   const handleAddToQueue = (e?: React.MouseEvent) => {
@@ -347,7 +358,11 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const handleCardClickInner = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(`/track/${track.id}`);
+    if (onClick) {
+      onClick(e);
+    } else {
+      navigate(`/track/${track.id}`);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {

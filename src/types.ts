@@ -53,7 +53,7 @@ export interface CollabRequest {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'track_upload' | 'nft_sale' | 'event' | 'bid_update' | 'general';
+  type: 'track_upload' | 'nft_sale' | 'event' | 'bid_update' | 'price_drop' | 'general';
   title: string;
   message: string;
   link?: string;

@@ -99,6 +99,7 @@ export const notificationService = {
       bid_update: 'auction',
       nft_sale: 'nft_sale',
       event: 'marketplace',
+      price_drop: 'marketplace',
     };
 
     const unifiedNotification: any = {
@@ -137,6 +138,12 @@ export const notificationService = {
     } else if (unifiedNotification.category === 'nft_sale') {
       unifiedNotification.quickAction = {
         label: 'Check Ledger',
+        type: 'view',
+        payload: { nftId: notification.metadata?.nftId }
+      };
+    } else if (notification.type === 'price_drop') {
+      unifiedNotification.quickAction = {
+        label: 'Buy Now',
         type: 'view',
         payload: { nftId: notification.metadata?.nftId }
       };

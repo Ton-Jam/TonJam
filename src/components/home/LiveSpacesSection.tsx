@@ -25,8 +25,8 @@ export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spac
     <section className="space-y-3 text-left w-full">
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
-          <Radio className="w-4 h-4 text-[#FF3A5C] animate-pulse" />
-          <h2 className="text-lg sm:text-xl font-black tracking-tight text-white">
+          <Radio className="w-5 h-5 text-[#FF3A5C] animate-pulse" />
+          <h2 className="text-section-title font-bold text-white">
             JamSpace Community
           </h2>
         </div>
@@ -36,9 +36,9 @@ export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spac
           </span>
           <button 
             onClick={() => navigate("/jamspace")} 
-            className="text-xs font-bold text-primary flex items-center gap-1 outline-none cursor-pointer border-none bg-transparent hover:text-primary/80 transition-colors"
+            className="text-xs font-semibold text-[#0088CC] flex items-center gap-1 outline-none cursor-pointer border-0 bg-transparent hover:text-white transition-colors"
           >
-            More <ChevronRight className="w-3.5 h-3.5" />
+            See All <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
