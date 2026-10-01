@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { ArtistProfileSkeleton } from '@/pages/Library/components/Skeletons';
 import { ArtistVerificationBadge } from '@/components/ArtistVerificationBadge';
 import ArtistHeader from '@/components/ArtistHeader';
+import ArtistNFTVolumeFloorChart from '@/components/artist/ArtistNFTVolumeFloorChart';
 
 interface ArtistProfileProps {
   artistId?: string;
@@ -561,6 +562,13 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
             Decentralized audio collectibles and exclusive master rights listed on the GRAM Blockchain
           </p>
         </div>
+
+        {/* NFT Market Volume and Floor Price History Data Visualization */}
+        <ArtistNFTVolumeFloorChart
+          artistId={currentArtist?.uid || activeId}
+          artistName={currentArtist?.name}
+          nfts={artistNfts}
+        />
 
         {/* NFT Grid Container */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

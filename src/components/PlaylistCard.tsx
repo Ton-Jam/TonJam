@@ -24,14 +24,14 @@ import { cardTokens } from '@/design';
 import MediaCard from '@/components/common/MediaCard';
 
 
-interface PlaylistCardProps {
+export interface PlaylistCardProps {
   playlist: Playlist;
   variant?: 'default' | 'row';
   onClick?: () => void;
   className?: string;
 }
 
-const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'default', onClick, className = '' }) => {
+export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'default', onClick, className = '' }) => {
   const { allTracks, playlistFolders, movePlaylistToFolder, deletePlaylist } = useAudio();
   const navigate = useNavigate();
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);

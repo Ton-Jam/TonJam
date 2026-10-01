@@ -73,7 +73,7 @@ const CountdownTimer: React.FC<{ targetDate: string }> = ({ targetDate }) => {
   );
 };
 
-interface TrackCardProps {
+export interface TrackCardProps {
   track: Track;
   variant?: 'default' | 'row' | 'compact';
   index?: number;
@@ -85,9 +85,10 @@ interface TrackCardProps {
   onClick?: (e?: React.MouseEvent) => void;
   onPlay?: (track: Track) => void;
   onLike?: (track: Track) => void;
+  onMore?: (track: Track) => void;
 }
 
-const TrackCard: React.FC<TrackCardProps> = ({ 
+export const TrackCard: React.FC<TrackCardProps> = ({ 
   track, 
   variant = 'default', 
   index,
@@ -137,6 +138,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
     return new Date(track.releaseDate).getTime() > Date.now();
   }, [track.releaseDate]);
 
+  const associatedNft = React.useMemo(() => {
+    return MOCK_NFTS.find(n => n.trackId === track.id);
+  }, [track.id]);
+
   const handleHypeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsHyped(prev => !prev);
@@ -159,10 +164,6 @@ const TrackCard: React.FC<TrackCardProps> = ({
   const isActive = currentTrack?.id === track.id;
   const isLiked = likedTrackIds.includes(track.id);
   const artist = artists.find(a => a.uid === track.artistId);
-
-  const associatedNft = React.useMemo(() => {
-    return MOCK_NFTS.find(n => n.trackId === track.id);
-  }, [track.id]);
 
   const handleArtistClick = (e: React.MouseEvent) => {
     e.stopPropagation();

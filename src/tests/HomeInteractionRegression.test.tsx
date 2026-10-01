@@ -130,11 +130,11 @@ describe('Home Screen Interaction Regression Pass', () => {
   const sampleArtist: Artist = {
     uid: 'artist-505',
     name: 'DJ Cyberton',
-    handle: '@cyberton',
-    avatar: 'https://example.com/artist.jpg',
+    username: 'cyberton',
+    avatarUrl: 'https://example.com/artist.jpg',
     verified: true,
     followers: 12500,
-    genres: ['Electronic', 'Cyberpunk'],
+    genre: 'Electronic',
   };
 
   beforeEach(() => {

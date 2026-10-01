@@ -120,7 +120,7 @@ const AppRouter: React.FC = () => {
 };
 
 const AppRouterContent: React.FC = () => {
-  const [isAppLoading, setIsAppLoading] = useState(true);
+  const [isAppLoading, setIsAppLoading] = useState(false);
   const [isBackendReachable, setIsBackendReachable] = useState(true);
   const location = useLocation();
 
@@ -130,33 +130,19 @@ const AppRouterContent: React.FC = () => {
   useProactivePreloader();
 
   useEffect(() => {
-    // Test Firebase connection
-    const initBackend = async (retries = 4) => {
+    // Non-blocking Firebase connection check with safe timeout
+    const initBackend = async () => {
       try {
-        if (retries === 4) await new Promise(resolve => setTimeout(resolve, 1500));
-        const q = query(collection(db, 'test'), limit(1));
-        await getDocs(q);
+        const checkPromise = (async () => {
+          const q = query(collection(db, 'test'), limit(1));
+          await getDocs(q);
+        })();
+        const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 300));
+        await Promise.race([checkPromise, timeoutPromise]);
+      } catch (error) {
+        // App continues gracefully in online/offline mode
+      } finally {
         setIsBackendReachable(true);
-        setIsAppLoading(false);
-      } catch (error: any) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorCode = error?.code;
-        const isPermissionError = errorCode === 'permission-denied' || 
-                                 errorMessage.includes('permission-denied') || 
-                                 errorMessage.includes('Missing or insufficient permissions');
-        
-        if (isPermissionError) {
-          setIsBackendReachable(true);
-          setIsAppLoading(false);
-          return;
-        }
-
-        if (retries > 1) {
-          await new Promise(resolve => setTimeout(resolve, 1500 * (5 - retries)));
-          return initBackend(retries - 1);
-        }
-        
-        setIsBackendReachable(true); 
         setIsAppLoading(false);
       }
     };

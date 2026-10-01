@@ -50,7 +50,7 @@ import { cardTokens } from '@/design';
 import MediaCard from '@/components/common/MediaCard';
 
 
-interface NFTCardProps {
+export interface NFTCardProps {
   nft: NFTItem;
   variant?: 'default' | 'row';
   onAction?: (nft: NFTItem) => void;
@@ -61,7 +61,7 @@ interface NFTCardProps {
   currencyMode?: 'TON' | 'USD';
 }
 
-const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false, className = '', isSelectedForCompare = false, onToggleCompare, currencyMode = 'TON' }) => {
+export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false, className = '', isSelectedForCompare = false, onToggleCompare, currencyMode = 'TON' }) => {
   const navigate = useNavigate();
   const [tonConnectUI] = useTonConnectUI();
   const { convertPrice, localCurrencyEnabled } = useGramPrice();
@@ -176,9 +176,6 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isRowImageLoaded, setIsRowImageLoaded] = useState(false);
 
-  if (isLoading) {
-    return <SkeletonCard variant={variant} className={className} />;
-  }
   const associatedTrack = MOCK_TRACKS.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
   const isOwner = Boolean(userProfile?.walletAddress && nft.owner && nft.owner === userProfile.walletAddress);
@@ -196,6 +193,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     if (nft.listingType !== 'auction' || !nft.auctionEndTime) return false;
     return new Date(nft.auctionEndTime).getTime() <= Date.now();
   }, [nft.listingType, nft.auctionEndTime]);
+
+  if (isLoading) {
+    return <SkeletonCard variant={variant} className={className} />;
+  }
 
   const handleSetAnthem = (e?: React.MouseEvent) => {
     e?.stopPropagation();

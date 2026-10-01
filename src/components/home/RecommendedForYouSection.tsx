@@ -64,21 +64,31 @@ export const RecommendedForYouSection: React.FC = () => {
         style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {recommendedTracks.map((rec) => (
-          <TrackCard 
-            key={rec.id} 
-            track={rec} 
-            variant="default" 
-            className="w-[140px] sm:w-[155px] shrink-0 snap-start" 
-          />
+          <div
+            key={rec.id}
+            style={{ width: 'var(--card-width, 168px)', scrollSnapAlign: 'start' }}
+            className="w-[168px] shrink-0 snap-start"
+          >
+            <TrackCard 
+              track={rec} 
+              variant="default" 
+              className="w-full" 
+            />
+          </div>
         ))}
 
         {mappedRecommendedNFTs.map((nft) => (
-          <NFTCard 
-            key={nft.id} 
-            nft={nft} 
-            variant="default" 
-            className="w-[140px] sm:w-[155px] shrink-0 snap-start" 
-          />
+          <div
+            key={nft.id}
+            style={{ width: 'var(--card-width, 168px)', scrollSnapAlign: 'start' }}
+            className="w-[168px] shrink-0 snap-start"
+          >
+            <NFTCard 
+              nft={nft} 
+              variant="default" 
+              className="w-full" 
+            />
+          </div>
         ))}
       </div>
     </section>

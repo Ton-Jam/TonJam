@@ -33,53 +33,11 @@ class ErrorBoundary extends Component<Props, State> {
     this.startAutoRecovery();
   }
 
-  componentDidMount() {
-    window.addEventListener('error', this.handleWindowError);
-    window.addEventListener('unhandledrejection', this.handleUnhandledRejection);
-  }
-
   componentWillUnmount() {
-    window.removeEventListener('error', this.handleWindowError);
-    window.removeEventListener('unhandledrejection', this.handleUnhandledRejection);
     if (this.timer) {
       clearInterval(this.timer);
     }
   }
-
-  private isNetworkOrIgnoredError = (err: any): boolean => {
-    if (!err) return false;
-    const message = err.message || (typeof err === 'string' ? err : '');
-    const stack = err.stack || '';
-    return (
-      message.includes('TON_CONNECT_SDK') ||
-      message.includes('tonconnect') ||
-      message.toLowerCase().includes('failed to fetch') ||
-      message.toLowerCase().includes('network-request-failed') ||
-      message.toLowerCase().includes('load failed') ||
-      message.toLowerCase().includes('networkerror') ||
-      stack.includes('tonconnect')
-    );
-  };
-
-  private handleWindowError = (event: ErrorEvent) => {
-    if (this.isNetworkOrIgnoredError(event.error) || this.isNetworkOrIgnoredError(event.message)) {
-      return;
-    }
-    this.setState({ hasError: true, error: event.error || new Error(event.message) }, () => {
-      this.startAutoRecovery();
-    });
-  };
-
-  private handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-    const reason = event.reason;
-    if (this.isNetworkOrIgnoredError(reason)) {
-      return;
-    }
-    const err = reason instanceof Error ? reason : new Error(String(reason));
-    this.setState({ hasError: true, error: err }, () => {
-      this.startAutoRecovery();
-    });
-  };
 
   private startAutoRecovery = () => {
     if (!this.state.autoRetryActive) return;

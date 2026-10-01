@@ -13,6 +13,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { toast } from "sonner";
 import LazyArtworkImage from "@/components/common/LazyArtworkImage";
+import ArtistNFTVolumeFloorChart from "@/components/artist/ArtistNFTVolumeFloorChart";
 
 // Custom Modals
 import EditArtistProfileModal from "@/components/EditArtistProfileModal";
@@ -387,6 +388,13 @@ export const ArtistProfile: React.FC = () => {
             ))}
           </div>
         )}
+
+        {/* Data visualization using Recharts for Volume and Floor Price History */}
+        <ArtistNFTVolumeFloorChart 
+          artistId={artist.uid}
+          artistName={artist.name}
+          nfts={nfts}
+        />
       </div>
 
       {/* SEPARATOR */}

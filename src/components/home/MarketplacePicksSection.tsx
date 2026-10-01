@@ -48,23 +48,28 @@ export const MarketplacePicksSection: React.FC<{ picks?: MarketplacePick[] }> = 
         style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {picks.map((pick) => (
-          <NFTCard 
+          <div
             key={pick.id}
-            nft={{
-              id: pick.id,
-              trackId: pick.id,
-              title: pick.title,
-              owner: pick.artist,
-              creator: pick.artist,
-              artist: pick.artist,
-              price: pick.price,
-              imageUrl: pick.image,
-              edition: 'Limited Edition',
-              description: '',
-              isAuction: false
-            } as any}
-            className="w-[140px] sm:w-[155px] shrink-0 snap-start"
-          />
+            style={{ width: 'var(--card-width, 168px)', scrollSnapAlign: 'start' }}
+            className="w-[168px] shrink-0 snap-start"
+          >
+            <NFTCard 
+              nft={{
+                id: pick.id,
+                trackId: pick.id,
+                title: pick.title,
+                owner: pick.artist,
+                creator: pick.artist,
+                artist: pick.artist,
+                price: pick.price,
+                imageUrl: pick.image,
+                edition: 'Limited Edition',
+                description: '',
+                isAuction: false
+              } as any}
+              className="w-full"
+            />
+          </div>
         ))}
       </div>
     </section>

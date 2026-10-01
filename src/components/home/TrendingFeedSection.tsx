@@ -40,12 +40,17 @@ export const TrendingFeedSection: React.FC = () => {
         style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {trendingTracks.map((track) => (
-          <TrackCard 
-            key={track.id} 
-            track={track} 
-            variant="default"
-            className="w-[140px] sm:w-[155px] shrink-0 snap-start"
-          />
+          <div
+            key={track.id}
+            style={{ width: 'var(--card-width, 168px)', scrollSnapAlign: 'start' }}
+            className="w-[168px] shrink-0 snap-start"
+          >
+            <TrackCard 
+              track={track} 
+              variant="default"
+              className="w-full"
+            />
+          </div>
         ))}
       </div>
     </section>
