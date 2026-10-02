@@ -70,7 +70,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
     isExplicit: Boolean(isExplicit),
     isNFT: Boolean(isNFT),
     audioUrl: '',
-  } as Track);
+  } as unknown as Track);
 
   return (
     <CanonicalTrackCard

@@ -13,24 +13,55 @@ import { seedDatabase } from '@/services/seedService';
 import { resolveEndedAuctions } from '@/services/auctionService';
 import HomePage from '@/pages/HomePage';
 
-// Resilient lazy import helper for dynamic module loading with automatic retry & reload recovery
+const RouteLoadingFallback: React.FC = () => (
+  <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3 py-16 text-center select-none">
+    <div className="w-8 h-8 rounded-full border-2 border-[#0088CC]/20 border-t-[#0088CC] animate-spin" />
+    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest">Loading TonJam...</span>
+  </div>
+);
+
+const RouteErrorFallback: React.FC<{ error?: Error; onRetry?: () => void }> = ({ error, onRetry }) => (
+  <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-4 py-16 px-4 text-center select-none">
+    <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-400 text-xl">
+      ⚠️
+    </div>
+    <div className="space-y-1 max-w-sm">
+      <h3 className="text-sm font-black uppercase tracking-wider text-white">Screen Temporarily Unavailable</h3>
+      <p className="text-xs text-zinc-400 leading-relaxed">
+        {error?.message || "Failed to load the requested module. Please check your connection and try again."}
+      </p>
+    </div>
+    <button
+      type="button"
+      onClick={onRetry || (() => window.location.reload())}
+      className="px-5 py-2.5 bg-[#0088CC] hover:bg-[#0077b3] text-white rounded-[6px] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-none"
+    >
+      Retry Loading
+    </button>
+  </div>
+);
+
+// Resilient lazy import helper for dynamic module loading with automatic retry & visible error fallback
 const lazyWithRetry = (componentImport: () => Promise<any>) =>
   lazy(async () => {
     try {
       return await componentImport();
-    } catch (error) {
+    } catch (error: any) {
+      console.error('[lazyWithRetry] Module failed initial import:', error);
       try {
         await new Promise((resolve) => setTimeout(resolve, 300));
         return await componentImport();
-      } catch (retryError) {
-        const pageHasAlreadyBeenRefreshed = JSON.parse(
-          window.sessionStorage.getItem('page_has_been_refreshed') || 'false'
-        );
-        if (!pageHasAlreadyBeenRefreshed) {
-          window.sessionStorage.setItem('page_has_been_refreshed', 'true');
-          window.location.reload();
-        }
-        throw retryError;
+      } catch (retryError: any) {
+        console.error('[lazyWithRetry] Module failed retry import:', retryError);
+        const errObj = retryError instanceof Error ? retryError : new Error(String(retryError?.message || retryError || 'Dynamic module import failed'));
+        return {
+          default: () => (
+            <RouteErrorFallback
+              error={errObj}
+              onRetry={() => window.location.reload()}
+            />
+          ),
+        };
       }
     }
   });
@@ -121,7 +152,6 @@ const AppRouter: React.FC = () => {
 
 const AppRouterContent: React.FC = () => {
   const [isAppLoading, setIsAppLoading] = useState(false);
-  const [isBackendReachable, setIsBackendReachable] = useState(true);
   const location = useLocation();
 
   const { user, userProfile } = useAuth();
@@ -130,7 +160,7 @@ const AppRouterContent: React.FC = () => {
   useProactivePreloader();
 
   useEffect(() => {
-    // Non-blocking Firebase connection check with safe timeout
+    // Non-blocking Firebase connection probe in background
     const initBackend = async () => {
       try {
         const checkPromise = (async () => {
@@ -140,9 +170,8 @@ const AppRouterContent: React.FC = () => {
         const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 300));
         await Promise.race([checkPromise, timeoutPromise]);
       } catch (error) {
-        // App continues gracefully in online/offline mode
+        // App continues gracefully in offline/client mode
       } finally {
-        setIsBackendReachable(true);
         setIsAppLoading(false);
       }
     };
@@ -163,32 +192,12 @@ const AppRouterContent: React.FC = () => {
   }, [user, userProfile]);
 
   useEffect(() => {
-    if (!isBackendReachable) return;
     resolveEndedAuctions();
     const interval = setInterval(() => {
       resolveEndedAuctions();
     }, 60000);
     return () => clearInterval(interval);
-  }, [isBackendReachable]);
-
-  if (!isBackendReachable) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-background text-foreground">
-        <div className="text-center p-6 max-w-md border border-border rounded-xl bg-card shadow-lg">
-          <h1 className="text-2xl font-bold mb-4">Connection Issue</h1>
-          <p className="text-muted-foreground mb-6">
-            The platform is having trouble reaching the database.
-          </p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
-          >
-            Retry Connection
-          </button>
-        </div>
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <>
@@ -199,7 +208,7 @@ const AppRouterContent: React.FC = () => {
         ) : (
           <Layout key="app">
             <AnimatePresence mode="wait">
-              <React.Suspense fallback={null}>
+              <React.Suspense fallback={<RouteLoadingFallback />}>
                 <Routes location={location} key={location.pathname}>
                   <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
                   <Route path="/discover" element={<PageWrapper><Discover /></PageWrapper>} />

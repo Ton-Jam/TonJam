@@ -2243,6 +2243,20 @@ async function startServer() {
         }
     });
 
+    // Dynamic TonConnect manifest handler to match exact host/domain origin
+    app.get('/tonconnect-manifest.json', (req, res) => {
+        const host = req.headers.host || 'localhost:3000';
+        const protocol = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
+        const origin = `${protocol}://${host}`;
+        res.json({
+            url: origin,
+            name: "TonJam",
+            iconUrl: `${origin}/tonjam-icon.png`,
+            termsOfUseUrl: origin,
+            privacyPolicyUrl: origin
+        });
+    });
+
     const isVercel = !!process.env.VERCEL;
 
     if (process.env.NODE_ENV === 'production') {

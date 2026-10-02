@@ -57,17 +57,17 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Check if testing tracks are already present in localStorage on mount
   useEffect(() => {
     const checkInjectionStatus = () => {
-      const localTracksStr = localStorage.getItem('tonjam_library_tracks');
-      if (localTracksStr) {
-        try {
+      try {
+        const localTracksStr = localStorage.getItem('tonjam_library_tracks');
+        if (localTracksStr) {
           const currentTracks = JSON.parse(localTracksStr);
           const hasAll = MOCK_TESTING_TRACKS.every(mt => 
             currentTracks.some((t: any) => t.id === mt.id)
           );
           setIsTestingTracksInjected(hasAll);
-        } catch (e) {
-          setIsTestingTracksInjected(false);
         }
+      } catch (e) {
+        setIsTestingTracksInjected(false);
       }
     };
 
@@ -94,7 +94,10 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const injectTestingTracks = () => {
-    const localTracksStr = localStorage.getItem('tonjam_library_tracks') || '[]';
+    let localTracksStr = '[]';
+    try {
+      localTracksStr = localStorage.getItem('tonjam_library_tracks') || '[]';
+    } catch {}
     try {
       const currentTracks = JSON.parse(localTracksStr);
       let addedCount = 0;

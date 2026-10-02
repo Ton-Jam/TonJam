@@ -281,14 +281,22 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem('tonjam_language');
-    if (['en', 'ru', 'uk', 'es', 'de', 'fr', 'zh'].includes(saved as string)) return saved as Language;
+    try {
+      const saved = localStorage.getItem('tonjam_language');
+      if (['en', 'ru', 'uk', 'es', 'de', 'fr', 'zh'].includes(saved as string)) return saved as Language;
+    } catch (err) {
+      console.warn('[I18nContext] LocalStorage read error:', err);
+    }
     return 'en';
   });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('tonjam_language', lang);
+    try {
+      localStorage.setItem('tonjam_language', lang);
+    } catch (err) {
+      console.warn('[I18nContext] LocalStorage write error:', err);
+    }
   };
 
   const t = (key: string) => {

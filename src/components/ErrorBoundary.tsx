@@ -20,7 +20,7 @@ class ErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       countdown: 10,
-      autoRetryActive: true,
+      autoRetryActive: false,
     };
   }
 
@@ -30,7 +30,6 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('[ErrorBoundary] Caught error:', error, errorInfo);
-    this.startAutoRecovery();
   }
 
   componentWillUnmount() {

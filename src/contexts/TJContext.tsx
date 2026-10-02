@@ -145,8 +145,12 @@ export const TJProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [dailyMissions, setDailyMissions] = useState<DailyMission[]>([]);
   const [hasClaimedDailyBonus, setHasClaimedDailyBonus] = useState<boolean>(false);
   const [dailyStreak, setDailyStreak] = useState<number>(() => {
-    const saved = localStorage.getItem('tonjam_daily_streak');
-    return saved ? parseInt(saved, 10) || 7 : 7;
+    try {
+      const saved = localStorage.getItem('tonjam_daily_streak');
+      return saved ? parseInt(saved, 10) || 7 : 7;
+    } catch {
+      return 7;
+    }
   });
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [timeUntilReset, setTimeUntilReset] = useState<string>('');
@@ -186,8 +190,12 @@ export const TJProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const bonusStorageKey = `tonjam_daily_bonus_${activeDateKey}`;
 
     // 1. Initial local fallback load
-    const cachedMissionsStr = localStorage.getItem(storageKey);
-    const cachedBonus = localStorage.getItem(bonusStorageKey) === 'true';
+    let cachedMissionsStr: string | null = null;
+    let cachedBonus = false;
+    try {
+      cachedMissionsStr = localStorage.getItem(storageKey);
+      cachedBonus = localStorage.getItem(bonusStorageKey) === 'true';
+    } catch {}
     setHasClaimedDailyBonus(cachedBonus);
 
     let initialMissions: DailyMission[] = [];
@@ -201,7 +209,9 @@ export const TJProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     if (!initialMissions || initialMissions.length === 0) {
       initialMissions = createDefaultDailyMissions(activeDateKey);
-      localStorage.setItem(storageKey, JSON.stringify(initialMissions));
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(initialMissions));
+      } catch {}
     }
     setDailyMissions(initialMissions);
 
