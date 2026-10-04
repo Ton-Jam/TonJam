@@ -44,7 +44,7 @@
       "handle": "filesystem"
     },
     {
-      "src": "/(.*)",
+      "src": "/((?!tonconnect-manifest\\.json).*)",
       "dest": "/index.html"
     }
   ]
