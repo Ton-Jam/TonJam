@@ -11,6 +11,7 @@ import { useTonConnectUI } from '@tonconnect/ui-react';
 import SkeletonCard from './SkeletonCard';
 import { useTokenGating } from '@/hooks/useTokenGating';
 import LazyArtworkImage from '@/components/common/LazyArtworkImage';
+import VerifiedArtistBadge from '@/components/common/VerifiedArtistBadge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -427,10 +428,11 @@ export const TrackCard: React.FC<TrackCardProps> = ({
                 {track.title}
               </h4>
               <p 
-                className="text-[11px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
+                className="text-[11px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
                 onClick={handleArtistClick}
               >
-                {track.artist}
+                <span>{track.artist}</span>
+                <VerifiedArtistBadge artistName={track.artist} isVerified={track.artistVerified} size="xs" />
               </p>
             </div>
             <MoreOptionsButton />
@@ -500,10 +502,11 @@ export const TrackCard: React.FC<TrackCardProps> = ({
                 {track.title}
               </h4>
               <p 
-                className="text-[11px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
+                className="text-[11px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
                 onClick={handleArtistClick}
               >
-                {track.artist}
+                <span>{track.artist}</span>
+                <VerifiedArtistBadge artistName={track.artist} isVerified={track.artistVerified} size="xs" />
               </p>
             </div>
 
@@ -573,8 +576,9 @@ export const TrackCard: React.FC<TrackCardProps> = ({
           }
           title={track.title}
           subtitle={
-            <span onClick={handleArtistClick} className="cursor-pointer hover:text-white transition-colors">
-              {track.artist}
+            <span onClick={handleArtistClick} className="cursor-pointer hover:text-white transition-colors inline-flex items-center gap-1">
+              <span>{track.artist}</span>
+              <VerifiedArtistBadge artistName={track.artist} isVerified={track.artistVerified} size="xs" />
             </span>
           }
         />

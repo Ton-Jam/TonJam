@@ -10,12 +10,35 @@
       "dest": "/uploads/$1"
     },
     {
-       "src": "/socket.io/(.*)",
-       "dest": "server.ts"
+      "src": "/socket.io/(.*)",
+      "dest": "server.ts"
     },
     {
-       "src": "/tonconnect-manifest.json",
-       "dest": "server.ts"
+      "src": "/tonconnect-manifest.json",
+      "dest": "/tonconnect-manifest.json",
+      "headers": {
+        "Content-Type": "application/json; charset=utf-8",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "src": "/icon-tonjam.png",
+      "dest": "/icon-tonjam.png",
+      "headers": {
+        "Content-Type": "image/png",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800"
+      }
+    },
+    {
+      "src": "/tonjam-icon.png",
+      "dest": "/tonjam-icon.png",
+      "headers": {
+        "Content-Type": "image/png",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800"
+      }
     },
     {
       "handle": "filesystem"
@@ -26,4 +49,3 @@
     }
   ]
 }
-

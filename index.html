@@ -98,40 +98,16 @@
         }
     </style>
     <script>
-      // Aggressively unregister all Service Workers and clear all caches to prevent stale JS chunk execution
+      // Safe cleanup of serviceWorker and caches if available
       try {
-        if ('serviceWorker' in navigator) {
+        if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
           navigator.serviceWorker.getRegistrations().then(function(registrations) {
             for (var i = 0; i < registrations.length; i++) {
               registrations[i].unregister();
             }
           }).catch(function() {});
         }
-        if ('caches' in window) {
-          caches.keys().then(function(names) {
-            for (var i = 0; i < names.length; i++) {
-              caches.delete(names[i]);
-            }
-          }).catch(function() {});
-        }
       } catch (e) {}
-
-      // Global boot error catcher to guarantee no silent blank screen before React mounts
-      window.addEventListener('error', function(e) {
-        var root = document.getElementById('root');
-        if (root && root.children.length === 0) {
-          var errDiv = document.createElement('div');
-          errDiv.id = 'tonjam-boot-error';
-          errDiv.style.cssText = 'min-height:100vh;background:#07111F;color:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;font-family:sans-serif;text-align:center;';
-          errDiv.innerHTML = '<div style="max-width:500px;background:rgba(10,22,40,0.85);border:1px solid rgba(255,255,255,0.12);padding:32px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.5);">' +
-            '<div style="font-size:36px;margin-bottom:12px;">⚠️</div>' +
-            '<h2 style="font-size:18px;font-weight:800;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;color:#ffffff;">TonJam Runtime Notice</h2>' +
-            '<p style="font-size:13px;color:#94a3b8;margin-bottom:24px;line-height:1.5;">' + (e.message || 'An error occurred while loading application modules.') + '</p>' +
-            '<button onclick="localStorage.clear();sessionStorage.clear();if(\'caches\' in window){caches.keys().then(function(k){k.forEach(function(c){caches.delete(c)})})};window.location.reload();" style="padding:12px 24px;background:#0088CC;color:white;border:none;border-radius:6px;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px;cursor:pointer;">Clear Storage & Reload</button>' +
-            '</div>';
-          root.appendChild(errDiv);
-        }
-      });
     </script>
 </head>
 <body>

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { Track } from '@/types';
+import { getSafeLocalStorage } from '@/lib/safeStorage';
 
 export type RepeatMode = 'off' | 'all' | 'one';
 
@@ -109,6 +110,7 @@ export const useAudioStore = create<AudioState>()(
     }),
     {
       name: 'tonjam-audio-storage',
+      storage: createJSONStorage(() => getSafeLocalStorage()),
       partialize: (state) => ({
         currentTrack: state.currentTrack,
         queue: state.queue,

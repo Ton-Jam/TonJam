@@ -65,7 +65,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
               src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
               fallbackSrc={getPlaceholderImage(`artist-${artist.uid}`)}
               alt={artist.name} 
-              className="w-12 h-12 rounded-full object-cover border border-[#c0c0c0]/25" 
+              className="w-12 h-12 rounded-full object-cover shadow-md shadow-black/40" 
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1">
@@ -76,7 +76,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
             </div>
             <Button 
               className={cn(
-                  "rounded-full transition-colors duration-500 ease-in-out border border-[#c0c0c0]/30",
+                  "rounded-full transition-colors duration-500 ease-in-out border-0",
                   isFollowing 
                     ? "bg-muted/50 text-muted-foreground hover:bg-muted/80" 
                     : "bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]"
@@ -104,7 +104,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
     >
       <div 
         style={{ width: cardTokens.artist.avatarSize, height: cardTokens.artist.avatarSize }}
-        className="relative rounded-full overflow-hidden bg-background transition-all mb-2 flex-shrink-0 border border-[#c0c0c0]/25"
+        className="relative rounded-full overflow-hidden bg-background transition-all mb-2 flex-shrink-0 shadow-lg shadow-black/50"
       >
         <LazyArtworkImage 
           src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
@@ -114,7 +114,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
         />
         {onMoreClick && (
           <button
-             className="absolute top-1.5 right-1.5 p-1 bg-black/60 rounded-full text-white/80 hover:text-white transition-all border border-[#c0c0c0]/25"
+             className="absolute top-1.5 right-1.5 p-1 bg-black/60 rounded-full text-white/80 hover:text-white transition-all border-0 shadow-sm"
              onClick={(e) => { e.stopPropagation(); onMoreClick(artist); }}
           >
             <MoreHorizontal className="h-3 w-3" />
@@ -139,7 +139,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
           size="sm"
           onClick={handleFollowClick}
           style={{ height: cardTokens.artist.followButtonHeight }}
-          className="w-full text-[8px] uppercase tracking-widest font-black rounded-full border border-[#c0c0c0]/30 transition-colors duration-500 ease-in-out"
+          className="w-full text-[8px] uppercase tracking-widest font-black rounded-full border-0 transition-colors duration-500 ease-in-out shadow-sm"
         >
           {isFollowing ? 'UNFOLLOW' : 'FOLLOW'}
         </Button>

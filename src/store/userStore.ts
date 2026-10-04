@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { UserProfile } from '@/types';
 import { MOCK_USER } from '@/constants';
+import { getSafeLocalStorage } from '@/lib/safeStorage';
 
 interface UserState {
   userProfile: UserProfile;
@@ -55,6 +56,7 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'tonjam-user-storage',
+      storage: createJSONStorage(() => getSafeLocalStorage()),
       partialize: (state) => ({
         userProfile: state.userProfile,
         followedUserIds: state.followedUserIds,

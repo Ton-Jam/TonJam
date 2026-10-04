@@ -1,11 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Verified, ChevronUp } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 import { MarqueeTitle } from './MarqueeTitle';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_ARTISTS, MOCK_USER } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
+import VerifiedArtistBadge from '@/components/common/VerifiedArtistBadge';
 
 interface ChartNFTCardProps {
   nft: NFTItem;
@@ -50,7 +51,7 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
         <h4 className="text-[10px] font-bold text-foreground uppercase tracking-[0.05em] truncate group-hover:text-primary transition-colors">
           {nft.title}
         </h4>
-        <div className="flex items-center gap-2 mt-0.5 min-w-0 w-full">
+        <div className="flex items-center gap-1.5 mt-0.5 min-w-0 w-full">
           <div 
             className="flex-1 min-w-0 cursor-pointer"
             onClick={(e) => {
@@ -64,9 +65,11 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
           >
             <MarqueeTitle text={nft.creator} className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest hover:text-foreground transition-colors" />
           </div>
-          {artist?.verified && (
-            <Verified className="h-2.5 w-2.5 text-blue-500 flex-shrink-0" />
-          )}
+          <VerifiedArtistBadge 
+            artistName={nft.creator} 
+            isVerified={Boolean(artist?.verified || artist?.isVerifiedArtist || nft.artistVerified)}
+            size="xs" 
+          />
         </div>
       </div>
 

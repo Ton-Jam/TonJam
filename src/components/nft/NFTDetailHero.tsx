@@ -13,6 +13,7 @@ import NFTAudioPreviewPlayer from "@/components/NFTAudioPreviewPlayer";
 import { CollectionSummaryCards } from "@/components/marketplace/CollectionSummaryCards";
 import { Interactive3DViewer } from "@/components/Interactive3DViewer";
 import NFTCard from "@/components/NFTCard";
+import VerifiedArtistBadge from "@/components/common/VerifiedArtistBadge";
 
 interface NFTDetailHeroProps {
   nft: NFTItem;
@@ -160,8 +161,9 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                   Original Creator
                 </span>
-                <span className="text-xs font-bold text-white uppercase tracking-tight group-hover:text-[#0098EA] transition-colors flex items-center gap-1">
-                  {nft.creator}
+                <span className="text-xs font-bold text-white uppercase tracking-tight group-hover:text-[#0098EA] transition-colors flex items-center gap-1.5">
+                  <span>{nft.creator}</span>
+                  <VerifiedArtistBadge artistName={nft.creator} isVerified={matchedCreator?.verified || (matchedCreator as any)?.isVerifiedArtist} size="sm" />
                 </span>
               </div>
             </div>

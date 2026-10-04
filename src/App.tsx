@@ -29,13 +29,12 @@ import AppRouter from "@/router/AppRouter";
 import { I18nProvider } from "@/contexts/I18nContext";
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
+import { SafeTonConnectProvider } from '@/components/SafeTonConnectProvider';
+import { DiagnosticProviderBoundary } from '@/components/DiagnosticProviderBoundary';
 
 const queryClient = new QueryClient();
 
-const manifestUrl = typeof window !== 'undefined'
-  ? `${window.location.origin}/tonconnect-manifest.json`
-  : 'https://ton-jam.vercel.app/tonconnect-manifest.json';
+const manifestUrl = 'https://ton-jam.vercel.app/tonconnect-manifest.json';
 
 export default function App() {
   useEffect(() => {
@@ -59,63 +58,117 @@ export default function App() {
     return () => window.removeEventListener('tonjam_font_size_changed', applyFontSize);
   }, []);
 
+  // Post-mount provider startup diagnostics report
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined' && window.getProviderDiagnostics) {
+        window.getProviderDiagnostics();
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <ErrorBoundary>
       <Suspense fallback={<AppLoadingFallback />}>
-        <QueryClientProvider client={queryClient}>
-          <TonConnectUIProvider manifestUrl={manifestUrl}>
-            <Router>
-              <ThemeProvider>
-                <I18nProvider>
-                  <TooltipProvider>
-                    <ToastProvider>
-                      <AuthProvider>
-                        <UserProvider>
-                          <WalletProvider>
-                            <TonPriceProvider>
-                              <GramPriceProvider>
-                                <AudioProvider>
-                                  <KeyboardShortcutListener />
-                                  <LibraryProvider>
-                                    <ArtistProvider>
-                                      <NFTProvider>
-                                        <FeedProvider>
-                                          <FollowProvider>
-                                            <NotificationProvider>
-                                              <TaskProvider>
-                                                <TJProvider>
-                                                  <ModalProvider>
-                                                    <ErrorBoundary>
-                                                      <AppRouter />
-                                                    </ErrorBoundary>
+        <DiagnosticProviderBoundary name="QueryClientProvider">
+          <QueryClientProvider client={queryClient}>
+            <DiagnosticProviderBoundary name="SafeTonConnectProvider">
+              <SafeTonConnectProvider manifestUrl={manifestUrl}>
+                <DiagnosticProviderBoundary name="Router">
+                  <Router>
+                    <DiagnosticProviderBoundary name="ThemeProvider">
+                      <ThemeProvider>
+                        <DiagnosticProviderBoundary name="I18nProvider">
+                          <I18nProvider>
+                            <DiagnosticProviderBoundary name="TooltipProvider">
+                              <TooltipProvider>
+                                <DiagnosticProviderBoundary name="ToastProvider">
+                                  <ToastProvider>
+                                    <DiagnosticProviderBoundary name="AuthProvider">
+                                      <AuthProvider>
+                                        <DiagnosticProviderBoundary name="UserProvider">
+                                          <UserProvider>
+                                            <DiagnosticProviderBoundary name="WalletProvider">
+                                              <WalletProvider>
+                                                <DiagnosticProviderBoundary name="TonPriceProvider">
+                                                  <TonPriceProvider>
+                                                    <DiagnosticProviderBoundary name="GramPriceProvider">
+                                                      <GramPriceProvider>
+                                                        <DiagnosticProviderBoundary name="AudioProvider">
+                                                          <AudioProvider>
+                                                            <KeyboardShortcutListener />
+                                                            <DiagnosticProviderBoundary name="LibraryProvider">
+                                                              <LibraryProvider>
+                                                                <DiagnosticProviderBoundary name="ArtistProvider">
+                                                                  <ArtistProvider>
+                                                                    <DiagnosticProviderBoundary name="NFTProvider">
+                                                                      <NFTProvider>
+                                                                        <DiagnosticProviderBoundary name="FeedProvider">
+                                                                          <FeedProvider>
+                                                                            <DiagnosticProviderBoundary name="FollowProvider">
+                                                                              <FollowProvider>
+                                                                                <DiagnosticProviderBoundary name="NotificationProvider">
+                                                                                  <NotificationProvider>
+                                                                                    <DiagnosticProviderBoundary name="TaskProvider">
+                                                                                      <TaskProvider>
+                                                                                        <DiagnosticProviderBoundary name="TJProvider">
+                                                                                          <TJProvider>
+                                                                                            <DiagnosticProviderBoundary name="ModalProvider">
+                                                                                              <ModalProvider>
+                                                                                                <ErrorBoundary>
+                                                                                                  <AppRouter />
+                                                                                                </ErrorBoundary>
 
-                                                    <Toaster
-                                                      richColors
-                                                      position="top-center"
-                                                      closeButton
-                                                    />
-                                                  </ModalProvider>
-                                                </TJProvider>
-                                              </TaskProvider>
-                                            </NotificationProvider>
-                                          </FollowProvider>
-                                        </FeedProvider>
-                                      </NFTProvider>
-                                    </ArtistProvider>
-                                  </LibraryProvider>
-                                </AudioProvider>
-                              </GramPriceProvider>
-                            </TonPriceProvider>
-                          </WalletProvider>
-                        </UserProvider>
-                      </AuthProvider>
-                    </ToastProvider>
-                  </TooltipProvider>
-                </I18nProvider>
-              </ThemeProvider>
-            </Router>
-          </TonConnectUIProvider>
-        </QueryClientProvider>
+                                                                                                <Toaster
+                                                                                                  richColors
+                                                                                                  position="top-center"
+                                                                                                  closeButton
+                                                                                                />
+                                                                                              </ModalProvider>
+                                                                                            </DiagnosticProviderBoundary>
+                                                                                          </TJProvider>
+                                                                                        </DiagnosticProviderBoundary>
+                                                                                      </TaskProvider>
+                                                                                    </DiagnosticProviderBoundary>
+                                                                                  </NotificationProvider>
+                                                                                </DiagnosticProviderBoundary>
+                                                                              </FollowProvider>
+                                                                            </DiagnosticProviderBoundary>
+                                                                          </FeedProvider>
+                                                                        </DiagnosticProviderBoundary>
+                                                                      </NFTProvider>
+                                                                    </DiagnosticProviderBoundary>
+                                                                  </ArtistProvider>
+                                                                </DiagnosticProviderBoundary>
+                                                              </LibraryProvider>
+                                                            </DiagnosticProviderBoundary>
+                                                          </AudioProvider>
+                                                        </DiagnosticProviderBoundary>
+                                                      </GramPriceProvider>
+                                                    </DiagnosticProviderBoundary>
+                                                  </TonPriceProvider>
+                                                </DiagnosticProviderBoundary>
+                                              </WalletProvider>
+                                            </DiagnosticProviderBoundary>
+                                          </UserProvider>
+                                        </DiagnosticProviderBoundary>
+                                      </AuthProvider>
+                                    </DiagnosticProviderBoundary>
+                                  </ToastProvider>
+                                </DiagnosticProviderBoundary>
+                              </TooltipProvider>
+                            </DiagnosticProviderBoundary>
+                          </I18nProvider>
+                        </DiagnosticProviderBoundary>
+                      </ThemeProvider>
+                    </DiagnosticProviderBoundary>
+                  </Router>
+                </DiagnosticProviderBoundary>
+              </SafeTonConnectProvider>
+            </DiagnosticProviderBoundary>
+          </QueryClientProvider>
+        </DiagnosticProviderBoundary>
       </Suspense>
     </ErrorBoundary>
   );

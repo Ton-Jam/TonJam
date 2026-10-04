@@ -5,6 +5,7 @@ import { Play, Pause, ListMusic, MoreVertical, Heart, ChevronUp, Music2 } from "
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
 import { useCoverColor } from "@/lib/color-utils";
+import VerifiedArtistBadge from "@/components/common/VerifiedArtistBadge";
 
 interface MiniPlayerProps {
   onQueueClick?: () => void;
@@ -499,12 +500,19 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                 </span>
               )}
             </div>
-            <ScrollingText
-              text={currentTrack.artist}
-              className="text-[11px] sm:text-xs font-medium text-zinc-400 mt-0.5"
-              containerClassName="min-w-0 flex-1"
-              id="mini-track-artist"
-            />
+            <div className="flex items-center gap-1 min-w-0">
+              <ScrollingText
+                text={currentTrack.artist}
+                className="text-[11px] sm:text-xs font-medium text-zinc-400 mt-0.5"
+                containerClassName="min-w-0"
+                id="mini-track-artist"
+              />
+              <VerifiedArtistBadge 
+                artistName={currentTrack.artist}
+                isVerified={currentTrack.artistVerified}
+                size="xs"
+              />
+            </div>
           </div>
         </div>
 

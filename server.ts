@@ -942,9 +942,7 @@ async function startServer() {
         try {
             const rawProto = (req.headers['x-forwarded-proto'] as string) || (req.secure ? 'https' : req.protocol) || 'https';
             const protocol = rawProto.split(',')[0].trim();
-            const host = req.get('host') || 'ais-dev-mfbg5o2augtyymzecgehh7-9697536059.europe-west2.run.app';
-            
-            // TON Connect specification mandates HTTPS dApp URLs unless purely on localhost
+            const host = (req.headers['x-forwarded-host'] as string) || req.get('host') || 'ton-jam.vercel.app';
             const isLocal = host.startsWith('localhost') || host.startsWith('127.0.0.1');
             const scheme = isLocal ? 'http' : 'https';
             const origin = `${scheme}://${host}`;
@@ -960,6 +958,7 @@ async function startServer() {
             res.setHeader('Access-Control-Allow-Origin', '*');
             res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
             res.setHeader('Access-Control-Allow-Headers', '*');
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
             res.setHeader('Content-Type', 'application/json; charset=utf-8');
             res.json(manifestData);
         } catch (error: any) {
@@ -2241,20 +2240,6 @@ async function startServer() {
             console.error('Spotify Liked Songs Proxy Error:', error.response?.data || error.message);
             res.status(500).json({ error: 'Failed to fetch Spotify liked songs' });
         }
-    });
-
-    // Dynamic TonConnect manifest handler to match exact host/domain origin
-    app.get('/tonconnect-manifest.json', (req, res) => {
-        const host = req.headers.host || 'localhost:3000';
-        const protocol = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
-        const origin = `${protocol}://${host}`;
-        res.json({
-            url: origin,
-            name: "TonJam",
-            iconUrl: `${origin}/tonjam-icon.png`,
-            termsOfUseUrl: origin,
-            privacyPolicyUrl: origin
-        });
     });
 
     const isVercel = !!process.env.VERCEL;

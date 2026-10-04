@@ -16,6 +16,7 @@ import SellNFTModal from './SellNFTModal';
 import PriceAlertModal from './PriceAlertModal';
 import SkeletonCard from './SkeletonCard';
 import LazyArtworkImage from '@/components/common/LazyArtworkImage';
+import VerifiedArtistBadge from '@/components/common/VerifiedArtistBadge';
 import ConfirmationModal from './ConfirmationModal';
 import NFTPurchaseConfirmationDialog from './NFTPurchaseConfirmationDialog';
 import NFTOptionsModal from './NFTOptionsModal';
@@ -637,10 +638,11 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                 {nft.title}
               </h4>
               <p 
-                className="text-[11px] text-white/60 truncate mt-0.5 hover:text-white transition-colors cursor-pointer"
+                className="text-[11px] text-white/60 truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
                 onClick={handleArtistClick}
               >
-                {nft.creator}
+                <span>{nft.creator}</span>
+                <VerifiedArtistBadge artistName={nft.creator} size="xs" />
               </p>
             </div>
 
@@ -743,8 +745,9 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
           }
           title={nft.title}
           subtitle={
-            <span onClick={handleArtistClick} className="hover:text-white transition-colors cursor-pointer">
-              {nft.creator}
+            <span onClick={handleArtistClick} className="hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1">
+              <span>{nft.creator}</span>
+              <VerifiedArtistBadge artistName={nft.creator} size="xs" />
             </span>
           }
           meta={

@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronUp, ChevronDown, UserPlus, UserCheck, Verified } from 'lucide-react';
+import { ChevronUp, ChevronDown, UserPlus, UserCheck } from 'lucide-react';
 import { UserProfile } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import { useAudio } from '@/contexts/AudioContext';
+import VerifiedArtistBadge from '@/components/common/VerifiedArtistBadge';
 
 interface ChartArtistCardProps {
   artist: UserProfile;
@@ -47,10 +48,13 @@ const ChartArtistCard: React.FC<ChartArtistCardProps> = ({ artist, rank }) => {
       {/* Info */}
       <div className="flex-1 min-w-0">
         <h4 className="text-[10px] font-bold text-foreground uppercase tracking-[0.05em] truncate group-hover:text-primary transition-colors flex items-center gap-1">
-          {artist.name}
-          {(artist.isVerifiedArtist || (artist as any).isVerified || (artist as any).verified) && (
-            <Verified className="w-3 h-3 text-blue-400 fill-current flex-shrink-0" />
-          )}
+          <span>{artist.name}</span>
+          <VerifiedArtistBadge 
+            artistName={artist.name}
+            artistId={artist.uid}
+            isVerified={artist.isVerifiedArtist || (artist as any).isVerified || (artist as any).verified}
+            size="xs"
+          />
         </h4>
         <div className="flex items-center gap-2 mt-2 min-w-0">
           <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest truncate">

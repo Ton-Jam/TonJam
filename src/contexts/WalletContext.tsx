@@ -1,5 +1,6 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useTonAddress, useTonWallet, useTonConnectUI } from '@tonconnect/ui-react';
+import { safeLocalStorage } from '@/lib/safeStorage';
 
 export interface WalletContextType {
   address: string;
@@ -39,7 +40,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [tonConnectUI] = useTonConnectUI();
   const [evmAddress, setEvmAddress] = useState<string | null>(() => {
     try {
-      return typeof window !== 'undefined' ? localStorage.getItem('tonjam_simulated_evm_address') : null;
+      return safeLocalStorage.getItem('tonjam_simulated_evm_address');
     } catch {
       return null;
     }
@@ -78,7 +79,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
     setEvmAddress(null);
     try {
-      localStorage.removeItem('tonjam_simulated_evm_address');
+      safeLocalStorage.removeItem('tonjam_simulated_evm_address');
     } catch (err) {
       console.warn("[WalletContext] Failed to remove EVM address from localStorage:", err);
     }

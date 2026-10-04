@@ -4,7 +4,8 @@ import { motion } from 'motion/react';
 import { useAudio } from '@/contexts/AudioContext';
 import { MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { NFTItem } from '@/types';
-import { ShoppingCart, BadgeCheck, Layers } from 'lucide-react';
+import { ShoppingCart, Layers } from 'lucide-react';
+import VerifiedArtistBadge from '@/components/common/VerifiedArtistBadge';
 import { MarqueeTitle } from './MarqueeTitle';
 import { cardTokens } from '@/design';
 
@@ -104,13 +105,14 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
           {nft.title}
         </h4>
         <p 
-          className="text-[12px] leading-[17px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors"
+          className="text-[12px] leading-[17px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors flex items-center gap-1"
           style={{
             fontSize: 'var(--card-meta-size, 12px)',
             lineHeight: 'var(--card-meta-line-height, 17px)',
           }}
         >
-          {nft.creator || nft.artist}
+          <span className="truncate">{nft.creator || nft.artist}</span>
+          <VerifiedArtistBadge artistName={nft.creator || nft.artist} isVerified={isVerified} size="xs" />
         </p>
         <div 
           className="flex items-center gap-1 mt-1 text-[12px] leading-[17px] font-medium text-white/80 font-mono"

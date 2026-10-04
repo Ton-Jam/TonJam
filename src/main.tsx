@@ -16,11 +16,7 @@ if (!rootElement) {
 
 try {
   const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
+  root.render(<App />);
 } catch (mountErr: any) {
   console.error('[TonJam Boot] Critical mount failure:', mountErr);
   rootElement.innerHTML = `

@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer';
+import { memoryLocalStorage, memorySessionStorage } from './lib/safeStorage';
 
 if (typeof window !== 'undefined') {
   window.Buffer = window.Buffer || Buffer;
@@ -17,47 +18,39 @@ if (typeof window !== 'undefined') {
   }
 
   // Safe fallback for localStorage/sessionStorage in cross-origin sandboxed iframes
-  const createMemoryStorage = () => {
-    const data: Record<string, string> = {};
-    return {
-      getItem: (k: string) => (k in data ? data[k] : null),
-      setItem: (k: string, v: string) => { data[k] = String(v); },
-      removeItem: (k: string) => { delete data[k]; },
-      clear: () => { Object.keys(data).forEach(k => delete data[k]); },
-      key: (i: number) => Object.keys(data)[i] ?? null,
-      get length() { return Object.keys(data).length; }
-    };
-  };
-
   try {
-    const testKey = '__storage_test__';
+    const testKey = '__tonjam_storage_test__';
     window.localStorage.setItem(testKey, testKey);
     window.localStorage.removeItem(testKey);
   } catch {
     try {
       Object.defineProperty(window, 'localStorage', {
-        value: createMemoryStorage(),
+        get: () => memoryLocalStorage,
         configurable: true,
-        writable: true,
+        enumerable: true,
       });
     } catch {
-      // Safe fallback
+      try {
+        (window as any).localStorage = memoryLocalStorage;
+      } catch {}
     }
   }
 
   try {
-    const testKey = '__session_test__';
+    const testKey = '__tonjam_session_test__';
     window.sessionStorage.setItem(testKey, testKey);
     window.sessionStorage.removeItem(testKey);
   } catch {
     try {
       Object.defineProperty(window, 'sessionStorage', {
-        value: createMemoryStorage(),
+        get: () => memorySessionStorage,
         configurable: true,
-        writable: true,
+        enumerable: true,
       });
     } catch {
-      // Safe fallback
+      try {
+        (window as any).sessionStorage = memorySessionStorage;
+      } catch {}
     }
   }
 }
