@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMarketplace } from "./hooks/useMarketplace";
 import { MarketplaceHero } from "./sections/MarketplaceHero";
+import { MarketplaceQuickLaunchpad } from "./sections/MarketplaceQuickLaunchpad";
 import { CategoryFilters } from "./sections/CategoryFilters";
 import { TrendingCollections } from "./sections/TrendingCollections";
 import { FeaturedMusicNFTs } from "./sections/FeaturedMusicNFTs";
@@ -173,7 +174,12 @@ const Marketplace: React.FC = () => {
           />
         )}
 
-        {/* 2. Category Filters (Interactive Horizontal Scroll Chips) */}
+        {/* 2. Quick Launchpad (Horizontal Scroll) */}
+        {!searchTerm && (
+          <MarketplaceQuickLaunchpad />
+        )}
+
+        {/* 3. Category Filters (Interactive Horizontal Scroll Chips) */}
         <CategoryFilters
           categories={filterCategories}
           activeCategory={activeCategory}

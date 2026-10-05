@@ -53,34 +53,34 @@ export const HomePage: React.FC = () => {
     >
       <HomePullToRefresh onRefresh={handleRefresh}>
         <div key={refreshKey} className="w-full space-y-6 sm:space-y-8 pt-2">
-          {/* 1. REFINED HEADER WITH GREETING & QUICK UTILITIES */}
-          <div className="px-4 sm:px-6 lg:px-8 text-left pt-1">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="space-y-0.5 min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white truncate">
-                  What’s up TON, Let’s Jam Up!
-                </h1>
-                <p className="text-xs sm:text-sm text-zinc-400 font-normal truncate">
-                  {userName 
-                    ? `Welcome back, ${userName} · Discover music & Music NFTs` 
-                    : "Discover independent music, artists and Music NFTs on TON"}
-                </p>
-              </div>
+          {/* 1. TASK & GRAM/TON PRICE UTILITIES */}
+          <div className="px-4 sm:px-6 lg:px-8 pt-1">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigate('/tasks')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 transition-all text-white cursor-pointer border-none shadow-sm"
+                aria-label="Tasks & Rewards"
+                title="Earn TonJam Coins"
+              >
+                <Coins className="w-3.5 h-3.5 text-[#0088CC]" />
+                <span className="text-xs font-bold text-zinc-200">Tasks</span>
+              </button>
+              <TonPriceChart />
+            </div>
+          </div>
 
-              {/* Quick Actions (Tasks + Ton Price) */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => navigate('/tasks')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 transition-all text-white cursor-pointer border-none shadow-sm"
-                  aria-label="Tasks & Rewards"
-                  title="Earn TonJam Coins"
-                >
-                  <Coins className="w-3.5 h-3.5 text-[#0088CC]" />
-                  <span className="text-xs font-bold text-zinc-200">Tasks</span>
-                </button>
-                <TonPriceChart />
-              </div>
+          {/* 2. WELCOME HEADER (COMPLETE GREETING) */}
+          <div className="px-4 sm:px-6 lg:px-8 text-left">
+            <div className="space-y-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white leading-tight">
+                What’s up TON, Let’s Jam Up!
+              </h1>
+              <p className="text-xs sm:text-sm text-zinc-400 font-normal leading-relaxed">
+                {userName 
+                  ? `Welcome back, ${userName} · Discover music & Music NFTs` 
+                  : "Discover independent music, artists and Music NFTs on TON"}
+              </p>
             </div>
           </div>
 

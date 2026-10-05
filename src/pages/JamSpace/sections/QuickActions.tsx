@@ -78,8 +78,11 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">⚡ Quick Launchpad</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">⚡ Quick Launchpad</h3>
+        <span className="text-[10px] font-medium text-slate-500 select-none hidden sm:inline-block">Swipe &rarr;</span>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2 pt-0.5 no-scrollbar scroll-smooth w-full -mx-1 px-1">
         {actions.map((act) => {
           const Icon = act.icon;
           return (
@@ -88,12 +91,12 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
               onClick={act.action}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="flex flex-col items-start p-4 bg-slate-900 border border-white/[0.03] rounded-[10px] text-left transition-colors hover:bg-slate-800/80 cursor-pointer w-full group"
+              className="flex flex-col items-start p-4 bg-slate-900 rounded-[10px] text-left transition-colors hover:bg-slate-800/80 cursor-pointer min-w-[145px] sm:min-w-[165px] shrink-0 group select-none shadow-md shadow-black/20"
             >
               <div className={`p-2 rounded-[10px] ${act.bg} ${act.color} mb-3 transition-transform group-hover:scale-105`}>
                 <Icon className="w-5 h-5" />
               </div>
-              <h4 className="text-sm font-bold text-white tracking-tight">{act.label}</h4>
+              <h4 className="text-sm font-bold text-white tracking-tight whitespace-nowrap">{act.label}</h4>
               <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1 leading-tight">{act.description}</p>
             </motion.button>
           );
