@@ -475,7 +475,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   transition={{ duration: 0.8, ease: "easeInOut" }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-3 py-1.5 flex items-center gap-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] transition-all text-xs font-bold text-white border-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#0098EA] select-none shrink-0"
+                  className="min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-3 py-1.5 flex items-center gap-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] transition-all text-xs font-bold text-white border border-white/10 hover:border-white/20 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#0098EA] select-none shrink-0"
                   aria-label="Open Earn TJ daily tasks"
                 >
                   <motion.img
@@ -682,7 +682,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
             <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
             <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jamspace" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
-            <MobileNavItem to="/library" icon={RectangleStackIcon} label="Library" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
+            <MobileNavItem to="/library" icon={RectangleStackIcon} label="My Library" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
             <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Market" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
           </nav>
         </div>

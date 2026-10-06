@@ -199,10 +199,10 @@ export const Web3MusicNews: React.FC<Web3MusicNewsProps> = ({ className = '' }) 
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-1 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer outline-none border-none shrink-0 ${
+                className={`px-3 py-1 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer outline-none shrink-0 ${
                   isSelected 
-                    ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20' 
-                    : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 hover:bg-white/[0.06]'
+                    ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20 border border-blue-500' 
+                    : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] border border-white/10 hover:border-white/20'
                 }`}
               >
                 {cat}

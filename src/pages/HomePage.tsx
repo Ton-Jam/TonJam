@@ -59,7 +59,7 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/tasks')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 transition-all text-white cursor-pointer border-none shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 transition-all text-white cursor-pointer border border-white/10 hover:border-white/20 shadow-sm"
                 aria-label="Tasks & Rewards"
                 title="Earn TonJam Coins"
               >

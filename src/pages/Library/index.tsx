@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLibrary } from '@/contexts/LibraryContext';
@@ -27,7 +27,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { 
   Sparkles, Heart, Download, Zap, Disc, Clock, Search, List, LayoutGrid, 
   Settings, Database, BarChart3, ListMusic, History, SlidersHorizontal, Sun, Moon,
-  WifiOff, HardDrive
+  WifiOff, HardDrive, Library as LibraryIcon, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -42,11 +42,25 @@ const LibraryPage: React.FC = () => {
   const [isSpotifyModalOpen, setIsSpotifyModalOpen] = useState(false);
   const [selectedArtistProfileId, setSelectedArtistProfileId] = useState<string>('dj-krupy');
   const [nftSearchQuery, setNftSearchQuery] = useState('');
+  const [isHeaderSearchOpen, setIsHeaderSearchOpen] = useState(false);
+  const headerSearchInputRef = useRef<HTMLInputElement>(null);
+
+  const handleOpenHeaderSearch = () => {
+    setIsHeaderSearchOpen(true);
+    setTimeout(() => {
+      headerSearchInputRef.current?.focus();
+    }, 50);
+  };
+
+  const handleCloseHeaderSearch = () => {
+    setIsHeaderSearchOpen(false);
+    data.setSearchQuery('');
+  };
 
   // Filter NFTs dynamically by title or artist name
   const filteredNfts = data.nfts.filter(nft => {
-    if (!nftSearchQuery) return true;
-    const q = nftSearchQuery.toLowerCase();
+    const q = (nftSearchQuery || data.searchQuery).toLowerCase();
+    if (!q) return true;
     return nft.title.toLowerCase().includes(q) || nft.artist.toLowerCase().includes(q);
   });
 
@@ -93,7 +107,60 @@ const LibraryPage: React.FC = () => {
 
   return (
     <PageLayout containerClassName="space-y-8" topSpacing="default">
-        {/* 2. QUICK ACTIONS */}
+        {/* 1. PAGE HEADER */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
+          <div className="space-y-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
+              <LibraryIcon className="w-6 h-6 sm:w-7 sm:h-7 text-[#0052FF] shrink-0" />
+              <span>My Library</span>
+            </h1>
+            <p className="text-xs text-slate-400 font-medium">
+              Your personal music collection, saved tracks, offline cache, and owned Music NFTs
+            </p>
+          </div>
+
+          {/* Header Search Trigger & Input */}
+          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 w-full sm:w-auto">
+            {isHeaderSearchOpen || data.searchQuery ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative flex items-center w-full sm:w-72 md:w-80"
+              >
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0052FF]" />
+                <input
+                  ref={headerSearchInputRef}
+                  type="text"
+                  placeholder="Search tracks, albums, collections..."
+                  value={data.searchQuery}
+                  onChange={(e) => data.setSearchQuery(e.target.value)}
+                  className="w-full bg-slate-900 rounded-[10px] pl-10 pr-9 py-2 text-xs font-semibold outline-none focus:ring-1 focus:ring-[#0052FF] transition-all text-white placeholder:text-slate-500 shadow-sm"
+                />
+                <button
+                  type="button"
+                  onClick={handleCloseHeaderSearch}
+                  aria-label="Close search"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-white rounded-full transition-colors cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </motion.div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleOpenHeaderSearch}
+                aria-label="Open search in library"
+                title="Search Library"
+                className="flex items-center gap-2 px-3.5 py-2 rounded-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all cursor-pointer shadow-sm select-none"
+              >
+                <Search className="w-4 h-4 text-[#0052FF]" />
+                <span className="text-xs font-bold hidden sm:inline">Search</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 2. LIBRARY DESTINATIONS */}
         {!data.isLoading && (
           <QuickActions 
             likedCount={data.likedCount}
@@ -103,37 +170,54 @@ const LibraryPage: React.FC = () => {
           />
         )}
 
-        {/* 3. FILTER CHIPS & SEARCH CONTROLLER */}
-        <div className="space-y-4 pt-2">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Search tracks, albums, collections..."
-                value={data.searchQuery}
-                onChange={(e) => data.setSearchQuery(e.target.value)}
-                className="w-full bg-slate-900 border border-white/5 rounded-[10px] pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-[#0052FF] transition-all text-white placeholder:text-slate-500"
-              />
+        {/* 3. FILTER CHIPS & CONTROLS */}
+        <div className="space-y-3 pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            {/* Scrolling Filter Chips with leading Search button */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none snap-x flex-1">
+              <button
+                type="button"
+                onClick={handleOpenHeaderSearch}
+                aria-label="Search filter"
+                title="Search in Library"
+                className={`flex-shrink-0 snap-start px-3 py-2 text-xs font-bold rounded-full cursor-pointer transition-all flex items-center gap-1.5 ${
+                  isHeaderSearchOpen || data.searchQuery
+                    ? 'bg-[#0052FF] text-white shadow-md shadow-[#0052FF]/20'
+                    : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Search</span>
+              </button>
+
+              {filterChips.map((chip) => {
+                const isActive = data.activeChip === chip;
+                return (
+                  <button
+                    key={chip}
+                    onClick={() => {
+                      data.setActiveChip(chip);
+                      if (chip === 'Import') {
+                        setShowImporter(true);
+                      } else {
+                        setShowImporter(false);
+                      }
+                    }}
+                    aria-pressed={isActive}
+                    className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full cursor-pointer transition-all ${
+                      isActive 
+                        ? 'bg-[#0052FF] text-white shadow-lg shadow-[#0052FF]/20' 
+                        : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-850'
+                    }`}
+                  >
+                    {chip}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Dedicated NFT Search Input */}
-            {(data.activeChip === 'All' || data.activeChip === 'NFT Music' || data.activeChip === 'Collections') && (
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
-                <input
-                  type="text"
-                  placeholder="Filter NFTs by title or artist..."
-                  value={nftSearchQuery}
-                  onChange={(e) => setNftSearchQuery(e.target.value)}
-                  className="w-full bg-slate-900 border border-white/5 rounded-[10px] pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 transition-all text-white placeholder:text-slate-500 font-medium"
-                />
-              </div>
-            )}
-
             {/* Controls: Offline Service Worker Cache Toggle & Layout Toggle */}
-            <div className="flex items-center gap-2 self-end md:self-auto" role="group" aria-label="Library view and filter controls">
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto" role="group" aria-label="Library view and filter controls">
               {/* Offline Service Worker Cache Storage Filter Toggle */}
               <button
                 type="button"
@@ -141,7 +225,7 @@ const LibraryPage: React.FC = () => {
                 onClick={data.toggleOfflineMode}
                 aria-pressed={data.isOfflineOnly}
                 aria-label="Filter to only display tracks cached in service worker storage"
-                className={`min-h-[44px] min-w-[44px] px-3.5 py-1.5 rounded-[10px] text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all border-none ${
+                className={`min-h-[38px] px-3.5 py-1.5 rounded-[10px] text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all border-none ${
                   data.isOfflineOnly
                     ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-950/40 ring-2 ring-emerald-400/30'
                     : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
@@ -149,7 +233,7 @@ const LibraryPage: React.FC = () => {
                 title={data.isOfflineOnly ? "Offline mode active: Showing only tracks cached in service worker" : "Toggle Offline filter (Service Worker storage)"}
               >
                 <div className="relative flex items-center justify-center">
-                  <WifiOff className="w-4 h-4" />
+                  <WifiOff className="w-3.5 h-3.5" />
                   {data.isOfflineOnly && (
                     <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-300 animate-ping" />
                   )}
@@ -162,7 +246,7 @@ const LibraryPage: React.FC = () => {
                 </span>
               </button>
 
-              <div className="bg-slate-900 border border-white/5 rounded-[10px] p-1 flex items-center relative">
+              <div className="bg-slate-900 rounded-[10px] p-1 flex items-center relative">
                 <button
                   type="button"
                   id="library-view-grid-btn"
@@ -201,34 +285,6 @@ const LibraryPage: React.FC = () => {
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* Scrolling Filter Chips */}
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
-            {filterChips.map((chip) => {
-              const isActive = data.activeChip === chip;
-              return (
-                <button
-                  key={chip}
-                  onClick={() => {
-                    data.setActiveChip(chip);
-                    if (chip === 'Import') {
-                      setShowImporter(true);
-                    } else {
-                      setShowImporter(false);
-                    }
-                  }}
-                  aria-pressed={isActive}
-                  className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full cursor-pointer transition-all border ${
-                    isActive 
-                      ? 'bg-[#0052FF] text-white border-[#c0c0c0]/40 shadow-lg shadow-[#0052FF]/20' 
-                      : 'bg-slate-900 text-slate-400 hover:text-white border-[#c0c0c0]/25 hover:bg-slate-850'
-                  }`}
-                >
-                  {chip}
-                </button>
-              );
-            })}
           </div>
         </div>
 

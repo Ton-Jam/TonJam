@@ -42,10 +42,10 @@ export const HomeGenreFilterBar: React.FC<HomeGenreFilterBarProps> = ({
               key={category}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleSelect(category)}
-              className={`shrink-0 snap-start px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer outline-none border-0 ${
+              className={`shrink-0 snap-start px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer outline-none ${
                 isSelected
-                  ? "bg-[#0088CC] text-white shadow-md shadow-[#0088CC]/20"
-                  : "bg-white/[0.06] text-zinc-400 hover:text-white hover:bg-white/[0.1]"
+                  ? "bg-[#0088CC] text-white shadow-md shadow-[#0088CC]/20 border border-[#0088CC]"
+                  : "bg-white/[0.06] text-zinc-400 hover:text-white hover:bg-white/[0.1] border border-white/10 hover:border-white/20"
               }`}
             >
               {category}
