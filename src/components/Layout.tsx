@@ -459,25 +459,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Tooltip>
           </div>
 
-          {/* RIGHT: [ Testnet ] [ $TJ ] [ 🔔 ] [ Profile ] */}
+          {/* RIGHT: [ $TJ ] [ 🔔 ] [ Profile ] */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* TON Testnet Sandbox Indicator */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => setIsTestnetModalOpen(true)}
-                  className="min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-3 py-1.5 flex items-center gap-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-mono font-bold tracking-tight transition-all cursor-pointer border border-emerald-500/20 shrink-0 select-none active:scale-95"
-                  aria-label="TON Testnet active - Click for Faucet & Contracts"
-                >
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="hidden sm:inline">TON Testnet</span>
-                  <span className="sm:hidden text-[10px]">Testnet</span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">TON Testnet Active - Click for Faucet & Contracts</TooltipContent>
-            </Tooltip>
-
             {/* $TJ Coin / Earn Control */}
             <Tooltip>
               <TooltipTrigger asChild>

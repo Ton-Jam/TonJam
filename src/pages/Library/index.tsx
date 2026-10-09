@@ -85,7 +85,7 @@ const LibraryPage: React.FC = () => {
         navigate('/library/downloads');
         break;
       case 'local-files':
-        navigate('/library/downloads?tab=local');
+        navigate('/local-tracks');
         break;
       case 'recently-played':
       case 'history':
