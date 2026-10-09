@@ -144,6 +144,8 @@ interface AudioContextType {
   nextTrack: () => void;
   prevTrack: () => void;
   addToQueue: (track: Track) => void;
+  removeFromQueue: (trackId: string) => void;
+  clearQueue: () => void;
   playAll: (tracks: Track[]) => void;
   seek: (value: number) => void;
   setVolume: (value: number) => void;
@@ -534,6 +536,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [artworkStyle, setArtworkStyle] = useState<'spotify' | 'vinyl' | 'visualizer'>('spotify');
   const [isSeeking, setIsSeeking] = useState(false);
+
+  const addNotification = useCallback((
+    message: string,
+    type: "success" | "info" | "error" | "warning" = "info",
+    duration: number = 4000,
+    description?: string,
+  ) => {
+    toastUI(type, message, description, duration);
+  }, [toastUI]);
   
   const [isOffline, setIsOffline] = useState<boolean>(() => {
     return typeof navigator !== 'undefined' ? !navigator.onLine : false;
@@ -2542,15 +2553,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
-  const addNotification = (
-    message: string,
-    type: "success" | "info" | "error" | "warning" = "info",
-    duration: number = 4000,
-    description?: string,
-  ) => {
-    toastUI(type, message, description, duration);
-  };
-
   useEffect(() => {
     const syncWallet = async () => {
       const activeAddr = tonAddress || evmAddress;
@@ -3910,6 +3912,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     addNotification(`Added "${track.title}" to queue`);
   };
 
+  const removeFromQueue = (trackId: string) => {
+    setQueue((prev) => prev.filter((t) => t.id !== trackId));
+    addNotification("Track removed from queue", "info");
+  };
+
+  const clearQueue = () => {
+    setQueue([]);
+    addNotification("Queue cleared", "info");
+  };
+
   const seek = (value: number) => {
     if (audioRef.current && isFinite(audioRef.current.duration) && audioRef.current.duration > 0) {
       const safeVal = Math.max(0, Math.min(100, isNaN(value) ? 0 : value));
@@ -4996,6 +5008,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         nextTrack,
         prevTrack,
         addToQueue,
+        removeFromQueue,
+        clearQueue,
         playAll,
         seek,
         setVolume,

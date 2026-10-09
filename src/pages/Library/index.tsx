@@ -35,7 +35,7 @@ import { motion, AnimatePresence } from 'motion/react';
 const LibraryPage: React.FC = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
-  const { localTracks } = useAudio();
+  const { localTracks, queue } = useAudio();
   const data = useLibraryData();
   const toast = useToast();
   const { testingTracks, injectTestingTracks, clearTestingTracks, isTestingTracksInjected } = useLibrary();
@@ -99,8 +99,7 @@ const LibraryPage: React.FC = () => {
         navigate('/library/imported-playlists');
         break;
       case 'queue':
-        data.setActiveChip('Recently Played');
-        setShowImporter(false);
+        navigate('/queue');
         break;
       case 'create-playlist':
         data.createPlaylist(`New Node Compilation #${Date.now().toString().slice(-4)}`);

@@ -8,6 +8,7 @@ interface QuickActionsProps {
   downloadCount: number;
   nftCount?: number;
   localCount?: number;
+  queueCount?: number;
 }
 
 export const QuickActions: React.FC<QuickActionsProps> = ({ 
@@ -15,7 +16,8 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
   likedCount, 
   downloadCount,
   nftCount = 0,
-  localCount = 0
+  localCount = 0,
+  queueCount = 0
 }) => {
   const actions = [
     {
@@ -63,7 +65,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
     {
       id: 'queue',
       title: 'Active Queue',
-      subtitle: 'Up next',
+      subtitle: queueCount > 0 ? `${queueCount} tracks queued` : 'Empty queue',
       icon: ListMusic,
       color: 'text-amber-500 bg-amber-500/10'
     },

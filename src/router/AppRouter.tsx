@@ -83,6 +83,7 @@ const RecentlyPlayedTracks = lazyWithRetry(() => import('@/pages/Library/Recentl
 const MyNFTTracks = lazyWithRetry(() => import('@/pages/Library/MyNFTTracks'));
 const ImportedPlaylists = lazyWithRetry(() => import('@/pages/Library/ImportedPlaylists'));
 const Settings = lazyWithRetry(() => import('@/pages/Settings'));
+const QueuePage = lazyWithRetry(() => import('@/pages/Queue'));
 const Tasks = lazyWithRetry(() => import('@/pages/Tasks'));
 const NFTDetail = lazyWithRetry(() => import('@/pages/NFTDetail'));
 const ExploreList = lazyWithRetry(() => import('@/pages/ExploreList'));
@@ -256,6 +257,8 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/library/nfts" element={<PageWrapper><ProtectedRoute><MyNFTTracks /></ProtectedRoute></PageWrapper>} />
                   <Route path="/library/imported-playlists" element={<PageWrapper><ProtectedRoute><ImportedPlaylists /></ProtectedRoute></PageWrapper>} />
                   <Route path="/library/spotify" element={<PageWrapper><ProtectedRoute><ImportedPlaylists /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/queue" element={<PageWrapper><QueuePage /></PageWrapper>} />
+                  <Route path="/library/queue" element={<PageWrapper><QueuePage /></PageWrapper>} />
                   <Route path="/wallet" element={<PageWrapper><ProtectedRoute><Wallet /></ProtectedRoute></PageWrapper>} />
                   <Route path="/staking" element={<PageWrapper><ProtectedRoute><Staking /></ProtectedRoute></PageWrapper>} />
                   <Route path="/playlist/:id" element={<PageWrapper><PlaylistDetail /></PageWrapper>} />

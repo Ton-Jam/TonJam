@@ -34,9 +34,7 @@ import { DiagnosticProviderBoundary } from '@/components/DiagnosticProviderBound
 
 const queryClient = new QueryClient();
 
-const manifestUrl = typeof window !== 'undefined'
-  ? `${window.location.origin}/tonconnect-manifest.json`
-  : 'https://ton-jam.vercel.app/tonconnect-manifest.json';
+const manifestUrl = 'https://ton-jam.vercel.app/tonconnect-manifest.json';
 
 export default function App() {
   useEffect(() => {
