@@ -17,6 +17,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
   }
 
   if (!user) {
+    // If offline or accessing library/downloads, allow seamless access to downloaded and local songs
+    if (typeof navigator !== 'undefined' && (!navigator.onLine || location.pathname.startsWith('/library'))) {
+      return <>{children}</>;
+    }
     // Redirect to login if not logged in
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

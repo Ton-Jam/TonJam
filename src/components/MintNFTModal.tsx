@@ -66,7 +66,7 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
   const [editions, setEditions] = useState(preselectedTrack?.editions || '100');
   const [lyrics, setLyrics] = useState(preselectedTrack?.lyrics || '');
   const [secondaryRoyalty, setSecondaryRoyalty] = useState('5'); // 0 - 15%
-  const [blockchain, setBlockchain] = useState<'ton-mainnet' | 'ton-testnet' | 'ton-miniapp'>('ton-mainnet');
+  const [blockchain, setBlockchain] = useState<'ton-mainnet' | 'ton-testnet' | 'ton-miniapp'>('ton-testnet');
   const [termsConfirmed, setTermsConfirmed] = useState(false);
 
   // Inspector mode in Step 2: Form vs JSON Metadata
@@ -1346,12 +1346,12 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
 
                   <div className="flex gap-3 pt-2">
                     <a
-                      href={`https://tonviewer.com/${TONJAM_COLLECTION_ADDRESS}`}
+                      href={`https://testnet.tonviewer.com/${TONJAM_COLLECTION_ADDRESS}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 text-blue-400" /> TonViewer
+                      <ExternalLink className="w-3.5 h-3.5 text-blue-400" /> TonViewer (Testnet)
                     </a>
 
                     <button

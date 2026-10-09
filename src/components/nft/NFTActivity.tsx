@@ -72,7 +72,7 @@ export const NFTActivity: React.FC<NFTActivityProps> = ({
           <div className="col-span-1 md:col-span-2 bg-white/[0.03] p-5 rounded-2xl flex flex-col sm:flex-row items-center gap-5">
             <div className="p-2.5 bg-white rounded-xl shadow-lg shrink-0">
               <QRCodeSVG
-                value={`https://tonviewer.com/${nft.contractAddress}`}
+                value={`https://testnet.tonviewer.com/${nft.contractAddress}`}
                 size={96}
                 bgColor="#ffffff"
                 fgColor="#050A24"
@@ -81,7 +81,7 @@ export const NFTActivity: React.FC<NFTActivityProps> = ({
             </div>
             <div className="min-w-0 flex-1 space-y-2 text-center sm:text-left">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Smart Contract Identifier
+                Smart Contract Identifier (TON Testnet)
               </span>
               <div className="flex items-center justify-between bg-white/[0.04] px-3 py-2 rounded-xl text-xs font-mono text-slate-300">
                 <span className="truncate mr-2">{nft.contractAddress}</span>
@@ -98,12 +98,12 @@ export const NFTActivity: React.FC<NFTActivityProps> = ({
                 </button>
               </div>
               <a
-                href={`https://tonviewer.com/${nft.contractAddress}`}
+                href={`https://testnet.tonviewer.com/${nft.contractAddress}`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0098EA] hover:text-blue-300 uppercase tracking-wider pt-1"
               >
-                Inspect On TonViewer <ExternalLink className="w-3.5 h-3.5" />
+                Inspect On TonViewer (Testnet) <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>

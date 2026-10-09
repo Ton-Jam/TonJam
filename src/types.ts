@@ -136,6 +136,9 @@ export class Track {
   isDrmProtected?: boolean;
   watermarkText?: string;
   floorPriceChange?: number; // Percentage change, e.g., 5.2 or -2.1
+  isLocal?: boolean;
+  isDownloaded?: boolean;
+  fileSize?: string;
 }
 
 export interface NFTTrait {

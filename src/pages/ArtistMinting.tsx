@@ -58,7 +58,7 @@ export const ArtistMinting: React.FC = () => {
     editions: '100',
     lyrics: '',
     secondaryRoyalty: '5', // Secondary marketplace royalty percentage (0-15%)
-    blockchain: 'ton-mainnet' as 'ton-mainnet' | 'ton-testnet' | 'ton-miniapp',
+    blockchain: 'ton-testnet' as 'ton-mainnet' | 'ton-testnet' | 'ton-miniapp',
     hasExclusive: false,
     exclusiveTitle: '',
     exclusiveType: 'document' as 'video' | 'track' | 'image' | 'document',

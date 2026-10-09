@@ -50,6 +50,8 @@ import PostModal from './PostModal';
 import { SearchBar } from './SearchBar';
 import { ModeToggle } from './ModeToggle';
 import { NotificationBell } from './NotificationBell';
+import { PWAInstallButton } from '@/components/pwa/PWAInstallButton';
+import { OfflineIndicator } from '@/components/pwa/OfflineIndicator';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import CreatePlaylistModal from './CreatePlaylistModal';
 import { FilterSection } from './FilterSection';
@@ -73,6 +75,7 @@ import {
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator";
+import { TestnetHubModal } from './TestnetHubModal';
 import { 
   Tooltip, 
   TooltipContent, 
@@ -157,6 +160,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isTippingModalOpen, setIsTippingModalOpen] = useState(false);
+  const [isTestnetModalOpen, setIsTestnetModalOpen] = useState(false);
   const [tonBalance, setTonBalance] = useState<number | null>(null);
 
   useEffect(() => {
@@ -455,8 +459,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Tooltip>
           </div>
 
-          {/* RIGHT: [ $TJ ] [ 🔔 ] [ Profile ] */}
+          {/* RIGHT: [ Testnet ] [ $TJ ] [ 🔔 ] [ Profile ] */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* TON Testnet Sandbox Indicator */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setIsTestnetModalOpen(true)}
+                  className="min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-3 py-1.5 flex items-center gap-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-mono font-bold tracking-tight transition-all cursor-pointer border border-emerald-500/20 shrink-0 select-none active:scale-95"
+                  aria-label="TON Testnet active - Click for Faucet & Contracts"
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="hidden sm:inline">TON Testnet</span>
+                  <span className="sm:hidden text-[10px]">Testnet</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">TON Testnet Active - Click for Faucet & Contracts</TooltipContent>
+            </Tooltip>
+
             {/* $TJ Coin / Earn Control */}
             <Tooltip>
               <TooltipTrigger asChild>
@@ -495,6 +516,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </TooltipTrigger>
               <TooltipContent side="bottom">Open Earn TJ daily tasks</TooltipContent>
             </Tooltip>
+
+            {/* PWA Install Button */}
+            <PWAInstallButton className="hidden md:flex" />
 
             {/* Notifications */}
             <NotificationBell />
@@ -543,7 +567,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Sidebar - Desktop */}
       {!isPostDetail && (
         <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-none flex-col p-4 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
-          <SidebarContent user={user} userProfile={userProfile} signOut={signOut} />
+          <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onOpenTestnetModal={() => setIsTestnetModalOpen(true)} />
         </aside>
       )}
 
@@ -574,7 +598,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <ArrowLeftIcon className="h-6 w-6 text-foreground" strokeWidth={3.5} />
                 </button>
               </div>
-              <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onNavigate={() => setIsMobileSidebarOpen(false)} />
+              <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onNavigate={() => setIsMobileSidebarOpen(false)} onOpenTestnetModal={() => { setIsMobileSidebarOpen(false); setIsTestnetModalOpen(true); }} />
             </motion.aside>
           </>
         )}
@@ -656,6 +680,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         }}
       />
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <TestnetHubModal isOpen={isTestnetModalOpen} onClose={() => setIsTestnetModalOpen(false)} />
       <AnimatePresence>
         {isPostModalOpen && (
           <PostModal 
@@ -701,13 +726,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </button>
       )}
     </div>
+
+      {/* Offline Connectivity Indicator */}
+      <OfflineIndicator />
     </div>
     )}
     </TooltipProvider>
   );
 };
 
-const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any; userProfile: any; signOut: () => void; onNavigate?: () => void }) => {
+const SidebarContent = ({ user, userProfile, signOut, onNavigate, onOpenTestnetModal }: { user: any; userProfile: any; signOut: () => void; onNavigate?: () => void; onOpenTestnetModal?: () => void }) => {
   const { isArtist, isAdmin } = useUserRole();
   const { t } = useI18n();
 
@@ -728,6 +756,9 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
         <ModeToggle />
       </div>
     </div>
+
+    {/* Install App Button in Sidebar */}
+    <PWAInstallButton className="w-full justify-center mb-3" />
 
     {user && (
       <Link 
@@ -870,6 +901,25 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           </Link>
         </div>
       </div>
+
+      {/* TON Testnet Sandbox Indicator Widget */}
+      <button
+        type="button"
+        onClick={() => {
+          if (onNavigate) onNavigate();
+          if (onOpenTestnetModal) onOpenTestnetModal();
+        }}
+        className="mt-2 w-full p-2.5 rounded-[6px] bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-left transition-all cursor-pointer flex items-center justify-between group active:scale-98"
+      >
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+          <div>
+            <p className="text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-wider">TON Testnet Active</p>
+            <p className="text-[10px] text-slate-400 font-medium">Faucet & Smart Contracts</p>
+          </div>
+        </div>
+        <span className="text-xs text-emerald-400 font-bold group-hover:translate-x-0.5 transition-transform font-mono">→</span>
+      </button>
     </nav>
   </>
 );

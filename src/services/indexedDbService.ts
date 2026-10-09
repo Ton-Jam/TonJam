@@ -1,9 +1,11 @@
 import { Track } from '../types';
 
 const DB_NAME = 'tonjam-offline-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const TRACKS_STORE = 'tracks';
 const AUDIO_STORE = 'audio';
+const LOCAL_TRACKS_STORE = 'local_tracks';
+const LOCAL_AUDIO_STORE = 'local_audio';
 
 let dbInstance: IDBDatabase | null = null;
 
@@ -27,6 +29,16 @@ export const initDB = (): Promise<IDBDatabase> => {
       // Store for audio files (Blobs)
       if (!db.objectStoreNames.contains(AUDIO_STORE)) {
         db.createObjectStore(AUDIO_STORE, { keyPath: 'id' });
+      }
+
+      // Store for user local device audio metadata
+      if (!db.objectStoreNames.contains(LOCAL_TRACKS_STORE)) {
+        db.createObjectStore(LOCAL_TRACKS_STORE, { keyPath: 'id' });
+      }
+
+      // Store for user local device audio files (Blobs)
+      if (!db.objectStoreNames.contains(LOCAL_AUDIO_STORE)) {
+        db.createObjectStore(LOCAL_AUDIO_STORE, { keyPath: 'id' });
       }
     };
 
@@ -224,6 +236,152 @@ export const indexedDbService = {
     } catch (err) {
       console.warn('Error reading audio cache list from IndexedDB:', err);
       return [];
+    }
+  },
+
+  /**
+   * Save a local device track metadata and audio blob to IndexedDB
+   */
+  async saveLocalTrack(track: Track, blob: Blob): Promise<void> {
+    try {
+      const db = await initDB();
+      const tx = db.transaction([LOCAL_TRACKS_STORE, LOCAL_AUDIO_STORE], 'readwrite');
+      const trackStore = tx.objectStore(LOCAL_TRACKS_STORE);
+      const audioStore = tx.objectStore(LOCAL_AUDIO_STORE);
+
+      trackStore.put(track);
+      audioStore.put({ id: track.id, blob, size: blob.size, addedAt: Date.now() });
+
+      return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (err) {
+      console.warn(`Error saving local track ${track.id} to IndexedDB:`, err);
+    }
+  },
+
+  /**
+   * Batch save multiple local device tracks
+   */
+  async saveLocalTracks(items: { track: Track; blob: Blob }[]): Promise<void> {
+    try {
+      const db = await initDB();
+      const tx = db.transaction([LOCAL_TRACKS_STORE, LOCAL_AUDIO_STORE], 'readwrite');
+      const trackStore = tx.objectStore(LOCAL_TRACKS_STORE);
+      const audioStore = tx.objectStore(LOCAL_AUDIO_STORE);
+
+      for (const item of items) {
+        trackStore.put(item.track);
+        audioStore.put({ id: item.track.id, blob: item.blob, size: item.blob.size, addedAt: Date.now() });
+      }
+
+      return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (err) {
+      console.warn('Error saving local tracks batch to IndexedDB:', err);
+    }
+  },
+
+  /**
+   * Get all local device tracks metadata stored in IndexedDB
+   */
+  async getLocalTracks(): Promise<Track[]> {
+    try {
+      const db = await initDB();
+      const tx = db.transaction(LOCAL_TRACKS_STORE, 'readonly');
+      const store = tx.objectStore(LOCAL_TRACKS_STORE);
+      const request = store.getAll();
+
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (err) {
+      console.warn('Error loading local tracks from IndexedDB:', err);
+      return [];
+    }
+  },
+
+  /**
+   * Get the audio blob for a local device track
+   */
+  async getLocalAudioBlob(trackId: string): Promise<Blob | null> {
+    try {
+      const db = await initDB();
+      const tx = db.transaction(LOCAL_AUDIO_STORE, 'readonly');
+      const store = tx.objectStore(LOCAL_AUDIO_STORE);
+      const request = store.get(trackId);
+
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => {
+          const res = request.result;
+          resolve(res ? res.blob : null);
+        };
+        request.onerror = () => reject(request.error);
+      });
+    } catch (err) {
+      console.warn(`Error loading local audio blob for ${trackId}:`, err);
+      return null;
+    }
+  },
+
+  /**
+   * Check if a local track audio blob exists in IndexedDB
+   */
+  async hasLocalAudioBlob(trackId: string): Promise<boolean> {
+    try {
+      const db = await initDB();
+      const tx = db.transaction(LOCAL_AUDIO_STORE, 'readonly');
+      const store = tx.objectStore(LOCAL_AUDIO_STORE);
+      const request = store.getKey(trackId);
+
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result !== undefined);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (err) {
+      return false;
+    }
+  },
+
+  /**
+   * Delete a local device track and its audio blob from IndexedDB
+   */
+  async deleteLocalTrack(trackId: string): Promise<void> {
+    try {
+      const db = await initDB();
+      const tx = db.transaction([LOCAL_TRACKS_STORE, LOCAL_AUDIO_STORE], 'readwrite');
+      tx.objectStore(LOCAL_TRACKS_STORE).delete(trackId);
+      tx.objectStore(LOCAL_AUDIO_STORE).delete(trackId);
+
+      return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (err) {
+      console.warn(`Error deleting local track ${trackId}:`, err);
+    }
+  },
+
+  /**
+   * Clear all local device tracks and audio from IndexedDB
+   */
+  async clearLocalTracks(): Promise<void> {
+    try {
+      const db = await initDB();
+      const tx = db.transaction([LOCAL_TRACKS_STORE, LOCAL_AUDIO_STORE], 'readwrite');
+      tx.objectStore(LOCAL_TRACKS_STORE).clear();
+      tx.objectStore(LOCAL_AUDIO_STORE).clear();
+
+      return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (err) {
+      console.warn('Error clearing local tracks in IndexedDB:', err);
     }
   }
 };

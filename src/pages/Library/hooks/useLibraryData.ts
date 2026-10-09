@@ -7,6 +7,7 @@ import {
   getCachedTrackIdsSet, 
   syncInitialOfflineTracks 
 } from '@/services/serviceWorkerCacheService';
+import { audioCacheService } from '@/services/audioCacheService';
 import { 
   LibraryTrack, LibraryArtist, LibraryAlbum, LibraryNFT, LibraryPlaylist, 
   HistoryEvent, QueueItem, LibraryAnalytics 
@@ -254,15 +255,18 @@ export const useLibraryData = () => {
             'Caching audio track...',
             `Storing "${track.title}" in Service Worker Cache.`
           );
-          // Store in Service Worker CacheStorage
+          // Store in Service Worker CacheStorage and IndexedDB
           setTimeout(async () => {
-            await cacheTrackInServiceWorker({
-              id: track.id,
-              title: track.title,
-              artist: track.artist,
-              audioUrl: track.coverUrl,
-              quality: downloadQuality
-            });
+            await Promise.all([
+              cacheTrackInServiceWorker({
+                id: track.id,
+                title: track.title,
+                artist: track.artist,
+                audioUrl: '/tonjam-offline-audio.mp3',
+                quality: downloadQuality
+              }),
+              audioCacheService.cacheTrack(track.id, '/tonjam-offline-audio.mp3')
+            ]);
 
             setTracks(current => current.map(t => t.id === id ? { 
               ...t, 
@@ -276,10 +280,11 @@ export const useLibraryData = () => {
               'Download Cached',
               `"${track.title}" is now available offline in Service Worker storage.`
             );
-          }, 800);
+          }, 400);
           return track;
         } else {
           removeTrackFromServiceWorker(track.id);
+          audioCacheService.removeCachedTrack(track.id);
           toast.success('Removed Download', `"${track.title}" deleted from Service Worker cache.`);
           return { ...track, isDownloaded: false, downloadSize: undefined, isOfflineAvailable: false };
         }

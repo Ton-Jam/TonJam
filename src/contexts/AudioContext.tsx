@@ -41,6 +41,7 @@ import * as tonService from "@/services/tonService";
 import * as royaltyService from "@/services/royaltyService";
 import { audioCacheService } from "@/services/audioCacheService";
 import { indexedDbService } from "@/services/indexedDbService";
+import { localAudioService } from "@/services/localAudioService";
 import { updateEngagementScore } from "@/services/engagementService";
 import {
   db,
@@ -285,6 +286,12 @@ interface AudioContextType {
   downloadTrackForOffline: (track: Track) => Promise<void>;
   isTrackCached: (trackId: string) => Promise<boolean>;
   deleteCachedTrack: (trackId: string) => Promise<void>;
+  localTracks: Track[];
+  loadLocalTracks: () => Promise<Track[]>;
+  scanLocalDirectory: () => Promise<Track[]>;
+  importLocalFiles: (files: FileList | File[]) => Promise<Track[]>;
+  removeLocalTrack: (trackId: string) => Promise<void>;
+  clearLocalTracks: () => Promise<void>;
   joinJamRoom: (roomId: string) => void;
   leaveJamRoom: () => void;
   allPlaylists: Playlist[];
@@ -528,7 +535,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const [artworkStyle, setArtworkStyle] = useState<'spotify' | 'vinyl' | 'visualizer'>('spotify');
   const [isSeeking, setIsSeeking] = useState(false);
   
-  const [isOffline, setIsOffline] = useState(false);
+  const [isOffline, setIsOffline] = useState<boolean>(() => {
+    return typeof navigator !== 'undefined' ? !navigator.onLine : false;
+  });
+
   const toggleOfflineMode = useCallback(() => {
     setIsOffline((prev) => {
       addNotification(
@@ -537,7 +547,93 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       );
       return !prev;
     });
+  }, [addNotification]);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      addNotification("Network restored. TonJam is back online.", "info");
+    };
+    const handleOffline = () => {
+      setIsOffline(true);
+      addNotification("Network lost. Switching to offline mode.", "info");
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [addNotification]);
+
+  const [localTracks, setLocalTracks] = useState<Track[]>([]);
+
+  const loadLocalTracks = useCallback(async () => {
+    try {
+      const saved = await localAudioService.getSavedLocalTracks();
+      setLocalTracks(saved);
+      return saved;
+    } catch (err) {
+      console.warn("Failed to load local tracks:", err);
+      return [];
+    }
   }, []);
+
+  useEffect(() => {
+    loadLocalTracks();
+  }, [loadLocalTracks]);
+
+  const scanLocalDirectory = useCallback(async () => {
+    try {
+      addNotification("Scanning device directory...", "info");
+      const res = await localAudioService.scanDirectory();
+      if (res.count > 0) {
+        addNotification(`Imported ${res.count} track${res.count > 1 ? 's' : ''} from device!`, "success");
+        await loadLocalTracks();
+      } else {
+        addNotification("No audio files selected or found.", "info");
+      }
+      return res.tracks;
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        console.warn("Scan directory failed:", err);
+        addNotification(err.message || "Could not read local directory", "error");
+      }
+      return [];
+    }
+  }, [loadLocalTracks, addNotification]);
+
+  const importLocalFiles = useCallback(async (files: FileList | File[]) => {
+    try {
+      addNotification("Importing device audio...", "info");
+      const imported = await localAudioService.processFiles(files);
+      if (imported.length > 0) {
+        addNotification(`Imported ${imported.length} audio file${imported.length > 1 ? 's' : ''}!`, "success");
+        await loadLocalTracks();
+      } else {
+        addNotification("No compatible audio files detected.", "info");
+      }
+      return imported;
+    } catch (err: any) {
+      console.warn("Import files failed:", err);
+      addNotification("Failed to import local audio files", "error");
+      return [];
+    }
+  }, [loadLocalTracks, addNotification]);
+
+  const removeLocalTrack = useCallback(async (trackId: string) => {
+    await localAudioService.removeLocalTrack(trackId);
+    setLocalTracks((prev) => prev.filter((t) => t.id !== trackId));
+    addNotification("Track removed from device library", "info");
+  }, [addNotification]);
+
+  const clearLocalTracks = useCallback(async () => {
+    await localAudioService.clearAllLocalTracks();
+    setLocalTracks([]);
+    addNotification("Cleared all local device tracks", "info");
+  }, [addNotification]);
 
   const downloadTrackForOffline = useCallback(async (track: Track) => {
     try {
@@ -551,7 +647,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error(err);
       addNotification("Failed to download track", "error");
     }
-  }, []);
+  }, [addNotification]);
 
   const isTrackCached = useCallback(async (trackId: string) => {
     return await audioCacheService.isTrackCached(trackId);
@@ -3354,14 +3450,28 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         sourceUrl = "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
       }
 
-      if (isOffline) {
+      // 1. Direct handling for Local device tracks and Blob/Data URLs
+      if (track.isLocal || sourceUrl.startsWith("blob:") || sourceUrl.startsWith("data:")) {
+        const localBlob = await indexedDbService.getLocalAudioBlob(track.id);
+        if (localBlob) {
+          sourceUrl = URL.createObjectURL(localBlob);
+        }
+      } else if (isOffline || !navigator.onLine) {
+        // 2. Offline Mode: retrieve from IndexedDB or Service Worker Cache
         const cachedUrl = await audioCacheService.getCachedTrack(track.id);
         if (cachedUrl) {
           sourceUrl = cachedUrl;
-          addNotification("Playing from cache", "info");
+          addNotification("Playing from offline cache", "info");
         } else {
-          addNotification("Track not available offline", "error");
-          return;
+          // Check if local device track exists with this ID
+          const localBlob = await indexedDbService.getLocalAudioBlob(track.id);
+          if (localBlob) {
+            sourceUrl = URL.createObjectURL(localBlob);
+            addNotification("Playing local device audio", "info");
+          } else {
+            sourceUrl = "/tonjam-offline-audio.mp3";
+            addNotification("Offline: Playing offline audio", "info");
+          }
         }
       } else {
         // Cache if not already cached
@@ -3399,12 +3509,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         const fallbacks = [
           // Fallback 1: Same URL but without crossOrigin (fixes CORS but disables frequencies visualizer)
           { url: sourceUrl, crossOrigin: false },
-          // Fallback 2: Stable public asset URL (CORS allowed)
+          // Fallback 2: Local offline audio files (guaranteed to succeed offline)
+          { url: "/tonjam-offline-audio.mp3", crossOrigin: false },
+          { url: "/tonjam-offline-audio.wav", crossOrigin: false },
+          // Fallback 3: Stable public asset URL (CORS allowed)
           { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: true },
-          // Fallback 3: Stable public asset URL (no CORS)
+          // Fallback 4: Stable public asset URL (no CORS)
           { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: false },
-          // Fallback 4: Alternate soundhelix mp3 as additional fallback
-          { url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", crossOrigin: false },
           // Fallback 5: Silent data URI (failsafe offline backup)
           { url: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=", crossOrigin: false }
         ];
@@ -5010,6 +5121,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         downloadTrackForOffline,
         isTrackCached,
         deleteCachedTrack,
+        localTracks,
+        loadLocalTracks,
+        scanLocalDirectory,
+        importLocalFiles,
+        removeLocalTrack,
+        clearLocalTracks,
         getEarnings,
         purchaseTrack,
         userAddress: tonAddress || evmAddress || null,
@@ -5062,7 +5179,7 @@ export const useAudio = () => {
         if (prop === "userProfile" || prop === "MOCK_USER") {
           return FALLBACK_USER_PROFILE;
         }
-        if (prop === "queue" || prop === "playlists" || prop === "recentlyPlayed" || prop === "likedTrackIds" || prop === "followedUserIds" || prop === "posts" || prop === "tasks" || prop === "transactions" || prop === "allTracks" || prop === "allNFTs" || prop === "artists" || prop === "collections" || prop === "playlistFolders" || prop === "firestorePlaylistFolders") {
+        if (prop === "queue" || prop === "playlists" || prop === "recentlyPlayed" || prop === "likedTrackIds" || prop === "followedUserIds" || prop === "posts" || prop === "tasks" || prop === "transactions" || prop === "allTracks" || prop === "allNFTs" || prop === "artists" || prop === "collections" || prop === "playlistFolders" || prop === "firestorePlaylistFolders" || prop === "localTracks") {
           return FALLBACK_ARRAY;
         }
         if (prop === "isPlaying" || prop === "isFullPlayerOpen" || prop === "isShuffle" || prop === "isSmartShuffle" || prop === "isLoading" || prop === "isOffline") {

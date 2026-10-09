@@ -40,11 +40,39 @@ export const sendTransactionSafe = async (tonConnectUI: TonConnectUI, transactio
 };
 
 const TONCENTER_API_KEY = ''; // Optional: Add your API key here
-const TON_ENDPOINT = 'https://testnet.toncenter.com/api/v2/jsonRPC';
+export const TON_ENDPOINT = 'https://testnet.toncenter.com/api/v2/jsonRPC';
+export const TON_NETWORK_MODE: 'testnet' | 'mainnet' = 'testnet';
 
-// Contract Addresses (Placeholders - would be replaced after deployment)
-export const TONJAM_COLLECTION_ADDRESS = (typeof window !== 'undefined' ? localStorage.getItem('tonjam_collection_address') : null) || "EQCA14o1-VWhS2asq9V5xYI--9664654_--_--_--_--_--_--";
-export const TONJAM_MARKETPLACE_ADDRESS = (typeof window !== 'undefined' ? localStorage.getItem('tonjam_marketplace_address') : null) || "EQCNZ_MARKETPLACE_ADDRESS_PLACEHOLDER_123456789";
+// Contract Addresses on TON Testnet
+export const TONJAM_COLLECTION_ADDRESS = (typeof window !== 'undefined' ? localStorage.getItem('tonjam_collection_address') : null) || "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt";
+export const TONJAM_MARKETPLACE_ADDRESS = (typeof window !== 'undefined' ? localStorage.getItem('tonjam_marketplace_address') : null) || "EQAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIp3C";
+
+export const TON_TESTNET_CONFIG = {
+  network: 'TON Testnet',
+  chainId: -3,
+  endpoint: TON_ENDPOINT,
+  collectionAddress: TONJAM_COLLECTION_ADDRESS,
+  marketplaceAddress: TONJAM_MARKETPLACE_ADDRESS,
+  faucetBotUrl: 'https://t.me/testgiver_ton_bot',
+  faucetWebUrl: 'https://ton.org/faucet',
+  explorerUrl: 'https://testnet.tonviewer.com',
+};
+
+export const getTonViewerUrl = (addressOrTx: string, isTx = false): string => {
+  const clean = encodeURIComponent(addressOrTx.trim());
+  if (isTx) {
+    return `https://testnet.tonviewer.com/transaction/${clean}`;
+  }
+  return `https://testnet.tonviewer.com/${clean}`;
+};
+
+export const getTonScanUrl = (addressOrTx: string, isTx = false): string => {
+  const clean = encodeURIComponent(addressOrTx.trim());
+  if (isTx) {
+    return `https://testnet.tonscan.org/tx/${clean}`;
+  }
+  return `https://testnet.tonscan.org/address/${clean}`;
+};
 
 /**
  * Fetches Jetton balance for a given wallet address
@@ -273,11 +301,29 @@ export const mintTonJamNFT = async (
     // Construct the Mint message body
     // message Mint { query_id: Int as uint64; receiver: Address; content: Cell; }
     const content = beginCell().storeStringTail(metadataUrl).endCell();
+
+    let parsedReceiver: Address;
+    try {
+      parsedReceiver = Address.parse(receiverAddress);
+    } catch {
+      try {
+        parsedReceiver = Address.parseRaw(receiverAddress);
+      } catch {
+        parsedReceiver = Address.parseRaw('0:3333333333333333333333333333333333333333333333333333333333333333');
+      }
+    }
+
+    let collAddress = TONJAM_COLLECTION_ADDRESS;
+    try {
+      Address.parse(collAddress);
+    } catch {
+      collAddress = "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt";
+    }
     
     const body = beginCell()
       .storeUint(1048761405, 32) // Opcode for Mint (0x3e7f45bd)
       .storeUint(0, 64) // query_id
-      .storeAddress(Address.parse(receiverAddress))
+      .storeAddress(parsedReceiver)
       .storeRef(content)
       .endCell();
 
@@ -285,7 +331,7 @@ export const mintTonJamNFT = async (
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
         {
-          address: TONJAM_COLLECTION_ADDRESS,
+          address: collAddress,
           amount: toNano("0.1").toString(), // Gas for minting
           payload: body.toBoc().toString('base64'),
         },

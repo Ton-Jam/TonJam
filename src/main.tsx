@@ -5,9 +5,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { runFirebaseDiagnostics } from './lib/firebase-debug';
+import { registerServiceWorker } from './registerServiceWorker';
 
 // Run non-blocking Firebase startup diagnostics
 runFirebaseDiagnostics().catch(() => {});
+
+// Register Progressive Web App Service Worker for offline playback & asset caching
+registerServiceWorker();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

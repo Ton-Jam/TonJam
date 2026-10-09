@@ -27,6 +27,7 @@ import { db, auth } from '@/lib/firebase';
 import { TON_LOGO, JAM_PRICE_USD, TJ_COIN_ICON } from '@/constants';
 import { SecureUserNFTDashboard } from '@/components/SecureUserNFTDashboard';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { TestnetHubModal } from '@/components/TestnetHubModal';
 import { toast } from 'sonner';
 
 const TON_PRICE_USD = 5.30;
@@ -75,6 +76,7 @@ const Wallet: React.FC = () => {
   };
   const [unclaimedRoyalty, setUnclaimedRoyalty] = useState(0);
   const [currencyMode, setCurrencyMode] = useState<'CRYPTO' | 'USD'>('CRYPTO');
+  const [isTestnetModalOpen, setIsTestnetModalOpen] = useState(false);
   
   // Modal state
   const [modalType, setModalType] = useState<'deposit' | 'withdraw' | null>(null);
@@ -281,7 +283,17 @@ const Wallet: React.FC = () => {
           <div className="bg-background/40 p-4 rounded-[4px] flex flex-col justify-between space-y-4">
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-[9px] font-bold text-blue-400 uppercase tracking-wider px-2 py-1 bg-blue-500/10 rounded-full">Primary</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-bold text-blue-400 uppercase tracking-wider px-2 py-1 bg-blue-500/10 rounded-full">Primary</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsTestnetModalOpen(true)}
+                    className="text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-wider px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-full border border-emerald-500/20 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>TON Testnet</span>
+                  </button>
+                </div>
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-tight mt-2 flex items-center gap-2">
                   <Coins className="h-4 w-4 text-blue-500" />
                   TON Wallet Relay
@@ -289,6 +301,14 @@ const Wallet: React.FC = () => {
                 <p className="text-[10px] text-muted-foreground mt-1 max-w-xs">
                   Native TON integration enables instant NFT purchasing, bid actions, and staking.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => setIsTestnetModalOpen(true)}
+                  className="mt-2.5 px-2.5 py-1 rounded-[6px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all border border-emerald-500/20 cursor-pointer"
+                >
+                  <Zap className="w-3 h-3 fill-emerald-400" />
+                  <span>Testnet Sandbox & Faucet Hub →</span>
+                </button>
               </div>
               <img src={TON_LOGO} className="w-8 h-8 opacity-90" alt="TON Network Logo" />
             </div>
@@ -961,6 +981,8 @@ const Wallet: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Testnet Sandbox Hub Modal */}
+      <TestnetHubModal isOpen={isTestnetModalOpen} onClose={() => setIsTestnetModalOpen(false)} />
       </div>
     </div>
   );

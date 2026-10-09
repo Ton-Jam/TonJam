@@ -5,13 +5,13 @@ import {
   Loader2, Check, Plus, Trash2, Volume2, Info, ChevronRight, Play, Pause,
   Flame, Disc, Crown, Tag, Sliders, Radio, Percent, ShieldCheck, FileAudio,
   Code, Eye, ExternalLink, ArrowRight, ArrowLeft, Wallet, CheckCircle2, Copy,
-  Share2, RefreshCw, Upload, Lock, Layers
+  Share2, RefreshCw, Upload, Lock, Layers, AlertTriangle
 } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNFT } from '@/contexts/NFTContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { uploadToPinata, uploadJSONToPinata } from '@/services/storageService';
-import { mintTonJamNFT, TONJAM_COLLECTION_ADDRESS } from '@/services/tonService';
+import { mintTonJamNFT, TONJAM_COLLECTION_ADDRESS, getTonViewerUrl } from '@/services/tonService';
 import { GasFeeEstimator } from '@/components/GasFeeEstimator';
 import { createActivityPost } from '@/services/socialService';
 import { validateFile, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
@@ -42,6 +42,7 @@ export const MintNFT: React.FC = () => {
   const [isMinting, setIsMinting] = useState(false);
   const [mintProgress, setMintProgress] = useState(0);
   const [mintStatusText, setMintStatusText] = useState('');
+  const [mintError, setMintError] = useState<string | null>(null);
   const [mintingMilestones, setMintingMilestones] = useState<Array<{ id: string; label: string; done: boolean; inProgress: boolean }>>([
     { id: 'audio_pin', label: 'Lossless Audio Master Pin to Pinata IPFS', done: false, inProgress: false },
     { id: 'cover_pin', label: 'Artwork Cover Image Pin to Pinata IPFS', done: false, inProgress: false },
@@ -71,7 +72,7 @@ export const MintNFT: React.FC = () => {
   const [editions, setEditions] = useState(preselectedTrack?.editions || '100');
   const [lyrics, setLyrics] = useState(preselectedTrack?.lyrics || '');
   const [secondaryRoyalty, setSecondaryRoyalty] = useState('5'); // 0 - 15%
-  const [blockchain, setBlockchain] = useState<'ton-mainnet' | 'ton-testnet'>('ton-mainnet');
+  const [blockchain, setBlockchain] = useState<'ton-mainnet' | 'ton-testnet'>('ton-testnet');
   const [termsConfirmed, setTermsConfirmed] = useState(false);
   const [metadataViewMode, setMetadataViewMode] = useState<'preview' | 'json'>('preview');
 
@@ -359,6 +360,7 @@ export const MintNFT: React.FC = () => {
       return;
     }
 
+    setMintError(null);
     setIsMinting(true);
     setStep(5);
     setMintProgress(5);
@@ -521,7 +523,9 @@ export const MintNFT: React.FC = () => {
     } catch (err: any) {
       console.error('Minting error:', err);
       setIsMinting(false);
-      toast.error(err.message || 'Minting transaction failed');
+      const errMsg = err?.message || 'Minting transaction failed. Please ensure your TON wallet is connected and has sufficient gas balance.';
+      setMintError(errMsg);
+      toast.error(errMsg);
     }
   };
 
@@ -641,6 +645,53 @@ export const MintNFT: React.FC = () => {
                 Your audio master will be stored directly on Pinata IPFS decentralized nodes, referenced by an immutable CID on the TON Blockchain smart contract.
               </p>
             </div>
+
+            {/* Quick Catalog Track Picker */}
+            {allTracks.length > 0 && (
+              <div className="bg-[#0B112C] rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl shadow-black/20">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                    <Disc className="w-4 h-4 text-[#0088CC]" />
+                    Or Select Existing Track From Catalog
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    Auto-fills audio, artwork & specs
+                  </span>
+                </div>
+                <div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
+                  {allTracks.filter(t => !t.isNFT).slice(0, 8).map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => {
+                        setTitle(t.title);
+                        setArtistName(t.artist);
+                        setGenre(t.genre || 'Electronic');
+                        setAudioPreview(t.audioUrl);
+                        setCoverPreview(t.coverUrl);
+                        setAudioDuration(t.duration || 180);
+                        setDescription(t.description || '');
+                        if (t.lyrics) setLyrics(t.lyrics);
+                        if (t.bpm) setBpm(String(t.bpm));
+                        if (t.key) setKeySig(t.key);
+                        toast.success(`Loaded "${t.title}" into minting studio`);
+                      }}
+                      className="shrink-0 flex items-center gap-2.5 p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] active:scale-95 transition-all text-left cursor-pointer border-none max-w-[220px]"
+                    >
+                      <img 
+                        src={t.coverUrl} 
+                        alt={t.title} 
+                        className="w-9 h-9 rounded-lg object-cover shrink-0" 
+                      />
+                      <div className="min-w-0 pr-1">
+                        <p className="text-xs font-bold text-white truncate">{t.title}</p>
+                        <p className="text-[10px] text-slate-400 truncate">{t.artist}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Audio Upload Card */}
@@ -1628,14 +1679,14 @@ export const MintNFT: React.FC = () => {
                 {/* Direct Explorer & IPFS Links */}
                 <div className="grid grid-cols-2 gap-3 text-left">
                   <a
-                    href={`https://tonviewer.com/${TONJAM_COLLECTION_ADDRESS}`}
+                    href={getTonViewerUrl(TONJAM_COLLECTION_ADDRESS)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="min-h-[44px] bg-white/[0.04] hover:bg-white/[0.08] p-3 rounded-xl flex items-center justify-between text-xs text-slate-200 transition-colors cursor-pointer"
                   >
                     <span className="font-bold flex items-center gap-1.5">
                       <Zap className="w-3.5 h-3.5 text-blue-400" />
-                      TonViewer
+                      TonViewer (Testnet)
                     </span>
                     <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                   </a>
@@ -1677,6 +1728,45 @@ export const MintNFT: React.FC = () => {
                     className="min-h-[44px] px-6 py-3 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 text-slate-300 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all border-none cursor-pointer"
                   >
                     Mint Another Track
+                  </button>
+                </div>
+              </div>
+            ) : mintError ? (
+              <div className="bg-[#0B112C] rounded-2xl p-6 sm:p-8 text-center space-y-6 shadow-2xl shadow-black/40 max-w-xl mx-auto">
+                <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto">
+                  <AlertTriangle className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono font-black text-rose-400 uppercase tracking-widest bg-rose-500/10 px-2.5 py-1 rounded-full">
+                    Minting Incomplete
+                  </span>
+                  <h3 className="text-base font-black text-white pt-2">
+                    Transaction Not Completed
+                  </h3>
+                  <p className="text-xs text-rose-300 font-mono max-w-md mx-auto pt-1 leading-relaxed">
+                    {mintError}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMintError(null);
+                      handleExecuteMint();
+                    }}
+                    className="flex-1 min-h-[44px] py-3 bg-[#0052FF] hover:bg-[#1a66ff] active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all border-none cursor-pointer shadow-lg shadow-blue-600/30"
+                  >
+                    Retry Transaction
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMintError(null);
+                      setStep(4);
+                    }}
+                    className="min-h-[44px] px-6 py-3 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 text-slate-300 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all border-none cursor-pointer"
+                  >
+                    Return to Review
                   </button>
                 </div>
               </div>

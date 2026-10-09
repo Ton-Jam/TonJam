@@ -416,12 +416,12 @@ export const SecureUserNFTDashboard: React.FC = () => {
 
                     {nft.contractAddress ? (
                       <a
-                        href={`https://tonscan.org/nft/${nft.contractAddress}`}
+                        href={`https://testnet.tonscan.org/nft/${nft.contractAddress}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-[10px] text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1"
                       >
-                        TonScan <ExternalLink className="w-3 h-3" />
+                        TonScan (Testnet) <ExternalLink className="w-3 h-3" />
                       </a>
                     ) : (
                       <span className="text-[10px] text-zinc-500 font-mono">

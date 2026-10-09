@@ -69,7 +69,7 @@ export const CreateAlbum: React.FC = () => {
     price: '5.0',
     editions: '500',
     secondaryRoyalty: '5',
-    blockchain: 'ton-mainnet' as 'ton-mainnet' | 'ton-testnet' | 'ton-miniapp'
+    blockchain: 'ton-testnet' as 'ton-mainnet' | 'ton-testnet' | 'ton-miniapp'
   });
 
   // Tracklist State

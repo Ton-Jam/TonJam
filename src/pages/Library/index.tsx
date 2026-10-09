@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLibrary } from '@/contexts/LibraryContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { useToast } from '@/components/layout/ToastProvider';
 import { useLibraryData } from './hooks/useLibraryData';
 import { LibraryHero } from './components/LibraryHero';
@@ -34,6 +35,7 @@ import { motion, AnimatePresence } from 'motion/react';
 const LibraryPage: React.FC = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
+  const { localTracks } = useAudio();
   const data = useLibraryData();
   const toast = useToast();
   const { testingTracks, injectTestingTracks, clearTestingTracks, isTestingTracksInjected } = useLibrary();
@@ -68,7 +70,7 @@ const LibraryPage: React.FC = () => {
 
   // Expanded and comprehensive filter chips
   const filterChips = [
-    'All', 'Tracks', 'Playlists', 'Albums', 'Artists', 'Downloads', 
+    'All', 'Tracks', 'Playlists', 'Albums', 'Artists', 'Downloads', 'Device Music',
     'NFT Music', 'Royalties', 'Recently Played', 'History', 'Analytics', 'Import', 'Testing'
   ];
 
@@ -81,6 +83,9 @@ const LibraryPage: React.FC = () => {
       case 'downloads':
       case 'offline':
         navigate('/library/downloads');
+        break;
+      case 'local-files':
+        navigate('/library/downloads?tab=local');
         break;
       case 'recently-played':
       case 'history':
@@ -166,6 +171,7 @@ const LibraryPage: React.FC = () => {
             likedCount={data.likedCount}
             downloadCount={data.downloadCount}
             nftCount={data.nftCount}
+            localCount={localTracks.length}
             onSelectAction={handleQuickAction}
           />
         )}
@@ -196,6 +202,14 @@ const LibraryPage: React.FC = () => {
                   <button
                     key={chip}
                     onClick={() => {
+                      if (chip === 'Downloads') {
+                        navigate('/library/downloads');
+                        return;
+                      }
+                      if (chip === 'Device Music') {
+                        navigate('/library/downloads?tab=local');
+                        return;
+                      }
                       data.setActiveChip(chip);
                       if (chip === 'Import') {
                         setShowImporter(true);

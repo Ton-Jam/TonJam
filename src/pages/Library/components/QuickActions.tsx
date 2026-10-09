@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Download, Clock, Gem, ListMusic, Plus, ArrowDownToLine, History, ChevronRight } from 'lucide-react';
+import { Heart, Download, Clock, Gem, ListMusic, Plus, ArrowDownToLine, History, ChevronRight, HardDrive } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface QuickActionsProps {
@@ -7,13 +7,15 @@ interface QuickActionsProps {
   likedCount: number;
   downloadCount: number;
   nftCount?: number;
+  localCount?: number;
 }
 
 export const QuickActions: React.FC<QuickActionsProps> = ({ 
   onSelectAction, 
   likedCount, 
   downloadCount,
-  nftCount = 0 
+  nftCount = 0,
+  localCount = 0
 }) => {
   const actions = [
     {
@@ -29,6 +31,13 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
       subtitle: `${downloadCount} tracks`,
       icon: Download,
       color: 'text-emerald-500 bg-emerald-500/10'
+    },
+    {
+      id: 'local-files',
+      title: 'Device & Local Music',
+      subtitle: localCount > 0 ? `${localCount} device tracks` : 'Play from local folders',
+      icon: HardDrive,
+      color: 'text-amber-400 bg-amber-400/10'
     },
     {
       id: 'recently-played',
