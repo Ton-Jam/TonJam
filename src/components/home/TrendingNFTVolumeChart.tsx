@@ -11,7 +11,10 @@ import {
   Play, 
   ChevronRight,
   Disc,
-  Sparkles
+  Sparkles,
+  Bell,
+  BellRing,
+  X
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -27,6 +30,7 @@ import { NFTItem } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import { TON_LOGO } from '@/constants';
+import { toast } from 'sonner';
 
 type Timeframe = '24h' | '7d' | '30d';
 
@@ -41,6 +45,47 @@ export const TrendingNFTVolumeChart: React.FC = () => {
   const { allNFTs, playTrack, allTracks } = useAudio();
   const [timeframe, setTimeframe] = useState<Timeframe>('24h');
   const [selectedNFTId, setSelectedNFTId] = useState<string | null>(null);
+
+  // Volume Alert State
+  const [volumeAlerts, setVolumeAlerts] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem('tonjam_nft_volume_alerts');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [alertModalNFT, setAlertModalNFT] = useState<any | null>(null);
+  const [customThreshold, setCustomThreshold] = useState<string>('');
+
+  const handleSaveAlert = () => {
+    if (!alertModalNFT) return;
+    const val = parseFloat(customThreshold);
+    if (isNaN(val) || val <= 0) {
+      toast.error("Please enter a valid volume threshold in TON");
+      return;
+    }
+    const updated = { ...volumeAlerts, [alertModalNFT.id]: val };
+    setVolumeAlerts(updated);
+    try {
+      localStorage.setItem('tonjam_nft_volume_alerts', JSON.stringify(updated));
+    } catch {}
+    toast.success(`Volume alert set for "${alertModalNFT.title}" at ${val} TON!`, {
+      description: "You will be notified on-chain when trading volume crosses this threshold."
+    });
+    setAlertModalNFT(null);
+    setCustomThreshold('');
+  };
+
+  const handleRemoveAlert = (nftId: string) => {
+    const updated = { ...volumeAlerts };
+    delete updated[nftId];
+    setVolumeAlerts(updated);
+    try {
+      localStorage.setItem('tonjam_nft_volume_alerts', JSON.stringify(updated));
+    } catch {}
+    toast.info("Volume threshold alert removed");
+  };
 
   // Timeframe chart datasets
   const chartData = useMemo<Record<Timeframe, ChartDataPoint[]>>(() => ({
@@ -343,16 +388,35 @@ export const TrendingNFTVolumeChart: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Volume & Price Metrics */}
-                  <div className="text-right shrink-0">
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-xs font-black font-mono text-white">{nft.volume} TON</span>
-                      <span className="text-[9px] font-bold text-emerald-400">{nft.change}</span>
+                  {/* Volume & Price Metrics & Alert Button */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <span className="text-xs font-black font-mono text-white">{nft.volume} TON</span>
+                        <span className="text-[9px] font-bold text-emerald-400">{nft.change}</span>
+                      </div>
+                      <div className="flex items-center justify-end gap-1 mt-0.5 text-[10px] text-slate-400 font-medium">
+                        <span>Floor: {nft.price}</span>
+                        <img src={TON_LOGO} alt="TON" className="w-2.5 h-2.5" />
+                      </div>
                     </div>
-                    <div className="flex items-center justify-end gap-1 mt-0.5 text-[10px] text-slate-400 font-medium">
-                      <span>Floor: {nft.price}</span>
-                      <img src={TON_LOGO} alt="TON" className="w-2.5 h-2.5" />
-                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAlertModalNFT(nft);
+                        setCustomThreshold(String(volumeAlerts[nft.id] || Math.round(nft.volume * 1.2)));
+                      }}
+                      className={`p-2 rounded-xl transition-all cursor-pointer ${
+                        volumeAlerts[nft.id] 
+                          ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50' 
+                          : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white'
+                      }`}
+                      title={volumeAlerts[nft.id] ? `Alert set at ${volumeAlerts[nft.id]} TON` : 'Set volume threshold alert'}
+                    >
+                      {volumeAlerts[nft.id] ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
               );
@@ -361,6 +425,94 @@ export const TrendingNFTVolumeChart: React.FC = () => {
         </div>
 
       </div>
+
+      {/* Volume Alert Configuration Modal */}
+      <AnimatePresence>
+        {alertModalNFT && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-5 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
+                    <Bell className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-white uppercase tracking-tight">Set Volume Alert</h3>
+                    <p className="text-xs text-slate-400">TON Blockchain On-Chain Trigger</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAlertModalNFT(null)}
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3">
+                <img 
+                  src={alertModalNFT.imageUrl || getPlaceholderImage(`nft-${alertModalNFT.id}`)} 
+                  alt={alertModalNFT.title}
+                  className="w-12 h-12 rounded-xl object-cover"
+                />
+                <div className="min-w-0">
+                  <h4 className="text-xs font-black text-white truncate uppercase">{alertModalNFT.title}</h4>
+                  <p className="text-[10px] text-slate-400">Current Volume: <span className="font-mono font-bold text-white">{alertModalNFT.volume} TON</span></p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-wider text-slate-300">
+                  Target Trading Volume Threshold (TON)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
+                    value={customThreshold}
+                    onChange={(e) => setCustomThreshold(e.target.value)}
+                    placeholder="e.g. 500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">TON</span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  You will receive an instant push notification and on-chain alert when this music NFT's trading volume crosses your custom threshold.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                {volumeAlerts[alertModalNFT.id] && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleRemoveAlert(alertModalNFT.id);
+                      setAlertModalNFT(null);
+                    }}
+                    className="px-4 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-black uppercase tracking-wider transition-colors cursor-pointer"
+                  >
+                    Remove Alert
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleSaveAlert}
+                  className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-blue-600/30 cursor-pointer"
+                >
+                  Save Alert Threshold
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
