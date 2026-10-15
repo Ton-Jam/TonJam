@@ -106,8 +106,8 @@ export const NewDropsSection: React.FC = () => {
               onClick={() => handleSelectGenre(genre)}
               className={`shrink-0 snap-start px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-200 cursor-pointer outline-none ${
                 isSelected
-                  ? "bg-primary text-black border border-primary shadow-sm"
-                  : "bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-white/10 hover:border-white/20"
+                  ? "bg-[#0088CC] text-white shadow-md shadow-[#0088CC]/30"
+                  : "bg-white/[0.05] text-zinc-400 hover:text-white hover:bg-white/[0.1]"
               }`}
             >
               {genre === 'All' ? 'All Drops' : genre}

@@ -11,6 +11,7 @@ import { getPlaceholderImage } from "@/lib/utils";
 
 // Home Sections
 import { HomeGenreFilterBar } from "@/components/home/HomeGenreFilterBar";
+import { FeaturedMusicHero } from "@/components/home/FeaturedMusicHero";
 import { MadeForYouSection } from "@/components/home/MadeForYouSection";
 import { RecentlyPlayedSection } from "@/components/home/RecentlyPlayedSection";
 import { TrendingMusicSection } from "@/components/home/TrendingMusicSection";
@@ -59,7 +60,7 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/tasks')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 transition-all text-white cursor-pointer border border-white/10 hover:border-white/20 shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 transition-all text-white cursor-pointer shadow-sm"
                 aria-label="Tasks & Rewards"
                 title="Earn TonJam Coins"
               >
@@ -72,8 +73,8 @@ export const HomePage: React.FC = () => {
 
           {/* 2. WELCOME HEADER (COMPLETE GREETING) */}
           <div className="px-4 sm:px-6 lg:px-8 text-left">
-            <div className="space-y-1">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white leading-tight">
+            <div className="space-y-1 sm:space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
                 What’s up TON, Let’s Jam Up!
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 font-normal leading-relaxed">
@@ -84,11 +85,16 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* 2. CATEGORY / FILTER CHIPS */}
+          {/* 3. CATEGORY / FILTER CHIPS */}
           <HomeGenreFilterBar
             activeCategory={activeCategory}
             onSelectCategory={setActiveCategory}
           />
+
+          {/* 4. FEATURED MUSIC HERO (FIGMA DISCOVERY BANNER) */}
+          {(activeCategory === "All" || activeCategory === "Music") && (
+            <FeaturedMusicHero />
+          )}
 
           {/* 3. QUICK "JUMP BACK IN" CARD (IF TRACK ACTIVE) */}
           {currentTrack && (

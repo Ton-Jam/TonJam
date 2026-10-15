@@ -31,11 +31,14 @@ export const TrendingNFTMusicSection: React.FC = () => {
       {/* Horizontal Trending Music NFTs List */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-            <Gem className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-section-title font-bold text-white">
-              More Trending Music Collectibles
-            </h2>
+          <div>
+            <div className="flex items-center gap-2">
+              <Gem className="w-5 h-5 text-cyan-400" />
+              <h2 className="text-section-title font-bold text-white">
+                Trending Music NFTs
+              </h2>
+            </div>
+            <p className="text-xs text-zinc-400 font-normal mt-0.5">Verified digital audio collectibles and drops on TON</p>
           </div>
           <button
             onClick={() => navigate('/marketplace')}

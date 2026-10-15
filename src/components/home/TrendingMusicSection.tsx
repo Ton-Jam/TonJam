@@ -22,11 +22,14 @@ export const TrendingMusicSection: React.FC = () => {
   return (
     <section className="space-y-3 text-left w-full">
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
-          <Flame className="w-5 h-5 text-amber-400" />
-          <h2 className="text-section-title font-bold text-white">
-            Trending on TonJam
-          </h2>
+        <div>
+          <div className="flex items-center gap-2">
+            <Flame className="w-5 h-5 text-amber-400" />
+            <h2 className="text-section-title font-bold text-white">
+              Trending on TonJam
+            </h2>
+          </div>
+          <p className="text-xs text-zinc-400 font-normal mt-0.5">Top-streamed music by the community this week</p>
         </div>
         <button
           onClick={() => navigate('/explore/tracks?title=Trending+on+TonJam&filter=trending')}
