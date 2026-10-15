@@ -114,7 +114,7 @@ export const DailyMissions: React.FC<DailyMissionsProps> = ({
               key={mission.id}
               onClick={() => onMissionClick?.(mission)}
               className={cn(
-                "p-3.5 sm:p-4 rounded-xl transition-all relative overflow-hidden select-none",
+                "p-3.5 sm:p-4 rounded-xl transition-all relative overflow-hidden select-none border border-white/10 dark:border-white/10",
                 isCompleted
                   ? "bg-surface/90"
                   : "bg-surface hover:bg-hover",

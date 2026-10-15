@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion, PanInfo, AnimatePresence } from "motion/react";
 import { Play, Pause, ListMusic, MoreVertical, Heart, ChevronUp, Music2 } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
@@ -118,6 +118,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   isMobileNavHidden = false,
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     currentTrack,
     isPlaying,
@@ -535,28 +536,21 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             )}
           </button>
 
-          {/* Queue Button */}
-          {onQueueClick && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onQueueClick();
-              }}
-              className="p-1.5 text-zinc-400 hover:text-white transition-colors hidden sm:flex items-center justify-center cursor-pointer border-none bg-transparent"
-              title="Queue"
-            >
-              <ListMusic className="w-4 h-4" />
-            </button>
-          )}
-
-          {/* More options */}
+          {/* Track Queue Button */}
           <button
-            onClick={handleOptionsClick}
-            aria-label="Track options"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onQueueClick) {
+                onQueueClick();
+              } else {
+                navigate('/queue');
+              }
+            }}
+            aria-label="Track queue"
             className="p-1.5 text-zinc-400 hover:text-white transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent"
-            title="Options"
+            title="Queue"
           >
-            <MoreVertical className="w-4 h-4" />
+            <ListMusic className="w-4 h-4" />
           </button>
         </div>
       </div>

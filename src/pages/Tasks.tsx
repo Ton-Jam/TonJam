@@ -558,7 +558,7 @@ const Tasks: React.FC = () => {
           </div>
 
           {/* Animated Balance Counter Widget */}
-          <div className="relative inline-flex items-center justify-center py-5 px-8 rounded-card bg-surface">
+          <div className="relative inline-flex items-center justify-center py-5 px-8 rounded-card bg-surface border border-white/10 dark:border-white/10 shadow-lg shadow-black/20">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-verified/10 rounded-card blur-[1px]" />
             <div className="relative flex items-center gap-3">
               <motion.img 
@@ -582,7 +582,7 @@ const Tasks: React.FC = () => {
         {/* SECTION 2: DAILY STREAK CARD */}
         <motion.div
           variants={slideUp}
-          className="relative overflow-hidden rounded-card bg-surface p-5"
+          className="relative overflow-hidden rounded-card bg-surface p-5 border border-white/10 dark:border-white/10 shadow-lg shadow-black/20"
         >
           {/* Subtle Ambient Glow */}
           <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
@@ -697,7 +697,7 @@ const Tasks: React.FC = () => {
               <motion.div
                 key={idx}
                 variants={slideUp}
-                className="bg-surface p-4 rounded-card flex flex-col justify-between space-y-2 relative overflow-hidden text-left"
+                className="bg-surface p-4 rounded-card flex flex-col justify-between space-y-2 relative overflow-hidden text-left border border-white/10 dark:border-white/10"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-caption uppercase">
@@ -719,7 +719,7 @@ const Tasks: React.FC = () => {
         <motion.div
           variants={slideUp}
           onClick={() => handleMissionClick(featuredMission)}
-          className={`relative rounded-card p-4 overflow-hidden transition-all duration-300 cursor-pointer group ${
+          className={`relative rounded-card p-4 overflow-hidden transition-all duration-300 cursor-pointer group border border-white/10 dark:border-white/10 ${
             featuredMission.state === "completed" 
               ? "bg-surface opacity-70" 
               : "bg-surface hover:bg-hover"
@@ -811,10 +811,10 @@ const Tasks: React.FC = () => {
                   aria-pressed={isActive}
                   className="relative p-0 cursor-pointer outline-none shrink-0"
                 >
-                  <span className={`px-4 py-2 rounded-full text-xs font-black tracking-widest uppercase transition-all duration-300 inline-block text-center border ${
+                  <span className={`px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 inline-block text-center border ${
                     isActive 
-                      ? "bg-primary text-white border-[#c0c0c0]/40 shadow-md shadow-primary/25" 
-                      : "bg-surface hover:bg-hover text-text-muted border-[#c0c0c0]/25"
+                      ? "bg-[#0088CC] text-white border-[#0088CC] shadow-md shadow-[#0088CC]/25" 
+                      : "bg-surface hover:bg-hover text-zinc-300 border-white/10 dark:border-white/10"
                   }`}>
                     {cat}
                   </span>
@@ -822,7 +822,7 @@ const Tasks: React.FC = () => {
                   {isActive && (
                     <motion.span 
                       layoutId="activeFilterUnderline"
-                      className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-4 h-1 bg-verified rounded-full"
+                      className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-4 h-1 bg-[#0088CC] rounded-full"
                     />
                   )}
                 </button>
@@ -847,7 +847,7 @@ const Tasks: React.FC = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="p-8 text-center bg-surface rounded-card"
+                  className="p-8 text-center bg-surface rounded-card border border-white/10 dark:border-white/10"
                 >
                   <AlertCircle className="w-8 h-8 text-text-muted/50 mx-auto mb-2" />
                   <p className="text-xs text-text-muted">No active missions found in this category.</p>
@@ -868,7 +868,7 @@ const Tasks: React.FC = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
                       onClick={() => handleMissionClick(m)}
-                      className={`h-[94px] rounded-card bg-surface hover:bg-hover transition-colors p-3.5 flex items-center justify-between gap-3 relative overflow-hidden select-none cursor-pointer ${
+                      className={`h-[94px] rounded-card bg-surface hover:bg-hover transition-colors p-3.5 flex items-center justify-between gap-3 relative overflow-hidden select-none cursor-pointer border border-white/10 dark:border-white/10 ${
                         isCompleted ? "opacity-60 bg-surface/30" : ""
                       }`}
                     >
@@ -955,7 +955,7 @@ const Tasks: React.FC = () => {
 
         <motion.div
           variants={slideUp}
-          className="rounded-card bg-surface p-5 relative overflow-hidden text-left"
+          className="rounded-card bg-surface p-5 relative overflow-hidden text-left border border-white/10 dark:border-white/10 shadow-lg shadow-black/20"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-error/5 rounded-full blur-2xl pointer-events-none" />
           
@@ -977,7 +977,7 @@ const Tasks: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 mb-4 bg-background/80 p-2.5 rounded-card">
+          <div className="flex items-center gap-2 mb-4 bg-background/80 p-2.5 rounded-card border border-white/5">
             <div className="flex-1 font-mono text-center font-bold text-sm text-verified tracking-widest">
               {referralCode}
             </div>
@@ -1031,7 +1031,7 @@ const Tasks: React.FC = () => {
             <span className="text-[9px] text-text-muted/60 font-medium">Recomputed Hourly</span>
           </div>
 
-          <div className="rounded-card bg-surface overflow-hidden p-1 shrink-0 space-y-1">
+          <div className="rounded-card bg-surface overflow-hidden p-1 shrink-0 space-y-1 border border-white/10 dark:border-white/10 shadow-lg shadow-black/20">
             {leaderboardUsers.map((user, idx) => {
               const isGold = user.rank === 1;
               const isSilver = user.rank === 2;

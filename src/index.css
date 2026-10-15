@@ -34,13 +34,64 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
 
+  /* =========================================================
+     TONJAM SEMANTIC DESIGN TOKENS
+     Consolidated colors, spacing, and surfaces
+     ========================================================= */
+  /* Colors - Base Backgrounds (TonJam Navy & Black Identity) */
+  --tj-bg: #07111F;
+  --tj-bg-deep: #000000;
+  --tj-bg-surface: #0A1628;
+  --tj-bg-elevated: #0f1c32;
+  --tj-bg-card: rgba(10, 22, 40, 0.85);
+  --tj-bg-glass: rgba(10, 22, 40, 0.55);
+  --tj-bg-hover: rgba(255, 255, 255, 0.05);
+
+  /* Colors - Primary Accents & TON Ecosystem */
+  --tj-accent: #00B4D8;
+  --tj-accent-blue: #0088CC;
+  --tj-accent-ton: #0098EA;
+  --tj-accent-cyan: #00E5FF;
+  --tj-accent-glow: rgba(0, 180, 216, 0.35);
+  --tj-accent-hover: #33C7E5;
+
+  /* Colors - Foreground / Typography */
+  --tj-text-primary: #FFFFFF;
+  --tj-text-secondary: rgba(241, 245, 249, 0.78);
+  --tj-text-muted: rgba(255, 255, 255, 0.55);
+  --tj-text-subtle: rgba(255, 255, 255, 0.40);
+
+  /* Semantic Borders (Zero border lines by default to respect borderless styling) */
+  --tj-border: transparent;
+  --tj-border-subtle: transparent;
+  --tj-border-visible: transparent;
+  --tj-border-focus: var(--tj-accent);
+
+  /* Semantic Spacing Scale */
+  --tj-space-1: 4px;
+  --tj-space-2: 8px;
+  --tj-space-3: 12px;
+  --tj-space-4: 16px;
+  --tj-space-5: 20px;
+  --tj-space-6: 24px;
+  --tj-space-8: 32px;
+  --tj-space-10: 40px;
+  --tj-space-12: 48px;
+
+  /* Layout Spacing */
+  --tj-content-padding-mobile: 16px;
+  --tj-content-padding-desktop: 24px;
+  --tj-header-height-mobile: 56px;
+  --tj-header-height-desktop: 64px;
+  --tj-nav-height: 64px;
+
   /* Card dimensions */
   --card-width: 168px;
   --card-radius: 12px;
   --card-image-radius: 10px;
 
   /* Spacing */
-  --card-gap: 12px;
+  --card-gap: var(--tj-space-3);
   --card-padding: 10px;
   --card-content-gap: 6px;
 
@@ -59,23 +110,23 @@
   --card-action-radius: 8px;
 
   /* Borders */
-  --card-border-width: 1px;
-  --card-border-color: rgba(255,255,255,0.08);
+  --card-border-width: 0px;
+  --card-border-color: var(--tj-border);
 
   /* Color Tokens */
-  --color-bg-primary: #07111F;
-  --color-bg-secondary: #0A1628;
-  --background: #07111F;
-  --foreground: #FFFFFF;
-  --primary: #00B4D8;
-  --primary-foreground: #FFFFFF;
-  --surface: #07111F;
-  --elevated: #0A1628;
+  --color-bg-primary: var(--tj-bg);
+  --color-bg-secondary: var(--tj-bg-surface);
+  --background: var(--tj-bg);
+  --foreground: var(--tj-text-primary);
+  --primary: var(--tj-accent);
+  --primary-foreground: var(--tj-text-primary);
+  --surface: var(--tj-bg);
+  --elevated: var(--tj-bg-surface);
 
   /* Border Tokens */
-  --border-subtle: 1px solid rgba(255, 255, 255, 0.12);
-  --border-visible: 1px solid rgba(255, 255, 255, 0.18);
-  --border-header: 1px solid rgba(255, 255, 255, 0.10);
+  --border-subtle: transparent;
+  --border-visible: transparent;
+  --border-header: transparent;
 
   /* Radius Tokens */
   --radius-xs: 4px;
@@ -86,56 +137,56 @@
 
   /* Card Tokens */
   --card-background: transparent;
-  --card-border: 1px solid rgba(255, 255, 255, 0.12);
+  --card-border: transparent;
   --card-radius: 12px;
-  --card-hover-border: rgba(255, 255, 255, 0.18);
-  --card-hover-background: rgba(255, 255, 255, 0.025);
+  --card-hover-border: transparent;
+  --card-hover-background: var(--tj-bg-hover);
 
   /* Filter Tokens */
   --filter-background: transparent;
-  --filter-border: 1px solid rgba(255, 255, 255, 0.12);
+  --filter-border: transparent;
   --filter-radius: 5px;
-  --filter-text: rgba(255, 255, 255, 0.72);
-  --filter-active-border: 1px solid rgba(255, 255, 255, 0.18);
+  --filter-text: var(--tj-text-secondary);
+  --filter-active-border: transparent;
 
   /* Button Tokens */
   --button-radius: 5px;
-  --button-border: 1px solid rgba(255, 255, 255, 0.12);
+  --button-border: transparent;
 
   /* Input Tokens */
   --input-background: transparent;
-  --input-border: 1px solid rgba(192, 192, 192, 0.24);
+  --input-border: transparent;
   --input-radius: 6px;
-  --input-focus-border: rgba(192, 192, 192, 0.45);
+  --input-focus-border: var(--tj-accent);
 
   /* Header Tokens */
   --header-background: transparent;
   --header-border: transparent;
   --header-scrolled-background: rgba(10, 22, 40, 0.85);
-  --header-scrolled-border: 1px solid rgba(255, 255, 255, 0.10);
+  --header-scrolled-border: transparent;
   --header-blur: 18px;
 
   /* Glass / Backdrop Tokens */
-  --glass-background: rgba(10, 22, 40, 0.55);
+  --glass-background: var(--tj-bg-glass);
   --glass-blur: 18px;
 
   /* Spacing Tokens */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
+  --space-1: var(--tj-space-1);
+  --space-2: var(--tj-space-2);
+  --space-3: var(--tj-space-3);
+  --space-4: var(--tj-space-4);
+  --space-5: var(--tj-space-5);
+  --space-6: var(--tj-space-6);
+  --space-8: var(--tj-space-8);
+  --space-10: var(--tj-space-10);
 
   /* Content Edge Padding */
-  --content-padding-mobile: 16px;
-  --content-padding-desktop: 24px;
+  --content-padding-mobile: var(--tj-content-padding-mobile);
+  --content-padding-desktop: var(--tj-content-padding-desktop);
 
   /* Header Height */
-  --header-height-mobile: 56px;
-  --header-height-desktop: 64px;
+  --header-height-mobile: var(--tj-header-height-mobile);
+  --header-height-desktop: var(--tj-header-height-desktop);
 
   /* Icon Sizes */
   --icon-xs: 14px;
@@ -159,18 +210,46 @@
 }
 
 @theme {
+  --color-tj-bg: var(--tj-bg);
+  --color-tj-bg-deep: var(--tj-bg-deep);
+  --color-tj-bg-surface: var(--tj-bg-surface);
+  --color-tj-bg-elevated: var(--tj-bg-elevated);
+  --color-tj-bg-card: var(--tj-bg-card);
+  --color-tj-bg-glass: var(--tj-bg-glass);
+  --color-tj-accent: var(--tj-accent);
+  --color-tj-accent-blue: var(--tj-accent-blue);
+  --color-tj-accent-ton: var(--tj-accent-ton);
+  --color-tj-accent-cyan: var(--tj-accent-cyan);
+  --color-tj-accent-hover: var(--tj-accent-hover);
+  --color-tj-text-primary: var(--tj-text-primary);
+  --color-tj-text-secondary: var(--tj-text-secondary);
+  --color-tj-text-muted: var(--tj-text-muted);
+  --color-tj-text-subtle: var(--tj-text-subtle);
+  --color-tj-border: var(--tj-border);
+  --color-tj-border-subtle: var(--tj-border-subtle);
+
+  --spacing-tj-1: var(--tj-space-1);
+  --spacing-tj-2: var(--tj-space-2);
+  --spacing-tj-3: var(--tj-space-3);
+  --spacing-tj-4: var(--tj-space-4);
+  --spacing-tj-5: var(--tj-space-5);
+  --spacing-tj-6: var(--tj-space-6);
+  --spacing-tj-8: var(--tj-space-8);
+  --spacing-tj-10: var(--tj-space-10);
+  --spacing-tj-12: var(--tj-space-12);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-surface: var(--surface);
   --color-elevated: var(--elevated);
-  --color-border-subtle: var(--border-subtle);
-  --color-divider: var(--border-subtle);
+  --color-border-subtle: var(--tj-border-subtle);
+  --color-divider: var(--tj-border-subtle);
   
-  --color-border: var(--border-subtle);
+  --color-border: var(--tj-border);
   --color-ring: var(--primary);
-  --color-input: var(--border-subtle);
+  --color-input: var(--tj-border);
   
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --font-ui: "Poppins", ui-sans-serif, system-ui, sans-serif;
@@ -413,18 +492,18 @@
 
   html {
     @apply font-sans;
-    background-color: #000000 !important;
-    background: #000000 !important;
+    background-color: var(--tj-bg-deep) !important;
+    background: var(--tj-bg-deep) !important;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: none;
   }
 
   body {
-    background-color: #07111F !important;
-    background: radial-gradient(circle at 50% -10%, rgba(0, 152, 234, 0.12), transparent 42%), #07111F !important;
+    background-color: var(--tj-bg) !important;
+    background: radial-gradient(circle at 50% -10%, rgba(0, 152, 234, 0.12), transparent 42%), var(--tj-bg) !important;
     background-attachment: fixed;
-    color: #FFFFFF;
+    color: var(--tj-text-primary);
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -622,8 +701,8 @@
   main section {
     margin-left: 0px !important;
     margin-right: 0px !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    padding-left: var(--tj-content-padding-mobile) !important;
+    padding-right: var(--tj-content-padding-mobile) !important;
     max-width: 100% !important;
     width: 100% !important;
   }
@@ -632,8 +711,8 @@
     .section-container,
     section.section-container,
     main section {
-      padding-left: 32px !important;
-      padding-right: 32px !important;
+      padding-left: var(--tj-space-8) !important;
+      padding-right: var(--tj-space-8) !important;
     }
   }
 
@@ -1397,10 +1476,10 @@ button,
 
 /* Dynamic Spacing Engine for MiniPlayer & Navigation bar */
 :root {
-  --tonjam-nav-height: 4rem; /* 64px standard navigation bar height */
+  --tonjam-nav-height: var(--tj-nav-height); /* 64px standard navigation bar height */
   --tonjam-safe-bottom: env(safe-area-inset-bottom, 0px);
   --tonjam-mini-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom));
-  --tonjam-collapsed-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom) + 0.75rem);
+  --tonjam-collapsed-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom) + var(--tj-space-3));
 }
 
 /* Apply CSS variables to Navigation and Player elements */

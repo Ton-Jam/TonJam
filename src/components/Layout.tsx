@@ -419,7 +419,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {isHome && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isLoginPage && (
         <motion.header 
           className={cn(
-            "fixed top-0 left-0 right-0 z-40 h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between transition-all duration-300 ease-out border-none",
+            "fixed top-0 left-0 right-0 z-40 h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between transition-all duration-300 ease-out border-b border-white/10 dark:border-white/10",
             "lg:left-64",
             isHeaderHidden ? "-translate-y-full" : "translate-y-0",
             isScrolled
@@ -487,7 +487,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     alt="$TJ"
                     animate={isTjPulsing ? { rotate: [0, -15, 15, -8, 0], scale: [1, 1.25, 1] } : {}}
                     transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className="w-4 h-4 sm:w-4.5 sm:h-4.5 object-contain shrink-0"
+                    className="w-[17px] h-[17px] sm:w-[19px] sm:h-[19px] object-contain shrink-0"
                   />
                   <span className={cn(
                     "font-mono font-bold tracking-tight text-xs sm:text-sm transition-colors duration-300",
@@ -549,7 +549,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Sidebar - Desktop */}
       {!isPostDetail && (
-        <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-none flex-col p-4 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
+        <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-r border-white/10 dark:border-white/10 flex-col p-4 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
           <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onOpenTestnetModal={() => setIsTestnetModalOpen(true)} />
         </aside>
       )}
@@ -684,7 +684,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         >
           <nav 
             id="tonjam-mobile-nav-bar"
-            className="h-full w-full bg-[#0A1628]/85 backdrop-blur-[18px] border-t border-[#c0c0c0]/20 px-2 flex justify-around items-center" 
+            className="h-full w-full bg-[#0A1628]/85 backdrop-blur-[18px] border-t border-white/15 dark:border-white/15 px-2 flex justify-around items-center" 
             aria-label="Mobile Navigation"
           >
             <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
@@ -694,19 +694,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Market" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
           </nav>
         </div>
-      )}
-
-      {/* Floating Action Button for Mobile */}
-      {isJamspace && (
-        <button 
-          onClick={() => setIsPostModalOpen(true)}
-          className={`lg:hidden fixed right-6 z-[100] w-14 h-14 rounded-full bg-primary shadow-2xl flex items-center justify-center transition-all duration-300 ${isFabActive ? 'opacity-100 scale-100' : 'opacity-40 scale-95'} hover:opacity-100 hover:scale-110 active:scale-95 ${
-            currentTrack && !isFullPlayerOpen ? 'bottom-40' : 'bottom-24'
-          }`}
-          aria-label="Create Post"
-        >
-          <PlusIcon className="w-7 h-7 text-primary-foreground" strokeWidth={2.5} />
-        </button>
       )}
     </div>
 
@@ -942,8 +929,8 @@ function MobileNavItem({ to, icon: Icon, label, onClick }: { to: string; icon: a
     >
       {({ isActive }) => (
         <>
-          <Icon className={`h-5 w-5 transition-transform ${isActive ? 'text-blue-500 scale-110' : 'text-white/90 group-hover:text-white'}`} strokeWidth={isActive ? 2.5 : 2} />
-          <span className={`text-[9px] font-medium uppercase tracking-wider transition-colors ${isActive ? 'text-blue-500 font-bold' : 'text-white/90'}`}>{label}</span>
+          <Icon className={`h-[21px] w-[21px] transition-transform ${isActive ? 'text-blue-500 scale-105' : 'text-white/90 group-hover:text-white'}`} strokeWidth={isActive ? 2.5 : 2} />
+          <span className={`text-[9px] font-['Poppins',sans-serif] font-medium uppercase tracking-wider transition-colors ${isActive ? 'text-blue-500 font-bold' : 'text-white/90'}`}>{label}</span>
         </>
       )}
     </NavLink>

@@ -166,7 +166,7 @@ export const TJTaskProgress: React.FC<TJTaskProgressProps> = ({
   return (
     <div
       className={cn(
-        "p-4 sm:p-5 rounded-card bg-surface shadow-lg shadow-black/20 relative overflow-hidden",
+        "p-4 sm:p-5 rounded-card bg-surface shadow-lg shadow-black/20 relative overflow-hidden border border-white/10 dark:border-white/10",
         isAllCompleted && "bg-gradient-to-b from-emerald-950/20 to-surface",
         className
       )}

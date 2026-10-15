@@ -2,12 +2,16 @@ import React from 'react';
 import ArtistRevenueDashboard from '@/components/ArtistRevenueDashboard';
 import TrendingMusicWidget from '@/components/TrendingMusicWidget';
 import RoyaltyStatusCard from '@/components/RoyaltyStatusCard';
+import JamTokenPriceTrendsWidget from '@/components/JamTokenPriceTrendsWidget';
 
 const Dashboard: React.FC = () => {
   return (
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
       {/* Royalty Status Card */}
       <RoyaltyStatusCard />
+
+      {/* JAM Token Market Price Trends */}
+      <JamTokenPriceTrendsWidget />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">

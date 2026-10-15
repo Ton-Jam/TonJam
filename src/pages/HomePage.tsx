@@ -8,6 +8,7 @@ import { Play, Pause, Sparkles, Coins, Radio } from "lucide-react";
 import { TonPriceChart } from "@/components/TonPriceChart";
 import LazyArtworkImage from "@/components/common/LazyArtworkImage";
 import { getPlaceholderImage } from "@/lib/utils";
+import { TJ_COIN_ICON } from "@/constants";
 
 // Home Sections
 import { HomeGenreFilterBar } from "@/components/home/HomeGenreFilterBar";
@@ -64,7 +65,7 @@ export const HomePage: React.FC = () => {
                 aria-label="Tasks & Rewards"
                 title="Earn TonJam Coins"
               >
-                <Coins className="w-3.5 h-3.5 text-[#0088CC]" />
+                <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[15px] h-[15px] object-contain shrink-0" />
                 <span className="text-xs font-bold text-zinc-200">Tasks</span>
               </button>
               <TonPriceChart />
