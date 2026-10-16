@@ -63,7 +63,7 @@ const JamSpaceMain: React.FC = () => {
   const [isNewsOpen, setIsNewsOpen] = useState(false);
 
   const categories = [
-    'All', 'Following', 'Artists', 'Fans', 'Spaces', 'NFTs', 
+    'All', 'For You', 'Following', 'Artists', 'Trending', 'Fans', 'Spaces', 'NFTs', 
     'Afrobeats', 'Hip-Hop', 'Amapiano', 'Pop', 'Rock', 'Electronic'
   ];
 
@@ -385,6 +385,20 @@ const JamSpaceMain: React.FC = () => {
         )}
       </AnimatePresence>
     </PageLayout>
+
+      {/* Floating Create Post Button (FAB) */}
+      <div className="fixed bottom-24 right-4 sm:right-8 z-40">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsComposeOpen(true)}
+          className="flex items-center gap-2 px-5 py-3.5 bg-[#00B4D8] hover:bg-[#0096B4] text-black font-extrabold text-sm rounded-full shadow-xl shadow-[#00B4D8]/30 cursor-pointer transition-all border-none"
+          aria-label="Create Post"
+        >
+          <Plus className="w-5 h-5" strokeWidth={3} />
+          <span className="hidden sm:inline">New Post</span>
+        </motion.button>
+      </div>
     </div>
   );
 };

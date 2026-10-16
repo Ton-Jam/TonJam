@@ -61,22 +61,33 @@ const SPOTIFY_CATEGORIES: SpotifyCategory[] = [
 
 const FILTER_PILLS = [
   { id: 'all', label: 'All' },
-  { id: 'tracks', label: 'Songs' },
   { id: 'artists', label: 'Artists' },
-  { id: 'playlists', label: 'Playlists' },
-  { id: 'albums', label: 'Albums' },
-  { id: 'nfts', label: 'NFTs' }
+  { id: 'tracks', label: 'Tracks' },
+  { id: 'nfts', label: 'NFTs' },
+  { id: 'playlists', label: 'Playlists' }
+];
+
+const GENRE_DISCOVERY_CHIPS = [
+  { label: 'Afrobeats', query: 'Afro-TON' },
+  { label: 'Amapiano', query: 'Amapiano' },
+  { label: 'Hip-hop', query: 'Hip Hop' },
+  { label: 'Gospel', query: 'Gospel' }
+];
+
+const TRENDING_SEARCHES = [
+  { label: 'New Afrobeats', query: 'New' },
+  { label: 'TON music NFTs', query: 'NFT' }
 ];
 
 const QUICK_VIBES = [
-  { label: 'High Energy', query: 'Electronic' },
+  { label: 'Afrobeats', query: 'Afro-TON' },
+  { label: 'Amapiano', query: 'Amapiano' },
+  { label: 'Hip-hop', query: 'Hip Hop' },
+  { label: 'Gospel', query: 'Gospel' },
+  { label: 'New Afrobeats', query: 'New' },
+  { label: 'TON music NFTs', query: 'NFT' },
   { label: 'Phonk Drift', query: 'Phonk' },
-  { label: 'Chill & Lo-Fi', query: 'Ambient' },
-  { label: 'Web3 NFTs', query: 'NFT' },
-  { label: 'Top Charts', query: 'Top' },
-  { label: 'Synthwave', query: 'Synthwave' },
-  { label: 'Afro-TON', query: 'Afro-TON' },
-  { label: 'Hip Hop', query: 'Hip Hop' }
+  { label: 'Chill & Lo-Fi', query: 'Ambient' }
 ];
 
 export const Discover: React.FC = () => {
@@ -205,9 +216,9 @@ export const Discover: React.FC = () => {
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
-      return saved ? JSON.parse(saved) : ['Phonk', 'Krupy Vibes', 'Synthwave', 'TON NFT'];
+      return saved ? JSON.parse(saved) : ['Burna Boy', 'Asake', 'Afrobeats 2026', 'Phonk', 'TON NFT'];
     } catch {
-      return ['Phonk', 'Krupy Vibes', 'Synthwave', 'TON NFT'];
+      return ['Burna Boy', 'Asake', 'Afrobeats 2026', 'Phonk', 'TON NFT'];
     }
   });
 
@@ -346,8 +357,16 @@ export const Discover: React.FC = () => {
       <PageHeader title="Search" showBack={true} />
       
       {/* Search Content Input Area */}
-      <div className="pt-2 pb-3 px-4 sm:px-6 lg:px-8 space-y-2.5">
-        
+      <div className="pt-2 pb-3 px-4 sm:px-6 lg:px-8 space-y-3">
+        <div className="space-y-0.5">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            Find your next favorite sound
+          </h1>
+          <p className="text-xs text-zinc-400">
+            Explore web3 tracks, artists, music NFTs and curated collections
+          </p>
+        </div>
+
         {/* Main Search Input Bar - High border radius with subtle blue border */}
         <div className="w-full relative">
           <div className="relative w-full flex items-center bg-white/[0.04] hover:bg-white/[0.06] focus-within:bg-white/[0.06] rounded-full px-4 py-2.5 sm:py-3 min-h-[48px] border border-blue-500/30 hover:border-blue-500/50 focus-within:border-blue-500/60 outline-none ring-0 transition-colors shadow-none">
@@ -360,7 +379,7 @@ export const Discover: React.FC = () => {
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 250)}
-                placeholder="What do you want to play?"
+                placeholder="Search artists, tracks, NFTs..."
                 className="search-bar-input w-full bg-transparent border-0 !border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus:ring-0 focus:outline-none focus:border-none text-sm sm:text-[15px] font-normal placeholder:text-[#b3b3b3] placeholder:opacity-100 text-white leading-relaxed p-0 shadow-none !shadow-none"
                 autoComplete="off"
                 autoCorrect="off"

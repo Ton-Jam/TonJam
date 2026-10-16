@@ -7,11 +7,13 @@ import { toast } from 'sonner';
 import { saveBookmarkToFirestore, removeBookmarkFromFirestore } from '../../../services/bookmarkService';
 import { likePost, unlikePost, repostPost, unrepostPost } from '../../../services/socialService';
 import { createSpaceInFirestore } from '../../../services/spaceService';
+import useDebounce from '@/hooks/use-debounce';
 
 export const useJamSpaceData = (currentUser?: { name?: string; email?: string; photoURL?: string; uid?: string }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [posts, setPosts] = useState<Post[]>([]);
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -156,7 +158,11 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     let result = [...posts];
 
     if (activeCategory !== 'All') {
-      if (activeCategory === 'Following') {
+      if (activeCategory === 'For You') {
+        result = result.sort((a, b) => (b.likes * 1.5 + b.reposts * 2) - (a.likes * 1.5 + a.reposts * 2));
+      } else if (activeCategory === 'Trending') {
+        result = result.sort((a, b) => (b.likes * 2 + b.reposts * 3 + b.commentsCount) - (a.likes * 2 + a.reposts * 3 + a.commentsCount));
+      } else if (activeCategory === 'Following') {
         // Filter by artists/users you are following
         result = result.filter(p => p.user.role === 'artist' || p.user.isVerified);
       } else if (activeCategory === 'Artists') {
@@ -177,7 +183,7 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
       }
     }
 
-    const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+    const safeSearchQuery = typeof debouncedSearchQuery === 'string' ? debouncedSearchQuery : '';
     if (safeSearchQuery.trim() !== '') {
       const q = safeSearchQuery.toLowerCase().trim();
       result = result.filter(p => 
@@ -188,7 +194,7 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     }
 
     return result;
-  }, [posts, activeCategory, searchQuery]);
+  }, [posts, activeCategory, debouncedSearchQuery]);
 
   // Actions
   const handleCreatePost = (content: string, attachments?: Post['attachments'], pollOptions?: string[]) => {
