@@ -5,6 +5,7 @@ import { motion, LayoutGroup } from 'motion/react';
 import { LibraryNFT } from '../types';
 import { useAudio } from '@/contexts/AudioContext';
 import { useToast } from '@/components/layout/ToastProvider';
+import { useNFT } from '@/contexts/NFTContext';
 
 interface NFTCollectionProps {
   nfts: LibraryNFT[];
@@ -16,6 +17,29 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
   const navigate = useNavigate();
   const toast = useToast();
   const { currentTrack, isPlaying, playTrack, togglePlay, userProfile } = useAudio();
+  const { nfts: providerNfts } = useNFT();
+
+  // Map provider NFTs into LibraryNFT format
+  const mappedProviderNfts: LibraryNFT[] = providerNfts.map(item => ({
+    id: item.id,
+    tokenId: item.edition || '#001',
+    title: item.title,
+    artist: item.artist || item.creator || 'Unknown Artist',
+    coverUrl: item.coverUrl || item.imageUrl || '',
+    collectionName: (item as any).collectionName || 'TonJam Genesis',
+    floorPriceTon: parseFloat(item.price || '12.5'),
+    royaltyPercent: item.royaltySplits?.[0]?.percentage || 10,
+    rarity: (item.rarity as any) || 'Rare',
+    ownerAddress: item.owner || userProfile?.walletAddress || 'UQAs9vW_3k7_pP3...',
+    musicFileUrl: item.audioUrl || ''
+  }));
+
+  // Combine prop nfts and provider nfts uniquely by id
+  const displayNfts = Array.from(
+    new Map([...nfts, ...mappedProviderNfts].map(item => [item.id, item])).values()
+  );
+
+  const displayTotalFloorValue = displayNfts.reduce((acc, nft) => acc + nft.floorPriceTon, 0);
 
   // State for NFT transfer
   const [transferringNft, setTransferringNft] = useState<LibraryNFT | null>(null);
@@ -122,14 +146,14 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
         <div className="flex items-center gap-6">
           <div className="space-y-0.5">
             <span className="text-[9px] text-muted-foreground uppercase font-mono font-bold tracking-wider">Owned NFTs</span>
-            <p className="text-base font-black text-purple-400 font-mono leading-none">{nfts.length} Items</p>
+            <p className="text-base font-black text-purple-400 font-mono leading-none">{displayNfts.length} Items</p>
           </div>
           <div className="h-8 w-[1px] bg-purple-500/10" />
           <div className="space-y-0.5">
             <span className="text-[9px] text-muted-foreground uppercase font-mono font-bold tracking-wider">Est. Vault Value</span>
             <p className="text-base font-black text-amber-400 font-mono leading-none flex items-center gap-1">
               <Coins className="w-4 h-4 shrink-0" />
-              <span>{totalFloorValue} TON</span>
+              <span>{displayTotalFloorValue} TON</span>
             </p>
           </div>
         </div>
@@ -142,7 +166,7 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
           transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
           className={layout === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-2"}
         >
-          {nfts.map((nft) => {
+          {displayNfts.map((nft) => {
             const isCurrentPlaying = currentTrack?.id === nft.id && isPlaying;
             const isOwner = nft.ownerAddress === CURRENT_USER_WALLET;
 

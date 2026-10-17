@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mic, Radio } from 'lucide-react';
+import { motion } from 'motion/react';
 import { Post } from '../types';
 import { PostCard } from '../components/PostCard';
 
@@ -40,16 +41,22 @@ export const ArtistPosts: React.FC<ArtistPostsProps> = ({
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {artistPosts.map((post) => (
-            <PostCard 
+          {artistPosts.map((post, idx) => (
+            <motion.div
               key={post.id}
-              post={post}
-              currentUserId={currentUserId}
-              onLike={onLike}
-              onRepost={onRepost}
-              onBookmark={onBookmark}
-              onVote={onVote}
-            />
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: idx * 0.06, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <PostCard 
+                post={post}
+                currentUserId={currentUserId}
+                onLike={onLike}
+                onRepost={onRepost}
+                onBookmark={onBookmark}
+                onVote={onVote}
+              />
+            </motion.div>
           ))}
         </div>
       )}

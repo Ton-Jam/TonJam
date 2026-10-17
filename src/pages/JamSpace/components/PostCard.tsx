@@ -404,9 +404,10 @@ export const PostCard: React.FC<PostCardProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
+      exit={{ opacity: 0, y: -14 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={`jamspace-post-card bg-white/[0.025] hover:bg-white/[0.04] p-4 sm:p-5 rounded-2xl text-white flex flex-col relative transition-colors duration-200 border-none ${isReported ? 'opacity-70' : 'opacity-100'}`}
     >
       {/* Header with Pinned info */}
