@@ -24,10 +24,10 @@ export const CategoryChips: React.FC<CategoryChipsProps> = ({
               key={cat}
               onClick={() => onSelectCategory(cat)}
               aria-pressed={isActive}
-              className={`flex-shrink-0 snap-start h-8 px-3.5 text-xs font-medium rounded-full cursor-pointer transition-all border select-none active:scale-95 ${
+              className={`flex-shrink-0 snap-start h-8 px-3.5 text-xs font-semibold rounded-full cursor-pointer transition-all border-none select-none active:scale-95 ${
                 isActive
-                  ? 'bg-[#00B4D8] text-black font-semibold shadow-md shadow-[#00B4D8]/20 border-[#c0c0c0]/40'
-                  : 'bg-white/[0.05] text-zinc-400 hover:text-white hover:bg-white/[0.09] border-[#c0c0c0]/25'
+                  ? 'bg-[#00B4D8] text-white shadow-md shadow-[#00B4D8]/20'
+                  : 'bg-[#0A1628] text-[#C2C7CD] hover:text-white hover:bg-[#0F1C32]'
               }`}
             >
               {cat}

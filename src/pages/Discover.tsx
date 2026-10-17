@@ -369,8 +369,8 @@ export const Discover: React.FC = () => {
 
         {/* Main Search Input Bar - High border radius with subtle blue border */}
         <div className="w-full relative">
-          <div className="relative w-full flex items-center bg-white/[0.04] hover:bg-white/[0.06] focus-within:bg-white/[0.06] rounded-full px-4 py-2.5 sm:py-3 min-h-[48px] border border-blue-500/30 hover:border-blue-500/50 focus-within:border-blue-500/60 outline-none ring-0 transition-colors shadow-none">
-            <Search className={`w-5 h-5 shrink-0 mr-3 transition-colors ${query ? 'text-white' : 'text-[#b3b3b3]'}`} />
+          <div className="relative w-full flex items-center bg-[#0A1628] rounded-full px-4 py-2.5 sm:py-3 min-h-[48px] border border-[#22374D] hover:border-[#38516B] focus-within:border-[#00B4D8] outline-none ring-0 transition-colors shadow-none">
+            <Search className={`w-5 h-5 shrink-0 mr-3 transition-colors ${query ? 'text-[#00B4D8]' : 'text-[#8C8C8C]'}`} />
             
             <div className="flex-1 flex items-center min-w-0 h-full border-0 !border-none outline-none !outline-none ring-0 !ring-0">
               <input
@@ -380,7 +380,7 @@ export const Discover: React.FC = () => {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 250)}
                 placeholder="Search artists, tracks, NFTs..."
-                className="search-bar-input w-full bg-transparent border-0 !border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus:ring-0 focus:outline-none focus:border-none text-sm sm:text-[15px] font-normal placeholder:text-[#b3b3b3] placeholder:opacity-100 text-white leading-relaxed p-0 shadow-none !shadow-none"
+                className="search-bar-input w-full bg-transparent border-0 !border-0 !border-none outline-none !outline-none ring-0 !ring-0 focus:ring-0 focus:outline-none focus:border-none text-sm sm:text-[15px] font-normal placeholder:text-[#8C8C8C] placeholder:opacity-100 text-white leading-relaxed p-0 shadow-none !shadow-none"
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="off"

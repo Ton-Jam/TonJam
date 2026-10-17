@@ -51,10 +51,10 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
               onClick={() => onSelectCategory(cat)}
               aria-pressed={isActive}
               aria-label={`Filter by ${cat}`}
-              className={`category-filter-btn px-3.5 py-1.5 rounded-[3px] text-[11px] font-medium tracking-wide transition-all duration-200 shrink-0 select-none border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0088CC] cursor-pointer shadow-none ${
+              className={`category-filter-btn px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 shrink-0 select-none border-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8] cursor-pointer shadow-none ${
                 isActive
-                  ? "active scale-105 bg-[#0088CC] text-white border-[#0088CC] font-semibold"
-                  : "bg-[#0A0A0A] text-white/70 hover:text-white hover:border-white/25 border-white/12 hover:scale-[1.02]"
+                  ? "active scale-105 bg-[#00B4D8] text-white font-bold shadow-md shadow-[#00B4D8]/20"
+                  : "bg-[#0A1628] text-[#C2C7CD] hover:text-white hover:bg-[#0F1C32]"
               }`}
             >
               {cat}

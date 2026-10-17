@@ -246,23 +246,23 @@ const Wallet: React.FC = () => {
           
           <div className="flex items-center gap-3">
             {/* Currency Toggle */}
-            <div className="bg-muted/50 p-1 rounded-xl flex items-center gap-1">
+            <div className="bg-[#0A1628] p-1 rounded-full flex items-center gap-1 border border-[#22374D]">
             <button
               onClick={() => setCurrencyMode('CRYPTO')}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer border-none ${
                 currencyMode === 'CRYPTO'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-[#00B4D8] text-white shadow-md shadow-[#00B4D8]/20'
+                  : 'text-[#C2C7CD] hover:text-white'
               }`}
             >
               TON / JAM
             </button>
             <button
               onClick={() => setCurrencyMode('USD')}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer border-none ${
                 currencyMode === 'USD'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-[#00B4D8] text-white shadow-md shadow-[#00B4D8]/20'
+                  : 'text-[#C2C7CD] hover:text-white'
               }`}
             >
               USD ($)

@@ -91,29 +91,29 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
   };
 
   return (
-    <div className="w-full bg-slate-900/60 p-5 rounded-[12px] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md z-30 relative">
+    <div className="w-full bg-[#0A1628] p-5 rounded-[12px] flex flex-col md:flex-row md:items-center justify-between gap-4 border border-[#22374D] z-30 relative">
       {/* JamSpace Status Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-[#0052FF]/10 rounded-[10px] flex items-center justify-center text-[#0052FF] shrink-0">
+        <div className="w-10 h-10 bg-[#00B4D8]/10 rounded-[10px] flex items-center justify-center text-[#00B4D8] shrink-0">
           <Volume2 className="w-5 h-5 animate-pulse" />
         </div>
         <div>
-          <h2 className="section-title">JamSpace Signal Gate</h2>
-          <p className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">Decentralized Stream Selector</p>
+          <h2 className="section-title text-white font-bold text-base">JamSpace Signal Gate</h2>
+          <p className="text-[10px] text-[#8C8C8C] font-mono tracking-widest uppercase">Decentralized Stream Selector</p>
         </div>
       </div>
 
       {/* Highly Interactive Search Bar Component with Auto-Suggestions Dropdown */}
       <div ref={containerRef} className="relative flex-1 max-w-lg w-full">
-        <div className={`relative flex items-center bg-slate-950/80 rounded-[10px] transition-all duration-300 ${isFocused ? 'ring-2 ring-[#0052FF]' : ''}`}>
-          <Search className="absolute left-4 w-4 h-4 text-slate-500" />
+        <div className={`relative flex items-center bg-[#07111F] rounded-[12px] border border-[#22374D] hover:border-[#38516B] transition-all duration-300 ${isFocused ? 'border-[#00B4D8] ring-1 ring-[#00B4D8]' : ''}`}>
+          <Search className="absolute left-4 w-4 h-4 text-[#8C8C8C]" />
           <input
             type="text"
             placeholder="Search communities, artists, or specific trending topics..."
             value={searchQuery}
             onFocus={() => setIsFocused(true)}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent pl-11 pr-12 py-3 text-xs text-white placeholder:text-slate-600 focus:outline-none"
+            className="w-full bg-transparent pl-11 pr-12 py-3 text-xs text-white placeholder:text-[#8C8C8C] outline-none border-none !border-0 focus:outline-none"
           />
           {searchQuery && (
             <button
@@ -121,7 +121,7 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
                 setSearchQuery('');
                 addNotification('Search filter cleared', 'info');
               }}
-              className="absolute right-4 text-[10px] uppercase font-bold text-slate-500 hover:text-white transition-colors cursor-pointer"
+              className="absolute right-4 text-[10px] uppercase font-bold text-[#8C8C8C] hover:text-white transition-colors cursor-pointer"
             >
               Clear
             </button>

@@ -350,7 +350,7 @@ const Settings: React.FC = () => {
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
         <div className="overflow-x-auto pb-1 w-full no-scrollbar">
-          <TabsList className="bg-[#0B132B]/60 backdrop-blur-md p-1.5 rounded-2xl border border-white/5 inline-flex h-auto gap-1">
+          <TabsList className="bg-[#0A1628] p-1.5 rounded-full border border-[#22374D] inline-flex h-auto gap-1">
             {[
               { id: 'account', label: 'Account', icon: User },
               { id: 'interface', label: 'Preferences', icon: Palette },
@@ -361,7 +361,7 @@ const Settings: React.FC = () => {
               <TabsTrigger 
                 key={tab.id}
                 value={tab.id} 
-                className="rounded-xl px-3.5 py-2.5 text-xs font-bold tracking-tight data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-zinc-400 hover:text-zinc-200 transition-all shadow-none border-none flex items-center gap-2 whitespace-nowrap"
+                className="rounded-full px-3.5 py-2 text-xs font-bold tracking-tight data-[state=active]:bg-[#00B4D8] data-[state=active]:text-white data-[state=inactive]:text-[#C2C7CD] hover:text-white transition-all shadow-none border-none flex items-center gap-2 whitespace-nowrap"
               >
                 <tab.icon className="w-3.5 h-3.5" />
                 {tab.label}

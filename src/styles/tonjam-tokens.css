@@ -1,0 +1,71 @@
+/**
+ * TonJam Design Tokens
+ * Source of truth derived from the TonJam Figma Design System
+ * Reference: https://www.figma.com/design/1KtGPRBhqtkRfa3Wmlsir8
+ */
+
+:root {
+  /* =========================================================
+     SEMANTIC COLOR TOKENS
+     Dark-blue TON-inspired visual identity
+     ========================================================= */
+  --tj-color-bg-primary: #07111F;
+  --tj-color-bg-secondary: #0A1628;
+  --tj-color-surface-default: #0A1628;
+  --tj-color-surface-elevated: #0F1C32;
+  --tj-color-brand-primary: #00B4D8;
+  --tj-color-brand-pressed: #009CC0;
+  --tj-color-text-primary: #FFFFFF;
+  --tj-color-text-secondary: #C2C7CD;
+  --tj-color-text-muted: #8C8C8C;
+  --tj-color-border-subtle: #22374D;
+  --tj-color-border-strong: #38516B;
+  --tj-color-state-success: #35C98A;
+  --tj-color-state-warning: #F4BD50;
+  --tj-color-state-danger: #F16D78;
+  --tj-color-overlay-glass: #0A1628;
+
+  /* =========================================================
+     SPACING TOKENS
+     Consistent 2px-40px dimensional progression
+     ========================================================= */
+  --tj-spacing-2: 2px;
+  --tj-spacing-4: 4px;
+  --tj-spacing-6: 6px;
+  --tj-spacing-8: 8px;
+  --tj-spacing-12: 12px;
+  --tj-spacing-16: 16px;
+  --tj-spacing-20: 20px;
+  --tj-spacing-24: 24px;
+  --tj-spacing-32: 32px;
+  --tj-spacing-40: 40px;
+
+  /* =========================================================
+     RADIUS TOKENS
+     Smooth geometric curves and pill shapes
+     ========================================================= */
+  --tj-radius-sm: 8px;
+  --tj-radius-md: 12px;
+  --tj-radius-lg: 16px;
+  --tj-radius-xl: 24px;
+  --tj-radius-pill: 999px;
+
+  /* =========================================================
+     TYPOGRAPHY TOKENS
+     Geometric sans font family and typographic scale
+     ========================================================= */
+  --tj-font-family-sans: 'Poppins', sans-serif;
+  --tj-font-size-caption: 12px;
+  --tj-font-size-body-sm: 14px;
+  --tj-font-size-body: 16px;
+  --tj-font-size-body-lg: 18px;
+  --tj-font-size-heading-sm: 20px;
+  --tj-font-size-heading-md: 24px;
+  --tj-font-size-heading-lg: 30px;
+  --tj-font-size-display: 36px;
+
+  --tj-font-weight-regular: 400;
+  --tj-font-weight-medium: 500;
+  --tj-font-weight-semibold: 600;
+  --tj-font-weight-bold: 700;
+}

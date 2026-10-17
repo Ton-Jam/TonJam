@@ -115,10 +115,10 @@ const LibraryPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
           <div className="space-y-1 min-w-0">
             <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
-              <LibraryIcon className="w-6 h-6 sm:w-7 sm:h-7 text-[#0052FF] shrink-0" />
+              <LibraryIcon className="w-6 h-6 sm:w-7 sm:h-7 text-[#00B4D8] shrink-0" />
               <span>My Library</span>
             </h1>
-            <p className="text-xs text-slate-400 font-medium">
+            <p className="text-xs text-[#C2C7CD] font-medium">
               Your personal music collection, saved tracks, offline cache, and owned Music NFTs
             </p>
           </div>
@@ -129,22 +129,22 @@ const LibraryPage: React.FC = () => {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="relative flex items-center w-full sm:w-72 md:w-80"
+                className="relative flex items-center w-full sm:w-72 md:w-80 rounded-[12px] border border-[#22374D] hover:border-[#38516B] focus-within:border-[#00B4D8] transition-all bg-[#0A1628]"
               >
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0052FF]" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#00B4D8]" />
                 <input
                   ref={headerSearchInputRef}
                   type="text"
                   placeholder="Search tracks, albums, collections..."
                   value={data.searchQuery}
                   onChange={(e) => data.setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-900 rounded-[10px] pl-10 pr-9 py-2 text-xs font-semibold outline-none focus:ring-1 focus:ring-[#0052FF] transition-all text-white placeholder:text-slate-500 shadow-sm"
+                  className="w-full bg-transparent pl-10 pr-9 py-2 text-xs font-semibold outline-none border-none !border-0 text-white placeholder:text-[#8C8C8C]"
                 />
                 <button
                   type="button"
                   onClick={handleCloseHeaderSearch}
                   aria-label="Close search"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-white rounded-full transition-colors cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-[#8C8C8C] hover:text-white rounded-full transition-colors cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -155,9 +155,9 @@ const LibraryPage: React.FC = () => {
                 onClick={handleOpenHeaderSearch}
                 aria-label="Open search in library"
                 title="Search Library"
-                className="flex items-center gap-2 px-3.5 py-2 rounded-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all cursor-pointer shadow-sm select-none"
+                className="flex items-center gap-2 px-3.5 py-2 rounded-[12px] bg-[#0A1628] hover:bg-[#0F1C32] text-[#C2C7CD] hover:text-white transition-all cursor-pointer border border-[#22374D] select-none"
               >
-                <Search className="w-4 h-4 text-[#0052FF]" />
+                <Search className="w-4 h-4 text-[#00B4D8]" />
                 <span className="text-xs font-bold hidden sm:inline">Search</span>
               </button>
             )}
@@ -185,10 +185,10 @@ const LibraryPage: React.FC = () => {
                 onClick={handleOpenHeaderSearch}
                 aria-label="Search filter"
                 title="Search in Library"
-                className={`flex-shrink-0 snap-start px-3 py-2 text-xs font-bold rounded-full cursor-pointer transition-all flex items-center gap-1.5 ${
+                className={`flex-shrink-0 snap-start px-3 py-2 text-xs font-bold rounded-full cursor-pointer transition-all flex items-center gap-1.5 border-none ${
                   isHeaderSearchOpen || data.searchQuery
-                    ? 'bg-[#0052FF] text-white shadow-md shadow-[#0052FF]/20'
-                    : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'bg-[#00B4D8] text-white shadow-md shadow-[#00B4D8]/20'
+                    : 'bg-[#0A1628] text-[#C2C7CD] hover:text-white hover:bg-[#0F1C32]'
                 }`}
               >
                 <Search className="w-3.5 h-3.5" />
@@ -217,10 +217,10 @@ const LibraryPage: React.FC = () => {
                       }
                     }}
                     aria-pressed={isActive}
-                    className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full cursor-pointer transition-all ${
+                    className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full cursor-pointer transition-all border-none ${
                       isActive 
-                        ? 'bg-[#0052FF] text-white shadow-lg shadow-[#0052FF]/20' 
-                        : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-850'
+                        ? 'bg-[#00B4D8] text-white shadow-lg shadow-[#00B4D8]/20' 
+                        : 'bg-[#0A1628] text-[#C2C7CD] hover:text-white hover:bg-[#0F1C32]'
                     }`}
                   >
                     {chip}
