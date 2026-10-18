@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { motion, useMotionValue, useTransform } from 'motion/react';
-import { Play, Pause, ListMusic, ChevronUp } from 'lucide-react';
-import { useCoverColor } from '@/lib/color-utils';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
+import { Play, Pause, ListMusic } from 'lucide-react';
+import { useAudio } from '@/contexts/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
-interface MiniPlayerProps {
+export interface MiniPlayerProps {
   track?: {
     id: string;
     title: string;
@@ -15,38 +17,61 @@ interface MiniPlayerProps {
   onQueueClick?: () => void;
   onExpand?: () => void;
   onSeek?: (percentage: number) => void;
-  progress?: number; // float between 0 and 1
+  progress?: number; // float between 0 and 1, or percentage 0 to 100
+  isMobileNavHidden?: boolean;
 }
 
 export const MiniPlayer: React.FC<MiniPlayerProps> = ({
-  track,
-  isPlaying = false,
-  onPlayPause,
-  onQueueClick,
-  onExpand,
-  onSeek,
-  progress = 0.35,
+  track: propTrack,
+  isPlaying: propIsPlaying,
+  onPlayPause: propOnPlayPause,
+  onQueueClick: propOnQueueClick,
+  onExpand: propOnExpand,
+  onSeek: propOnSeek,
+  progress: propProgress,
+  isMobileNavHidden = false,
 }) => {
-  const dragY = useMotionValue(0);
-  const opacity = useTransform(dragY, [0, -100], [1, 0]);
-  const [localProgress, setLocalProgress] = useState(progress * 100);
-  const [isScrubbing, setIsScrubbing] = useState(false);
-  const progressBarRef = React.useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const audio = useAudio();
 
-  React.useEffect(() => {
+  // Seamlessly use props if provided, otherwise fall back to global AudioContext
+  const currentTrack = propTrack ?? audio.currentTrack;
+  const isPlaying = propIsPlaying !== undefined ? propIsPlaying : audio.isPlaying;
+  const togglePlay = propOnPlayPause ?? audio.togglePlay;
+  const setFullPlayerOpen = propOnExpand ?? (() => audio.setFullPlayerOpen(true));
+  const seekHandler = propOnSeek ?? audio.seek;
+
+  // Normalize progress to 0-100 percentage
+  const rawProgress = propProgress !== undefined 
+    ? (propProgress <= 1 ? propProgress * 100 : propProgress) 
+    : audio.progress;
+
+  const [localProgress, setLocalProgress] = useState(rawProgress);
+  const [isScrubbing, setIsScrubbing] = useState(false);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const dragY = useMotionValue(0);
+
+  useEffect(() => {
     if (!isScrubbing) {
-      setLocalProgress(progress * 100);
+      setLocalProgress(rawProgress);
     }
-  }, [progress, isScrubbing]);
+  }, [rawProgress, isScrubbing]);
+
+  if (!currentTrack) return null;
+
+  const coverUrl = currentTrack.coverUrl || getPlaceholderImage('cover');
+
+  const getPercentageFromEvent = (clientX: number) => {
+    const rect = progressBarRef.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0) return 0;
+    return Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+  };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.stopPropagation();
     setIsScrubbing(true);
-    const rect = progressBarRef.current?.getBoundingClientRect();
-    if (rect && rect.width > 0) {
-      const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-      setLocalProgress(pct);
-    }
+    const pct = getPercentageFromEvent(e.clientX);
+    setLocalProgress(pct);
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {}
@@ -55,11 +80,8 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (isScrubbing) {
       e.stopPropagation();
-      const rect = progressBarRef.current?.getBoundingClientRect();
-      if (rect && rect.width > 0) {
-        const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-        setLocalProgress(pct);
-      }
+      const pct = getPercentageFromEvent(e.clientX);
+      setLocalProgress(pct);
     }
   };
 
@@ -72,21 +94,16 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         e.currentTarget.releasePointerCapture(e.pointerId);
       }
     } catch {}
-    const rect = progressBarRef.current?.getBoundingClientRect();
-    if (rect && rect.width > 0) {
-      const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-      setLocalProgress(pct);
-      if (onSeek) onSeek(pct);
+    const pct = getPercentageFromEvent(e.clientX);
+    setLocalProgress(pct);
+    if (seekHandler) {
+      seekHandler(pct);
     }
   };
 
-  const coverColor = useCoverColor(track?.coverUrl);
-
-  if (!track) return null;
-
-  const handleDragEnd = (_event: any, info: any) => {
-    if (info.offset.y < -50 && onExpand) {
-      onExpand();
+  const handleDragEnd = (_event: any, info: PanInfo) => {
+    if (info.offset.y < -40 && setFullPlayerOpen) {
+      setFullPlayerOpen();
     }
   };
 
@@ -94,21 +111,16 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     <motion.div
       drag="y"
       dragConstraints={{ top: 0, bottom: 0 }}
-      dragElastic={{ top: 0.3, bottom: 0 }}
+      dragElastic={{ top: 0.4, bottom: 0 }}
       onDragEnd={handleDragEnd}
-      style={{
-        y: dragY,
-        opacity: 1,
-        backgroundColor: "#000000",
-      }}
-      className="fixed left-0 right-0 lg:left-64 bottom-16 lg:bottom-0 z-40 select-none shadow-2xl p-3 pt-2 flex flex-col gap-2 cursor-pointer active:cursor-grabbing border-none overflow-hidden bg-black"
+      style={{ y: dragY }}
+      className={`fixed left-0 right-0 lg:left-64 text-[#FFFFFF] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-in-out cursor-pointer bg-[#0F1C32] ${
+        isMobileNavHidden ? 'bottom-0' : 'bottom-[64px] lg:bottom-0'
+      }`}
       id="tonjam-mini-player"
-      onClick={onExpand}
+      onClick={setFullPlayerOpen}
     >
-      {/* Solid Black Background */}
-      <div className="absolute inset-0 pointer-events-none bg-black z-0 select-none" />
-
-      {/* Embedded Progress Bar at Top (1px flush) */}
+      {/* 2px Progress Bar at Top */}
       <div 
         ref={progressBarRef}
         onPointerDown={handlePointerDown}
@@ -116,68 +128,82 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         onClick={(e) => e.stopPropagation()}
-        className="relative z-10 w-full h-[1px] -mt-2 mb-1 flex items-center cursor-pointer group/seek select-none touch-none bg-white/10"
-        title="Click or drag to scrub"
+        role="slider"
+        aria-label="Seek track playback"
+        aria-valuenow={Math.round(localProgress)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        className="relative w-full h-[2px] bg-[#22374D] cursor-pointer touch-none select-none z-20 group"
+        title="Scrub playback position"
       >
+        {/* Expanded touch target */}
+        <div className="absolute -top-2 -bottom-2 left-0 right-0" />
         <div
-          className="h-full bg-blue-500 transition-all duration-150"
+          className="h-full bg-[#00B4D8] transition-all duration-100 shadow-[0_0_6px_rgba(0,180,216,0.6)]"
           style={{ width: `${Math.min(100, Math.max(0, localProgress))}%` }}
         />
       </div>
 
-      <div className="relative z-10 flex items-center justify-between gap-3">
-        {/* Track Metadata Info */}
+      {/* Main Track Details Row */}
+      <div className="relative z-10 flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 gap-3">
+        {/* Artwork + Title + Artist */}
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#1E2230] flex-shrink-0">
-            {track.coverUrl ? (
-              <img
-                src={track.coverUrl}
-                alt={track.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-blue-600/10 flex items-center justify-center text-blue-500 font-bold text-xs">
-                {track.title[0]}
-              </div>
-            )}
+          <div className="w-10 h-10 rounded-[10px] overflow-hidden bg-[#0A1628] shrink-0 shadow-sm">
+            <img
+              src={coverUrl}
+              alt={currentTrack.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = getPlaceholderImage('cover');
+              }}
+            />
           </div>
 
-          <div className="min-w-0 flex-1">
-            <h4 className="text-[11px] font-black uppercase tracking-wider text-white truncate">
-              {track.title}
+          <div className="flex flex-col min-w-0 justify-center leading-tight flex-1">
+            <h4 className="text-xs sm:text-sm font-bold text-[#FFFFFF] truncate tracking-tight">
+              {currentTrack.title}
             </h4>
-            <p className="text-[9px] font-bold text-[#9AA0AE] uppercase tracking-widest truncate mt-0.5">
-              {track.artist}
+            <p className="text-[11px] font-medium text-[#C2C7CD] truncate mt-0.5">
+              {currentTrack.artist}
             </p>
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-          {onQueueClick && (
-            <button
-              onClick={onQueueClick}
-              className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 active:scale-90 transition-all"
-              aria-label="View Queue"
-            >
-              <ListMusic className="w-4.5 h-4.5" />
-            </button>
-          )}
-
+        {/* Action Controls */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+          {/* Play/Pause Button */}
           <button
-            onClick={onPlayPause}
-            className="w-9 h-9 bg-blue-500 hover:bg-blue-600 active:scale-90 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/25 transition-all"
-            aria-label={isPlaying ? 'Pause' : 'Play'}
+            onClick={togglePlay}
+            aria-label={isPlaying ? "Pause track" : "Play track"}
+            className="w-9 h-9 rounded-full bg-[#00B4D8] hover:bg-[#009CC0] text-white flex items-center justify-center transition-all active:scale-95 shadow-md shadow-[#00B4D8]/30 cursor-pointer border-none shrink-0"
+            title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
-              <Pause className="w-4 h-4 fill-white text-white" />
+              <Pause className="w-4 h-4 fill-current" />
             ) : (
-              <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+              <Play className="w-4 h-4 fill-current ml-0.5" />
             )}
+          </button>
+
+          {/* Queue Button */}
+          <button
+            onClick={() => {
+              if (propOnQueueClick) {
+                propOnQueueClick();
+              } else {
+                navigate('/queue');
+              }
+            }}
+            aria-label="Track queue"
+            className="p-2 text-[#8C8C8C] hover:text-[#FFFFFF] transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent active:scale-90"
+            title="Queue"
+          >
+            <ListMusic className="w-4 h-4" />
           </button>
         </div>
       </div>
     </motion.div>
   );
 };
+
 export default MiniPlayer;

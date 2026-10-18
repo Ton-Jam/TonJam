@@ -1,8 +1,9 @@
 import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Layers } from "lucide-react";
+import { ChevronLeft, ChevronRight, Layers, CheckCircle2 } from "lucide-react";
 import { NFTCollection } from "../types";
 import { useGramPrice } from "@/contexts/GramPriceContext";
+import { getPlaceholderImage } from "@/lib/utils";
 
 interface TrendingCollectionsProps {
   collections: NFTCollection[];
@@ -19,7 +20,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
-      const scrollAmount = 300;
+      const scrollAmount = 280;
       scrollRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth"
@@ -27,40 +28,47 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
     }
   };
 
+  if (!collections || collections.length === 0) {
+    return null;
+  }
+
   return (
     <div className="w-full relative text-left" id="marketplace-trending-collections">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <div className="space-y-0.5">
-          <h2 className="text-sm sm:text-base font-semibold uppercase tracking-wider text-[#F5F7FA] flex items-center gap-2">
-            <Layers className="w-4 h-4 text-[#0088CC]" />
+          <h2 className="text-base sm:text-lg font-bold text-[#FFFFFF] flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[#00B4D8]" />
             Trending Collections
           </h2>
+          <p className="text-xs text-[#8C8C8C]">
+            Curated audio collections with verified origin on TON
+          </p>
         </div>
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/collections')}
-            className="text-xs font-semibold text-[#0088CC] hover:text-[#0088CC]/80 flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
+            className="text-xs font-semibold text-[#00B4D8] hover:text-[#009CC0] flex items-center gap-0.5 border-none bg-transparent outline-none cursor-pointer"
           >
-            More <ChevronRight className="w-3.5 h-3.5" />
+            All Collections <ChevronRight className="w-3.5 h-3.5" />
           </button>
           <div className="flex gap-1">
             <button
               type="button"
               onClick={() => scroll("left")}
-              className="w-7 h-7 rounded-[3px] bg-white/5 text-white/60 hover:text-white flex items-center justify-center transition-colors border-none focus:outline-none"
+              className="w-8 h-8 rounded-lg bg-[#0A1628] border border-[#22374D] text-[#C2C7CD] hover:text-white flex items-center justify-center transition-colors focus:outline-none"
               aria-label="Previous collections"
             >
-              <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             </button>
             <button
               type="button"
               onClick={() => scroll("right")}
-              className="w-7 h-7 rounded-[3px] bg-white/5 text-white/60 hover:text-white flex items-center justify-center transition-colors border-none focus:outline-none"
+              className="w-8 h-8 rounded-lg bg-[#0A1628] border border-[#22374D] text-[#C2C7CD] hover:text-white flex items-center justify-center transition-colors focus:outline-none"
               aria-label="Next collections"
             >
-              <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -69,51 +77,59 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
       {/* Horizontal Carousel List */}
       <div
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory scroll-smooth w-full"
+        className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory scroll-smooth w-full"
       >
         {collections.map((col) => (
           <div
             key={col.id}
             onClick={() => onSelectCollection(col)}
-            className="min-w-[240px] max-w-[240px] bg-[#0B112C] hover:bg-[#0E1638] rounded-[10px] overflow-hidden p-3 cursor-pointer select-none snap-start flex flex-col justify-between transition-all duration-300 shadow-lg shadow-black/30 border-none"
+            className="min-w-[240px] max-w-[240px] bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-2xl overflow-hidden p-3.5 cursor-pointer select-none snap-start flex flex-col justify-between transition-all duration-200"
           >
             {/* Collection Cover Image */}
-            <div className="aspect-square w-full rounded-[8px] overflow-hidden bg-[#101010] relative mb-2.5">
+            <div className="aspect-square w-full rounded-xl overflow-hidden bg-[#07111F] relative mb-3">
               <img
-                src={col.imageUrl}
+                src={col.imageUrl || getPlaceholderImage(col.name)}
                 alt={col.name}
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.currentTarget.src = getPlaceholderImage(col.name);
+                }}
                 className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                 loading="lazy"
               />
-              <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-[4px] bg-black/75 backdrop-blur-md text-[8px] font-mono font-black text-white uppercase tracking-wider">
-                {col.itemCount} Items
-              </div>
+              {col.itemCount !== undefined && (
+                <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-[#07111F]/80 backdrop-blur-md text-[9px] font-mono font-semibold text-[#FFFFFF] uppercase tracking-wider border border-[#22374D]">
+                  {col.itemCount} Items
+                </div>
+              )}
             </div>
 
             {/* Collection Meta */}
             <div className="text-left space-y-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black text-[#F5F7FA] truncate block max-w-[85%]">{col.name}</span>
+                <span className="text-sm font-semibold text-[#FFFFFF] truncate block max-w-[85%]">{col.name}</span>
                 {col.verified && (
-                  <span className="w-3.5 h-3.5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[8px] font-bold" title="Verified Creator">✓</span>
+                  <span title="Verified Creator" className="inline-flex">
+                    <CheckCircle2 className="w-3.5 h-3.5 fill-[#00B4D8] text-[#07111F] shrink-0" />
+                  </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-1">
-                <span className="text-[9px] font-normal text-slate-400">Creator:</span>
-                <span className="text-[9px] font-medium text-slate-300 truncate max-w-[65%]">{col.creator}</span>
+              <div className="flex items-center gap-1 text-xs text-[#C2C7CD]">
+                <span className="text-[#8C8C8C]">By</span>
+                <span className="truncate">{col.creator}</span>
               </div>
             </div>
 
             {/* Price / Volume Metrics */}
-            <div className="grid grid-cols-2 gap-2 mt-3 pt-2">
+            <div className="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-[#22374D]/60">
               <div>
-                <span className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider block">Floor Price</span>
-                <span className="text-xs font-black text-cyan-400 font-mono">{convertPrice(col.floorPrice)}</span>
+                <span className="text-[9px] font-medium text-[#8C8C8C] uppercase tracking-wider block">Floor Price</span>
+                <span className="text-xs font-bold text-[#00B4D8] font-mono">{convertPrice(col.floorPrice || "1.5 TON")}</span>
               </div>
               <div className="text-right">
-                <span className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider block">Volume</span>
-                <span className="text-xs font-black text-white font-mono">{convertPrice(col.volume)}</span>
+                <span className="text-[9px] font-medium text-[#8C8C8C] uppercase tracking-wider block">Volume</span>
+                <span className="text-xs font-bold text-[#FFFFFF] font-mono">{convertPrice(col.volume || "0 TON")}</span>
               </div>
             </div>
           </div>
@@ -122,3 +138,5 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
     </div>
   );
 };
+
+export default TrendingCollections;

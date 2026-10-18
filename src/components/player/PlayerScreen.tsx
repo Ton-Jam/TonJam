@@ -183,7 +183,7 @@ export const PlayerScreen: React.FC = () => {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="fixed inset-0 z-50 bg-[#050A24] text-[#F2F4F8] font-sans overflow-y-auto overscroll-contain touch-pan-y scrollbar-thin scrollbar-thumb-[#16244F]"
+        className="fixed inset-0 z-50 bg-[#07111F] text-[#FFFFFF] font-sans overflow-y-auto overscroll-contain touch-pan-y scrollbar-thin scrollbar-thumb-[#22374D]"
       >
         {/* Cover Photo Dominant Color Gradient Ambient Background */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 select-none">
@@ -192,31 +192,23 @@ export const PlayerScreen: React.FC = () => {
               src={coverUrl}
               alt=""
               aria-hidden="true"
-              className="absolute inset-0 w-full h-full object-cover blur-3xl scale-125 opacity-30 transition-opacity duration-700"
+              className="absolute inset-0 w-full h-full object-cover blur-3xl scale-125 opacity-25 transition-opacity duration-700"
             />
           )}
-          {/* Subtle extracted dominant color radial and linear soft gradients */}
+          {/* Subtle extracted dominant color radial and soft gradients */}
           <div
             className="absolute inset-0 transition-all duration-700 ease-out"
             style={{
-              background: `radial-gradient(circle at 50% 25%, ${coverColor}66 0%, ${coverColor}22 55%, transparent 100%)`,
-              opacity: 0.85,
+              background: `radial-gradient(circle at 50% 25%, ${coverColor}44 0%, ${coverColor}11 55%, transparent 100%)`,
+              opacity: 0.75,
             }}
           />
-          <div
-            className="absolute inset-0 transition-all duration-700 ease-out mix-blend-screen"
-            style={{
-              background: `radial-gradient(ellipse at 50% 18%, ${coverColor}55 0%, transparent 60%)`,
-              opacity: 0.55,
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#050A24]/60 via-[#050A24]/80 to-[#000000]/95" />
-          <div className="absolute inset-0 bg-radial from-transparent via-[#050A24]/30 to-[#000000]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#07111F]/70 via-[#07111F]/90 to-[#07111F]" />
         </div>
 
-        {/* Scrollable Core Player Body including Header */}
-        <div className="relative z-10 min-h-full max-w-md mx-auto w-full px-3 pt-2.5 pb-28 flex flex-col items-center justify-start gap-4 sm:gap-5">
-          <div className="w-full">
+        {/* Scrollable Core Player Body including Header with Safe-Area respect */}
+        <div className="relative z-10 min-h-full max-w-md mx-auto w-full px-3 pt-2.5 pb-[calc(env(safe-area-inset-bottom,20px)+28px)] flex flex-col items-center justify-start gap-4 sm:gap-5">
+          <div className="w-full bg-transparent">
             <PlayerHeader
               onClose={() => setFullPlayerOpen(false)}
               onMoreClick={() => setOptionsTrack(currentTrack)}
@@ -238,7 +230,7 @@ export const PlayerScreen: React.FC = () => {
             <div className="w-full px-4">
               <MarqueeTitle 
                 text={currentTrack.title}
-                className="text-[18px] font-bold text-[#F2F4F8] tracking-tight"
+                className="text-[20px] font-bold text-[#FFFFFF] tracking-tight"
                 containerClassName="w-full max-w-xs mx-auto"
               />
             </div>
@@ -246,44 +238,44 @@ export const PlayerScreen: React.FC = () => {
             <div className="w-full px-4">
               <MarqueeTitle 
                 text={currentTrack.artist}
-                className="text-[14px] font-medium text-[#9AA0AE]"
+                className="text-[14px] font-medium text-[#C2C7CD]"
                 containerClassName="w-full max-w-xs mx-auto"
               />
             </div>
 
             {/* Badges & Streams Counter Row */}
             <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
-              <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] rounded-[6px] text-[10px] font-bold text-amber-400">
+              <span className="flex items-center gap-1 px-2.5 py-0.5 bg-[#0A1628] rounded-[8px] text-[10px] font-bold text-[#F4BD50]">
                 <Flame className="w-3 h-3 fill-current" /> 1.4M Streams
               </span>
 
               {currentTrack.artistVerified && (
-                <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] rounded-[6px] text-[10px] font-bold text-[#0098EA]">
-                  <Check className="w-3 h-3 text-[#0098EA]" /> Verified
+                <span className="flex items-center gap-1 px-2.5 py-0.5 bg-[#0A1628] rounded-[8px] text-[10px] font-bold text-[#00B4D8]">
+                  <Check className="w-3 h-3 text-[#00B4D8]" /> Verified
                 </span>
               )}
               {currentTrack.isNFT && (
-                <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] rounded-[6px] text-[10px] font-bold text-emerald-400">
+                <span className="flex items-center gap-1 px-2.5 py-0.5 bg-[#0A1628] rounded-[8px] text-[10px] font-bold text-[#35C98A]">
                   <Gem className="w-3 h-3" /> Music NFT
                 </span>
               )}
               {currentTrack.isHighFidelity && (
-                <span className="flex items-center gap-1 px-2 py-0.5 bg-[#0A113A] rounded-[6px] text-[10px] font-bold text-white border border-white/10">
+                <span className="flex items-center gap-1 px-2.5 py-0.5 bg-[#0A1628] rounded-[8px] text-[10px] font-bold text-white border border-[#22374D]">
                   <Award className="w-3 h-3 text-white" /> Lossless Hi-Fi
                 </span>
               )}
             </div>
           </div>
 
-          {/* AUDIOMACK-STYLE SOCIAL ENGAGEMENT ACTION BAR - HORIZONTAL SCROLL */}
-          <div className="w-full flex items-center gap-2 overflow-x-auto px-3 py-2 bg-[#0A113A] rounded-[16px] scrollbar-none snap-x touch-pan-x">
+          {/* Social Engagement Action Bar */}
+          <div className="w-full flex items-center gap-2 overflow-x-auto px-3 py-2 bg-[#0A1628] rounded-[16px] scrollbar-none snap-x touch-pan-x">
             {/* Tip Artist TON Button */}
             <button
               onClick={() => setShowTipModal(true)}
-              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-cyan-500/20 to-blue-600/30 hover:from-amber-500/30 hover:to-cyan-500/40 border border-amber-500/40 text-amber-300 hover:text-white text-xs font-bold transition-all shadow-[0_0_12px_rgba(245,158,11,0.2)] active:scale-95"
+              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-[#00B4D8]/15 to-blue-600/25 border border-[#F4BD50]/40 text-[#F4BD50] hover:text-white text-xs font-bold transition-all active:scale-95 cursor-pointer"
               title="Tip Artist in TON"
             >
-              <Coins className="w-4 h-4 text-amber-400 fill-amber-400/30" />
+              <Coins className="w-4 h-4 text-[#F4BD50] fill-[#F4BD50]/30" />
               <span>Tip Artist</span>
             </button>
 
@@ -293,23 +285,23 @@ export const PlayerScreen: React.FC = () => {
                 toggleLikeTrack(currentTrack.id);
                 setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
               }}
-              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                 isLiked
-                  ? "bg-[#0098EA]/20 border-[#0098EA]/40 text-[#0098EA]"
-                  : "bg-[#16244F]/40 border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8]/20 border-[#00B4D8]/40 text-[#00B4D8]"
+                  : "bg-[#0F1C32] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
               }`}
             >
-              <Heart className={`w-4 h-4 ${isLiked ? "fill-[#0098EA]" : ""}`} />
+              <Heart className={`w-4 h-4 ${isLiked ? "fill-[#00B4D8]" : ""}`} />
               <span>Like {(likeCount / 1000).toFixed(1)}k</span>
             </button>
 
             {/* JamUp / Repost Button */}
             <button
               onClick={handleRepostToggle}
-              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                 isReposted
-                  ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
-                  : "bg-[#16244F]/40 border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#35C98A]/20 border-[#35C98A]/40 text-[#35C98A]"
+                  : "bg-[#0F1C32] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
               }`}
               title="JamUp Repost"
             >
@@ -320,14 +312,14 @@ export const PlayerScreen: React.FC = () => {
             {/* Comments Button */}
             <button
               onClick={() => setActiveTab(activeTab === "comments" ? "none" : "comments")}
-              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                 activeTab === "comments"
-                  ? "bg-[#0098EA] border-[#0098EA] text-white"
-                  : "bg-[#16244F]/40 border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8] border-[#00B4D8] text-white"
+                  : "bg-[#0F1C32] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
               }`}
               title="Track Comments"
             >
-              <MessageSquare className="w-4 h-4 text-cyan-400" />
+              <MessageSquare className="w-4 h-4 text-[#00B4D8]" />
               <span>Comments (412)</span>
             </button>
 
@@ -340,34 +332,34 @@ export const PlayerScreen: React.FC = () => {
                   toast.success("Added to playlist queue");
                 }
               }}
-              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#16244F]/40 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F] text-xs font-bold transition-all"
+              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0F1C32] border border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F] text-xs font-bold transition-all cursor-pointer"
               title="Add to Playlist"
             >
-              <Plus className="w-4 h-4 text-purple-400" />
+              <Plus className="w-4 h-4 text-[#00B4D8]" />
               <span>Add to Playlist</span>
             </button>
 
             {/* Download Offline */}
             <button
               onClick={handleDownloadToggle}
-              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                 isCached
-                  ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
-                  : "bg-[#16244F]/40 border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#35C98A]/20 border-[#35C98A]/40 text-[#35C98A]"
+                  : "bg-[#0F1C32] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
               }`}
               title="Download Offline"
             >
-              <Download className={`w-4 h-4 ${isCached ? "text-emerald-400" : "text-green-400"}`} />
+              <Download className={`w-4 h-4 ${isCached ? "text-[#35C98A]" : "text-[#8C8C8C]"}`} />
               <span>{isCached ? "Downloaded" : "Download"}</span>
             </button>
 
             {/* Share */}
             <button
               onClick={handleShare}
-              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#16244F]/40 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F] text-xs font-bold transition-all"
+              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0F1C32] border border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F] text-xs font-bold transition-all cursor-pointer"
               title="Share Track"
             >
-              <Share2 className="w-4 h-4 text-blue-400" />
+              <Share2 className="w-4 h-4 text-[#00B4D8]" />
               <span>Share</span>
             </button>
           </div>
@@ -385,59 +377,60 @@ export const PlayerScreen: React.FC = () => {
           <PlayerControls />
 
           {/* Secondary Features Tab Row (Live Visualizer, EQ, Lyrics, Queue, Audio Info, NFT, Artist) - Horizontal Scroll */}
-          <div className="w-full flex items-center gap-2 overflow-x-auto py-2.5 px-1 text-[#9AA0AE] scrollbar-none snap-x touch-pan-x">
+          {/* Secondary Features Tab Row (Live Visualizer, EQ, Radio, Lyrics, Queue, Audio Info, NFT, Artist) */}
+          <div className="w-full flex items-center gap-2 overflow-x-auto py-2.5 px-1 text-[#8C8C8C] scrollbar-none snap-x touch-pan-x">
             {/* Live Visualizer Canvas */}
             <button
               onClick={() => setActiveTab(activeTab === "visualizer" ? "none" : "visualizer")}
-              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start ${
+              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border ${
                 activeTab === "visualizer"
-                  ? "bg-gradient-to-r from-[#0098EA] to-blue-600 text-white shadow-[0_0_15px_rgba(0,152,234,0.5)] scale-105"
-                  : "bg-[#0A113A]/80 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8] text-white border-[#00B4D8] shadow-[0_0_12px_rgba(0,180,216,0.5)] scale-105"
+                  : "bg-[#0A1628] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
               }`}
               title="Live Frequency Visualizer"
             >
-              <Activity className="w-4 h-4 text-cyan-400 animate-pulse" />
+              <Activity className="w-4 h-4 text-[#00B4D8] animate-pulse" />
               <span>Live Visualizer</span>
             </button>
 
             {/* Equalizer FX */}
             <button
               onClick={() => setActiveTab(activeTab === "equalizer" ? "none" : "equalizer")}
-              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start ${
+              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border ${
                 activeTab === "equalizer"
-                  ? "bg-[#0098EA] text-white shadow-[0_0_12px_rgba(0,152,234,0.4)] scale-105"
-                  : "bg-[#0A113A]/80 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8] text-white border-[#00B4D8] shadow-[0_0_12px_rgba(0,180,216,0.4)] scale-105"
+                  : "bg-[#0A1628] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
               }`}
               title="Equalizer & FX Settings"
             >
-              <Sliders className="w-4 h-4 text-[#0098EA]" />
+              <Sliders className="w-4 h-4 text-[#00B4D8]" />
               <span>Equalizer & FX</span>
             </button>
 
             {/* Smart Radio */}
             <button
               onClick={() => setActiveTab(activeTab === "radio" ? "none" : "radio")}
-              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all relative flex items-center gap-1.5 text-xs font-bold snap-start ${
+              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all relative flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border ${
                 activeTab === "radio"
-                  ? "bg-[#5B6BFF] text-white shadow-[0_0_12px_rgba(91,107,255,0.4)] scale-105"
-                  : "bg-[#0A113A]/80 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8] text-white border-[#00B4D8] shadow-[0_0_12px_rgba(0,180,216,0.4)] scale-105"
+                  : "bg-[#0A1628] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
               }`}
               title="Smart Radio Engine"
             >
-              <Radio className="w-4 h-4 text-emerald-400" />
+              <Radio className="w-4 h-4 text-[#35C98A]" />
               <span>Smart Radio</span>
               {isSmartRadio && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-[#35C98A] shadow-[0_0_8px_rgba(53,201,138,0.8)] animate-pulse" />
               )}
             </button>
 
             {/* Lyrics Toggle */}
             <button
               onClick={() => setActiveTab(activeTab === "lyrics" ? "none" : "lyrics")}
-              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start ${
+              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border ${
                 activeTab === "lyrics"
-                  ? "bg-[#0098EA] text-white shadow-[0_0_12px_rgba(0,152,234,0.4)] scale-105"
-                  : "bg-[#0A113A]/80 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8] text-white border-[#00B4D8] shadow-[0_0_12px_rgba(0,180,216,0.4)] scale-105"
+                  : "bg-[#0A1628] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
               }`}
               title="Lyrics"
             >
@@ -448,17 +441,17 @@ export const PlayerScreen: React.FC = () => {
             {/* Queue Toggle */}
             <button
               onClick={() => setActiveTab(activeTab === "queue" ? "none" : "queue")}
-              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all relative flex items-center gap-1.5 text-xs font-bold snap-start ${
+              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all relative flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border ${
                 activeTab === "queue"
-                  ? "bg-[#0098EA] text-white shadow-[0_0_12px_rgba(0,152,234,0.4)] scale-105"
-                  : "bg-[#0A113A]/80 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8] text-white border-[#00B4D8] shadow-[0_0_12px_rgba(0,180,216,0.4)] scale-105"
+                  : "bg-[#0A1628] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
               }`}
               title="Queue"
             >
-              <ListMusic className="w-4 h-4 text-purple-400" />
+              <ListMusic className="w-4 h-4 text-[#00B4D8]" />
               <span>Queue</span>
               {queue.length > 0 && (
-                <span className="px-1.5 py-0.5 bg-[#0098EA] text-white text-[10px] font-bold rounded-full">
+                <span className="px-1.5 py-0.5 bg-[#00B4D8] text-white text-[10px] font-bold rounded-full">
                   {queue.length}
                 </span>
               )}
@@ -467,42 +460,42 @@ export const PlayerScreen: React.FC = () => {
             {/* Audio Specs */}
             <button
               onClick={() => setActiveTab(activeTab === "audio_info" ? "none" : "audio_info")}
-              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start ${
+              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border ${
                 activeTab === "audio_info"
-                  ? "bg-[#0098EA] text-white shadow-[0_0_12px_rgba(0,152,234,0.4)] scale-105"
-                  : "bg-[#0A113A]/80 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8] text-white border-[#00B4D8] shadow-[0_0_12px_rgba(0,180,216,0.4)] scale-105"
+                  : "bg-[#0A1628] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
               }`}
               title="Audio Specs"
             >
-              <Info className="w-4 h-4 text-cyan-400" />
+              <Info className="w-4 h-4 text-[#00B4D8]" />
               <span>Audio Specs</span>
             </button>
 
             {/* NFT Collectible */}
             <button
               onClick={() => setActiveTab(activeTab === "nft" ? "none" : "nft")}
-              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start ${
+              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border ${
                 activeTab === "nft"
-                  ? "bg-[#0098EA] text-white shadow-[0_0_12px_rgba(0,152,234,0.4)] scale-105"
-                  : "bg-[#0A113A]/80 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8] text-white border-[#00B4D8] shadow-[0_0_12px_rgba(0,180,216,0.4)] scale-105"
+                  : "bg-[#0A1628] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
               }`}
               title="NFT Collectible"
             >
-              <Gem className="w-4 h-4 text-amber-400" />
+              <Gem className="w-4 h-4 text-[#F4BD50]" />
               <span>NFT Collectible</span>
             </button>
 
             {/* Artist Card */}
             <button
               onClick={() => setActiveTab(activeTab === "artist" ? "none" : "artist")}
-              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start ${
+              className={`shrink-0 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border ${
                 activeTab === "artist"
-                  ? "bg-[#0098EA] text-white shadow-[0_0_12px_rgba(0,152,234,0.4)] scale-105"
-                  : "bg-[#0A113A]/80 border border-[#16244F]/60 text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8] text-white border-[#00B4D8] shadow-[0_0_12px_rgba(0,180,216,0.4)] scale-105"
+                  : "bg-[#0A1628] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
               }`}
               title="Artist Info"
             >
-              <User className="w-4 h-4 text-emerald-400" />
+              <User className="w-4 h-4 text-[#35C98A]" />
               <span>Artist Info</span>
             </button>
           </div>

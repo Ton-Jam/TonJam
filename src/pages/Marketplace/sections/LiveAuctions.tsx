@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Zap, Play, Pause, Heart, Clock } from "lucide-react";
+import React from "react";
+import { Zap, Clock, ArrowRight } from "lucide-react";
 import { LiveAuction } from "../types";
-import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
 import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
+import { useGramPrice } from "@/contexts/GramPriceContext";
 
 interface LiveAuctionsProps {
   auctions: LiveAuction[];
@@ -16,104 +16,93 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
   onPlaceBid,
   onSelectNFT
 }) => {
-  const { playTrack, currentTrack, isPlaying } = useAudio();
-  const [watchedAuctions, setWatchedAuctions] = useState<Record<string, boolean>>({});
+  const { convertPrice } = useGramPrice();
 
-  const toggleWatch = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setWatchedAuctions(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
+  if (!auctions || auctions.length === 0) {
+    return null;
+  }
 
   return (
     <div className="w-full relative text-left" id="marketplace-live-auctions">
-      <div className="flex items-center justify-between mb-3">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
         <div className="space-y-0.5">
-          <h2 className="text-sm sm:text-base font-semibold uppercase tracking-wider text-[#F5F7FA] flex items-center gap-2">
-            <Zap className="w-4 h-4 text-[#0088CC] fill-current" />
+          <h2 className="text-base sm:text-lg font-bold text-[#FFFFFF] flex items-center gap-2">
+            <Zap className="w-4 h-4 text-[#00B4D8] fill-current" />
             Live Auctions
           </h2>
+          <p className="text-xs text-[#8C8C8C]">
+            Real-time on-chain auctions for rare music editions
+          </p>
         </div>
       </div>
 
       {/* Grid of Auctions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
         {auctions.map((auc) => {
-          const isCurrentPlaying = currentTrack?.id === auc.nft.id && isPlaying;
-          const isWatched = !!watchedAuctions[auc.id];
+          const artwork = auc.nft.coverUrl || auc.nft.imageUrl || getPlaceholderImage(auc.nft.title);
+          const currentBidFormatted = auc.currentBid.includes("TON") ? auc.currentBid : `${auc.currentBid} TON`;
 
           return (
             <div
               key={auc.id}
               onClick={() => onSelectNFT(auc.nft)}
-              className="bg-[#0A0A0A] border border-white/12 rounded-[3px] overflow-hidden p-3 flex flex-col justify-between cursor-pointer select-none transition-colors hover:border-white/20"
+              className="bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-2xl overflow-hidden p-3.5 flex flex-col justify-between cursor-pointer select-none transition-all duration-200"
             >
               {/* Media Section */}
-              <div className="relative aspect-square w-full rounded-[3px] bg-[#101010] border border-white/10 overflow-hidden mb-2.5">
+              <div className="relative aspect-square w-full rounded-xl bg-[#07111F] overflow-hidden mb-3">
                 <img
-                  src={auc.nft.coverUrl || getPlaceholderImage(auc.nft.title)}
+                  src={artwork}
                   alt={auc.nft.title}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-103"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.currentTarget.src = getPlaceholderImage(auc.nft.title);
+                  }}
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                   loading="lazy"
                 />
                 
                 {/* Visual Overlays */}
-                <div className="absolute top-2 left-2 flex gap-1 items-center">
-                  <span className="flex items-center gap-1 text-[8px] font-semibold bg-rose-500/90 text-white px-1.5 py-0.5 rounded-[3px] uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                <div className="absolute top-2 left-2 flex gap-1.5 items-center">
+                  <span className="flex items-center gap-1 text-[9px] font-bold bg-[#00B4D8] text-[#07111F] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 bg-[#07111F] rounded-full" />
                     Live
                   </span>
-                  <span className="text-[8px] font-medium bg-black/70 text-white/80 px-1.5 py-0.5 rounded-[3px] border border-white/10 uppercase tracking-wider">
-                    {auc.bidsCount} Bids
-                  </span>
+                  {auc.bidsCount !== undefined && (
+                    <span className="text-[9px] font-medium bg-[#07111F]/80 backdrop-blur-sm text-[#FFFFFF] px-2 py-0.5 rounded-full border border-[#22374D] uppercase tracking-wider">
+                      {auc.bidsCount} Bids
+                    </span>
+                  )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={(e) => toggleWatch(auc.id, e)}
-                  className="absolute top-2 right-2 w-6 h-6 rounded-[3px] bg-black/60 border border-white/10 text-white/70 hover:text-white flex items-center justify-center transition-colors focus:outline-none"
-                  aria-label={isWatched ? `Remove ${auc.nft.title} from watchlist` : `Watch ${auc.nft.title} auction`}
-                >
-                  <Heart className={`w-3 h-3 ${isWatched ? "fill-rose-500 text-rose-500" : ""}`} aria-hidden="true" />
-                </button>
-
-                {/* Hover Play Button */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playTrack(auc.nft as any);
-                    }}
-                    className="w-10 h-10 rounded-full bg-[#0088CC] hover:bg-[#0077b3] text-white flex items-center justify-center transition-colors focus:outline-none"
-                    aria-label={isCurrentPlaying ? `Pause preview for ${auc.nft.title}` : `Play preview for ${auc.nft.title}`}
-                  >
-                    {isCurrentPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-                  </button>
-                </div>
-
-                {/* Countdown display at bottom of image */}
-                <div className="absolute bottom-1.5 left-1.5 right-1.5 p-1.5 bg-black/80 rounded-[3px] flex items-center justify-between border border-white/5">
-                  <span className="text-[8px] font-medium text-white/60 uppercase tracking-wider flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-[#0088CC]" /> Ends In
+                {/* Countdown display */}
+                <div className="absolute bottom-2 left-2 right-2 p-2 bg-[#07111F]/85 backdrop-blur-md rounded-lg flex items-center justify-between border border-[#22374D]">
+                  <span className="text-[10px] font-medium text-[#C2C7CD] uppercase tracking-wider flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-[#00B4D8]" /> Ends In
                   </span>
                   <AuctionCountdownTimer nft={{ ...auc.nft, endsAt: auc.endsAt } as any} variant="mini" />
                 </div>
               </div>
 
-              {/* Text Meta */}
-              <div className="text-left space-y-0.5">
-                <span className="text-xs font-semibold text-[#F5F7FA] block truncate">{auc.nft.title}</span>
-                <span className="text-[11px] font-normal text-white/60 block truncate">{auc.nft.artist}</span>
+              {/* Title & Artist */}
+              <div className="space-y-0.5">
+                <h3 className="text-sm font-semibold text-[#FFFFFF] truncate">
+                  {auc.nft.title}
+                </h3>
+                <span className="text-xs text-[#C2C7CD] block truncate">
+                  {auc.nft.artist || auc.nft.creator}
+                </span>
               </div>
 
               {/* Auction Bidding Metrics */}
-              <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between gap-2">
+              <div className="mt-3 pt-2.5 border-t border-[#22374D]/60 flex items-center justify-between gap-2">
                 <div>
-                  <span className="text-[8px] font-medium text-white/50 uppercase tracking-wider block">Current Bid</span>
-                  <span className="text-xs font-semibold text-[#0088CC] font-mono">{auc.currentBid}</span>
+                  <span className="text-[10px] text-[#8C8C8C] uppercase tracking-wider block">
+                    Current Bid
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-[#00B4D8] font-mono">
+                    {convertPrice(currentBidFormatted)}
+                  </span>
                 </div>
 
                 <button
@@ -123,9 +112,10 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
                     onPlaceBid(auc);
                   }}
                   aria-label={`Place bid on ${auc.nft.title}`}
-                  className="px-3 py-1 rounded-[3px] bg-[#0088CC] text-white font-medium text-[10px] uppercase tracking-wider hover:bg-[#0077b3] transition-colors focus:outline-none"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#00B4D8] text-[#07111F] font-bold text-xs uppercase tracking-wider hover:bg-[#009CC0] transition-colors focus:outline-none flex items-center gap-1"
                 >
                   Place Bid
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -135,3 +125,5 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
     </div>
   );
 };
+
+export default LiveAuctions;

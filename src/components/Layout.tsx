@@ -41,6 +41,7 @@ import { useWallet } from '@/contexts/WalletContext';
 import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import BottomNavigation from '@/components/layout/BottomNavigation';
 import MiniPlayer from './player/MiniPlayer';
 import PlayerScreen from './player/PlayerScreen';
 import AddToPlaylistModal from './AddToPlaylistModal';
@@ -677,25 +678,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
       <div className="lg:hidden">
         {/* Mobile Navigation */}
-      {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
-        <div 
-          id="tonjam-mobile-nav"
-          className={`lg:hidden fixed bottom-0 left-0 right-0 z-[70] h-16 transition-all duration-300 ease-in-out ${isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
-        >
-          <nav 
-            id="tonjam-mobile-nav-bar"
-            className="h-full w-full bg-[#0A1628]/85 backdrop-blur-[18px] border-t border-white/15 dark:border-white/15 px-2 flex justify-around items-center" 
-            aria-label="Mobile Navigation"
-          >
-            <MobileNavItem to="/" icon={HomeIcon} label="Home" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
-            <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
-            <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jamspace" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
-            <MobileNavItem to="/library" icon={RectangleStackIcon} label="My Library" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
-            <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Market" onClick={() => isFullPlayerOpen && setFullPlayerOpen(false)} />
-          </nav>
-        </div>
-      )}
-    </div>
+        {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
+          <BottomNavigation
+            isHidden={isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin}
+          />
+        )}
+      </div>
 
       {/* Offline Connectivity Indicator */}
       <OfflineIndicator />

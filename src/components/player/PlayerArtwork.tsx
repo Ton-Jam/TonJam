@@ -58,16 +58,16 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
   return (
     <div className="relative w-full flex flex-col items-center justify-center my-1 sm:my-2 select-none">
       {/* Blurred background image behind the artwork */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none rounded-3xl opacity-35 filter blur-3xl scale-125">
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none rounded-[24px] opacity-30 filter blur-3xl scale-125">
         <img
           src={coverUrl}
           alt=""
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-[#050A24]/70" />
+        <div className="absolute inset-0 bg-[#07111F]/75" />
       </div>
 
-      {/* Main Artwork Frame */}
+      {/* Main Artwork Frame - 18px-20px rounded corners per Figma */}
       <motion.div
         drag="y"
         dragConstraints={{ top: 0, bottom: 0 }}
@@ -82,24 +82,24 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
         onClick={handleClick}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
-        animate={{ scale: isZoomed ? 1.1 : 1 }}
+        animate={{ scale: isZoomed ? 1.08 : 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="relative w-[68vw] max-w-[260px] sm:max-w-[320px] md:max-w-[360px] max-h-[34vh] sm:max-h-[38vh] aspect-square rounded-lg overflow-hidden shadow-2xl bg-[#0A113A] group cursor-pointer"
+        className="relative w-[76vw] max-w-[280px] sm:max-w-[340px] md:max-w-[360px] max-h-[36vh] sm:max-h-[40vh] aspect-square rounded-[20px] overflow-hidden shadow-2xl bg-[#0A1628] group cursor-pointer"
       >
         {/* Static artwork container (no rotation) */}
         <div className="w-full h-full relative flex items-center justify-center">
           <img
             src={coverUrl}
             alt={track?.title || "Track Artwork"}
-            className="w-full h-full object-cover rounded-lg"
+            className="w-full h-full object-cover rounded-[20px]"
             onError={(e) => {
               (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
             }}
           />
 
           {/* Subdued vinyl center overlay for disc aesthetic */}
-          <div className="absolute w-12 h-12 rounded-full bg-[#050A24]/40 backdrop-blur-sm flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-            <Disc3 className="w-6 h-6 text-[#F2F4F8]" />
+          <div className="absolute w-12 h-12 rounded-full bg-[#07111F]/50 backdrop-blur-sm flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+            <Disc3 className="w-6 h-6 text-[#FFFFFF]" />
           </div>
         </div>
 
@@ -114,7 +114,7 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
               className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-xs z-30"
             >
               <div className="relative flex items-center justify-center">
-                <Heart className="w-20 h-20 text-[#0098EA] fill-[#0098EA] filter drop-shadow-[0_0_15px_rgba(0,152,234,0.8)]" />
+                <Heart className="w-20 h-20 text-[#00B4D8] fill-[#00B4D8] filter drop-shadow-[0_0_15px_rgba(0,180,216,0.8)]" />
                 <Sparkles className="w-8 h-8 text-white absolute -top-2 -right-2 animate-spin" />
               </div>
             </motion.div>
@@ -127,7 +127,7 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
             e.stopPropagation();
             setIsZoomed(!isZoomed);
           }}
-          className="absolute bottom-2.5 right-2.5 px-2 py-1 bg-[#0A113A]/80 backdrop-blur-md rounded-[8px] text-[10px] font-bold text-[#F2F4F8] opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute bottom-2.5 right-2.5 px-2 py-1 bg-[#0A1628]/80 backdrop-blur-md rounded-[8px] text-[10px] font-bold text-[#FFFFFF] opacity-0 group-hover:opacity-100 transition-opacity border-none cursor-pointer"
         >
           {isZoomed ? "Reset" : "Zoom"}
         </button>

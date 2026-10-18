@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   Play,
   Pause,
@@ -10,7 +10,6 @@ import {
   Repeat1,
   Volume2,
   VolumeX,
-  Tv,
   Clock,
   Gauge,
   Laptop,
@@ -104,7 +103,7 @@ export const PlayerControls: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-4 my-2 select-none">
+    <div className="w-full flex flex-col items-center gap-4 my-2 select-none font-sans">
       {/* Primary Playback Controls Row */}
       <div className="flex items-center justify-center gap-6 sm:gap-8">
         {/* Shuffle Button */}
@@ -114,10 +113,10 @@ export const PlayerControls: React.FC = () => {
             toggleShuffle();
           }}
           aria-label="Toggle Shuffle"
-          className={`p-2.5 rounded-[12px] transition-all duration-200 ${
+          className={`p-2.5 rounded-[12px] transition-all duration-200 border-none bg-transparent cursor-pointer ${
             isShuffle
-              ? "text-[#0098EA] bg-[#0098EA]/15"
-              : "text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#0A113A]"
+              ? "text-[#00B4D8] bg-[#00B4D8]/15"
+              : "text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0A1628]"
           }`}
         >
           <Shuffle className="w-5 h-5" />
@@ -130,12 +129,12 @@ export const PlayerControls: React.FC = () => {
             prevTrack();
           }}
           aria-label="Previous Track"
-          className="p-3 text-[#F2F4F8] hover:text-[#0098EA] transition-all active:scale-90"
+          className="p-3 text-[#FFFFFF] hover:text-[#00B4D8] transition-all active:scale-90 border-none bg-transparent cursor-pointer"
         >
           <SkipBack className="w-6 h-6 fill-current" />
         </button>
 
-        {/* Large Play/Pause 64px Circle */}
+        {/* Prominent Circular 64px TonJam Cyan Play/Pause Button */}
         <motion.button
           onClick={() => {
             triggerHaptic();
@@ -144,7 +143,7 @@ export const PlayerControls: React.FC = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label={isPlaying ? "Pause" : "Play"}
-          className="relative w-[64px] h-[64px] rounded-full bg-[#0179f4] hover:bg-[#0179f4]/90 text-[#F2F4F8] flex items-center justify-center shadow-lg shadow-[#0179f4]/35 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40"
+          className="relative w-[64px] h-[64px] rounded-full bg-[#00B4D8] hover:bg-[#009CC0] text-[#FFFFFF] flex items-center justify-center shadow-lg shadow-[#00B4D8]/35 cursor-pointer focus:outline-none border-none"
         >
           {isPlaying ? (
             <Pause className="w-7 h-7 fill-current" />
@@ -160,7 +159,7 @@ export const PlayerControls: React.FC = () => {
             nextTrack();
           }}
           aria-label="Next Track"
-          className="p-3 text-[#F2F4F8] hover:text-[#0098EA] transition-all active:scale-90"
+          className="p-3 text-[#FFFFFF] hover:text-[#00B4D8] transition-all active:scale-90 border-none bg-transparent cursor-pointer"
         >
           <SkipForward className="w-6 h-6 fill-current" />
         </button>
@@ -172,10 +171,10 @@ export const PlayerControls: React.FC = () => {
             toggleRepeat();
           }}
           aria-label="Toggle Repeat Mode"
-          className={`p-2.5 rounded-[12px] transition-all duration-200 ${
+          className={`p-2.5 rounded-[12px] transition-all duration-200 border-none bg-transparent cursor-pointer ${
             repeatMode !== "off"
-              ? "text-[#0098EA] bg-[#0098EA]/15"
-              : "text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#0A113A]"
+              ? "text-[#00B4D8] bg-[#00B4D8]/15"
+              : "text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0A1628]"
           }`}
         >
           {repeatMode === "one" ? (
@@ -186,22 +185,22 @@ export const PlayerControls: React.FC = () => {
         </button>
       </div>
 
-      {/* Auxiliary Controls Bar (Radio, Speed, Sleep Timer, Output Device, Volume) - Horizontal Scroll */}
-      <div className="w-full flex items-center gap-2 overflow-x-auto scrollbar-none snap-x touch-pan-x px-2 py-2 text-xs text-[#9AA0AE]">
+      {/* Auxiliary Controls Bar (Radio, Speed, Sleep Timer, Output Device, Volume) */}
+      <div className="w-full flex items-center gap-2 overflow-x-auto scrollbar-none snap-x touch-pan-x px-2 py-2 text-xs text-[#8C8C8C]">
         {/* Smart Radio Quick Toggle */}
         <button
           onClick={() => {
             triggerHaptic();
             toggleSmartRadio();
           }}
-          className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all ${
+          className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all cursor-pointer ${
             isSmartRadio
-              ? "border-[#5B6BFF] text-[#5B6BFF] bg-[#5B6BFF]/15 shadow-[0_0_10px_rgba(91,107,255,0.3)]"
-              : "border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
+              ? "border-[#00B4D8] text-[#00B4D8] bg-[#00B4D8]/15 shadow-[0_0_10px_rgba(0,180,216,0.3)]"
+              : "border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628]"
           }`}
           title="Toggle Smart Radio Autoplay"
         >
-          <Radio className={`w-3.5 h-3.5 ${isSmartRadio ? "animate-pulse text-emerald-400" : ""}`} />
+          <Radio className={`w-3.5 h-3.5 ${isSmartRadio ? "animate-pulse text-[#35C98A]" : ""}`} />
           <span>Radio</span>
         </button>
 
@@ -213,10 +212,10 @@ export const PlayerControls: React.FC = () => {
               setShowSleepMenu(false);
               setShowDeviceMenu(false);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border border-[#16244F] text-[11px] font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all cursor-pointer ${
               speed !== 1.0
-                ? "border-[#0098EA] text-[#0098EA] bg-[#0098EA]/10"
-                : "text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
+                ? "border-[#00B4D8] text-[#00B4D8] bg-[#00B4D8]/15"
+                : "border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628]"
             }`}
           >
             <Gauge className="w-3.5 h-3.5" />
@@ -224,14 +223,14 @@ export const PlayerControls: React.FC = () => {
           </button>
 
           {showSpeedMenu && (
-            <div className="absolute left-0 bottom-10 w-32 bg-[#0A113A] border border-[#16244F] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-[#9AA0AE] px-2 py-1 uppercase">Speed</span>
+            <div className="absolute left-0 bottom-10 w-32 bg-[#0F1C32] border border-[#22374D] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-[#8C8C8C] px-2 py-1 uppercase">Speed</span>
               {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((s) => (
                 <button
                   key={s}
                   onClick={() => handleSpeedSelect(s)}
-                  className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left ${
-                    speed === s ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
+                  className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left cursor-pointer border-none ${
+                    speed === s ? "bg-[#00B4D8] text-white" : "bg-transparent hover:bg-[#22374D] text-[#FFFFFF]"
                   }`}
                 >
                   <span>{s}x</span>
@@ -250,19 +249,19 @@ export const PlayerControls: React.FC = () => {
               setShowSpeedMenu(false);
               setShowDeviceMenu(false);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all cursor-pointer ${
               sleepMinutes !== null
-                ? "border-[#0098EA] text-[#0098EA] bg-[#0098EA]/10"
-                : "border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A]"
+                ? "border-[#00B4D8] text-[#00B4D8] bg-[#00B4D8]/15"
+                : "border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628]"
             }`}
           >
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <Clock className="w-3.5 h-3.5 text-[#F4BD50]" />
             <span>{sleepMinutes !== null ? `${sleepMinutes}m` : "Timer"}</span>
           </button>
 
           {showSleepMenu && (
-            <div className="absolute left-0 bottom-10 w-36 bg-[#0A113A] border border-[#16244F] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-[#9AA0AE] px-2 py-1 uppercase">Sleep Timer</span>
+            <div className="absolute left-0 bottom-10 w-36 bg-[#0F1C32] border border-[#22374D] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-[#8C8C8C] px-2 py-1 uppercase">Sleep Timer</span>
               {[
                 { label: "Off", value: null },
                 { label: "5 minutes", value: 5 },
@@ -274,8 +273,8 @@ export const PlayerControls: React.FC = () => {
                 <button
                   key={opt.label}
                   onClick={() => handleSleepSelect(opt.value)}
-                  className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left ${
-                    sleepMinutes === opt.value ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
+                  className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left cursor-pointer border-none ${
+                    sleepMinutes === opt.value ? "bg-[#00B4D8] text-white" : "bg-transparent hover:bg-[#22374D] text-[#FFFFFF]"
                   }`}
                 >
                   <span>{opt.label}</span>
@@ -294,16 +293,16 @@ export const PlayerControls: React.FC = () => {
               setShowSpeedMenu(false);
               setShowSleepMenu(false);
             }}
-            className="px-3 py-1.5 rounded-[12px] border border-[#16244F] text-[#9AA0AE] hover:text-[#F2F4F8] bg-[#0A113A] transition-all flex items-center gap-1.5 text-[11px] font-bold"
+            className="px-3 py-1.5 rounded-[12px] border border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628] transition-all flex items-center gap-1.5 text-[11px] font-bold cursor-pointer"
             title="Audio Output Device"
           >
-            <Laptop className="w-3.5 h-3.5 text-blue-400" />
+            <Laptop className="w-3.5 h-3.5 text-[#00B4D8]" />
             <span className="truncate max-w-[90px]">{activeDevice}</span>
           </button>
 
           {showDeviceMenu && (
-            <div className="absolute right-0 bottom-10 w-44 bg-[#0A113A] border border-[#16244F] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-[#9AA0AE] px-2 py-1 uppercase">Audio Device</span>
+            <div className="absolute right-0 bottom-10 w-44 bg-[#0F1C32] border border-[#22374D] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-[#8C8C8C] px-2 py-1 uppercase">Audio Device</span>
               {["Local Speaker", "AirPlay / WebCast", "Bluetooth Headphones", "TonJam Hi-Fi DAC"].map((dev) => (
                 <button
                   key={dev}
@@ -312,8 +311,8 @@ export const PlayerControls: React.FC = () => {
                     setShowDeviceMenu(false);
                     toast.success(`Connected to ${dev}`);
                   }}
-                  className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-[11px] font-medium text-left ${
-                    activeDevice === dev ? "bg-[#0098EA] text-[#F2F4F8]" : "hover:bg-[#16244F] text-[#F2F4F8]"
+                  className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-[11px] font-medium text-left cursor-pointer border-none ${
+                    activeDevice === dev ? "bg-[#00B4D8] text-white" : "bg-transparent hover:bg-[#22374D] text-[#FFFFFF]"
                   }`}
                 >
                   <span className="truncate">{dev}</span>
@@ -325,15 +324,15 @@ export const PlayerControls: React.FC = () => {
         </div>
 
         {/* Volume Control */}
-        <div className="shrink-0 snap-start flex items-center gap-2 px-3 py-1.5 rounded-[12px] border border-[#16244F] bg-[#0A113A]">
+        <div className="shrink-0 snap-start flex items-center gap-2 px-3 py-1.5 rounded-[12px] border border-[#22374D] bg-[#0A1628]">
           <button
             onClick={toggleMute}
-            className="text-[#9AA0AE] hover:text-[#F2F4F8] transition-colors"
+            className="text-[#8C8C8C] hover:text-[#FFFFFF] transition-colors border-none bg-transparent cursor-pointer p-0 flex items-center"
           >
             {isMuted || volume === 0 ? (
-              <VolumeX className="w-3.5 h-3.5 text-red-400" />
+              <VolumeX className="w-3.5 h-3.5 text-[#F16D78]" />
             ) : (
-              <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
+              <Volume2 className="w-3.5 h-3.5 text-[#00B4D8]" />
             )}
           </button>
           <input
@@ -343,7 +342,7 @@ export const PlayerControls: React.FC = () => {
             step="0.01"
             value={isMuted ? 0 : volume}
             onChange={(e) => setVolume(parseFloat(e.target.value))}
-            className="w-16 h-1 bg-[#16244F] accent-[#0098EA] rounded-lg cursor-pointer"
+            className="w-16 h-1 bg-[#22374D] accent-[#00B4D8] rounded-lg cursor-pointer"
           />
         </div>
       </div>

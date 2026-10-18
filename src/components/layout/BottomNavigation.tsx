@@ -1,19 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Sparkles, Compass, Store, Headphones, User } from 'lucide-react';
+import { Home, Search, Radio, Headphones, ShoppingBag } from 'lucide-react';
+import { useAudio } from '@/contexts/AudioContext';
 
-export type TabId = 'jamup' | 'discover' | 'marketplace' | 'library' | 'profile';
+export type TabId = 
+  | 'home' 
+  | 'search' 
+  | 'jamspace' 
+  | 'library'
+  | 'marketplace'
+  | 'wallet' 
+  | 'profile' 
+  | 'jamup' 
+  | 'discover';
 
-interface TabItem {
+export interface TabItem {
   id: TabId;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: string | number }>;
+  path: string;
   badge?: string | number;
 }
 
-interface BottomNavigationProps {
-  activeTab: TabId;
-  onTabChange: (id: TabId) => void;
+export interface BottomNavigationProps {
+  activeTab?: TabId;
+  onTabChange?: (id: TabId) => void;
   badges?: Partial<Record<TabId, string | number>>;
   isHidden?: boolean;
 }
@@ -30,15 +42,36 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   badges = {},
   isHidden = false,
 }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isFullPlayerOpen, setFullPlayerOpen } = useAudio();
+
   const tabs: TabItem[] = [
-    { id: 'jamup', label: 'Jam Up', icon: Sparkles, badge: badges.jamup },
-    { id: 'discover', label: 'Discover', icon: Compass, badge: badges.discover },
-    { id: 'marketplace', label: 'Market', icon: Store, badge: badges.marketplace },
-    { id: 'library', label: 'Library', icon: Headphones, badge: badges.library },
-    { id: 'profile', label: 'Profile', icon: User, badge: badges.profile },
+    { id: 'home', label: 'Home', icon: Home, path: '/', badge: badges.home },
+    { id: 'search', label: 'Search', icon: Search, path: '/discover', badge: badges.search ?? badges.discover },
+    { id: 'jamspace', label: 'JamSpace', icon: Radio, path: '/jamspace', badge: badges.jamspace },
+    { id: 'library', label: 'Library', icon: Headphones, path: '/library', badge: badges.library },
+    { id: 'marketplace', label: 'Marketplace', icon: ShoppingBag, path: '/marketplace', badge: badges.marketplace },
   ];
 
-  const [ripples, setRipples] = React.useState<Record<string, Ripple[]>>({});
+  const currentTab = React.useMemo<TabId>(() => {
+    if (activeTab) {
+      if (activeTab === 'discover') return 'search';
+      if (activeTab === 'jamup') return 'home';
+      return activeTab;
+    }
+    const path = location.pathname;
+    if (path === '/') return 'home';
+    if (path === '/discover' || path === '/search') return 'search';
+    if (path.startsWith('/jamspace')) return 'jamspace';
+    if (path.startsWith('/library')) return 'library';
+    if (path.startsWith('/marketplace')) return 'marketplace';
+    if (path.startsWith('/wallet')) return 'wallet';
+    if (path.startsWith('/profile') || path.startsWith('/user/')) return 'profile';
+    return 'home';
+  }, [activeTab, location.pathname]);
+
+  const [ripples, setRipples] = useState<Record<string, Ripple[]>>({});
 
   const triggerRipple = (tabId: string, event: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
@@ -81,35 +114,49 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
     }));
   };
 
+  const handleTabClick = (tab: TabItem) => {
+    if (isFullPlayerOpen && setFullPlayerOpen) {
+      setFullPlayerOpen(false);
+    }
+    if (onTabChange) {
+      onTabChange(tab.id);
+    }
+    navigate(tab.path);
+  };
+
   return (
     <nav 
       id="tonjam-bottom-navigation"
-      className={`fixed bottom-0 left-0 right-0 z-50 bg-[#0A1628]/85 backdrop-blur-[18px] border-t border-[#c0c0c0]/20 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] select-none transition-all duration-300 ${isHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
+      className={`fixed bottom-0 left-0 right-0 z-50 bg-[#0A1628]/95 backdrop-blur-[18px] border-t border-[rgba(226,232,240,0.15)] pb-[calc(env(safe-area-inset-bottom,0px)+8px)] select-none transition-all duration-300 ${
+        isHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
+      }`}
+      aria-label="Bottom Navigation"
     >
-      <div className="max-w-lg mx-auto h-[64px] px-2 flex items-center justify-around relative">
+      <div className="max-w-lg mx-auto h-[60px] px-2 flex items-center justify-around relative">
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
+          const isActive = currentTab === tab.id;
 
           return (
             <button
               key={tab.id}
-              onClick={() => onTabChange(tab.id)}
+              onClick={() => handleTabClick(tab)}
               onMouseDown={(e) => triggerRipple(tab.id, e)}
               onTouchStart={(e) => triggerRipple(tab.id, e)}
-              className="flex flex-col items-center justify-center flex-1 h-full min-h-[44px] min-w-[44px] relative cursor-pointer group overflow-hidden border-none bg-transparent"
+              className="flex flex-col items-center justify-center flex-1 h-full min-h-[44px] min-w-[44px] relative cursor-pointer group overflow-hidden border-none bg-transparent active:scale-95 transition-transform"
               aria-label={tab.label}
+              aria-current={isActive ? 'page' : undefined}
             >
               {/* Native-like Ripple Container */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
                 {(ripples[tab.id] || []).map((ripple) => (
                   <motion.span
                     key={ripple.id}
-                    initial={{ scale: 0, opacity: 0.4 }}
+                    initial={{ scale: 0, opacity: 0.35 }}
                     animate={{ scale: 4, opacity: 0 }}
-                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    transition={{ duration: 0.45, ease: 'easeOut' }}
                     onAnimationComplete={() => clearRipple(tab.id, ripple.id)}
-                    className="absolute bg-blue-500/25 rounded-full pointer-events-none"
+                    className="absolute bg-[#00B4D8]/25 rounded-full pointer-events-none"
                     style={{
                       top: ripple.y - 20,
                       left: ripple.x - 20,
@@ -124,13 +171,13 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               <div className="relative pointer-events-none">
                 <motion.div
                   animate={{
-                    scale: isActive ? 1.15 : 1.0,
+                    scale: isActive ? 1.1 : 1.0,
                     y: isActive ? -1 : 0,
                   }}
                   transition={{ duration: 0.2 }}
-                  className={`${isActive ? 'text-blue-400' : 'text-white/90 group-hover:text-white'} transition-colors`}
+                  className={`${isActive ? 'text-[#00B4D8]' : 'text-[#8C8C8C] group-hover:text-[#C2C7CD]'} transition-colors`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
                 </motion.div>
 
                 {/* Status Badges */}
@@ -147,10 +194,9 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 
               {/* Text label */}
               <span
-                className={`
-                  text-[9px] font-medium uppercase tracking-widest mt-1 transition-colors pointer-events-none
-                  ${isActive ? 'text-blue-400 font-bold' : 'text-white/90 group-hover:text-white'}
-                `}
+                className={`text-[10px] font-medium tracking-tight mt-1 transition-colors pointer-events-none ${
+                  isActive ? 'text-[#00B4D8] font-bold' : 'text-[#8C8C8C] group-hover:text-[#C2C7CD]'
+                }`}
               >
                 {tab.label}
               </span>
@@ -161,4 +207,5 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
     </nav>
   );
 };
+
 export default BottomNavigation;

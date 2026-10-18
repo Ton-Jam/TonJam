@@ -53,9 +53,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
     updateProgressFromEvent(e.clientX);
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {
-      // fallback for environments without capture
-    }
+    } catch {}
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -78,9 +76,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
       if (e.currentTarget.hasPointerCapture(e.pointerId)) {
         e.currentTarget.releasePointerCapture(e.pointerId);
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
     const finalPct = updateProgressFromEvent(e.clientX);
     if (finalPct !== undefined) {
       onSeek(finalPct);
@@ -98,53 +94,52 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
         onPointerCancel={handlePointerUp}
         onPointerLeave={() => setHoverTime(null)}
         style={{ touchAction: "none" }}
-        className="relative py-2 w-full flex flex-col justify-center cursor-pointer group"
+        className="relative py-2.5 w-full flex flex-col justify-center cursor-pointer group"
       >
         {/* Scrubbing Hover Time Tooltip */}
         {hoverTime && (
           <div
-            className="absolute -top-6 px-2 py-0.5 bg-[#0098EA] text-[#F2F4F8] text-[10px] font-bold rounded-[6px] shadow-lg pointer-events-none -translate-x-1/2 transition-opacity z-30"
+            className="absolute -top-6 px-2 py-0.5 bg-[#07111F] border border-[#22374D] text-[#FFFFFF] text-[10px] font-bold rounded-[6px] shadow-lg pointer-events-none -translate-x-1/2 transition-opacity z-30 font-mono"
             style={{ left: `${hoverPos}%` }}
           >
             {hoverTime}
           </div>
         )}
 
-        {/* Clean Progress Bar Track */}
-        <div className="w-full h-1.5 group-hover:h-2 bg-[#16244F]/50 rounded-full overflow-hidden relative transition-all duration-150">
-          {/* Buffered Progress Background Layer */}
+        {/* Clean Progress Bar Track: Dark Blue-Grey remaining progress */}
+        <div className="w-full h-1.5 group-hover:h-2 bg-[#22374D] rounded-full overflow-hidden relative transition-all duration-150">
+          {/* Buffered Progress Layer */}
           <div
-            className="absolute left-0 top-0 bottom-0 bg-[#16244F] rounded-full pointer-events-none transition-all duration-300"
+            className="absolute left-0 top-0 bottom-0 bg-[#22374D]/80 rounded-full pointer-events-none"
             style={{ width: `${bufferedPercentage}%` }}
           />
 
-          {/* Active Played Fill Layer */}
+          {/* TonJam Cyan Played Progress */}
           <motion.div
-            className="h-full bg-gradient-to-r from-[#0098EA] to-[#00D2FF] rounded-full relative shadow-[0_0_8px_rgba(0,152,234,0.8)]"
+            className="h-full bg-[#00B4D8] rounded-full relative shadow-[0_0_8px_rgba(0,180,216,0.6)]"
             style={{ width: `${localProgress}%` }}
             transition={{ duration: 0.1 }}
           />
         </div>
 
-        {/* Sleek Thumb handle */}
+        {/* Usable Seek Handle Thumb */}
         <motion.div
           className="absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none -translate-x-1/2"
           style={{ left: `${localProgress}%` }}
-          animate={{ scale: isSeeking ? 1.25 : 1 }}
+          animate={{ scale: isSeeking ? 1.3 : 1 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
-          <div className="w-3.5 h-3.5 bg-white rounded-full border border-[#0098EA] shadow-[0_0_8px_rgba(0,152,234,0.8)] group-hover:scale-125 transition-transform" />
+          <div className="w-3.5 h-3.5 bg-white rounded-full border-2 border-[#00B4D8] shadow-[0_0_8px_rgba(0,180,216,0.8)] group-hover:scale-125 transition-transform" />
         </motion.div>
       </div>
 
-      {/* Time Labels Row */}
-      <div className="flex justify-between items-center text-[11px] font-medium text-[#9AA0AE] px-0.5">
+      {/* Time Labels Row: Elapsed time on left, Total duration on right */}
+      <div className="flex justify-between items-center text-xs font-medium text-[#8C8C8C] px-0.5">
         <span>{formatTime(currentTime)}</span>
-        <span>-{formatTime(remainingTime)}</span>
+        <span>{formatTime(duration)}</span>
       </div>
     </div>
   );
 };
 
 export default PlayerProgress;
-

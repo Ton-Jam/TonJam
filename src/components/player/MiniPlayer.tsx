@@ -267,20 +267,20 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       >
         <div 
           onClick={() => setIsDroppedDown(false)}
-          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.8)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden bg-black"
+          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.8)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden bg-[#0F1C32]"
           style={{
-            backgroundColor: "#000000",
+            backgroundColor: "#0F1C32",
             opacity: 1,
           }}
           title="Click to expand Mini Player"
         >
-          {/* Solid Black Background */}
-          <div className="absolute inset-0 pointer-events-none bg-black z-0 select-none" />
+          {/* Elevated Navy Surface */}
+          <div className="absolute inset-0 pointer-events-none bg-[#0F1C32] z-0 select-none" />
 
           {/* Sleek top progress indicator on collapsed pill */}
-          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-slate-800/80 z-10">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#22374D] z-10">
             <div 
-              className="h-full bg-gradient-to-r from-blue-500 via-[#0098EA] to-cyan-400" 
+              className="h-full bg-[#00B4D8]" 
               style={{ width: `${localProgress}%` }} 
             />
           </div>
@@ -293,8 +293,8 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                 className={`w-full h-full object-cover ${isPlaying ? "animate-spin-slow" : ""}`}
               />
               {isPlaying && (
-                <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-ping" />
+                <div className="absolute inset-0 bg-[#00B4D8]/20 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-[#00B4D8] rounded-full animate-ping" />
                 </div>
               )}
             </div>
@@ -303,7 +303,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           {/* Track Info */}
           <div className="relative z-10 flex flex-col min-w-0 pr-1 max-w-[100px] sm:max-w-[130px]">
             <div className="flex items-center gap-1 min-w-0">
-              <Music2 className="w-3 h-3 text-[#0098EA] shrink-0" />
+              <Music2 className="w-3 h-3 text-[#00B4D8] shrink-0" />
               <ScrollingText
                 text={currentTrack.title}
                 className="text-[11px] font-bold text-white"
@@ -312,7 +312,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             </div>
             <ScrollingText
               text={currentTrack.artist}
-              className="text-[9.5px] font-medium text-slate-400"
+              className="text-[9.5px] font-medium text-[#C2C7CD]"
               containerClassName="w-full pl-4"
             />
           </div>
@@ -323,7 +323,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               e.stopPropagation();
               togglePlay();
             }}
-            className="relative z-10 w-7 h-7 rounded-full bg-[#0098EA] hover:bg-blue-400 text-white flex items-center justify-center shadow-md transition-transform active:scale-90 shrink-0"
+            className="relative z-10 w-7 h-7 rounded-full bg-[#00B4D8] hover:bg-[#009CC0] text-white flex items-center justify-center shadow-md transition-transform active:scale-90 shrink-0"
             title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
@@ -339,10 +339,10 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               e.stopPropagation();
               setIsDroppedDown(false);
             }}
-            className="relative z-10 p-1 text-slate-400 hover:text-white transition-colors shrink-0"
+            className="relative z-10 p-1 text-[#8C8C8C] hover:text-white transition-colors shrink-0"
             title="Expand Mini Player"
           >
-            <ChevronUp className="w-4 h-4 text-[#0098EA]" />
+            <ChevronUp className="w-4 h-4 text-[#00B4D8]" />
           </button>
         </div>
 
@@ -381,20 +381,20 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       onDragEnd={handleDragEnd}
       onClick={() => setFullPlayerOpen(true)}
       whileTap={{ scale: 0.99 }}
-      className={`fixed left-0 right-0 lg:left-64 text-[#F2F4F8] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-in-out cursor-pointer bg-black ${
-        isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
+      className={`fixed left-0 right-0 lg:left-64 text-[#FFFFFF] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-in-out cursor-pointer bg-[#0F1C32] ${
+        isMobileNavHidden ? "bottom-0" : "bottom-[60px] lg:bottom-0"
       }`}
       style={{
         touchAction: "none",
-        backgroundColor: "#000000",
+        backgroundColor: "#0F1C32",
         opacity: 1,
       }}
       id="tonjam-mini-player"
     >
-      {/* Solid Black Background */}
-      <div className="absolute inset-0 pointer-events-none bg-black z-0 select-none" />
+      {/* Elevated Navy Surface */}
+      <div className="absolute inset-0 pointer-events-none bg-[#0F1C32] z-0 select-none" />
 
-      {/* Interactive Flush Top Seek Bar (Perfect 1px top alignment) */}
+      {/* Interactive Flush Top Seek Bar */}
       <div 
         ref={progressBarRef}
         onPointerDown={handlePointerDown}
@@ -424,7 +424,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             if (typeof seek === 'function') seek(next);
           }
         }}
-        className="relative w-full h-[1px] group/seek cursor-pointer select-none z-30 touch-none outline-none bg-white/10" 
+        className="relative w-full h-[2px] group/seek cursor-pointer select-none z-30 touch-none outline-none bg-[#22374D]" 
         id="mini-progress-track"
         title="Click or drag to scrub playback position"
       >
@@ -434,7 +434,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         {/* Hover/Scrub Time Tooltip */}
         {(isScrubbing || hoverPos !== null) && duration > 0 && (
           <div 
-            className="absolute top-2 -translate-x-1/2 px-1.5 py-0.5 bg-[#050A24]/95 text-white text-[10px] font-mono font-bold rounded shadow-lg pointer-events-none z-40 transition-opacity"
+            className="absolute top-2 -translate-x-1/2 px-1.5 py-0.5 bg-[#07111F]/95 text-white text-[10px] font-mono font-bold rounded shadow-lg pointer-events-none z-40 transition-opacity"
             style={{ left: `${Math.max(5, Math.min(95, isScrubbing ? localProgress : (hoverPos ?? localProgress)))}%` }}
           >
             {formatTime(((isScrubbing ? localProgress : (hoverPos ?? localProgress)) / 100) * duration)}
@@ -443,13 +443,13 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
 
         {/* Progress Fill */}
         <div
-          className="h-full bg-gradient-to-r from-blue-600 via-[#0098EA] to-cyan-400 relative transition-all shadow-[0_0_4px_rgba(0,152,234,0.5)]"
+          className="h-full bg-[#00B4D8] relative transition-all shadow-[0_0_6px_rgba(0,180,216,0.6)]"
           style={{ width: `${localProgress}%` }}
           id="mini-progress-indicator"
         >
           {/* Glowing Seek Knob / Thumb (shown on hover and active scrub) */}
           <div 
-            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_6px_rgba(0,152,234,1)] transition-transform duration-100 ${
+            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_6px_rgba(0,180,216,1)] transition-transform duration-100 ${
               isScrubbing ? 'scale-100' : 'scale-0 group-hover/seek:scale-100'
             }`} 
           />
@@ -464,7 +464,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             <img
               src={coverUrl}
               alt={currentTrack.title}
-              className="w-10 h-10 object-cover rounded-md shrink-0 shadow-sm"
+              className="w-10 h-10 object-cover rounded-[10px] shrink-0 shadow-sm"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
               }}
@@ -473,9 +473,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             {/* Streaming Health Indicator badge on artwork corner */}
             <span 
               className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-black shrink-0 transition-all duration-300 ${
-                audioConnectionState === 'connected' ? 'bg-emerald-400 shadow-[0_0_4px_#34d399]' :
-                audioConnectionState === 'connecting' ? 'bg-amber-400 animate-pulse' :
-                audioConnectionState === 'error' ? 'bg-rose-500 animate-bounce' :
+                audioConnectionState === 'connected' ? 'bg-[#35C98A] shadow-[0_0_4px_#35C98A]' :
+                audioConnectionState === 'connecting' ? 'bg-[#F4BD50] animate-pulse' :
+                audioConnectionState === 'error' ? 'bg-[#F16D78] animate-bounce' :
                 'bg-slate-500'
               }`}
               title={
@@ -491,12 +491,12 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             <div className="flex items-center gap-1.5 min-w-0">
               <ScrollingText
                 text={currentTrack.title}
-                className="text-xs sm:text-sm font-bold text-[#F2F4F8]"
+                className="text-xs sm:text-sm font-bold text-[#FFFFFF]"
                 containerClassName="min-w-0 flex-1"
                 id="mini-track-title"
               />
               {currentTrack.isHighFidelity && (
-                <span className="px-1 py-0.2 bg-[#0098EA]/20 text-[#0098EA] text-[8px] font-black rounded-xs uppercase shrink-0">
+                <span className="px-1 py-0.2 bg-[#00B4D8]/20 text-[#00B4D8] text-[8px] font-black rounded-xs uppercase shrink-0">
                   Hi-Fi
                 </span>
               )}
@@ -504,7 +504,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             <div className="flex items-center gap-1 min-w-0">
               <ScrollingText
                 text={currentTrack.artist}
-                className="text-[11px] sm:text-xs font-medium text-zinc-400 mt-0.5"
+                className="text-[11px] sm:text-xs font-medium text-[#C2C7CD] mt-0.5"
                 containerClassName="min-w-0"
                 id="mini-track-artist"
               />
@@ -526,7 +526,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               togglePlay();
             }}
             aria-label={isPlaying ? "Pause track" : "Play track"}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0098EA] text-white flex items-center justify-center hover:bg-[#0098EA]/90 transition-transform active:scale-90 shadow-md shadow-[#0098EA]/30 cursor-pointer border-none shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#00B4D8] hover:bg-[#009CC0] text-white flex items-center justify-center transition-transform active:scale-90 shadow-md shadow-[#00B4D8]/30 cursor-pointer border-none shrink-0"
             title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
@@ -547,7 +547,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               }
             }}
             aria-label="Track queue"
-            className="p-1.5 text-zinc-400 hover:text-white transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent"
+            className="p-1.5 text-[#8C8C8C] hover:text-white transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent active:scale-90"
             title="Queue"
           >
             <ListMusic className="w-4 h-4" />

@@ -1,42 +1,83 @@
 import React from "react";
-import { Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Sparkles, Clock, ArrowRight } from "lucide-react";
 import { NFTItem } from "@/types";
-import NFTCard from "@/components/NFTCard";
+import { getPlaceholderImage } from "@/lib/utils";
+import { useGramPrice } from "@/contexts/GramPriceContext";
 
 interface RecentlyMintedProps {
   nfts: NFTItem[];
 }
 
 export const RecentlyMinted: React.FC<RecentlyMintedProps> = ({ nfts }) => {
+  const navigate = useNavigate();
+  const { convertPrice } = useGramPrice();
+
+  if (!nfts || nfts.length === 0) {
+    return null;
+  }
+
   return (
     <div className="w-full text-left" id="marketplace-recently-minted">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <div className="space-y-0.5">
-          <h2 className="text-sm sm:text-base font-semibold uppercase tracking-wider text-[#F5F7FA] flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#0088CC]" />
-            Recently Minted Tracks
+          <h2 className="text-base sm:text-lg font-bold text-[#FFFFFF] flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[#00B4D8]" />
+            Recently Listed
           </h2>
+          <p className="text-xs text-[#8C8C8C]">
+            New audio collectibles recently added to the marketplace
+          </p>
         </div>
       </div>
 
-      {/* Grid of newly minted items */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 w-full">
-        {nfts.map((nft) => (
-          <div key={nft.id} className="relative group">
-            {/* Corner NEW Badge */}
-            <div className="absolute top-2 left-2 z-10 select-none pointer-events-none">
-              <span className="bg-[#0088CC] text-white text-[8px] font-semibold px-1.5 py-0.5 rounded-[3px] uppercase tracking-wider">
-                New
-              </span>
+      {/* Grid of recently listed items */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+        {nfts.slice(0, 8).map((nft) => {
+          const artwork = nft.coverUrl || nft.imageUrl || getPlaceholderImage(nft.title);
+          const priceFormatted = nft.price ? (nft.price.includes("TON") ? nft.price : `${nft.price} TON`) : "2.0 TON";
+
+          return (
+            <div
+              key={nft.id}
+              onClick={() => navigate(`/nft/${nft.id}`)}
+              className="bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-2xl p-3 flex items-center gap-3 cursor-pointer select-none transition-colors group"
+            >
+              <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#07111F] shrink-0 border border-[#22374D]">
+                <img
+                  src={artwork}
+                  alt={nft.title}
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.currentTarget.src = getPlaceholderImage(nft.title);
+                  }}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-[#FFFFFF] truncate group-hover:text-[#00B4D8] transition-colors">
+                  {nft.title}
+                </h3>
+                <p className="text-xs text-[#C2C7CD] truncate mt-0.5">
+                  {nft.artist || nft.creator}
+                </p>
+                <div className="flex items-center justify-between mt-1.5">
+                  <span className="text-xs font-bold text-[#00B4D8] font-mono">
+                    {convertPrice(priceFormatted)}
+                  </span>
+                  <span className="text-[10px] text-[#8C8C8C] flex items-center gap-0.5">
+                    View <ArrowRight className="w-3 h-3" />
+                  </span>
+                </div>
+              </div>
             </div>
-            
-            <NFTCard
-              nft={{ ...nft, owner: 'marketplace' } as any}
-              className="w-full"
-            />
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 };
+
+export default RecentlyMinted;

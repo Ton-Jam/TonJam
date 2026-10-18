@@ -1,20 +1,18 @@
 import React, { useMemo } from 'react';
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Zap, ShieldCheck, Wallet, Sparkles, TrendingUp, Info } from 'lucide-react';
+import { Loader2, Zap, TrendingUp, X } from 'lucide-react';
 import { TON_LOGO } from '@/constants';
 import { NFTItem } from '@/types';
 import { useTonPrice } from '@/contexts/TonPriceContext';
 import { useGramPrice } from '@/contexts/GramPriceContext';
-import { cn, getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage } from '@/lib/utils';
 import NFTAudioPreviewPlayer from './NFTAudioPreviewPlayer';
 
 export interface NFTPurchaseConfirmationDialogProps {
@@ -44,27 +42,27 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
   userWalletAddress,
   recipientAddress,
   title = "Confirm NFT Purchase",
-  description = "Please review transaction details and cost breakdown before authorizing on the TON network.",
+  description = "Review transaction details and cost breakdown before authorizing on TON.",
   confirmText = "Authorize & Purchase",
   cancelText = "Cancel",
 }) => {
-  const { price: tonUsdPrice, loading: isTonPriceLoading } = useTonPrice();
-  const { fiatCurrency, fiatSymbol } = useGramPrice();
+  const { price: tonUsdPrice } = useTonPrice();
+  const { fiatCurrency } = useGramPrice();
 
   // Exchange rates relative to USD
-  const fiatRates: Record<string, { rate: number; symbol: string; decimals: number }> = useMemo(() => ({
-    USD: { rate: 1.0, symbol: '$', decimals: 2 },
-    EUR: { rate: 0.92, symbol: '€', decimals: 2 },
-    GBP: { rate: 0.78, symbol: '£', decimals: 2 },
-    RUB: { rate: 90.0, symbol: '₽', decimals: 2 },
-    AED: { rate: 3.67, symbol: 'AED ', decimals: 2 },
-    TRY: { rate: 34.0, symbol: '₺', decimals: 2 },
-    INR: { rate: 84.0, symbol: '₹', decimals: 2 },
-    CNY: { rate: 7.25, symbol: '¥', decimals: 2 },
+  const fiatRates: Record<string, { rate: number; symbol: string }> = useMemo(() => ({
+    USD: { rate: 1.0, symbol: '$' },
+    EUR: { rate: 0.92, symbol: '€' },
+    GBP: { rate: 0.78, symbol: '£' },
+    RUB: { rate: 90.0, symbol: '₽' },
+    AED: { rate: 3.67, symbol: 'AED ' },
+    TRY: { rate: 34.0, symbol: '₺' },
+    INR: { rate: 84.0, symbol: '₹' },
+    CNY: { rate: 7.25, symbol: '¥' },
   }), []);
 
   const activeFiat = fiatRates[fiatCurrency] || fiatRates.USD;
-  const currentTonRateUsd = tonUsdPrice || 7.50; // Fallback to 7.50 if loading or offline
+  const currentTonRateUsd = tonUsdPrice || 7.50;
 
   // Calculate TON amounts
   const rawPriceNum = useMemo(() => {
@@ -89,7 +87,7 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
     return rawPriceNum + platformFeeNum + networkFeeNum;
   }, [rawPriceNum, platformFeeNum, networkFeeNum]);
 
-  // Convert TON to user's local currency using TonPriceContext
+  // Convert TON to user's local currency
   const formatFiat = (tonAmount: number): string => {
     const usdVal = tonAmount * currentTonRateUsd;
     const localVal = usdVal * activeFiat.rate;
@@ -110,58 +108,76 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && !isProcessing && onClose()}>
-      <AlertDialogContent className="w-[95vw] max-w-[430px] rounded-2xl bg-[#090D24]/95 text-white p-6 shadow-2xl backdrop-blur-2xl border-none">
-        <AlertDialogHeader className="space-y-2 text-left">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+      {/* Mobile-friendly bottom sheet on narrow viewports, centered card on desktop */}
+      <AlertDialogContent className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:-translate-x-[50%] sm:-translate-y-[50%] w-full sm:max-w-md max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl bg-[#0A1628] text-[#FFFFFF] p-4 sm:p-6 shadow-2xl border border-[#22374D] z-50 select-none">
+        
+        {/* Mobile Drag Indicator */}
+        <div className="w-12 h-1.5 bg-[#22374D] rounded-full mx-auto mb-3 sm:hidden" />
+
+        {/* Header */}
+        <AlertDialogHeader className="space-y-1.5 text-left relative">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isProcessing}
+            aria-label="Close dialog"
+            className="absolute right-0 top-0 p-1.5 text-[#8C8C8C] hover:text-[#FFFFFF] rounded-lg bg-[#0F1C32] border border-[#22374D] sm:hidden"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          <div className="flex items-center justify-between pr-8 sm:pr-0">
+            <div className="flex items-center gap-1.5">
               <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00B4D8] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00B4D8]"></span>
               </span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">
-                NFT Acquisition
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#00B4D8]">
+                TON Blockchain
               </span>
             </div>
             
-            {/* Live TON Price Rate Badge from TonPriceContext */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-300 text-[10px] font-bold">
-              <TrendingUp className="w-3 h-3 text-blue-400" />
+            {/* Live TON Rate Badge */}
+            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#0F1C32] border border-[#22374D] text-[#C2C7CD] text-[10px] font-mono">
+              <TrendingUp className="w-3 h-3 text-[#00B4D8]" />
               <span>1 TON ≈ {formatFiat(1)}</span>
             </div>
           </div>
 
-          <AlertDialogTitle className="text-xl font-black text-white tracking-tight uppercase">
+          <AlertDialogTitle className="text-lg sm:text-xl font-bold text-[#FFFFFF] tracking-tight">
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-slate-300 text-xs font-normal leading-relaxed">
+          <AlertDialogDescription className="text-[#C2C7CD] text-xs leading-relaxed">
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         {/* NFT Asset Card */}
-        <div className="mt-4 p-3.5 bg-white/[0.04] rounded-xl flex items-center gap-3.5">
+        <div className="mt-3.5 p-3 bg-[#0F1C32] rounded-xl border border-[#22374D] flex items-center gap-3">
           <img
             src={nftImage}
             alt={nftTitle}
-            className="w-14 h-14 rounded-xl object-cover bg-neutral-900 shadow-md shrink-0"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              e.currentTarget.src = getPlaceholderImage(nftTitle);
+            }}
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover bg-[#07111F] shrink-0 border border-[#22374D]"
           />
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="text-[8px] font-black uppercase tracking-widest text-cyan-400">
-                {nft.edition || 'GENESIS COLLECTIBLE'}
-              </span>
-            </div>
-            <h4 className="text-sm font-black text-white truncate uppercase tracking-tight">
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-[#00B4D8] block mb-0.5">
+              {nft.edition || 'GENESIS COLLECTIBLE'}
+            </span>
+            <h4 className="text-xs sm:text-sm font-bold text-[#FFFFFF] truncate">
               {nftTitle}
             </h4>
-            <p className="text-[11px] font-semibold text-slate-400 truncate">
+            <p className="text-[11px] text-[#C2C7CD] truncate">
               {nftCreator}
             </p>
           </div>
         </div>
 
-        {/* 30-Second Audio Snippet Preview */}
-        <div className="mt-3">
+        {/* Audio Preview Snippet */}
+        <div className="mt-2.5">
           <NFTAudioPreviewPlayer 
             nft={nft} 
             variant="compact"
@@ -171,49 +187,45 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
         </div>
 
         {/* Breakdown of Cost */}
-        <div className="mt-3.5 p-4 bg-white/[0.03] rounded-xl space-y-2.5">
-          {/* Asset Base Price */}
+        <div className="mt-3 p-3.5 bg-[#0F1C32] rounded-xl border border-[#22374D] space-y-2.5">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-400 font-medium">NFT Price</span>
+            <span className="text-[#8C8C8C]">NFT Price</span>
             <div className="text-right">
-              <span className="font-mono text-white font-bold">{rawPriceNum.toFixed(2)} TON</span>
-              <span className="text-[10px] text-slate-400 block font-mono">≈ {formatFiat(rawPriceNum)}</span>
+              <span className="font-mono text-[#FFFFFF] font-bold">{rawPriceNum.toFixed(2)} TON</span>
+              <span className="text-[10px] text-[#8C8C8C] block font-mono">≈ {formatFiat(rawPriceNum)}</span>
             </div>
           </div>
 
-          {/* Platform Fee */}
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-400 font-medium">Platform Fee (5%)</span>
+            <span className="text-[#8C8C8C]">Platform Fee (5%)</span>
             <div className="text-right">
-              <span className="font-mono text-slate-300 font-medium">+{platformFeeNum.toFixed(2)} TON</span>
-              <span className="text-[10px] text-slate-400 block font-mono">≈ {formatFiat(platformFeeNum)}</span>
+              <span className="font-mono text-[#C2C7CD]">+{platformFeeNum.toFixed(2)} TON</span>
+              <span className="text-[10px] text-[#8C8C8C] block font-mono">≈ {formatFiat(platformFeeNum)}</span>
             </div>
           </div>
 
-          {/* Network / Gas Fee */}
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-400 font-medium">Estimated Network Fee</span>
+            <span className="text-[#8C8C8C]">Estimated Network Fee</span>
             <div className="text-right">
-              <span className="font-mono text-slate-300 font-medium">~{networkFeeNum.toFixed(2)} TON</span>
-              <span className="text-[10px] text-slate-400 block font-mono">≈ {formatFiat(networkFeeNum)}</span>
+              <span className="font-mono text-[#C2C7CD]">~{networkFeeNum.toFixed(2)} TON</span>
+              <span className="text-[10px] text-[#8C8C8C] block font-mono">≈ {formatFiat(networkFeeNum)}</span>
             </div>
           </div>
 
-          {/* Address Information */}
           {(userWalletAddress || recipient) && (
-            <div className="pt-2 mt-1 space-y-1 text-[10px] text-slate-400">
+            <div className="pt-2 mt-1 border-t border-[#22374D]/60 space-y-1 text-[10px] text-[#8C8C8C]">
               {userWalletAddress && (
                 <div className="flex justify-between items-center">
-                  <span className="font-medium">Paying From</span>
-                  <span className="font-mono text-slate-300">
+                  <span>Paying From</span>
+                  <span className="font-mono text-[#C2C7CD]">
                     {userWalletAddress.slice(0, 6)}...{userWalletAddress.slice(-4)}
                   </span>
                 </div>
               )}
               {recipient && (
                 <div className="flex justify-between items-center">
-                  <span className="font-medium">Seller Vault</span>
-                  <span className="font-mono text-slate-300">
+                  <span>Seller Vault</span>
+                  <span className="font-mono text-[#C2C7CD]">
                     {recipient.slice(0, 6)}...{recipient.slice(-4)}
                   </span>
                 </div>
@@ -221,63 +233,61 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
             </div>
           )}
 
-          {/* Total Cost Highlight Box */}
-          <div className="mt-3 p-3.5 bg-blue-600/15 rounded-xl flex items-center justify-between">
+          {/* Total Due Highlight */}
+          <div className="mt-3 p-3 bg-[#07111F] rounded-xl border border-[#00B4D8]/30 flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#00B4D8] block">
                 Total Due
               </span>
-              <p className="text-[10px] text-slate-400">All fees included</p>
+              <span className="text-[10px] text-[#8C8C8C]">Includes network & gas fees</span>
             </div>
             
             <div className="text-right">
               <div className="flex items-center justify-end gap-1.5">
                 <img src={TON_LOGO} alt="TON" className="w-4 h-4" />
-                <span className="font-mono text-white font-black text-xl leading-none">
+                <span className="font-mono text-[#FFFFFF] font-black text-lg sm:text-xl leading-none">
                   {totalTon.toFixed(2)} TON
                 </span>
               </div>
-              <div className="mt-1 flex items-center justify-end gap-1">
-                <span className="text-xs font-mono font-bold text-cyan-300">
-                  ≈ {formatFiat(totalTon)}
-                </span>
-                <span className="text-[9px] font-bold text-cyan-400/80 uppercase">
-                  ({fiatCurrency})
-                </span>
+              <div className="mt-1 text-xs font-mono font-bold text-[#00B4D8]">
+                ≈ {formatFiat(totalTon)} ({fiatCurrency})
               </div>
             </div>
           </div>
         </div>
 
-        <AlertDialogFooter className="mt-5 flex-row gap-3">
-          <AlertDialogCancel
+        {/* Actions Footer */}
+        <AlertDialogFooter className="mt-4 flex flex-row gap-2.5 sm:gap-3">
+          <button
+            type="button"
             disabled={isProcessing}
             onClick={onClose}
-            className="flex-1 h-11 rounded-xl bg-white/[0.06] text-slate-300 hover:bg-white/[0.1] hover:text-white font-medium text-xs border-none transition-all"
+            className="flex-1 h-11 rounded-xl bg-[#0F1C32] hover:bg-[#22374D] text-[#C2C7CD] hover:text-[#FFFFFF] font-medium text-xs border border-[#22374D] transition-colors cursor-pointer"
           >
             {cancelText}
-          </AlertDialogCancel>
+          </button>
 
-          <AlertDialogAction
+          <button
+            type="button"
             disabled={isProcessing}
             onClick={(e) => {
               e.preventDefault();
               onConfirm();
             }}
-            className="flex-1 h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-wider text-xs shadow-lg shadow-blue-600/25 border-none transition-all flex items-center justify-center gap-2"
+            className="flex-1 h-11 rounded-xl bg-[#00B4D8] hover:bg-[#009CC0] text-[#07111F] font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shadow-[#00B4D8]/20 border-none cursor-pointer"
           >
             {isProcessing ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin text-[#07111F]" />
                 <span>Processing...</span>
               </>
             ) : (
               <>
-                <Zap className="w-3.5 h-3.5 fill-current" />
+                <Zap className="w-3.5 h-3.5 fill-current text-[#07111F]" />
                 <span>{confirmText}</span>
               </>
             )}
-          </AlertDialogAction>
+          </button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
