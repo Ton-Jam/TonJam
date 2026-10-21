@@ -91,16 +91,9 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#0A1628] p-5 rounded-[12px] flex flex-col md:flex-row md:items-center justify-between gap-4 border border-[#22374D] z-30 relative">
-      {/* JamSpace Status Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-[#00B4D8]/10 rounded-[10px] flex items-center justify-center text-[#00B4D8] shrink-0">
-          <Volume2 className="w-5 h-5 animate-pulse" />
-        </div>
-        <div>
-          <h2 className="section-title text-white font-bold text-base">JamSpace Signal Gate</h2>
-          <p className="text-[10px] text-[#8C8C8C] font-mono tracking-widest uppercase">Decentralized Stream Selector</p>
-        </div>
+    <div className="w-full bg-[#0A1628] p-4 rounded-[12px] flex flex-col md:flex-row md:items-center justify-between gap-4 border border-[#22374D] z-30 relative">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-bold text-white">Search Feed</span>
       </div>
 
       {/* Highly Interactive Search Bar Component with Auto-Suggestions Dropdown */}

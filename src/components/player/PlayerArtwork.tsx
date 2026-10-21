@@ -67,7 +67,7 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
         <div className="absolute inset-0 bg-[#07111F]/75" />
       </div>
 
-      {/* Main Artwork Frame - 18px-20px rounded corners per Figma */}
+      {/* Main Artwork Frame - Prominent, bold album art */}
       <motion.div
         drag="y"
         dragConstraints={{ top: 0, bottom: 0 }}
@@ -84,7 +84,7 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = ({
         whileTap={{ scale: 0.99 }}
         animate={{ scale: isZoomed ? 1.08 : 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="relative w-[76vw] max-w-[280px] sm:max-w-[340px] md:max-w-[360px] max-h-[36vh] sm:max-h-[40vh] aspect-square rounded-[20px] overflow-hidden shadow-2xl bg-[#0A1628] group cursor-pointer"
+        className="relative w-[78vw] max-w-[280px] sm:max-w-[320px] aspect-square rounded-[20px] overflow-hidden border-[3px] border-[#1E3048] shadow-[0_20px_50px_rgba(0,0,0,0.8)] bg-[#0A1628] group cursor-pointer"
       >
         {/* Static artwork container (no rotation) */}
         <div className="w-full h-full relative flex items-center justify-center">

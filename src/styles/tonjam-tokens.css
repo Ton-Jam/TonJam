@@ -27,18 +27,15 @@
 
   /* =========================================================
      SPACING TOKENS
-     Consistent 2px-40px dimensional progression
+     Consistent Figma spacing increments (4, 8, 12, 16, 20, 24, 32px)
      ========================================================= */
-  --tj-spacing-2: 2px;
   --tj-spacing-4: 4px;
-  --tj-spacing-6: 6px;
   --tj-spacing-8: 8px;
   --tj-spacing-12: 12px;
   --tj-spacing-16: 16px;
   --tj-spacing-20: 20px;
   --tj-spacing-24: 24px;
   --tj-spacing-32: 32px;
-  --tj-spacing-40: 40px;
 
   /* =========================================================
      RADIUS TOKENS

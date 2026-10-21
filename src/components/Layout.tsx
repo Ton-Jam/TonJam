@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { useI18n } from '@/contexts/I18nContext';
 import { getTonBalance } from '@/services/tonService';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
@@ -550,9 +551,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Sidebar - Desktop */}
       {!isPostDetail && (
-        <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-r border-white/10 dark:border-white/10 flex-col p-4 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
-          <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onOpenTestnetModal={() => setIsTestnetModalOpen(true)} />
-        </aside>
+        <ErrorBoundary>
+          <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-r border-white/10 dark:border-white/10 flex-col p-4 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
+            <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onOpenTestnetModal={() => setIsTestnetModalOpen(true)} />
+          </aside>
+        </ErrorBoundary>
       )}
 
       {/* Sidebar - Mobile Drawer */}
@@ -589,22 +592,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`transition-all w-full flex-1 ${isHome ? 'pt-14 sm:pt-16' : 'pt-0'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 ${isSearch ? 'overflow-visible' : 'overflow-x-clip'} ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
-        <div className={`w-full max-w-full ${isSearch ? 'overflow-visible' : 'overflow-x-clip'}`}>
-          {children}
-        </div>
-      </main>
+      <ErrorBoundary>
+        <main id="main-content" className={`transition-all w-full flex-1 ${isHome ? 'pt-14 sm:pt-16' : 'pt-0'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 ${isSearch ? 'overflow-visible' : 'overflow-x-clip'} ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
+          <div className={`w-full max-w-full ${isSearch ? 'overflow-visible' : 'overflow-x-clip'}`}>
+            {children}
+          </div>
+        </main>
+      </ErrorBoundary>
 
       {/* Audio Player Container */}
-      <div className="relative">
-        {currentTrack && !isDJKrupy && !isPostDetail && (
-          <MiniPlayer isMobileNavHidden={isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin} />
-        )}
-        
-        <AnimatePresence>
-          {isFullPlayerOpen && <PlayerScreen />}
-        </AnimatePresence>
-      </div>
+      <ErrorBoundary>
+        <div className="relative">
+          {currentTrack && !isDJKrupy && !isPostDetail && (
+            <MiniPlayer isMobileNavHidden={isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin} />
+          )}
+          
+          <AnimatePresence>
+            {isFullPlayerOpen && <PlayerScreen />}
+          </AnimatePresence>
+        </div>
+      </ErrorBoundary>
 
       {trackToAddToPlaylist && (
         <AddToPlaylistModal 
@@ -676,14 +683,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           />
         )}
       </AnimatePresence>
-      <div className="lg:hidden">
-        {/* Mobile Navigation */}
-        {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
-          <BottomNavigation
-            isHidden={isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin}
-          />
-        )}
-      </div>
+      <ErrorBoundary>
+        <div className="lg:hidden">
+          {/* Mobile Navigation */}
+          {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
+            <BottomNavigation
+              isHidden={isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin}
+            />
+          )}
+        </div>
+      </ErrorBoundary>
 
       {/* Offline Connectivity Indicator */}
       <OfflineIndicator />

@@ -104,15 +104,13 @@
   --card-radius: 16px;
 
   /* Semantic Spacing Scale */
-  --tj-space-1: var(--tj-spacing-4, 4px);
-  --tj-space-2: var(--tj-spacing-8, 8px);
-  --tj-space-3: var(--tj-spacing-12, 12px);
-  --tj-space-4: var(--tj-spacing-16, 16px);
-  --tj-space-5: var(--tj-spacing-20, 20px);
-  --tj-space-6: var(--tj-spacing-24, 24px);
-  --tj-space-8: var(--tj-spacing-32, 32px);
-  --tj-space-10: var(--tj-spacing-40, 40px);
-  --tj-space-12: 48px;
+  --tj-space-1: var(--tj-spacing-4);
+  --tj-space-2: var(--tj-spacing-8);
+  --tj-space-3: var(--tj-spacing-12);
+  --tj-space-4: var(--tj-spacing-16);
+  --tj-space-5: var(--tj-spacing-20);
+  --tj-space-6: var(--tj-spacing-24);
+  --tj-space-8: var(--tj-spacing-32);
 
   /* Layout Spacing */
   --tj-content-padding-mobile: 16px;
@@ -197,7 +195,6 @@
   --space-5: var(--tj-space-5);
   --space-6: var(--tj-space-6);
   --space-8: var(--tj-space-8);
-  --space-10: var(--tj-space-10);
 
   /* Content Edge Padding */
   --content-padding-mobile: var(--tj-content-padding-mobile);
@@ -247,16 +244,13 @@
   --color-tj-overlay-glass: var(--tj-color-overlay-glass);
 
   /* Spacing Scale */
-  --spacing-tj-2: var(--tj-spacing-2);
   --spacing-tj-4: var(--tj-spacing-4);
-  --spacing-tj-6: var(--tj-spacing-6);
   --spacing-tj-8: var(--tj-spacing-8);
   --spacing-tj-12: var(--tj-spacing-12);
   --spacing-tj-16: var(--tj-spacing-16);
   --spacing-tj-20: var(--tj-spacing-20);
   --spacing-tj-24: var(--tj-spacing-24);
   --spacing-tj-32: var(--tj-spacing-32);
-  --spacing-tj-40: var(--tj-spacing-40);
 
   /* Radius Scale */
   --radius-tj-sm: var(--tj-radius-sm);
@@ -509,59 +503,59 @@
 
   h1 {
     font-family: var(--font-family-sans, 'Poppins', sans-serif);
-    font-size: 24px;
+    font-size: var(--tj-font-size-heading-md, 24px);
     line-height: 32px;
     font-weight: 600;
     letter-spacing: -0.01em;
   }
   @media (min-width: 640px) {
     h1 {
-      font-size: 28px;
-      line-height: 36px;
+      font-size: var(--tj-font-size-heading-lg, 30px);
+      line-height: 38px;
     }
   }
 
   h2 {
     font-family: var(--font-family-sans, 'Poppins', sans-serif);
-    font-size: 18px;
-    line-height: 26px;
+    font-size: var(--tj-font-size-heading-sm, 20px);
+    line-height: 28px;
     font-weight: 500;
     letter-spacing: -0.005em;
   }
   @media (min-width: 640px) {
     h2 {
-      font-size: 20px;
-      line-height: 28px;
+      font-size: var(--tj-font-size-heading-md, 24px);
+      line-height: 32px;
     }
   }
 
   h3 {
     font-family: var(--font-family-sans, 'Poppins', sans-serif);
-    font-size: 16px;
-    line-height: 24px;
+    font-size: var(--tj-font-size-body-lg, 18px);
+    line-height: 26px;
     font-weight: 500;
     letter-spacing: 0;
   }
 
   h4, h5, h6 {
     font-family: var(--font-family-sans, 'Poppins', sans-serif);
-    font-size: 15px;
-    line-height: 22px;
+    font-size: var(--tj-font-size-body, 16px);
+    line-height: 24px;
     font-weight: 500;
     letter-spacing: 0;
   }
 
   p {
     font-family: var(--font-family-sans, 'Poppins', sans-serif);
-    font-size: 14px;
-    line-height: 22px;
+    font-size: var(--tj-font-size-body, 16px);
+    line-height: 24px;
     font-weight: 400;
     letter-spacing: 0;
   }
 
   input, textarea, select {
     font-family: var(--font-family-sans, 'Poppins', sans-serif);
-    font-size: 14px;
+    font-size: var(--tj-font-size-body-sm, 14px);
     line-height: 22px;
     font-weight: 400;
     letter-spacing: 0;
@@ -569,6 +563,48 @@
 
   input::placeholder, textarea::placeholder {
     font-weight: 400;
+  }
+
+  /* Standardized Poppins Typography Scale Utilities */
+  .text-tj-caption {
+    font-size: var(--tj-font-size-caption, 12px);
+    line-height: 18px;
+    font-weight: 400;
+  }
+  .text-tj-body-sm {
+    font-size: var(--tj-font-size-body-sm, 14px);
+    line-height: 20px;
+    font-weight: 400;
+  }
+  .text-tj-body {
+    font-size: var(--tj-font-size-body, 16px);
+    line-height: 24px;
+    font-weight: 400;
+  }
+  .text-tj-body-lg {
+    font-size: var(--tj-font-size-body-lg, 18px);
+    line-height: 26px;
+    font-weight: 400;
+  }
+  .text-tj-heading-sm {
+    font-size: var(--tj-font-size-heading-sm, 20px);
+    line-height: 28px;
+    font-weight: 600;
+  }
+  .text-tj-heading-md {
+    font-size: var(--tj-font-size-heading-md, 24px);
+    line-height: 32px;
+    font-weight: 600;
+  }
+  .text-tj-heading-lg {
+    font-size: var(--tj-font-size-heading-lg, 30px);
+    line-height: 38px;
+    font-weight: 700;
+  }
+  .text-tj-display {
+    font-size: var(--tj-font-size-display, 36px);
+    line-height: 44px;
+    font-weight: 700;
   }
 
   html {
@@ -632,7 +668,7 @@
   .dark section,
   .dark main,
   .dark main section,
-  .dark header,
+  .dark header:not(#tonjam-full-player-header),
   .dark aside,
   .dark nav,
   .dark .section-container,
@@ -662,6 +698,19 @@
     background-color: #000000 !important;
     background: #000000 !important;
     transform: translateZ(0);
+  }
+
+  /* Full Player Header Always Transparent */
+  #tonjam-full-player-header,
+  header#tonjam-full-player-header,
+  .dark #tonjam-full-player-header,
+  .dark header#tonjam-full-player-header {
+    background: transparent !important;
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   /* Interactive state for elements */

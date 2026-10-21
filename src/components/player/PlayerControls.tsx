@@ -17,6 +17,7 @@ import {
   Radio,
 } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
+import { usePlaybackSpeed } from "@/hooks/usePlaybackSpeed";
 import { toast } from "sonner";
 
 export const PlayerControls: React.FC = () => {
@@ -33,13 +34,11 @@ export const PlayerControls: React.FC = () => {
     setVolume,
     isMuted,
     toggleMute,
-    audioElement,
-    currentTrack,
     isSmartRadio,
     toggleSmartRadio,
   } = useAudio();
 
-  const [speed, setSpeed] = useState<number>(1.0);
+  const { speed, changeSpeed, availableSpeeds } = usePlaybackSpeed();
   const [showSpeedMenu, setShowSpeedMenu] = useState<boolean>(false);
   const [showSleepMenu, setShowSleepMenu] = useState<boolean>(false);
   const [showDeviceMenu, setShowDeviceMenu] = useState<boolean>(false);
@@ -47,13 +46,6 @@ export const PlayerControls: React.FC = () => {
   const [activeDevice, setActiveDevice] = useState<string>("Local Speaker");
 
   const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Sync playback rate with HTML5 Audio
-  useEffect(() => {
-    if (audioElement) {
-      audioElement.playbackRate = speed;
-    }
-  }, [speed, audioElement, currentTrack]);
 
   // Sleep timer interval
   useEffect(() => {
@@ -81,9 +73,8 @@ export const PlayerControls: React.FC = () => {
   }, [sleepMinutes, isPlaying, togglePlay]);
 
   const handleSpeedSelect = (s: number) => {
-    setSpeed(s);
+    changeSpeed(s);
     setShowSpeedMenu(false);
-    toast.success(`Playback speed: ${s}x`);
   };
 
   const handleSleepSelect = (mins: number | null) => {
@@ -193,10 +184,10 @@ export const PlayerControls: React.FC = () => {
             triggerHaptic();
             toggleSmartRadio();
           }}
-          className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all cursor-pointer ${
+          className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] text-[11px] font-bold transition-all cursor-pointer border-none ${
             isSmartRadio
-              ? "border-[#00B4D8] text-[#00B4D8] bg-[#00B4D8]/15 shadow-[0_0_10px_rgba(0,180,216,0.3)]"
-              : "border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628]"
+              ? "text-[#00B4D8] bg-[#00B4D8]/15 shadow-[0_0_10px_rgba(0,180,216,0.3)]"
+              : "text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628]"
           }`}
           title="Toggle Smart Radio Autoplay"
         >
@@ -212,10 +203,10 @@ export const PlayerControls: React.FC = () => {
               setShowSleepMenu(false);
               setShowDeviceMenu(false);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] text-[11px] font-bold transition-all cursor-pointer border-none ${
               speed !== 1.0
-                ? "border-[#00B4D8] text-[#00B4D8] bg-[#00B4D8]/15"
-                : "border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628]"
+                ? "text-[#00B4D8] bg-[#00B4D8]/15"
+                : "text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628]"
             }`}
           >
             <Gauge className="w-3.5 h-3.5" />
@@ -223,17 +214,17 @@ export const PlayerControls: React.FC = () => {
           </button>
 
           {showSpeedMenu && (
-            <div className="absolute left-0 bottom-10 w-32 bg-[#0F1C32] border border-[#22374D] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
+            <div className="absolute left-0 bottom-10 w-36 bg-[#0F1C32] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1 border-none">
               <span className="text-[10px] font-bold text-[#8C8C8C] px-2 py-1 uppercase">Speed</span>
-              {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((s) => (
+              {availableSpeeds.map((s) => (
                 <button
                   key={s}
                   onClick={() => handleSpeedSelect(s)}
-                  className={`w-full flex items-center justify-between px-2 py-1 rounded-[8px] text-xs font-medium text-left cursor-pointer border-none ${
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[8px] text-xs font-medium text-left cursor-pointer border-none ${
                     speed === s ? "bg-[#00B4D8] text-white" : "bg-transparent hover:bg-[#22374D] text-[#FFFFFF]"
                   }`}
                 >
-                  <span>{s}x</span>
+                  <span>{s}x {s === 1.0 ? "(Normal)" : ""}</span>
                   {speed === s && <Check className="w-3.5 h-3.5" />}
                 </button>
               ))}
@@ -249,10 +240,10 @@ export const PlayerControls: React.FC = () => {
               setShowSpeedMenu(false);
               setShowDeviceMenu(false);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border text-[11px] font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] text-[11px] font-bold transition-all cursor-pointer border-none ${
               sleepMinutes !== null
-                ? "border-[#00B4D8] text-[#00B4D8] bg-[#00B4D8]/15"
-                : "border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628]"
+                ? "text-[#00B4D8] bg-[#00B4D8]/15"
+                : "text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628]"
             }`}
           >
             <Clock className="w-3.5 h-3.5 text-[#F4BD50]" />
@@ -260,7 +251,7 @@ export const PlayerControls: React.FC = () => {
           </button>
 
           {showSleepMenu && (
-            <div className="absolute left-0 bottom-10 w-36 bg-[#0F1C32] border border-[#22374D] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
+            <div className="absolute left-0 bottom-10 w-36 bg-[#0F1C32] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1 border-none">
               <span className="text-[10px] font-bold text-[#8C8C8C] px-2 py-1 uppercase">Sleep Timer</span>
               {[
                 { label: "Off", value: null },
@@ -293,7 +284,7 @@ export const PlayerControls: React.FC = () => {
               setShowSpeedMenu(false);
               setShowSleepMenu(false);
             }}
-            className="px-3 py-1.5 rounded-[12px] border border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628] transition-all flex items-center gap-1.5 text-[11px] font-bold cursor-pointer"
+            className="px-3 py-1.5 rounded-[12px] text-[#8C8C8C] hover:text-[#FFFFFF] bg-[#0A1628] transition-all flex items-center gap-1.5 text-[11px] font-bold cursor-pointer border-none"
             title="Audio Output Device"
           >
             <Laptop className="w-3.5 h-3.5 text-[#00B4D8]" />
@@ -301,7 +292,7 @@ export const PlayerControls: React.FC = () => {
           </button>
 
           {showDeviceMenu && (
-            <div className="absolute right-0 bottom-10 w-44 bg-[#0F1C32] border border-[#22374D] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1">
+            <div className="absolute right-0 bottom-10 w-44 bg-[#0F1C32] rounded-[12px] p-1.5 shadow-2xl z-50 flex flex-col gap-1 border-none">
               <span className="text-[10px] font-bold text-[#8C8C8C] px-2 py-1 uppercase">Audio Device</span>
               {["Local Speaker", "AirPlay / WebCast", "Bluetooth Headphones", "TonJam Hi-Fi DAC"].map((dev) => (
                 <button
@@ -324,7 +315,7 @@ export const PlayerControls: React.FC = () => {
         </div>
 
         {/* Volume Control */}
-        <div className="shrink-0 snap-start flex items-center gap-2 px-3 py-1.5 rounded-[12px] border border-[#22374D] bg-[#0A1628]">
+        <div className="shrink-0 snap-start flex items-center gap-2 px-3 py-1.5 rounded-[12px] bg-[#0A1628] border-none">
           <button
             onClick={toggleMute}
             className="text-[#8C8C8C] hover:text-[#FFFFFF] transition-colors border-none bg-transparent cursor-pointer p-0 flex items-center"

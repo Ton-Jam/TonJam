@@ -69,6 +69,7 @@ const JamSpaceMain: React.FC = () => {
 
   const handleCreatePostSubmit = (content: string, attachments?: any[], pollOptions?: string[]) => {
     jamData.handleCreatePost(content, attachments, pollOptions);
+    jamData.setActiveCategory('All');
     addNotification('Post shared with the community!', 'success');
   };
 
@@ -342,14 +343,9 @@ const JamSpaceMain: React.FC = () => {
               </div>
             </div>
 
-            {/* 14. BOTTOM SPACER / FOOTER */}
-            <div className="pt-8 border-t border-white/[0.02] flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] text-slate-500 font-mono tracking-widest uppercase">
-              <span>TonJam Music Client • JamSpace Hub Center</span>
-              <span className="flex items-center gap-1">
-                <span>Node Sync • SECURE ledgers</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              </span>
-              <span>v2.1.0 • Android Target SDK 34</span>
+            {/* Clean bottom space */}
+            <div className="py-6 text-center text-xs text-zinc-500">
+              <span>TonJam &copy; {new Date().getFullYear()}</span>
             </div>
 
           </div>

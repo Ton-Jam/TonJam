@@ -166,7 +166,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
       icon: isCurrentPlaying ? Pause : Play,
       label: isCurrentPlaying ? 'Pause Track' : 'Play Track',
       color: 'text-white',
-      iconColor: isCurrentPlaying ? 'text-[#0088CC]' : 'text-zinc-400 group-hover:text-[#0088CC]',
+      iconColor: isCurrentPlaying ? 'text-[#00B4D8]' : 'text-zinc-400 group-hover:text-[#00B4D8]',
       action: () => handleAction('playback')
     },
     {
@@ -276,10 +276,10 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
       aria-label="Track options screen"
     >
       {/* Ambient background glow without border lines */}
-      <div className="fixed top-0 right-1/4 w-96 h-96 bg-[#0088CC]/10 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="fixed top-0 right-1/4 w-96 h-96 bg-[#00B4D8]/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
-      {/* Screen Top Header Bar */}
-      <div className="sticky top-0 z-20 bg-[#07111F]/90 backdrop-blur-xl px-4 sm:px-6 py-3.5 flex items-center justify-between border-b border-white/5">
+      {/* Screen Top Header Bar - Clean and borderless */}
+      <div className="sticky top-0 z-20 bg-[#07111F]/95 backdrop-blur-xl px-4 sm:px-6 py-3.5 flex items-center justify-between border-none">
         <button
           type="button"
           onClick={onClose}
@@ -304,10 +304,10 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
         </button>
       </div>
 
-      <div className="w-full max-w-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Track Hero Banner */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 p-4 rounded-3xl bg-white/[0.03] backdrop-blur-md">
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-neutral-900 shrink-0 shadow-xl shadow-black/50">
+      <div className="w-full max-w-xl mx-auto px-4 sm:px-6 py-4 space-y-4 pb-[calc(env(safe-area-inset-bottom,16px)+32px)]">
+        {/* Track Hero Banner - Compact horizontal card with reduced title fitting mobile screens cleanly */}
+        <div className="flex flex-row items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl bg-[#0A1628] shadow-lg">
+          <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-neutral-900 shrink-0 shadow-md">
             <img 
               src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
               className="w-full h-full object-cover" 
@@ -316,32 +316,33 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
             />
           </div>
           
-          <div className="flex-1 min-w-0 text-center sm:text-left space-y-1">
-            <h1 className="text-xl sm:text-2xl font-black text-white truncate tracking-tight">
+          <div className="flex-1 min-w-0 space-y-0.5 text-left">
+            {/* Reduced track title for mobile viewport */}
+            <h1 className="text-sm sm:text-base font-bold text-white truncate tracking-tight">
               {track.title}
             </h1>
             
-            <div className="flex items-center justify-center sm:justify-start gap-1.5">
-              <p className="text-sm font-semibold text-zinc-300 truncate">
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs sm:text-sm font-medium text-[#C2C7CD] truncate">
                 {track.artist}
               </p>
               {isVerified && (
                 <BadgeCheck 
-                  className="w-4 h-4 text-blue-400 shrink-0 fill-blue-500/20" 
+                  className="w-3.5 h-3.5 text-[#00B4D8] shrink-0 fill-[#00B4D8]/20" 
                   aria-label="Verified Artist" 
                 />
               )}
             </div>
 
-            {/* Badges row with reduced border lines */}
-            <div className="flex items-center justify-center sm:justify-start gap-2 pt-1 flex-wrap">
+            {/* Badges row */}
+            <div className="flex items-center gap-2 pt-0.5 flex-wrap">
               {track.genre && (
-                <span className="text-[11px] font-medium px-3 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 font-mono">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/[0.06] text-[#C2C7CD] font-mono">
                   {track.genre}
                 </span>
               )}
               {track.isNFT && (
-                <span className="text-[11px] font-semibold px-3 py-0.5 rounded-full bg-purple-950/60 text-purple-300">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-950/60 text-purple-300">
                   NFT {track.price ? `• ${track.price} TON` : ''}
                 </span>
               )}
@@ -349,10 +350,10 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
           </div>
         </div>
 
-        {/* Action Groups with reduced border lines */}
-        <div className="space-y-4" role="menu" aria-label="Track actions">
+        {/* Action Groups with borderless design */}
+        <div className="space-y-3" role="menu" aria-label="Track actions">
           {/* Primary Actions Group */}
-          <div className="rounded-2xl bg-white/[0.03] p-1.5 space-y-1">
+          <div className="rounded-2xl bg-[#0A1628] p-1.5 space-y-0.5 border-none">
             {primaryActions.map((opt) => (
               <button
                 key={opt.id}
@@ -362,11 +363,11 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
                   opt.action();
                 }}
                 aria-label={opt.label}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/[0.07] active:bg-white/[0.1] transition-colors text-left group cursor-pointer border-none"
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl hover:bg-white/[0.07] active:bg-white/[0.1] transition-colors text-left group cursor-pointer border-none"
               >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <opt.icon className={cn("h-5 w-5 shrink-0", opt.iconColor)} />
-                  <span className={cn("text-sm font-medium truncate font-['Poppins',sans-serif]", opt.color)}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <opt.icon className={cn("h-4.5 w-4.5 shrink-0", opt.iconColor)} />
+                  <span className={cn("text-xs sm:text-sm font-medium truncate font-['Poppins',sans-serif]", opt.color)}>
                     {opt.label}
                   </span>
                 </div>
@@ -376,7 +377,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
           </div>
 
           {/* Details & Social Group */}
-          <div className="rounded-2xl bg-white/[0.03] p-1.5 space-y-1">
+          <div className="rounded-2xl bg-[#0A1628] p-1.5 space-y-0.5 border-none">
             {detailActions.map((opt) => (
               <button
                 key={opt.id}
@@ -386,11 +387,11 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
                   opt.action();
                 }}
                 aria-label={opt.label}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/[0.07] active:bg-white/[0.1] transition-colors text-left group cursor-pointer border-none"
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl hover:bg-white/[0.07] active:bg-white/[0.1] transition-colors text-left group cursor-pointer border-none"
               >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <opt.icon className={cn("h-5 w-5 shrink-0", opt.iconColor)} />
-                  <span className={cn("text-sm font-medium truncate font-['Poppins',sans-serif]", opt.color)}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <opt.icon className={cn("h-4.5 w-4.5 shrink-0", opt.iconColor)} />
+                  <span className={cn("text-xs sm:text-sm font-medium truncate font-['Poppins',sans-serif]", opt.color)}>
                     {opt.label}
                   </span>
                 </div>
@@ -400,7 +401,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
           </div>
 
           {/* Web3 / Monetization Group */}
-          <div className="rounded-2xl bg-white/[0.03] p-1.5 space-y-1">
+          <div className="rounded-2xl bg-[#0A1628] p-1.5 space-y-0.5 border-none">
             {monetizationActions.map((opt) => (
               <button
                 key={opt.id}
@@ -410,11 +411,11 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
                   opt.action();
                 }}
                 aria-label={opt.label}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/[0.07] active:bg-white/[0.1] transition-colors text-left group cursor-pointer border-none"
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl hover:bg-white/[0.07] active:bg-white/[0.1] transition-colors text-left group cursor-pointer border-none"
               >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <opt.icon className={cn("h-5 w-5 shrink-0", opt.iconColor)} />
-                  <span className={cn("text-sm font-medium truncate font-['Poppins',sans-serif]", opt.color)}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <opt.icon className={cn("h-4.5 w-4.5 shrink-0", opt.iconColor)} />
+                  <span className={cn("text-xs sm:text-sm font-medium truncate font-['Poppins',sans-serif]", opt.color)}>
                     {opt.label}
                   </span>
                 </div>
@@ -424,7 +425,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
           </div>
 
           {/* Management Actions */}
-          <div className="rounded-2xl bg-white/[0.03] p-1.5 space-y-1">
+          <div className="rounded-2xl bg-[#0A1628] p-1.5 space-y-0.5 border-none">
             {managementActions.map((opt) => (
               <button
                 key={opt.id}
@@ -434,11 +435,11 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
                   opt.action();
                 }}
                 aria-label={opt.label}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/[0.07] active:bg-white/[0.1] transition-colors text-left group cursor-pointer border-none"
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl hover:bg-white/[0.07] active:bg-white/[0.1] transition-colors text-left group cursor-pointer border-none"
               >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <opt.icon className={cn("h-5 w-5 shrink-0", opt.iconColor)} />
-                  <span className={cn("text-sm font-medium truncate font-['Poppins',sans-serif]", opt.color)}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <opt.icon className={cn("h-4.5 w-4.5 shrink-0", opt.iconColor)} />
+                  <span className={cn("text-xs sm:text-sm font-medium truncate font-['Poppins',sans-serif]", opt.color)}>
                     {opt.label}
                   </span>
                 </div>
@@ -449,12 +450,12 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
         </div>
 
         {/* Bottom Done / Cancel CTA */}
-        <div className="pt-2 pb-6">
+        <div className="pt-2">
           <Button 
             type="button"
             onClick={onClose}
             aria-label="Cancel and close options"
-            className="w-full rounded-2xl h-12 text-sm font-bold bg-white/[0.08] hover:bg-white/[0.14] text-white transition-all cursor-pointer border-none"
+            className="w-full rounded-2xl h-11 text-xs sm:text-sm font-bold bg-white/[0.08] hover:bg-white/[0.14] text-white transition-all cursor-pointer border-none"
           >
             Done
           </Button>

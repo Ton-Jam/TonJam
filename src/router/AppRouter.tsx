@@ -12,6 +12,7 @@ import { collection, getDocs, limit, query } from 'firebase/firestore';
 import { seedDatabase } from '@/services/seedService';
 import { resolveEndedAuctions } from '@/services/auctionService';
 import HomePage from '@/pages/HomePage';
+import NotificationsPage from '@/pages/Notifications';
 
 const RouteLoadingFallback: React.FC = () => (
   <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3 py-16 text-center select-none">
@@ -26,10 +27,7 @@ const RouteErrorFallback: React.FC<{ error?: Error; onRetry?: () => void }> = ({
       ⚠️
     </div>
     <div className="space-y-1 max-w-sm">
-      <h3 className="text-sm font-black uppercase tracking-wider text-white">Screen Temporarily Unavailable</h3>
-      <p className="text-xs text-zinc-400 leading-relaxed">
-        {error?.message || "Failed to load the requested module. Please check your connection and try again."}
-      </p>
+      <h3 className="text-sm font-black uppercase tracking-wider text-white">Screen is under construction</h3>
     </div>
     <button
       type="button"
@@ -44,26 +42,26 @@ const RouteErrorFallback: React.FC<{ error?: Error; onRetry?: () => void }> = ({
 // Resilient lazy import helper for dynamic module loading with automatic retry & visible error fallback
 const lazyWithRetry = (componentImport: () => Promise<any>) =>
   lazy(async () => {
-    try {
-      return await componentImport();
-    } catch (error: any) {
-      console.error('[lazyWithRetry] Module failed initial import:', error);
+    let lastError: any = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 300));
         return await componentImport();
-      } catch (retryError: any) {
-        console.error('[lazyWithRetry] Module failed retry import:', retryError);
-        const errObj = retryError instanceof Error ? retryError : new Error(String(retryError?.message || retryError || 'Dynamic module import failed'));
-        return {
-          default: () => (
-            <RouteErrorFallback
-              error={errObj}
-              onRetry={() => window.location.reload()}
-            />
-          ),
-        };
+      } catch (error: any) {
+        lastError = error;
+        console.warn(`[lazyWithRetry] Module failed import (attempt ${attempt + 1}/3):`, error);
+        await new Promise((resolve) => setTimeout(resolve, 300 * Math.pow(2, attempt)));
       }
     }
+    console.error('[lazyWithRetry] Module failed all retry attempts:', lastError);
+    const errObj = lastError instanceof Error ? lastError : new Error(String(lastError?.message || lastError || 'Dynamic module import failed'));
+    return {
+      default: () => (
+        <RouteErrorFallback
+          error={errObj}
+          onRetry={() => window.location.reload()}
+        />
+      ),
+    };
   });
 
 // Root landing page is directly imported for instant zero-fetch initialization
@@ -78,7 +76,7 @@ const UserProfile = lazyWithRetry(() => import('@/pages/UserProfile'));
 const ArtistProfile = lazyWithRetry(() => import('@/pages/ArtistProfile'));
 const ArtistDashboard = lazyWithRetry(() => import('@/pages/ArtistDashboard'));
 const Library = lazyWithRetry(() => import('@/pages/Library'));
-const DownloadedTracks = lazyWithRetry(() => import('@/pages/Library/DownloadedTracks'));
+const DownloadedTracks = lazyWithRetry(() => import('@/pages/Library/DownloadedTracks.tsx'));
 const LocalTracks = lazyWithRetry(() => import('@/pages/LocalTracks'));
 const RecentlyPlayedTracks = lazyWithRetry(() => import('@/pages/Library/RecentlyPlayedTracks'));
 const MyNFTTracks = lazyWithRetry(() => import('@/pages/Library/MyNFTTracks'));
@@ -88,7 +86,7 @@ const QueuePage = lazyWithRetry(() => import('@/pages/Queue'));
 const Tasks = lazyWithRetry(() => import('@/pages/Tasks'));
 const NFTDetail = lazyWithRetry(() => import('@/pages/NFTDetail'));
 const ExploreList = lazyWithRetry(() => import('@/pages/ExploreList'));
-const Notifications = lazyWithRetry(() => import('@/pages/Notifications'));
+const Notifications = NotificationsPage;
 const UploadTrack = lazyWithRetry(() => import('@/pages/UploadTrack'));
 const CreateAlbum = lazyWithRetry(() => import('@/pages/CreateAlbum').then(m => ({ default: m.CreateAlbum })));
 const MintNFT = lazyWithRetry(() => import('@/pages/MintNFT'));

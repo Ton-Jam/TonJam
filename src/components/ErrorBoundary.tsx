@@ -9,6 +9,7 @@ interface State {
   error: Error | null;
   countdown: number;
   autoRetryActive: boolean;
+  isOffline: boolean;
 }
 
 class ErrorBoundary extends Component<Props, State> {
@@ -21,11 +22,19 @@ class ErrorBoundary extends Component<Props, State> {
       error: null,
       countdown: 10,
       autoRetryActive: false,
+      isOffline: typeof navigator !== 'undefined' ? !navigator.onLine : false,
     };
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error };
+  }
+
+  componentDidMount() {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', this.handleOnline);
+      window.addEventListener('offline', this.handleOffline);
+    }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
@@ -36,7 +45,14 @@ class ErrorBoundary extends Component<Props, State> {
     if (this.timer) {
       clearInterval(this.timer);
     }
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('online', this.handleOnline);
+      window.removeEventListener('offline', this.handleOffline);
+    }
   }
+
+  private handleOnline = () => this.setState({ isOffline: false });
+  private handleOffline = () => this.setState({ isOffline: true });
 
   private startAutoRecovery = () => {
     if (!this.state.autoRetryActive) return;
@@ -71,7 +87,29 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   render() {
-    const { hasError, error, autoRetryActive, countdown } = this.state;
+    const { hasError, error, autoRetryActive, countdown, isOffline } = this.state;
+
+    if (isOffline) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-[#060B1E] p-4 text-white">
+          <div className="glass bg-[#0b132e]/85 backdrop-blur-xl p-8 rounded-[4px] max-w-md w-full text-center space-y-5 shadow-[0_0_50px_rgba(59,130,246,0.15)] relative overflow-hidden">
+            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto">
+              <span className="text-blue-400 text-2xl">📡</span>
+            </div>
+            <h1 className="text-xl font-black uppercase tracking-widest text-white">You are offline connect and try again</h1>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[4px] font-bold text-[10px] uppercase tracking-widest hover:opacity-90 transition-all cursor-pointer text-white"
+              >
+                Retry Connection
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     if (hasError) {
       let errorMessage = 'An unexpected error occurred.';
@@ -140,4 +178,3 @@ class ErrorBoundary extends Component<Props, State> {
 }
 
 export default ErrorBoundary;
-

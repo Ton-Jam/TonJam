@@ -203,19 +203,19 @@ export const PlayerScreen: React.FC = () => {
               opacity: 0.75,
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#07111F]/70 via-[#07111F]/90 to-[#07111F]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#07111F]/75 to-[#07111F]" />
         </div>
 
         {/* Scrollable Core Player Body including Header with Safe-Area respect */}
-        <div className="relative z-10 min-h-full max-w-md mx-auto w-full px-3 pt-2.5 pb-[calc(env(safe-area-inset-bottom,20px)+28px)] flex flex-col items-center justify-start gap-4 sm:gap-5">
+        <div className="relative z-10 min-h-full max-w-md mx-auto w-full px-3 pt-2 pb-[calc(env(safe-area-inset-bottom,20px)+28px)] flex flex-col items-center justify-start gap-3 sm:gap-4">
           <div className="w-full bg-transparent">
             <PlayerHeader
               onClose={() => setFullPlayerOpen(false)}
-              onMoreClick={() => setOptionsTrack(currentTrack)}
+              onQueueClick={() => setActiveTab(activeTab === "queue" ? "none" : "queue")}
               track={currentTrack}
             />
           </div>
-          {/* Artwork with gestures */}
+          {/* Artwork with gestures - prominent and bolder */}
           <PlayerArtwork
             track={currentTrack}
             isPlaying={isPlaying}
@@ -230,7 +230,7 @@ export const PlayerScreen: React.FC = () => {
             <div className="w-full px-4">
               <MarqueeTitle 
                 text={currentTrack.title}
-                className="text-[20px] font-bold text-[#FFFFFF] tracking-tight"
+                className="text-[17px] sm:text-[19px] font-bold text-[#FFFFFF] tracking-tight"
                 containerClassName="w-full max-w-xs mx-auto"
               />
             </div>
@@ -238,7 +238,7 @@ export const PlayerScreen: React.FC = () => {
             <div className="w-full px-4">
               <MarqueeTitle 
                 text={currentTrack.artist}
-                className="text-[14px] font-medium text-[#C2C7CD]"
+                className="text-[13px] sm:text-[14px] font-medium text-[#C2C7CD]"
                 containerClassName="w-full max-w-xs mx-auto"
               />
             </div>
@@ -260,19 +260,33 @@ export const PlayerScreen: React.FC = () => {
                 </span>
               )}
               {currentTrack.isHighFidelity && (
-                <span className="flex items-center gap-1 px-2.5 py-0.5 bg-[#0A1628] rounded-[8px] text-[10px] font-bold text-white border border-[#22374D]">
+                <span className="flex items-center gap-1 px-2.5 py-0.5 bg-[#0A1628] rounded-[8px] text-[10px] font-bold text-white">
                   <Award className="w-3 h-3 text-white" /> Lossless Hi-Fi
                 </span>
               )}
             </div>
           </div>
 
+          {/* Waveform Progress Bar - Positioned below album art & metadata, above primary playback controls */}
+          <div className="w-full mt-1 mb-0.5">
+            <PlayerProgress
+              progress={progress}
+              duration={trackDuration}
+              onSeek={(pct) => seek(pct)}
+              isSeeking={isSeeking}
+              setIsSeeking={setIsSeeking}
+            />
+          </div>
+
+          {/* Primary Controls (Play, Shuffle, Prev, Next, Repeat, Speed, Sleep) */}
+          <PlayerControls />
+
           {/* Social Engagement Action Bar */}
           <div className="w-full flex items-center gap-2 overflow-x-auto px-3 py-2 bg-[#0A1628] rounded-[16px] scrollbar-none snap-x touch-pan-x">
             {/* Tip Artist TON Button */}
             <button
               onClick={() => setShowTipModal(true)}
-              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-[#00B4D8]/15 to-blue-600/25 border border-[#F4BD50]/40 text-[#F4BD50] hover:text-white text-xs font-bold transition-all active:scale-95 cursor-pointer"
+              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-[#00B4D8]/15 to-blue-600/25 text-[#F4BD50] hover:text-white text-xs font-bold transition-all active:scale-95 cursor-pointer"
               title="Tip Artist in TON"
             >
               <Coins className="w-4 h-4 text-[#F4BD50] fill-[#F4BD50]/30" />
@@ -285,10 +299,10 @@ export const PlayerScreen: React.FC = () => {
                 toggleLikeTrack(currentTrack.id);
                 setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
               }}
-              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 isLiked
-                  ? "bg-[#00B4D8]/20 border-[#00B4D8]/40 text-[#00B4D8]"
-                  : "bg-[#0F1C32] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8]/20 text-[#00B4D8]"
+                  : "bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
               }`}
             >
               <Heart className={`w-4 h-4 ${isLiked ? "fill-[#00B4D8]" : ""}`} />
@@ -298,10 +312,10 @@ export const PlayerScreen: React.FC = () => {
             {/* JamUp / Repost Button */}
             <button
               onClick={handleRepostToggle}
-              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 isReposted
-                  ? "bg-[#35C98A]/20 border-[#35C98A]/40 text-[#35C98A]"
-                  : "bg-[#0F1C32] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
+                  ? "bg-[#35C98A]/20 text-[#35C98A]"
+                  : "bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
               }`}
               title="JamUp Repost"
             >
@@ -312,10 +326,10 @@ export const PlayerScreen: React.FC = () => {
             {/* Comments Button */}
             <button
               onClick={() => setActiveTab(activeTab === "comments" ? "none" : "comments")}
-              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "comments"
-                  ? "bg-[#00B4D8] border-[#00B4D8] text-white"
-                  : "bg-[#0F1C32] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
+                  ? "bg-[#00B4D8] text-white"
+                  : "bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
               }`}
               title="Track Comments"
             >
@@ -332,7 +346,7 @@ export const PlayerScreen: React.FC = () => {
                   toast.success("Added to playlist queue");
                 }
               }}
-              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0F1C32] border border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F] text-xs font-bold transition-all cursor-pointer"
+              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F] text-xs font-bold transition-all cursor-pointer"
               title="Add to Playlist"
             >
               <Plus className="w-4 h-4 text-[#00B4D8]" />
@@ -342,10 +356,10 @@ export const PlayerScreen: React.FC = () => {
             {/* Download Offline */}
             <button
               onClick={handleDownloadToggle}
-              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+              className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 isCached
-                  ? "bg-[#35C98A]/20 border-[#35C98A]/40 text-[#35C98A]"
-                  : "bg-[#0F1C32] border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
+                  ? "bg-[#35C98A]/20 text-[#35C98A]"
+                  : "bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
               }`}
               title="Download Offline"
             >
@@ -356,25 +370,13 @@ export const PlayerScreen: React.FC = () => {
             {/* Share */}
             <button
               onClick={handleShare}
-              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0F1C32] border border-[#22374D] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F] text-xs font-bold transition-all cursor-pointer"
+              className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F] text-xs font-bold transition-all cursor-pointer"
               title="Share Track"
             >
               <Share2 className="w-4 h-4 text-[#00B4D8]" />
               <span>Share</span>
             </button>
           </div>
-
-          {/* Waveform Progress Bar */}
-          <PlayerProgress
-            progress={progress}
-            duration={trackDuration}
-            onSeek={(pct) => seek(pct)}
-            isSeeking={isSeeking}
-            setIsSeeking={setIsSeeking}
-          />
-
-          {/* Primary Controls (Play, Shuffle, Prev, Next, Repeat, Speed, Sleep) */}
-          <PlayerControls />
 
           {/* Secondary Features Tab Row (Live Visualizer, EQ, Lyrics, Queue, Audio Info, NFT, Artist) - Horizontal Scroll */}
           {/* Secondary Features Tab Row (Live Visualizer, EQ, Radio, Lyrics, Queue, Audio Info, NFT, Artist) */}
