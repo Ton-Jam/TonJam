@@ -10,7 +10,7 @@ interface CreatePlaylistModalProps {
 }
 
 const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClose }) => {
-  const { createNewPlaylist, addNotification } = useAudio();
+  const { createNewPlaylist, addNotification, trackToAddToPlaylist, setTrackToAddToPlaylist } = useAudio();
   const [isCreating, setIsCreating] = useState(false);
   const [step, setStep] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,19 +54,23 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
     setIsCreating(true);
     
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
     const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
 
     createNewPlaylist(
       formData.name, 
       formData.description, 
-      undefined, 
+      trackToAddToPlaylist || undefined, 
       formData.coverUrl,
       formData.isPrivate,
       formData.isCollaborative,
       tagsArray
     );
+
+    if (trackToAddToPlaylist) {
+      setTrackToAddToPlaylist(null);
+    }
     
     setIsCreating(false);
     setStep(2); // Success step
@@ -82,49 +86,50 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
       isCollaborative: false,
       tags: ''
     });
+    if (trackToAddToPlaylist) {
+      setTrackToAddToPlaylist(null);
+    }
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-2 sm:p-2 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={resetAndClose}></div>
+    <div className="fixed inset-0 z-[210] flex items-end sm:items-center justify-center p-2 sm:p-2 animate-in fade-in duration-300">
+      <div className="absolute inset-0 bg-[#07111F]/90 backdrop-blur-xl" onClick={resetAndClose}></div>
       
-      <div className="relative w-full max-w-md glass border-t sm:border border-border bg-white rounded-t-[20px] sm:rounded-[4px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-500 flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+      <div className="relative w-full max-w-md bg-[#0A1628] text-white rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-500 flex flex-col max-h-[95vh] sm:max-h-[90vh]">
         {/* Handle for mobile */}
-        <div className="w-12 h-1 mx-auto my-2 rounded-full bg-muted sm:hidden" />
+        <div className="w-12 h-1 mx-auto my-2 rounded-full bg-white/20 sm:hidden" />
 
         {/* Header */}
-        <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between flex-shrink-0">
+        <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between flex-shrink-0">
           <div>
-            <h2 className="text-lg font-black text-black tracking-tighter uppercase leading-none">
-              {step === 2 ? 'Sync Successful' : 'Create New Playlist'}
+            <h2 className="text-base font-black text-white tracking-tight uppercase leading-none font-['Poppins',sans-serif]">
+              {step === 2 ? 'Playlist Created' : 'Create New Playlist'}
             </h2>
-            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-1.5">
-              {step === 1 ? 'Configure Neural Parameters' : 'Protocol Established'}
+            <p className="text-[9px] font-mono font-bold text-[#00B4D8] uppercase tracking-[0.2em] mt-1.5">
+              {trackToAddToPlaylist ? `Adding "${trackToAddToPlaylist.title}"` : 'Configure Playlist'}
             </p>
           </div>
-          <button onClick={resetAndClose} className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close Create Playlist Modal">
+          <button 
+            onClick={resetAndClose} 
+            className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-zinc-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8]"
+            aria-label="Close Create Playlist Modal"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="px-5 py-5 overflow-y-auto custom-scrollbar">
           {step === 1 && (
-            <form onSubmit={handleCreate} className="space-y-2">
-              <div className="flex flex-col gap-2">
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div className="flex flex-col gap-3">
                 {/* Top Section: Cover + Basic Info */}
-                <div className="flex flex-col sm:flex-row gap-2">
-                  {/* Cover Upload - Compact */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Cover Upload */}
                   <div className="w-full sm:w-28 flex-shrink-0">
                     <div 
-                      className="aspect-square sm:aspect-square rounded-[4px] border border-dashed border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-neutral-500/50 transition-all cursor-pointer relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      className="aspect-square rounded-xl border border-dashed border-white/20 bg-white/[0.02] flex flex-col items-center justify-center p-2 group hover:border-[#00B4D8] transition-all cursor-pointer relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8]"
                       onClick={() => fileInputRef.current?.click()}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          fileInputRef.current?.click();
-                        }
-                      }}
                       role="button"
                       tabIndex={0}
                       aria-label="Upload Playlist Cover"
@@ -133,14 +138,14 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                         <img src={formData.coverUrl} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
                       ) : (
                         <>
-                          <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                            <ImageIcon className="h-5 w-5 text-blue-500" />
+                          <div className="w-10 h-10 rounded-full bg-[#00B4D8]/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                            <ImageIcon className="h-5 w-5 text-[#00B4D8]" />
                           </div>
-                          <p className="text-[7px] font-bold text-muted-foreground/80 uppercase tracking-widest text-center">Add Cover</p>
+                          <p className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-widest text-center">Add Cover</p>
                         </>
                       )}
-                      <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Upload className="h-5 w-5 text-foreground" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Upload className="h-5 w-5 text-white" />
                       </div>
                     </div>
                     <input 
@@ -153,29 +158,29 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                   </div>
 
                   {/* Name & Tags */}
-                  <div className="flex-1 space-y-2">
-                    <div className="space-y-3">
-                      <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Playlist Name</label>
+                  <div className="flex-1 space-y-3">
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-mono font-bold text-zinc-400 uppercase tracking-widest">Playlist Name</label>
                       <input 
                         type="text" 
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full bg-foreground/[0.03] border border-border/50 rounded-[4px] p-2 text-sm text-black outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-muted-foreground/50"
+                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8] transition-all placeholder:text-zinc-600 font-medium"
                         placeholder="e.g. Late Night Vibes"
                         autoFocus
                         required
                         aria-label="Playlist Name"
                       />
                     </div>
-                    <div className="space-y-3">
-                      <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest flex items-center gap-2">
-                        <Tag className="h-3 w-3" /> Tags
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-mono font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <Tag className="h-3 w-3 text-[#00B4D8]" /> Tags
                       </label>
                       <input 
                         type="text" 
                         value={formData.tags}
                         onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                        className="w-full bg-foreground/[0.03] border border-border/50 rounded-[4px] p-2 text-sm text-black outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-muted-foreground/50"
+                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8] transition-all placeholder:text-zinc-600 font-medium"
                         placeholder="chill, workout..."
                         aria-label="Playlist Tags"
                       />
@@ -184,71 +189,71 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                 </div>
 
                 {/* Description */}
-                <div className="space-y-3">
-                  <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Description (Optional)</label>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-mono font-bold text-zinc-400 uppercase tracking-widest">Description (Optional)</label>
                   <textarea 
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[4px] p-2 text-sm text-black outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-muted-foreground/50 resize-none h-20"
+                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8] transition-all placeholder:text-zinc-600 resize-none h-20 font-medium"
                     placeholder="Describe the vibe..."
                     aria-label="Playlist Description"
                   />
                 </div>
 
-                {/* Toggles - Compact Grid */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="flex items-center justify-between p-2 rounded-[4px] bg-foreground/[0.02] border border-border/50">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${formData.isPrivate ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
+                {/* Toggles */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`p-2 rounded-lg ${formData.isPrivate ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
                         {formData.isPrivate ? <Lock className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />}
                       </div>
-                      <p className="text-[9px] font-bold text-black uppercase tracking-wider">Private</p>
+                      <p className="text-[10px] font-bold text-white uppercase tracking-wider">Private</p>
                     </div>
                     <Switch 
                       checked={formData.isPrivate} 
                       onCheckedChange={(checked) => setFormData({...formData, isPrivate: checked})} 
-                      className="scale-75 origin-right"
+                      className="scale-90 origin-right"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded-[4px] bg-foreground/[0.02] border border-border/50">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${formData.isCollaborative ? 'bg-blue-500/10 text-blue-500' : 'bg-muted/50 text-muted-foreground'}`}>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`p-2 rounded-lg ${formData.isCollaborative ? 'bg-[#00B4D8]/10 text-[#00B4D8]' : 'bg-white/5 text-zinc-400'}`}>
                         <Users className="h-3.5 w-3.5" />
                       </div>
-                      <p className="text-[9px] font-bold text-black uppercase tracking-wider">Collab</p>
+                      <p className="text-[10px] font-bold text-white uppercase tracking-wider">Collab</p>
                     </div>
                     <Switch 
                       checked={formData.isCollaborative} 
                       onCheckedChange={(checked) => setFormData({...formData, isCollaborative: checked})} 
-                      className="scale-75 origin-right"
+                      className="scale-90 origin-right"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="pt-2 flex gap-2 border-t border-border/50 mt-2 pb-2 sm:pb-2">
+              <div className="pt-3 flex gap-3 border-t border-white/[0.06] mt-4">
                 <button 
                   type="button" 
                   onClick={resetAndClose}
-                  className="flex-1 py-3 bg-muted/50 text-black rounded-[4px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex-1 py-3 bg-white/[0.06] hover:bg-white/[0.1] text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all cursor-pointer border-none"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
                   disabled={isCreating}
-                  className="flex-[1.5] py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-[4px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex-[1.5] py-3 bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-[#00B4D8]/30 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer border-none"
                 >
                   {isCreating ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Syncing...
+                      Creating...
                     </>
                   ) : (
                     <>
                       <Music className="h-4 w-4" />
-                      Create Sync
+                      Create Playlist
                     </>
                   )}
                 </button>
@@ -257,25 +262,25 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
           )}
 
           {step === 2 && (
-            <div className="py-2 flex flex-col items-center text-center space-y-2">
-              <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mb-2 animate-in zoom-in duration-500">
+            <div className="py-6 flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 mb-2 animate-in zoom-in duration-500 border border-green-500/30">
                 <CheckCircle2 className="h-8 w-8" />
               </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-black tracking-tighter uppercase">Playlist Created</h3>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] max-w-xs leading-relaxed">
-                  "{formData.name}" has been added to your library.
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-bold text-white tracking-tight uppercase">Playlist Ready</h3>
+                <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.2em] max-w-xs leading-relaxed">
+                  "{formData.name}" has been created successfully in your library.
                 </p>
               </div>
               <div className="flex gap-2">
-                {formData.isPrivate && <span className="text-[8px] px-2 py-3 bg-muted rounded-full text-muted-foreground/80 uppercase tracking-widest">Private</span>}
-                {formData.isCollaborative && <span className="text-[8px] px-2 py-3 bg-blue-500/10 text-blue-500 rounded-full uppercase tracking-widest">Collaborative</span>}
+                {formData.isPrivate && <span className="text-[9px] font-mono px-2.5 py-1 bg-white/10 rounded-full text-zinc-300 uppercase tracking-widest">Private</span>}
+                {formData.isCollaborative && <span className="text-[9px] font-mono px-2.5 py-1 bg-[#00B4D8]/20 text-[#00B4D8] rounded-full uppercase tracking-widest">Collaborative</span>}
               </div>
               <button 
                 onClick={resetAndClose}
-                className="mt-2 w-full sm:w-auto px-2 py-3 bg-black text-white rounded-[4px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="mt-4 w-full py-3 bg-[#00B4D8] text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[#00B4D8]/90 transition-all cursor-pointer border-none shadow-lg shadow-[#00B4D8]/30"
               >
-                Continue
+                Done
               </button>
             </div>
           )}

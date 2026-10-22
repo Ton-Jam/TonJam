@@ -358,14 +358,6 @@ export const Discover: React.FC = () => {
       
       {/* Search Content Input Area */}
       <div className="pt-2 pb-3 px-4 sm:px-6 lg:px-8 space-y-3">
-        <div className="space-y-0.5">
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-            Find your next favorite sound
-          </h1>
-          <p className="text-xs text-zinc-400">
-            Explore web3 tracks, artists, music NFTs and curated collections
-          </p>
-        </div>
 
         {/* Main Search Input Bar - High border radius with subtle blue border */}
         <div className="w-full relative">
