@@ -9,6 +9,8 @@ import {
 import { UserProfile as UserProfileType, NFTItem, Track } from "@/types";
 import { getPlaceholderImage } from "@/lib/utils";
 import NFTCard from "@/components/NFTCard";
+import { MusicNftGallery } from "@/components/profile/MusicNftGallery";
+import { MusicNftCard } from "@/components/profile/MusicNftCard";
 import PlaylistCard from "@/components/PlaylistCard";
 import SocialFeed from "@/components/SocialFeed";
 import { ArtistVerificationBadge } from "@/components/ArtistVerificationBadge";
@@ -186,7 +188,7 @@ export const ArtistProfileContent: React.FC<ArtistProfileContentProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {displayNFTs.slice(0, 3).map((nft) => (
-                  <NFTCard key={nft.id} nft={nft} />
+                  <MusicNftCard key={nft.id} nft={nft} />
                 ))}
               </div>
             </div>
@@ -353,21 +355,11 @@ export const ArtistProfileContent: React.FC<ArtistProfileContentProps> = ({
       {/* NFTS TAB */}
       {activeTab === "nfts" && (
         <div className="space-y-6">
-          <h3 className="text-base font-bold text-white uppercase tracking-wider">
-            Minted NFT Catalog ({displayNFTs.length})
-          </h3>
-          {displayNFTs.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {displayNFTs.map((nft) => (
-                <NFTCard key={nft.id} nft={nft} />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-[#101A3B] p-12 rounded-2xl text-center space-y-2">
-              <Gem className="w-10 h-10 text-slate-600 mx-auto" />
-              <p className="text-sm font-bold text-slate-300 uppercase tracking-wider">No music NFTs released yet</p>
-            </div>
-          )}
+          <MusicNftGallery
+            nfts={displayNFTs}
+            isOwnProfile={isOwnProfile}
+            userName={user.name || user.username}
+          />
         </div>
       )}
 

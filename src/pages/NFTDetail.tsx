@@ -113,6 +113,7 @@ import { PriceSparkline } from "@/components/PriceSparkline";
 import { RecentBidsList } from "@/components/RecentBidsList";
 import { RecentBidsSidebar } from "@/components/RecentBidsSidebar";
 import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
+import { useNftColorPalette } from "@/hooks/useNftColorPalette";
 import { QuickBid } from "@/components/QuickBid";
 import { NFTBidTracker } from "@/components/NFTBidTracker";
 import { CollectionStats } from "@/components/CollectionStats";
@@ -264,6 +265,9 @@ const NFTDetail: React.FC = () => {
     const currentWallet = userAddress || userProfile.walletAddress;
     return localNft.owner === currentWallet;
   }, [localNft, userAddress, userProfile.walletAddress]);
+
+  // Seamless shifting gradient background palette based on viewed music NFT
+  const { primaryColor, secondaryColor, accentColor, radialGradient } = useNftColorPalette(localNft);
 
   useEffect(() => {
     if (
@@ -874,19 +878,53 @@ const NFTDetail: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen pb-4 animate-in fade-in duration-500 bg-background">
-      {/* Blurred Cover Background */}
-      <div className="absolute top-0 left-0 w-full h-[60vh] z-0 overflow-hidden">
+    <div className="relative min-h-screen pb-4 animate-in fade-in duration-500 bg-background overflow-hidden">
+      {/* Blurred Cover Art Atmosphere with Smooth Transition */}
+      <div className="absolute top-0 left-0 w-full h-[65vh] z-0 overflow-hidden pointer-events-none">
         <div
-          className="absolute inset-0 bg-cover bg-center blur-3xl opacity-20"
+          className="absolute inset-0 bg-cover bg-center blur-3xl opacity-25 transition-all duration-1000 ease-out"
           style={{ backgroundImage: `url(${localNft.imageUrl || getPlaceholderImage(`nft-${localNft.id}`)})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/60 to-background transition-colors duration-1000" />
       </div>
 
-      {/* Immersive background glow */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
+      {/* Seamless Shifting Gradient Background Canvas (Zero border lines) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Dynamic Primary Spotlight Gradient */}
+        <div
+          className="absolute -top-36 left-1/2 -translate-x-1/2 w-[900px] h-[650px] rounded-full blur-[140px] transition-all duration-1000 ease-out pointer-events-none"
+          style={{
+            backgroundColor: primaryColor,
+            opacity: 0.22,
+          }}
+        />
+
+        {/* Dynamic Secondary Color Orbit Glow */}
+        <div
+          className="absolute top-1/4 -right-24 w-[650px] h-[650px] rounded-full blur-[160px] transition-all duration-1000 ease-out pointer-events-none"
+          style={{
+            backgroundColor: secondaryColor,
+            opacity: 0.16,
+          }}
+        />
+
+        {/* Dynamic Accent Color Ground Glow */}
+        <div
+          className="absolute -bottom-24 -left-24 w-[650px] h-[650px] rounded-full blur-[150px] transition-all duration-1000 ease-out pointer-events-none"
+          style={{
+            backgroundColor: accentColor,
+            opacity: 0.14,
+          }}
+        />
+
+        {/* Seamless Radial Mesh Gradient Shift */}
+        <div
+          className="absolute inset-0 transition-all duration-1000 ease-out pointer-events-none"
+          style={{
+            background: radialGradient,
+          }}
+        />
+      </div>
 
       {isFetchingMetadata && (
         <div className="fixed inset-0 z-50 bg-background/90 flex flex-col items-center justify-center animate-in fade-in duration-300">

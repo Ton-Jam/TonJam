@@ -76,7 +76,7 @@ const UserProfile = lazyWithRetry(() => import('@/pages/UserProfile'));
 const ArtistProfile = lazyWithRetry(() => import('@/pages/ArtistProfile'));
 const ArtistDashboard = lazyWithRetry(() => import('@/pages/ArtistDashboard'));
 const Library = lazyWithRetry(() => import('@/pages/Library'));
-const DownloadedTracks = lazyWithRetry(() => import('@/pages/Library/DownloadedTracks.tsx'));
+const DownloadedTracks = lazyWithRetry(() => import('@/pages/Library/DownloadedTracks'));
 const LocalTracks = lazyWithRetry(() => import('@/pages/LocalTracks'));
 const RecentlyPlayedTracks = lazyWithRetry(() => import('@/pages/Library/RecentlyPlayedTracks'));
 const MyNFTTracks = lazyWithRetry(() => import('@/pages/Library/MyNFTTracks'));

@@ -11,6 +11,8 @@ import { ListenStreakIndicator } from "@/components/profile/ListenStreakIndicato
 import { BadgeSystem } from "@/components/BadgeSystem";
 import { AchievementList } from "@/components/profile/AchievementList";
 import NFTCard from "@/components/NFTCard";
+import { MusicNftGallery } from "@/components/profile/MusicNftGallery";
+import { MusicNftCard } from "@/components/profile/MusicNftCard";
 import { SecureUserNFTDashboard } from "@/components/SecureUserNFTDashboard";
 import PlaylistCard from "@/components/PlaylistCard";
 import SocialFeed from "@/components/SocialFeed";
@@ -161,7 +163,7 @@ export const UserProfileContent: React.FC<UserProfileContentProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {ownedNfts.slice(0, 3).map((nft) => (
-                  <NFTCard key={nft.id} nft={nft} />
+                  <MusicNftCard key={nft.id} nft={nft} />
                 ))}
               </div>
             </div>
@@ -297,31 +299,11 @@ export const UserProfileContent: React.FC<UserProfileContentProps> = ({
       {/* NFTS COLLECTION TAB */}
       {activeTab === "nfts" && (
         <div className="space-y-6">
-          {isOwnProfile ? (
-            <SecureUserNFTDashboard />
-          ) : ownedNfts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {ownedNfts.map((nft) => (
-                <NFTCard key={nft.id} nft={nft} />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-[#101A3B] p-12 rounded-2xl text-center flex flex-col items-center justify-center space-y-3">
-              <Gem className="w-12 h-12 text-slate-600" />
-              <h4 className="text-base font-bold text-white uppercase tracking-wider">
-                No Digital Assets Yet
-              </h4>
-              <p className="text-xs text-slate-400 max-w-sm">
-                This collector hasn't acquired any music NFTs on TON yet.
-              </p>
-              <button
-                onClick={() => navigate("/launchpad")}
-                className="mt-2 px-6 py-2.5 bg-[#0052FF] hover:bg-[#1a66ff] text-white rounded-full font-extrabold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg"
-              >
-                Explore Launchpad Drops
-              </button>
-            </div>
-          )}
+          <MusicNftGallery
+            nfts={ownedNfts}
+            isOwnProfile={isOwnProfile}
+            userName={user.name || user.username}
+          />
         </div>
       )}
 

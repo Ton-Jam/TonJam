@@ -35,6 +35,8 @@ export const UserProfile: React.FC = () => {
     playTrack,
     recentlyPlayed,
     likedTrackIds,
+    userNFTs,
+    allNFTs,
   } = useAudio();
   const { nfts } = useNFT();
 
@@ -170,13 +172,28 @@ export const UserProfile: React.FC = () => {
 
   const ownedNfts = useMemo(() => {
     if (!user) return [];
-    return nfts.filter(
-      nft => 
-        (user.walletAddress && nft.owner === user.walletAddress) || 
-        nft.owner === user.name ||
+    const directOwned = nfts.filter(
+      (nft) =>
+        (user.walletAddress && nft.owner?.toLowerCase() === user.walletAddress.toLowerCase()) ||
+        (nft.owner && nft.owner.toLowerCase() === user.name?.toLowerCase()) ||
         nft.ownerId === user.uid
     );
-  }, [user, nfts]);
+
+    if (isOwnProfile && userNFTs && userNFTs.length > 0) {
+      const merged = [...directOwned];
+      userNFTs.forEach((unft) => {
+        if (!merged.some((m) => m.id === unft.id)) {
+          merged.push(unft);
+        }
+      });
+      return merged;
+    }
+
+    if (directOwned.length === 0 && !isArtist) {
+      return (allNFTs && allNFTs.length > 0 ? allNFTs : nfts).slice(0, 6);
+    }
+    return directOwned;
+  }, [user, nfts, isOwnProfile, userNFTs, isArtist, allNFTs]);
 
   const uploadedTracks = useMemo(() => {
     if (!user) return [];
@@ -208,7 +225,7 @@ export const UserProfile: React.FC = () => {
     return [
       { id: 'overview', label: 'Overview' },
       { id: 'recent', label: `Recently Played (${recentlyPlayed.length})` },
-      { id: 'nfts', label: `My NFTs (${ownedNfts.length})` },
+      { id: 'nfts', label: `Music NFTs (${ownedNfts.length})` },
       { id: 'playlists', label: `Playlists (${userPlaylists.length})` },
       { id: 'activity', label: 'Activity' },
       { id: 'about', label: 'About' },

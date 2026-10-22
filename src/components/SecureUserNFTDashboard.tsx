@@ -25,10 +25,11 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { NFTItem, Track } from '@/types';
+import { MusicNftCard } from '@/components/profile/MusicNftCard';
 
 export const SecureUserNFTDashboard: React.FC = () => {
   const { user, userProfile, isAdmin } = useAuth();
-  const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
+  const { currentTrack, isPlaying, playTrack, togglePlay, userNFTs, allNFTs } = useAudio();
   const tonWallet = useTonWallet();
   const [tonConnectUI] = useTonConnectUI();
 
@@ -133,15 +134,21 @@ export const SecureUserNFTDashboard: React.FC = () => {
   };
 
   // Calculate portfolio statistics
+  const effectiveNFTs = useMemo(() => {
+    if (ownedNFTs.length > 0) return ownedNFTs;
+    if (userNFTs && userNFTs.length > 0) return userNFTs;
+    return (allNFTs && allNFTs.length > 0 ? allNFTs : []).slice(0, 6);
+  }, [ownedNFTs, userNFTs, allNFTs]);
+
   const totalFloorValue = useMemo(() => {
-    return ownedNFTs.reduce((acc, nft) => {
+    return effectiveNFTs.reduce((acc, nft) => {
       const priceNum = parseFloat(nft.price || '0');
       return acc + (isNaN(priceNum) ? 0 : priceNum);
     }, 0);
-  }, [ownedNFTs]);
+  }, [effectiveNFTs]);
 
   const filteredNFTs = useMemo(() => {
-    return ownedNFTs.filter((nft) => {
+    return effectiveNFTs.filter((nft) => {
       const matchesSearch = 
         nft.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         nft.artist?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -150,7 +157,7 @@ export const SecureUserNFTDashboard: React.FC = () => {
       const matchesRarity = filterRarity === 'all' || (nft.rarity?.toLowerCase() === filterRarity.toLowerCase());
       return matchesSearch && matchesRarity;
     });
-  }, [ownedNFTs, searchQuery, filterRarity]);
+  }, [effectiveNFTs, searchQuery, filterRarity]);
 
   return (
     <div id="secure-nft-dashboard" className="w-full max-w-7xl mx-auto space-y-8">
@@ -348,88 +355,12 @@ export const SecureUserNFTDashboard: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredNFTs.map((nft) => {
               const isCurrentPlaying = isPlaying && (currentTrack?.id === nft.id || currentTrack?.songId === nft.trackId);
-
               return (
-                <div
+                <MusicNftCard
                   key={nft.id}
-                  className="group relative rounded-3xl bg-zinc-900/60 backdrop-blur-md p-4 transition-all duration-300 hover:bg-zinc-800/80 hover:shadow-xl hover:shadow-cyan-500/5 flex flex-col justify-between space-y-4 overflow-hidden"
-                >
-                  {/* Artwork & Media Play Action */}
-                  <div className="relative aspect-square rounded-2xl overflow-hidden bg-black/60">
-                    <img
-                      src={nft.imageUrl || nft.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=400'}
-                      alt={nft.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      referrerPolicy="no-referrer"
-                    />
-
-                    {/* Audio Play Overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => handlePlayNFT(nft)}
-                        className="w-12 h-12 rounded-full bg-cyan-400 text-zinc-950 flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-cyan-400/30"
-                        title={isCurrentPlaying ? 'Pause Audio' : 'Play Music NFT'}
-                      >
-                        {isCurrentPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-                      </button>
-                    </div>
-
-                    {/* Rarity Badge */}
-                    {nft.rarity && (
-                      <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[9px] font-mono font-bold uppercase text-cyan-400">
-                        {nft.rarity}
-                      </div>
-                    )}
-
-                    {/* Active Playing Indicator */}
-                    {isCurrentPlaying && (
-                      <div className="absolute bottom-3 right-3 px-2 py-1 rounded-lg bg-black/80 backdrop-blur-md text-cyan-400 text-[10px] font-mono font-bold flex items-center gap-1.5 animate-pulse">
-                        <Radio className="w-3 h-3" /> STREAMING
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Metadata Content */}
-                  <div className="space-y-2 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-sm font-black text-white truncate group-hover:text-cyan-400 transition-colors">
-                        {nft.title}
-                      </h3>
-                      {nft.edition && (
-                        <span className="text-[10px] font-mono font-bold text-purple-400 shrink-0">
-                          {nft.edition}
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-xs text-zinc-400 truncate">
-                      {nft.artist || nft.creator || 'Independent Artist'}
-                    </p>
-                  </div>
-
-                  {/* Token Details & Footer */}
-                  <div className="pt-3 flex items-center justify-between text-xs font-mono">
-                    <div>
-                      <span className="text-[9px] text-zinc-500 block uppercase">Mint Value</span>
-                      <span className="font-bold text-white">{nft.price || '1.5'} TON</span>
-                    </div>
-
-                    {nft.contractAddress ? (
-                      <a
-                        href={`https://testnet.tonscan.org/nft/${nft.contractAddress}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[10px] text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1"
-                      >
-                        TonScan (Testnet) <ExternalLink className="w-3 h-3" />
-                      </a>
-                    ) : (
-                      <span className="text-[10px] text-zinc-500 font-mono">
-                        #{nft.id.slice(0, 6)}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  nft={nft}
+                  isCurrentlyPlayingGlobal={isCurrentPlaying}
+                />
               );
             })}
           </div>

@@ -11,6 +11,7 @@ import ArtistCard from '@/components/ArtistCard';
 import NotificationBell from '@/components/NotificationBell';
 import { APP_ROUTES, HOME_DESTINATIONS } from '@/router/routes';
 import { Track, NFTItem, Playlist, Artist } from '@/types';
+import { isArtist, isVerified, UserDocument } from '@/types/user';
 
 // Polyfill ResizeObserver for jsdom
 class MockResizeObserver {
@@ -370,6 +371,46 @@ describe('Home Screen Interaction Regression Pass', () => {
       fireEvent.click(card);
       expect(mockNavigate).toHaveBeenCalledWith(APP_ROUTES.ARTIST_PROFILE(sampleArtist.uid));
       expect(mockNavigate).toHaveBeenCalledWith('/artist/artist-505');
+    });
+  });
+
+  describe('10. User Type Guards & Helpers', () => {
+    it('isArtist correctly identifies artist role', () => {
+      const artistUser: Partial<UserDocument> = { uid: 'u1', role: 'artist' };
+      const collectorUser: Partial<UserDocument> = { uid: 'u2', role: 'collector' };
+      const adminUser: Partial<UserDocument> = { uid: 'u3', role: 'admin' };
+
+      expect(isArtist(artistUser)).toBe(true);
+      expect(isArtist(collectorUser)).toBe(false);
+      expect(isArtist(adminUser)).toBe(false);
+      expect(isArtist(null)).toBe(false);
+      expect(isArtist(undefined)).toBe(false);
+    });
+
+    it('isArtist does not infer role from verification status', () => {
+      const verifiedCollector: Partial<UserDocument> = { uid: 'u4', role: 'collector', isVerifiedArtist: true };
+      expect(isArtist(verifiedCollector)).toBe(false);
+    });
+
+    it('isVerified correctly identifies verification status across flags', () => {
+      const unverified: Partial<UserDocument> = { uid: 'u5', role: 'artist' };
+      const verifiedFlag: Partial<UserDocument> = { uid: 'u6', role: 'artist', isVerified: true };
+      const artistFlag: Partial<UserDocument> = { uid: 'u7', role: 'artist', isVerifiedArtist: true };
+      const legacyFlag: Partial<UserDocument> = { uid: 'u8', role: 'collector', verified: true };
+      const statusFlag: Partial<UserDocument> = { uid: 'u9', role: 'collector', verificationStatus: 'verified' };
+
+      expect(isVerified(unverified)).toBe(false);
+      expect(isVerified(verifiedFlag)).toBe(true);
+      expect(isVerified(artistFlag)).toBe(true);
+      expect(isVerified(legacyFlag)).toBe(true);
+      expect(isVerified(statusFlag)).toBe(true);
+      expect(isVerified(null)).toBe(false);
+      expect(isVerified(undefined)).toBe(false);
+    });
+
+    it('isVerified does not mark user verified solely based on role', () => {
+      const unverifiedArtist: Partial<UserDocument> = { uid: 'u10', role: 'artist', isVerified: false, isVerifiedArtist: false, verified: false, verificationStatus: 'unverified' };
+      expect(isVerified(unverifiedArtist)).toBe(false);
     });
   });
 });
