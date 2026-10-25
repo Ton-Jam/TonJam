@@ -1,23 +1,22 @@
 import React from 'react';
 import { BadgeCheck } from 'lucide-react';
-import { isVerified, type UserDocument } from '@/types/user';
+import { isVerified as checkIsVerified, UserDocument } from '@/types/user';
+import { cn } from '@/lib/utils';
 
 export interface VerifiedBadgeProps {
-  user?: UserDocument | null;
+  user?: Partial<UserDocument> | null;
   isVerified?: boolean;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
-  title?: string;
 }
 
 export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
   user,
-  isVerified: propIsVerified,
+  isVerified: isVerifiedProp,
   size = 'md',
-  className = '',
-  title = 'Verified Artist',
+  className
 }) => {
-  const verified = propIsVerified !== undefined ? propIsVerified : isVerified(user);
+  const verified = isVerifiedProp !== undefined ? isVerifiedProp : checkIsVerified(user);
 
   if (!verified) {
     return null;
@@ -26,17 +25,22 @@ export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
   const sizeClasses = {
     sm: 'w-3.5 h-3.5',
     md: 'w-4 h-4',
-    lg: 'w-5 h-5',
+    lg: 'w-5 h-5'
   };
 
   return (
-    <span
-      className={`inline-flex items-center justify-center text-[#0098EA] dark:text-[#2EA8FF] shrink-0 ${className}`}
+    <span 
+      className={cn("inline-flex items-center justify-center shrink-0 select-none", className)}
       role="img"
       aria-label="Verified artist"
-      title={title}
+      title="Verified artist"
     >
-      <BadgeCheck className={`${sizeClasses[size]} fill-[#0098EA]/10 text-[#0098EA] dark:fill-[#2EA8FF]/15 dark:text-[#2EA8FF]`} />
+      <BadgeCheck 
+        className={cn(
+          "text-[#00B4D8] fill-[#00B4D8]/20 transition-transform", 
+          sizeClasses[size] || sizeClasses.md
+        )} 
+      />
     </span>
   );
 };

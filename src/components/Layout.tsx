@@ -847,7 +847,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate, onOpenTestnetM
       <div className="mt-2 p-2 rounded-[4px] bg-muted/50 border-0 space-y-2" role="complementary" aria-label="Token Price Info">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src={TJ_COIN_ICON} alt="JAM Token" className="w-[26px] h-[26px] object-contain" />
+            <img src={TJ_COIN_ICON} alt="JAM Token" className="w-[31px] h-[31px] object-contain" />
             <div>
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{t('nav.jam_price')}</p>
               <p className="text-sm font-bold text-foreground tracking-tighter">${JAM_PRICE_USD.toFixed(3)}</p>

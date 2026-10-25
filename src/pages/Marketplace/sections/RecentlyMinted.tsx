@@ -31,8 +31,8 @@ export const RecentlyMinted: React.FC<RecentlyMintedProps> = ({ nfts }) => {
         </div>
       </div>
 
-      {/* Grid of recently listed items */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+      {/* Horizontal Scroll Section */}
+      <div className="-mx-3 flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-3 sm:mx-0 sm:px-0 scroll-smooth">
         {nfts.slice(0, 8).map((nft) => {
           const artwork = nft.coverUrl || nft.imageUrl || getPlaceholderImage(nft.title);
           const priceFormatted = nft.price ? (nft.price.includes("TON") ? nft.price : `${nft.price} TON`) : "2.0 TON";
@@ -41,9 +41,9 @@ export const RecentlyMinted: React.FC<RecentlyMintedProps> = ({ nfts }) => {
             <div
               key={nft.id}
               onClick={() => navigate(`/nft/${nft.id}`)}
-              className="bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-2xl p-3 flex items-center gap-3 cursor-pointer select-none transition-colors group"
+              className="w-[220px] sm:w-[250px] shrink-0 bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-2xl p-3 flex items-center gap-3 cursor-pointer select-none transition-colors group"
             >
-              <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#07111F] shrink-0 border border-[#22374D]">
+              <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#07111F] shrink-0 border border-[#22374D]">
                 <img
                   src={artwork}
                   alt={nft.title}
@@ -57,10 +57,10 @@ export const RecentlyMinted: React.FC<RecentlyMintedProps> = ({ nfts }) => {
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-[#FFFFFF] truncate group-hover:text-[#00B4D8] transition-colors">
+                <h3 className="text-xs sm:text-sm font-semibold text-[#FFFFFF] truncate group-hover:text-[#00B4D8] transition-colors">
                   {nft.title}
                 </h3>
-                <p className="text-xs text-[#C2C7CD] truncate mt-0.5">
+                <p className="text-[11px] text-[#C2C7CD] truncate mt-0.5">
                   {nft.artist || nft.creator}
                 </p>
                 <div className="flex items-center justify-between mt-1.5">

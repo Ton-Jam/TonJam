@@ -53,8 +53,8 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
         </div>
       </div>
 
-      {/* Responsive NFT Grid: 2 columns on mobile, 3 on tablet, 4 on desktop */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+      {/* Horizontal Scroll Section */}
+      <div className="-mx-3 flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-3 sm:mx-0 sm:px-0 scroll-smooth">
         {nfts.slice(0, 24).map((nft) => {
           const isThisPlaying = currentTrack?.id === nft.id && isPlaying;
           const isFav = Boolean(favorites[nft.id]);
@@ -65,7 +65,7 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
             <div
               key={nft.id}
               onClick={() => handleCardClick(nft)}
-              className="group bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition-all duration-200 select-none overflow-hidden relative"
+              className="w-[160px] sm:w-[190px] shrink-0 group bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition-all duration-200 select-none overflow-hidden relative"
             >
               {/* Artwork Media Area */}
               <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#07111F] mb-3">
@@ -94,9 +94,9 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
                   type="button"
                   onClick={(e) => toggleFavorite(nft.id, e)}
                   aria-label={isFav ? `Remove ${nft.title} from favorites` : `Add ${nft.title} to favorites`}
-                  className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-[#07111F]/70 backdrop-blur-sm border border-[#22374D] text-[#FFFFFF] hover:text-[#00B4D8] flex items-center justify-center transition-colors focus:outline-none"
+                  className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-[#07111F]/70 backdrop-blur-sm border border-[#22374D] text-[#FFFFFF] hover:text-[#00B4D8] flex items-center justify-center transition-colors focus:outline-none cursor-pointer"
                 >
-                  <Heart className={`w-4 h-4 ${isFav ? "fill-[#00B4D8] text-[#00B4D8]" : "text-[#FFFFFF]"}`} />
+                  <Heart className={`w-3.5 h-3.5 ${isFav ? "fill-[#00B4D8] text-[#00B4D8]" : "text-[#FFFFFF]"}`} />
                 </button>
 
                 {/* Play Button Overlay */}
@@ -107,12 +107,12 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
                     type="button"
                     onClick={(e) => handlePlayToggle(nft, e)}
                     aria-label={isThisPlaying ? `Pause ${nft.title}` : `Play preview of ${nft.title}`}
-                    className="w-11 h-11 rounded-full bg-[#00B4D8] text-[#07111F] flex items-center justify-center shadow-lg transition-transform transform hover:scale-110 active:scale-95 focus:outline-none"
+                    className="w-10 h-10 rounded-full bg-[#00B4D8] text-[#07111F] flex items-center justify-center shadow-lg transition-transform transform hover:scale-110 active:scale-95 focus:outline-none cursor-pointer"
                   >
                     {isThisPlaying ? (
-                      <Pause className="w-5 h-5 fill-current" />
+                      <Pause className="w-4 h-4 fill-current" />
                     ) : (
-                      <Play className="w-5 h-5 fill-current ml-0.5" />
+                      <Play className="w-4 h-4 fill-current ml-0.5" />
                     )}
                   </button>
                 </div>
@@ -126,12 +126,12 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
                   </h3>
                   
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[11px] sm:text-xs text-[#C2C7CD] truncate">
+                    <span className="text-[11px] text-[#C2C7CD] truncate">
                       {nft.artist || nft.creator}
                     </span>
                     {nft.artistVerified && (
                       <span title="Verified Artist" className="inline-flex">
-                        <CheckCircle2 className="w-3.5 h-3.5 fill-[#00B4D8] text-[#07111F] shrink-0" />
+                        <CheckCircle2 className="w-3 h-3 fill-[#00B4D8] text-[#07111F] shrink-0" />
                       </span>
                     )}
                   </div>
@@ -142,7 +142,7 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
                   <span className="text-[10px] text-[#8C8C8C] uppercase tracking-wider">
                     Price
                   </span>
-                  <span className="text-xs sm:text-sm font-bold text-[#00B4D8] font-mono">
+                  <span className="text-xs font-bold text-[#00B4D8] font-mono">
                     {convertPrice(priceFormatted)}
                   </span>
                 </div>

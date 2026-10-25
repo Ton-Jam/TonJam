@@ -50,6 +50,15 @@ export default function UploadTrackScreen() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
+  // Granular upload progress states for audio and artwork
+  const [audioUploadProgress, setAudioUploadProgress] = useState(0);
+  const [coverUploadProgress, setCoverUploadProgress] = useState(0);
+
+  // Drag and drop hover states
+  const [isCoverDragging, setIsCoverDragging] = useState(false);
+  const [isAudioDragging, setIsAudioDragging] = useState(false);
+  const [isBatchDragging, setIsBatchDragging] = useState(false);
+
   // Google Drive Integration States
   const [driveModalOpen, setDriveModalOpen] = useState(false);
   const [driveModalType, setDriveModalType] = useState<'audio' | 'image'>('audio');
@@ -133,7 +142,6 @@ export default function UploadTrackScreen() {
     } catch (e) {
       console.error(e);
       addNotification("Analysis fallback triggered", "warning");
-      // Fallback
       setGenre("Electronic");
       setBpm("128");
       setDescription("An energetic, futuristic electronic track with vibrant tones.\n\nMoods: Energetic, Futuristic, Atmospheric\nInstruments: Synthesizer, Drum Machine");
@@ -154,24 +162,46 @@ export default function UploadTrackScreen() {
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStep, setUploadStep] = useState<'idle' | 'uploading' | 'success'>('idle');
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   const audioInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const batchAudioInputRef = useRef<HTMLInputElement>(null);
 
+  const handleAudioSelected = (file: File) => {
+    const validation = validateFile(file, 'audio', 50);
+    if (!validation.isValid) {
+      addNotification(validation.error || "Invalid audio file", "error");
+      return;
+    }
+    setAudioFile(file);
+    if (!title) setTitle(file.name.replace(/\.[^/.]+$/, ""));
+    addNotification("Audio file added successfully", "success");
+  };
+
+  const handleCoverSelected = (file: File) => {
+    const validation = validateFile(file, 'image', 10);
+    if (!validation.isValid) {
+      addNotification(validation.error || "Invalid image file", "error");
+      return;
+    }
+    setCoverFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const preview = reader.result as string;
+      setCoverPreview(preview);
+    };
+    reader.readAsDataURL(file);
+    addNotification("Cover image added successfully", "success");
+  };
+
   const handleAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const validation = validateFile(file, 'audio', 50);
-      if (!validation.isValid) {
-        addNotification(validation.error || "Invalid audio file", "error");
-        return;
-      }
-      setAudioFile(file);
-      if (!title) setTitle(file.name.replace(/\.[^/.]+$/, ""));
-      addNotification("Audio file added successfully", "success");
-    }
+    if (file) handleAudioSelected(file);
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleCoverSelected(file);
   };
 
   const handleBatchAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,7 +221,7 @@ export default function UploadTrackScreen() {
         title: file.name.replace(/\.[^/.]+$/, ""),
         genre: genre || "Electronic",
         audioFile: file,
-        coverFile: coverFile, // Default to current cover if exists
+        coverFile: coverFile,
         coverPreview: coverPreview
       }));
 
@@ -206,27 +236,6 @@ export default function UploadTrackScreen() {
 
   const updateBatchTrack = (id: string, updates: Partial<typeof batchTracks[0]>) => {
     setBatchTracks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
-  };
-
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const validation = validateFile(file, 'image', 10);
-      if (!validation.isValid) {
-        addNotification(validation.error || "Invalid image file", "error");
-        return;
-      }
-      setCoverFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const preview = reader.result as string;
-        setCoverPreview(preview);
-        // If in batch mode and no individual covers set, maybe suggest applying to all?
-        // For now just update the state
-      };
-      reader.readAsDataURL(file);
-      addNotification("Cover image added successfully", "success");
-    }
   };
 
   const handleUpload = async () => {
@@ -253,28 +262,18 @@ export default function UploadTrackScreen() {
         addNotification("All tracks must have a cover image", "warning");
         return;
       }
-      const incompleteTracks = batchTracks.filter(t => !t.title.trim() || !t.genre);
-      if (incompleteTracks.length > 0) {
-        addNotification("All tracks in batch must have a title and genre", "warning");
-        return;
-      }
     }
 
     setIsUploading(true);
     setUploadStep('uploading');
-    setUploadProgress(0);
+    setAudioUploadProgress(0);
+    setCoverUploadProgress(0);
 
     try {
       if (mode === 'single') {
-        let audioProg = 0;
-        let coverProg = 0;
-        const updateOverallProgress = () => {
-          setUploadProgress(Math.round((audioProg + coverProg) / 2));
-        };
-
         const [audioRes, coverRes] = await Promise.all([
-          uploadAudio(audioFile!, (p) => { audioProg = p; updateOverallProgress(); }),
-          uploadCover(coverFile!, (p) => { coverProg = p; updateOverallProgress(); })
+          uploadAudio(audioFile!, (p) => setAudioUploadProgress(p)),
+          uploadCover(coverFile!, (p) => setCoverUploadProgress(p))
         ]);
 
         const trackId = `track-${Date.now()}`;
@@ -306,17 +305,14 @@ export default function UploadTrackScreen() {
 
         await addUserTrack(newTrack);
       } else {
-        // Batch Upload
         for (let i = 0; i < batchTracks.length; i++) {
           const track = batchTracks[i];
-          setUploadProgress(Math.round((i / batchTracks.length) * 100));
-          
           const trackCover = track.coverFile || coverFile;
           if (!trackCover) continue;
 
           const [audioRes, coverRes] = await Promise.all([
-            uploadAudio(track.audioFile),
-            uploadCover(trackCover)
+            uploadAudio(track.audioFile, (p) => setAudioUploadProgress(p)),
+            uploadCover(trackCover, (p) => setCoverUploadProgress(p))
           ]);
 
           const trackId = `track-${Date.now()}-${i}`;
@@ -365,28 +361,21 @@ export default function UploadTrackScreen() {
 
   const handleMint = async () => {
     if (!audioFile || !coverFile || !title || !genre) {
-      addNotification("Please fill in basic track info (title, genre, audio, cover) first", "warning");
+      addNotification("Please fill in basic track info first", "warning");
       return;
     }
 
     setIsUploading(true);
     setUploadStep('uploading');
-    setUploadProgress(0);
+    setAudioUploadProgress(0);
+    setCoverUploadProgress(0);
 
     try {
-      // 1. Upload files
-      let audioProg = 0;
-      let coverProg = 0;
-      const updateOverallProgress = () => {
-        setUploadProgress(Math.round((audioProg + coverProg) / 2));
-      };
-
       const [audioRes, coverRes] = await Promise.all([
-        uploadAudio(audioFile, (p) => { audioProg = p; updateOverallProgress(); }),
-        uploadCover(coverFile, (p) => { coverProg = p; updateOverallProgress(); })
+        uploadAudio(audioFile, (p) => setAudioUploadProgress(p)),
+        uploadCover(coverFile, (p) => setCoverUploadProgress(p))
       ]);
 
-      // 2. Create and upload metadata
       const metadata = {
         name: title,
         description: description,
@@ -400,7 +389,6 @@ export default function UploadTrackScreen() {
       };
       const metadataRes = await uploadMetadata(metadata);
 
-      // 3. Mint NFT on TON
       const wallet = tonConnectUI.wallet?.account.address;
       if (!wallet) {
         addNotification("Please connect your GRAM wallet first", "warning");
@@ -410,7 +398,6 @@ export default function UploadTrackScreen() {
 
       await mintTonJamNFT(tonConnectUI, wallet, metadataRes.downloadUrl);
 
-      // 4. Save to database as NFT
       const trackId = `track-nft-${Date.now()}`;
       const newTrack = {
         id: trackId,
@@ -453,9 +440,10 @@ export default function UploadTrackScreen() {
     }
   };
 
+  const overallUploadProgress = Math.round((audioUploadProgress + coverUploadProgress) / 2);
+
   return (
     <div className="min-h-screen bg-black text-white pb-48 relative overflow-y-auto overflow-x-hidden scroll-smooth transition-all duration-300">
-      {/* Background Glow */}
       <div className="fixed inset-0 opacity-10 blur-[120px] pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500 rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -479,11 +467,11 @@ export default function UploadTrackScreen() {
           </button>
         </div>
 
-        {/* Global Cover Upload */}
+        {/* Global Cover Art Drag-and-Drop Zone */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-               {mode === 'single' ? 'Cover Art' : 'Default Cover Art'}
+               {mode === 'single' ? 'Cover Art (Drag & Drop)' : 'Default Cover Art (Drag & Drop)'}
             </label>
             <button
               type="button"
@@ -496,7 +484,16 @@ export default function UploadTrackScreen() {
           </div>
           <div 
             onClick={() => coverInputRef.current?.click()}
-            className={`aspect-square sm:aspect-[21/9] w-48 mx-auto sm:w-full rounded-2xl bg-white/5 border-2 border-dashed ${coverPreview ? 'border-transparent' : 'border-white/10 hover:border-cyan-500/50'} transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center group relative`}
+            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsCoverDragging(true); }}
+            onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsCoverDragging(false); }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsCoverDragging(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file) handleCoverSelected(file);
+            }}
+            className={`aspect-square sm:aspect-[21/9] w-48 mx-auto sm:w-full rounded-2xl bg-white/5 border-2 border-dashed ${isCoverDragging ? 'border-cyan-400 bg-cyan-500/10 scale-[1.01]' : coverPreview ? 'border-transparent' : 'border-white/10 hover:border-cyan-500/50'} transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center group relative shadow-inner`}
           >
             {coverPreview ? (
               <img src={coverPreview} className="w-full h-full object-cover" alt="Preview" referrerPolicy="no-referrer" />
@@ -505,7 +502,9 @@ export default function UploadTrackScreen() {
                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <ImageIcon className="w-6 h-6 text-white/20 group-hover:text-cyan-500" />
                 </div>
-                <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest px-4 text-center">Click to Upload</p>
+                <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest px-4 text-center">
+                  Drag & drop cover art here or click to browse
+                </p>
               </>
             )}
             <input 
@@ -520,11 +519,11 @@ export default function UploadTrackScreen() {
 
         {mode === 'single' ? (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Audio Upload */}
+            {/* Audio Drag-and-Drop Zone */}
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-                  <Music className="w-3 h-3" /> Audio File *
+                  <Music className="w-3 h-3" /> Audio File (Drag & Drop) *
                 </label>
                 <div className="flex items-center gap-2">
                   <button
@@ -549,7 +548,16 @@ export default function UploadTrackScreen() {
               </div>
               <div 
                 onClick={() => audioInputRef.current?.click()}
-                className={`w-full rounded-2xl ${audioFile ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5'} border-2 border-dashed ${!audioFile && 'border-white/10 hover:border-purple-500/50'} transition-all cursor-pointer flex flex-col items-center justify-center p-6 group relative`}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsAudioDragging(true); }}
+                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsAudioDragging(false); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsAudioDragging(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) handleAudioSelected(file);
+                }}
+                className={`w-full rounded-2xl ${isAudioDragging ? 'bg-purple-500/20 border-purple-400 scale-[1.01]' : audioFile ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5'} border-2 border-dashed ${!audioFile && !isAudioDragging && 'border-white/10 hover:border-purple-500/50'} transition-all cursor-pointer flex flex-col items-center justify-center p-8 group relative shadow-inner`}
               >
                 {audioFile ? (
                   <div className="text-center">
@@ -559,8 +567,11 @@ export default function UploadTrackScreen() {
                   </div>
                 ) : (
                   <>
-                    <Upload className="w-5 h-5 text-white/20 mb-2 group-hover:text-purple-500" />
-                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Select Audio</p>
+                    <Upload className="w-8 h-8 text-white/20 mb-3 group-hover:text-purple-500 transition-colors" />
+                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest text-center">
+                      Drag & drop audio file here or click to browse
+                    </p>
+                    <p className="text-[8px] text-white/20 uppercase tracking-[0.2em] mt-1">MP3, WAV, FLAC, AAC up to 50MB</p>
                   </>
                 )}
                 <input 
@@ -573,7 +584,7 @@ export default function UploadTrackScreen() {
               </div>
             </div>
 
-            {/* Form Fields - Grouping metadata */}
+            {/* Form Fields */}
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -603,7 +614,6 @@ export default function UploadTrackScreen() {
                   </select>
                 </div>
               </div>
-
 
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
@@ -742,11 +752,11 @@ export default function UploadTrackScreen() {
           </div>
         ) : (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Batch Audio Upload */}
+            {/* Batch Audio Drag-and-Drop Zone */}
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-                  <Music className="w-3 h-3" /> Batch Audio Artifacts
+                  <Music className="w-3 h-3" /> Batch Audio Artifacts (Drag & Drop)
                 </label>
                 <button
                   type="button"
@@ -759,12 +769,38 @@ export default function UploadTrackScreen() {
               </div>
               <div 
                 onClick={() => batchAudioInputRef.current?.click()}
-                className="w-full rounded-3xl bg-white/5 border-2 border-dashed border-white/10 hover:border-purple-500/50 transition-all cursor-pointer flex flex-col items-center justify-center p-8 group relative"
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsBatchDragging(true); }}
+                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsBatchDragging(false); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsBatchDragging(false);
+                  const files = Array.from(e.dataTransfer.files || []);
+                  if (files.length > 0) {
+                    const validFiles = files.filter(file => {
+                      const validation = validateFile(file, 'audio', 50);
+                      return validation.isValid;
+                    });
+                    const newTracks = validFiles.map(file => ({
+                      id: Math.random().toString(36).substr(2, 9),
+                      title: file.name.replace(/\.[^/.]+$/, ""),
+                      genre: genre || "Electronic",
+                      audioFile: file,
+                      coverFile: coverFile,
+                      coverPreview: coverPreview
+                    }));
+                    setBatchTracks(prev => [...prev, ...newTracks]);
+                    addNotification(`${validFiles.length} tracks added to batch via drop`, "success");
+                  }
+                }}
+                className={`w-full rounded-3xl ${isBatchDragging ? 'bg-purple-500/20 border-purple-400 scale-[1.01]' : 'bg-white/5'} border-2 border-dashed ${!isBatchDragging && 'border-white/10 hover:border-purple-500/50'} transition-all cursor-pointer flex flex-col items-center justify-center p-10 group relative shadow-inner`}
               >
                 <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Upload className="w-6 h-6 text-white/20" />
+                  <Upload className="w-6 h-6 text-white/20 group-hover:text-purple-400 transition-colors" />
                 </div>
-                <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">Select Multiple Audio Files</p>
+                <p className="mt-4 text-[10px] font-bold text-white/40 uppercase tracking-widest text-center">
+                  Drag & drop multiple audio files here or click to browse
+                </p>
                 <p className="mt-2 text-[8px] text-white/20 uppercase tracking-[0.2em] text-center">MP3, WAV, FLAC, OGG, AAC, M4A up to 50MB per file</p>
                 <input 
                   type="file" 
@@ -842,33 +878,60 @@ export default function UploadTrackScreen() {
           </div>
         )}
 
-        {/* Action Buttons */}
+        {/* Granular Real-Time Progress Bars Section */}
         <div className="pt-8 space-y-4">
           {isUploading && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
-                <span className="text-white/40">Transmission Progress</span>
-                <span className="text-cyan-500">{uploadProgress}%</span>
+            <div className="space-y-4 bg-white/5 p-4 sm:p-5 rounded-2xl border border-white/10 shadow-xl backdrop-blur-md animate-in fade-in duration-300">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                <span className="text-white/60">Transmission & Processing</span>
+                <span className="text-cyan-400 font-mono font-bold">{overallUploadProgress}% Overall</span>
               </div>
-              <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
-                <div 
-                  className="bg-cyan-500 h-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(8,145,178,0.5)]" 
-                  style={{ width: `${uploadProgress}%` }}
-                />
+
+              {/* Audio Upload Granular Progress Bar */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[9px] font-bold uppercase tracking-wider text-white/50">
+                  <span className="flex items-center gap-1.5">
+                    <Music className="w-3 h-3 text-purple-400" /> Audio File Upload (Firebase Storage)
+                  </span>
+                  <span className="font-mono">{audioUploadProgress}%</span>
+                </div>
+                <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden border border-white/5">
+                  <div 
+                    className="bg-gradient-to-r from-purple-600 to-indigo-500 h-full transition-all duration-300 ease-out shadow-[0_0_12px_rgba(168,85,247,0.6)]" 
+                    style={{ width: `${audioUploadProgress}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Artwork Processing Granular Progress Bar */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[9px] font-bold uppercase tracking-wider text-white/50">
+                  <span className="flex items-center gap-1.5">
+                    <ImageIcon className="w-3 h-3 text-cyan-400" /> Artwork Processing & Upload (Firebase Storage)
+                  </span>
+                  <span className="font-mono">{coverUploadProgress}%</span>
+                </div>
+                <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden border border-white/5">
+                  <div 
+                    className="bg-gradient-to-r from-cyan-500 to-teal-400 h-full transition-all duration-300 ease-out shadow-[0_0_12px_rgba(8,145,178,0.6)]" 
+                    style={{ width: `${coverUploadProgress}%` }}
+                  />
+                </div>
               </div>
             </div>
           )}
+
           <button
             onClick={handleUpload}
             disabled={isUploading || 
               (mode === 'single' && (!title.trim() || !genre || !audioFile || !coverFile)) || 
               (mode === 'batch' && (batchTracks.length === 0 || batchTracks.some(t => !t.title.trim() || !t.genre)))}
-            className="w-full bg-[#0891b2] text-black font-black text-[12px] uppercase tracking-[0.3em] py-5 rounded-2xl shadow-[0_10px_30px_rgba(8,145,178,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
+            className="w-full bg-[#0891b2] text-black font-black text-[12px] uppercase tracking-[0.3em] py-5 rounded-2xl shadow-[0_10px_30px_rgba(8,145,178,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100 cursor-pointer"
           >
             {isUploading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Transmitting {uploadProgress}%
+                Transmitting ({overallUploadProgress}%)
               </>
             ) : (
               <>
@@ -882,7 +945,7 @@ export default function UploadTrackScreen() {
             <button
               onClick={handleMint}
               disabled={isUploading || !title.trim() || !genre || !audioFile || !coverFile}
-              className="w-full bg-purple-600 text-white font-black text-[12px] uppercase tracking-[0.3em] py-5 rounded-2xl shadow-[0_10px_30px_rgba(147,51,234,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
+              className="w-full bg-purple-600 text-white font-black text-[12px] uppercase tracking-[0.3em] py-5 rounded-2xl shadow-[0_10px_30px_rgba(147,51,234,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100 cursor-pointer"
             >
               <Sparkles className="w-5 h-5 fill-current" />
               Mint NFT Protocol
@@ -917,7 +980,6 @@ export default function UploadTrackScreen() {
         )}
       </AnimatePresence>
 
-      {/* Google Drive Import Modal */}
       <GoogleDriveImportModal
         isOpen={driveModalOpen}
         onClose={() => setDriveModalOpen(false)}

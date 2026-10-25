@@ -41,7 +41,7 @@ const RewardPreviewCard: React.FC<RewardPreviewCardProps> = ({
         </div>
 
         <div className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full shrink-0">
-          <img src={TJ_COIN_ICON} alt="TJ" className="w-4 h-4 object-contain" />
+          <img src={TJ_COIN_ICON} alt="TJ" className="w-5 h-5 object-contain" />
           <span className="text-[11px] font-black font-mono tracking-tight text-white">
             {balance.toLocaleString()}
           </span>

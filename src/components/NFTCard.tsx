@@ -16,7 +16,7 @@ import SellNFTModal from './SellNFTModal';
 import PriceAlertModal from './PriceAlertModal';
 import SkeletonCard from './SkeletonCard';
 import LazyArtworkImage from '@/components/common/LazyArtworkImage';
-import VerifiedArtistBadge from '@/components/common/VerifiedArtistBadge';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 import ConfirmationModal from './ConfirmationModal';
 import NFTPurchaseConfirmationDialog from './NFTPurchaseConfirmationDialog';
 import NFTOptionsModal from './NFTOptionsModal';
@@ -352,7 +352,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
         setIsSellModalOpen(true);
       }
     } else if (nft.listingType === 'auction') {
-      setIsBidModalOpen(true);
+      navigate(`/nft/${nft.id}`);
     } else if (!isAuctionEnded) {
       // BUY / COLLECT flow - trigger confirmation modal first to prevent accidental purchase
       if (!tonConnectUI.connected) {
@@ -642,7 +642,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                 onClick={handleArtistClick}
               >
                 <span>{nft.creator}</span>
-                <VerifiedArtistBadge artistName={nft.creator} size="xs" />
+                <VerifiedBadge user={artist} size="sm" />
               </p>
             </div>
 
@@ -660,7 +660,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                 disabled={!isOwner && isAuctionEnded}
                 aria-label={isOwner ? `Owned by you: ${nft.title}` : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Auction ended' : `Place bid on ${nft.title}`) : `Buy ${nft.title} for ${formattedPrice} TON`)}
                 className={cn(
-                  "cursor-pointer transition-colors rounded-lg min-h-[34px] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white border-none focus:outline-none focus-visible:ring-1 focus-visible:ring-[#0052FF]",
+                  "cursor-pointer transition-colors rounded-full min-h-[34px] px-4 py-1 text-xs font-bold uppercase tracking-wider text-white border-none focus:outline-none focus-visible:ring-1 focus-visible:ring-[#0052FF]",
                   isOwner 
                     ? 'bg-white/[0.08] hover:bg-white/[0.12] text-slate-300' 
                     : (isAuctionEnded ? 'bg-white/[0.04] text-slate-500 cursor-not-allowed' : 'bg-[#0052FF] hover:bg-[#1a66ff]')
@@ -747,7 +747,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
           subtitle={
             <span onClick={handleArtistClick} className="hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1">
               <span>{nft.creator}</span>
-              <VerifiedArtistBadge artistName={nft.creator} size="xs" />
+              <VerifiedBadge user={artist} size="sm" />
             </span>
           }
           meta={
@@ -776,7 +776,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                 borderRadius: 'var(--card-action-radius, 8px)',
               }}
               className={cn(
-                "w-full h-[34px] py-1 px-3 rounded-[8px] text-xs font-bold uppercase tracking-wider transition-all duration-150 flex items-center justify-center text-center cursor-pointer border-none select-none",
+                "w-full h-[34px] py-1 px-4 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-150 flex items-center justify-center text-center cursor-pointer border-none select-none",
                 isOwner
                   ? "bg-white/[0.08] hover:bg-white/[0.12] text-slate-300"
                   : isAuctionEnded

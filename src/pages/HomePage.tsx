@@ -65,7 +65,7 @@ export const HomePage: React.FC = () => {
                 aria-label="Tasks & Rewards"
                 title="Earn TonJam Coins"
               >
-                <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[15px] h-[15px] object-contain shrink-0" />
+                <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[18px] h-[18px] object-contain shrink-0" />
                 <span className="text-xs font-bold text-zinc-200">Tasks</span>
               </button>
               <TonPriceChart />

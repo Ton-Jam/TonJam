@@ -70,7 +70,7 @@ export function CardSmall({ onClick }: { onClick?: () => void }) {
           </div>
           <ArrowRight className="w-3.5 h-3.5 text-blue-500/40" />
           <div className="flex items-center gap-1.5">
-            <img src={TJ_COIN_ICON} alt="JAM" className="w-4 h-4 object-contain" />
+            <img src={TJ_COIN_ICON} alt="JAM" className="w-5 h-5 object-contain" />
             <span className="text-[10px] font-black text-blue-400">100 JAM</span>
           </div>
         </div>

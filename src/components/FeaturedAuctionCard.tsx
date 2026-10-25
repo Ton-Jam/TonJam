@@ -169,11 +169,7 @@ export const FeaturedAuctionCard: React.FC<FeaturedAuctionCardProps> = ({
 
   const handleBidClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onPlaceBid) {
-      onPlaceBid(cardData as unknown as NFTItem);
-    } else {
-      setShowBidModal(true);
-    }
+    navigate(`/nft/${cardData.id}`);
   };
 
   return (

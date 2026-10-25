@@ -8,7 +8,7 @@ import {
 import { useAudio } from "@/contexts/AudioContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getPlaceholderImage } from "@/lib/utils";
-import { ArtistVerificationBadge } from "@/components/ArtistVerificationBadge";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { toast } from "sonner";
@@ -223,9 +223,8 @@ export const ArtistProfile: React.FC = () => {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               {artist.name}
             </h1>
-            <ArtistVerificationBadge 
-              isVerified={Boolean(artist.isVerifiedArtist || artist.verified)}
-              artistName={artist.name}
+            <VerifiedBadge 
+              user={artist}
               size="md"
             />
           </div>

@@ -152,7 +152,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
       <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-white/[0.03]">
         <div className="flex items-center gap-1.5">
             <span className="text-xs font-bold text-white">{task.reward}</span>
-            <img src={TJ_COIN_ICON} alt="TJ" className="w-3.5 h-3.5 object-contain" referrerPolicy="no-referrer" />
+            <img src={TJ_COIN_ICON} alt="TJ" className="w-4 h-4 object-contain" referrerPolicy="no-referrer" />
             <span className="text-[9px] text-blue-400 font-bold ml-1">+{task.points} XP</span>
         </div>
 
