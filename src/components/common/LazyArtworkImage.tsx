@@ -3,19 +3,22 @@ import { cn } from '@/lib/utils';
 
 export interface LazyArtworkImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackSrc?: string;
+  placeholderSrc?: string;
   rootMargin?: string;
   fadeIn?: boolean;
+  containerClassName?: string;
 }
 
-// 1x1 transparent PNG data URL to avoid broken image placeholders while awaiting intersection
 const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export const LazyArtworkImage = React.forwardRef<HTMLImageElement, LazyArtworkImageProps>(({
   src,
   alt = '',
   fallbackSrc,
+  placeholderSrc,
   className,
-  rootMargin = '200px 100px',
+  containerClassName,
+  rootMargin = '250px 150px',
   fadeIn = true,
   onLoad,
   onError,
@@ -23,8 +26,8 @@ export const LazyArtworkImage = React.forwardRef<HTMLImageElement, LazyArtworkIm
 }, forwardedRef) => {
   const [isInView, setIsInView] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState<string | undefined>(undefined);
   const [hasError, setHasError] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState<string | undefined>(undefined);
 
   const localRef = useRef<HTMLImageElement | null>(null);
 
@@ -37,12 +40,10 @@ export const LazyArtworkImage = React.forwardRef<HTMLImageElement, LazyArtworkIm
     }
   }, [forwardedRef]);
 
-  // IntersectionObserver to detect when the artwork element approaches the viewport
   useEffect(() => {
     const el = localRef.current;
     if (!el) return;
 
-    // Graceful fallback for non-browser or environments lacking IntersectionObserver (e.g. tests)
     if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
       setIsInView(true);
       return;
@@ -63,13 +64,9 @@ export const LazyArtworkImage = React.forwardRef<HTMLImageElement, LazyArtworkIm
     );
 
     observer.observe(el);
-
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, [rootMargin]);
 
-  // Once in view, set the image source
   useEffect(() => {
     if (isInView && src) {
       setCurrentSrc(src);
@@ -86,28 +83,49 @@ export const LazyArtworkImage = React.forwardRef<HTMLImageElement, LazyArtworkIm
     if (!hasError && fallbackSrc && currentSrc !== fallbackSrc) {
       setHasError(true);
       setCurrentSrc(fallbackSrc);
+      setIsLoaded(true);
+    } else if (!hasError && !fallbackSrc) {
+      setHasError(true);
+      setIsLoaded(true);
     }
     onError?.(e);
   };
 
-  const activeSrc = isInView ? (currentSrc || fallbackSrc) : TRANSPARENT_PIXEL;
+  const activeSrc = isInView ? (currentSrc || placeholderSrc || fallbackSrc || TRANSPARENT_PIXEL) : (placeholderSrc || TRANSPARENT_PIXEL);
 
   return (
-    <img
-      ref={setRef}
-      src={activeSrc}
-      alt={alt}
-      loading="lazy"
-      decoding="async"
-      referrerPolicy="no-referrer"
-      onLoad={handleLoad}
-      onError={handleError}
-      className={cn(
-        className,
-        fadeIn && (!isLoaded && isInView ? "opacity-0" : "opacity-100 transition-opacity duration-300")
+    <div className={cn("relative overflow-hidden bg-muted/20", containerClassName)}>
+      {/* Blur-up placeholder or gradient skeleton */}
+      {placeholderSrc && !isLoaded && isInView && (
+        <img
+          src={placeholderSrc}
+          alt=""
+          aria-hidden="true"
+          className={cn("absolute inset-0 w-full h-full object-cover filter blur-md scale-110 transition-opacity duration-700 pointer-events-none", className)}
+        />
       )}
-      {...props}
-    />
+
+      {!isLoaded && !placeholderSrc && isInView && (
+        <div className="absolute inset-0 bg-gradient-to-r from-muted/30 via-muted/60 to-muted/35 animate-pulse pointer-events-none" />
+      )}
+
+      <img
+        ref={setRef}
+        src={activeSrc}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        referrerPolicy="no-referrer"
+        onLoad={handleLoad}
+        onError={handleError}
+        className={cn(
+          "w-full h-full object-cover transition-all duration-700 ease-out",
+          fadeIn && (!isLoaded ? "opacity-0 scale-105 filter blur-sm" : "opacity-100 scale-100 filter blur-0"),
+          className
+        )}
+        {...props}
+      />
+    </div>
   );
 });
 

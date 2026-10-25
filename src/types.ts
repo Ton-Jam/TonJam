@@ -118,6 +118,7 @@ export class Track {
   likes?: number = 0;
   jamScore?: number;
   releaseDate?: string;
+  tags?: string[];
   ipfsUrl?: string; // Decentralized metadata/audio link
   cid?: string; // Content Identifier
   description?: string;

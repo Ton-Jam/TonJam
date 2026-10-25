@@ -1,111 +1,119 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Disc3 } from "lucide-react";
 import { motion } from "motion/react";
-import { BadgeCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ProgressiveImage } from "@/components/common/ProgressiveImage";
+import { VerifiedArtistLabel } from "./VerifiedArtistLabel";
+
+export interface CollectionData {
+  id: string;
+  name: string;
+  creator: string;
+  creatorVerified?: boolean;
+  verified?: boolean;
+  itemCount: number;
+  totalNFTs?: number;
+  imageUrl: string;
+  badge?: string;
+  floorPrice?: string;
+  volume?: string;
+  change?: string;
+}
 
 interface CollectionCardProps {
-  collection: {
-    id: string;
-    name: string;
-    creator: string;
-    floorPrice: string;
-    volume: string;
-    imageUrl: string;
-    itemCount?: number;
-    verified?: boolean;
-    change?: string;
-  };
+  collection: CollectionData;
+  onView?: (collection: CollectionData) => void;
   onClick?: () => void;
   className?: string;
 }
 
 export const CollectionCard: React.FC<CollectionCardProps> = ({
   collection,
+  onView,
   onClick,
   className,
 }) => {
-  const navigate = useNavigate();
-  const isPositiveChange = collection.change ? collection.change.startsWith("+") : true;
+  const badgeLabel = collection.badge || "COLLECTION";
+  const totalNFTsCount = collection.totalNFTs ?? collection.itemCount;
 
   const handleClick = () => {
-    if (onClick) {
-      onClick();
-    } else {
-      navigate(`/collections/${collection.id}`);
-    }
+    if (onClick) onClick();
+    else if (onView) onView(collection);
   };
 
   return (
     <motion.div
-      whileHover={{ y: -3, scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
       onClick={handleClick}
       className={cn(
-        "cursor-pointer group flex items-center gap-3.5 p-3 bg-[#0B112C] hover:bg-[#0E1638] rounded-[10px] shadow-lg shadow-black/30 transition-all duration-300 border-none",
+        "w-[240px] sm:w-[260px] shrink-0 snap-start flex flex-col justify-between",
+        "bg-[#101A32] hover:bg-[#152440] rounded-2xl p-3 shadow-lg shadow-black/25 cursor-pointer transition-colors duration-200 select-none",
         className
       )}
     >
-      {/* Cover Image */}
-      <div className="relative w-16 h-16 rounded-[8px] overflow-hidden bg-black/40 xl:w-20 xl:h-20 shrink-0">
-        <img
-          src={collection.imageUrl}
-          alt={collection.name}
-          referrerPolicy="no-referrer"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <div className="absolute bottom-1 right-1 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded-[4px] text-[8px] text-white/90 uppercase tracking-widest font-black">
-          {collection.itemCount || 10} Items
+      <div>
+        {/* Artwork with subtle disc badge */}
+        <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#070D20] group">
+          <ProgressiveImage
+            src={collection.imageUrl}
+            alt={collection.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+
+          {/* Top Badge */}
+          <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase bg-[#070D20]/80 backdrop-blur-md text-[#65B8FF]">
+            <Disc3 className="w-3 h-3 text-[#3390EC]" />
+            <span>{badgeLabel}</span>
+          </div>
+
+          {/* Dynamic Total NFTs Chip */}
+          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#070D20]/85 backdrop-blur-md text-[#F5F8FF]">
+            {totalNFTsCount} NFTs
+          </div>
+        </div>
+
+        {/* Collection Name & Creator */}
+        <div className="mt-3 space-y-1">
+          <h3 className="text-sm font-bold text-[#F5F8FF] truncate leading-tight">
+            {collection.name}
+          </h3>
+          <VerifiedArtistLabel
+            artist={collection.creator}
+            verified={collection.creatorVerified ?? true}
+          />
+
+          {/* Dynamic Total NFTs Metric */}
+          <div className="flex items-center justify-between text-[11px] pt-1 text-[#9BAAC5]">
+            <span>Total NFTs</span>
+            <span className="font-semibold text-[#65B8FF]">
+              {totalNFTsCount}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Info details */}
-      <div className="min-w-0 flex-grow flex flex-col justify-between h-full">
-        <div>
-          <div className="flex items-center gap-1 mb-0.5">
-            <h4 className="text-xs font-black text-white uppercase tracking-tight truncate group-hover:text-blue-400 transition-colors">
-              {collection.name}
-            </h4>
-            {collection.verified && (
-              <BadgeCheck className="w-3.5 h-3.5 text-blue-400 fill-current shrink-0" />
-            )}
+      {/* Footer: Floor Price or Explore */}
+      <div className="mt-3 pt-2.5 flex items-center justify-between text-xs">
+        {collection.floorPrice ? (
+          <div>
+            <span className="text-[10px] uppercase tracking-wider text-[#9BAAC5]/80 block">
+              Floor
+            </span>
+            <span className="text-xs font-bold text-[#65B8FF]">
+              {collection.floorPrice}
+            </span>
           </div>
-          <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase truncate">
-            {collection.creator}
-          </p>
-        </div>
+        ) : (
+          <span className="text-[10px] text-[#9BAAC5]">Curated Drop</span>
+        )}
 
-        {/* Pricing data */}
-        <div className="flex items-center justify-between mt-2 pt-1.5">
-          <div className="flex flex-col">
-            <span className="text-[7.5px] uppercase tracking-widest text-slate-400 font-semibold">
-              Floor Price
-            </span>
-            <span className="text-xs font-black text-cyan-400 font-mono">
-              {collection.floorPrice} <span className="text-[8px] text-slate-400 font-sans">TON</span>
-            </span>
-          </div>
-
-          <div className="flex flex-col items-end">
-            <span className="text-[7.5px] uppercase tracking-widest text-slate-400 font-semibold">
-              24h Volume
-            </span>
-            <span className="text-[11px] font-bold text-white font-mono flex items-center gap-1">
-              {collection.volume} <span className="text-[8px] font-medium text-slate-400 font-sans">TON</span>
-              {collection.change && (
-                <span
-                  className={cn(
-                    "text-[8px] font-bold",
-                    isPositiveChange ? "text-emerald-400" : "text-rose-400"
-                  )}
-                >
-                  {collection.change}
-                </span>
-              )}
-            </span>
-          </div>
-        </div>
+        <span className="text-xs font-semibold text-[#3390EC] hover:text-[#65B8FF] transition-colors">
+          View Collection &rarr;
+        </span>
       </div>
     </motion.div>
   );
 };
+
+export default CollectionCard;

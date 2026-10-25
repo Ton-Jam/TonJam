@@ -12,7 +12,6 @@ import { TJ_COIN_ICON } from "@/constants";
 
 // Home Sections
 import { HomeGenreFilterBar } from "@/components/home/HomeGenreFilterBar";
-import { FeaturedMusicHero } from "@/components/home/FeaturedMusicHero";
 import { MadeForYouSection } from "@/components/home/MadeForYouSection";
 import { RecentlyPlayedSection } from "@/components/home/RecentlyPlayedSection";
 import { TrendingMusicSection } from "@/components/home/TrendingMusicSection";
@@ -91,11 +90,6 @@ export const HomePage: React.FC = () => {
             activeCategory={activeCategory}
             onSelectCategory={setActiveCategory}
           />
-
-          {/* 4. FEATURED MUSIC HERO (FIGMA DISCOVERY BANNER) */}
-          {(activeCategory === "All" || activeCategory === "Music") && (
-            <FeaturedMusicHero />
-          )}
 
           {/* 3. QUICK "JUMP BACK IN" CARD (IF TRACK ACTIVE) */}
           {currentTrack && (

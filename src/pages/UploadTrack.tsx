@@ -41,6 +41,8 @@ export default function UploadTrackScreen() {
   // Single Mode State
   const [title, setTitle] = useState("");
   const [genre, setGenre] = useState("");
+  const [tags, setTags] = useState("");
+  const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split('T')[0]);
   const [description, setDescription] = useState("");
   const [lyrics, setLyrics] = useState("");
   const [price, setPrice] = useState("5");
@@ -88,6 +90,8 @@ export default function UploadTrackScreen() {
           id: trackId,
           title: file.name.replace(/\.[^/.]+$/, ""),
           genre: genre || "Electronic",
+          tags: tags || "",
+          releaseDate: releaseDate || new Date().toISOString().split('T')[0],
           audioFile: file,
           coverFile: coverFile,
           coverPreview: coverPreview
@@ -155,6 +159,8 @@ export default function UploadTrackScreen() {
     id: string;
     title: string;
     genre: string;
+    tags: string;
+    releaseDate: string;
     audioFile: File;
     coverFile: File | null;
     coverPreview: string | null;
@@ -220,6 +226,8 @@ export default function UploadTrackScreen() {
         id: Math.random().toString(36).substr(2, 9),
         title: file.name.replace(/\.[^/.]+$/, ""),
         genre: genre || "Electronic",
+        tags: tags || "",
+        releaseDate: releaseDate || new Date().toISOString().split('T')[0],
         audioFile: file,
         coverFile: coverFile,
         coverPreview: coverPreview
@@ -290,6 +298,8 @@ export default function UploadTrackScreen() {
           streams: 0,
           likes: 0,
           genre,
+          tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+          releaseDate: releaseDate || new Date().toISOString().split('T')[0],
           description,
           lyrics,
           price,
@@ -329,6 +339,8 @@ export default function UploadTrackScreen() {
             streams: 0,
             likes: 0,
             genre: track.genre,
+            tags: track.tags ? track.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
+            releaseDate: track.releaseDate || new Date().toISOString().split('T')[0],
             description: description,
             price: price,
             editions: editions,
@@ -412,6 +424,8 @@ export default function UploadTrackScreen() {
         streams: 0,
         likes: 0,
         genre,
+        tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+        releaseDate: releaseDate || new Date().toISOString().split('T')[0],
         description,
         lyrics,
         price,
@@ -615,6 +629,31 @@ export default function UploadTrackScreen() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    Tags (comma-separated)
+                  </label>
+                  <input
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-500/50 transition-all text-xs font-bold"
+                    placeholder="e.g. ambient, synthwave, instrumental"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    Release Date
+                  </label>
+                  <input
+                    type="date"
+                    value={releaseDate}
+                    onChange={(e) => setReleaseDate(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-500/50 transition-all text-xs font-bold text-white [color-scheme:dark]"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
                   <FileText className="w-3 h-3" /> Description
@@ -785,6 +824,8 @@ export default function UploadTrackScreen() {
                       id: Math.random().toString(36).substr(2, 9),
                       title: file.name.replace(/\.[^/.]+$/, ""),
                       genre: genre || "Electronic",
+                      tags: tags || "",
+                      releaseDate: releaseDate || new Date().toISOString().split('T')[0],
                       audioFile: file,
                       coverFile: coverFile,
                       coverPreview: coverPreview
@@ -844,12 +885,27 @@ export default function UploadTrackScreen() {
                           className="w-full bg-transparent border-none outline-none text-xs font-bold text-white placeholder:text-white/20 p-0"
                           placeholder="Track Title"
                         />
-                        <input 
-                          value={track.genre}
-                          onChange={(e) => updateBatchTrack(track.id, { genre: e.target.value })}
-                          className="w-full bg-transparent border-none outline-none text-[10px] font-bold text-white/40 placeholder:text-white/10 p-0"
-                          placeholder="Genre"
-                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <input 
+                            value={track.genre}
+                            onChange={(e) => updateBatchTrack(track.id, { genre: e.target.value })}
+                            className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 outline-none text-[10px] font-bold text-white/80"
+                            placeholder="Genre"
+                          />
+                          <input 
+                            value={track.tags}
+                            onChange={(e) => updateBatchTrack(track.id, { tags: e.target.value })}
+                            className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 outline-none text-[10px] font-bold text-white/80"
+                            placeholder="Tags (comma-separated)"
+                          />
+                          <input 
+                            type="date"
+                            value={track.releaseDate}
+                            onChange={(e) => updateBatchTrack(track.id, { releaseDate: e.target.value })}
+                            className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 outline-none text-[10px] font-bold text-white/80 [color-scheme:dark]"
+                            placeholder="Release Date"
+                          />
+                        </div>
                       </div>
                       <button 
                         onClick={() => removeBatchTrack(track.id)}

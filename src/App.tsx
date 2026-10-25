@@ -25,6 +25,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 
 import AppRouter from "@/router/AppRouter";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 import { I18nProvider } from "@/contexts/I18nContext";
 

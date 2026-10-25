@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Loader2, CheckCircle2, AlertCircle, Clock, ExternalLink, RefreshCw, X } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle, Clock, ExternalLink, RefreshCw, X, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type TransactionStatus = 'idle' | 'pending' | 'confirmed' | 'failed';
+export type TransactionStatus = 'idle' | 'pending' | 'confirmed' | 'failed' | 'error';
 
 interface TransactionStatusIndicatorProps {
   status: TransactionStatus;
@@ -33,6 +33,7 @@ export const TransactionStatusIndicator: React.FC<TransactionStatusIndicatorProp
   }
 
   const explorerBase = isTestnet ? 'https://testnet.tonscan.org/tx' : 'https://tonscan.org/tx';
+  const isErrorState = status === 'failed' || status === 'error';
 
   const statusConfig = {
     pending: {
@@ -48,10 +49,16 @@ export const TransactionStatusIndicator: React.FC<TransactionStatusIndicatorProp
       defaultDesc: 'Successfully settled on the TON blockchain.',
     },
     failed: {
-      icon: <AlertCircle className="w-5 h-5 text-rose-400" />,
-      bg: 'bg-rose-500/10 border-rose-500/30 text-rose-400',
-      defaultTitle: 'Transaction Failed',
-      defaultDesc: errorMessage || 'The transaction was rejected or failed to settle.',
+      icon: <ShieldAlert className="w-5 h-5 text-rose-400 animate-pulse" />,
+      bg: 'bg-rose-500/10 border-rose-500/30 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.2)]',
+      defaultTitle: 'Transaction Error',
+      defaultDesc: errorMessage || 'The transaction failed or was rejected. Re-trigger attempt below.',
+    },
+    error: {
+      icon: <ShieldAlert className="w-5 h-5 text-rose-400 animate-pulse" />,
+      bg: 'bg-rose-500/10 border-rose-500/30 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.2)]',
+      defaultTitle: 'Transaction Error',
+      defaultDesc: errorMessage || 'The transaction failed or was rejected. Re-trigger attempt below.',
     },
   };
 
@@ -117,7 +124,7 @@ export const TransactionStatusIndicator: React.FC<TransactionStatusIndicatorProp
           )}
         </div>
 
-        {(txHash || (status === 'failed' && onRetry)) && (
+        {(txHash || isErrorState) && (
           <div className="flex items-center justify-between pt-2 border-t border-white/10 text-xs">
             {txHash ? (
               <a
@@ -136,14 +143,15 @@ export const TransactionStatusIndicator: React.FC<TransactionStatusIndicatorProp
               </span>
             )}
 
-            {status === 'failed' && onRetry && (
+            {isErrorState && onRetry && (
               <button
                 type="button"
                 onClick={onRetry}
-                className="flex items-center gap-1 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-sm active:scale-95 ml-auto"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-md active:scale-95 ml-auto"
+                title="Re-trigger original transaction attempt"
               >
-                <RefreshCw className="w-3 h-3" />
-                <span>Retry</span>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" />
+                <span>Retry Transaction</span>
               </button>
             )}
           </div>

@@ -22,6 +22,7 @@ export const useMarketplace = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [firestoreNFTs, setFirestoreNFTs] = useState<NFTItem[]>([]);
+  const [collectionNFTCounts, setCollectionNFTCounts] = useState<Record<string, number>>({});
 
   // Real TON Connect wallet hook
   const walletAddress = useTonAddress();
@@ -114,7 +115,46 @@ export const useMarketplace = () => {
       }
     }
 
+    async function loadCollectionNFTIndices() {
+      const counts: Record<string, number> = {};
+
+      try {
+        const colSnap = await getDocs(query(collection(db, "collections"), limit(50)));
+        if (!colSnap.empty) {
+          colSnap.forEach((docSnap) => {
+            const data = docSnap.data();
+            const total = data.totalNFTs || data.itemsCount || (Array.isArray(data.nftIds) ? data.nftIds.length : 0);
+            if (total) {
+              counts[docSnap.id] = total;
+            }
+          });
+        }
+      } catch (error) {
+        handleFirestoreError(error, OperationType.LIST, "collections");
+      }
+
+      try {
+        const nftsSnap = await getDocs(query(collection(db, "nfts"), limit(100)));
+        if (!nftsSnap.empty) {
+          nftsSnap.forEach((docSnap) => {
+            const data = docSnap.data();
+            const colId = data.collectionId || data.albumId;
+            if (colId) {
+              counts[colId] = (counts[colId] || 0) + 1;
+            }
+          });
+        }
+      } catch (error) {
+        handleFirestoreError(error, OperationType.LIST, "nfts");
+      }
+
+      if (isMounted && Object.keys(counts).length > 0) {
+        setCollectionNFTCounts(counts);
+      }
+    }
+
     loadFirestoreNFTs();
+    loadCollectionNFTIndices();
 
     return () => {
       isMounted = false;
@@ -280,6 +320,7 @@ export const useMarketplace = () => {
     recentSales: MOCK_SALES,
     analyticsStats,
     genreCategories: GENRE_CATEGORIES,
+    collectionNFTCounts,
     handleResetFilters
   };
 };
