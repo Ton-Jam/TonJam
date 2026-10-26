@@ -1,406 +1,343 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Bell, 
-  Search, 
-  Wifi, 
-  WifiOff, 
-  ChevronRight, 
   Plus, 
-  Globe, 
+  Radio, 
+  TrendingUp, 
+  Users, 
+  FolderOpen, 
+  Loader2, 
   Sparkles,
-  RefreshCw,
-  FolderOpen
+  ArrowRight,
+  Music2,
+  X
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudio } from '@/contexts/AudioContext';
-
-// Import our custom JamSpace modules
-import { useJamSpaceData } from './hooks/useJamSpaceData';
-import { CommunityHero } from './sections/CommunityHero';
-import { QuickActions } from './sections/QuickActions';
-import { CategoryChips } from './sections/CategoryChips';
-import { LiveSpaces } from './sections/LiveSpaces';
-import { TrendingDiscussions } from './sections/TrendingDiscussions';
-import { FeaturedPosts } from './sections/FeaturedPosts';
-import { FanFeed } from './sections/FanFeed';
-import { ArtistPosts } from './sections/ArtistPosts';
-import { NFTCommunity } from './sections/NFTCommunity';
-import { MusicNews } from './sections/MusicNews';
-import { UpcomingEvents } from './sections/UpcomingEvents';
-import { SuggestedCommunities } from './sections/SuggestedCommunities';
-import { Leaderboard } from './sections/Leaderboard';
-
-// Import our shared components
-import { CreatePostModal } from './components/CreatePostModal';
-import { CreateJamSpaceModal } from './components/CreateJamSpaceModal';
-import { NotificationsPanel } from './components/NotificationsPanel';
-import { PostCard } from './components/PostCard';
-import { JamSpaceHeader } from './components/JamSpaceHeader';
-import { JamSpaceQuickCompose } from './components/JamSpaceQuickCompose';
+import { useJamSpaceFeed } from '@/hooks/useJamSpaceFeed';
+import { usePostActions } from '@/hooks/usePostActions';
+import { JamFeedHeader } from '@/components/jamspace/JamFeedHeader';
+import { JamComposer } from '@/components/jamspace/JamComposer';
+import { JamPostCard } from '@/components/jamspace/JamPostCard';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { 
-  HeroSkeleton, 
-  LiveSpacesSkeleton, 
-  FeedSkeleton, 
-  LeaderboardSkeleton 
-} from './components/Skeletons';
+import { FeedSkeleton } from './components/Skeletons';
+import { SocialPost } from '@/types/social';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
-const JamSpaceMain: React.FC = () => {
+export const JamSpaceMain: React.FC = () => {
   const navigate = useNavigate();
-  const { userProfile } = useAuth();
-  const { addNotification, currentTrack } = useAudio();
-  const [isOnline, setIsOnline] = useState(true);
+  const { userProfile, user } = useAuth();
+  const { addNotification, artists } = useAudio();
 
-  // Core state from custom hook
-  const jamData = useJamSpaceData(userProfile || undefined);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeQuotePost, setActiveQuotePost] = useState<SocialPost | null>(null);
+  const [activeReplyPost, setActiveReplyPost] = useState<SocialPost | null>(null);
+  const [isMobileComposeOpen, setIsMobileComposeOpen] = useState(false);
 
-  // Modal & Drawer triggers
-  const [isComposeOpen, setIsComposeOpen] = useState(false);
-  const [isCreateSpaceOpen, setIsCreateSpaceOpen] = useState(false);
-  const [isNewsOpen, setIsNewsOpen] = useState(false);
+  // Core feed hook
+  const {
+    activeTab,
+    setActiveTab,
+    posts,
+    isLoading,
+    isRefreshing,
+    isLoadingMore,
+    hasMore,
+    error,
+    refreshFeed,
+    loadMore,
+    prependPost,
+    removePostFromFeed,
+    updatePostInFeed
+  } = useJamSpaceFeed('for-you');
 
-  const categories = [
-    'All', 'For You', 'Following', 'Artists', 'Trending', 'Fans', 'Spaces', 'NFTs', 
-    'Afrobeats', 'Hip-Hop', 'Amapiano', 'Pop', 'Rock', 'Electronic'
-  ];
+  // Core actions hook
+  const {
+    handleToggleLike,
+    handleToggleRepost,
+    handleToggleBookmark,
+    handleShare,
+    handleDelete,
+    handleReport
+  } = usePostActions(updatePostInFeed);
 
-  const handleCreatePostSubmit = (content: string, attachments?: any[], pollOptions?: string[]) => {
-    jamData.handleCreatePost(content, attachments, pollOptions);
-    jamData.setActiveCategory('All');
-    addNotification('Post shared with the community!', 'success');
-  };
-
-  const handleCreateSpaceSubmit = async (data: {
-    name: string;
-    description: string;
-    visibility: 'public' | 'private';
-    coverUrl?: string;
-  }) => {
-    const newSpace = await jamData.handleCreateSpace(
-      data.name,
-      data.description,
-      data.visibility,
-      data.coverUrl
+  // Search filter
+  const filteredPosts = useMemo(() => {
+    if (!searchQuery.trim()) return posts;
+    const q = searchQuery.toLowerCase();
+    return posts.filter((p) => 
+      p.text.toLowerCase().includes(q) ||
+      p.author.name.toLowerCase().includes(q) ||
+      p.author.username.toLowerCase().includes(q)
     );
-    addNotification(`JamSpace "${data.name}" is now live!`, 'success');
-    if (newSpace?.id) {
-      navigate(`/space/${newSpace.id}`);
-    }
+  }, [posts, searchQuery]);
+
+  const handlePostCreated = (newPost: SocialPost) => {
+    prependPost(newPost);
+    setActiveQuotePost(null);
+    setActiveReplyPost(null);
+    setIsMobileComposeOpen(false);
   };
 
-  const toggleConnection = () => {
-    const nextState = !isOnline;
-    setIsOnline(nextState);
-    if (nextState) {
-      addNotification('Signal restored. Reconnected to TonJam nodes.', 'success');
-    } else {
-      addNotification('Offline mode. Browsing local cached transmissions.', 'warning');
-    }
+  const handleInitiateQuote = (post: SocialPost) => {
+    setActiveQuotePost(post);
+    setActiveReplyPost(null);
+    // Scroll smoothly to composer
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleInitiateReply = (post: SocialPost) => {
+    setActiveReplyPost(post);
+    setActiveQuotePost(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-32">
+    <div className="min-h-screen bg-[#030B17] text-white pb-32">
+      {/* Global Page Header */}
       <PageHeader 
         title="JamSpace" 
         showBack={false}
         rightContent={
           <button 
-            onClick={() => setIsComposeOpen(true)}
-            className="p-2 rounded-full text-[#00B4D8] bg-[#0088CC]/10 hover:bg-[#0088CC]/20 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none"
-            aria-label="Create Post"
-            title="Create Post"
+            type="button"
+            onClick={() => setIsMobileComposeOpen(true)}
+            className="md:hidden p-2 rounded-full text-[#00B4D8] bg-[#0088CC]/10 hover:bg-[#0088CC]/20 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+            aria-label="New Post"
           >
             <Plus className="w-5 h-5" strokeWidth={2.5} />
           </button>
         }
       />
-      <PageLayout containerClassName="space-y-8 relative pt-2" topSpacing="none">
 
-        {/* Skeletons vs Normal view loading toggle */}
-        {jamData.isLoading ? (
-          <div className="space-y-8">
-            <HeroSkeleton />
-            <div className="h-20 bg-slate-900 border border-white/[0.03] rounded-[10px] animate-pulse" />
-            <LiveSpacesSkeleton />
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <div className="lg:col-span-8 space-y-8">
-                <FeedSkeleton />
-              </div>
-              <div className="lg:col-span-4">
-                <LeaderboardSkeleton />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-8">
-            
-            {/* 1. COMMUNITY HERO */}
-            <CommunityHero 
-              user={jamData.user}
-              activeMembers={2450}
-              liveSpacesCount={jamData.spaces.filter(s => s.isLive).length}
-              trendingHashtag="#TONGenesis"
-            />
+      <PageLayout containerClassName="max-w-6xl mx-auto px-3 sm:px-6 relative pt-2" topSpacing="none">
+        {/* Sticky For You / Following Header */}
+        <JamFeedHeader
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onRefresh={refreshFeed}
+          isRefreshing={isRefreshing}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
 
-            {/* 2. QUICK ACTIONS */}
-            <QuickActions 
-              onStartPost={() => setIsComposeOpen(true)}
-              onCreateSpace={() => setIsCreateSpaceOpen(true)}
-              onJoinSpace={() => {
-                const live = jamData.spaces.find(s => s.isLive);
-                if (live) jamData.handleJoinSpace(live.id);
-              }}
-              onCreateCommunity={() => addNotification('Lounge created. Invite friends to populate!', 'success')}
-              onDiscoverArtists={() => addNotification('Searching verified artists node...', 'info')}
-              onInviteFriends={() => addNotification('Referral code copied to clipboard!', 'success')}
-            />
-
-            {/* Offline Mode Banner */}
-            {!isOnline && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-red-500/15 border border-red-500/20 text-red-400 p-4 rounded-[10px] flex items-center justify-between text-xs"
-              >
-                <div className="flex items-center gap-2">
-                  <WifiOff className="w-4 h-4 text-red-400 animate-pulse" />
-                  <span>Currently navigating offline cached transmissions. New posts won't sync until online state is toggled.</span>
-                </div>
-                <button 
-                  onClick={() => setIsOnline(true)}
-                  className="px-3 py-1 bg-red-500/20 text-red-300 font-bold uppercase rounded-[10px] hover:bg-red-500/30 cursor-pointer"
-                >
-                  Connect
-                </button>
-              </motion.div>
-            )}
-
-            {/* 3. FILTER CHIPS & SEARCH CONTROLLER */}
-            <div className="space-y-4">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <JamSpaceHeader 
-                  searchQuery={jamData.searchQuery}
-                  setSearchQuery={jamData.setSearchQuery}
-                  onJoinCommunity={jamData.handleToggleCommunity}
-                  joinedCommunityIds={jamData.communities.filter(c => c.joined).map(c => c.id)}
-                  activeCategory={jamData.activeCategory}
-                  setActiveCategory={jamData.setActiveCategory}
-                />
-
-                <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
-                  <button
-                    onClick={() => jamData.setShowNotifications(true)}
-                    aria-label="View notifications"
-                    className="relative p-3 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-[#00B4D8] transition-colors cursor-pointer rounded-xl border-none"
-                  >
-                    <Bell className="w-4 h-4" />
-                    {jamData.notifications.some(n => !n.read) && (
-                      <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#00B4D8] animate-pulse" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Horizontally Scrolling Category Chips */}
-              <CategoryChips 
-                categories={categories}
-                activeCategory={jamData.activeCategory}
-                onSelectCategory={jamData.setActiveCategory}
+        {/* Two-Column Responsive Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 pt-3">
+          
+          {/* Main Feed Column (Span 8) */}
+          <main className="lg:col-span-8 space-y-4">
+            {/* Inline Desktop & Tablet Composer */}
+            <div className="hidden md:block">
+              <JamComposer
+                onPostCreated={handlePostCreated}
+                replyToPost={activeReplyPost}
+                quotePost={activeQuotePost}
+                onCancelReplyOrQuote={() => {
+                  setActiveReplyPost(null);
+                  setActiveQuotePost(null);
+                }}
               />
             </div>
 
-            {/* MAIN CONTENT BLOCK - TWO COLUMNS */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              
-              {/* LEFT MAIN GRID STREAM (Col span 8) */}
-              <div className="lg:col-span-8 space-y-8">
-                
-                {/* 4. QUICK COMPOSE */}
-                <JamSpaceQuickCompose onClick={() => setIsComposeOpen(true)} onSubmit={handleCreatePostSubmit} />
-
-                {/* 5. LIVE SPACES */}
-                <LiveSpaces 
-                  spaces={jamData.spaces}
-                  activeSpace={jamData.activeSpace}
-                  onCreateSpace={() => setIsCreateSpaceOpen(true)}
-                  onJoinSpace={(spaceId) => {
-                    jamData.handleJoinSpace(spaceId);
-                    navigate(`/space/${spaceId}`);
-                  }}
-                />
-
-                {/* 5. TRENDING DISCUSSIONS */}
-                <TrendingDiscussions />
-
-                {/* Dynamic Posts Stream with custom empty states */}
-                <div className="space-y-6">
-                  {jamData.posts.length === 0 ? (
-                    <div className="bg-white/[0.03] rounded-2xl p-10 sm:p-12 text-center text-zinc-400 border-none">
-                      <FolderOpen className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
-                      <h4 className="text-sm font-bold text-white uppercase tracking-wider">No matching signals</h4>
-                      <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto leading-relaxed">
-                        The spectrum in this filter looks quiet. Clear your search parameters or start a new broadcast.
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Pinned/Featured posts (Large cards) */}
-                      {jamData.activeCategory === 'All' && (
-                        <FeaturedPosts 
-                          posts={jamData.posts}
-                          currentUserId={jamData.user.id}
-                          onLike={jamData.handleLikePost}
-                          onRepost={jamData.handleRepostPost}
-                          onBookmark={jamData.handleBookmarkPost}
-                          onVote={jamData.handleVotePoll}
-                        />
-                      )}
-
-                      {/* Chronological Fan Feed (When filtered or in normal feed) */}
-                      {(jamData.activeCategory === 'All' || jamData.activeCategory === 'Fans') && (
-                        <FanFeed 
-                          posts={jamData.posts}
-                          currentUserId={jamData.user.id}
-                          onLike={jamData.handleLikePost}
-                          onRepost={jamData.handleRepostPost}
-                          onBookmark={jamData.handleBookmarkPost}
-                          onVote={jamData.handleVotePoll}
-                        />
-                      )}
-
-                      {/* Verified Creator announcements (Artist Posts) */}
-                      {(jamData.activeCategory === 'All' || jamData.activeCategory === 'Artists' || jamData.activeCategory === 'Following') && (
-                        <ArtistPosts 
-                          posts={jamData.posts}
-                          currentUserId={jamData.user.id}
-                          onLike={jamData.handleLikePost}
-                          onRepost={jamData.handleRepostPost}
-                          onBookmark={jamData.handleBookmarkPost}
-                          onVote={jamData.handleVotePoll}
-                        />
-                      )}
-
-                      {/* Standard Post Card Rendering for specific category streams (e.g. Genre feeds) */}
-                      {jamData.activeCategory !== 'All' && jamData.activeCategory !== 'Artists' && jamData.activeCategory !== 'Fans' && (
-                        <div className="space-y-4">
-                          <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
-                            #{jamData.activeCategory} Transmission Stream
-                          </h3>
-                          <div className="grid grid-cols-1 gap-4">
-                            {jamData.posts.map((post, idx) => (
-                              <motion.div
-                                key={post.id}
-                                initial={{ opacity: 0, y: 16 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.4, delay: idx * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                              >
-                                <PostCard 
-                                  post={post}
-                                  currentUserId={jamData.user.id}
-                                  onLike={jamData.handleLikePost}
-                                  onRepost={jamData.handleRepostPost}
-                                  onBookmark={jamData.handleBookmarkPost}
-                                  onVote={jamData.handleVotePoll}
-                                />
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
+            {/* Mobile Composer Modal / Drawer */}
+            {isMobileComposeOpen && (
+              <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md p-4 flex items-center justify-center md:hidden">
+                <div className="w-full max-w-lg bg-[#0A1628] rounded-2xl p-4 space-y-3 relative shadow-2xl">
+                  <div className="flex items-center justify-between pb-2">
+                    <h3 className="text-sm font-bold text-white">Broadcast Transmission</h3>
+                    <button
+                      type="button"
+                      onClick={() => setIsMobileComposeOpen(false)}
+                      className="p-1.5 text-zinc-400 hover:text-white rounded-full transition-colors cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <JamComposer
+                    onPostCreated={handlePostCreated}
+                    replyToPost={activeReplyPost}
+                    quotePost={activeQuotePost}
+                    onCancelReplyOrQuote={() => {
+                      setActiveReplyPost(null);
+                      setActiveQuotePost(null);
+                    }}
+                    isModal={true}
+                  />
                 </div>
-
-                {/* 9. NFT COMMUNITY */}
-                <NFTCommunity />
-
-                {/* 10. MUSIC NEWS */}
-                <MusicNews />
-
               </div>
+            )}
 
-              {/* RIGHT SIDEBAR COLUMN (Col span 4) */}
-              <div className="lg:col-span-4 space-y-8">
-                
-                {/* 11. UPCOMING EVENTS */}
-                <UpcomingEvents 
-                  events={jamData.events}
-                  onToggleEvent={jamData.handleToggleEvent}
-                />
-
-                {/* 12. SUGGESTED COMMUNITIES */}
-                <SuggestedCommunities 
-                  communities={jamData.communities}
-                  onToggleCommunity={jamData.handleToggleCommunity}
-                />
-
-                {/* 13. LEADERBOARD */}
-                <Leaderboard />
-
+            {/* Feed Loading Skeletons */}
+            {isLoading ? (
+              <FeedSkeleton />
+            ) : error ? (
+              <div className="p-8 text-center rounded-2xl bg-white/[0.02] space-y-3">
+                <p className="text-sm font-semibold text-rose-400">{error}</p>
+                <button
+                  type="button"
+                  onClick={refreshFeed}
+                  className="px-4 py-2 rounded-full bg-[#0088CC] text-white text-xs font-bold transition-all cursor-pointer hover:bg-[#0077B5]"
+                >
+                  Retry Signal
+                </button>
               </div>
+            ) : filteredPosts.length === 0 ? (
+              /* Empty Feed State */
+              <div className="p-12 text-center rounded-2xl bg-white/[0.02] space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/[0.04] flex items-center justify-center mx-auto text-[#00B4D8]">
+                  <Radio className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-bold text-white">
+                  {activeTab === 'following' ? 'No Transmissions from Followed Accounts' : 'No Posts Yet in JamSpace'}
+                </h3>
+                <p className="text-xs text-zinc-400 max-w-sm mx-auto leading-relaxed">
+                  {activeTab === 'following' 
+                    ? 'Follow your favorite music producers, artists, and NFT collectors to see their broadcasts here.'
+                    : 'Be the first to share an audio clip, music track, or sonic thought with the TonJam community!'}
+                </p>
+                {activeTab === 'following' && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('for-you')}
+                    className="px-4 py-2 rounded-full bg-[#0088CC] text-white text-xs font-bold transition-all cursor-pointer hover:bg-[#0077B5]"
+                  >
+                    Explore For You Feed
+                  </button>
+                )}
+              </div>
+            ) : (
+              /* Post Stream */
+              <div className="space-y-3">
+                {filteredPosts.map((post) => (
+                  <JamPostCard
+                    key={post.id}
+                    post={post}
+                    onLike={handleToggleLike}
+                    onRepost={handleToggleRepost}
+                    onBookmark={handleToggleBookmark}
+                    onShare={handleShare}
+                    onDelete={handleDelete}
+                    onReport={handleReport}
+                    onReply={handleInitiateReply}
+                    onQuote={handleInitiateQuote}
+                  />
+                ))}
+
+                {/* Cursor Pagination Trigger */}
+                {hasMore && (
+                  <div className="pt-4 pb-6 text-center">
+                    <button
+                      type="button"
+                      onClick={loadMore}
+                      disabled={isLoadingMore}
+                      className="min-h-[44px] px-6 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 text-xs font-bold text-zinc-300 hover:text-white transition-all cursor-pointer flex items-center gap-2 mx-auto disabled:opacity-50"
+                    >
+                      {isLoadingMore ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-[#00B4D8]" />
+                          <span>Retrieving Transmissions...</span>
+                        </>
+                      ) : (
+                        <span>Load More Posts</span>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </main>
+
+          {/* Desktop Right Rail (Col Span 4) */}
+          <aside className="hidden lg:block lg:col-span-4 space-y-5">
+            {/* Live Audio Spaces Card */}
+            <div className="p-4 rounded-2xl bg-[#0A1628]/70 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white">
+                  <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+                  <span>Live JamSpaces</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/space-room')}
+                  className="text-xs font-semibold text-[#00B4D8] hover:underline cursor-pointer"
+                >
+                  View All
+                </button>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Join live audio hangouts hosted by verified music artists and producers.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate('/space-room')}
+                className="w-full min-h-[40px] px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs font-bold text-white transition-all flex items-center justify-between cursor-pointer"
+              >
+                <span>Browse Live Rooms</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#00B4D8]" />
+              </button>
             </div>
 
-            {/* Clean bottom space */}
-            <div className="py-6 text-center text-xs text-zinc-500">
-              <span>TonJam &copy; {new Date().getFullYear()}</span>
+            {/* Suggested Artists to Follow */}
+            {artists && artists.length > 0 && (
+              <div className="p-4 rounded-2xl bg-[#0A1628]/70 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white">
+                  <Users className="w-4 h-4 text-[#00B4D8]" />
+                  <span>Suggested Creators</span>
+                </div>
+                <div className="space-y-2.5">
+                  {artists.slice(0, 4).map((artist) => (
+                    <div 
+                      key={artist.uid || artist.id}
+                      onClick={() => navigate(`/artist/${artist.uid || artist.id}`)}
+                      className="flex items-center justify-between gap-2 p-1.5 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-800 shrink-0">
+                          <img src={artist.avatar} alt={artist.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs font-bold text-white truncate">{artist.name}</span>
+                            <VerifiedBadge isVerified={true} size={12} className="shrink-0" />
+                          </div>
+                          <p className="text-[11px] text-zinc-400 truncate">{artist.genre || 'Electronic'}</p>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-bold text-[#00B4D8] shrink-0">View</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Trending Sonic Topics */}
+            <div className="p-4 rounded-2xl bg-[#0A1628]/70 space-y-2.5">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white">
+                <TrendingUp className="w-4 h-4 text-amber-400" />
+                <span>Trending in Music</span>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { tag: '#TONGenesis', subtitle: '1.4k broadcasts' },
+                  { tag: '#AmapianoVibes', subtitle: '890 broadcasts' },
+                  { tag: '#SonicNFTs', subtitle: '620 broadcasts' },
+                  { tag: '#Web3Audio', subtitle: '450 broadcasts' }
+                ].map((topic, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setSearchQuery(topic.tag)}
+                    className="p-2 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer text-left"
+                  >
+                    <p className="text-xs font-bold text-white hover:text-[#00B4D8] transition-colors">{topic.tag}</p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">{topic.subtitle}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-
-          </div>
-        )}
-
-
-      {/* CREATE POST MODAL OVERLAY */}
-      <AnimatePresence>
-        {isComposeOpen && (
-          <CreatePostModal 
-            isOpen={isComposeOpen}
-            onClose={() => setIsComposeOpen(false)}
-            onSubmit={handleCreatePostSubmit}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* CREATE JAMSPACE MODAL OVERLAY */}
-      <AnimatePresence>
-        {isCreateSpaceOpen && (
-          <CreateJamSpaceModal 
-            isOpen={isCreateSpaceOpen}
-            onClose={() => setIsCreateSpaceOpen(false)}
-            onSubmit={handleCreateSpaceSubmit}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* NOTIFICATIONS DRAWERS */}
-      <AnimatePresence>
-        {jamData.showNotifications && (
-          <NotificationsPanel 
-            isOpen={jamData.showNotifications}
-            onClose={() => jamData.setShowNotifications(false)}
-            notifications={jamData.notifications}
-            onMarkRead={jamData.handleMarkNotificationRead}
-            onMarkAllRead={jamData.handleMarkAllNotificationsRead}
-          />
-        )}
-      </AnimatePresence>
-    </PageLayout>
-
-      {/* Floating Create Post Button (FAB) */}
-      <div className="fixed bottom-24 right-4 sm:right-8 z-40">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsComposeOpen(true)}
-          className="flex items-center gap-2 px-5 py-3.5 bg-[#00B4D8] hover:bg-[#0096B4] text-black font-extrabold text-sm rounded-full shadow-xl shadow-[#00B4D8]/30 cursor-pointer transition-all border-none"
-          aria-label="Create Post"
-        >
-          <Plus className="w-5 h-5" strokeWidth={3} />
-          <span className="hidden sm:inline">New Post</span>
-        </motion.button>
-      </div>
+          </aside>
+        </div>
+      </PageLayout>
     </div>
   );
 };

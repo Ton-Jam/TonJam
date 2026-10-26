@@ -249,6 +249,9 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/favorite-artists" element={<PageWrapper><ProtectedRoute><FavoriteArtists /></ProtectedRoute></PageWrapper>} />
                   <Route path="/artist-minting" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin', 'collector']}><MintNFT /></ProtectedRoute></PageWrapper>} />
                   <Route path="/library" element={<PageWrapper><ProtectedRoute><Library /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/local-tracks" element={<PageWrapper><ProtectedRoute><LocalTracks /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/library/local" element={<PageWrapper><ProtectedRoute><LocalTracks /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/library/local-tracks" element={<PageWrapper><ProtectedRoute><LocalTracks /></ProtectedRoute></PageWrapper>} />
                   <Route path="/library/downloads" element={<PageWrapper><ProtectedRoute><DownloadedTracks /></ProtectedRoute></PageWrapper>} />
                   <Route path="/library/recently-played" element={<PageWrapper><ProtectedRoute><RecentlyPlayedTracks /></ProtectedRoute></PageWrapper>} />
                   <Route path="/library/history" element={<PageWrapper><ProtectedRoute><RecentlyPlayedTracks /></ProtectedRoute></PageWrapper>} />

@@ -58,9 +58,8 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
       <input
         ref={inputRef}
         type="file"
-        accept={accept}
+        {...(isFolder ? { webkitdirectory: '', directory: '' } : { accept })}
         multiple={multiple}
-        {...(isFolder ? { webkitdirectory: '', directory: '' } : {})}
         onChange={handleFileChange}
         className="hidden"
       />

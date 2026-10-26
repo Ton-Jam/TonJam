@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAudio } from '@/contexts/AudioContext';
+import { useLibraryScanner } from '@/hooks/useLibraryScanner';
 import { BackButton } from '@/components/BackButton';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SpotifyTrackRow } from './Library/components/SpotifyTrackRow';
@@ -14,12 +15,15 @@ import {
   Play, 
   Shuffle, 
   CheckCircle2,
-  Music2
+  Music2,
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import { Track } from '@/types';
 
 export const LocalTracks: React.FC = () => {
   const navigate = useNavigate();
+  const scanner = useLibraryScanner();
 
   const {
     setHeaderTitle,
@@ -27,14 +31,12 @@ export const LocalTracks: React.FC = () => {
     isShuffle,
     toggleShuffle,
     localTracks,
-    scanLocalDirectory,
-    importLocalFiles,
+    loadLocalTracks,
     removeLocalTrack,
     clearLocalTracks
   } = useAudio();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [isScanning, setIsScanning] = useState(false);
 
   // Set header title on mount
   React.useEffect(() => {
@@ -64,25 +66,76 @@ export const LocalTracks: React.FC = () => {
     }
   };
 
+  const folderInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
   const handleOpenDirectory = async () => {
-    setIsScanning(true);
+    const isIframe = typeof window !== 'undefined' ? window.self !== window.top : false;
+    // In iframe previews, direct window.showDirectoryPicker() throws SecurityError.
+    // Triggering the folder input directly preserves user gesture activation.
+    if (isIframe) {
+      console.log('[LocalTracks] Iframe sandbox detected: Opening directory input directly to avoid SecurityError.');
+      folderInputRef.current?.click();
+      return;
+    }
+
     try {
-      if (typeof window !== 'undefined' && 'showDirectoryPicker' in window) {
-        await scanLocalDirectory();
-      } else {
-        // Fallback handled via FileSelector
+      const res = await scanner.scanDirectory();
+      if (res.permissionError === 'security-iframe' || res.permissionError === 'unsupported') {
+        folderInputRef.current?.click();
+      } else if (res.tracks && res.tracks.length > 0) {
+        await loadLocalTracks();
       }
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
-        // Fallback
+        folderInputRef.current?.click();
       }
-    } finally {
-      setIsScanning(false);
+    }
+  };
+
+  const handleFolderChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const imported = await scanner.scanFiles(e.target.files);
+      if (imported.length > 0) {
+        await loadLocalTracks();
+      }
+      e.target.value = '';
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const imported = await scanner.scanFiles(e.target.files);
+      if (imported.length > 0) {
+        await loadLocalTracks();
+      }
+      e.target.value = '';
     }
   };
 
   return (
     <PageLayout containerClassName="max-w-4xl mx-auto px-4 space-y-6 pb-24" topSpacing="default">
+      {/* Hidden file inputs for local device directory and audio files */}
+      <input
+        ref={folderInputRef}
+        type="file"
+        // @ts-ignore
+        webkitdirectory=""
+        // @ts-ignore
+        directory=""
+        multiple
+        onChange={handleFolderChange}
+        className="hidden"
+      />
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.opus"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {/* HEADER & CONTROLS */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div className="flex items-center gap-3.5 min-w-0">
@@ -130,41 +183,62 @@ export const LocalTracks: React.FC = () => {
         )}
       </div>
 
+      {/* SCANNING PROGRESS OR DIAGNOSTIC NOTICE */}
+      {scanner.isScanning && (
+        <div className="p-4 rounded-xl bg-[#00B4D8]/10 text-white space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2 font-bold text-[#00B4D8]">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Scanning Audio Files ({scanner.scanProgress.percent}%)</span>
+            </div>
+            <span className="font-mono text-zinc-400">
+              {scanner.scanProgress.current} / {scanner.scanProgress.total}
+            </span>
+          </div>
+          {scanner.scanProgress.currentFileName && (
+            <p className="text-[11px] text-zinc-300 truncate">
+              {scanner.scanProgress.currentFileName}
+            </p>
+          )}
+          <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+            <div 
+              className="h-full bg-[#00B4D8] transition-all duration-300"
+              style={{ width: `${scanner.scanProgress.percent}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* SCAN ERROR / PERMISSION NOTICE */}
+      {scanner.scanError && (
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-500/10 text-amber-300 text-xs font-medium">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{scanner.scanError}</span>
+        </div>
+      )}
+
       {/* TOOLBAR: FOLDER PICKER, FILE UPLOAD & SEARCH */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-white/[0.03]">
         <div className="flex flex-wrap items-center gap-2">
-          {typeof window !== 'undefined' && 'showDirectoryPicker' in window ? (
-            <button
-              type="button"
-              onClick={handleOpenDirectory}
-              disabled={isScanning}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold cursor-pointer active:scale-95 transition-all shadow-sm disabled:opacity-50"
-            >
-              <FolderOpen className="w-3.5 h-3.5" />
-              <span>{isScanning ? 'Scanning...' : 'Select Music Folder'}</span>
-            </button>
-          ) : (
-            <FileSelector
-              isFolder={true}
-              buttonClassName="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg"
-            >
-              <span className="flex items-center gap-2">
-                <FolderOpen className="w-3.5 h-3.5" />
-                <span>Select Folder</span>
-              </span>
-            </FileSelector>
-          )}
-
-          <FileSelector
-            accept="audio/*"
-            multiple={true}
-            buttonClassName="bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-bold px-3.5 py-2 rounded-lg"
+          <button
+            type="button"
+            onClick={handleOpenDirectory}
+            disabled={scanner.isScanning}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold cursor-pointer active:scale-95 transition-all shadow-sm disabled:opacity-50"
           >
-            <span className="flex items-center gap-2">
-              <Upload className="w-3.5 h-3.5 text-zinc-300" />
-              <span>Pick Audio Files</span>
-            </span>
-          </FileSelector>
+            <FolderOpen className="w-3.5 h-3.5" />
+            <span>{scanner.isScanning ? 'Scanning...' : 'Select Music Folder'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={scanner.isScanning}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-bold cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+          >
+            <Upload className="w-3.5 h-3.5 text-zinc-300" />
+            <span>Pick Audio Files</span>
+          </button>
 
           {localTracks.length > 0 && (
             <button
@@ -186,7 +260,7 @@ export const LocalTracks: React.FC = () => {
               placeholder="Search local tracks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-black/50 border border-white/10 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white placeholder:text-zinc-500 outline-none focus:border-[#0052FF]"
+              className="w-full bg-black/50 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white placeholder:text-zinc-500 outline-none"
             />
           </div>
         )}
@@ -205,37 +279,23 @@ export const LocalTracks: React.FC = () => {
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            {typeof window !== 'undefined' && 'showDirectoryPicker' in window ? (
-              <button
-                type="button"
-                onClick={handleOpenDirectory}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95 transition-all shadow-md"
-              >
-                <FolderOpen className="w-4 h-4" />
-                <span>Select Music Folder</span>
-              </button>
-            ) : (
-              <FileSelector
-                isFolder={true}
-                buttonClassName="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl uppercase tracking-wider"
-              >
-                <span className="flex items-center gap-2">
-                  <FolderOpen className="w-4 h-4" />
-                  <span>Select Music Folder</span>
-                </span>
-              </FileSelector>
-            )}
-
-            <FileSelector
-              accept="audio/*"
-              multiple={true}
-              buttonClassName="bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-bold px-4 py-2.5 rounded-xl uppercase tracking-wider"
+            <button
+              type="button"
+              onClick={handleOpenDirectory}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95 transition-all shadow-md"
             >
-              <span className="flex items-center gap-2">
-                <Upload className="w-4 h-4 text-cyan-400" />
-                <span>Pick Audio Files</span>
-              </span>
-            </FileSelector>
+              <FolderOpen className="w-4 h-4" />
+              <span>Select Music Folder</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95 transition-all"
+            >
+              <Upload className="w-4 h-4 text-cyan-400" />
+              <span>Pick Audio Files</span>
+            </button>
           </div>
           <div className="flex items-center justify-center gap-4 pt-4 text-[11px] text-zinc-500">
             <span className="flex items-center gap-1.5">

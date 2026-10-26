@@ -114,17 +114,33 @@ export const DownloadedTracks: React.FC = () => {
     }
   };
 
+  // Keep activeTab in sync with query param
+  useEffect(() => {
+    const currentTab = searchParams.get('tab') === 'local' ? 'local' : 'downloaded';
+    if (currentTab !== activeTab) {
+      setActiveTab(currentTab);
+    }
+  }, [searchParams, activeTab]);
+
   const handleOpenDirectory = async () => {
+    const isIframe = typeof window !== 'undefined' ? window.self !== window.top : false;
+    if (isIframe) {
+      folderInputRef.current?.click();
+      return;
+    }
+
     try {
       if (typeof window !== 'undefined' && 'showDirectoryPicker' in window) {
-        await scanLocalDirectory();
-      } else if (folderInputRef.current) {
-        folderInputRef.current.click();
+        try {
+          const res = await scanLocalDirectory();
+          if (res && res.length > 0) return;
+        } catch (pickerErr: any) {
+          if (pickerErr?.name === 'AbortError') return;
+        }
       }
+      folderInputRef.current?.click();
     } catch (e) {
-      if (folderInputRef.current) {
-        folderInputRef.current.click();
-      }
+      folderInputRef.current?.click();
     }
   };
 
@@ -139,7 +155,6 @@ export const DownloadedTracks: React.FC = () => {
         // @ts-ignore
         directory=""
         multiple
-        accept="audio/*"
         onChange={handleFolderInputChange}
         className="hidden"
       />
@@ -147,7 +162,7 @@ export const DownloadedTracks: React.FC = () => {
         ref={fileInputRef}
         type="file"
         multiple
-        accept="audio/*"
+        accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.opus,.weba"
         onChange={handleFileInputChange}
         className="hidden"
       />

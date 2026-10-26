@@ -206,7 +206,7 @@ const LibraryPage: React.FC = () => {
                         return;
                       }
                       if (chip === 'Device Music') {
-                        navigate('/library/downloads?tab=local');
+                        navigate('/local-tracks');
                         return;
                       }
                       data.setActiveChip(chip);
