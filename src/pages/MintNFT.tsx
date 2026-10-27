@@ -14,7 +14,7 @@ import { uploadToPinata, uploadJSONToPinata } from '@/services/storageService';
 import { mintTonJamNFT, TONJAM_COLLECTION_ADDRESS, getTonViewerUrl } from '@/services/tonService';
 import { GasFeeEstimator } from '@/components/GasFeeEstimator';
 import { createActivityPost } from '@/services/socialService';
-import { validateFile, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
+import { validateFile, compressImageForNFT, ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 import { Track, NFTItem, RoyaltySplitExtended, NFTTrait } from '@/types';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -384,9 +384,10 @@ export const MintNFT: React.FC = () => {
       updateMilestone('audio_pin', true, false, 35, 'Lossless audio pinned to Pinata IPFS gateway.');
 
       // 2. Upload Cover Artwork to Pinata IPFS
-      updateMilestone('cover_pin', false, true, 40, 'Pinning artwork image to Pinata IPFS cluster...');
+      updateMilestone('cover_pin', false, true, 40, 'Optimizing artwork canvas & pinning image to Pinata IPFS...');
       if (coverFile) {
-        finalCoverUrl = await uploadToPinata(coverFile);
+        const compressedCover = await compressImageForNFT(coverFile);
+        finalCoverUrl = await uploadToPinata(compressedCover);
       }
       updateMilestone('cover_pin', true, false, 55, 'Artwork pinned to Pinata IPFS gateway.');
 

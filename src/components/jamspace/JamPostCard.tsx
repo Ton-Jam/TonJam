@@ -165,7 +165,7 @@ export const JamPostCard: React.FC<JamPostCardProps> = ({
                 {post.author.name}
               </span>
               {post.author.isVerified && (
-                <VerifiedBadge isVerified={true} role={post.author.role} size={14} className="shrink-0" />
+                <VerifiedBadge isVerified={true} size="sm" className="shrink-0" />
               )}
               <span className="text-xs text-zinc-400 truncate max-w-[100px] sm:max-w-[140px]">
                 {post.author.username}
@@ -344,7 +344,7 @@ export const JamPostCard: React.FC<JamPostCardProps> = ({
                 </div>
                 <span className="text-xs font-bold text-white truncate">{post.quotePost.authorName}</span>
                 {post.quotePost.authorVerified && (
-                  <VerifiedBadge isVerified={true} size={12} className="shrink-0" />
+                  <VerifiedBadge isVerified={true} size="sm" className="shrink-0" />
                 )}
                 <span className="text-xs text-zinc-400 truncate">{post.quotePost.authorUsername}</span>
               </div>

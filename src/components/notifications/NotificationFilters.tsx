@@ -69,14 +69,14 @@ export const NotificationFilters: React.FC<NotificationFiltersProps> = ({
             className={`
               flex items-center gap-1.5 px-4 py-2 rounded-full
               text-xs font-black tracking-wide uppercase transition-all duration-300
-              cursor-pointer shrink-0 outline-none border
+              cursor-pointer shrink-0 outline-none
               ${isActive 
-                ? 'bg-[#0088CC] text-white border-[#c0c0c0]/40 shadow-[0_0_16px_rgba(0,136,204,0.45)]'
-                : 'bg-zinc-900/90 text-zinc-400 hover:text-white hover:bg-[#0088CC]/20 border-[#c0c0c0]/25'
+                ? 'bg-[#0088CC] text-white shadow-[0_0_16px_rgba(0,136,204,0.45)]'
+                : 'bg-white/[0.04] text-slate-400 hover:text-white hover:bg-[#0088CC]/20'
               }
             `}
           >
-            <FilterIcon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-zinc-400'}`} />
+            <FilterIcon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
             <span>{filter.label}</span>
           </motion.button>
         );

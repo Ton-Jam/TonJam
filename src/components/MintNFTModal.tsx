@@ -13,7 +13,7 @@ import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { uploadToPinata, uploadJSONToPinata } from '@/services/storageService';
 import { mintTonJamNFT, TONJAM_COLLECTION_ADDRESS } from '@/services/tonService';
 import { createActivityPost } from '@/services/socialService';
-import { validateFile } from '@/lib/utils';
+import { validateFile, compressImageForNFT } from '@/lib/utils';
 import { 
   Dialog, 
   DialogContent, 
@@ -320,13 +320,21 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
 
       // 2. Upload cover to Pinata
       if (coverFile) {
+        setOverallProgress(35);
+        setProgressMsg("Optimizing cover artwork canvas for Web3 mobile performance...");
+        updateMintingStatus(activeTrackId, {
+          progress: 35,
+          message: 'Optimizing cover artwork canvas...'
+        });
+        const compressedCover = await compressImageForNFT(coverFile);
+
         setOverallProgress(45);
-        setProgressMsg("Uploading cover art image to IPFS...");
+        setProgressMsg("Uploading compressed cover art to IPFS gateway...");
         updateMintingStatus(activeTrackId, {
           progress: 45,
           message: 'Uploading cover art image to IPFS...'
         });
-        finalCoverUrl = await uploadToPinata(coverFile);
+        finalCoverUrl = await uploadToPinata(compressedCover);
       }
 
       // 3. Format and Compile metadata

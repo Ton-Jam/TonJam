@@ -2166,6 +2166,101 @@ async function startServer() {
         }
     });
 
+    // In-memory buffer for developer task monitoring in production
+    interface ServerTaskErrorLog {
+        id: string;
+        timestamp: string;
+        eventType: string;
+        severity: string;
+        taskId: string | null;
+        taskTitle: string | null;
+        statusTransition: { from: string | null; to: string | null };
+        error: { name: string; message: string; code?: string; stack?: string };
+        context: any;
+        clientIp?: string;
+        receivedAt: string;
+    }
+
+    const taskErrorLogs: ServerTaskErrorLog[] = [];
+    const MAX_SERVER_TASK_LOGS = 200;
+
+    // Structured Task Monitoring Ingestion Service
+    app.post('/api/monitoring/task-errors', (req, res) => {
+        try {
+            const body = req.body || {};
+            const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+            const entry: ServerTaskErrorLog = {
+                id: body.id || `srv_err_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+                timestamp: body.timestamp || new Date().toISOString(),
+                eventType: body.eventType || 'UNKNOWN_TASK_ERROR',
+                severity: body.severity || 'error',
+                taskId: body.taskId || null,
+                taskTitle: body.taskTitle || null,
+                statusTransition: body.statusTransition || { from: null, to: null },
+                error: body.error || { name: 'Error', message: 'Unknown error' },
+                context: body.context || {},
+                clientIp: typeof clientIp === 'string' ? clientIp : Array.isArray(clientIp) ? clientIp[0] : undefined,
+                receivedAt: new Date().toISOString()
+            };
+
+            // Maintain circular buffer
+            taskErrorLogs.unshift(entry);
+            if (taskErrorLogs.length > MAX_SERVER_TASK_LOGS) {
+                taskErrorLogs.pop();
+            }
+
+            console.error(
+                `[MonitoringService] [${entry.severity.toUpperCase()}] ${entry.eventType} on task "${entry.taskId || 'unknown'}" (${entry.statusTransition.from || 'none'} -> ${entry.statusTransition.to || 'none'}):`,
+                entry.error.message
+            );
+
+            res.status(200).json({
+                success: true,
+                recordedId: entry.id,
+                timestamp: entry.receivedAt
+            });
+        } catch (err: any) {
+            console.error('[MonitoringService] Failed to record task error:', err);
+            res.status(500).json({ error: 'Internal monitoring ingestion failure' });
+        }
+    });
+
+    // Query task error logs for production developer debugging
+    app.get('/api/monitoring/task-errors', (req, res) => {
+        try {
+            const { taskId, eventType, severity, limit } = req.query;
+            let results = [...taskErrorLogs];
+
+            if (taskId && typeof taskId === 'string') {
+                results = results.filter(e => e.taskId === taskId);
+            }
+            if (eventType && typeof eventType === 'string') {
+                results = results.filter(e => e.eventType === eventType);
+            }
+            if (severity && typeof severity === 'string') {
+                results = results.filter(e => e.severity === severity);
+            }
+
+            const maxLimit = Math.min(parseInt(limit as string) || 50, MAX_SERVER_TASK_LOGS);
+            results = results.slice(0, maxLimit);
+
+            res.json({
+                total: results.length,
+                bufferSize: taskErrorLogs.length,
+                errors: results
+            });
+        } catch (err: any) {
+            res.status(500).json({ error: 'Failed to retrieve task error logs' });
+        }
+    });
+
+    // Clear task error logs
+    app.delete('/api/monitoring/task-errors', (req, res) => {
+        taskErrorLogs.length = 0;
+        res.json({ success: true, message: 'Task error monitoring buffer cleared' });
+    });
+
     const isVercel = !!process.env.VERCEL;
 
     if (process.env.NODE_ENV === 'production') {

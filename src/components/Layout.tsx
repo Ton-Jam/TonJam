@@ -31,7 +31,8 @@ import {
   StarIcon,
   TicketIcon,
   SparklesIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  Bars3Icon
 } from '@heroicons/react/24/outline';
 import { Sparkles as SparklesLucide, History, X, Rocket, Heart } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, TON_LOGO, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
@@ -43,6 +44,7 @@ import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import BottomNavigation from '@/components/layout/BottomNavigation';
+import { SideDrawer } from '@/components/drawer';
 import MiniPlayer from './player/MiniPlayer';
 import PlayerScreen from './player/PlayerScreen';
 import AddToPlaylistModal from './AddToPlaylistModal';
@@ -175,8 +177,48 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const handleTippingState = (e: any) => {
       setIsTippingModalOpen(e.detail.open);
     };
+    const handleOpenDrawer = () => setIsMobileSidebarOpen(true);
+
     window.addEventListener('tippingModalState', handleTippingState as EventListener);
-    return () => window.removeEventListener('tippingModalState', handleTippingState as EventListener);
+    window.addEventListener('openTonJamDrawer', handleOpenDrawer);
+    return () => {
+      window.removeEventListener('tippingModalState', handleTippingState as EventListener);
+      window.removeEventListener('openTonJamDrawer', handleOpenDrawer);
+    };
+  }, []);
+
+  // Edge swipe gesture to slide open side drawer on mobile
+  useEffect(() => {
+    let startX = 0;
+    let startY = 0;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (e.changedTouches.length > 0) {
+        const endX = e.changedTouches[0].clientX;
+        const endY = e.changedTouches[0].clientY;
+        const diffX = endX - startX;
+        const diffY = Math.abs(endY - startY);
+
+        if (startX < 32 && diffX > 60 && diffY < 50) {
+          setIsMobileSidebarOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
   }, []);
 
 
@@ -429,8 +471,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               : "bg-[#0A1628]/55 backdrop-blur-[18px]"
           )}
         >
-          {/* LEFT: TonJam Logo & Brand */}
-          <div className="flex items-center gap-2">
+          {/* LEFT: TonJam Logo & Brand + Mobile Menu Button */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            <button
+              type="button"
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="lg:hidden p-1.5 -ml-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/[0.06] active:scale-95 transition-all cursor-pointer border-none outline-none flex items-center justify-center shrink-0"
+              aria-label="Open side navigation drawer"
+            >
+              <Bars3Icon className="w-5 h-5 text-white" strokeWidth={2.4} />
+            </button>
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <button 
@@ -441,7 +492,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       navigate('/');
                     }
                   }}
-                  className="flex items-center gap-2 p-1 -ml-1 rounded-full hover:bg-white/5 active:scale-95 transition-all flex-shrink-0 cursor-pointer border-none outline-none group"
+                  className="flex items-center gap-2 p-1 rounded-full hover:bg-white/5 active:scale-95 transition-all flex-shrink-0 cursor-pointer border-none outline-none group"
                   aria-label="TonJam Home"
                 >
                   <div className="relative w-8 h-8 flex items-center justify-center rounded-full bg-[#0088CC]/10 group-hover:bg-[#0088CC]/20 transition-colors">
@@ -558,38 +609,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </ErrorBoundary>
       )}
 
-      {/* Sidebar - Mobile Drawer */}
-      <AnimatePresence>
-        {isMobileSidebarOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileSidebarOpen(false)}
-              className="fixed inset-0 bg-black/70 z-[60] lg:hidden"
-            />
-            <motion.aside 
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 bottom-0 w-[280px] bg-background z-[70] lg:hidden flex flex-col p-4 overflow-y-auto"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <Link to="/" onClick={() => setIsMobileSidebarOpen(false)} className="flex items-center gap-2">
-                  <img src={APP_LOGO} alt="" className="w-8 h-8 object-contain" />
-                  <span className="font-bold text-lg tracking-tight text-foreground uppercase">TonJam</span>
-                </Link>
-                <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 rounded-full hover:bg-white/10 text-foreground active:scale-95">
-                  <ArrowLeftIcon className="h-6 w-6 text-foreground" strokeWidth={3.5} />
-                </button>
-              </div>
-              <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onNavigate={() => setIsMobileSidebarOpen(false)} onOpenTestnetModal={() => { setIsMobileSidebarOpen(false); setIsTestnetModalOpen(true); }} />
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
+      {/* Sidebar - Mobile Side Navigation Drawer */}
+      <SideDrawer
+        isOpen={isMobileSidebarOpen}
+        onClose={() => setIsMobileSidebarOpen(false)}
+      />
 
       {/* Main Content Area */}
       <ErrorBoundary>
@@ -603,7 +627,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Audio Player Container */}
       <ErrorBoundary>
         <div className="relative">
-          {currentTrack && !isDJKrupy && !isPostDetail && (
+          {currentTrack && !isDJKrupy && !isPostDetail && !isTasks && (
             <MiniPlayer isMobileNavHidden={isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin} />
           )}
           

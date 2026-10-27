@@ -288,18 +288,18 @@ export const JamSpaceMain: React.FC = () => {
                 <div className="space-y-2.5">
                   {artists.slice(0, 4).map((artist) => (
                     <div 
-                      key={artist.uid || artist.id}
-                      onClick={() => navigate(`/artist/${artist.uid || artist.id}`)}
+                      key={artist.uid}
+                      onClick={() => navigate(`/artist/${artist.uid}`)}
                       className="flex items-center justify-between gap-2 p-1.5 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-800 shrink-0">
-                          <img src={artist.avatar} alt={artist.name} className="w-full h-full object-cover" />
+                          <img src={artist.avatarUrl || (artist as any).avatar || '/default-avatar.png'} alt={artist.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1">
                             <span className="text-xs font-bold text-white truncate">{artist.name}</span>
-                            <VerifiedBadge isVerified={true} size={12} className="shrink-0" />
+                            <VerifiedBadge isVerified={true} size="sm" className="shrink-0" />
                           </div>
                           <p className="text-[11px] text-zinc-400 truncate">{artist.genre || 'Electronic'}</p>
                         </div>

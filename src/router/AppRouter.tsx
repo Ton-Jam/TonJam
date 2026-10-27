@@ -13,6 +13,9 @@ import { seedDatabase } from '@/services/seedService';
 import { resolveEndedAuctions } from '@/services/auctionService';
 import HomePage from '@/pages/HomePage';
 import NotificationsPage from '@/pages/Notifications';
+import JamSpacePage from '@/pages/JamSpace';
+import MarketplacePage from '@/pages/Marketplace';
+import DiscoverPage from '@/pages/Discover';
 
 const RouteLoadingFallback: React.FC = () => (
   <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3 py-16 text-center select-none">
@@ -27,7 +30,8 @@ const RouteErrorFallback: React.FC<{ error?: Error; onRetry?: () => void }> = ({
       ⚠️
     </div>
     <div className="space-y-1 max-w-sm">
-      <h3 className="text-sm font-black uppercase tracking-wider text-white">Screen is under construction</h3>
+      <h3 className="text-sm font-black uppercase tracking-wider text-white">Screen is loading</h3>
+      <p className="text-xs text-zinc-400">Click below to refresh module dependencies.</p>
     </div>
     <button
       type="button"
@@ -42,10 +46,15 @@ const RouteErrorFallback: React.FC<{ error?: Error; onRetry?: () => void }> = ({
 // Resilient lazy import helper for dynamic module loading with automatic retry & visible error fallback
 const lazyWithRetry = (componentImport: () => Promise<any>) =>
   lazy(async () => {
+    const pageHasAlreadyBeenReloaded = JSON.parse(
+      sessionStorage.getItem('page_reloaded_for_chunk_error') || 'false'
+    );
     let lastError: any = null;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        return await componentImport();
+        const component = await componentImport();
+        sessionStorage.setItem('page_reloaded_for_chunk_error', 'false');
+        return component;
       } catch (error: any) {
         lastError = error;
         console.warn(`[lazyWithRetry] Module failed import (attempt ${attempt + 1}/3):`, error);
@@ -53,23 +62,31 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
       }
     }
     console.error('[lazyWithRetry] Module failed all retry attempts:', lastError);
+    if (!pageHasAlreadyBeenReloaded && typeof window !== 'undefined') {
+      sessionStorage.setItem('page_reloaded_for_chunk_error', 'true');
+      window.location.reload();
+      return new Promise(() => {});
+    }
     const errObj = lastError instanceof Error ? lastError : new Error(String(lastError?.message || lastError || 'Dynamic module import failed'));
     return {
       default: () => (
         <RouteErrorFallback
           error={errObj}
-          onRetry={() => window.location.reload()}
+          onRetry={() => {
+            sessionStorage.setItem('page_reloaded_for_chunk_error', 'false');
+            window.location.reload();
+          }}
         />
       ),
     };
   });
 
-// Root landing page is directly imported for instant zero-fetch initialization
+// Primary core pages are directly imported for instant zero-fetch initialization
 const Home = HomePage;
 const HomeFeed = HomePage;
-const Discover = lazyWithRetry(() => import('@/pages/Discover'));
-const JamSpace = lazyWithRetry(() => import('@/pages/JamSpace'));
-const Marketplace = lazyWithRetry(() => import('@/pages/Marketplace'));
+const Discover = DiscoverPage;
+const JamSpace = JamSpacePage;
+const Marketplace = MarketplacePage;
 const Profile = lazyWithRetry(() => import('@/pages/Profile'));
 const EditProfile = lazyWithRetry(() => import('@/pages/EditProfile'));
 const UserProfile = lazyWithRetry(() => import('@/pages/UserProfile'));
@@ -129,6 +146,7 @@ const SpaceRoom = lazyWithRetry(() => import('@/pages/SpaceRoom'));
 const LivestreamHub = lazyWithRetry(() => import('@/pages/Livestream').then(m => ({ default: m.LivestreamHub })));
 const LivestreamViewer = lazyWithRetry(() => import('@/pages/Livestream/LivestreamViewer').then(m => ({ default: m.LivestreamViewer })));
 const LiveStudio = lazyWithRetry(() => import('@/pages/Livestream/LiveStudio').then(m => ({ default: m.LiveStudio })));
+const SideDrawerShowcase = lazyWithRetry(() => import('@/pages/SideDrawerShowcase'));
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
@@ -288,6 +306,8 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/uikit" element={<PageWrapper><UIKitShowcase /></PageWrapper>} />
                   <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
                   <Route path="/referrals" element={<PageWrapper><ProtectedRoute><Referrals /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/side-drawer" element={<PageWrapper><SideDrawerShowcase /></PageWrapper>} />
+                  <Route path="/drawer" element={<PageWrapper><SideDrawerShowcase /></PageWrapper>} />
                 </Routes>
               </React.Suspense>
             </AnimatePresence>
