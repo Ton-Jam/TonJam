@@ -248,9 +248,9 @@ export const UserProfile: React.FC = () => {
   if (!user) return null;
 
   return (
-    <PageContainer animate={true} hasPlayerSpacing={true} className="min-h-screen bg-[#050A24] text-white font-sans pb-32">
+    <PageContainer animate={true} hasPlayerSpacing={true} className="min-h-screen bg-[#080D1A] text-white font-sans pb-32">
       
-      {/* 1. Transparent Spotify-Inspired Profile Header */}
+      {/* 1. Mobile-Optimized Profile Header */}
       <ProfileHeader
         user={user}
         isOwnProfile={isOwnProfile}
@@ -258,7 +258,7 @@ export const UserProfile: React.FC = () => {
         onFollow={handleFollow}
         onShare={() => setIsQRModalOpen(true)}
         onTipArtist={() => setIsTipModalOpen(true)}
-        onEditProfile={() => navigate('/edit-profile')}
+        onOpenSettings={() => navigate('/settings')}
       />
 
       {/* 2. Main Profile Content Canvas */}

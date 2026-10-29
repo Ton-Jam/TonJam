@@ -190,48 +190,6 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                     </button>
                   ))}
                 </div>
-
-                {/* Search History */}
-                {searchHistory.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between px-2 pt-1">
-                      <div className="flex items-center gap-2">
-                        <History className="h-3 w-3 text-muted-foreground/50" />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">Recent Searches</span>
-                      </div>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); clearHistory(); }}
-                        className="text-[9px] font-black uppercase tracking-widest text-rose-500/70 hover:text-rose-500 transition-colors flex items-center gap-1"
-                      >
-                        <Trash2 className="h-2.5 w-2.5" />
-                        Clear All
-                      </button>
-                    </div>
-                    <div className="flex flex-col gap-1 max-h-[200px] overflow-y-auto no-scrollbar px-1">
-                      {searchHistory.map((term, idx) => (
-                        <div 
-                          key={`${term}-${idx}`}
-                          onClick={() => {
-                            setQuery(term);
-                            addToHistory(term);
-                          }}
-                          className="group flex items-center justify-between p-2 rounded-[6px] hover:bg-muted/50 transition-all cursor-pointer"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-3 w-3 text-muted-foreground/40 group-hover:text-blue-400 transition-colors" />
-                            <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{term}</span>
-                          </div>
-                          <button
-                            onClick={(e) => removeFromHistory(term, e)}
-                            className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-rose-500/10 text-muted-foreground/30 hover:text-rose-500 transition-all rounded-[4px]"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             ) : (
               <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto no-scrollbar">

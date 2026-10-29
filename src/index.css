@@ -41,10 +41,10 @@
      Source of truth aligned with Figma
      ========================================================= */
   /* Semantic Tokens */
-  --tj-color-bg-primary: #07111F;
-  --tj-color-bg-secondary: #0A1628;
-  --tj-color-surface-default: #0A1628;
-  --tj-color-surface-elevated: #0F1C32;
+  --tj-color-bg-primary: #080D1A;
+  --tj-color-bg-secondary: #0D1628;
+  --tj-color-surface-default: #0D1628;
+  --tj-color-surface-elevated: #111F36;
   --tj-color-brand-primary: #00B4D8;
   --tj-color-brand-pressed: #009CC0;
   --tj-color-text-primary: #FFFFFF;
@@ -55,29 +55,47 @@
   --tj-color-state-success: #35C98A;
   --tj-color-state-warning: #F4BD50;
   --tj-color-state-danger: #F16D78;
-  --tj-color-overlay-glass: #0A1628;
+  --tj-color-overlay-glass: #0D1628;
 
   /* Aliased TonJam colors aligned with Figma */
   --tj-bg: var(--tj-color-bg-primary);
   --tj-bg-surface: var(--tj-color-surface-default);
   --tj-bg-elevated: var(--tj-color-surface-elevated);
-  --tj-bg-deep: #000000;
+  --tj-surface: var(--tj-color-surface-elevated);
+  --tj-surface-hover: #17243A;
+  --tj-surface-active: #1B2C45;
+  --tj-bg-deep: #080D1A;
   --tj-bg-card: rgba(10, 22, 40, 0.85);
   --tj-bg-glass: var(--tj-color-overlay-glass);
   --tj-bg-hover: rgba(255, 255, 255, 0.05);
 
-  --tj-accent: var(--tj-color-brand-primary);
-  --tj-accent-hover: var(--tj-color-brand-pressed);
-  --tj-accent-pressed: var(--tj-color-brand-pressed);
+  --tj-brand: #229ED9;
+  --tj-brand-hover: #168AC4;
+  --tj-brand-soft: rgba(34, 158, 217, 0.14);
+  --tj-brand-glow: rgba(34, 158, 217, 0.22);
+  --tj-accent: var(--tj-brand);
+  --tj-accent-hover: var(--tj-brand-hover);
+  --tj-accent-pressed: var(--tj-brand-hover);
   --tj-accent-blue: #0088CC;
   --tj-accent-ton: #0098EA;
   --tj-accent-cyan: #00E5FF;
-  --tj-accent-glow: rgba(0, 180, 216, 0.35);
+  --tj-accent-glow: var(--tj-brand-glow);
 
-  --tj-text-primary: var(--tj-color-text-primary);
-  --tj-text-secondary: var(--tj-color-text-secondary);
-  --tj-text-muted: var(--tj-color-text-muted);
+  --tj-text-primary: #F8FAFC;
+  --tj-text-secondary: #A8B7CC;
+  --tj-text-muted: #7F91AA;
+  --tj-text-inverse: #07111F;
   --tj-text-subtle: rgba(255, 255, 255, 0.40);
+
+  /* Expressive Accents */
+  --tj-purple: #9B7CFF;
+  --tj-purple-soft: rgba(155, 124, 255, 0.14);
+  --tj-teal: #2DD4BF;
+  --tj-teal-soft: rgba(45, 212, 191, 0.14);
+  --tj-gold: #FFC857;
+  --tj-gold-soft: rgba(255, 200, 87, 0.14);
+  --tj-pink: #F472B6;
+  --tj-pink-soft: rgba(244, 114, 182, 0.14);
 
   /* Visible but subtle borders */
   --tj-border: var(--tj-color-border-subtle);
@@ -276,6 +294,13 @@
   --color-tj-bg-elevated: var(--tj-bg-elevated);
   --color-tj-bg-card: var(--tj-bg-card);
   --color-tj-bg-glass: var(--tj-bg-glass);
+  --color-tj-brand: var(--tj-brand);
+  --color-tj-brand-hover: var(--tj-brand-hover);
+  --color-tj-brand-soft: var(--tj-brand-soft);
+  --color-tj-brand-glow: var(--tj-brand-glow);
+  --color-tj-surface: var(--tj-surface);
+  --color-tj-surface-hover: var(--tj-surface-hover);
+  --color-tj-surface-active: var(--tj-surface-active);
   --color-tj-accent: var(--tj-accent);
   --color-tj-accent-blue: var(--tj-accent-blue);
   --color-tj-accent-ton: var(--tj-accent-ton);
@@ -283,6 +308,18 @@
   --color-tj-accent-hover: var(--tj-accent-hover);
   --color-tj-text-subtle: var(--tj-text-subtle);
   --color-tj-border: var(--tj-border);
+  --color-tj-purple: var(--tj-purple);
+  --color-tj-purple-soft: var(--tj-purple-soft);
+  --color-tj-teal: var(--tj-teal);
+  --color-tj-teal-soft: var(--tj-teal-soft);
+  --color-tj-gold: var(--tj-gold);
+  --color-tj-gold-soft: var(--tj-gold-soft);
+  --color-tj-pink: var(--tj-pink);
+  --color-tj-pink-soft: var(--tj-pink-soft);
+  --color-tj-success: var(--tj-success);
+  --color-tj-warning: var(--tj-warning);
+  --color-tj-danger: var(--tj-danger);
+  --color-tj-info: var(--tj-info);
 
   --spacing-tj-1: var(--tj-space-1);
   --spacing-tj-3: var(--tj-space-3);
@@ -609,22 +646,35 @@
 
   html {
     @apply font-sans;
-    background-color: var(--tj-bg-deep) !important;
-    background: var(--tj-bg-deep) !important;
+    background-color: #080D1A !important;
+    background: #080D1A !important;
+    min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: none;
   }
 
   body {
-    background-color: var(--tj-bg) !important;
-    background: radial-gradient(circle at 50% -10%, rgba(0, 152, 234, 0.12), transparent 42%), var(--tj-bg) !important;
+    background-color: #080D1A !important;
+    background: radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.14) 0%, rgba(0, 136, 204, 0.05) 40%, transparent 70%), #080D1A !important;
     background-attachment: fixed;
     color: var(--tj-text-primary);
+    min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+
+  #root {
+    background-color: #080D1A !important;
+    min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
   }
 
   /* Make all sections stretch edge-to-edge across all screens */
@@ -635,10 +685,10 @@
     width: 100% !important;
   }
 
-  /* Solid Black UI Theme for entire App including all sections, headers, bottom nav */
+  /* TonJam Dark UI Theme for entire App */
   .dark {
-    background: #000000 !important;
-    background-color: #000000 !important;
+    background: #080D1A !important;
+    background-color: #080D1A !important;
   }
   .dark body,
   .dark .bg-background,
@@ -650,54 +700,9 @@
   .dark [class*="bg-[#0a0a0a]"],
   .dark [class*="bg-[#080d2d]"],
   .dark .bg-zinc-950,
-  .dark .bg-zinc-900,
-  .dark .bg-black,
-  .dark .bg-zinc-950\/60,
-  .dark .bg-zinc-950\/80,
-  .dark .bg-zinc-900\/50 {
-    background: #000000 !important;
-    background-color: #000000 !important;
-  }
-
-  /* Black surfaces for all panels, cards, containers, sections, headers, bottom navigation */
-  .dark .bg-card,
-  .dark .bg-secondary,
-  .dark .bg-zinc-800,
-  .dark .bg-accent,
-  .dark .bg-slate-900,
-  .dark section,
-  .dark main,
-  .dark main section,
-  .dark header:not(#tonjam-full-player-header),
-  .dark aside,
-  .dark nav,
-  .dark .section-container,
-  .dark .bg-zinc-900\/40,
-  .dark .bg-zinc-900\/60,
-  .dark [class*="bg-[#0A113A]"],
-  .dark [class*="bg-[#0a113a]"],
-  .dark [class*="bg-[#101A3B]"],
-  .dark [class*="bg-[#101a3b]"],
-  .dark [class*="bg-white/0.01"],
-  .dark [class*="bg-white/0.02"],
-  .dark [class*="bg-white/0.03"],
-  .dark [class*="bg-white/0.04"],
-  .dark [class*="bg-white/0.05"],
-  .dark [class*="bg-white/[0.01]"],
-  .dark [class*="bg-white/[0.02]"],
-  .dark [class*="bg-white/[0.03]"],
-  .dark [class*="bg-white/[0.04]"],
-  .dark [class*="bg-white/[0.05]"],
-  .dark [class*="bg-white/[0.06]"],
-  .dark [class*="bg-white/[0.08]"],
-  .dark [class*="bg-white/5"],
-  .dark [class*="bg-zinc-900/40"],
-  .dark [class*="bg-zinc-900/60"],
-  .dark [class*="bg-zinc-950/60"],
-  .dark [class*="bg-zinc-950/80"] {
-    background-color: #000000 !important;
-    background: #000000 !important;
-    transform: translateZ(0);
+  .dark .bg-black {
+    background: #080D1A !important;
+    background-color: #080D1A !important;
   }
 
   /* Full Player Header Always Transparent */
@@ -1487,7 +1492,7 @@ button,
   flex: 0 0 auto; /* Prevents pills from shrinking */
   background: linear-gradient(135deg, #1e293b, #0f172a);
   color: #fff;
-  border: 1px solid rgba(192, 192, 192, 0.28) !important;
+  border: 1px solid rgba(192, 192, 192, 0.28);
   background-clip: padding-box !important;
   padding: 0.32rem 0.75rem;
   border-radius: 50px;
@@ -1501,6 +1506,14 @@ button,
   scroll-snap-align: center;
   transform-origin: center center;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.pill.border-0,
+.pill.border-none,
+.pill.\!border-none,
+.filter-btn.border-0,
+.filter-btn.border-none {
+  border: none !important;
 }
 
 /* Active State with smooth scaling animation */

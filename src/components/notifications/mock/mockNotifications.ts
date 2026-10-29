@@ -1,231 +1,310 @@
 import { TonJamNotification, NotificationCategory } from '../types';
 
-const AVATARS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=100&fit=crop&q=80',
-];
+export const INITIAL_CURATED_NOTIFICATIONS: Omit<TonJamNotification, 'id' | 'userId'>[] = [
+  // TODAY - Fresh activity
+  {
+    category: 'artist_release',
+    title: 'Tiwa Savage released a new track',
+    description: 'Discover the latest afrobeat single "Water & Fire" from an artist you follow.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 18).toISOString(), // 18m ago
+    read: false,
+    senderName: 'Tiwa Savage',
+    isVerified: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&fit=crop&q=80',
+    musicPreview: {
+      trackId: 'track-water-fire',
+      title: 'Water & Fire',
+      artist: 'Tiwa Savage',
+      artwork: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&fit=crop&q=80',
+      duration: 198,
+      isVerified: true,
+    },
+    quickAction: {
+      label: 'Play Track',
+      type: 'play',
+      payload: { trackId: 'track-water-fire' },
+    },
+    metadata: {
+      trackId: 'track-water-fire',
+      artistName: 'Tiwa Savage',
+      isVerified: true,
+    },
+  },
+  {
+    category: 'auction',
+    title: 'New high bid on your Music NFT',
+    description: 'Collector @ton_collector placed a top bid of 45.0 TON on "Cosmic Groove #004".',
+    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45m ago
+    read: false,
+    senderName: 'ton_collector',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=200&fit=crop&q=80',
+    nftPreview: {
+      nftId: 'nft-cosmic-groove-004',
+      title: 'Cosmic Groove #004',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=200&fit=crop&q=80',
+      event: 'bid',
+      amountTon: 45.0,
+      sellerOrBidder: 'ton_collector',
+    },
+    quickAction: {
+      label: 'View NFT',
+      type: 'bid',
+      payload: { nftId: 'nft-cosmic-groove-004' },
+    },
+    metadata: {
+      nftId: 'nft-cosmic-groove-004',
+      bidAmount: 45.0,
+      subCategory: 'new_bid',
+    },
+  },
+  {
+    category: 'mention',
+    title: 'Luna Ray mentioned you in a discussion',
+    description: '@lunaray: "Checking out the stems and master tracks from the latest community session!"',
+    timestamp: new Date(Date.now() - 1000 * 60 * 95).toISOString(), // 1.5h ago
+    read: false,
+    senderName: 'Luna Ray',
+    isVerified: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&fit=crop&q=80',
+    socialPreview: {
+      postId: 'post-luna-session',
+      postExcerpt: 'Checking out the stems and master tracks from the latest community session! Fantastic tonal balance @you',
+      targetUser: 'lunaray',
+    },
+    quickAction: {
+      label: 'Reply',
+      type: 'reply',
+      payload: { postId: 'post-luna-session' },
+    },
+    metadata: {
+      postId: 'post-luna-session',
+      isVerified: true,
+    },
+  },
+  {
+    category: 'nft_sale',
+    title: 'Music NFT Sale Confirmed',
+    description: 'Your 1-of-1 audio artifact "Frequency Artifact #012" sold for 28.5 TON.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(), // 3h ago
+    read: false,
+    senderName: 'TonJam Marketplace',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&fit=crop&q=80',
+    nftPreview: {
+      nftId: 'nft-freq-012',
+      title: 'Frequency Artifact #012',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&fit=crop&q=80',
+      event: 'sale',
+      amountTon: 28.5,
+      txHash: 'EQD3...92aF',
+    },
+    quickAction: {
+      label: 'View NFT',
+      type: 'view',
+      payload: { nftId: 'nft-freq-012' },
+    },
+    metadata: {
+      nftId: 'nft-freq-012',
+      txHash: 'EQD3...92aF',
+      rewardAmount: 28.5,
+      subCategory: 'sale',
+    },
+  },
+  {
+    category: 'follower',
+    title: 'Burna Boy started following your profile',
+    description: 'Grammy-winning African Giant is now tracking your music releases and JamSpaces.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 270).toISOString(), // 4.5h ago
+    read: false,
+    senderName: 'Burna Boy',
+    isVerified: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&fit=crop&q=80',
+    quickAction: {
+      label: 'Follow Back',
+      type: 'follow',
+      payload: { userId: 'burna_boy' },
+    },
+    metadata: {
+      userId: 'burna_boy',
+      isVerified: true,
+    },
+  },
+  {
+    category: 'like',
+    title: 'Wizkid liked your soundtrack "Lagos Midnight"',
+    description: 'Your sound design is getting love from top verified creators.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 360).toISOString(), // 6h ago
+    read: true,
+    senderName: 'Wizkid',
+    isVerified: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&fit=crop&q=80',
+    socialPreview: {
+      postExcerpt: 'Lagos Midnight (Original Stem Mix) — Pure vibes and master percussion.',
+      postId: 'track-lagos-midnight',
+    },
+    quickAction: {
+      label: 'View',
+      type: 'view',
+      payload: { trackId: 'track-lagos-midnight' },
+    },
+    metadata: {
+      trackId: 'track-lagos-midnight',
+      isVerified: true,
+    },
+  },
 
-const THUMBNAILS = [
-  'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=150&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=150&fit=crop&q=80',
-];
+  // YESTERDAY
+  {
+    category: 'auction',
+    title: 'Outbid on "Sonic Key #07"',
+    description: 'You were outbid by @vibe_architect. The current high bid is now 32.0 TON.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(), // 28h ago (Yesterday)
+    read: true,
+    senderName: 'vibe_architect',
+    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&fit=crop&q=80',
+    nftPreview: {
+      nftId: 'nft-sonic-key-07',
+      title: 'Sonic Key #07',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&fit=crop&q=80',
+      event: 'outbid',
+      amountTon: 32.0,
+      sellerOrBidder: 'vibe_architect',
+    },
+    quickAction: {
+      label: 'Counter Bid',
+      type: 'bid',
+      payload: { nftId: 'nft-sonic-key-07' },
+    },
+    metadata: {
+      nftId: 'nft-sonic-key-07',
+      bidAmount: 32.0,
+      subCategory: 'outbid',
+    },
+  },
+  {
+    category: 'music',
+    title: 'Live JamSpace session in progress',
+    description: 'Nadia Synth is hosting an open audio collaboration room with 142 listeners.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 32).toISOString(), // 32h ago (Yesterday)
+    read: true,
+    senderName: 'Nadia Synth',
+    isVerified: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&fit=crop&q=80',
+    musicPreview: {
+      trackId: 'jamspace-live-synth',
+      title: 'Deep House & Modular Synthesis',
+      artist: 'Nadia Synth',
+      artwork: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&fit=crop&q=80',
+      isVerified: true,
+    },
+    quickAction: {
+      label: 'Join Space',
+      type: 'join',
+      payload: { spaceId: 'jamspace-live-synth' },
+    },
+    metadata: {
+      spaceId: 'jamspace-live-synth',
+      subCategory: 'jamspace',
+      isVerified: true,
+    },
+  },
+  {
+    category: 'comment',
+    title: 'Dmitry TON replied to your stem drop',
+    description: '@dmitry_ton: "The sub bass progression on the 2nd chorus is phenomenal!"',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 38).toISOString(), // 38h ago (Yesterday)
+    read: true,
+    senderName: 'Dmitry TON',
+    isVerified: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150&fit=crop&q=80',
+    socialPreview: {
+      postId: 'stem-drop-chorus',
+      postExcerpt: 'The sub bass progression on the 2nd chorus is phenomenal! Would love to mint a remix on TON.',
+      targetUser: 'dmitry_ton',
+    },
+    quickAction: {
+      label: 'Reply',
+      type: 'reply',
+      payload: { commentId: 'comment-sub-bass' },
+    },
+    metadata: {
+      commentId: 'comment-sub-bass',
+      isVerified: true,
+    },
+  },
 
-const USERNAMES = [
-  'ton_whale', 'cyber_jam', 'luna_ray', 'beat_lord', 'dust_bunny', 'dmitry_ton', 'nadia_synth',
-  'sol_master', 'wave_rider', 'vibe_architect', 'cryptokid', 'sound_shaper', 'apex_dj', 'marvin_g'
-];
-
-const TRACK_TITLES = [
-  'Solar Pulse', 'Digital Horizon', 'Neon Nights', 'Cyber Cruise', 'Ethereal Flow', 'Vapor Echo',
-  'Acoustic Wave', 'Hyper Sonic', 'Bass Overdrive', 'Midnight Drift', 'Liquid Synapse', 'Void Resonance'
-];
-
-const NFT_TITLES = [
-  'Cosmic Vinyl #001', 'Frequency Artifact #042', 'Audio Genesis Key', 'Sound Sphere Premium',
-  'Infinite Groove Gold', 'Sonic Prism Red', 'Subwoofer Elite #102', 'Audio Genesis Key Silver'
+  // EARLIER
+  {
+    category: 'system',
+    title: 'Artist Verification Approved',
+    description: 'Your TonJam Creator Verification has been validated by the protocol. Enjoy zero-gas minting!',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 84).toISOString(), // 3.5 days ago (Earlier)
+    read: true,
+    senderName: 'TonJam Security',
+    quickAction: {
+      label: 'View Badge',
+      type: 'view',
+      payload: { section: 'profile' },
+    },
+    metadata: {
+      subCategory: 'verification',
+    },
+  },
+  {
+    category: 'royalty',
+    title: 'Streaming Royalty Disbursed',
+    description: '+12.45 TON was deposited to your linked TON wallet from decentralized streams.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 120).toISOString(), // 5 days ago (Earlier)
+    read: true,
+    senderName: 'TonJam Royalties',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&fit=crop&q=80',
+    quickAction: {
+      label: 'View Wallet',
+      type: 'view',
+      payload: { section: 'wallet' },
+    },
+    metadata: {
+      rewardAmount: 12.45,
+      subCategory: 'royalty',
+    },
+  },
+  {
+    category: 'marketplace',
+    title: 'New Genesis Collection Open for Minting',
+    description: 'Snoop Dogg dropped exclusive TON audio passes with lifetime streaming perks.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 168).toISOString(), // 7 days ago (Earlier)
+    read: true,
+    senderName: 'Snoop Dogg',
+    isVerified: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&fit=crop&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&fit=crop&q=80',
+    nftPreview: {
+      nftId: 'nft-snoop-genesis',
+      title: 'Death Row TON Pass #001',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&fit=crop&q=80',
+      event: 'minted',
+      amountTon: 25.0,
+      sellerOrBidder: 'Snoop Dogg',
+    },
+    quickAction: {
+      label: 'View NFT',
+      type: 'mint',
+      payload: { nftId: 'nft-snoop-genesis' },
+    },
+    metadata: {
+      nftId: 'nft-snoop-genesis',
+      isVerified: true,
+    },
+  },
 ];
 
 export const generateMockNotifications = (userId: string): TonJamNotification[] => {
-  const list: TonJamNotification[] = [];
-  const now = new Date();
-
-  // Helper to generate custom dates
-  const getDateNDaysAgo = (days: number, hoursOffset: number) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() - days);
-    d.setHours(d.getHours() - hoursOffset);
-    return d.toISOString();
-  };
-
-  const categories: NotificationCategory[] = [
-    'music', 'artist_release', 'follower', 'like', 'comment', 'mention',
-    'playlist_share', 'track_share', 'nft_sale', 'nft_purchase', 'auction',
-    'marketplace', 'wallet_transaction', 'royalty', 'tj_reward', 'mission', 'system'
-  ];
-
-  // We want to generate exactly 500 notifications with balanced distribution.
-  for (let i = 0; i < 500; i++) {
-    const category = categories[i % categories.length];
-    
-    // Distribute across periods: Today (0-1 days), Yesterday (1-2 days), This Week (2-7 days), Earlier (7-30 days)
-    let daysAgo = 0;
-    let hoursOffset = i % 24;
-    
-    if (i < 50) {
-      // Today
-      daysAgo = 0;
-      hoursOffset = Math.floor(Math.random() * 12);
-    } else if (i < 120) {
-      // Yesterday
-      daysAgo = 1;
-      hoursOffset = Math.floor(Math.random() * 24);
-    } else if (i < 250) {
-      // This Week
-      daysAgo = 2 + (i % 5);
-      hoursOffset = Math.floor(Math.random() * 24);
-    } else {
-      // Earlier
-      daysAgo = 7 + Math.floor((i - 250) / 10);
-      hoursOffset = Math.floor(Math.random() * 24);
-    }
-
-    const timestamp = getDateNDaysAgo(daysAgo, hoursOffset);
-    const read = i >= 8; // Keep the first 8 notifications unread for excellent testing space
-    
-    const user = USERNAMES[i % USERNAMES.length];
-    const avatar = AVATARS[i % AVATARS.length];
-    const thumbnail = THUMBNAILS[i % THUMBNAILS.length];
-    const track = TRACK_TITLES[i % TRACK_TITLES.length];
-    const nft = NFT_TITLES[i % NFT_TITLES.length];
-
-    let title = '';
-    let description = '';
-    let quickAction: any = undefined;
-    let metadata: any = {};
-
-    switch (category) {
-      case 'music':
-        title = 'VIBE STREAMING ALIGNMENT';
-        description = `@${user} is playing your original track "${track}" right now on TonJam!`;
-        quickAction = { label: 'Play Along', type: 'play', payload: { trackId: `track-${i}` } };
-        metadata = { trackId: `track-${i}` };
-        break;
-
-      case 'artist_release':
-        title = 'NEW CREATION RELEASED';
-        description = `Artist @${user} just uploaded a new digital release: "${track}"! Sync up.`;
-        quickAction = { label: 'Listen Now', type: 'play', payload: { trackId: `track-${i}` } };
-        metadata = { trackId: `track-${i}`, artistId: `artist-${i}` };
-        break;
-
-      case 'follower':
-        title = 'NEW SIGNAL ESTABLISHED';
-        description = `@${user} is now tracking your telemetry and musical updates!`;
-        quickAction = { label: 'Track Back', type: 'follow', payload: { userId: `user-${i}` } };
-        metadata = { userId: `user-${i}` };
-        break;
-
-      case 'like':
-        title = 'RESONANCE COMPATIBILITY';
-        description = `@${user} liked your latest digital transmission: "${track}"!`;
-        quickAction = { label: 'View Freq', type: 'view', payload: { trackId: `track-${i}` } };
-        metadata = { trackId: `track-${i}` };
-        break;
-
-      case 'comment':
-        title = 'COMMENTS PORTAL SIGNAL';
-        description = `@${user} commented: "This synthesizer pattern is absolutely breathtaking!"`;
-        quickAction = { label: 'Reply', type: 'reply', payload: { commentId: `comment-${i}` } };
-        metadata = { trackId: `track-${i}` };
-        break;
-
-      case 'mention':
-        title = 'TELEMETRY MENTION SIGNAL';
-        description = `@${user} tagged you in a discussion about upcoming NFT auction ${nft}!`;
-        quickAction = { label: 'Join Talk', type: 'reply', payload: { mentionId: `mention-${i}` } };
-        metadata = { nftId: `nft-${i}` };
-        break;
-
-      case 'playlist_share':
-        title = 'PLAYLIST SIGNAL DISPATCH';
-        description = `@${user} shared their curations "Cyber Synth Lounge" with your inbox.`;
-        quickAction = { label: 'Import Playlist', type: 'view', payload: { playlistId: `playlist-${i}` } };
-        break;
-
-      case 'track_share':
-        title = 'TRACK INCOMING BEAM';
-        description = `@${user} broadcasted a private track recommendation: "${track}" to your channel.`;
-        quickAction = { label: 'Listen', type: 'play', payload: { trackId: `track-${i}` } };
-        metadata = { trackId: `track-${i}` };
-        break;
-
-      case 'nft_sale':
-        title = 'NFT TRANSACTION COMPLETED';
-        description = `Resonance NFT "${nft}" was sold to @${user} for 24.5 TON! Royalties allocated.`;
-        quickAction = { label: 'View Ledger', type: 'view', payload: { txHash: `tx-${i}` } };
-        metadata = { nftId: `nft-${i}`, txHash: `tx-${i}` };
-        break;
-
-      case 'nft_purchase':
-        title = 'NFT SECURED IN VAULT';
-        description = `Successfully acquired "${nft}" from the marketplace for 18.0 TON!`;
-        quickAction = { label: 'Open Vault', type: 'view', payload: { nftId: `nft-${i}` } };
-        metadata = { nftId: `nft-${i}` };
-        break;
-
-      case 'auction':
-        const bidPrice = 12 + (i % 20);
-        title = 'CYBER AUCTION BID OUT';
-        description = `Alert: Your active auction placement on "${nft}" was outbid. Current top: ${bidPrice} TON.`;
-        quickAction = { label: 'Place Counter Bid', type: 'bid', payload: { nftId: `nft-${i}`, currentBid: bidPrice } };
-        metadata = { nftId: `nft-${i}`, bidAmount: bidPrice };
-        break;
-
-      case 'marketplace':
-        title = 'MARKET TREND DEPLOYMENT';
-        description = `Exclusive launch: 10 new legendary music NFTs from @${user} are now open for public minting!`;
-        quickAction = { label: 'Mint Direct', type: 'mint', payload: { collectionId: `coll-${i}` } };
-        break;
-
-      case 'wallet_transaction':
-        title = 'TON BLOCKCHAIN DEPOSIT';
-        description = `Received +15.50 TON from address EQDx...a9sJ. Wallet balance updated.`;
-        quickAction = { label: 'Ledger Details', type: 'view', payload: { txHash: `tx-${i}` } };
-        metadata = { txHash: `tx-${i}` };
-        break;
-
-      case 'royalty':
-        const amount = (2.5 + (i % 5)).toFixed(2);
-        title = 'CREATOR ROYALTY RESOLVED';
-        description = `Disbursed +${amount} TON from continuous secondary marketplace streams of your catalog!`;
-        quickAction = { label: 'Claim Revenue', type: 'claim', payload: { amount: Number(amount) } };
-        metadata = { rewardAmount: Number(amount) };
-        break;
-
-      case 'tj_reward':
-        title = 'PROTOCOL REWARD ALLOCATED';
-        description = `Received +500 TJ COINS for maintaining a 7-day streak on JamSpace broadcasting!`;
-        quickAction = { label: 'Claim Coins', type: 'claim', payload: { amount: 500 } };
-        metadata = { rewardAmount: 500 };
-        break;
-
-      case 'mission':
-        title = 'DAILY MISSION SIGNAL';
-        description = `Unlock premium status! Complete today's mission: Listen to 3 upcoming NFT previews.`;
-        quickAction = { label: 'Start Mission', type: 'join', payload: { missionId: `mission-${i}` } };
-        break;
-
-      case 'system':
-      default:
-        title = 'NODE TELEMETRY SYNCHRONIZED';
-        description = 'TonJam network upgrade complete: Node v2.1.0-alpha is now fully live with zero-gas NFT transfers.';
-        quickAction = { label: 'Read Patch Notes', type: 'view', payload: { version: '2.1.0' } };
-        break;
-    }
-
-    list.push({
-      id: `notice-${i}`,
-      userId,
-      category,
-      title,
-      description,
-      timestamp,
-      read,
-      avatarUrl: ['follower', 'like', 'comment', 'mention', 'playlist_share', 'track_share', 'music', 'artist_release'].includes(category) ? avatar : undefined,
-      thumbnailUrl: ['nft_sale', 'nft_purchase', 'auction', 'marketplace', 'like', 'music', 'artist_release'].includes(category) ? thumbnail : undefined,
-      quickAction,
-      metadata
-    });
-  }
-
-  return list;
+  return INITIAL_CURATED_NOTIFICATIONS.map((item, index) => ({
+    ...item,
+    id: `tonjam-notif-${index + 1}`,
+    userId,
+  }));
 };

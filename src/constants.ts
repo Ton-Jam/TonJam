@@ -12,6 +12,9 @@ export const DJ_KRUPY_AVATAR = "https://i.postimg.cc/K8QgMBjt/grok-image-1777930
 export const JAM_PRICE_USD = 0.052;
 export const JAM_JETTON_MASTER = "EQCxE6mNZ_9MvS_88888888888888888888888888888"; // Placeholder JAM Master Address
 
+// Official Configured TonJam Treasury Receiving Wallet Address
+export const TONJAM_TREASURY_ADDRESS = (import.meta.env.VITE_TONJAM_TREASURY_ADDRESS as string) || "EQA0jamTreasury_TonJam_Official_Ecosystem_Vault_01";
+
 export const MOODS = [
   { id: 'chill', name: 'Chill', color: 'from-blue-400 to-indigo-500' },
   { id: 'energetic', name: 'Energetic', color: 'from-orange-400 to-red-500' },

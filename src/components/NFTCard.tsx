@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers, History, RotateCw, Bell } from 'lucide-react';
+import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers, History, RotateCw, Bell, Zap } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { useGramPrice } from '@/contexts/GramPriceContext';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
@@ -19,6 +19,7 @@ import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import ConfirmationModal from './ConfirmationModal';
 import NFTPurchaseConfirmationDialog from './NFTPurchaseConfirmationDialog';
+import QuickBuyNFTModal from './QuickBuyNFTModal';
 import NFTOptionsModal from './NFTOptionsModal';
 import ManageNFTModal from './ManageNFTModal';
 import BidModal from './BidModal';
@@ -121,6 +122,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isConfirmPurchaseOpen, setIsConfirmPurchaseOpen] = useState(false);
   const [isPriceAlertOpen, setIsPriceAlertOpen] = useState(false);
+  const [isQuickBuyOpen, setIsQuickBuyOpen] = useState(false);
 
   const [isHovered, setIsHovered] = useState(false);
   const [isEndingSoon, setIsEndingSoon] = useState(false);
@@ -413,6 +415,12 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         <span className="text-[10px] font-bold uppercase tracking-widest">Play Associated Track</span>
       </DropdownMenuItem>
+      {!isOwner && !isAuctionEnded && nft.listingType !== 'auction' && (
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setIsQuickBuyOpen(true); }} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-[#229ED9] focus:text-white transition-colors">
+          <Zap className="h-4 w-4 text-[#229ED9]" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#229ED9]">Quick Buy</span>
+        </DropdownMenuItem>
+      )}
       <DropdownMenuItem onClick={handleQuickViewClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Eye className="h-4 w-4" />
         <span className="text-[10px] font-bold uppercase tracking-widest">Quick View</span>
@@ -489,6 +497,12 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         <span className="text-[10px] font-semibold uppercase tracking-wider">Play Track</span>
       </ContextMenuItem>
+      {!isOwner && !isAuctionEnded && nft.listingType !== 'auction' && (
+        <ContextMenuItem onClick={(e) => { e.stopPropagation(); setIsQuickBuyOpen(true); }} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#229ED9] rounded-[3px] text-[#229ED9] font-bold">
+          <Zap className="h-4 w-4 fill-current" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Quick Buy</span>
+        </ContextMenuItem>
+      )}
       <ContextMenuItem onClick={handleArtistClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
         <User className="h-4 w-4" />
         <span className="text-[10px] font-semibold uppercase tracking-wider">View Artist</span>
@@ -761,7 +775,11 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/nft/${nft.id}`);
+                if (!isOwner && !isAuctionEnded && nft.listingType !== 'auction') {
+                  setIsQuickBuyOpen(true);
+                } else {
+                  navigate(`/nft/${nft.id}`);
+                }
               }}
               disabled={!isOwner && isAuctionEnded}
               aria-label={
@@ -769,28 +787,33 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                   ? `Owned by you: ${nft.title}`
                   : isAuctionEnded
                   ? `Sold out: ${nft.title}`
-                  : `Buy ${nft.title} for ${formattedPrice} TON`
+                  : `Quick Buy ${nft.title} for ${formattedPrice} TON`
               }
               style={{
                 height: 'var(--card-action-height, 34px)',
                 borderRadius: 'var(--card-action-radius, 8px)',
               }}
               className={cn(
-                "w-full h-[34px] py-1 px-4 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-150 flex items-center justify-center text-center cursor-pointer border-none select-none",
+                "w-full h-[34px] py-1 px-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-150 flex items-center justify-center gap-1.5 text-center cursor-pointer border-none select-none",
                 isOwner
                   ? "bg-white/[0.08] hover:bg-white/[0.12] text-slate-300"
                   : isAuctionEnded
                   ? "bg-white/[0.04] text-slate-500 cursor-not-allowed"
-                  : "bg-[#0052FF] hover:bg-[#1a66ff] active:scale-[0.98] text-white shadow-md shadow-blue-600/20"
+                  : "bg-[#229ED9] hover:bg-[#168AC4] active:scale-[0.98] text-white shadow-md shadow-[#229ED9]/25"
               )}
             >
-              {isOwner 
-                ? "Owned" 
-                : isAuctionEnded 
-                ? "Sold" 
-                : nft.listingType === 'auction' 
-                ? "Bid" 
-                : "Buy"}
+              {isOwner ? (
+                "Owned"
+              ) : isAuctionEnded ? (
+                "Sold"
+              ) : nft.listingType === 'auction' ? (
+                "Bid"
+              ) : (
+                <>
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  <span>Quick Buy</span>
+                </>
+              )}
             </button>
           }
         />
@@ -904,6 +927,13 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
           onClose={() => setIsPriceAlertOpen(false)}
         />
       )}
+
+      {/* Compact Centered Quick Buy Modal */}
+      <QuickBuyNFTModal
+        isOpen={isQuickBuyOpen}
+        onClose={() => setIsQuickBuyOpen(false)}
+        nft={nft as any}
+      />
     </>
   );
 };

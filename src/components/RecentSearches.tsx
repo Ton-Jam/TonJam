@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { History, X, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useSearchHistory } from '@/hooks/useSearchHistory';
 
 interface RecentSearchesProps {
   searches?: string[];
@@ -10,8 +11,6 @@ interface RecentSearchesProps {
   className?: string;
 }
 
-const DEFAULT_SEARCHES = ['Lo-fi hip hop', 'Cyberpunk Beats', 'Phonk Vibes', 'Genesis NFT'];
-
 export const RecentSearches: React.FC<RecentSearchesProps> = ({
   searches: propSearches,
   onSelect,
@@ -19,38 +18,13 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
   onClearAll,
   className = "",
 }) => {
-  const [localSearches, setLocalSearches] = useState<string[]>(() => {
-    const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      } catch (e) {}
-    }
-    localStorage.setItem('tonjam_search_history', JSON.stringify(DEFAULT_SEARCHES));
-    localStorage.setItem('recentSearches', JSON.stringify(DEFAULT_SEARCHES));
-    return DEFAULT_SEARCHES;
-  });
+  const {
+    searchHistory: hookSearches,
+    removeQuery,
+    clearAllQueries
+  } = useSearchHistory();
 
-  useEffect(() => {
-    const handleStorage = () => {
-      const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) {
-            setLocalSearches(parsed);
-          }
-        } catch (e) {}
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
-
-  const activeSearches = propSearches !== undefined ? propSearches : localSearches;
+  const activeSearches = propSearches !== undefined ? propSearches : hookSearches;
 
   if (!activeSearches || activeSearches.length === 0) {
     return null;
@@ -67,10 +41,7 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
     if (onRemove) {
       onRemove(term);
     } else {
-      const updated = localSearches.filter(s => s !== term);
-      setLocalSearches(updated);
-      localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
-      localStorage.setItem('recentSearches', JSON.stringify(updated));
+      removeQuery(term);
     }
   };
 
@@ -78,18 +49,16 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
     if (onClearAll) {
       onClearAll();
     } else {
-      setLocalSearches([]);
-      localStorage.removeItem('tonjam_search_history');
-      localStorage.removeItem('recentSearches');
+      clearAllQueries();
     }
   };
 
   return (
     <div className={`w-full flex items-center justify-between gap-3 select-none py-1 ${className}`}>
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/15 rounded-[4px] shrink-0 mr-1">
-          <History className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">Recent Searches</span>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#00B4D8]/15 rounded-full shrink-0 mr-1">
+          <History className="w-3.5 h-3.5 text-[#00B4D8] shrink-0" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#00B4D8]">Recent Searches</span>
         </div>
         <AnimatePresence mode="popLayout">
           {activeSearches.map((term, idx) => (
@@ -101,7 +70,7 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.15 }}
               onClick={() => handleSelect(term)}
-              className="flex items-center gap-1.5 bg-[#132354] hover:bg-blue-600 active:bg-blue-700 px-3 py-1 rounded-[6px] cursor-pointer transition-colors shrink-0 group shadow-sm"
+              className="pill border-0 !border-none flex items-center gap-1.5 bg-[#132354] hover:bg-[#1a2d6d] px-3 py-1 rounded-full cursor-pointer transition-colors shrink-0 group"
             >
               <Search className="w-3 h-3 text-slate-400 group-hover:text-white shrink-0 transition-colors" />
               <span className="text-xs font-semibold text-slate-200 group-hover:text-white transition-colors">
@@ -110,7 +79,7 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
               <button
                 type="button"
                 onClick={(e) => handleRemove(e, term)}
-                className="text-slate-400 hover:text-red-300 p-0.5 rounded-[4px] hover:bg-black/20 transition-colors ml-0.5"
+                className="text-slate-400 hover:text-red-300 p-0.5 rounded-full hover:bg-black/20 transition-colors ml-0.5"
                 title="Remove search"
               >
                 <X className="w-3 h-3" />
@@ -132,3 +101,4 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
   );
 };
 export default RecentSearches;
+

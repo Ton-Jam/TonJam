@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, HelpCircle, LogOut } from 'lucide-react';
+import { Settings, HelpCircle, LogOut, Smartphone } from 'lucide-react';
 
 interface DrawerFooterProps {
   isAuthenticated: boolean;
@@ -24,6 +24,15 @@ export const DrawerFooter: React.FC<DrawerFooterProps> = ({
         >
           <Settings className="w-4 h-4 text-slate-400 shrink-0" />
           <span>Settings</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate?.('/unified-design-system')}
+          className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.04] text-xs font-medium transition-colors cursor-pointer outline-none"
+        >
+          <Smartphone className="w-4 h-4 text-[#2E8CEB] shrink-0" />
+          <span>Mobile Design System</span>
         </button>
 
         <button

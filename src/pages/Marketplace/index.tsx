@@ -15,6 +15,7 @@ import {
   CollectionData,
   CarouselSkeletonList,
 } from "@/components/marketplace";
+import { QuickBuyNFTModal, QuickBuyNFTData } from "@/components/marketplace/QuickBuyNFTModal";
 import { useMarketplace } from "./hooks/useMarketplace";
 import { MOCK_COLLECTIONS, MOCK_AUCTIONS } from "./mock";
 import { PRIMARY_COLLECTIONS } from "@/data/collectionsData";
@@ -125,6 +126,8 @@ export default function MarketplacePage() {
     isWalletConnected,
     collectionNFTCounts,
   } = useMarketplace();
+
+  const [quickBuyNFT, setQuickBuyNFT] = useState<QuickBuyNFTData | null>(null);
 
   // Combine curated and dynamic NFTs
   const trendingNFTs: MusicNFTData[] = useMemo(() => {
@@ -300,7 +303,8 @@ export default function MarketplacePage() {
                   nft={nft}
                   isPlaying={currentTrack?.id === nft.id && isPlaying}
                   onPlayPreview={handlePlayPreview}
-                  onCollect={(item) => navigate(`/nft/${item.id}`)}
+                  onQuickBuy={(item) => setQuickBuyNFT(item)}
+                  onCollect={(item) => setQuickBuyNFT(item)}
                   onViewNFT={(item) => navigate(`/nft/${item.id}`)}
                 />
               ))}
@@ -367,6 +371,13 @@ export default function MarketplacePage() {
           isWalletConnected={isWalletConnected}
         />
       </div>
+
+      {/* Compact Centered Quick Buy Modal without navigating away from the marketplace */}
+      <QuickBuyNFTModal
+        isOpen={Boolean(quickBuyNFT)}
+        onClose={() => setQuickBuyNFT(null)}
+        nft={quickBuyNFT}
+      />
     </div>
   );
 }

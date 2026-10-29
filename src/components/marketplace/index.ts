@@ -20,3 +20,5 @@ export {
   CollectionCardSkeleton,
   CarouselSkeletonList,
 } from "./MarketplaceSkeleton";
+export { QuickBuyNFTModal } from "./QuickBuyNFTModal";
+export type { QuickBuyNFTData, QuickBuyNFTModalProps } from "./QuickBuyNFTModal";

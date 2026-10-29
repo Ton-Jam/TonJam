@@ -71,7 +71,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait', classNa
         {!isOwnProfile && (
           <button 
             onClick={handleFollow}
-            className={`follow-btn w-8 h-8 rounded-full flex items-center justify-center transition-all border border-[#c0c0c0]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-muted/50 text-blue-400' : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'}`}
+            className={`follow-btn pill w-8 h-8 rounded-full flex items-center justify-center transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-muted/50 text-blue-400' : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'}`}
             aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}
           >
             {isFollowing ? <UserCheck className="h-3 w-3" /> : <UserPlus className="h-3 w-3" />}
@@ -116,7 +116,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait', classNa
           {!isOwnProfile && (
             <button 
               onClick={handleFollow}
-              className={`follow-btn px-4 py-2 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border border-[#c0c0c0]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-muted/50 text-blue-400' : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'}`}
+              className={`follow-btn pill px-4 py-2 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-muted/50 text-blue-400' : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'}`}
               aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}
             >
               {isFollowing ? 'Synced' : 'Follow'}
@@ -171,7 +171,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait', classNa
           {!isOwnProfile && (
             <button 
               onClick={handleFollow}
-              className={`cursor-pointer transition-all rounded-full h-7 w-full text-[8px] font-black uppercase tracking-[0.1em] text-white flex items-center justify-center border border-[#c0c0c0]/30
+              className={`follow-btn pill cursor-pointer transition-all rounded-full h-7 w-full text-[8px] font-black uppercase tracking-[0.1em] text-white flex items-center justify-center border-0
                 ${isFollowing 
                   ? 'bg-muted text-foreground' 
                   : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 shadow-lg shadow-blue-500/20'

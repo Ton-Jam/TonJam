@@ -1,4 +1,4 @@
-import React, { Component, ReactNode, useState, useEffect } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { TonConnectUIProvider, TonConnectUIContext } from '@tonconnect/ui-react';
 
 // Complete mock instance matching TonConnectUI interface to guarantee hooks never crash if SDK fails
@@ -65,48 +65,72 @@ interface SafeTonConnectProviderProps {
   manifestUrl: string;
 }
 
-export const SafeTonConnectProvider: React.FC<SafeTonConnectProviderProps> = ({ children, manifestUrl }) => {
-  const [hasProviderError, setHasProviderError] = useState(false);
+interface SafeTonConnectProviderState {
+  hasError: boolean;
+}
 
-  useEffect(() => {
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      const reason = String(event.reason?.message || event.reason || '');
-      if (
-        reason.includes('tonconnect') || 
-        reason.includes('TonConnect') || 
-        reason.includes('manifest') ||
-        reason.includes('bridge.tonapi.io')
-      ) {
-        console.warn("[SafeTonConnectProvider] Caught TonConnect background rejection:", reason);
-        event.preventDefault();
-      }
-    };
-
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-  }, []);
-
-  if (hasProviderError) {
-    return (
-      <TonConnectUIContext.Provider value={fallbackTonConnectUI}>
-        {children}
-      </TonConnectUIContext.Provider>
-    );
+export class SafeTonConnectProvider extends Component<SafeTonConnectProviderProps, SafeTonConnectProviderState> {
+  constructor(props: SafeTonConnectProviderProps) {
+    super(props);
+    this.state = { hasError: false };
   }
 
-  return (
-    <TonConnectErrorBoundary>
-      <TonConnectUIProvider
-        manifestUrl={manifestUrl}
-        actionsConfiguration={{
-          twaReturnUrl: typeof window !== 'undefined' ? (window.location.href as any) : undefined,
-          returnStrategy: 'back',
-        }}
-      >
-        {children}
-      </TonConnectUIProvider>
-    </TonConnectErrorBoundary>
-  );
-};
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any) {
+    console.warn("[SafeTonConnectProvider] Caught TonConnect tree error, falling back safely:", error);
+  }
+
+  private handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+    const reason = String(event.reason?.message || event.reason || '');
+    if (
+      reason.includes('tonconnect') || 
+      reason.includes('TonConnect') || 
+      reason.includes('manifest') ||
+      reason.includes('bridge.tonapi.io')
+    ) {
+      console.warn("[SafeTonConnectProvider] Caught TonConnect background rejection:", reason);
+      event.preventDefault();
+    }
+  };
+
+  componentDidMount() {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('unhandledrejection', this.handleUnhandledRejection);
+    }
+  }
+
+  componentWillUnmount() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('unhandledrejection', this.handleUnhandledRejection);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <TonConnectUIContext.Provider value={fallbackTonConnectUI}>
+          {this.props.children}
+        </TonConnectUIContext.Provider>
+      );
+    }
+
+    return (
+      <TonConnectErrorBoundary>
+        <TonConnectUIProvider
+          manifestUrl={this.props.manifestUrl}
+          actionsConfiguration={{
+            twaReturnUrl: typeof window !== 'undefined' ? (window.location.href as any) : undefined,
+            returnStrategy: 'back',
+          }}
+        >
+          {this.props.children}
+        </TonConnectUIProvider>
+      </TonConnectErrorBoundary>
+    );
+  }
+}
 
 export default SafeTonConnectProvider;

@@ -6,28 +6,88 @@
 
 :root {
   /* =========================================================
-     SEMANTIC COLOR TOKENS
-     Dark-blue TON-inspired visual identity
+     BRAND COLORS & GRADIENTS
+     TonJam TON-native identity (#229ED9)
      ========================================================= */
-  --tj-color-bg-primary: #07111F;
-  --tj-color-bg-secondary: #0A1628;
-  --tj-color-surface-default: #0A1628;
-  --tj-color-surface-elevated: #0F1C32;
-  --tj-color-brand-primary: #00B4D8;
-  --tj-color-brand-pressed: #009CC0;
-  --tj-color-text-primary: #FFFFFF;
-  --tj-color-text-secondary: #C2C7CD;
-  --tj-color-text-muted: #8C8C8C;
-  --tj-color-border-subtle: #22374D;
-  --tj-color-border-strong: #38516B;
-  --tj-color-state-success: #35C98A;
-  --tj-color-state-warning: #F4BD50;
-  --tj-color-state-danger: #F16D78;
-  --tj-color-overlay-glass: #0A1628;
+  --tj-brand: #229ED9;
+  --tj-brand-hover: #168AC4;
+  --tj-brand-soft: rgba(34, 158, 217, 0.14);
+  --tj-brand-glow: rgba(34, 158, 217, 0.22);
+  --tj-color-brand-primary: var(--tj-brand);
+  --tj-color-brand-pressed: var(--tj-brand-hover);
 
   /* =========================================================
-     SPACING TOKENS
-     Consistent Figma spacing increments (4, 8, 12, 16, 20, 24, 32px)
+     DARK THEME SURFACES & BACKGROUNDS
+     Deep navy tonal architecture
+     ========================================================= */
+  --tj-bg: #080D1A;
+  --tj-bg-elevated: #0B1424;
+  --tj-surface: #111C30;
+  --tj-surface-hover: #17243A;
+  --tj-surface-active: #1B2C45;
+
+  --tj-color-bg-primary: var(--tj-bg);
+  --tj-color-bg-secondary: var(--tj-bg-elevated);
+  --tj-color-surface-default: var(--tj-bg-elevated);
+  --tj-color-surface-elevated: var(--tj-surface);
+
+  /* =========================================================
+     TYPOGRAPHIC TOKENS & CONTRAST
+     ========================================================= */
+  --tj-text-primary: #F8FAFC;
+  --tj-text-secondary: #A8B7CC;
+  --tj-text-muted: #7F91AA;
+  --tj-text-inverse: #07111F;
+
+  --tj-color-text-primary: var(--tj-text-primary);
+  --tj-color-text-secondary: var(--tj-text-secondary);
+  --tj-color-text-muted: var(--tj-text-muted);
+
+  /* =========================================================
+     BORDER DISCIPLINE (NO BORDER LINES)
+     Zero-border aesthetic: transparent borders with subtle shadow depth
+     ========================================================= */
+  --tj-border: transparent;
+  --tj-border-subtle: transparent;
+  --tj-border-strong: transparent;
+  --tj-color-border-subtle: transparent;
+  --tj-color-border-strong: transparent;
+
+  /* =========================================================
+     ACCENTS & EXPRESSIVE IDENTITY
+     ========================================================= */
+  --tj-purple: #9B7CFF;
+  --tj-purple-soft: rgba(155, 124, 255, 0.14);
+  --tj-teal: #2DD4BF;
+  --tj-teal-soft: rgba(45, 212, 191, 0.14);
+  --tj-gold: #FFC857;
+  --tj-gold-soft: rgba(255, 200, 87, 0.14);
+  --tj-pink: #F472B6;
+  --tj-pink-soft: rgba(244, 114, 182, 0.14);
+
+  /* Semantic State */
+  --tj-success: #34D399;
+  --tj-warning: #FFC857;
+  --tj-danger: #F87171;
+  --tj-info: #60A5FA;
+  --tj-color-state-success: var(--tj-success);
+  --tj-color-state-warning: var(--tj-warning);
+  --tj-color-state-danger: var(--tj-danger);
+
+  /* Glassmorphism & Overlays */
+  --tj-glass-bg: rgba(17, 28, 48, 0.75);
+  --tj-glass-blur: 16px;
+  --tj-overlay: rgba(8, 13, 26, 0.82);
+  --tj-color-overlay-glass: var(--tj-surface);
+
+  /* Soft Elevation & Shadows (replacing hard border lines) */
+  --tj-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --tj-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --tj-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.50);
+  --tj-shadow-glow: 0 0 20px rgba(34, 158, 217, 0.22);
+
+  /* =========================================================
+     SPACING TOKENS (Figma scale: 4, 8, 12, 16, 20, 24, 32px)
      ========================================================= */
   --tj-spacing-4: 4px;
   --tj-spacing-8: 8px;
@@ -39,7 +99,7 @@
 
   /* =========================================================
      RADIUS TOKENS
-     Smooth geometric curves and pill shapes
+     Smooth geometric curves
      ========================================================= */
   --tj-radius-sm: 8px;
   --tj-radius-md: 12px;
@@ -49,7 +109,6 @@
 
   /* =========================================================
      TYPOGRAPHY TOKENS
-     Geometric sans font family and typographic scale
      ========================================================= */
   --tj-font-family-sans: 'Poppins', sans-serif;
   --tj-font-size-caption: 12px;
@@ -66,3 +125,4 @@
   --tj-font-weight-semibold: 600;
   --tj-font-weight-bold: 700;
 }
+

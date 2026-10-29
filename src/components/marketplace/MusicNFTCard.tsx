@@ -1,5 +1,5 @@
 import React from "react";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, Zap } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { ProgressiveImage } from "@/components/common/ProgressiveImage";
@@ -19,6 +19,8 @@ export interface MusicNFTData {
   badge?: string;
   audioUrl?: string;
   status?: string;
+  owner?: string;
+  royaltySplits?: Array<{ address: string; percentage: number }>;
 }
 
 interface MusicNFTCardProps {
@@ -26,6 +28,7 @@ interface MusicNFTCardProps {
   isPlaying?: boolean;
   onPlayPreview?: (nft: MusicNFTData) => void;
   onCollect?: (nft: MusicNFTData) => void;
+  onQuickBuy?: (nft: MusicNFTData) => void;
   onViewNFT?: (nft: MusicNFTData) => void;
   className?: string;
 }
@@ -35,6 +38,7 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
   isPlaying = false,
   onPlayPreview,
   onCollect,
+  onQuickBuy,
   onViewNFT,
   className,
 }) => {
@@ -47,6 +51,17 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
   const handleCollectClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onCollect) {
+      onCollect(nft);
+    } else if (onViewNFT) {
+      onViewNFT(nft);
+    }
+  };
+
+  const handleQuickBuyClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onQuickBuy) {
+      onQuickBuy(nft);
+    } else if (onCollect) {
       onCollect(nft);
     } else if (onViewNFT) {
       onViewNFT(nft);
@@ -151,13 +166,17 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={handleCollectClick}
-          className="px-3.5 py-1.5 rounded-xl bg-[#3390EC]/15 hover:bg-[#3390EC] text-[#65B8FF] hover:text-white transition-all text-xs font-semibold cursor-pointer border-none outline-none shrink-0"
-        >
-          Collect
-        </button>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={handleQuickBuyClick}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#229ED9] hover:bg-[#168AC4] active:scale-95 text-white transition-all text-xs font-bold cursor-pointer border-none outline-none shadow-sm shadow-[#229ED9]/25 shrink-0"
+            title="Quick Buy without leaving marketplace"
+          >
+            <Zap className="w-3 h-3 fill-current" />
+            <span>Quick Buy</span>
+          </button>
+        </div>
       </div>
     </motion.div>
   );

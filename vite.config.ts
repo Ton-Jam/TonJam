@@ -42,6 +42,7 @@ export default defineConfig(({ mode }) => {
           'react-router',
           'react-router-dom',
           '@tonconnect/ui-react',
+          '@tanstack/react-query',
           'lucide-react',
           'motion/react',
           'canvas-confetti',
@@ -49,12 +50,23 @@ export default defineConfig(({ mode }) => {
         ],
       },
       resolve: {
-        alias: {
-          '@': path.resolve(__dirname, './src'),
-          'react': path.resolve(__dirname, './node_modules/react'),
-          'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
-        },
-        dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom']
+        alias: [
+          { find: '@', replacement: path.resolve(__dirname, './src') },
+          { find: /^react$/, replacement: path.resolve(__dirname, './node_modules/react') },
+          { find: /^react-dom$/, replacement: path.resolve(__dirname, './node_modules/react-dom') },
+          { find: /^react\/jsx-runtime$/, replacement: path.resolve(__dirname, './node_modules/react/jsx-runtime.js') },
+          { find: /^react\/jsx-dev-runtime$/, replacement: path.resolve(__dirname, './node_modules/react/jsx-dev-runtime.js') },
+        ],
+        dedupe: [
+          'react',
+          'react-dom',
+          'react/jsx-runtime',
+          'react/jsx-dev-runtime',
+          'react-router',
+          'react-router-dom',
+          '@tonconnect/ui-react',
+          '@tanstack/react-query'
+        ]
       }
     };
 });

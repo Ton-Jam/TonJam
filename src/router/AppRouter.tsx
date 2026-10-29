@@ -16,6 +16,7 @@ import NotificationsPage from '@/pages/Notifications';
 import JamSpacePage from '@/pages/JamSpace';
 import MarketplacePage from '@/pages/Marketplace';
 import DiscoverPage from '@/pages/Discover';
+import NFTDetailPage from '@/pages/NFTDetail';
 
 const RouteLoadingFallback: React.FC = () => (
   <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3 py-16 text-center select-none">
@@ -52,9 +53,9 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
     let lastError: any = null;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const component = await componentImport();
+        const mod = await componentImport();
         sessionStorage.setItem('page_reloaded_for_chunk_error', 'false');
-        return component;
+        return mod && mod.default ? mod : { default: mod };
       } catch (error: any) {
         lastError = error;
         console.warn(`[lazyWithRetry] Module failed import (attempt ${attempt + 1}/3):`, error);
@@ -87,6 +88,7 @@ const HomeFeed = HomePage;
 const Discover = DiscoverPage;
 const JamSpace = JamSpacePage;
 const Marketplace = MarketplacePage;
+const NFTDetail = NFTDetailPage;
 const Profile = lazyWithRetry(() => import('@/pages/Profile'));
 const EditProfile = lazyWithRetry(() => import('@/pages/EditProfile'));
 const UserProfile = lazyWithRetry(() => import('@/pages/UserProfile'));
@@ -101,7 +103,6 @@ const ImportedPlaylists = lazyWithRetry(() => import('@/pages/Library/ImportedPl
 const Settings = lazyWithRetry(() => import('@/pages/Settings'));
 const QueuePage = lazyWithRetry(() => import('@/pages/Queue'));
 const Tasks = lazyWithRetry(() => import('@/pages/Tasks'));
-const NFTDetail = lazyWithRetry(() => import('@/pages/NFTDetail'));
 const ExploreList = lazyWithRetry(() => import('@/pages/ExploreList'));
 const Notifications = NotificationsPage;
 const UploadTrack = lazyWithRetry(() => import('@/pages/UploadTrack'));
@@ -133,6 +134,7 @@ const Governance = lazyWithRetry(() => import('@/pages/Governance'));
 const UIKitShowcase = lazyWithRetry(() => import('@/pages/UIKitShowcase'));
 const Dashboard = lazyWithRetry(() => import('@/pages/Dashboard'));
 const ArtistOnboarding = lazyWithRetry(() => import('@/pages/ArtistOnboarding'));
+const ArtistVerification = lazyWithRetry(() => import('@/pages/ArtistVerification'));
 const ArtistAnalytics = lazyWithRetry(() => import('@/pages/ArtistAnalytics'));
 const ArtistPortfolio = lazyWithRetry(() => import('@/pages/ArtistPortfolio'));
 const NFTLaunchpad = lazyWithRetry(() => import('@/pages/NFTLaunchpad'));
@@ -147,6 +149,8 @@ const LivestreamHub = lazyWithRetry(() => import('@/pages/Livestream').then(m =>
 const LivestreamViewer = lazyWithRetry(() => import('@/pages/Livestream/LivestreamViewer').then(m => ({ default: m.LivestreamViewer })));
 const LiveStudio = lazyWithRetry(() => import('@/pages/Livestream/LiveStudio').then(m => ({ default: m.LiveStudio })));
 const SideDrawerShowcase = lazyWithRetry(() => import('@/pages/SideDrawerShowcase'));
+const UnifiedDesignSystem = lazyWithRetry(() => import('@/pages/UnifiedDesignSystem'));
+const Partnerships = lazyWithRetry(() => import('@/pages/Partnerships'));
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
@@ -257,6 +261,8 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/artist-analytics" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistAnalytics /></ProtectedRoute></PageWrapper>} />
                   <Route path="/artist-portfolio" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistPortfolio /></ProtectedRoute></PageWrapper>} />
                   <Route path="/artist-onboarding" element={<PageWrapper><ProtectedRoute><ArtistOnboarding /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/artist-verification" element={<PageWrapper><ProtectedRoute><ArtistVerification /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/verification" element={<PageWrapper><ProtectedRoute><ArtistVerification /></ProtectedRoute></PageWrapper>} />
                   <Route path="/upload" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><UploadTrack /></ProtectedRoute></PageWrapper>} />
                   <Route path="/create-album" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><CreateAlbum /></ProtectedRoute></PageWrapper>} />
                   <Route path="/album/create" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><CreateAlbum /></ProtectedRoute></PageWrapper>} />
@@ -308,6 +314,12 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/referrals" element={<PageWrapper><ProtectedRoute><Referrals /></ProtectedRoute></PageWrapper>} />
                   <Route path="/side-drawer" element={<PageWrapper><SideDrawerShowcase /></PageWrapper>} />
                   <Route path="/drawer" element={<PageWrapper><SideDrawerShowcase /></PageWrapper>} />
+                  <Route path="/unified-design-system" element={<PageWrapper><UnifiedDesignSystem /></PageWrapper>} />
+                  <Route path="/mobile-system" element={<PageWrapper><UnifiedDesignSystem /></PageWrapper>} />
+                  <Route path="/figma" element={<PageWrapper><UnifiedDesignSystem /></PageWrapper>} />
+                  <Route path="/earn-tj" element={<PageWrapper><ProtectedRoute><Tasks /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/partnerships" element={<PageWrapper><Partnerships /></PageWrapper>} />
+                  <Route path="/partners" element={<PageWrapper><Partnerships /></PageWrapper>} />
                 </Routes>
               </React.Suspense>
             </AnimatePresence>

@@ -39,7 +39,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         sticky ? "sticky top-0" : "relative",
         transparent
           ? "bg-transparent"
-          : "bg-black/85 backdrop-blur-xl",
+          : "bg-[#080D1A]/90 backdrop-blur-xl",
         className
       )}
     >

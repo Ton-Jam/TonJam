@@ -13,7 +13,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { toast } from "sonner";
 import LazyArtworkImage from "@/components/common/LazyArtworkImage";
-import ArtistNFTVolumeFloorChart from "@/components/artist/ArtistNFTVolumeFloorChart";
+import ArtistAnalyticsDashboard from "@/components/analytics/ArtistAnalyticsDashboard";
 
 // Custom Modals
 import EditArtistProfileModal from "@/components/EditArtistProfileModal";
@@ -551,11 +551,13 @@ export const ArtistProfile: React.FC = () => {
           </div>
         )}
 
-        {/* Data visualization using Recharts for Volume and Floor Price History */}
-        <ArtistNFTVolumeFloorChart 
+        {/* Data visualization using Recharts for Streaming Data, Follower Growth, and NFT Sales Volume */}
+        <ArtistAnalyticsDashboard 
           artistId={artist.uid}
           artistName={artist.name}
+          tracks={tracks}
           nfts={nfts}
+          className="pt-2"
         />
       </div>
 

@@ -21,6 +21,7 @@ import { TrendingNFTMusicSection } from "@/components/home/TrendingNFTMusicSecti
 import { HomePlaylistsSection, HomeCollectionsSection } from "@/components/home/HomePlaylistsCollectionsSection";
 import { LiveSpacesSection } from "@/components/home/LiveSpacesSection";
 import { HomeFooter } from "@/components/home/HomeFooter";
+import { TrendingNowWidget } from "@/components/home/TrendingNowWidget";
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -176,7 +177,10 @@ export const HomePage: React.FC = () => {
 
           {/* 9. TRENDING MUSIC NFTS */}
           {(activeCategory === "All" || activeCategory === "NFTs") && (
-            <TrendingNFTMusicSection />
+            <>
+              <TrendingNowWidget />
+              <TrendingNFTMusicSection />
+            </>
           )}
 
           {/* 10. PLAYLISTS & COLLECTIONS */}

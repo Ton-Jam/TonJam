@@ -983,15 +983,16 @@ const Settings: React.FC = () => {
                     ) : (
                       <Button 
                         type="button"
-                        onClick={() => setIsVerifyModalOpen(true)}
-                        className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl h-11 px-6 text-xs font-bold border-none"
+                        onClick={() => navigate('/artist-verification')}
+                        className="bg-[#229ED9] hover:bg-[#168AC4] text-white rounded-xl h-11 px-6 text-xs font-bold border-none cursor-pointer shadow-lg shadow-[#229ED9]/20"
                       >
                         Apply for Verification
                       </Button>
                     )}
                     <button 
                       type="button"
-                      className="px-4 py-2.5 text-xs font-bold text-zinc-400 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 rounded-xl"
+                      onClick={() => navigate('/artist-verification')}
+                      className="px-4 py-2.5 text-xs font-bold text-zinc-400 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 rounded-xl cursor-pointer"
                     >
                       Learn More
                     </button>

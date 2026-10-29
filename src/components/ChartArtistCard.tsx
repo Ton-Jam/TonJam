@@ -66,7 +66,7 @@ const ChartArtistCard: React.FC<ChartArtistCardProps> = ({ artist, rank }) => {
       {/* Follow Button */}
       <button
         onClick={handleFollowClick}
-        className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all flex-shrink-0 ${
+        className={`pill px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all flex-shrink-0 border-0 ${
           isFollowing
             ? 'bg-blue-500/20 text-blue-400'
             : 'bg-white/10 hover:bg-white hover:text-black text-white'

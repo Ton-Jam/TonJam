@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Menu,
@@ -45,6 +46,7 @@ import {
 import { APP_LOGO } from '@/constants';
 
 export const SideDrawerShowcase: React.FC = () => {
+  const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'prototype' | 'states' | 'components'>('prototype');
 
@@ -95,15 +97,26 @@ export const SideDrawerShowcase: React.FC = () => {
           </p>
         </div>
 
-        {/* PRIMARY CTA TO LAUNCH DRAWER */}
-        <button
-          type="button"
-          onClick={() => setIsDrawerOpen(true)}
-          className="py-3 px-5 rounded-2xl bg-[#229ED9] hover:bg-[#1f8ec4] text-white text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 shrink-0 cursor-pointer outline-none"
-        >
-          <Menu className="w-4 h-4" />
-          <span>Launch Live Drawer</span>
-        </button>
+        {/* ACTIONS */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => navigate('/unified-design-system')}
+            className="py-3 px-4 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] text-white text-xs font-bold transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer outline-none"
+          >
+            <Smartphone className="w-4 h-4 text-[#2E8CEB]" />
+            <span>Mobile 3-Screen System</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsDrawerOpen(true)}
+            className="py-3 px-5 rounded-2xl bg-[#229ED9] hover:bg-[#1f8ec4] text-white text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 cursor-pointer outline-none"
+          >
+            <Menu className="w-4 h-4" />
+            <span>Launch Live Drawer</span>
+          </button>
+        </div>
       </div>
 
       {/* SEGMENTED TAB SELECTOR - NO BORDERS */}

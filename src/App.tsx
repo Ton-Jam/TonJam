@@ -16,6 +16,7 @@ import { FollowProvider } from "@/contexts/FollowContext";
 import { NFTProvider } from "@/contexts/NFTContext";
 import { TJProvider } from "@/contexts/TJContext";
 import { ArtistProvider } from "@/contexts/ArtistContext";
+import { ArtistAnalyticsProvider } from "@/contexts/ArtistAnalyticsContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { TaskProvider } from "@/contexts/TaskContext";
 import { TonPriceProvider } from "@/contexts/TonPriceContext";
@@ -103,6 +104,8 @@ export default function App() {
                                                               <LibraryProvider>
                                                                 <DiagnosticProviderBoundary name="ArtistProvider">
                                                                   <ArtistProvider>
+                                                                    <DiagnosticProviderBoundary name="ArtistAnalyticsProvider">
+                                                                      <ArtistAnalyticsProvider>
                                                                     <DiagnosticProviderBoundary name="NFTProvider">
                                                                       <NFTProvider>
                                                                         <DiagnosticProviderBoundary name="FeedProvider">
@@ -139,6 +142,8 @@ export default function App() {
                                                                           </FeedProvider>
                                                                         </DiagnosticProviderBoundary>
                                                                       </NFTProvider>
+                                                                    </DiagnosticProviderBoundary>
+                                                                      </ArtistAnalyticsProvider>
                                                                     </DiagnosticProviderBoundary>
                                                                   </ArtistProvider>
                                                                 </DiagnosticProviderBoundary>

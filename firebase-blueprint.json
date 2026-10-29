@@ -589,9 +589,69 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "streamId", "requesterId", "songTitle", "status", "createdAt"]
+    },
+    "SearchHistory": {
+      "title": "SearchHistory",
+      "description": "User search query history",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "query": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "query", "timestamp"]
+    },
+    "TrendingSearch": {
+      "title": "TrendingSearch",
+      "description": "Aggregated trending search queries with real-time count",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "term": { "type": "string" },
+        "count": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "term", "count"]
+    },
+    "PartnershipContribution": {
+      "title": "PartnershipContribution",
+      "description": "Contribution or partnership inquiry recorded in the TonJam Treasury Portal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "paymentReference": { "type": "string" },
+        "partnerName": { "type": "string" },
+        "contactEmail": { "type": "string", "format": "email" },
+        "partnershipType": { "type": "string", "enum": ["support", "sponsor", "strategic"] },
+        "category": { "type": "string" },
+        "amountTon": { "type": "number" },
+        "amountNanotons": { "type": "string" },
+        "senderAddress": { "type": "string" },
+        "treasuryAddress": { "type": "string" },
+        "txHash": { "type": "string" },
+        "status": { "type": "string", "enum": ["submitted", "pending", "verified", "failed"] },
+        "website": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "paymentReference", "partnerName", "contactEmail", "partnershipType", "status", "createdAt"]
     }
   },
   "firestore": {
+    "/partnershipContributions/{contributionId}": {
+      "schema": "PartnershipContribution",
+      "description": "Ecosystem contributions and partnership inquiries for TonJam Treasury"
+    },
+    "/trendingSearches/{queryId}": {
+      "schema": "TrendingSearch",
+      "description": "Global trending searches with search count"
+    },
+    "/users/{userId}/searchHistory/{searchId}": {
+      "schema": "SearchHistory",
+      "description": "User search history queries subcollection"
+    },
     "/achievements/{achievementId}": {
       "schema": "Achievement",
       "description": "System achievements definitions"

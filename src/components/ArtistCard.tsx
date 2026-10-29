@@ -1,18 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Verified, UserPlus, UserCheck, MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { cn, getPlaceholderImage } from '@/lib/utils';
 import LazyArtworkImage from '@/components/common/LazyArtworkImage';
+import VerifiedArtistBadge from '@/components/common/VerifiedArtistBadge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-
 import { motion } from 'motion/react';
-import { cardTokens } from '@/design';
-
 
 interface ArtistCardProps {
   artist?: Artist;
@@ -22,17 +17,26 @@ interface ArtistCardProps {
   onMoreClick?: (artist: Artist) => void;
 }
 
-const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', className = '', isLoading = false, onMoreClick }) => {
+export const ArtistCard: React.FC<ArtistCardProps> = ({ 
+  artist, 
+  variant = 'default', 
+  className = '', 
+  isLoading = false, 
+  onMoreClick 
+}) => {
   const navigate = useNavigate();
   const { followedUserIds, toggleFollowUser } = useAudio();
 
   if (isLoading || !artist) {
     return (
-      <Card className={cn("flex flex-col items-center justify-center p-6 space-y-4", className)}>
-        <Skeleton className="w-24 h-24 rounded-full" />
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="h-8 w-full rounded-full" />
-      </Card>
+      <div className={cn("flex items-center gap-3 p-3 rounded-2xl bg-[#111C30]/50 animate-pulse", className)}>
+        <Skeleton className="w-11 h-11 rounded-full bg-white/5 shrink-0" />
+        <div className="flex-1 space-y-1.5">
+          <Skeleton className="h-3 w-24 bg-white/5" />
+          <Skeleton className="h-2.5 w-16 bg-white/5" />
+        </div>
+        <Skeleton className="h-7 w-16 rounded-full bg-white/5" />
+      </div>
     );
   }
 
@@ -41,108 +45,153 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     toggleFollowUser(artist.uid);
   };
   
   const handleMoreClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onMoreClick && onMoreClick(artist);
+    e.preventDefault();
+    if (onMoreClick) onMoreClick(artist);
   };
 
   const handleCardClick = () => {
     navigate(`/artist/${artist.uid}`);
   };
 
-  if (variant === 'row') {
-      return (
-        <motion.div 
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
-          className="w-full artist-card-custom-style"
-        >
-          <Card onClick={handleCardClick} className={cn("group p-2 flex items-center gap-4 cursor-pointer bg-transparent border-none shadow-none transition-all", className)}>
-            <LazyArtworkImage 
-              src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
-              fallbackSrc={getPlaceholderImage(`artist-${artist.uid}`)}
-              alt={artist.name} 
-              className="w-12 h-12 rounded-full object-cover shadow-md shadow-black/40" 
+  const username = (artist as any).username ? `@${(artist as any).username}` : undefined;
+  const followerText = artist.followers 
+    ? `${artist.followers.toLocaleString()} fans` 
+    : (username || 'Artist');
+
+  // Compact Row Variant
+  if (variant === 'row' || variant === 'compact') {
+    return (
+      <motion.div 
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        onClick={handleCardClick}
+        className={cn(
+          "group flex items-center gap-3 p-2.5 rounded-2xl bg-[#111C30] hover:bg-[#17243A] cursor-pointer transition-all duration-200 select-none shadow-md shadow-black/20 w-full",
+          className
+        )}
+      >
+        <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 bg-neutral-900 shadow-md">
+          <LazyArtworkImage 
+            src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
+            fallbackSrc={getPlaceholderImage(`artist-${artist.uid}`)}
+            alt={artist.name} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+          />
+        </div>
+
+        <div className="flex-1 min-w-0 text-left">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h3 className="font-bold text-xs text-white truncate leading-tight">
+              {artist.name}
+            </h3>
+            <VerifiedArtistBadge 
+              artistName={artist.name} 
+              artistId={artist.uid} 
+              isVerified={isVerified} 
+              size="xs" 
             />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1">
-                <h3 className="font-bold text-[12px] truncate uppercase">{artist.name}</h3>
-                {isVerified && <Verified className="w-3.5 h-3.5 text-blue-400 fill-current flex-shrink-0" />}
-              </div>
-              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{artist.followers.toLocaleString()} LISTENERS</p>
-            </div>
-            <Button 
-              className={cn(
-                  "rounded-full transition-colors duration-500 ease-in-out border-0",
-                  isFollowing 
-                    ? "bg-muted/50 text-muted-foreground hover:bg-muted/80" 
-                    : "bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]"
-                )}
-                onClick={handleFollowClick} size="sm">
-              {isFollowing ? 'Following' : 'Follow'}
-            </Button>
-            {onMoreClick && (
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleMoreClick}>
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-              </Button>
+          </div>
+          <p className="text-[10px] text-[#94A3B8] truncate mt-0.5 font-medium">
+            {followerText}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <button 
+            type="button"
+            onClick={handleFollowClick} 
+            className={cn(
+              "px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer border-none outline-none shadow-sm",
+              isFollowing 
+                ? "bg-white/10 hover:bg-white/20 text-[#94A3B8] hover:text-white" 
+                : "bg-[#229ED9] hover:bg-[#168AC4] text-white shadow-[#229ED9]/25 active:scale-95"
             )}
-          </Card>
-        </motion.div>
-      )
+            aria-label={isFollowing ? `Unfollow ${artist.name}` : `Follow ${artist.name}`}
+          >
+            {isFollowing ? 'Following' : 'Follow'}
+          </button>
+
+          {onMoreClick && (
+            <button
+              type="button"
+              onClick={handleMoreClick}
+              className="p-1.5 text-[#94A3B8] hover:text-white rounded-full hover:bg-white/10 transition-colors"
+              aria-label="More options"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </motion.div>
+    );
   }
 
+  // Grid / Vertical Card Variant
   return (
     <motion.div
-      whileHover={{ y: -4, scale: cardTokens.animation.hoverScale }}
-      whileTap={{ scale: cardTokens.animation.tapScale }}
-      style={{ width: cardTokens.artist.width, borderRadius: cardTokens.global.borderRadius }}
-      className={cn("group flex flex-col items-center text-center relative cursor-pointer transition-all duration-300 bg-transparent p-0", className)}
+      whileHover={{ y: -3 }}
+      whileTap={{ scale: 0.98 }}
       onClick={handleCardClick}
+      className={cn(
+        "group flex flex-col items-center text-center p-3 sm:p-3.5 rounded-2xl bg-[#111C30] hover:bg-[#17243A] cursor-pointer transition-all duration-200 select-none shadow-lg shadow-black/25 w-[130px] sm:w-[140px] shrink-0",
+        className
+      )}
     >
-      <div 
-        style={{ width: cardTokens.artist.avatarSize, height: cardTokens.artist.avatarSize }}
-        className="relative rounded-full overflow-hidden bg-background transition-all mb-2 flex-shrink-0 shadow-lg shadow-black/50"
-      >
+      <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-neutral-900 transition-all mb-2 shrink-0 shadow-md shadow-black/40">
         <LazyArtworkImage 
           src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
           fallbackSrc={getPlaceholderImage(`artist-${artist.uid}`)}
           alt={artist.name} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
         />
         {onMoreClick && (
           <button
-             className="absolute top-1.5 right-1.5 p-1 bg-black/60 rounded-full text-white/80 hover:text-white transition-all border-0 shadow-sm"
-             onClick={(e) => { e.stopPropagation(); onMoreClick(artist); }}
+            type="button"
+            className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white/80 hover:text-white transition-all border-none shadow-sm"
+            onClick={handleMoreClick}
+            aria-label="More options"
           >
-            <MoreHorizontal className="h-3 w-3" />
+            <MoreHorizontal className="w-3 h-3" />
           </button>
         )}
       </div>
 
-      <div className="w-full flex flex-col items-center gap-0.5">
+      <div className="w-full flex flex-col items-center gap-1">
         <div className="flex items-center gap-1 justify-center max-w-full">
-          <h3 className="text-[12px] font-bold text-foreground truncate max-w-[100px] uppercase tracking-tight">
+          <h3 className="text-xs font-bold text-white truncate max-w-[95px] leading-tight">
             {artist.name}
           </h3>
-          {isVerified && <Verified className="w-3.5 h-3.5 text-blue-400 fill-current flex-shrink-0" />}
+          <VerifiedArtistBadge 
+            artistName={artist.name} 
+            artistId={artist.uid} 
+            isVerified={isVerified} 
+            size="xs" 
+          />
         </div>
         
-        <p className="text-[10px] text-muted-foreground truncate mb-2 uppercase tracking-wider font-semibold">
-          {artist.followers ? `${artist.followers.toLocaleString()} fans` : 'artist'}
+        <p className="text-[10px] text-[#94A3B8] truncate font-medium">
+          {followerText}
         </p>
 
-        <Button 
-          variant={isFollowing ? "secondary" : "primary"}
-          size="sm"
+        <button 
+          type="button"
           onClick={handleFollowClick}
-          style={{ height: cardTokens.artist.followButtonHeight }}
-          className="w-full text-[8px] uppercase tracking-widest font-black rounded-full border-0 transition-colors duration-500 ease-in-out shadow-sm"
+          className={cn(
+            "mt-1.5 w-full py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer border-none outline-none shadow-sm",
+            isFollowing 
+              ? "bg-white/10 hover:bg-white/20 text-[#94A3B8] hover:text-white" 
+              : "bg-[#229ED9] hover:bg-[#168AC4] text-white shadow-[#229ED9]/25 active:scale-95"
+          )}
+          aria-label={isFollowing ? `Unfollow ${artist.name}` : `Follow ${artist.name}`}
         >
-          {isFollowing ? 'UNFOLLOW' : 'FOLLOW'}
-        </Button>
+          {isFollowing ? 'Following' : 'Follow'}
+        </button>
       </div>
     </motion.div>
   );

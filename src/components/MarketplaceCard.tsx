@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "motion/react";
+import { Zap } from "lucide-react";
 import { cardTokens } from "@/design";
 
 interface MarketplaceCardProps {
@@ -9,6 +10,7 @@ interface MarketplaceCardProps {
   badge: string;
   image: string;
   onBid: () => void;
+  onQuickBuy?: () => void;
 }
 
 const MarketplaceCard: React.FC<MarketplaceCardProps> = ({
@@ -18,6 +20,7 @@ const MarketplaceCard: React.FC<MarketplaceCardProps> = ({
   badge,
   image,
   onBid,
+  onQuickBuy,
 }) => {
   return (
     <motion.div
@@ -38,17 +41,32 @@ const MarketplaceCard: React.FC<MarketplaceCardProps> = ({
         <p className="text-[9px] text-[#9AA0AE] truncate uppercase font-semibold">Artist: {artist}</p>
       </div>
 
-      <div className="flex items-center justify-between pt-1 mt-auto">
-        <div className="text-left">
+      <div className="flex items-center justify-between pt-1 mt-auto gap-1.5">
+        <div className="text-left min-w-0">
           <span className="text-[7.5px] uppercase tracking-wider text-[#9AA0AE] block leading-none">Value</span>
-          <p className="text-[10px] font-black text-[#2BE08C] leading-none tracking-tight mt-1">{price}</p>
+          <p className="text-[10px] font-black text-[#2BE08C] leading-none tracking-tight mt-1 truncate">{price}</p>
         </div>
-        <button
-          onClick={onBid}
-          className="min-h-[44px] min-w-[44px] text-[8.5px] font-black uppercase tracking-widest px-3.5 bg-[#5B6BFF] hover:bg-[#4856ea] text-white rounded-full cursor-pointer border-none flex items-center justify-center active:scale-95 transition-transform"
-        >
-          Bid
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          {onQuickBuy && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onQuickBuy();
+              }}
+              className="h-8 px-2.5 text-[8.5px] font-bold uppercase tracking-wider bg-[#229ED9] hover:bg-[#168AC4] text-white rounded-full cursor-pointer border-none flex items-center gap-1 active:scale-95 transition-transform"
+              title="Quick Buy"
+            >
+              <Zap className="w-2.5 h-2.5 fill-current" />
+              <span>Quick Buy</span>
+            </button>
+          )}
+          <button
+            onClick={onBid}
+            className="h-8 px-3 text-[8.5px] font-black uppercase tracking-widest bg-[#5B6BFF] hover:bg-[#4856ea] text-white rounded-full cursor-pointer border-none flex items-center justify-center active:scale-95 transition-transform"
+          >
+            Bid
+          </button>
+        </div>
       </div>
     </motion.div>
   );

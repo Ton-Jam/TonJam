@@ -11,7 +11,6 @@ import {
   BadgeCheck, 
   MoreVertical, 
   Clock, 
-  History,
   Sparkles, 
   Compass, 
   QrCode, 
@@ -23,7 +22,6 @@ import {
   ListMusic,
   Radio,
   Gem,
-  Flame,
   ArrowRight,
   ChevronRight
 } from 'lucide-react';
@@ -35,6 +33,10 @@ import { SearchResults } from '@/components/search/SearchResults';
 import { SearchResultsSkeleton, FullDiscoverSkeleton } from '@/components/search/Skeletons';
 import QRScanner from '@/components/QRScanner';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { useSearchHistory } from '@/hooks/useSearchHistory';
+import { useTrendingSearches } from '@/hooks/useTrendingSearches';
+import { ArtistLeaderboard } from '@/components/ArtistLeaderboard';
+import { FeaturedArtistCard } from '@/components/FeaturedArtistCard';
 
 interface SpotifyCategory {
   id: string;
@@ -212,34 +214,29 @@ export const Discover: React.FC = () => {
     }
   }, [allTracks]);
 
-  // Recent Searches
-  const [searchHistory, setSearchHistory] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
-      return saved ? JSON.parse(saved) : ['Burna Boy', 'Asake', 'Afrobeats 2026', 'Phonk', 'TON NFT'];
-    } catch {
-      return ['Burna Boy', 'Asake', 'Afrobeats 2026', 'Phonk', 'TON NFT'];
-    }
-  });
+  // Search history & trending searches tracking
+  const {
+    saveQuery
+  } = useSearchHistory();
+
+  // Real-time trending searches tracking
+  const {
+    recordSearchTerm
+  } = useTrendingSearches();
 
   const handleSelectSearchTerm = (term: string) => {
     setQuery(term);
-    const updated = [term, ...searchHistory.filter((h) => h !== term)].slice(0, 8);
-    setSearchHistory(updated);
-    localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
+    saveQuery(term);
+    recordSearchTerm(term);
   };
 
-  const handleRemoveSearchTerm = (term: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const updated = searchHistory.filter((h) => h !== term);
-    setSearchHistory(updated);
-    localStorage.setItem('tonjam_search_history', JSON.stringify(updated));
-  };
-
-  const handleClearAllHistory = () => {
-    setSearchHistory([]);
-    localStorage.removeItem('tonjam_search_history');
-  };
+  // Auto-save query to search history & trending on debounced change
+  useEffect(() => {
+    if (debouncedQuery.trim().length >= 2) {
+      saveQuery(debouncedQuery);
+      recordSearchTerm(debouncedQuery);
+    }
+  }, [debouncedQuery, saveQuery, recordSearchTerm]);
 
   // Voice Search Toggle
   const toggleVoiceSearch = () => {
@@ -426,50 +423,7 @@ export const Discover: React.FC = () => {
                 className="absolute left-0 right-0 top-full mt-2 z-50 bg-[#181818] rounded-[8px] p-4 shadow-2xl space-y-4 max-h-[75vh] overflow-y-auto"
                 onMouseDown={(e) => e.preventDefault()}
               >
-                {/* 1. Recent Search Queries */}
-                {searchHistory.length > 0 && (
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
-                        <History className="w-3.5 h-3.5 text-[#00B4D8]" />
-                        <span>Recent Searches</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleClearAllHistory}
-                        className="text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                      >
-                        Clear all
-                      </button>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {searchHistory.map((term) => (
-                        <div
-                          key={`focus-recent-${term}`}
-                          onClick={() => {
-                            handleSelectSearchTerm(term);
-                            setIsFocused(false);
-                          }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[#242424] hover:bg-[#2e2e2e] cursor-pointer transition-all text-xs font-medium text-zinc-200 hover:text-white select-none group"
-                        >
-                          <Search className="w-3 h-3 text-zinc-400 group-hover:text-white" />
-                          <span>{term}</span>
-                          <button
-                            type="button"
-                            onClick={(e) => handleRemoveSearchTerm(term, e)}
-                            className="p-0.5 text-zinc-500 hover:text-white rounded-[4px] transition-colors ml-0.5 cursor-pointer"
-                            aria-label={`Remove ${term}`}
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 2. Recently Searched / Played Tracks */}
+                {/* 1. Recently Searched / Played Tracks */}
                 {last5RecentlyPlayed.length > 0 && (
                   <div className="space-y-2.5 pt-1">
                     <div className="flex items-center justify-between">
@@ -542,7 +496,7 @@ export const Discover: React.FC = () => {
                           handleSelectSearchTerm(vibe.query);
                           setIsFocused(false);
                         }}
-                        className="px-3 py-1.5 rounded-[6px] text-xs font-medium bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                        className="pill border-0 !border-none px-3 py-1.5 rounded-full text-xs font-medium bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white transition-colors cursor-pointer"
                       >
                         {vibe.label}
                       </button>
@@ -566,9 +520,9 @@ export const Discover: React.FC = () => {
                   key={pill.id}
                   onClick={() => setActiveFilter(pill.id)}
                   aria-pressed={isActive}
-                  className={`px-3.5 sm:px-4 py-1.5 rounded-[6px] text-xs font-semibold shrink-0 transition-all select-none cursor-pointer ${
+                  className={`pill border-0 !border-none px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none cursor-pointer ${
                     isActive
-                      ? 'bg-white text-black font-bold shadow-sm'
+                      ? 'active bg-[#00B4D8] text-white font-bold'
                       : 'bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white'
                   }`}
                 >
@@ -586,7 +540,7 @@ export const Discover: React.FC = () => {
                   type="button"
                   key={vibe.query}
                   onClick={() => handleSelectSearchTerm(vibe.query)}
-                  className="px-3 py-1 rounded-[6px] text-[11px] font-medium shrink-0 transition-all select-none bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white cursor-pointer"
+                  className="pill border-0 !border-none px-3 py-1 rounded-full text-[11px] font-medium shrink-0 transition-all select-none bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white cursor-pointer"
                 >
                   {vibe.label}
                 </button>
@@ -632,7 +586,6 @@ export const Discover: React.FC = () => {
           <FullDiscoverSkeleton />
         ) : (
           <div className="space-y-10">
-
             {/* 1. Browse All Categories */}
             <section className="space-y-3.5">
               <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Browse All</h3>
@@ -862,62 +815,21 @@ export const Discover: React.FC = () => {
               </section>
             )}
 
-            {/* 5. Popular Artists */}
-            {popularArtists.length > 0 && (
-              <section className="space-y-3.5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Popular Artists</h3>
-                  <button
-                    onClick={() => navigate('/explore/artists?title=Popular+Artists')}
-                    className="text-xs font-bold text-[#00B4D8] hover:text-[#00B4D8]/80 transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    More <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+            {/* 5. Featured Artist Spotlight */}
+            <section className="space-y-3.5">
+              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Artist Spotlight</h3>
+              <FeaturedArtistCard />
+            </section>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-                  {popularArtists.map((artist) => {
-                    const isFollowing = followedUserIds.includes(artist.uid);
-                    return (
-                      <motion.div
-                        key={`pop-artist-${artist.uid}`}
-                        whileHover={{ y: -3 }}
-                        onClick={() => navigate(`/artist/${artist.uid}`)}
-                        className="bg-white/[0.03] hover:bg-white/[0.06] rounded-[6px] p-3.5 sm:p-4 text-center flex flex-col items-center space-y-3 cursor-pointer group transition-all select-none"
-                      >
-                        <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden shadow-md bg-zinc-900">
-                          <img
-                            src={artist.avatarUrl || getPlaceholderImage(artist.name)}
-                            alt={artist.name}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        </div>
-
-                        <div className="w-full truncate">
-                          <h4 className="text-xs font-bold text-white group-hover:text-[#00B4D8] transition-colors truncate">
-                            {artist.name}
-                          </h4>
-                          <p className="text-[10px] text-zinc-400 capitalize truncate mt-0.5">
-                            {artist.genre || 'Artist'}
-                          </p>
-                        </div>
-
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFollowUser(artist.uid);
-                          }}
-                          className="w-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white hover:bg-white/20 rounded-[6px] h-7 sm:h-8"
-                        >
-                          {isFollowing ? 'Following' : 'Follow'}
-                        </Button>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
+            {/* 6. Artist Leaderboard (Top 10) */}
+            <section className="space-y-4 pt-2">
+              <ArtistLeaderboard 
+                limit={10} 
+                artists={artists} 
+                title="Artist Leaderboard" 
+                description="Top performing creators ranked by NFT sales volume and streaming activity" 
+              />
+            </section>
 
             {/* 6. Featured Playlists */}
             {allUserPlaylists.length > 0 && (

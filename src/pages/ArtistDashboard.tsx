@@ -67,6 +67,18 @@ import ManageNFTModal from "@/components/ManageNFTModal";
 import { ChartAreaInteractive } from "@/components/ChartAreaInteractive";
 import DailyStreamsChart from "@/components/DailyStreamsChart";
 import ListenerActivityFeed from "@/components/ListenerActivityFeed";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
+  CartesianGrid,
+} from "recharts";
+import { useArtistAnalytics } from "@/contexts/ArtistAnalyticsContext";
 
 import { FloorPriceChart } from "@/components/FloorPriceChart";
 import { StreamingStatsChart } from "@/components/StreamingStatsChart";
@@ -83,13 +95,92 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 
+const DailyStreamsLineTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const dataPoint = payload[0]?.payload;
+    return (
+      <div className="bg-[#111C30]/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl shadow-2xl text-xs space-y-1.5 select-none pointer-events-none">
+        <p className="font-bold text-white mb-1 flex items-center justify-between gap-3">
+          <span>{label}</span>
+          {dataPoint?.hasMilestone && (
+            <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">
+              🎯 Milestone
+            </span>
+          )}
+        </p>
+        <div className="flex items-center gap-2 text-[#229ED9]">
+          <span className="w-2 h-2 rounded-full bg-[#229ED9]" />
+          <span className="text-zinc-300">Daily Streams:</span>
+          <span className="font-mono font-bold text-white">{payload[0]?.value?.toLocaleString()}</span>
+        </div>
+        {payload[1] && (
+          <div className="flex items-center gap-2 text-[#9B7CFF]">
+            <span className="w-2 h-2 rounded-full bg-[#9B7CFF]" />
+            <span className="text-zinc-300">Listeners:</span>
+            <span className="font-mono font-bold text-white">{payload[1]?.value?.toLocaleString()}</span>
+          </div>
+        )}
+        {dataPoint?.milestoneLabel && (
+          <p className="text-[10px] font-bold text-amber-300 pt-1 border-t border-white/10">
+            {dataPoint.milestoneLabel}
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
+const NftSalesAreaTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const dataPoint = payload[0]?.payload;
+    return (
+      <div className="bg-[#111C30]/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl shadow-2xl text-xs space-y-1.5 select-none pointer-events-none">
+        <p className="font-bold text-white mb-1 flex items-center justify-between gap-3">
+          <span>{label}</span>
+          {dataPoint?.hasMilestone && (
+            <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">
+              🎯 Milestone
+            </span>
+          )}
+        </p>
+        <div className="flex items-center gap-2 text-[#FFC857]">
+          <span className="w-2 h-2 rounded-full bg-[#FFC857]" />
+          <span className="text-zinc-300">NFT Volume:</span>
+          <span className="font-mono font-bold text-white">{payload[0]?.value?.toLocaleString()} TON</span>
+        </div>
+        <div className="flex items-center gap-2 text-[#34D399]">
+          <span className="w-2 h-2 rounded-full bg-[#34D399]" />
+          <span className="text-zinc-300">Sales Count:</span>
+          <span className="font-mono font-bold text-white">{dataPoint?.salesCount || 1}</span>
+        </div>
+        {dataPoint?.milestoneLabel && (
+          <p className="text-[10px] font-bold text-amber-300 pt-1 border-t border-white/10">
+            {dataPoint.milestoneLabel}
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function ArtistDashboard() {
   const navigate = useNavigate();
   const { getEarnings, addNotification, deleteTrack, updateTrack, addUserNFT, userProfile } = useAudio();
   const { user, isArtist, isAdmin, loading } = useAuth();
+  const { 
+    timeRange, 
+    setTimeRange, 
+    streamData, 
+    nftSalesData, 
+    summary: analyticsSummary, 
+    setArtistContextData 
+  } = useArtistAnalytics();
   
   // Tabs state
   const [activeTab, setActiveTab] = useState<"overview" | "creator" | "verification" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections" | "loyalty" | "royalties" | "portfolio" | "collabs" | "tours">("overview");
+  const [rechartsTheme, setRechartsTheme] = useState<'dark' | 'neon'>('dark');
   const [isRoyaltyModalOpen, setIsRoyaltyModalOpen] = useState(false);
 
   const artistDataForRoyalty = useMemo(() => {
@@ -132,6 +223,32 @@ export default function ArtistDashboard() {
   const [albums, setAlbums] = useState<any[]>([]);
   const [earnings, setEarnings] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Sync artist data with ArtistAnalyticsProvider
+  useEffect(() => {
+    if (user?.uid || tracks.length > 0 || nfts.length > 0) {
+      setArtistContextData({
+        artistId: user?.uid,
+        artistName: userProfile?.name || userProfile?.username,
+        tracks,
+        nfts,
+      });
+    }
+  }, [user?.uid, userProfile?.name, userProfile?.username, tracks, nfts, setArtistContextData]);
+
+  const total30dStreams = useMemo(() => {
+    return streamData.reduce((acc, curr) => acc + curr.streams, 0);
+  }, [streamData]);
+
+  const avgDailyStreams = useMemo(() => {
+    if (streamData.length === 0) return 0;
+    return Math.round(total30dStreams / streamData.length);
+  }, [streamData, total30dStreams]);
+
+  const peakDay = useMemo(() => {
+    if (streamData.length === 0) return { date: 'N/A', streams: 0 };
+    return streamData.reduce((max, curr) => (curr.streams > max.streams ? curr : max), streamData[0]);
+  }, [streamData]);
 
   // Modal Configuration States
   const [selectedTrackForConfig, setSelectedTrackForConfig] = useState<any | null>(null);
@@ -956,9 +1073,188 @@ export default function ArtistDashboard() {
                 {/* Real-time Pending Minting Status */}
                 <MintingStatus />
 
-                {/* Live Streams Bar Chart */}
-                <div className="bg-white/[0.02] p-4 rounded-xl shadow-lg">
-                  <DailyStreamsChart tracks={tracks} />
+                {/* Date Range Toggle & Telemetry Charts Section */}
+                <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-[#229ED9] animate-pulse" />
+                    <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Telemetry Range</h3>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/[0.04]">
+                    {[
+                      { id: '30d', label: 'Last 30 days' },
+                      { id: '90d', label: 'Last 90 days' },
+                      { id: 'all', label: 'All-time' },
+                    ].map((range) => {
+                      const isActive = timeRange === range.id;
+                      return (
+                        <button
+                          key={range.id}
+                          type="button"
+                          onClick={() => setTimeRange(range.id as any)}
+                          className={`px-3 py-1 text-xs font-bold rounded-full transition-all cursor-pointer select-none ${
+                            isActive
+                              ? 'bg-[#229ED9] text-white shadow-md shadow-[#229ED9]/30'
+                              : 'text-zinc-400 hover:text-white hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          {range.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Daily Streams LineChart */}
+                <div className="bg-white/[0.02] p-5 rounded-2xl shadow-lg space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-[#229ED9] animate-pulse" />
+                        <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
+                          Daily Streams
+                        </h3>
+                        <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#229ED9]/15 text-[#229ED9]">
+                          {timeRange === '30d' ? '30D' : timeRange === '90d' ? '90D' : 'All-Time'}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-zinc-400 mt-0.5">
+                        Stream playback velocity across the selected timeframe
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4 self-start sm:self-auto">
+                      <div className="text-left sm:text-right">
+                        <p className="text-[8px] font-black uppercase tracking-wider text-zinc-500">Total Volume</p>
+                        <p className="text-sm sm:text-base font-black text-white tabular-nums tracking-tight">
+                          {streamData.reduce((acc, curr) => acc + curr.streams, 0).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-left sm:text-right">
+                        <p className="text-[8px] font-black uppercase tracking-wider text-zinc-500">Daily Avg</p>
+                        <p className="text-sm sm:text-base font-black text-[#229ED9] tabular-nums tracking-tight">
+                          {Math.round(streamData.reduce((acc, curr) => acc + curr.streams, 0) / (streamData.length || 1)).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-60 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={streamData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="date" 
+                          stroke="none" 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tick={{ fill: '#94A3B8', fontSize: 10 }}
+                          interval={timeRange === '30d' ? 3 : 1}
+                        />
+                        <YAxis 
+                          stroke="none" 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tick={{ fill: '#94A3B8', fontSize: 10 }}
+                          tickFormatter={(val) => val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val}
+                        />
+                        <RechartsTooltip content={<DailyStreamsLineTooltip />} />
+                        <Line
+                          type="monotone"
+                          dataKey="streams"
+                          name="Daily Streams"
+                          stroke="#229ED9"
+                          strokeWidth={2.5}
+                          dot={false}
+                          activeDot={{ r: 5, fill: "#229ED9", stroke: "#07111F", strokeWidth: 2 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="listeners"
+                          name="Unique Listeners"
+                          stroke="#9B7CFF"
+                          strokeWidth={1.5}
+                          strokeDasharray="3 3"
+                          dot={false}
+                          activeDot={{ r: 4, fill: "#9B7CFF", stroke: "#07111F", strokeWidth: 2 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* NFT Sales Volume AreaChart */}
+                <div className="bg-white/[0.02] p-5 rounded-2xl shadow-lg space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-[#FFC857] animate-pulse" />
+                        <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
+                          NFT Sales Volume Trends
+                        </h3>
+                        <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#FFC857]/15 text-[#FFC857]">
+                          TON Volume
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-zinc-400 mt-0.5">
+                        Music NFT secondary and primary marketplace volume in TON across the selected timeframe
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4 self-start sm:self-auto">
+                      <div className="text-left sm:text-right">
+                        <p className="text-[8px] font-black uppercase tracking-wider text-zinc-500">Total Volume</p>
+                        <p className="text-sm sm:text-base font-black text-[#FFC857] tabular-nums tracking-tight">
+                          {nftSalesData.reduce((acc, curr) => acc + curr.volumeTON, 0).toFixed(1)} TON
+                        </p>
+                      </div>
+                      <div className="text-left sm:text-right">
+                        <p className="text-[8px] font-black uppercase tracking-wider text-zinc-500">Total Sales</p>
+                        <p className="text-sm sm:text-base font-black text-[#34D399] tabular-nums tracking-tight">
+                          {nftSalesData.reduce((acc, curr) => acc + curr.salesCount, 0)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-60 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={nftSalesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="nftVolumeAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#FFC857" stopOpacity={0.45} />
+                            <stop offset="95%" stopColor="#FFC857" stopOpacity={0.0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="date" 
+                          stroke="none" 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tick={{ fill: '#94A3B8', fontSize: 10 }}
+                          interval={timeRange === '30d' ? 3 : 1}
+                        />
+                        <YAxis 
+                          stroke="none" 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tick={{ fill: '#94A3B8', fontSize: 10 }}
+                          tickFormatter={(val) => `${val}T`}
+                        />
+                        <RechartsTooltip content={<NftSalesAreaTooltip />} />
+                        <Area
+                          type="monotone"
+                          dataKey="volumeTON"
+                          name="NFT Volume (TON)"
+                          stroke="#FFC857"
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill="url(#nftVolumeAreaGradient)"
+                          activeDot={{ r: 6, fill: "#FFC857", stroke: "#07111F", strokeWidth: 2 }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
 
                 {/* Simulated Feed of Listeners Activity */}
@@ -1561,15 +1857,109 @@ export default function ArtistDashboard() {
             {/* ANALYTICS TAB */}
             {activeTab === "analytics" && (
               <div className="space-y-6">
-                <div className="space-y-1">
-                  <h3 className="text-sm font-black uppercase tracking-wider">Protocol Insights & Metrics</h3>
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Real-time stats of streaming activity, demand scales and engagement</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-black uppercase tracking-wider">Protocol Insights & Metrics</h3>
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Real-time stats of streaming activity, demand scales and engagement</p>
+                  </div>
+
+                  {/* Dark / Neon Theme Toggle */}
+                  <div className="flex bg-white/[0.04] p-1 rounded-xl gap-1">
+                    {(['dark', 'neon'] as const).map((mode) => (
+                      <button
+                        key={mode}
+                        onClick={() => setRechartsTheme(mode)}
+                        aria-pressed={rechartsTheme === mode}
+                        className={`px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer outline-none ${
+                          rechartsTheme === mode
+                            ? 'bg-cyan-500 text-black shadow-md'
+                            : 'text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        {mode === 'dark' ? 'Dark Mode' : 'Neon Mode'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 30-Day Daily Streams Recharts LineChart */}
+                <div className="bg-white/[0.02] p-5 rounded-2xl shadow-lg space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${rechartsTheme === 'neon' ? 'bg-[#00F0FF] shadow-[0_0_10px_#00F0FF]' : 'bg-[#229ED9]'} animate-pulse`} />
+                        <h4 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
+                          Daily Streams (Last 30 Days)
+                        </h4>
+                      </div>
+                      <p className="text-[10px] text-zinc-400 mt-0.5">
+                        Daily playback volume from ArtistAnalyticsProvider across the 30-day period ({rechartsTheme === 'neon' ? 'Neon Mode' : 'Dark Mode'})
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-[8px] font-black uppercase tracking-wider text-zinc-500">30D Total</p>
+                        <p className="text-sm font-black text-white tabular-nums">
+                          {total30dStreams.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[8px] font-black uppercase tracking-wider text-zinc-500">Daily Avg</p>
+                        <p className={`text-sm font-black tabular-nums ${rechartsTheme === 'neon' ? 'text-[#00F0FF]' : 'text-[#229ED9]'}`}>
+                          {avgDailyStreams.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-56 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={streamData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid vertical={false} stroke={rechartsTheme === 'neon' ? 'rgba(0,240,255,0.08)' : 'rgba(255,255,255,0.04)'} strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="date" 
+                          stroke="none" 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tick={{ fill: '#94A3B8', fontSize: 10 }}
+                          interval={3}
+                        />
+                        <YAxis 
+                          stroke="none" 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tick={{ fill: '#94A3B8', fontSize: 10 }}
+                          tickFormatter={(val) => val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val}
+                        />
+                        <RechartsTooltip content={<DailyStreamsLineTooltip />} />
+                        <Line
+                          type="monotone"
+                          dataKey="streams"
+                          name="Daily Streams"
+                          stroke={rechartsTheme === 'neon' ? '#00F0FF' : '#229ED9'}
+                          strokeWidth={rechartsTheme === 'neon' ? 3 : 2.5}
+                          dot={false}
+                          activeDot={{ r: 6, fill: rechartsTheme === 'neon' ? '#00F0FF' : '#229ED9', stroke: "#07111F", strokeWidth: 2 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="listeners"
+                          name="Unique Listeners"
+                          stroke={rechartsTheme === 'neon' ? '#FF007F' : '#9B7CFF'}
+                          strokeWidth={2}
+                          strokeDasharray="3 3"
+                          dot={false}
+                          activeDot={{ r: 5, fill: rechartsTheme === 'neon' ? '#FF007F' : '#9B7CFF', stroke: "#07111F", strokeWidth: 2 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
 
                 {/* Sub-components Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FloorPriceChart data={[{ date: "May 24", price: 1.1 }, { date: "May 25", price: 1.4 }, { date: "May 26", price: 1.2 }, { date: "May 27", price: 1.8 }]} />
-                  <StreamingStatsChart data={[{ day: "Mon", plays: 2400 }, { day: "Tue", plays: 3100 }, { day: "Wed", plays: 2900 }, { day: "Thu", plays: 4200 }, { day: "Fri", plays: 5900 }]} />
                   <NFTChart data={[{ date: "May 24", value: 140 }, { date: "May 25", value: 180 }, { date: "May 26", value: 210 }, { date: "May 27", value: 290 }]} />
                   <ArtistAnalyticsChart data={[{ subject: "Streams", A: 95 }, { subject: "NFT Sales", A: 75 }, { subject: "Social Buzz", A: 90 }, { subject: "Direct DMs", A: 85 }]} />
                 </div>

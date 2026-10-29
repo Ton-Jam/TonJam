@@ -391,7 +391,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 
                   <button
                     onClick={(e) => handleFollowClick(e, creator.uid)}
-                    className={`px-2.5 py-0.5 rounded-[3px] text-[8px] font-semibold uppercase tracking-wider flex items-center gap-1 transition-colors duration-300 cursor-pointer ${
+                    className={`pill px-2.5 py-1 rounded-full text-[8px] font-semibold uppercase tracking-wider flex items-center gap-1 transition-colors duration-300 cursor-pointer border-0 ${
                       isFollowed
                         ? 'bg-[#0088CC] text-white'
                         : 'bg-white/10 hover:bg-white/20 text-white/80 hover:text-white'
@@ -517,7 +517,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 
                 <button
                   onClick={(e) => handleFollowClick(e, creator.uid)}
-                  className={`w-full py-1 rounded-[3px] text-[8px] font-semibold uppercase tracking-wider flex items-center justify-center gap-1 transition-colors duration-300 ${
+                  className={`pill w-full py-1.5 rounded-full text-[8px] font-semibold uppercase tracking-wider flex items-center justify-center gap-1 transition-colors duration-300 border-0 ${
                     isFollowed
                       ? 'bg-[#0088CC] text-white'
                       : 'bg-white/10 text-white hover:bg-white/20'

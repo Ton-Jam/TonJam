@@ -521,6 +521,7 @@ export interface ArtistVerificationRequest {
   userId: string;
   artistName: string;
   email: string;
+  userEmail?: string;
   bio: string;
   statement?: string; // New field
   genre: string;
@@ -531,7 +532,10 @@ export interface ArtistVerificationRequest {
     instagram?: string;
     website?: string;
     soundcloud?: string;
+    appleMusic?: string;
+    audius?: string;
   } | Array<{ platform: string; url: string; }>;
+
   portfolioUrls?: string[];
   portfolioUrl?: string;
   status: 'pending' | 'needs_revision' | 'approved' | 'rejected';
@@ -578,7 +582,7 @@ export interface Royalty {
 
 export interface Transaction {
   id: string;
-  type: 'stream' | 'nft_sale' | 'nft_mint' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards' | 'sponsorship' | 'deposit' | 'tip' | 'fan_club_join';
+  type: 'stream' | 'nft_sale' | 'nft_mint' | 'nft_purchase' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards' | 'reward' | 'sponsorship' | 'deposit' | 'tip' | 'fan_club_join';
   amount: number; // Total amount in GRAM or JAM
   platformFee: number; // Total platform fee
   artistShare: number; // Amount sent to artist

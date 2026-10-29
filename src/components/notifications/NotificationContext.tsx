@@ -111,13 +111,22 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
 
     if (!uid) {
-      // Guest User mode - use local storage without seeding fake backend items
+      // Guest User mode - use local storage or seed initial curated notifications
       try {
         const storedGuest = localStorage.getItem(getStorageKey('list'));
         if (storedGuest) {
-          setNotifications(JSON.parse(storedGuest));
+          const parsed = JSON.parse(storedGuest);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setNotifications(parsed);
+          } else {
+            const initial = generateMockNotifications('guest_user');
+            setNotifications(initial);
+            localStorage.setItem(getStorageKey('list'), JSON.stringify(initial));
+          }
         } else {
-          setNotifications([]);
+          const initial = generateMockNotifications('guest_user');
+          setNotifications(initial);
+          localStorage.setItem(getStorageKey('list'), JSON.stringify(initial));
         }
       } catch (err) {
         console.error('Error handling guest notifications:', err);
@@ -136,9 +145,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       (snapshot) => {
         setError(null);
         if (snapshot.empty) {
-          setNotifications([]);
+          // If first time or empty, seed initial curated notifications
+          const initial = generateMockNotifications(uid);
+          setNotifications(initial);
           try {
-            localStorage.setItem(getStorageKey('list'), JSON.stringify([]));
+            localStorage.setItem(getStorageKey('list'), JSON.stringify(initial));
           } catch (err) {
             console.warn(err);
           }
@@ -159,6 +170,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             read: data.read ?? false,
             avatarUrl: data.avatarUrl,
             thumbnailUrl: data.thumbnailUrl,
+            senderName: data.senderName,
+            isVerified: data.isVerified,
+            musicPreview: data.musicPreview,
+            nftPreview: data.nftPreview,
+            socialPreview: data.socialPreview,
             link: data.link,
             quickAction: data.quickAction,
             metadata: data.metadata,

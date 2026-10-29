@@ -19,6 +19,9 @@ export type NotificationCategory =
 
 export type NotificationFilter =
   | 'all'
+  | 'verified_artists'
+  | 'mentions'
+  | 'music_nfts'
   | 'unread'
   | 'music'
   | 'artists'
@@ -36,6 +39,32 @@ export interface NotificationQuickAction {
   payload?: any;
 }
 
+export interface MusicPreviewData {
+  trackId?: string;
+  title: string;
+  artist: string;
+  artwork?: string;
+  audioUrl?: string;
+  duration?: number;
+  isVerified?: boolean;
+}
+
+export interface NFTPreviewData {
+  nftId?: string;
+  title: string;
+  thumbnailUrl?: string;
+  event: 'bid' | 'sale' | 'outbid' | 'auction' | 'minted' | 'listed';
+  amountTon?: number;
+  txHash?: string;
+  sellerOrBidder?: string;
+}
+
+export interface SocialPreviewData {
+  postExcerpt?: string;
+  postId?: string;
+  targetUser?: string;
+}
+
 export interface TonJamNotification {
   id: string;
   userId: string;
@@ -46,14 +75,25 @@ export interface TonJamNotification {
   read: boolean;
   avatarUrl?: string; // Optional user avatar
   thumbnailUrl?: string; // Optional cover/NFT thumbnail
+  senderName?: string;
+  isVerified?: boolean;
+  musicPreview?: MusicPreviewData;
+  nftPreview?: NFTPreviewData;
+  socialPreview?: SocialPreviewData;
   quickAction?: NotificationQuickAction;
   metadata?: {
     trackId?: string;
     artistId?: string;
+    artistName?: string;
+    isVerified?: boolean;
     nftId?: string;
+    nftTitle?: string;
     txHash?: string;
     rewardAmount?: number;
     bidAmount?: number;
+    commentId?: string;
+    postId?: string;
+    subCategory?: string;
     [key: string]: any;
   };
 }

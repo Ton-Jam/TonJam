@@ -437,9 +437,9 @@ export const FollowersFollowing: React.FC = () => {
 
                 <button
                   onClick={(e) => handleToggleFollow(user, e)}
-                  className={`px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5 shadow-md ${
+                  className={`pill px-4 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5 shadow-md border-0 ${
                     isFollowing
-                      ? 'bg-white/10 hover:bg-rose-600/20 text-slate-200 hover:text-rose-300 border border-white/10'
+                      ? 'bg-white/10 hover:bg-rose-600/20 text-slate-200 hover:text-rose-300'
                       : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30'
                   }`}
                 >

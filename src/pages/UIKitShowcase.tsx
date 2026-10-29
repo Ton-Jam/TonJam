@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Play, Pause, Flame, Heart, Sparkles, ChevronRight, Compass, Zap, 
   ListMusic, Award, Radio, AlertCircle, Music, Trophy, Wallet, 
-  TrendingUp, Users, MessageSquare, BarChart3, HelpCircle 
+  TrendingUp, Users, MessageSquare, BarChart3, HelpCircle, Smartphone 
 } from 'lucide-react';
 
 // --- MOCK DATA IMPORTS ---
@@ -78,6 +79,7 @@ const mapTrackToNFT = (track: any): any => ({
 });
 
 export const UIKitShowcase: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'music' | 'nft' | 'artists' | 'social' | 'tasks' | 'wallet' | 'analytics' | 'home'>('music');
   const [isPlaying, setIsPlaying] = useState(false);
   const [nowPlayingTrack, setNowPlayingTrack] = useState(tracks[0]);
@@ -113,7 +115,15 @@ export const UIKitShowcase: React.FC = () => {
             Clean, high-fidelity components built for The Open Network (GRAM) creator economy. Free of borders, optimized for fast rendering.
           </p>
         </div>
-        <div className="flex gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => navigate('/unified-design-system')}
+            className="p-3 bg-[#2E8CEB] hover:bg-[#2577c9] active:scale-95 text-white rounded-lg flex items-center gap-2 font-mono text-xs font-bold transition-all shadow-md"
+          >
+            <Smartphone className="w-4 h-4" />
+            <span>Mobile 3-Screen System</span>
+          </button>
           <div className="p-3 bg-white/5 rounded-lg text-center min-w-20 font-mono">
             <span className="text-[9px] uppercase tracking-wider text-white/50 block">Components</span>
             <span className="text-lg font-black text-blue-400">55+</span>

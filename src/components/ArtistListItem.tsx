@@ -62,7 +62,7 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
         <div className="flex items-center gap-3">
           <button 
             onClick={handleFollowClick}
-            className={`px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-[9px] font-black uppercase tracking-widest border border-[#c0c0c0]/30
+            className={`pill px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-[9px] font-black uppercase tracking-widest border-0
               ${isFollowing 
                 ? 'bg-muted/50 text-muted-foreground/80 hover:bg-muted' 
                 : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'

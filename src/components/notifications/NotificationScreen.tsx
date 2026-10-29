@@ -1,30 +1,19 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { cn } from '@/lib/utils';
-import { 
-  Bell,
-  CheckCheck, 
-  Trash2, 
-  Search, 
-  WifiOff, 
-  Inbox, 
-  Activity, 
-  Loader2, 
-  ArrowLeft,
-  Settings,
-  Sparkles,
-  AlertCircle,
-  RotateCw
-} from 'lucide-react';
+import { WifiOff, Search } from 'lucide-react';
 import { useTonJamNotifications } from './NotificationContext';
 import { TonJamNotification, NotificationFilter, NotificationQuickAction } from './types';
-import NotificationFilters from './NotificationFilters';
-import NotificationCard from './NotificationCard';
+import NotificationsHeader from './NotificationsHeader';
+import NotificationFilterPills from './NotificationFilterPills';
+import NotificationGroupHeader from './NotificationGroupHeader';
+import NotificationItem from './NotificationItem';
+import NotificationSkeleton from './NotificationSkeleton';
+import NotificationEmptyState from './NotificationEmptyState';
+import NotificationErrorState from './NotificationErrorState';
 import NotificationSettings from './NotificationSettings';
 import { useAudio } from '@/contexts/AudioContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/layout/PageHeader';
 
 export const NotificationScreen: React.FC = () => {
   const { 
@@ -37,9 +26,6 @@ export const NotificationScreen: React.FC = () => {
     markAsRead, 
     markAllAsRead, 
     deleteNotification,
-    simulateNotification,
-    simulateBidUpdate,
-    simulateTrackDrop,
   } = useTonJamNotifications();
 
   const { playTrack, allTracks } = useAudio();
@@ -48,52 +34,61 @@ export const NotificationScreen: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<NotificationFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSettings, setShowSettings] = useState(false);
-  
-  // High-performance lazy pagination limit
-  const [visibleCount, setVisibleCount] = useState(20);
+  const [visibleCount, setVisibleCount] = useState(25);
 
   // Reset pagination when filters change
   useEffect(() => {
-    setVisibleCount(20);
+    setVisibleCount(25);
   }, [activeFilter, searchQuery]);
 
   // Filtering Logic
   const filteredNotifications = useMemo(() => {
     return notifications.filter((item) => {
-      // 1. Category filter matching
+      // 1. Category Filter Matching
       let categoryMatches = true;
-      if (activeFilter === 'unread') {
+
+      if (activeFilter === 'verified_artists') {
+        categoryMatches = Boolean(
+          item.isVerified ||
+          item.metadata?.isVerified ||
+          item.category === 'artist_release' ||
+          item.musicPreview?.isVerified
+        );
+      } else if (activeFilter === 'mentions') {
+        categoryMatches = Boolean(
+          item.category === 'mention' ||
+          item.category === 'comment' ||
+          item.socialPreview !== undefined
+        );
+      } else if (activeFilter === 'music_nfts') {
+        categoryMatches = Boolean(
+          item.musicPreview !== undefined ||
+          item.nftPreview !== undefined ||
+          [
+            'music',
+            'artist_release',
+            'playlist_share',
+            'track_share',
+            'nft_sale',
+            'nft_purchase',
+            'auction',
+            'marketplace',
+          ].includes(item.category)
+        );
+      } else if (activeFilter === 'unread') {
         categoryMatches = !item.read;
-      } else if (activeFilter === 'music') {
-        categoryMatches = ['music', 'playlist_share', 'track_share'].includes(item.category);
-      } else if (activeFilter === 'artists') {
-        categoryMatches = item.category === 'artist_release';
-      } else if (activeFilter === 'nfts') {
-        categoryMatches = ['nft_sale', 'nft_purchase', 'auction'].includes(item.category);
-      } else if (activeFilter === 'marketplace') {
-        categoryMatches = item.category === 'marketplace';
-      } else if (activeFilter === 'wallet') {
-        categoryMatches = ['wallet_transaction', 'royalty'].includes(item.category);
-      } else if (activeFilter === 'rewards') {
-        categoryMatches = item.category === 'tj_reward';
-      } else if (activeFilter === 'social') {
-        categoryMatches = ['follower', 'like', 'comment', 'mention'].includes(item.category);
-      } else if (activeFilter === 'tasks') {
-        categoryMatches = item.category === 'mission';
-      } else if (activeFilter === 'system') {
-        categoryMatches = item.category === 'system';
       }
 
       if (!categoryMatches) return false;
 
-      // 2. Search query matching
-      const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
-      if (safeSearchQuery.trim() !== '') {
-        const query = safeSearchQuery.toLowerCase().trim();
+      // 2. Search Query Matching
+      const safeSearch = searchQuery.trim().toLowerCase();
+      if (safeSearch) {
         return (
-          item.title.toLowerCase().includes(query) ||
-          item.description.toLowerCase().includes(query) ||
-          item.category.toLowerCase().includes(query)
+          item.title.toLowerCase().includes(safeSearch) ||
+          item.description.toLowerCase().includes(safeSearch) ||
+          (item.senderName && item.senderName.toLowerCase().includes(safeSearch)) ||
+          item.category.toLowerCase().includes(safeSearch)
         );
       }
 
@@ -101,24 +96,22 @@ export const NotificationScreen: React.FC = () => {
     });
   }, [notifications, activeFilter, searchQuery]);
 
-  // Paginated list
+  // Paginated List
   const paginatedNotifications = useMemo(() => {
     return filteredNotifications.slice(0, visibleCount);
   }, [filteredNotifications, visibleCount]);
 
-  // Grouping Logic
+  // Grouping Logic: Today, Yesterday, Earlier
   const groupedNotifications = useMemo(() => {
     const groups: {
       today: TonJamNotification[];
       yesterday: TonJamNotification[];
-      thisWeek: TonJamNotification[];
       earlier: TonJamNotification[];
-    } = { today: [], yesterday: [], thisWeek: [], earlier: [] };
+    } = { today: [], yesterday: [], earlier: [] };
 
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     const yesterdayStart = todayStart - 24 * 60 * 60 * 1000;
-    const thisWeekStart = todayStart - 7 * 24 * 60 * 60 * 1000;
 
     paginatedNotifications.forEach((item) => {
       const itemTime = new Date(item.timestamp).getTime();
@@ -126,8 +119,6 @@ export const NotificationScreen: React.FC = () => {
         groups.today.push(item);
       } else if (itemTime >= yesterdayStart) {
         groups.yesterday.push(item);
-      } else if (itemTime >= thisWeekStart) {
-        groups.thisWeek.push(item);
       } else {
         groups.earlier.push(item);
       }
@@ -137,27 +128,24 @@ export const NotificationScreen: React.FC = () => {
   }, [paginatedNotifications]);
 
   const handleActionClick = (action: NotificationQuickAction, notification: TonJamNotification) => {
-    // Perform responsive actions
     switch (action.type) {
       case 'play': {
         const targetTrackId = action.payload?.trackId || notification.metadata?.trackId;
-        const foundTrack = targetTrackId ? allTracks.find(t => t.id === targetTrackId) : null;
-        if (foundTrack) {
-          playTrack(foundTrack);
-          toast.success('Playing Track', { description: foundTrack.title });
+        const found = targetTrackId ? allTracks.find((t) => t.id === targetTrackId) : null;
+        if (found) {
+          playTrack(found);
+          toast.success('Playing Track', { description: found.title });
         } else if (allTracks.length > 0) {
           playTrack(allTracks[0]);
           toast.success('Playing Track', { description: notification.title });
-        } else {
-          toast.info('Streaming Track', { description: notification.title });
         }
         break;
       }
       case 'follow':
-        toast.success('Followed User', { description: 'Connected on TonJam social network' });
+        toast.success('Followed User', { description: `Connected with ${notification.senderName || 'user'}` });
         break;
       case 'claim':
-        toast.success('Reward Claimed', { description: '+250 TJ Points credited to your wallet' });
+        toast.success('Reward Claimed', { description: '+250 TJ Points credited to your TON wallet' });
         break;
       case 'bid': {
         const targetNftId = action.payload?.nftId || notification.metadata?.nftId;
@@ -168,10 +156,19 @@ export const NotificationScreen: React.FC = () => {
         }
         break;
       }
-      case 'mint':
-        navigate('/launchpad');
+      case 'mint': {
+        const targetNftId = action.payload?.nftId || notification.metadata?.nftId;
+        if (targetNftId) {
+          navigate(`/nft/${targetNftId}`);
+        } else {
+          navigate('/launchpad');
+        }
         break;
+      }
       case 'reply':
+        navigate('/jamspace');
+        break;
+      case 'join':
         navigate('/jamspace');
         break;
       case 'view':
@@ -190,11 +187,10 @@ export const NotificationScreen: React.FC = () => {
         break;
       }
     }
-    // Auto mark read on action
     markAsRead(notification.id);
   };
 
-  const handleCardClick = (notification: TonJamNotification) => {
+  const handleItemClick = (notification: TonJamNotification) => {
     if (!notification.read) {
       markAsRead(notification.id);
     }
@@ -202,49 +198,45 @@ export const NotificationScreen: React.FC = () => {
       navigate(`/nft/${notification.metadata.nftId}`);
     } else if (notification.metadata?.trackId) {
       navigate(`/track/${notification.metadata.trackId}`);
-    } else if (notification.category === 'auction' || notification.category === 'nft_sale' || notification.category === 'nft_purchase') {
+    } else if (['auction', 'nft_sale', 'nft_purchase'].includes(notification.category)) {
       navigate('/marketplace');
-    } else if (notification.category === 'artist_release' || notification.category === 'music') {
-      if (allTracks.length > 0) {
-        playTrack(allTracks[0]);
-      }
+    } else if (['music', 'artist_release'].includes(notification.category) && allTracks.length > 0) {
+      playTrack(allTracks[0]);
     }
   };
 
-  // Infinite scroll loader trigger
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => Math.min(prev + 20, filteredNotifications.length));
+  const handleMarkAllRead = () => {
+    markAllAsRead();
+    toast.success('All marked as read');
   };
 
-  // Group render helper
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => Math.min(prev + 25, filteredNotifications.length));
+  };
+
   const renderGroup = (title: string, list: TonJamNotification[]) => {
     if (list.length === 0) return null;
 
     return (
-      <div className="flex flex-col gap-3">
-        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-4 pt-1 flex items-center justify-between">
-          <span>{title}</span>
-          <span className="text-[9px] font-semibold text-slate-400 bg-white/[0.04] px-2 py-0.5 rounded-full select-none normal-case">
-            {list.length} {list.length === 1 ? 'alert' : 'alerts'}
-          </span>
-        </div>
-        <div className="flex flex-col gap-2.5 px-4">
+      <div className="flex flex-col gap-2">
+        <NotificationGroupHeader title={title} count={list.length} />
+        <div className="flex flex-col gap-2 px-4">
           <AnimatePresence mode="popLayout">
             {list.map((item) => (
               <motion.div
                 key={item.id}
                 layout
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.15 } }}
+                transition={{ duration: 0.2 }}
               >
-                <NotificationCard
+                <NotificationItem
                   notification={item}
                   onMarkRead={markAsRead}
                   onDelete={deleteNotification}
                   onActionClick={handleActionClick}
-                  onCardClick={handleCardClick}
+                  onItemClick={handleItemClick}
                 />
               </motion.div>
             ))}
@@ -255,8 +247,7 @@ export const NotificationScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-[calc(100vh-64px)] bg-[#050A24] text-white font-sans pb-28 relative">
-      
+    <div className="w-full min-h-screen bg-[#080D1A] text-[#F5F7FB] font-sans pb-32 relative select-none">
       {/* OFFLINE STATUS BANNER */}
       <AnimatePresence>
         {isOffline && (
@@ -264,64 +255,65 @@ export const NotificationScreen: React.FC = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="w-full bg-rose-500/20 text-rose-300 py-2.5 px-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider select-none shrink-0"
+            className="w-full bg-rose-500/15 text-rose-300 py-2 px-4 flex items-center justify-center gap-2 text-xs font-semibold shrink-0"
           >
-            <WifiOff className="w-4 h-4 shrink-0 animate-pulse" />
-            <span>Offline Mode Enabled. Viewing cached notifications.</span>
+            <WifiOff className="w-3.5 h-3.5 shrink-0 animate-pulse" />
+            <span>Offline Mode. Viewing cached notifications.</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* STICKY HEADER */}
-      <div className="sticky top-0 z-20 w-full bg-[#050A24]/95 backdrop-blur-xl flex flex-col shrink-0">
-        <PageHeader
-          title={showSettings ? 'Notification Settings' : 'Notifications'}
-          showBack={true}
-          onBack={showSettings ? () => setShowSettings(false) : () => navigate(-1)}
-          rightContent={
-            !showSettings && unreadCount > 0 ? (
-              <button
-                onClick={() => {
-                  markAllAsRead();
-                  toast.success('All marked as read');
-                }}
-                className="p-2 -mr-2 text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 rounded-full transition-all cursor-pointer border-none outline-none flex items-center justify-center"
-                title="Mark all as read"
-                aria-label="Mark all as read"
-              >
-                <CheckCheck className="w-5 h-5 text-[#00B4D8]" />
-              </button>
-            ) : null
-          }
-        />
+      {/* HEADER */}
+      <NotificationsHeader
+        unreadCount={unreadCount}
+        onMarkAllAsRead={handleMarkAllRead}
+        onOpenSettings={() => setShowSettings(!showSettings)}
+        showBack={true}
+      />
 
-        {/* SEARCH & FILTERS */}
-        <AnimatePresence>
-          {!showSettings && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
+      {/* MAIN CONTAINER */}
+      <div className="w-full max-w-lg mx-auto flex flex-col pt-2">
+        <AnimatePresence mode="wait">
+          {showSettings ? (
+            <motion.div
+              key="settings-panel"
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col gap-2 py-2 shrink-0 bg-[#050A24]"
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="px-4"
             >
+              <NotificationSettings onClose={() => setShowSettings(false)} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="notifications-feed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col gap-3"
+            >
+              {/* FILTER PILLS */}
+              <NotificationFilterPills
+                activeFilter={activeFilter}
+                onChangeFilter={setActiveFilter}
+              />
+
               {/* SEARCH INPUT BAR */}
               <div className="px-4">
-                <div className="relative w-full rounded-2xl bg-white/[0.04] hover:bg-white/[0.07] focus-within:bg-white/[0.08] transition-colors flex items-center px-4 py-2.5">
-                  <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                <div className="relative w-full rounded-full bg-[#111C30] hover:bg-[#16243E] transition-colors flex items-center px-3.5 py-2 border border-white/[0.04]">
+                  <Search className="w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
                   <input
                     type="text"
                     placeholder="Search notifications..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="
-                      w-full bg-transparent border-none text-xs text-white placeholder-slate-500 
-                      ml-2.5 outline-none font-semibold leading-none
-                    "
+                    className="w-full bg-transparent border-none text-xs text-[#F5F7FB] placeholder-[#94A3B8] ml-2 outline-none font-medium"
                   />
                   {searchQuery && (
                     <button 
                       onClick={() => setSearchQuery('')}
-                      className="text-[10px] font-black text-slate-400 hover:text-white uppercase tracking-widest px-1"
+                      className="text-[10px] font-bold text-[#94A3B8] hover:text-[#F5F7FB] uppercase tracking-wider px-1 cursor-pointer"
                     >
                       Clear
                     </button>
@@ -329,156 +321,48 @@ export const NotificationScreen: React.FC = () => {
                 </div>
               </div>
 
-              {/* HORIZONTAL FILTERS SCROLL */}
-              <NotificationFilters 
-                activeFilter={activeFilter}
-                onChangeFilter={setActiveFilter}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* DYNAMIC SCROLLABLE WRAPPER */}
-      <div className="flex-1 w-full max-w-lg mx-auto flex flex-col pt-3 z-10">
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div 
-              key="loading-skeleton"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col gap-3 px-4 py-2"
-            >
-              <div className="flex items-center gap-2.5 mb-2 px-1">
-                <Loader2 className="w-4 h-4 text-[#0088CC] animate-spin" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Loading activity center...
-                </span>
-              </div>
-              {Array.from({ length: 5 }).map((_, idx) => (
-                <div 
-                  key={idx} 
-                  className="w-full h-20 rounded-2xl bg-white/[0.03] animate-pulse"
+              {/* CONTENT AREA: SKELETON, ERROR, OR GROUPED LIST */}
+              {isLoading ? (
+                <NotificationSkeleton />
+              ) : error && notifications.length === 0 ? (
+                <NotificationErrorState
+                  errorMessage={error}
+                  onRetry={retryFetch}
                 />
-              ))}
-            </motion.div>
-          ) : error && notifications.length === 0 ? (
-            <motion.div 
-              key="error-state"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="py-16 px-6 flex flex-col items-center justify-center text-center select-none"
-            >
-              <div className="w-14 h-14 rounded-full bg-rose-500/10 flex items-center justify-center mb-4 text-rose-400">
-                <AlertCircle className="w-7 h-7" />
-              </div>
-              <h2 className="text-sm font-black uppercase tracking-wider text-white">
-                Unable to Load Notifications
-              </h2>
-              <p className="text-xs text-slate-400 font-medium max-w-xs leading-relaxed mt-1 mb-5">
-                {error || 'An error occurred while connecting to the notification stream.'}
-              </p>
-              <button
-                onClick={retryFetch}
-                className="px-5 py-2.5 bg-[#0052FF] hover:bg-[#1a66ff] text-white rounded-full text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-              >
-                <RotateCw className="w-3.5 h-3.5" />
-                <span>Retry Connection</span>
-              </button>
-            </motion.div>
-          ) : showSettings ? (
-            <motion.div 
-              key="settings-panel"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.25 }}
-              className="px-4"
-            >
-              <NotificationSettings onClose={() => setShowSettings(false)} />
-            </motion.div>
-          ) : (
-            <motion.div 
-              key="notifications-list"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col gap-6"
-            >
-              {filteredNotifications.length > 0 ? (
-                <div className="flex flex-col gap-6">
+              ) : filteredNotifications.length > 0 ? (
+                <div className="flex flex-col gap-5 mt-1">
                   {renderGroup('Today', groupedNotifications.today)}
                   {renderGroup('Yesterday', groupedNotifications.yesterday)}
-                  {renderGroup('This Week', groupedNotifications.thisWeek)}
                   {renderGroup('Earlier', groupedNotifications.earlier)}
 
-                  {/* INFINITE SCROLL */}
                   {filteredNotifications.length > visibleCount && (
-                    <div className="px-4 pb-8 pt-2 flex justify-center">
+                    <div className="px-4 pt-2 pb-6 flex justify-center">
                       <button
                         onClick={handleLoadMore}
-                        className="w-full sm:w-auto h-11 px-6 rounded-full bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-white transition-all cursor-pointer"
+                        className="px-6 py-2 rounded-full bg-[#111C30] hover:bg-[#16243E] text-xs font-semibold text-[#94A3B8] hover:text-[#F5F7FB] transition-all cursor-pointer border border-white/[0.04]"
                       >
-                        <Activity className="w-3.5 h-3.5 text-[#0088CC] animate-pulse" />
-                        <span>Load next 20 ({filteredNotifications.length - visibleCount} remaining)</span>
+                        Load more ({filteredNotifications.length - visibleCount} remaining)
                       </button>
                     </div>
                   )}
                 </div>
               ) : (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="py-16 px-6 flex flex-col items-center justify-center text-center select-none"
-                >
-                  <div className="w-14 h-14 rounded-full bg-white/[0.04] flex items-center justify-center mb-3.5 text-slate-400">
-                    <Inbox className="w-7 h-7" />
-                  </div>
-                  
-                  <h2 className="text-sm font-black uppercase tracking-wider text-white">
-                    {activeFilter === 'unread' ? "You're All Caught Up" : 'No Activity Found'}
-                  </h2>
-                  
-                  <p className="text-xs text-slate-400 font-medium max-w-xs leading-relaxed mt-1.5">
-                    {activeFilter === 'unread' 
-                      ? 'No unread notifications pending in your feed.'
-                      : 'No notifications matched your current filter or search criteria.'
-                    }
-                  </p>
-
-                  <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-                    <button
-                      onClick={() => {
-                        simulateBidUpdate();
-                      }}
-                      className="px-4 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-full text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-                    >
-                      <span>🎯 Test Bid Alert</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        simulateTrackDrop();
-                      }}
-                      className="px-4 py-2.5 bg-[#0088CC]/20 hover:bg-[#0088CC]/30 text-[#0088CC] rounded-full text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-                    >
-                      <span>🎵 Test Track Drop</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        simulateNotification();
-                        toast.success('Activity Generated', { description: 'New notification added to activity feed' });
-                      }}
-                      className="px-4 py-2.5 bg-white/[0.06] hover:bg-white/[0.12] text-white rounded-full text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>General Alert</span>
-                    </button>
-                  </div>
-                </motion.div>
+                <NotificationEmptyState
+                  isFilterEmpty={activeFilter !== 'all' || searchQuery.trim() !== ''}
+                  filterName={
+                    activeFilter === 'verified_artists'
+                      ? 'Verified Artists'
+                      : activeFilter === 'mentions'
+                      ? 'Mentions'
+                      : activeFilter === 'music_nfts'
+                      ? 'Music & NFTs'
+                      : undefined
+                  }
+                  onResetFilter={() => {
+                    setActiveFilter('all');
+                    setSearchQuery('');
+                  }}
+                />
               )}
             </motion.div>
           )}

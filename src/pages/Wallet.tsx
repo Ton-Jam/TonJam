@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Wallet as WalletIcon, 
   TrendingUp, 
   ArrowRight, 
   CheckCircle2, 
@@ -11,21 +10,25 @@ import {
   Sparkles, 
   X, 
   AlertTriangle, 
-  Download, 
   RefreshCw,
   Info,
   Copy,
   Check,
   Users,
-  ArrowDownUp
+  ExternalLink,
+  ArrowUpRight,
+  Play,
+  ShoppingBag,
+  Disc,
+  ArrowDownUp,
+  Wallet as WalletIcon
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAudio } from '@/contexts/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { doc, getDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import { TON_LOGO, JAM_PRICE_USD, TJ_COIN_ICON } from '@/constants';
-import { SecureUserNFTDashboard } from '@/components/SecureUserNFTDashboard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { TestnetHubModal } from '@/components/TestnetHubModal';
 import { toast } from 'sonner';
@@ -41,46 +44,26 @@ const Wallet: React.FC = () => {
     transactions, 
     depositTON, 
     withdrawTON,
-    recordTransaction 
+    recordTransaction,
+    userNFTs,
+    allTracks,
+    playTrack
   } = useAudio();
   
   const safeTransactions = transactions || [];
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   
-  // EVM wallet state
-  const [simulatedEvmAddress, setSimulatedEvmAddress] = useState<string | null>(() => {
-    return localStorage.getItem('tonjam_simulated_evm_address');
-  });
-
-  const activeEvmAddress = simulatedEvmAddress;
-  const isAnyEvmConnected = !!simulatedEvmAddress;
-
   const [isProcessing, setIsProcessing] = useState(false);
   const [isClaimingRoyalty, setIsClaimingRoyalty] = useState(false);
-  const [copiedType, setCopiedType] = useState<'TON' | 'EVM' | null>(null);
-
-  const handleCopyAddress = async (address: string, type: 'TON' | 'EVM' = 'TON') => {
-    try {
-      await navigator.clipboard.writeText(address);
-      setCopiedType(type);
-      toast.success(`${type} Address Copied`, {
-        description: `${address.substring(0, 12)}...${address.substring(address.length - 12)}`
-      });
-      setTimeout(() => {
-        setCopiedType(null);
-      }, 2000);
-    } catch (err) {
-      toast.error("Failed to copy address");
-    }
-  };
+  const [copied, setCopied] = useState(false);
   const [unclaimedRoyalty, setUnclaimedRoyalty] = useState(0);
   const [currencyMode, setCurrencyMode] = useState<'CRYPTO' | 'USD'>('CRYPTO');
   const [isTestnetModalOpen, setIsTestnetModalOpen] = useState(false);
   
   // Modal state
   const [modalType, setModalType] = useState<'deposit' | 'withdraw' | null>(null);
-  const [modalCurrency, setModalCurrency] = useState<'TON' | 'JAM'>('TON');
+  const [modalCurrency, setModalCurrency] = useState<'TON' | 'TJ'>('TON');
   const [amount, setAmount] = useState('');
   const [withdrawAddress, setWithdrawAddress] = useState(userAddress || '');
 
@@ -90,6 +73,20 @@ const Wallet: React.FC = () => {
     { id: 'p3', amount: '1200', price: '10', label: 'Elite Pack' },
   ];
 
+  const handleCopyAddress = async (address: string) => {
+    if (!address) return;
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      toast.success('Wallet Address Copied', {
+        description: `${address.substring(0, 10)}...${address.substring(address.length - 8)}`
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast.error('Failed to copy address');
+    }
+  };
+
   // Fetch unclaimed royalties from Firestore
   useEffect(() => {
     const fetchRoyalties = async () => {
@@ -98,115 +95,94 @@ const Wallet: React.FC = () => {
           const royaltyRef = doc(db, 'royalties', auth.currentUser.uid);
           const snap = await getDoc(royaltyRef);
           if (snap.exists()) {
-            setUnclaimedRoyalty(snap.data().pendingWithdrawal || 0);
-          } else {
-            // Seed 0.15 TON royalty for developers to have a cool experience
-            setUnclaimedRoyalty(0.15);
+            setUnclaimedRoyalty(snap.data().unclaimedAmount || 0);
           }
-        } catch (e) {
-          console.error("Error fetching creator royalties:", e);
+        } catch (error) {
+          console.error("Error reading creator royalties:", error);
         }
       }
     };
     fetchRoyalties();
-  }, [auth.currentUser, safeTransactions]);
+  }, []);
 
-  const handlePurchaseJAM = async (price: string, amount: string) => {
-    if (!userAddress && !activeEvmAddress) {
-      toast.warning("Please connect a TON or MetaMask wallet to purchase");
-      return;
-    }
+  const handlePurchaseJAM = async (priceTon: string, jamAmount: string) => {
     setIsProcessing(true);
     try {
-      await purchaseJAM(price, amount);
+      await purchaseJAM(priceTon, jamAmount);
+      toast.success(`Acquired ${jamAmount} TJ Coins!`);
+    } catch (error) {
+      console.error(error);
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleSubscribePremium = async () => {
-    if (!userAddress && !activeEvmAddress) {
-      toast.warning("Please connect a wallet to subscribe to premium");
-      return;
-    }
     setIsProcessing(true);
     try {
-      await subscribePremium('5'); // 5 TON for Premium
+      await subscribePremium("5");
+      toast.success("Welcome to TonJam Premium! Lossless audio unlocked.");
+    } catch (error) {
+      console.error(error);
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleModalSubmit = async () => {
-    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) return;
-    
+    if (!amount || Number(amount) <= 0) return;
     setIsProcessing(true);
     try {
       if (modalType === 'deposit') {
-        await depositTON(amount);
+        if (modalCurrency === 'TON') {
+          await depositTON(amount);
+        }
       } else if (modalType === 'withdraw') {
-        if (!withdrawAddress) return;
-        await withdrawTON(amount, withdrawAddress);
+        if (modalCurrency === 'TON') {
+          if (!withdrawAddress) {
+            toast.error("Please enter a withdrawal address");
+            setIsProcessing(false);
+            return;
+          }
+          await withdrawTON(amount, withdrawAddress);
+        }
       }
       setModalType(null);
+      setAmount('');
+    } catch (error) {
+      console.error(error);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const openModal = (type: 'deposit' | 'withdraw', currency: 'TON' | 'JAM') => {
-    setModalType(type);
-    setModalCurrency(currency);
-    setAmount('');
-    setWithdrawAddress(type === 'withdraw' ? (userAddress || activeEvmAddress || '') : '');
-  };
-
-  // Claim creator royalties payout to connected wallet
-  const handleClaimRoyalty = async (targetWallet: 'TON' | 'MetaMask') => {
-    const address = targetWallet === 'TON' ? userAddress : activeEvmAddress;
-    if (!address) {
-      toast.error(`Please connect your ${targetWallet} wallet to receive payouts`);
-      return;
-    }
-    if (unclaimedRoyalty <= 0) {
-      toast.warning("No outstanding royalties detected on your nodes");
+  const handleClaimRoyalty = async () => {
+    if (unclaimedRoyalty <= 0) return;
+    if (!userAddress) {
+      toast.error("Please connect your TON wallet to claim accumulated royalties.");
       return;
     }
 
     setIsClaimingRoyalty(true);
-    toast.info(`Initiating royalty payout release to your connected ${targetWallet} wallet...`);
-    
     try {
-      // Simulate cryptographic contract validation
-      await new Promise(resolve => setTimeout(resolve, 1800));
-
       if (auth.currentUser) {
         const royaltyRef = doc(db, 'royalties', auth.currentUser.uid);
-        
-        // 1. Reset outstanding royalty balance in database
         await updateDoc(royaltyRef, {
-          pendingWithdrawal: 0,
-          updatedAt: serverTimestamp()
+          unclaimedAmount: 0,
+          totalClaimed: increment(unclaimedRoyalty)
         });
 
-        // 2. Increment user's profile TON balance with the payout
-        const userRef = doc(db, 'users', auth.currentUser.uid);
-        await updateDoc(userRef, {
-          tonBalance: increment(unclaimedRoyalty)
-        });
-
-        // 3. Document actual payout in the ledger index
-        await recordTransaction({
-          type: 'nft_sale', // reuse nft_sale or generic balance update
+        recordTransaction({
+          type: 'nft_sale',
           amount: unclaimedRoyalty,
           platformFee: 0,
           artistShare: unclaimedRoyalty,
-          recipientAddress: address,
+          recipientAddress: userAddress,
           senderAddress: "CREATOR_ROYALTY_POOL",
-          trackTitle: `Royalty Disbursed to ${targetWallet}`,
+          trackTitle: `Creator Royalty Disbursed to TON Node`,
         });
 
-        toast.success(`Broadcasting complete! Disbursed ${unclaimedRoyalty.toFixed(3)} TON to on-chain node ${address.substring(0, 8)}...`);
+        toast.success(`Claimed ${unclaimedRoyalty.toFixed(3)} TON into wallet!`);
         setUnclaimedRoyalty(0);
       }
     } catch (e) {
@@ -217,52 +193,59 @@ const Wallet: React.FC = () => {
     }
   };
 
-  // Simulate MetaMask connection
-  const handleSimulateMetaMask = () => {
-    const mockEthAddress = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
-    setSimulatedEvmAddress(mockEthAddress);
-    localStorage.setItem('tonjam_simulated_evm_address', mockEthAddress);
-    toast.success("MetaMask connection simulated! Address synced.");
+  // Shorten address format: EQ... or UQ...
+  const formatShortAddress = (addr: string) => {
+    if (!addr) return '';
+    return `${addr.substring(0, 6)}...${addr.substring(addr.length - 6)}`;
   };
 
-  const handleDisconnectMetaMask = () => {
-    setSimulatedEvmAddress(null);
-    localStorage.removeItem('tonjam_simulated_evm_address');
-    toast.success("MetaMask disconnected successfully.");
-  };
+  const rawTonVal = userProfile.tonBalance || 0;
+  const rawTjVal = userProfile.tjBalance ?? userProfile.jamBalance ?? 0;
+  const ownedNftsCount = userNFTs?.length || 0;
 
   return (
-    <div className="w-full max-w-full pb-12 animate-in fade-in duration-700">
-      <PageHeader title="Wallet" showBack={true} />
-      <div className="w-full max-w-full px-4 sm:px-6 md:px-8 space-y-6 pt-2">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-              <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.4em]">Financial Protocol</span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">Balances & Assets</h2>
-          </div>
-          
+    <div className="w-full min-h-screen bg-[#080D1A] text-[#F5F7FB] pb-32 animate-in fade-in duration-500">
+      {/* SCREEN HEADER */}
+      <div className="sticky top-0 z-30 bg-[#080D1A]/90 backdrop-blur-xl px-4 sm:px-6 py-4">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Currency Toggle */}
-            <div className="bg-[#0A1628] p-1 rounded-full flex items-center gap-1 border border-[#22374D]">
             <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="text-xs font-bold text-[#94A3B8] hover:text-white transition-colors cursor-pointer bg-[#111C30] px-3.5 py-2 rounded-xl"
+            >
+              Back
+            </button>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight">
+                Wallet
+              </h1>
+              <p className="text-xs text-[#94A3B8] font-medium">
+                Manage your TON, TJ balance, and music assets.
+              </p>
+            </div>
+          </div>
+
+          {/* Currency Toggle */}
+          <div className="bg-[#111C30] p-1 rounded-xl flex items-center gap-1 shadow-md shadow-black/20">
+            <button
+              type="button"
               onClick={() => setCurrencyMode('CRYPTO')}
-              className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer border-none ${
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 currencyMode === 'CRYPTO'
-                  ? 'bg-[#00B4D8] text-white shadow-md shadow-[#00B4D8]/20'
-                  : 'text-[#C2C7CD] hover:text-white'
+                  ? 'bg-[#229ED9] text-white shadow-md shadow-[#229ED9]/25'
+                  : 'text-[#94A3B8] hover:text-white'
               }`}
             >
-              TON / JAM
+              TON / TJ
             </button>
             <button
+              type="button"
               onClick={() => setCurrencyMode('USD')}
-              className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer border-none ${
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 currencyMode === 'USD'
-                  ? 'bg-[#00B4D8] text-white shadow-md shadow-[#00B4D8]/20'
-                  : 'text-[#C2C7CD] hover:text-white'
+                  ? 'bg-[#229ED9] text-white shadow-md shadow-[#229ED9]/25'
+                  : 'text-[#94A3B8] hover:text-white'
               }`}
             >
               USD ($)
@@ -271,719 +254,564 @@ const Wallet: React.FC = () => {
         </div>
       </div>
 
-      {/* Multi-Chain Connections Panel */}
-      <section className="bg-muted/35 px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] space-y-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-blue-400" />
-          <h2 className="text-xs font-bold uppercase tracking-widest text-white">Active Web3 Network Nodes</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* TON connection column */}
-          <div className="bg-background/40 p-4 rounded-[4px] flex flex-col justify-between space-y-4">
-            <div className="flex items-start justify-between">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 space-y-6">
+        {/* A. WALLET CONNECTION STATUS CARD */}
+        <div className="rounded-2xl bg-[#111C30] p-5 sm:p-6 shadow-xl shadow-black/25 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-xl bg-[#229ED9]/15 flex items-center justify-center text-[#229ED9] shrink-0">
+                <img src={TON_LOGO} alt="TON" className="w-7 h-7 object-contain" />
+              </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-bold text-blue-400 uppercase tracking-wider px-2 py-1 bg-blue-500/10 rounded-full">Primary</span>
-                  <button
-                    type="button"
-                    onClick={() => setIsTestnetModalOpen(true)}
-                    className="text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-wider px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-full border border-emerald-500/20 flex items-center gap-1 cursor-pointer transition-colors"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>TON Testnet</span>
-                  </button>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8]">
+                    TON Blockchain Connection
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                    userAddress
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : 'bg-zinc-700/50 text-zinc-300'
+                  }`}>
+                    {userAddress ? 'Connected' : 'Disconnected'}
+                  </span>
                 </div>
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-tight mt-2 flex items-center gap-2">
-                  <Coins className="h-4 w-4 text-blue-500" />
-                  TON Wallet Relay
+                <h3 className="text-base sm:text-lg font-bold text-white mt-0.5">
+                  {userAddress ? 'Active TON Network Wallet' : 'Connect Your TON Wallet'}
                 </h3>
-                <p className="text-[10px] text-muted-foreground mt-1 max-w-xs">
-                  Native TON integration enables instant NFT purchasing, bid actions, and staking.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setIsTestnetModalOpen(true)}
-                  className="mt-2.5 px-2.5 py-1 rounded-[6px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all border border-emerald-500/20 cursor-pointer"
-                >
-                  <Zap className="w-3 h-3 fill-emerald-400" />
-                  <span>Testnet Sandbox & Faucet Hub →</span>
-                </button>
               </div>
-              <img src={TON_LOGO} className="w-8 h-8 opacity-90" alt="TON Network Logo" />
             </div>
 
-            <div className="flex items-center justify-between pt-2">
-              <div className="text-left">
-                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Connection Node</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <p className="font-mono text-[11px] text-foreground font-semibold">
-                    {userAddress ? `${userAddress.substring(0, 9)}...${userAddress.substring(userAddress.length - 8)}` : 'Offline / Disconnected'}
-                  </p>
-                  {userAddress && (
-                    <button
-                      onClick={() => handleCopyAddress(userAddress, 'TON')}
-                      className="p-1 text-muted-foreground hover:text-white hover:bg-white/5 transition-all rounded-[4px] flex items-center justify-center"
-                      title="Copy Address"
-                      id="copy-ton-address-btn"
-                    >
-                      {copiedType === 'TON' ? (
-                        <Check className="h-3 w-3 text-emerald-400" />
-                      ) : (
-                        <Copy className="h-3 w-3" />
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
-              
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsTestnetModalOpen(true)}
+                className="px-3 py-2 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Testnet Faucet</span>
+              </button>
+
               {userAddress ? (
                 <button
+                  type="button"
                   onClick={async () => {
                     try {
-                      if (tonConnectUI && tonConnectUI.connected && (tonConnectUI.wallet || (tonConnectUI as any).connector?.wallet)) {
-                        await tonConnectUI.disconnect();
-                      }
+                      await tonConnectUI.disconnect();
+                      toast.info('Wallet disconnected');
                     } catch (e) {
-                      console.warn("Error disconnecting TON wallet:", e);
+                      console.warn(e);
                     }
                   }}
-                  className="px-3 py-2 text-[9px] font-bold text-red-400 uppercase tracking-wider hover:bg-red-500/10 transition-all rounded-[4px]"
+                  className="px-4 py-2 text-xs font-bold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 rounded-xl transition-all cursor-pointer"
                 >
                   Disconnect
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={() => tonConnectUI.openModal()}
-                  className="px-4 py-2 text-[9px] font-bold text-white bg-blue-600 hover:bg-blue-700 uppercase tracking-widest transition-all rounded-[4px]"
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-[#229ED9] hover:bg-[#168AC4] rounded-xl transition-all shadow-lg shadow-[#229ED9]/25 cursor-pointer flex items-center gap-2"
                 >
-                  Connect TON
+                  <WalletIcon className="w-4 h-4" />
+                  <span>Connect Wallet</span>
                 </button>
               )}
             </div>
           </div>
 
-          {/* EVM connection column */}
-          <div className="bg-background/40 p-4 rounded-[4px] flex flex-col justify-between space-y-4 font-sans">
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="text-[9px] font-bold text-purple-400 uppercase tracking-wider px-2 py-1 bg-purple-500/10 rounded-full">EVM Standard</span>
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-tight mt-2 flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-purple-500" />
-                  MetaMask / Browser Wallet
-                </h3>
-                <p className="text-[10px] text-muted-foreground mt-1 max-w-xs">
-                  Connect popular multi-chain browser extensions to stream HD tracks and manage royalty allocations.
+          {/* Connected Address Details & Quick Actions */}
+          {userAddress ? (
+            <div className="rounded-xl bg-[#0B1424] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">
+                  Address:
+                </span>
+                <span className="font-mono text-xs text-white font-semibold">
+                  {formatShortAddress(userAddress)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleCopyAddress(userAddress)}
+                  className="p-1.5 text-[#94A3B8] hover:text-white bg-[#111C30] hover:bg-[#17243A] rounded-lg transition-all cursor-pointer"
+                  title="Copy Address"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs">
+                <a
+                  href={`https://tonviewer.com/${userAddress}`}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="flex items-center gap-1.5 text-[#229ED9] hover:text-[#5bc2ff] font-bold transition-colors cursor-pointer"
+                >
+                  <span>View on Explorer</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl bg-[#0B1424] p-4 text-xs text-[#94A3B8] leading-relaxed">
+              Connect your TON wallet (Tonkeeper, MyTonWallet, Telegram Wallet) to hold native TON, purchase music NFTs, stream audio with real-time royalty mints, and collect TJ platform rewards.
+            </div>
+          )}
+        </div>
+
+        {/* B. BALANCES OVERVIEW (3 SEPARATE CARDS) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* 1. TON Balance (Native Crypto) */}
+          <div className="rounded-2xl bg-[#111C30] p-5 sm:p-6 shadow-xl shadow-black/25 flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-[#229ED9] uppercase tracking-widest flex items-center gap-1.5">
+                  <Coins className="w-3.5 h-3.5" />
+                  <span>TON Native Crypto</span>
+                </span>
+                <span className="text-[9px] font-bold bg-[#229ED9]/10 text-[#229ED9] px-2 py-0.5 rounded-full">
+                  On-Chain
+                </span>
+              </div>
+
+              <div className="pt-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-white tracking-tight">
+                    {currencyMode === 'USD'
+                      ? `$${(rawTonVal * TON_PRICE_USD).toFixed(2)}`
+                      : `${rawTonVal.toFixed(2)}`}
+                  </span>
+                  <span className="text-sm font-bold text-[#94A3B8]">
+                    {currencyMode === 'USD' ? 'USD' : 'TON'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#94A3B8] font-medium mt-1">
+                  {currencyMode === 'USD'
+                    ? `≈ ${rawTonVal.toFixed(2)} TON`
+                    : `≈ $${(rawTonVal * TON_PRICE_USD).toFixed(2)} USD (@ $${TON_PRICE_USD}/TON)`}
                 </p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center font-bold text-[10px] text-white">🦊</div>
             </div>
 
-            <div className="flex items-center justify-between pt-2">
-              <div className="text-left">
-                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Linked EVM Address</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <p className="font-mono text-[11px] text-foreground font-semibold">
-                    {activeEvmAddress ? `${activeEvmAddress.substring(0, 9)}...${activeEvmAddress.substring(activeEvmAddress.length - 6)}` : 'Offline / Disconnected'}
-                  </p>
-                  {activeEvmAddress && (
-                    <button
-                      onClick={() => handleCopyAddress(activeEvmAddress, 'EVM')}
-                      className="p-1 text-muted-foreground hover:text-white hover:bg-white/5 transition-all rounded-[4px] flex items-center justify-center"
-                      title="Copy Address"
-                      id="copy-evm-address-btn"
-                    >
-                      {copiedType === 'EVM' ? (
-                        <Check className="h-3 w-3 text-emerald-400" />
-                      ) : (
-                        <Copy className="h-3 w-3" />
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {activeEvmAddress ? (
-                <button
-                  onClick={handleDisconnectMetaMask}
-                  className="px-3 py-2 text-[9px] font-bold text-red-400 uppercase tracking-wider hover:bg-red-500/10 transition-all rounded-[4px]"
-                >
-                  Disconnect
-                </button>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleSimulateMetaMask}
-                    className="px-3 py-2 text-[9px] font-bold text-white bg-purple-600 hover:bg-purple-700 uppercase tracking-widest transition-all rounded-[4px]"
-                  >
-                    Connect MetaMask
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Streaming Eligibility Info Badge */}
-        <div className="bg-[#0e214d]/40 p-3 rounded-[4px] flex items-center gap-3">
-          <Info className="h-4 w-4 text-blue-400 shrink-0" />
-          <div className="text-left">
-            <p className="text-[10px] font-bold text-white uppercase tracking-wider">On-Chain Stream-Verify Protocol</p>
-            <p className="text-[9px] text-white/70 leading-normal">
-              {userAddress || activeEvmAddress ? (
-                <span className="text-green-400 font-semibold">✓ Wallet connected: high-fidelity lossless streaming and real-time royalty mints authorized.</span>
-              ) : (
-                <span className="text-amber-400">⚡ Connect either TON or MetaMask wallet to verify stream ownership and earn continuous play rewards.</span>
-              )}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Un unclaimed Royalties module */}
-      <section className="bg-gradient-to-r from-blue-950/20 to-purple-950/20 px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
-            <h2 className="text-xs font-bold uppercase tracking-widest text-white">Creator Royalty Audit & Disbursal Module</h2>
-          </div>
-          <span className="text-[8px] bg-green-500/10 text-green-400 px-2 py-1 rounded-full font-bold uppercase tracking-widest">Real-Time</span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-          <div className="lg:col-span-2 space-y-2">
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Royalty payments originate dynamically from music streams (0.001 TON / play), secondary NFT sales, and direct listener contributions. These micro-shares compound autonomously until they are claimed directly onto either of your active wallet nodes.
-            </p>
-            <div className="flex items-center gap-4 pt-1">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Audit Sync: OK</span>
-              </div>
-              <div className="flex items-center gap-1.5 animate-pulse">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Active Pool: Verified</span>
-              </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => { setModalCurrency('TON'); setModalType('deposit'); }}
+                className="flex-1 py-2.5 bg-[#229ED9] hover:bg-[#168AC4] text-white text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-[#229ED9]/20"
+              >
+                Deposit
+              </button>
+              <button
+                type="button"
+                onClick={() => { setModalCurrency('TON'); setModalType('withdraw'); }}
+                className="flex-1 py-2.5 bg-[#17243A] hover:bg-[#1B2C45] text-white text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+              >
+                Withdraw
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/swap')}
+                className="px-3 py-2.5 bg-[#17243A] hover:bg-[#1B2C45] text-[#229ED9] rounded-xl transition-all cursor-pointer flex items-center justify-center"
+                title="Swap"
+              >
+                <ArrowDownUp className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
 
-          <div className="bg-muted/[0.15] p-4 rounded-[4px] flex flex-col justify-between h-full space-y-4">
-            <div>
-              <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Unclaimed Accumulated Balance</p>
-              <div className="flex items-end gap-2 text-left">
-                <span className="text-[28px] font-black tracking-tighter text-foreground leading-none">
-                  {currencyMode === 'USD' ? `$${(unclaimedRoyalty * TON_PRICE_USD).toFixed(3)}` : `${unclaimedRoyalty.toFixed(3)} GRAM`}
-                </span>
-                <span className="text-xs font-bold text-muted-foreground">USD/GRAM Equivalent</span>
-              </div>
-            </div>
-
+          {/* 2. TJ Points (In-App Platform Balance) */}
+          <div className="rounded-2xl bg-[#111C30] p-5 sm:p-6 shadow-xl shadow-black/25 flex flex-col justify-between space-y-4">
             <div className="space-y-2">
-              <label className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block">Disburse Royalty Directly To:</label>
-              <div className="flex gap-2">
-                <button
-                  disabled={isClaimingRoyalty || unclaimedRoyalty <= 0 || !userAddress}
-                  onClick={() => handleClaimRoyalty('TON')}
-                  className={`flex-1 py-2 text-[9px] font-bold uppercase tracking-wider rounded-[4px] transition-all cursor-pointer ${
-                    !userAddress || unclaimedRoyalty <= 0
-                      ? 'bg-muted/40 text-muted-foreground/30 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
-                  }`}
-                >
-                  TON Wallet
-                </button>
-                <button
-                  disabled={isClaimingRoyalty || unclaimedRoyalty <= 0 || !activeEvmAddress}
-                  onClick={() => handleClaimRoyalty('MetaMask')}
-                  className={`flex-1 py-2 text-[9px] font-bold uppercase tracking-wider rounded-[4px] transition-all cursor-pointer ${
-                    !activeEvmAddress || unclaimedRoyalty <= 0
-                      ? 'bg-muted/40 text-muted-foreground/30 cursor-not-allowed'
-                      : 'bg-purple-600 hover:bg-purple-700 text-white'
-                  }`}
-                >
-                  MetaMask
-                </button>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-[#9B7CFF] uppercase tracking-widest flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>TJ Points (In-App)</span>
+                </span>
+                <span className="text-[9px] font-bold bg-[#9B7CFF]/10 text-[#9B7CFF] px-2 py-0.5 rounded-full">
+                  Platform Rewards
+                </span>
               </div>
-              {(!userAddress && !activeEvmAddress) && (
-                <p className="text-[8px] text-amber-500/80 font-medium tracking-tight">⚠️ Please connect a TON or MetaMask wallet to disburse royalty pool.</p>
-              )}
+
+              <div className="pt-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-white tracking-tight">
+                    {currencyMode === 'USD'
+                      ? `$${(rawTjVal * JAM_PRICE_USD).toFixed(2)}`
+                      : rawTjVal.toLocaleString()}
+                  </span>
+                  <span className="text-sm font-bold text-[#94A3B8]">
+                    {currencyMode === 'USD' ? 'USD' : 'TJ'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#94A3B8] font-medium mt-1">
+                  Earned through listening, quests, and community missions. Not native crypto.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => navigate('/earn-tj')}
+                className="flex-1 py-2.5 bg-[#9B7CFF] hover:bg-[#8663F2] text-white text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-[#9B7CFF]/20"
+              >
+                Earn More TJ
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/staking')}
+                className="px-4 py-2.5 bg-[#17243A] hover:bg-[#1B2C45] text-white text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+              >
+                Stake
+              </button>
+            </div>
+          </div>
+
+          {/* 3. Total Music NFTs Owned */}
+          <div className="rounded-2xl bg-[#111C30] p-5 sm:p-6 shadow-xl shadow-black/25 flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-[#2DD4BF] uppercase tracking-widest flex items-center gap-1.5">
+                  <Disc className="w-3.5 h-3.5" />
+                  <span>Music NFT Assets</span>
+                </span>
+                <span className="text-[9px] font-bold bg-[#2DD4BF]/10 text-[#2DD4BF] px-2 py-0.5 rounded-full">
+                  Owned Tracks
+                </span>
+              </div>
+
+              <div className="pt-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-white tracking-tight">
+                    {ownedNftsCount}
+                  </span>
+                  <span className="text-sm font-bold text-[#94A3B8]">
+                    NFT{ownedNftsCount === 1 ? '' : 's'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#94A3B8] font-medium mt-1">
+                  Verifiable music ownership with lossless audio and creator royalty share.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('owned-nfts-section');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="flex-1 py-2.5 bg-[#2DD4BF] hover:bg-[#20b8a5] text-black text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-[#2DD4BF]/20"
+              >
+                View Collection
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/marketplace')}
+                className="px-4 py-2.5 bg-[#17243A] hover:bg-[#1B2C45] text-white text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+              >
+                Marketplace
+              </button>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Balance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-600/20 to-black px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] relative overflow-hidden group flex flex-col justify-between">
-          <div>
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <img src={TON_LOGO} className="w-32 h-32" alt="" />
+        {/* UNCLAIMED CREATOR ROYALTIES BANNER */}
+        {unclaimedRoyalty > 0 && (
+          <div className="rounded-2xl bg-gradient-to-r from-[#111C30] via-[#14233D] to-[#111C30] p-5 shadow-xl shadow-black/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
+                <TrendingUp className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                  Unclaimed Creator Royalties
+                </span>
+                <h4 className="text-lg font-bold text-white">
+                  {unclaimedRoyalty.toFixed(3)} TON available
+                </h4>
+                <p className="text-[11px] text-[#94A3B8]">
+                  Generated from secondary NFT trades and music streams.
+                </p>
+              </div>
             </div>
-            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em] mb-4">GRAM Balance</p>
-            <div className="flex items-end gap-4">
-              {currencyMode === 'USD' ? (
+
+            <button
+              type="button"
+              disabled={isClaimingRoyalty || !userAddress}
+              onClick={handleClaimRoyalty}
+              className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-black text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-2 self-start sm:self-auto shadow-lg shadow-emerald-500/20"
+            >
+              {isClaimingRoyalty ? (
                 <>
-                  <span className="text-[44px] font-black text-foreground tracking-tighter">
-                    ${((userProfile.tonBalance || 0) * TON_PRICE_USD).toFixed(2)}
-                  </span>
-                  <span className="text-xl font-bold text-muted-foreground mb-4">USD</span>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Claiming...</span>
                 </>
               ) : (
                 <>
-                  <span className="text-[44px] font-black text-foreground tracking-tighter">
-                    {userProfile.tonBalance?.toFixed(2) || '0.00'}
-                  </span>
-                  <span className="text-xl font-bold text-muted-foreground mb-4">GRAM</span>
+                  <Coins className="w-4 h-4" />
+                  <span>Claim to Wallet</span>
                 </>
               )}
-            </div>
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4 mb-4">
-              {currencyMode === 'USD' 
-                ? `≈ ${(userProfile.tonBalance || 0).toFixed(2)} GRAM` 
-                : `≈ $${((userProfile.tonBalance || 0) * TON_PRICE_USD).toFixed(2)} USD`
-              }
-            </p>
-          </div>
-          <div className="flex gap-2 relative z-10 mt-auto">
-            <button onClick={() => openModal('deposit', 'TON')} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer">Deposit</button>
-            <button onClick={() => openModal('withdraw', 'TON')} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer">Withdraw</button>
-            <button onClick={() => navigate('/swap')} className="flex-1 py-3 bg-[#0098EA] text-white hover:bg-[#0098EA]/90 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-1">
-              <ArrowDownUp className="w-3 h-3" />
-              Swap
             </button>
           </div>
+        )}
+
+        {/* D. OWNED MUSIC NFTS SECTION */}
+        <div id="owned-nfts-section" className="rounded-2xl bg-[#111C30] p-5 sm:p-6 shadow-xl shadow-black/25 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Disc className="w-5 h-5 text-[#229ED9]" />
+              <h2 className="text-base font-bold text-white tracking-tight">
+                My Music NFTs ({ownedNftsCount})
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/marketplace')}
+              className="text-xs font-bold text-[#229ED9] hover:text-[#5bc2ff] flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <span>Explore Marketplace</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {ownedNftsCount > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {userNFTs.map((nft) => {
+                const track = allTracks.find((t) => t.id === nft.trackId || t.title === nft.title);
+                return (
+                  <div
+                    key={nft.id}
+                    className="rounded-xl bg-[#0B1424] p-3 flex items-center gap-3.5 group hover:bg-[#17243A] transition-all cursor-pointer"
+                    onClick={() => navigate(`/nft/${nft.id}`)}
+                  >
+                    <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-black/40">
+                      <img
+                        src={nft.imageUrl || nft.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300'}
+                        alt={nft.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                      {track && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            playTrack(track);
+                          }}
+                          className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Play Track"
+                        >
+                          <Play className="w-5 h-5 text-white fill-white" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[9px] font-bold text-[#229ED9] bg-[#229ED9]/15 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          {nft.edition || 'NFT Single'}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-bold text-white truncate mt-1">
+                        {nft.title}
+                      </h4>
+                      <p className="text-[11px] text-[#94A3B8] truncate mt-0.5">
+                        {nft.artist}
+                      </p>
+                    </div>
+
+                    <ArrowRight className="w-4 h-4 text-[#94A3B8] group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0" />
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-xl bg-[#0B1424] p-8 text-center space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-[#229ED9]/10 text-[#229ED9] flex items-center justify-center mx-auto">
+                <ShoppingBag className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-white">No Music NFTs Owned Yet</h3>
+                <p className="text-xs text-[#94A3B8] max-w-sm mx-auto leading-relaxed">
+                  Start collecting digital vinyl and limited release tracks from your favorite Web3 artists to unlock lossless audio streams and royalties.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/marketplace')}
+                className="mt-2 px-5 py-2.5 bg-[#229ED9] hover:bg-[#168AC4] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-lg shadow-[#229ED9]/20"
+              >
+                Browse Music NFT Drops
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="bg-gradient-to-br from-purple-600/20 to-black px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] relative overflow-hidden group flex flex-col justify-between">
-          <div>
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <img src={TJ_COIN_ICON} className="w-32 h-32" />
+        {/* E. TRANSACTION HISTORY */}
+        <div className="rounded-2xl bg-[#111C30] p-5 sm:p-6 shadow-xl shadow-black/25 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Clock className="w-5 h-5 text-[#229ED9]" />
+              <h2 className="text-base font-bold text-white tracking-tight">
+                Transaction History
+              </h2>
             </div>
-            <p className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.3em] mb-4">JAM Tokens</p>
-            <div className="flex items-end justify-between text-right">
-              <div className="flex items-end gap-2 text-left">
-                {currencyMode === 'USD' ? (
-                  <>
-                    <span className="text-[34px] xl:text-[44px] font-black text-foreground tracking-tighter">
-                      ${((userProfile.jamBalance || 0) * JAM_PRICE_USD).toFixed(2)}
-                    </span>
-                    <span className="text-xl font-bold text-muted-foreground mb-4">USD</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-[34px] xl:text-[44px] font-black text-foreground tracking-tighter">
-                      {userProfile.jamBalance || '0'}
-                    </span>
-                    <span className="text-xl font-bold text-muted-foreground mb-4">JAM</span>
-                  </>
-                )}
-              </div>
-              <div className="mb-4">
-                <span className="text-xs font-bold text-purple-400">
-                  {currencyMode === 'USD' 
-                    ? `≈ ${userProfile.jamBalance || 0} JAM` 
-                    : `≈ $${((userProfile.jamBalance || 0) * JAM_PRICE_USD).toFixed(3)}`
-                  }
-                </span>
-              </div>
-            </div>
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4 mb-4">Utility: In-App Currency</p>
-          </div>
-          <div className="flex gap-2 relative z-10 mt-auto">
-            <button onClick={() => openModal('deposit', 'JAM')} className="flex-1 py-3 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer">Deposit</button>
-            <button onClick={() => openModal('withdraw', 'JAM')} className="flex-1 py-3 bg-white/5 text-foreground hover:bg-white/10 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer">Withdraw</button>
-          </div>
-        </div>
-
-        <div className={`px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] relative overflow-hidden group transition-all flex flex-col justify-between ${userProfile.isPremium ? 'bg-gradient-to-br from-amber-600/20 to-black' : 'bg-muted/50'}`}>
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <ShieldCheck className={`w-32 h-32 ${userProfile.isPremium ? 'text-amber-500' : 'text-foreground'}`} />
-          </div>
-          <p className={`text-[10px] font-bold uppercase tracking-[0.3em] mb-4 ${userProfile.isPremium ? 'text-amber-500' : 'text-muted-foreground'}`}>Subscription Status</p>
-          <div className="flex items-center gap-4">
-            <span className="text-[32px] font-black text-foreground tracking-tighter uppercase">
-              {userProfile.isPremium ? 'Premium' : 'Standard'}
+            <span className="text-[11px] font-mono text-[#94A3B8]">
+              {safeTransactions.length} recorded
             </span>
-            {userProfile.isPremium && <CheckCircle2 className="h-6 w-6 text-amber-500" />}
           </div>
-          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4">
-            {userProfile.isPremium ? 'All features unlocked' : 'Upgrade for high-fidelity audio'}
-          </p>
+
+          {safeTransactions.length > 0 ? (
+            <div className="space-y-2">
+              {safeTransactions.map((tx) => {
+                const isPositive = tx.type === 'deposit' || tx.type === 'nft_sale' || tx.type === 'reward';
+                return (
+                  <div
+                    key={tx.id}
+                    className="rounded-xl bg-[#0B1424] p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#17243A] transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                        isPositive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-[#229ED9]/15 text-[#229ED9]'
+                      }`}>
+                        {tx.type === 'nft_sale' || tx.type === 'nft_purchase' ? (
+                          <Disc className="w-4 h-4" />
+                        ) : tx.type === 'jam_purchase' ? (
+                          <Sparkles className="w-4 h-4" />
+                        ) : isPositive ? (
+                          <TrendingUp className="w-4 h-4" />
+                        ) : (
+                          <ArrowRight className="w-4 h-4" />
+                        )}
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-white uppercase tracking-wider">
+                            {(tx.type || 'Transaction').replace('_', ' ')}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-bold uppercase tracking-wider">
+                            {tx.status || 'Completed'}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#94A3B8] mt-0.5">
+                          {tx.trackTitle || tx.senderAddress || 'TonJam Protocol'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center">
+                      <span className={`text-xs font-bold font-mono ${
+                        isPositive ? 'text-emerald-400' : 'text-white'
+                      }`}>
+                        {isPositive ? '+' : '-'}{tx.amount} {tx.type === 'jam_purchase' ? 'TJ' : 'TON'}
+                      </span>
+                      <span className="text-[10px] text-[#94A3B8] mt-0.5">
+                        {new Date(tx.timestamp).toLocaleDateString()} • {new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-xl bg-[#0B1424] p-8 text-center space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center mx-auto">
+                <Clock className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-white">No Transactions Yet</h3>
+                <p className="text-xs text-[#94A3B8] max-w-sm mx-auto leading-relaxed">
+                  Your purchase history, streaming payouts, deposits, and TJ rewards will be tracked here.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/discover')}
+                className="mt-2 px-5 py-2.5 bg-[#229ED9] hover:bg-[#168AC4] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-lg shadow-[#229ED9]/20"
+              >
+                Discover Music
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* JAM Purchase Section */}
-      <section className="space-y-4">
-        <div className="flex items-center gap-4 px-4 sm:px-0">
-          <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
-          <h2 className="text-[20px] font-bold uppercase tracking-tighter">Purchase JAM Tokens</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {jamPackages.map(pkg => (
-            <div key={pkg.id} className={`relative px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] transition-all hover:scale-[1.02] cursor-pointer group ${pkg.popular ? 'bg-blue-600/5' : 'bg-muted/50'}`}>
-              {pkg.popular && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 py-1 bg-blue-600 text-[6px] font-bold uppercase tracking-widest rounded-full">Most Popular</div>
-              )}
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-bold uppercase tracking-tight text-foreground">{pkg.label}</h3>
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Utility Tokens</p>
-                </div>
-                <img src={TJ_COIN_ICON} className="h-6 w-6" />
-              </div>
-              
-              <div className="flex items-end gap-4 mb-4">
-                <span className="text-[32px] font-black text-foreground tracking-tighter">{pkg.amount}</span>
-                <span className="text-lg font-bold text-muted-foreground mb-4 uppercase">JAM</span>
-              </div>
-              
-              <button 
-                onClick={() => handlePurchaseJAM(pkg.price, pkg.amount)}
-                disabled={isProcessing}
-                className={`w-full py-4 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 shadow-xl shadow-blue-500/20 disabled:opacity-50 cursor-pointer`}
-              >
-                {isProcessing ? 'Processing...' : `Buy for ${pkg.price} GRAM`}
-                {!isProcessing && <ArrowRight className="h-4 w-4" />}
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Premium Upgrade Section */}
-      {!userProfile.isPremium && (
-        <section className="relative rounded-none sm:rounded-[4px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black px-4 py-6 sm:p-6 lg:p-6">
-          <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
-            <Zap className="w-full h-full text-amber-500" />
-          </div>
-          
-          <div className="relative z-10 max-w-2xl space-y-4 font-sans">
-            <div className="inline-flex items-center gap-4 px-4 py-4 rounded-full bg-amber-500/10 border border-neutral-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-[0.2em]">
-              <Sparkles className="h-3 w-3" />
-              Premium Protocol
-            </div>
-            
-            <h2 className="text-[32px] lg:text-[56px] font-black uppercase tracking-tighter leading-[0.9] text-foreground">
-              Unlock <span className="text-amber-500">High-Fidelity</span> Audio
-            </h2>
-            
-            <ul className="space-y-4">
-              {[
-                'Lossless FLAC Streaming (24-bit/192kHz)',
-                'Early access to Genesis NFT drops',
-                'Zero platform fees on secondary sales',
-                'Exclusive Premium profile badge',
-                'Unlimited JamSpace reactions'
-              ].map((feature, i) => (
-                <li key={i} className="flex items-center gap-4 text-sm text-muted-foreground/80 font-medium">
-                  <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            
-            <div className="pt-4">
-              <button 
-                onClick={handleSubscribePremium}
-                disabled={isProcessing}
-                className="px-4 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white font-bold uppercase tracking-widest rounded-[4px] transition-all shadow-xl shadow-blue-600/20 flex items-center gap-4 cursor-pointer"
-              >
-                {isProcessing ? 'Processing...' : 'Upgrade Now for 5 GRAM'}
-                {!isProcessing && <Zap className="h-5 w-5 fill-white" />}
-              </button>
-              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4">One-time payment for lifetime access</p>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Secure User Profile & Owned Music NFTs Dashboard */}
-      <section className="space-y-4">
-        <SecureUserNFTDashboard />
-      </section>
-
-      {/* Refer-a-Fan Banner */}
-      <section className="relative rounded-none sm:rounded-[4px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black px-4 py-6 sm:p-6 lg:p-6 flex flex-col md:flex-row items-center justify-between gap-6 border border-amber-500/20">
-        <div className="absolute top-0 right-0 w-1/2 h-full opacity-5 pointer-events-none">
-          <Users className="w-full h-full text-amber-500" />
-        </div>
-        <div className="relative z-10 max-w-xl space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-500 text-[9px] font-bold uppercase tracking-[0.2em] mb-2">
-            <Users className="h-3 w-3" />
-            Refer-a-Fan Program
-          </div>
-          <h2 className="text-2xl font-black uppercase tracking-tighter text-foreground">
-            Invite Friends, <span className="text-amber-500">Earn JAM</span>
-          </h2>
-          <p className="text-sm text-muted-foreground/80 font-medium">
-            Generate your unique referral link to invite friends. You both receive 50 JAM Coins and a 5% discount on marketplace fees for successful sign-ups!
-          </p>
-        </div>
-        <div className="relative z-10 w-full md:w-auto shrink-0">
-          <Link 
-            to="/referrals"
-            className="w-full md:w-auto px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black font-black uppercase tracking-widest rounded-[4px] transition-all flex items-center justify-center gap-3 cursor-pointer shadow-lg shadow-amber-500/20 active:scale-95"
-          >
-            Get Referral Link
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
-
-      {/* Wallet Recommendations & Guidelines */}
-      <section className="space-y-4">
-        <div className="flex items-center gap-4 px-4 sm:px-0">
-          <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
-          <h2 className="text-[20px] font-bold uppercase tracking-tighter">Standard Security & Trading Recommendations</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-foreground/[0.02] px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <ShieldCheck className="h-5 w-5 text-green-400" />
-                <h3 className="text-xs font-black uppercase tracking-wider text-green-400">Seed Protection</h3>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Your 24-word recovery phrase is your only key. Never type it on non-custodial tools or share it. Support admins will never request your seed credentials.
-              </p>
-            </div>
-            <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Security Level: Maximum</div>
-          </div>
-
-          <div className="bg-foreground/[0.02] px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Zap className="h-5 w-5 text-blue-400" />
-                <h3 className="text-xs font-black uppercase tracking-wider text-blue-400">Gas Maintenance</h3>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Always maintain at least 0.1 TON in your active balance. The network requires small gas margins to secure, build, and broadcast smart contract transactions.
-              </p>
-            </div>
-            <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Efficiency Margin: Optimal</div>
-          </div>
-
-          <div className="bg-foreground/[0.02] px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="h-5 w-5 text-amber-400" />
-                <h3 className="text-xs font-black uppercase tracking-wider text-amber-400">Active Delegation</h3>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Unlock higher gains by staking JAM to vetted nodes. High-uptime delegation (e.g. Node A with 99.9% uptime) is recommended to mitigate slashing variables.
-              </p>
-            </div>
-            <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Yield Standard: 15% APY</div>
-          </div>
-
-          <div className="bg-foreground/[0.02] px-4 py-6 sm:p-6 rounded-none sm:rounded-[4px] flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="h-5 w-5 text-purple-400" />
-                <h3 className="text-xs font-black uppercase tracking-wider text-purple-400">Safe Auditing</h3>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Audit and revoke unnecessary third-party contract spend limits frequently to prevent potential vulnerability exploits. Keep your digital assets secure.
-              </p>
-            </div>
-            <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Risk Level: Low-Defense</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Transaction History */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between px-4 sm:px-0">
-          <div className="flex items-center gap-4">
-            <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
-            <h2 className="text-[20px] font-bold uppercase tracking-tighter">Transaction Ledger</h2>
-          </div>
-          <button className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-foreground transition-colors cursor-pointer">Export CSV</button>
-        </div>
-        
-        <div className="bg-muted/20 rounded-none sm:rounded-[4px] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-foreground/[0.02] border-b border-white/5">
-                  <th className="px-4 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Type</th>
-                  <th className="px-4 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Asset / Protocol</th>
-                  <th className="px-4 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Amount</th>
-                  <th className="px-4 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Status</th>
-                  <th className="px-4 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-right">Timestamp</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {safeTransactions.filter(tx => 
-                  tx.senderAddress === userAddress || 
-                  tx.recipientAddress === userAddress || 
-                  tx.senderAddress === activeEvmAddress || 
-                  tx.recipientAddress === activeEvmAddress || 
-                  tx.type === 'jam_purchase' || 
-                  tx.type === 'premium_subscription' ||
-                  tx.senderAddress === 'CREATOR_ROYALTY_POOL'
-                ).map((tx) => (
-                  <tr key={tx.id} className="hover:bg-foreground/[0.01] transition-colors group">
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-4 font-sans">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          tx.type === 'nft_sale' ? 'bg-green-500/10 text-green-500' :
-                          tx.type === 'jam_purchase' ? 'bg-blue-500/10 text-blue-500' :
-                          tx.type === 'premium_subscription' ? 'bg-amber-500/10 text-amber-500' :
-                          'bg-muted/50 text-muted-foreground'
-                        }`}>
-                          {tx.type === 'nft_sale' ? <TrendingUp className="h-3 w-3" /> : 
-                           tx.type === 'jam_purchase' ? <img src={TJ_COIN_ICON} className="h-3 w-3" /> :
-                           tx.type === 'premium_subscription' ? <Zap className="h-3 w-3" /> :
-                           <Clock className="h-3 w-3" />}
-                        </div>
-                        <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">{(tx.type || 'transaction').replace('_', ' ')}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <p className="text-[10px] font-bold text-foreground uppercase tracking-tighter">{tx.trackTitle || 'Network Protocol'}</p>
-                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest truncate w-32">{tx.txHash}</p>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex flex-col justify-center">
-                        <div className="flex items-center gap-1.5">
-                          {currencyMode === 'USD' ? (
-                            <>
-                              <span className="text-[11px] font-bold text-foreground tracking-tighter">
-                                ${(Number(tx.amount) * TON_PRICE_USD).toFixed(2)}
-                              </span>
-                              <span className="text-[9px] font-medium text-muted-foreground">USD</span>
-                            </>
-                          ) : (
-                            <>
-                              <img src={TON_LOGO} className="w-3 h-3" alt="" />
-                              <span className="text-[11px] font-bold text-foreground tracking-tighter">{tx.amount} GRAM</span>
-                            </>
-                          )}
-                        </div>
-                        <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-0.5 animate-in">
-                          {currencyMode === 'USD' ? (
-                            <span className="flex items-center gap-1">
-                              <img src={TON_LOGO} className="w-2.5 h-2.5" alt="" />
-                              {tx.amount} GRAM
-                            </span>
-                          ) : (
-                            `≈ $${(Number(tx.amount) * TON_PRICE_USD).toFixed(2)} USD`
-                          )}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className="px-4 py-1 rounded-full bg-green-500/10 text-green-500 text-[8px] font-bold uppercase tracking-widest">Completed</span>
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                        {new Date(tx.timestamp).toLocaleDateString()}
-                      </p>
-                      <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-widest animate-in">
-                        {new Date(tx.timestamp).toLocaleTimeString()}
-                      </p>
-                    </td>
-                  </tr>
-                ))}
-                {transactions.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="px-4 py-4 text-center">
-                      <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest animate-in">No transaction signals detected</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* Modal for Deposit/Withdraw */}
+      {/* DEPOSIT / WITHDRAW MODAL */}
       {modalType && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-background/90 backdrop-blur-xl"
+          <div
+            className="absolute inset-0 bg-[#080D1A]/90 backdrop-blur-xl"
             onClick={() => setModalType(null)}
-          ></div>
-          <div className="relative w-full max-w-md bg-zinc-950 p-6 rounded-[4px] border border-white/5 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-[20px] font-bold text-foreground tracking-tighter uppercase">
+          />
+          <div className="relative w-full max-w-md bg-[#111C30] p-6 rounded-2xl shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white tracking-tight">
                 {modalType === 'deposit' ? 'Deposit' : 'Withdraw'} {modalCurrency}
-              </h2>
-              <button onClick={() => setModalType(null)} className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                <X className="h-5 w-5" />
+              </h3>
+              <button
+                type="button"
+                onClick={() => setModalType(null)}
+                className="w-8 h-8 rounded-full bg-[#0B1424] text-[#94A3B8] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
-            
-            {modalCurrency === 'JAM' && (
-              <div className="bg-amber-500/10 rounded-[4px] p-4 mb-6 flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Feature Disabled</p>
-                  <p className="text-xs text-amber-500/80">
-                    {modalType === 'deposit' ? 'Deposits' : 'Withdrawals'} for JAM are currently disabled for future functionality updates. Please check back later.
-                  </p>
-                </div>
-              </div>
-            )}
 
             <div className="space-y-4">
-              <div>
-                <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2 block">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">
                   Amount ({modalCurrency})
                 </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="0.00"
-                    className={`w-full bg-foreground/[0.03] border border-white/10 rounded-[4px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all ${modalCurrency === 'JAM' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={modalCurrency === 'JAM' || isProcessing}
-                  />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{modalCurrency}</span>
-                  </div>
-                </div>
+                <input
+                  type="number"
+                  min="0.1"
+                  step="0.1"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full bg-[#0B1424] text-white text-sm font-semibold px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-[#229ED9] transition-all"
+                />
               </div>
 
               {modalType === 'withdraw' && (
-                <div>
-                  <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2 block">
-                    Destination Address
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">
+                    Recipient TON Address
                   </label>
                   <input
                     type="text"
                     value={withdrawAddress}
                     onChange={(e) => setWithdrawAddress(e.target.value)}
-                    placeholder={`Enter ${modalCurrency} address`}
-                    className={`w-full bg-foreground/[0.03] border border-white/10 rounded-[4px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all ${modalCurrency === 'JAM' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={modalCurrency === 'JAM' || isProcessing}
+                    placeholder="EQ... or UQ..."
+                    className="w-full bg-[#0B1424] text-white text-xs font-mono px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-[#229ED9] transition-all"
                   />
                 </div>
               )}
 
               <button
+                type="button"
+                disabled={isProcessing || !amount || Number(amount) <= 0}
                 onClick={handleModalSubmit}
-                disabled={modalCurrency === 'JAM' || isProcessing || !amount || Number(amount) <= 0 || (modalType === 'withdraw' && !withdrawAddress)}
-                className={`w-full py-4 rounded-[4px] font-bold text-[10px] uppercase tracking-widest transition-all mt-4 cursor-pointer ${
-                  modalCurrency === 'JAM' || isProcessing || !amount || Number(amount) <= 0 || (modalType === 'withdraw' && !withdrawAddress)
-                    ? 'bg-muted/50 text-muted-foreground opacity-50 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg'
-                }`}
+                className="w-full py-3.5 bg-[#229ED9] hover:bg-[#168AC4] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-lg shadow-[#229ED9]/25 flex items-center justify-center gap-2"
               >
-                {isProcessing ? 'Processing...' : modalType === 'deposit' ? 'Confirm Deposit' : 'Confirm Withdrawal'}
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Processing Transaction...</span>
+                  </>
+                ) : (
+                  <span>Confirm {modalType === 'deposit' ? 'Deposit' : 'Withdrawal'}</span>
+                )}
               </button>
             </div>
           </div>
         </div>
       )}
+
       {/* Testnet Sandbox Hub Modal */}
       <TestnetHubModal isOpen={isTestnetModalOpen} onClose={() => setIsTestnetModalOpen(false)} />
-      </div>
     </div>
   );
 };
