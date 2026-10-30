@@ -950,7 +950,7 @@ function MobileNavItem({ to, icon: Icon, label, onClick }: { to: string; icon: a
     >
       {({ isActive }) => (
         <>
-          <Icon className={`h-[21px] w-[21px] transition-transform ${isActive ? 'text-blue-500 scale-105' : 'text-white/90 group-hover:text-white'}`} strokeWidth={isActive ? 2.5 : 2} />
+          <Icon className={`h-[21px] w-[21px] transition-transform ${isActive ? 'text-blue-500 scale-105' : 'text-white/90 group-hover:text-white'}`} strokeWidth={isActive ? 3.5 : 3} />
           <span className={`text-[9px] font-['Poppins',sans-serif] font-medium uppercase tracking-wider transition-colors ${isActive ? 'text-blue-500 font-bold' : 'text-white/90'}`}>{label}</span>
         </>
       )}

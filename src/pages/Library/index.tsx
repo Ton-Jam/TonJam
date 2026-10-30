@@ -17,8 +17,13 @@ import { QueueManager } from './components/QueueManager';
 import { DownloadsManager } from './components/DownloadsManager';
 import { AnalyticsSection } from './components/AnalyticsSection';
 import { ListeningHistory } from './components/ListeningHistory';
-import { EmptyState } from './components/EmptyState';
-import { CardSkeleton, StatsSkeleton, RowSkeleton } from './components/Skeletons';
+import { 
+  CardSkeleton, 
+  StatsSkeleton, 
+  RowSkeleton, 
+  QuickActionsSkeleton, 
+  LibraryScreenSkeleton 
+} from './components/Skeletons';
 import { LibraryImporter } from './components/LibraryImporter';
 import { ImportSpotifyPlaylistModal } from './components/ImportSpotifyPlaylistModal';
 import { RoyaltiesDashboard } from './components/RoyaltiesDashboard';
@@ -129,7 +134,7 @@ const LibraryPage: React.FC = () => {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="relative flex items-center w-full sm:w-72 md:w-80 rounded-[12px] border border-[#22374D] hover:border-[#38516B] focus-within:border-[#00B4D8] transition-all bg-[#0A1628]"
+                className="relative flex items-center w-full sm:w-72 md:w-80 rounded-[12px] border-none transition-all bg-[#0A1628] shadow-md ring-1 ring-white/10 focus-within:ring-2 focus-within:ring-[#00B4D8]"
               >
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#00B4D8]" />
                 <input
@@ -155,7 +160,7 @@ const LibraryPage: React.FC = () => {
                 onClick={handleOpenHeaderSearch}
                 aria-label="Open search in library"
                 title="Search Library"
-                className="flex items-center gap-2 px-3.5 py-2 rounded-[12px] bg-[#0A1628] hover:bg-[#0F1C32] text-[#C2C7CD] hover:text-white transition-all cursor-pointer border border-[#22374D] select-none"
+                className="flex items-center gap-2 px-3.5 py-2 rounded-[12px] bg-[#0A1628] hover:bg-[#0F1C32] text-[#C2C7CD] hover:text-white transition-all cursor-pointer border-none select-none shadow-sm"
               >
                 <Search className="w-4 h-4 text-[#00B4D8]" />
                 <span className="text-xs font-bold hidden sm:inline">Search</span>
@@ -165,7 +170,9 @@ const LibraryPage: React.FC = () => {
         </div>
 
         {/* 2. LIBRARY DESTINATIONS */}
-        {!data.isLoading && (
+        {data.isLoading ? (
+          <QuickActionsSkeleton />
+        ) : (
           <QuickActions 
             likedCount={data.likedCount}
             downloadCount={data.downloadCount}
@@ -359,9 +366,7 @@ const LibraryPage: React.FC = () => {
         {/* MAIN DYNAMIC CONTENT STREAM */}
         <div className="space-y-12">
           {data.isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {Array.from({ length: 8 }).map((_, i) => <CardSkeleton key={i} />)}
-            </div>
+            <LibraryScreenSkeleton activeChip={data.activeChip} />
           ) : (
             <AnimatePresence mode="wait">
               <motion.div

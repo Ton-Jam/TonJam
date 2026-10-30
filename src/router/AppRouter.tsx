@@ -17,6 +17,7 @@ import JamSpacePage from '@/pages/JamSpace';
 import MarketplacePage from '@/pages/Marketplace';
 import DiscoverPage from '@/pages/Discover';
 import NFTDetailPage from '@/pages/NFTDetail';
+import PartnershipsPage from '@/pages/Partnerships';
 
 const RouteLoadingFallback: React.FC = () => (
   <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3 py-16 text-center select-none">
@@ -150,7 +151,7 @@ const LivestreamViewer = lazyWithRetry(() => import('@/pages/Livestream/Livestre
 const LiveStudio = lazyWithRetry(() => import('@/pages/Livestream/LiveStudio').then(m => ({ default: m.LiveStudio })));
 const SideDrawerShowcase = lazyWithRetry(() => import('@/pages/SideDrawerShowcase'));
 const UnifiedDesignSystem = lazyWithRetry(() => import('@/pages/UnifiedDesignSystem'));
-const Partnerships = lazyWithRetry(() => import('@/pages/Partnerships'));
+const Partnerships = PartnershipsPage;
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div

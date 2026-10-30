@@ -133,7 +133,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         aria-valuenow={Math.round(localProgress)}
         aria-valuemin={0}
         aria-valuemax={100}
-        className="relative w-full h-[2px] bg-[#22374D] cursor-pointer touch-none select-none z-20 group"
+        className="relative w-full h-[2px] bg-transparent border-none cursor-pointer touch-none select-none z-20 group"
         title="Scrub playback position"
       >
         {/* Expanded touch target */}

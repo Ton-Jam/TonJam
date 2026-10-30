@@ -167,17 +167,22 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                 ))}
               </div>
 
-              {/* Icon Container with active scaling */}
-              <div className="relative pointer-events-none">
+              {/* Icon Container with consistent scaling and stroke density */}
+              <div className="relative pointer-events-none flex items-center justify-center w-6 h-6 shrink-0">
                 <motion.div
                   animate={{
-                    scale: isActive ? 1.1 : 1.0,
+                    scale: isActive ? 1.08 : 1.0,
                     y: isActive ? -1 : 0,
                   }}
-                  transition={{ duration: 0.2 }}
-                  className={`${isActive ? 'text-[#00B4D8]' : 'text-[#8C8C8C] group-hover:text-[#C2C7CD]'} transition-colors`}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className={`flex items-center justify-center w-full h-full ${
+                    isActive ? 'text-[#00B4D8]' : 'text-[#8C8C8C] group-hover:text-[#C2C7CD]'
+                  } transition-colors`}
                 >
-                  <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+                  <Icon 
+                    className="w-5 h-5 shrink-0 [vector-effect:non-scaling-stroke] [shape-rendering:geometricPrecision]" 
+                    strokeWidth={isActive ? 3.5 : 3} 
+                  />
                 </motion.div>
 
                 {/* Status Badges */}
@@ -185,7 +190,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1.5 -right-2 bg-red-500 text-white font-black text-[8px] h-4 min-w-4 px-1 rounded-full flex items-center justify-center shadow-lg"
+                    className="absolute -top-1.5 -right-2 bg-red-500 text-white font-black text-[8px] h-4 min-w-4 px-1 rounded-full flex items-center justify-center shadow-lg pointer-events-none"
                   >
                     {tab.badge}
                   </motion.span>
@@ -194,7 +199,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 
               {/* Text label */}
               <span
-                className={`text-[10px] font-medium tracking-tight mt-1 transition-colors pointer-events-none ${
+                className={`text-[10px] font-medium tracking-tight mt-1 transition-colors pointer-events-none truncate max-w-full px-0.5 ${
                   isActive ? 'text-[#00B4D8] font-bold' : 'text-[#8C8C8C] group-hover:text-[#C2C7CD]'
                 }`}
               >

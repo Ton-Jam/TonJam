@@ -424,7 +424,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             if (typeof seek === 'function') seek(next);
           }
         }}
-        className="relative w-full h-[2px] group/seek cursor-pointer select-none z-30 touch-none outline-none bg-[#22374D]" 
+        className="relative w-full h-[2px] group/seek cursor-pointer select-none z-30 touch-none outline-none bg-transparent border-none" 
         id="mini-progress-track"
         title="Click or drag to scrub playback position"
       >
