@@ -118,10 +118,10 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 
           {renderCover()}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-[11px] font-bold tracking-tight truncate text-foreground group-hover:text-primary transition-colors uppercase">
+          <h4 className="text-[9px] font-bold tracking-tight truncate text-foreground group-hover:text-primary transition-colors uppercase">
             {playlist.title}
           </h4>
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest truncate">
+          <p className="text-[7px] font-semibold text-muted-foreground uppercase tracking-widest truncate">
             {playlist.creator}
           </p>
         </div>

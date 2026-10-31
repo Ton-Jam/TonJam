@@ -40,11 +40,11 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
       
       <div className="relative w-full max-w-md bg-[#0A1628] text-white rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         {/* Header */}
-        <div className="p-4 border-b border-white/[0.06] flex flex-col gap-3">
+        <div className="p-4 bg-white/[0.02] flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-2 h-2 bg-[#00B4D8] rounded-full shadow-[0_0_10px_#00B4D8]"></div>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-white/9ns">Add to Playlist</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-white/90">Add to Playlist</h2>
             </div>
             <button 
               onClick={onClose} 
@@ -78,7 +78,7 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
               placeholder="Search your playlists..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/[0.06] border border-white/[0.08] rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#00B4D8] transition-all"
+              className="w-full bg-[#111C30] rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#00B4D8] transition-all"
             />
           </div>
         </div>
@@ -99,7 +99,7 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
                   key={playlist.id} 
                   onClick={() => handleTogglePlaylist(playlist.id, playlist.title, playlist.trackIds)}
                   className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left group cursor-pointer ${
-                    isInPlaylist ? 'bg-[#00B4D8]/15 border border-[#00B4D8]/30' : 'hover:bg-white/[0.06] bg-transparent'
+                    isInPlaylist ? 'bg-[#00B4D8]/20 text-white' : 'hover:bg-white/[0.06] bg-transparent'
                   }`}
                 >
                   <div className="w-11 h-11 rounded-lg bg-neutral-900 flex items-center justify-center overflow-hidden shrink-0 relative">
@@ -130,7 +130,7 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
         </div>
 
         {/* Footer Create Action */}
-        <div className="p-3 border-t border-white/[0.06] bg-[#07111F]/50">
+        <div className="p-3 bg-[#07111F]/80">
           <button 
             onClick={() => {
               setTrackToAddToPlaylist(track);

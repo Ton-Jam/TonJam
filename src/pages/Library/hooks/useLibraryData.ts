@@ -20,7 +20,16 @@ import {
 
 export const useLibraryData = () => {
   const toast = useToast();
-  const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
+  const { 
+    currentTrack, 
+    isPlaying, 
+    playTrack, 
+    togglePlay,
+    playlists: audioPlaylists,
+    createNewPlaylist: audioCreateNewPlaylist,
+    deletePlaylist: audioDeletePlaylist,
+    setIsCreatePlaylistModalOpen
+  } = useAudio();
 
   // Loading state for skeletons
   const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +64,44 @@ export const useLibraryData = () => {
     }
     return MOCK_LIBRARY_NFTS;
   });
-  const [playlists, setPlaylists] = useState<LibraryPlaylist[]>(MOCK_LIBRARY_PLAYLISTS);
+
+  // Pinned playlist IDs persisted in local storage
+  const [pinnedPlaylistIds, setPinnedPlaylistIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('tonjam_pinned_playlists');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const togglePinPlaylist = (id: string) => {
+    setPinnedPlaylistIds(prev => {
+      const next = prev.includes(id) ? prev.filter(pId => pId !== id) : [...prev, id];
+      localStorage.setItem('tonjam_pinned_playlists', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  // Synced with AudioContext for seamless cross-app playlist creation, editing, and persistence
+  const playlists: LibraryPlaylist[] = useMemo(() => {
+    if (audioPlaylists && audioPlaylists.length > 0) {
+      return audioPlaylists.map(pl => ({
+        id: pl.id,
+        title: pl.title,
+        creator: pl.creator || 'You',
+        coverUrl: pl.coverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80',
+        tracksCount: pl.trackCount ?? (pl.trackIds?.length || 0),
+        isPinned: pinnedPlaylistIds.includes(pl.id),
+        isDownloaded: false,
+        isCustom: true
+      }));
+    }
+    return MOCK_LIBRARY_PLAYLISTS.map(pl => ({
+      ...pl,
+      isPinned: pinnedPlaylistIds.includes(pl.id)
+    }));
+  }, [audioPlaylists, pinnedPlaylistIds]);
   const [history, setHistory] = useState<HistoryEvent[]>(MOCK_HISTORY_EVENTS);
   const [queue, setQueue] = useState<QueueItem[]>(MOCK_QUEUE);
   const [analytics, setAnalytics] = useState<LibraryAnalytics>(MOCK_LIBRARY_ANALYTICS);
@@ -293,29 +339,15 @@ export const useLibraryData = () => {
     }));
   };
 
-  const createPlaylist = (title: string) => {
+  const createPlaylist = (title: string, description?: string, coverUrl?: string) => {
     if (!title.trim()) return;
-    const newPlaylist: LibraryPlaylist = {
-      id: `pl-${Date.now()}`,
-      title,
-      creator: 'You',
-      coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80',
-      tracksCount: 0,
-      isPinned: false,
-      isDownloaded: false,
-      isCustom: true
-    };
-    setPlaylists(prev => [newPlaylist, ...prev]);
-    toast.success('Playlist Created', `Successfully compiled the "${title}" node.`);
+    audioCreateNewPlaylist(title.trim(), description, undefined, coverUrl);
+    toast.success('Playlist Created', `Successfully compiled the "${title.trim()}" playlist.`);
   };
 
   const deletePlaylist = (id: string) => {
-    setPlaylists(prev => prev.filter(p => p.id !== id));
-    toast.success('Playlist Deleted', 'Custom playlist deleted from Library.');
-  };
-
-  const togglePinPlaylist = (id: string) => {
-    setPlaylists(prev => prev.map(p => p.id === id ? { ...p, isPinned: !p.isPinned } : p));
+    audioDeletePlaylist(id);
+    toast.success('Playlist Deleted', 'Playlist removed from Library.');
   };
 
   const handlePlayTrack = (track: LibraryTrack) => {
@@ -433,6 +465,7 @@ export const useLibraryData = () => {
     createPlaylist,
     deletePlaylist,
     togglePinPlaylist,
+    openCreatePlaylistModal: () => setIsCreatePlaylistModalOpen(true),
     handlePlayTrack,
     clearHistory,
     addToQueue,
@@ -478,21 +511,13 @@ export const useLibraryData = () => {
       });
     },
     importPlaylistWithTracks: (playlistTitle: string, playlistCoverUrl: string, tracksList: { title: string; artist: string; album?: string; coverUrl?: string; duration?: number }[]) => {
-      const playlistId = `pl-imported-${Date.now()}`;
-      
-      // 1. Create the playlist
-      const newPlaylist: LibraryPlaylist = {
-        id: playlistId,
-        title: playlistTitle,
-        creator: 'You (Imported)',
-        coverUrl: playlistCoverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80',
-        tracksCount: tracksList.length,
-        isPinned: false,
-        isDownloaded: false,
-        isCustom: true
-      };
-      
-      setPlaylists(prev => [newPlaylist, ...prev]);
+      // 1. Create the playlist in unified audio context & firestore
+      audioCreateNewPlaylist(
+        playlistTitle, 
+        `Imported playlist with ${tracksList.length} tracks`, 
+        undefined, 
+        playlistCoverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80'
+      );
 
       // 2. Add any missing tracks to our master list
       setTracks(prev => {

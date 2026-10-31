@@ -26,8 +26,8 @@ export const MusicCard = React.forwardRef<HTMLDivElement, MusicCardProps>(
         <div className="relative w-full h-[180px] rounded-lg overflow-hidden mb-3">
           <img src={coverUrl} alt={title} className="w-full h-full object-cover" />
         </div>
-        <h4 className="text-[14px] font-semibold text-white truncate">{title}</h4>
-        <p className="text-[12px] text-[#9AA0AE] truncate">{artist}</p>
+        <h4 className="text-[12px] font-semibold text-white truncate">{title}</h4>
+        <p className="text-[10px] text-[#9AA0AE] truncate">{artist}</p>
       </motion.div>
     );
   }

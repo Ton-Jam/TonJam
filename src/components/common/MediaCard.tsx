@@ -87,12 +87,12 @@ export const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
           {typeof title === 'string' ? (
             <h3
               className={cn(
-                "text-[12px] leading-[16px] font-medium tracking-tight truncate w-full transition-colors",
+                "text-[10px] leading-[14px] font-medium tracking-tight truncate w-full transition-colors",
                 isActive ? "text-cyan-400 font-bold" : "text-white/95 group-hover:text-white"
               )}
               style={{
-                fontSize: 'var(--card-title-size, 12px)',
-                lineHeight: 'var(--card-title-line-height, 16px)',
+                fontSize: 'var(--card-title-size, 10px)',
+                lineHeight: 'var(--card-title-line-height, 14px)',
               }}
             >
               {title}
@@ -105,10 +105,10 @@ export const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
           {subtitle && (
             typeof subtitle === 'string' ? (
               <p
-                className="text-[11px] leading-[14px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors"
+                className="text-[9px] leading-[12px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors"
                 style={{
-                  fontSize: 'var(--card-meta-size, 11px)',
-                  lineHeight: 'var(--card-meta-line-height, 14px)',
+                  fontSize: 'var(--card-meta-size, 9px)',
+                  lineHeight: 'var(--card-meta-line-height, 12px)',
                 }}
               >
                 {subtitle}

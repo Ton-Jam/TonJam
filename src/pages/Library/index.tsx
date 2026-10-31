@@ -535,6 +535,7 @@ const LibraryPage: React.FC = () => {
                       onDeletePlaylist={data.deletePlaylist}
                       onTogglePin={data.togglePinPlaylist}
                       onImportSpotify={() => setIsSpotifyModalOpen(true)}
+                      onOpenCreateModal={data.openCreatePlaylistModal}
                       layout={viewLayout}
                     />
                   </div>

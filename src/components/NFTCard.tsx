@@ -648,11 +648,11 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
             </div>
 
             <div className="flex-1 min-w-0">
-              <h4 className={`text-[13px] font-medium leading-tight truncate ${isActive ? 'text-[#0088CC] font-semibold' : 'text-[#F5F7FA]'}`}>
+              <h4 className={`text-[11px] font-medium leading-tight truncate ${isActive ? 'text-[#0088CC] font-semibold' : 'text-[#F5F7FA]'}`}>
                 {nft.title}
               </h4>
               <p 
-                className="text-[11px] text-white/60 truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+                className="text-[9px] text-white/60 truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
                 onClick={handleArtistClick}
               >
                 <span>{nft.creator}</span>

@@ -370,7 +370,6 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       </motion.div>
     );
   }
-
   // RENDER FULL MINI PLAYER BAR
   return (
     <motion.div
@@ -380,8 +379,8 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       dragElastic={{ top: 0.8, bottom: 0.2 }}
       onDragEnd={handleDragEnd}
       onClick={() => setFullPlayerOpen(true)}
-      whileTap={{ scale: 0.99 }}
-      className={`fixed left-0 right-0 lg:left-64 text-[#FFFFFF] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-in-out cursor-pointer bg-[#0F1C32] ${
+      whileTap={{ scale: 0.995 }}
+      className={`fixed left-0 right-0 lg:left-64 text-[#FFFFFF] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-[0_-8px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out cursor-pointer bg-[#0F1C32] ${
         isMobileNavHidden ? "bottom-0" : "bottom-[60px] lg:bottom-0"
       }`}
       style={{
@@ -391,10 +390,10 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       }}
       id="tonjam-mini-player"
     >
-      {/* Elevated Navy Surface */}
+      {/* Background Navy Surface */}
       <div className="absolute inset-0 pointer-events-none bg-[#0F1C32] z-0 select-none" />
 
-      {/* Interactive Flush Top Seek Bar */}
+      {/* Interactive Flush Top Progress Bar / Scrubber */}
       <div 
         ref={progressBarRef}
         onPointerDown={handlePointerDown}
@@ -424,17 +423,17 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             if (typeof seek === 'function') seek(next);
           }
         }}
-        className="relative w-full h-[2px] group/seek cursor-pointer select-none z-30 touch-none outline-none bg-transparent border-none" 
+        className="relative w-full h-[3px] bg-[#1E2D42] group/seek cursor-pointer select-none z-30 touch-none outline-none border-none" 
         id="mini-progress-track"
         title="Click or drag to scrub playback position"
       >
-        {/* Expanded touch/click target area */}
-        <div className="absolute -top-1.5 -bottom-1.5 left-0 right-0 z-10" />
+        {/* Touch target expansion */}
+        <div className="absolute -top-2 -bottom-2 left-0 right-0 z-10" />
 
-        {/* Hover/Scrub Time Tooltip */}
+        {/* Scrub tooltip */}
         {(isScrubbing || hoverPos !== null) && duration > 0 && (
           <div 
-            className="absolute top-2 -translate-x-1/2 px-1.5 py-0.5 bg-[#07111F]/95 text-white text-[10px] font-mono font-bold rounded shadow-lg pointer-events-none z-40 transition-opacity"
+            className="absolute top-2.5 -translate-x-1/2 px-1.5 py-0.5 bg-[#07111F]/95 text-white text-[10px] font-mono font-bold rounded shadow-lg pointer-events-none z-40 transition-opacity"
             style={{ left: `${Math.max(5, Math.min(95, isScrubbing ? localProgress : (hoverPos ?? localProgress)))}%` }}
           >
             {formatTime(((isScrubbing ? localProgress : (hoverPos ?? localProgress)) / 100) * duration)}
@@ -443,36 +442,36 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
 
         {/* Progress Fill */}
         <div
-          className="h-full bg-[#00B4D8] relative transition-all shadow-[0_0_6px_rgba(0,180,216,0.6)]"
+          className="h-full bg-[#00B4D8] relative transition-all shadow-[0_0_8px_rgba(0,180,216,0.8)]"
           style={{ width: `${localProgress}%` }}
           id="mini-progress-indicator"
         >
-          {/* Glowing Seek Knob / Thumb (shown on hover and active scrub) */}
+          {/* Glowing Thumb knob */}
           <div 
-            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_6px_rgba(0,180,216,1)] transition-transform duration-100 ${
+            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2.5 h-2.5 bg-white rounded-full shadow-[0_0_6px_rgba(0,180,216,1)] transition-transform duration-100 ${
               isScrubbing ? 'scale-100' : 'scale-0 group-hover/seek:scale-100'
             }`} 
           />
         </div>
       </div>
 
-      {/* Main Content Row: Artwork, Metadata, Controls */}
-      <div className="relative z-10 flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 gap-3">
+      {/* Main Content Row */}
+      <div className="relative z-10 flex items-center justify-between px-3.5 py-2 sm:px-5 sm:py-2.5 gap-3">
         {/* Artwork + Title + Artist */}
-        <div className="flex items-center gap-2.5 flex-1 min-w-0" id="mini-metadata-area">
-          <div className="relative shrink-0">
+        <div className="flex items-center gap-3 flex-1 min-w-0" id="mini-metadata-area">
+          <div className="relative shrink-0 flex items-center justify-center">
             <img
               src={coverUrl}
               alt={currentTrack.title}
-              className="w-10 h-10 object-cover rounded-[10px] shrink-0 shadow-sm"
+              className="w-10 h-10 sm:w-11 sm:h-11 object-cover rounded-[10px] shrink-0 shadow-md bg-[#0A1628]"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
               }}
               id="mini-artwork"
             />
-            {/* Streaming Health Indicator badge on artwork corner */}
+            {/* Streaming Health Dot */}
             <span 
-              className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-black shrink-0 transition-all duration-300 ${
+              className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-[#0F1C32] shrink-0 transition-all duration-300 ${
                 audioConnectionState === 'connected' ? 'bg-[#35C98A] shadow-[0_0_4px_#35C98A]' :
                 audioConnectionState === 'connecting' ? 'bg-[#F4BD50] animate-pulse' :
                 audioConnectionState === 'error' ? 'bg-[#F16D78] animate-bounce' :
@@ -487,16 +486,16 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             />
           </div>
 
-          <div className="flex flex-col min-w-0 justify-center leading-tight flex-1">
+          <div className="flex flex-col min-w-0 justify-center flex-1">
             <div className="flex items-center gap-1.5 min-w-0">
               <ScrollingText
                 text={currentTrack.title}
-                className="text-xs sm:text-sm font-bold text-[#FFFFFF]"
+                className="text-xs sm:text-sm font-semibold text-[#FFFFFF]"
                 containerClassName="min-w-0 flex-1"
                 id="mini-track-title"
               />
               {currentTrack.isHighFidelity && (
-                <span className="px-1 py-0.2 bg-[#00B4D8]/20 text-[#00B4D8] text-[8px] font-black rounded-xs uppercase shrink-0">
+                <span className="px-1 py-0.2 bg-[#00B4D8]/20 text-[#00B4D8] text-[8px] font-bold rounded-xs uppercase shrink-0">
                   Hi-Fi
                 </span>
               )}
@@ -504,7 +503,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             <div className="flex items-center gap-1 min-w-0">
               <ScrollingText
                 text={currentTrack.artist}
-                className="text-[11px] sm:text-xs font-medium text-[#C2C7CD] mt-0.5"
+                className="text-[11px] sm:text-xs font-medium text-[#C2C7CD]"
                 containerClassName="min-w-0"
                 id="mini-track-artist"
               />
@@ -517,8 +516,20 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           </div>
         </div>
 
-        {/* Action Controls */}
+        {/* Action Control Buttons */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Like / Heart Button */}
+          <button
+            onClick={handleLikeClick}
+            aria-label={isLiked ? "Unlike track" : "Like track"}
+            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all cursor-pointer border-none bg-transparent active:scale-90 shrink-0 ${
+              isLiked ? "text-[#F16D78]" : "text-[#8C8C8C] hover:text-white hover:bg-white/10"
+            }`}
+            title={isLiked ? "Unlike" : "Like"}
+          >
+            <Heart className={`w-4 h-4 ${isLiked ? "fill-current text-[#F16D78]" : ""}`} />
+          </button>
+
           {/* Play/Pause Button */}
           <button
             onClick={(e) => {
@@ -526,17 +537,17 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               togglePlay();
             }}
             aria-label={isPlaying ? "Pause track" : "Play track"}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#00B4D8] hover:bg-[#009CC0] text-white flex items-center justify-center transition-transform active:scale-90 shadow-md shadow-[#00B4D8]/30 cursor-pointer border-none shrink-0"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#00B4D8] hover:bg-[#009CC0] text-white flex items-center justify-center transition-transform active:scale-90 shadow-md shadow-[#00B4D8]/30 cursor-pointer border-none shrink-0"
             title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
-              <Pause className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
+              <Pause className="w-4 h-4 sm:w-4.5 sm:h-4.5 fill-current" />
             ) : (
-              <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current ml-0.5" />
+              <Play className="w-4 h-4 sm:w-4.5 sm:h-4.5 fill-current ml-0.5" />
             )}
           </button>
 
-          {/* Track Queue Button */}
+          {/* Queue Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -547,10 +558,20 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               }
             }}
             aria-label="Track queue"
-            className="p-1.5 text-[#8C8C8C] hover:text-white transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent active:scale-90"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full text-[#8C8C8C] hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent active:scale-90 shrink-0"
             title="Queue"
           >
             <ListMusic className="w-4 h-4" />
+          </button>
+
+          {/* Track Options Button */}
+          <button
+            onClick={handleOptionsClick}
+            aria-label="Track options"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full text-[#8C8C8C] hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent active:scale-90 shrink-0"
+            title="More Options"
+          >
+            <MoreVertical className="w-4 h-4" />
           </button>
         </div>
       </div>

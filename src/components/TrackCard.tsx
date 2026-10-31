@@ -424,11 +424,11 @@ export const TrackCard: React.FC<TrackCardProps> = ({
               </button>
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className={`text-[13px] font-medium leading-tight truncate ${isActive ? 'text-blue-400 font-semibold' : 'text-white/90'}`}>
+              <h4 className={`text-[11px] font-medium leading-tight truncate ${isActive ? 'text-blue-400 font-semibold' : 'text-white/90'}`}>
                 {track.title}
               </h4>
               <p 
-                className="text-[11px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+                className="text-[9px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
                 onClick={handleArtistClick}
               >
                 <span>{track.artist}</span>
@@ -498,11 +498,11 @@ export const TrackCard: React.FC<TrackCardProps> = ({
             </div>
 
             <div className="flex-1 min-w-0">
-              <h4 className={`text-[13px] font-medium leading-tight truncate ${isActive ? 'text-blue-400 font-semibold' : 'text-white/95'}`}>
+              <h4 className={`text-[11px] font-medium leading-tight truncate ${isActive ? 'text-blue-400 font-semibold' : 'text-white/95'}`}>
                 {track.title}
               </h4>
               <p 
-                className="text-[11px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+                className="text-[9px] text-zinc-400 truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
                 onClick={handleArtistClick}
               >
                 <span>{track.artist}</span>

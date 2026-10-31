@@ -442,9 +442,10 @@
     border-color: rgba(255, 255, 255, 0.12);
   }
 
-  /* Specific mini player silver border line */
+  /* Specific mini player borderless rule */
   #tonjam-mini-player {
-    border-top: 1px solid rgba(192, 192, 192, 0.28) !important;
+    border: none !important;
+    border-top: none !important;
   }
 
   /* Subtle bottom navigation bar top border line */

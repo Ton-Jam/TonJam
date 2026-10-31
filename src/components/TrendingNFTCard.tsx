@@ -96,29 +96,29 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
         style={{ marginTop: 'var(--card-content-gap, 6px)' }}
       >
         <h4 
-          className="text-[14px] leading-[20px] font-semibold tracking-tight text-white/95 truncate w-full group-hover:text-blue-400 transition-colors"
+          className="text-[12px] leading-[18px] font-semibold tracking-tight text-white/95 truncate w-full group-hover:text-blue-400 transition-colors"
           style={{
-            fontSize: 'var(--card-title-size, 14px)',
-            lineHeight: 'var(--card-title-line-height, 20px)',
+            fontSize: 'var(--card-title-size, 12px)',
+            lineHeight: 'var(--card-title-line-height, 18px)',
           }}
         >
           {nft.title}
         </h4>
         <p 
-          className="text-[12px] leading-[17px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors flex items-center gap-1"
+          className="text-[10px] leading-[15px] font-normal text-zinc-400 truncate w-full mt-0.5 hover:text-white transition-colors flex items-center gap-1"
           style={{
-            fontSize: 'var(--card-meta-size, 12px)',
-            lineHeight: 'var(--card-meta-line-height, 17px)',
+            fontSize: 'var(--card-meta-size, 10px)',
+            lineHeight: 'var(--card-meta-line-height, 15px)',
           }}
         >
           <span className="truncate">{nft.creator || nft.artist}</span>
           <VerifiedArtistBadge artistName={nft.creator || nft.artist} isVerified={isVerified} size="xs" />
         </p>
         <div 
-          className="flex items-center gap-1 mt-1 text-[12px] leading-[17px] font-medium text-white/80 font-mono"
+          className="flex items-center gap-1 mt-1 text-[10px] leading-[15px] font-medium text-white/80 font-mono"
           style={{
-            fontSize: 'var(--card-meta-size, 12px)',
-            lineHeight: 'var(--card-meta-line-height, 17px)',
+            fontSize: 'var(--card-meta-size, 10px)',
+            lineHeight: 'var(--card-meta-line-height, 15px)',
           }}
         >
           <span className="text-blue-400 font-bold">{nft.price}</span>
