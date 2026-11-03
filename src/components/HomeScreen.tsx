@@ -13,9 +13,10 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "@/contexts/AudioContext";
-import { TJ_COIN_ICON, TON_LOGO, MOCK_TRACKS } from "@/constants";
+import { TJ_COIN_ICON, TON_LOGO, MOCK_TRACKS, MOCK_PLAYLISTS } from "@/constants";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
+import { TrackCard, NFTCard, PlaylistCard } from "@/components/music";
 
 import ContinueListeningCard from "./ContinueListeningCard";
 import NFTCollectionCard from "./NFTCollectionCard";
@@ -420,27 +421,51 @@ const HomeScreen: React.FC = () => {
 
       {/* SECTION 4: NEW DROPS */}
       <div className="space-y-3">
-        <h2 className="text-lg font-black text-white">New Drops</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-black text-white">New Drops</h2>
+          <button
+            onClick={() => navigate("/search")}
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#00B4D8] border-none bg-transparent cursor-pointer"
+            aria-label="View all new drops"
+          >
+            All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
+          </button>
+        </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
           {mockNewDrops.map(track => (
-            <div
-              key={track.id}
-              className="w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/50 p-3.5 flex flex-col justify-between space-y-3"
-            >
-              <div className="relative aspect-square rounded-xl overflow-hidden bg-[#050A24]">
-                <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black text-white truncate">{track.title}</h4>
-                <p className="text-[10px] text-[#9AA0AE] truncate">{track.artist}</p>
-              </div>
-              <Button
-                size="sm"
-                onClick={() => playTrack(track)}
-                className="w-full min-h-[44px] text-[9px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 text-[#9AA0AE] hover:text-white border-none flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
-              >
-                Play
-              </Button>
+            <div key={track.id} className="w-[170px] sm:w-[190px] shrink-0 snap-start">
+              <TrackCard
+                track={track}
+                variant="expanded"
+                showVerifiedBadge={true}
+                showDuration={true}
+                showGenre={true}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FEATURED PLAYLISTS */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-black text-white">Featured Playlists</h2>
+          <button
+            onClick={() => navigate("/library")}
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#00B4D8] border-none bg-transparent cursor-pointer"
+            aria-label="View all playlists"
+          >
+            All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
+          </button>
+        </div>
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+          {MOCK_PLAYLISTS.map((playlist, idx) => (
+            <div key={playlist.id} className="w-[180px] sm:w-[200px] shrink-0 snap-start">
+              <PlaylistCard
+                playlist={playlist}
+                artworkStyle={idx % 2 === 0 ? "single" : "collage"}
+                showStatusIndicator={true}
+              />
             </div>
           ))}
         </div>
@@ -554,41 +579,34 @@ const HomeScreen: React.FC = () => {
           ) : (
             <>
               {recommendedTrackList.map(track => (
-                <div
-                  key={track.id}
-                  className="w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/50 p-3 flex flex-col justify-between space-y-2.5 hover:bg-[#101A3B]/60 transition-colors"
-                >
-                  <div className="relative aspect-square rounded-xl overflow-hidden group">
-                    <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
-                    <span className="absolute top-1.5 left-1.5 text-[8px] font-black bg-[#5B6BFF] px-2 py-0.5 rounded-sm">Track</span>
-                  </div>
-                  <h4 className="text-xs font-black text-white truncate">{track.title}</h4>
-                  <Button
-                    size="sm"
-                    onClick={() => playTrack(track)}
-                    className="w-full min-h-[44px] text-[9px] font-black bg-white/5 hover:bg-white/10 border-none text-[#9AA0AE] hover:text-white flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
-                  >
-                    Listen
-                  </Button>
+                <div key={track.id} className="w-[170px] sm:w-[190px] shrink-0 snap-start">
+                  <TrackCard
+                    track={track}
+                    variant="expanded"
+                    showVerifiedBadge={true}
+                    showDuration={true}
+                    showGenre={true}
+                  />
                 </div>
               ))}
               {recommendedNFTs.map(nft => (
-                <div
-                  key={nft.id}
-                  className="w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/50 p-3 flex flex-col justify-between space-y-2.5 hover:bg-[#101A3B]/60 transition-colors"
-                >
-                  <div className="relative aspect-square rounded-xl overflow-hidden">
-                    <img src={nft.cover} className="w-full h-full object-cover" alt="" />
-                    <span className="absolute top-1.5 left-1.5 text-[8px] font-black bg-[#00B4D8] text-[#050A24] px-2 py-0.5 rounded-sm">NFT</span>
-                  </div>
-                  <h4 className="text-xs font-black text-white truncate">{nft.title}</h4>
-                  <Button
-                    size="sm"
-                    onClick={() => confetti({ particleCount: 15 })}
-                    className="w-full min-h-[44px] text-[9px] font-black bg-white/5 hover:bg-white/10 border-none text-[#00B4D8] hover:text-white flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
-                  >
-                    Bid
-                  </Button>
+                <div key={nft.id} className="w-[170px] sm:w-[190px] shrink-0 snap-start">
+                  <NFTCard
+                    nft={{
+                      id: nft.id,
+                      trackId: nft.id,
+                      title: nft.title,
+                      artist: nft.owner,
+                      creator: nft.owner,
+                      owner: nft.owner,
+                      price: nft.price.replace(" TON", "").trim(),
+                      imageUrl: nft.cover,
+                      rarity: "Rare",
+                      edition: "1 of 25",
+                      artistVerified: true,
+                    }}
+                    variant="sale"
+                  />
                 </div>
               ))}
             </>
@@ -598,18 +616,38 @@ const HomeScreen: React.FC = () => {
 
       {/* SECTION 10: TOP MARKETPLACE PICKS */}
       <div className="space-y-3">
-        <h2 className="text-lg font-black text-white">Top Marketplace Picks</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-black text-white">Top Marketplace Picks</h2>
+          <button
+            onClick={() => navigate("/marketplace")}
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#00B4D8] border-none bg-transparent cursor-pointer"
+            aria-label="View all marketplace picks"
+          >
+            All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
+          </button>
+        </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          {marketplacePicks.map(pick => (
-            <MarketplaceCard
-              key={pick.id}
-              title={pick.title}
-              artist={pick.artist}
-              price={pick.price}
-              badge={pick.badge}
-              image={pick.image}
-              onBid={() => confetti({ particleCount: 15 })}
-            />
+          {marketplacePicks.map((pick, idx) => (
+            <div key={pick.id} className="w-[175px] sm:w-[195px] shrink-0 snap-start">
+              <NFTCard
+                nft={{
+                  id: pick.id,
+                  trackId: pick.id,
+                  title: pick.title,
+                  artist: pick.artist,
+                  creator: pick.artist,
+                  owner: pick.artist,
+                  price: pick.price.replace(" TON", "").trim(),
+                  imageUrl: pick.image,
+                  rarity: pick.badge === "Trending" ? "Legendary" : "Epic",
+                  edition: "1 of 50",
+                  artistVerified: true,
+                  isAuction: idx % 2 === 1,
+                  startingBid: idx % 2 === 1 ? pick.price.replace(" TON", "").trim() : undefined,
+                }}
+                variant={idx % 2 === 1 ? "auction" : "sale"}
+              />
+            </div>
           ))}
         </div>
       </div>

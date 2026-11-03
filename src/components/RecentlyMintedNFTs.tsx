@@ -17,6 +17,7 @@ import { NFTItem, Track } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
+import { NFTCard } from '@/components/music';
 
 interface RecentlyMintedNFTsProps {
   title?: string;
@@ -200,11 +201,9 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
         style={{ overscrollBehaviorX: 'contain' }}
       >
         {recentNFTs.map((nft, idx) => {
-          const isThisTrackPlaying = currentTrack?.id === nft.trackId && isPlaying;
           const displayPrice = nft.price.toLowerCase().includes('ton') 
-            ? nft.price 
-            : `${nft.price} TON`;
-          const creator = getCreatorDetails(nft);
+            ? nft.price.replace(/ton/i, '').trim() 
+            : nft.price;
 
           return (
             <motion.div
@@ -212,82 +211,15 @@ const RecentlyMintedNFTs: React.FC<RecentlyMintedNFTsProps> = ({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.28, delay: Math.min(idx * 0.04, 0.24), ease: 'easeOut' }}
-              onClick={() => navigate(`/nft/${nft.id}`)}
-              className="min-w-[165px] max-w-[165px] sm:min-w-[180px] sm:max-w-[180px] snap-start shrink-0 bg-[#0A113A]/60 hover:bg-[#0E1644] p-3 rounded-2xl cursor-pointer group flex flex-col justify-between space-y-2.5 transition-colors select-none"
+              className="w-[175px] sm:w-[195px] shrink-0 snap-start"
             >
-              {/* ARTWORK & PLAY OVERLAY */}
-              <div className="relative aspect-square rounded-xl overflow-hidden bg-black/40 shadow-lg">
-                <LazyArtworkImage
-                  src={nft.imageUrl || nft.coverUrl}
-                  fallbackSrc={getPlaceholderImage(`nft-${nft.id}`)}
-                  alt={nft.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-
-                {/* Live Tag / Rarity Tag */}
-                <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/65 backdrop-blur-xs px-2 py-0.5 rounded-full text-[9px] font-bold text-white">
-                  <Flame className="w-2.5 h-2.5 text-[#FF3A5C]" />
-                  <span>{nft.rarity || 'New'}</span>
-                </div>
-
-                {/* Edition Tag */}
-                {nft.edition && (
-                  <div className="absolute top-2 right-2 bg-black/65 backdrop-blur-xs px-1.5 py-0.5 rounded-sm text-[8px] font-black text-slate-300">
-                    {nft.edition}
-                  </div>
-                )}
-
-                {/* Quick Play Preview Button Overlay */}
-                <button
-                  onClick={(e) => handlePlayPreview(e, nft)}
-                  className="absolute bottom-2 right-2 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-[#5B6BFF] hover:bg-[#4a58eb] text-white flex items-center justify-center shadow-lg transition-transform active:scale-95 cursor-pointer opacity-95 group-hover:opacity-100 border-none"
-                  aria-label={isThisTrackPlaying ? "Pause audio preview" : "Play audio preview"}
-                >
-                  {isThisTrackPlaying ? (
-                    <Pause className="w-4 h-4 fill-current" />
-                  ) : (
-                    <Play className="w-4 h-4 fill-current translate-x-0.5" />
-                  )}
-                </button>
-              </div>
-
-              {/* CARD INFO & PRICE */}
-              <div className="space-y-1">
-                <h4 className="text-xs font-black text-white truncate group-hover:text-[#5B6BFF] transition-colors">
-                  {nft.title}
-                </h4>
-                <div className="flex items-center justify-between text-[11px] font-bold pt-0.5">
-                  <div className="flex items-center gap-1 text-slate-200">
-                    <img src={TON_LOGO} alt="TON" className="w-3 h-3" />
-                    <span className="text-white font-black">{displayPrice}</span>
-                  </div>
-                  <div className="text-[#5B6BFF] group-hover:translate-x-0.5 transition-transform">
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-              </div>
-
-              {/* CREATOR FOOTER AREA */}
-              <div
-                onClick={(e) => handleCreatorClick(e, creator.uid)}
-                className="flex items-center gap-2 pt-1 mt-0.5 min-h-[44px] group/creator cursor-pointer hover:opacity-90 transition-opacity"
-                title={`View ${creator.name}'s profile`}
-              >
-                <LazyArtworkImage
-                  src={creator.avatarUrl}
-                  fallbackSrc={`https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(creator.name)}`}
-                  alt={creator.name}
-                  className="w-5 h-5 rounded-full object-cover shrink-0 ring-1 ring-white/10 group-hover/creator:ring-[#5B6BFF]/60 transition-all"
-                />
-                <div className="flex items-center gap-1 min-w-0 flex-1">
-                  <span className="text-[10px] font-semibold text-[#9AA0AE] group-hover/creator:text-[#5B6BFF] truncate transition-colors">
-                    {creator.name}
-                  </span>
-                  {creator.isVerified && (
-                    <CheckCircle className="w-2.5 h-2.5 text-blue-400 fill-current shrink-0" />
-                  )}
-                </div>
-              </div>
+              <NFTCard
+                nft={{
+                  ...nft,
+                  price: displayPrice,
+                }}
+                variant="sale"
+              />
             </motion.div>
           );
         })}
