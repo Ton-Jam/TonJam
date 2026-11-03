@@ -436,6 +436,58 @@ export const UnifiedDesignSystem: React.FC = () => {
               </div>
             </div>
 
+            {/* Figma Extended Variables (20 New Tokens) */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[#91A8C5]">
+                  Dark Theme Enhancement — 20 Figma Color Tokens (Value Mode)
+                </h3>
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#102943] text-[#38BDF8]">
+                  20 New Variables
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+                {[
+                  { name: 'surface/hover', hex: '#132B49', purpose: 'Hovered cards and surfaces' },
+                  { name: 'surface/pressed', hex: '#193657', purpose: 'Pressed interactive surfaces' },
+                  { name: 'surface/overlay', hex: '#07182BCC', purpose: 'Glass overlays' },
+                  { name: 'brand/hover', hex: '#21C2E8', purpose: 'Primary button hover' },
+                  { name: 'brand/disabled', hex: '#24536B', purpose: 'Disabled brand controls' },
+                  { name: 'text/disabled', hex: '#64748B', purpose: 'Disabled text' },
+                  { name: 'border/focus', hex: '#00B4D8', purpose: 'Focus indicators' },
+                  { name: 'border/interactive', hex: '#245078', purpose: 'Interactive input borders' },
+                  { name: 'state/info', hex: '#38BDF8', purpose: 'Informational status' },
+                  { name: 'state/success-bg', hex: '#103B32', purpose: 'Success backgrounds' },
+                  { name: 'state/warning-bg', hex: '#493516', purpose: 'Warning backgrounds' },
+                  { name: 'state/danger-bg', hex: '#451F2A', purpose: 'Error backgrounds' },
+                  { name: 'player/background', hex: '#061426', purpose: 'Audio player background' },
+                  { name: 'player/progress-track', hex: '#29415C', purpose: 'Audio progress track' },
+                  { name: 'navigation/background', hex: '#07172A', purpose: 'Bottom navigation' },
+                  { name: 'navigation/active', hex: '#00B4D8', purpose: 'Active navigation item' },
+                  { name: 'input/background', hex: '#0B1F36', purpose: 'Search and form inputs' },
+                  { name: 'input/placeholder', hex: '#8193A8', purpose: 'Placeholder text' },
+                  { name: 'chip/background', hex: '#102943', purpose: 'Inactive filter pills' },
+                  { name: 'chip/active-background', hex: '#063C55', purpose: 'Active filter pills' },
+                ].map((token) => (
+                  <div key={token.name} className="p-3 rounded-2xl bg-[#0B1424] flex flex-col gap-2">
+                    <div
+                      className="w-full h-10 rounded-xl shadow-inner border border-white/5"
+                      style={{ backgroundColor: token.hex.length === 9 ? token.hex.slice(0, 7) : token.hex }}
+                    />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold text-white font-mono truncate" title={token.name}>
+                        {token.name}
+                      </span>
+                      <span className="text-[10px] text-[#38BDF8] font-mono">{token.hex}</span>
+                      <span className="text-[9.5px] text-[#8193A8] line-clamp-1 mt-0.5" title={token.purpose}>
+                        {token.purpose}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Component Showcase 1: Headers & Profile Cards */}
             <div className="space-y-4">
               <h3 className="text-sm font-bold uppercase tracking-wider text-[#91A8C5]">

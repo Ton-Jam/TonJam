@@ -252,18 +252,18 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       >
         <div 
           onClick={() => setIsDroppedDown(false)}
-          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.8)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden bg-[#0F1C32]"
+          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.8)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden bg-[var(--tj-color-player-background,#061426)]"
           style={{
-            backgroundColor: "#0F1C32",
+            backgroundColor: "var(--tj-color-player-background, #061426)",
             opacity: 1,
           }}
           title="Click to expand Mini Player"
         >
-          {/* Elevated Navy Surface */}
-          <div className="absolute inset-0 pointer-events-none bg-[#0F1C32] z-0 select-none" />
+          {/* Elevated Player Surface */}
+          <div className="absolute inset-0 pointer-events-none bg-[var(--tj-color-player-background,#061426)] z-0 select-none" />
 
           {/* Sleek top progress indicator on collapsed pill */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#22374D] z-10">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[var(--tj-color-player-progress-track,#29415C)] z-10">
             <div 
               className="h-full bg-[#00B4D8]" 
               style={{ width: `${localProgress}%` }} 
@@ -365,18 +365,18 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       onDragEnd={handleDragEnd}
       onClick={() => setFullPlayerOpen(true)}
       whileTap={{ scale: 0.995 }}
-      className={`fixed left-0 right-0 lg:left-64 text-[#FFFFFF] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-[0_-8px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out cursor-pointer bg-[#0F1C32] ${
+      className={`fixed left-0 right-0 lg:left-64 text-[#FFFFFF] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-[0_-8px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out cursor-pointer bg-[var(--tj-color-player-background,#061426)] ${
         isMobileNavHidden ? "bottom-0" : "bottom-[60px] lg:bottom-0"
       }`}
       style={{
         touchAction: "none",
-        backgroundColor: "#0F1C32",
+        backgroundColor: "var(--tj-color-player-background, #061426)",
         opacity: 1,
       }}
       id="tonjam-mini-player"
     >
-      {/* Background Navy Surface */}
-      <div className="absolute inset-0 pointer-events-none bg-[#0F1C32] z-0 select-none" />
+      {/* Background Player Surface */}
+      <div className="absolute inset-0 pointer-events-none bg-[var(--tj-color-player-background,#061426)] z-0 select-none" />
 
       {/* Interactive Flush Top Progress Bar / Scrubber */}
       <div 
@@ -408,7 +408,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             if (typeof seek === 'function') seek(next);
           }
         }}
-        className="relative w-full h-[3px] bg-[#1E2D42] group/seek cursor-pointer select-none z-30 touch-none outline-none border-none" 
+        className="relative w-full h-[3px] bg-[var(--tj-color-player-progress-track,#29415C)] group/seek cursor-pointer select-none z-30 touch-none outline-none border-none" 
         id="mini-progress-track"
         title="Click or drag to scrub playback position"
       >

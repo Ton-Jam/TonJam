@@ -7,17 +7,17 @@ import { colors, radius, typography, spacing } from "@/design"
 
 // Consume design system tokens explicitly for custom style attributes if needed
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tj-color-border-focus,#00B4D8)] disabled:pointer-events-none disabled:bg-[var(--tj-color-brand-disabled,#24536B)] disabled:text-[var(--tj-color-text-disabled,#64748B)] active:scale-[0.98]",
   {
     variants: {
       variant: {
-        primary: "hover:opacity-90",
-        secondary: "border border-white/12 hover:border-[#ffffff] hover:opacity-95",
-        ghost: "border border-transparent hover:border-[#ffffff] hover:bg-white/[0.04]",
-        outline: "border border-white/12 hover:border-[#ffffff] hover:bg-white/[0.02]",
+        primary: "bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] active:bg-[var(--tj-color-brand-pressed,#009CC0)] text-black",
+        secondary: "bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] active:bg-[var(--tj-color-surface-pressed,#193657)] text-white",
+        ghost: "bg-transparent hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white",
+        outline: "bg-transparent hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white",
         destructive: "hover:opacity-90",
         success: "hover:opacity-90",
-        default: "hover:opacity-90",
+        default: "bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] active:bg-[var(--tj-color-brand-pressed,#009CC0)] text-black",
         link: "underline-offset-4 hover:underline",
       },
       size: {
@@ -54,7 +54,7 @@ function Button({
       case "primary":
       case "default":
         return {
-          backgroundColor: colors.dark.primary,
+          backgroundColor: 'var(--tj-color-brand-primary, #00B4D8)',
           color: colors.dark.background,
         };
       case "secondary":

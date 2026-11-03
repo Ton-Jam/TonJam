@@ -124,5 +124,65 @@
   --tj-font-weight-medium: 500;
   --tj-font-weight-semibold: 600;
   --tj-font-weight-bold: 700;
+
+  /* =========================================================
+     DARK THEME ENHANCEMENTS — 20 NEW FIGMA COLOR VARIABLES
+     Extending TonJam Colors collection in "Value" mode
+     ========================================================= */
+  /* Surfaces */
+  --tj-color-surface-hover: #132B49;
+  --tj-color-surface-pressed: #193657;
+  --tj-color-surface-overlay: #07182BCC;
+
+  /* Brand States */
+  --tj-color-brand-hover: #21C2E8;
+  --tj-color-brand-disabled: #24536B;
+
+  /* Text States */
+  --tj-color-text-disabled: #64748B;
+
+  /* Borders & Focus */
+  --tj-color-border-focus: #00B4D8;
+  --tj-color-border-interactive: #245078;
+
+  /* Semantic Status & Backgrounds */
+  --tj-color-state-info: #38BDF8;
+  --tj-color-state-success-bg: #103B32;
+  --tj-color-state-warning-bg: #493516;
+  --tj-color-state-danger-bg: #451F2A;
+
+  /* Dedicated Audio Player */
+  --tj-color-player-background: #061426;
+  --tj-color-player-progress-track: #29415C;
+
+  /* Bottom Navigation */
+  --tj-color-navigation-background: #07172A;
+  --tj-color-navigation-active: #00B4D8;
+
+  /* Inputs & Form Controls */
+  --tj-color-input-background: #0B1F36;
+  --tj-color-input-placeholder: #8193A8;
+
+  /* Filter Pills & Chips */
+  --tj-color-chip-background: #102943;
+  --tj-color-chip-active-background: #063C55;
+
+  /* Aliases */
+  --tj-surface-pressed: var(--tj-color-surface-pressed);
+  --tj-surface-overlay: var(--tj-color-surface-overlay);
+  --tj-brand-disabled: var(--tj-color-brand-disabled);
+  --tj-text-disabled: var(--tj-color-text-disabled);
+  --tj-border-interactive: var(--tj-color-border-interactive);
+  --tj-state-success-bg: var(--tj-color-state-success-bg);
+  --tj-state-warning-bg: var(--tj-color-state-warning-bg);
+  --tj-state-danger-bg: var(--tj-color-state-danger-bg);
+  --tj-player-bg: var(--tj-color-player-background);
+  --tj-player-progress-track: var(--tj-color-player-progress-track);
+  --tj-nav-bg: var(--tj-color-navigation-background);
+  --tj-nav-active: var(--tj-color-navigation-active);
+  --tj-input-bg: var(--tj-color-input-background);
+  --tj-input-placeholder: var(--tj-color-input-placeholder);
+  --tj-chip-bg: var(--tj-color-chip-background);
+  --tj-chip-active-bg: var(--tj-color-chip-active-background);
 }
 

@@ -70,8 +70,8 @@ export const NotificationFilterPills: React.FC<NotificationFilterPillsProps> = (
               transition-all duration-200 cursor-pointer shrink-0 whitespace-nowrap outline-none
               ${
                 isActive
-                  ? 'bg-[#229ED9] text-white shadow-sm shadow-[#229ED9]/25 font-bold'
-                  : 'bg-[#111C30] text-[#94A3B8] hover:text-[#F5F7FB] hover:bg-[#16243E] border border-white/[0.06]'
+                  ? 'bg-[var(--tj-color-chip-active-background,#063C55)] text-white shadow-sm shadow-[#063C55]/25 font-bold'
+                  : 'bg-[var(--tj-color-chip-background,#102943)] text-[#94A3B8] hover:text-[#F5F7FB] hover:bg-[var(--tj-color-surface-hover,#132B49)]'
               }
             `}
           >

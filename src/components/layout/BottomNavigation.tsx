@@ -127,7 +127,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   return (
     <nav 
       id="tonjam-bottom-navigation"
-      className={`fixed bottom-0 left-0 right-0 z-50 bg-[#0A1628]/95 backdrop-blur-[18px] border-none shadow-[0_-8px_24px_rgba(0,0,0,0.45)] pb-[calc(env(safe-area-inset-bottom,0px)+8px)] select-none transition-all duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 z-50 bg-[var(--tj-color-navigation-background,#07172A)]/95 backdrop-blur-[18px] border-none shadow-[0_-8px_24px_rgba(0,0,0,0.45)] pb-[calc(env(safe-area-inset-bottom,0px)+8px)] select-none transition-all duration-300 ${
         isHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
       }`}
       aria-label="Bottom Navigation"
@@ -156,7 +156,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                     animate={{ scale: 4, opacity: 0 }}
                     transition={{ duration: 0.45, ease: 'easeOut' }}
                     onAnimationComplete={() => clearRipple(tab.id, ripple.id)}
-                    className="absolute bg-[#00B4D8]/25 rounded-full pointer-events-none"
+                    className="absolute bg-[var(--tj-color-navigation-active,#00B4D8)]/25 rounded-full pointer-events-none"
                     style={{
                       top: ripple.y - 20,
                       left: ripple.x - 20,
@@ -176,7 +176,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                   }}
                   transition={{ duration: 0.18, ease: 'easeOut' }}
                   className={`flex items-center justify-center w-full h-full ${
-                    isActive ? 'text-[#00B4D8]' : 'text-[#8C8C8C] group-hover:text-[#C2C7CD]'
+                    isActive ? 'text-[var(--tj-color-navigation-active,#00B4D8)]' : 'text-[#8C8C8C] group-hover:text-[#C2C7CD]'
                   } transition-colors`}
                 >
                   <Icon 
@@ -200,7 +200,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               {/* Text label */}
               <span
                 className={`text-[10px] font-medium tracking-tight mt-1 transition-colors pointer-events-none truncate max-w-full px-0.5 ${
-                  isActive ? 'text-[#00B4D8] font-bold' : 'text-[#8C8C8C] group-hover:text-[#C2C7CD]'
+                  isActive ? 'text-[var(--tj-color-navigation-active,#00B4D8)] font-bold' : 'text-[#8C8C8C] group-hover:text-[#C2C7CD]'
                 }`}
               >
                 {tab.label}

@@ -19,6 +19,27 @@ export const colors = {
     success: '#35C98A',
     warning: '#F4BD50',
     error: '#F16D78',
+    // 20 New Dark Theme Enhancement Tokens
+    surfaceHover: '#132B49',
+    surfacePressed: '#193657',
+    surfaceOverlay: '#07182BCC',
+    brandHover: '#21C2E8',
+    brandDisabled: '#24536B',
+    textDisabled: '#64748B',
+    borderFocus: '#00B4D8',
+    borderInteractive: '#245078',
+    stateInfo: '#38BDF8',
+    stateSuccessBg: '#103B32',
+    stateWarningBg: '#493516',
+    stateDangerBg: '#451F2A',
+    playerBackground: '#061426',
+    playerProgressTrack: '#29415C',
+    navigationBackground: '#07172A',
+    navigationActive: '#00B4D8',
+    inputBackground: '#0B1F36',
+    inputPlaceholder: '#8193A8',
+    chipBackground: '#102943',
+    chipActiveBackground: '#063C55',
     // Utility colors
     transparent: 'transparent',
     white: '#FFFFFF',
@@ -46,4 +67,53 @@ export const colors = {
     success: '#10B981',
     error: '#EF4444',
   }
+};
+
+export interface FigmaColorVariable {
+  name: string;
+  cssVariable: string;
+  value: string;
+  purpose: string;
+  collection: 'TonJam Colors';
+}
+
+export const tonjamColorVariables: Record<string, FigmaColorVariable> = {
+  // Original 15 Variables
+  'bg/primary': { name: 'bg/primary', cssVariable: '--tj-color-bg-primary', value: '#080D1A', purpose: 'Canvas primary background', collection: 'TonJam Colors' },
+  'bg/secondary': { name: 'bg/secondary', cssVariable: '--tj-color-bg-secondary', value: '#0D1628', purpose: 'Secondary background', collection: 'TonJam Colors' },
+  'surface/default': { name: 'surface/default', cssVariable: '--tj-color-surface-default', value: '#0D1628', purpose: 'Default component surface', collection: 'TonJam Colors' },
+  'surface/elevated': { name: 'surface/elevated', cssVariable: '--tj-color-surface-elevated', value: '#111F36', purpose: 'Elevated card surface', collection: 'TonJam Colors' },
+  'brand/primary': { name: 'brand/primary', cssVariable: '--tj-color-brand-primary', value: '#00B4D8', purpose: 'Primary brand TON cyan', collection: 'TonJam Colors' },
+  'brand/pressed': { name: 'brand/pressed', cssVariable: '--tj-color-brand-pressed', value: '#009CC0', purpose: 'Pressed brand controls', collection: 'TonJam Colors' },
+  'text/primary': { name: 'text/primary', cssVariable: '--tj-color-text-primary', value: '#FFFFFF', purpose: 'High-contrast primary text', collection: 'TonJam Colors' },
+  'text/secondary': { name: 'text/secondary', cssVariable: '--tj-color-text-secondary', value: '#C2C7CD', purpose: 'Muted secondary text', collection: 'TonJam Colors' },
+  'text/muted': { name: 'text/muted', cssVariable: '--tj-color-text-muted', value: '#8C8C8C', purpose: 'Muted captions and hints', collection: 'TonJam Colors' },
+  'border/subtle': { name: 'border/subtle', cssVariable: '--tj-color-border-subtle', value: '#22374D', purpose: 'Subtle borders', collection: 'TonJam Colors' },
+  'border/strong': { name: 'border/strong', cssVariable: '--tj-color-border-strong', value: '#38516B', purpose: 'Prominent borders', collection: 'TonJam Colors' },
+  'state/success': { name: 'state/success', cssVariable: '--tj-color-state-success', value: '#35C98A', purpose: 'Success indicators', collection: 'TonJam Colors' },
+  'state/warning': { name: 'state/warning', cssVariable: '--tj-color-state-warning', value: '#F4BD50', purpose: 'Warning alerts', collection: 'TonJam Colors' },
+  'state/danger': { name: 'state/danger', cssVariable: '--tj-color-state-danger', value: '#F16D78', purpose: 'Destructive / danger states', collection: 'TonJam Colors' },
+  'overlay/glass': { name: 'overlay/glass', cssVariable: '--tj-color-overlay-glass', value: '#0D1628', purpose: 'Glass backdrop overlay', collection: 'TonJam Colors' },
+
+  // 20 New Variables (Dark Theme Enhancement)
+  'surface/hover': { name: 'surface/hover', cssVariable: '--tj-color-surface-hover', value: '#132B49', purpose: 'Hovered cards and surfaces', collection: 'TonJam Colors' },
+  'surface/pressed': { name: 'surface/pressed', cssVariable: '--tj-color-surface-pressed', value: '#193657', purpose: 'Pressed interactive surfaces', collection: 'TonJam Colors' },
+  'surface/overlay': { name: 'surface/overlay', cssVariable: '--tj-color-surface-overlay', value: '#07182BCC', purpose: 'Glass overlays', collection: 'TonJam Colors' },
+  'brand/hover': { name: 'brand/hover', cssVariable: '--tj-color-brand-hover', value: '#21C2E8', purpose: 'Primary button hover', collection: 'TonJam Colors' },
+  'brand/disabled': { name: 'brand/disabled', cssVariable: '--tj-color-brand-disabled', value: '#24536B', purpose: 'Disabled brand controls', collection: 'TonJam Colors' },
+  'text/disabled': { name: 'text/disabled', cssVariable: '--tj-color-text-disabled', value: '#64748B', purpose: 'Disabled text', collection: 'TonJam Colors' },
+  'border/focus': { name: 'border/focus', cssVariable: '--tj-color-border-focus', value: '#00B4D8', purpose: 'Focus indicators', collection: 'TonJam Colors' },
+  'border/interactive': { name: 'border/interactive', cssVariable: '--tj-color-border-interactive', value: '#245078', purpose: 'Interactive input borders', collection: 'TonJam Colors' },
+  'state/info': { name: 'state/info', cssVariable: '--tj-color-state-info', value: '#38BDF8', purpose: 'Informational status', collection: 'TonJam Colors' },
+  'state/success-bg': { name: 'state/success-bg', cssVariable: '--tj-color-state-success-bg', value: '#103B32', purpose: 'Success backgrounds', collection: 'TonJam Colors' },
+  'state/warning-bg': { name: 'state/warning-bg', cssVariable: '--tj-color-state-warning-bg', value: '#493516', purpose: 'Warning backgrounds', collection: 'TonJam Colors' },
+  'state/danger-bg': { name: 'state/danger-bg', cssVariable: '--tj-color-state-danger-bg', value: '#451F2A', purpose: 'Error backgrounds', collection: 'TonJam Colors' },
+  'player/background': { name: 'player/background', cssVariable: '--tj-color-player-background', value: '#061426', purpose: 'Audio player background', collection: 'TonJam Colors' },
+  'player/progress-track': { name: 'player/progress-track', cssVariable: '--tj-color-player-progress-track', value: '#29415C', purpose: 'Audio progress track', collection: 'TonJam Colors' },
+  'navigation/background': { name: 'navigation/background', cssVariable: '--tj-color-navigation-background', value: '#07172A', purpose: 'Bottom navigation', collection: 'TonJam Colors' },
+  'navigation/active': { name: 'navigation/active', cssVariable: '--tj-color-navigation-active', value: '#00B4D8', purpose: 'Active navigation item', collection: 'TonJam Colors' },
+  'input/background': { name: 'input/background', cssVariable: '--tj-color-input-background', value: '#0B1F36', purpose: 'Search and form inputs', collection: 'TonJam Colors' },
+  'input/placeholder': { name: 'input/placeholder', cssVariable: '--tj-color-input-placeholder', value: '#8193A8', purpose: 'Placeholder text', collection: 'TonJam Colors' },
+  'chip/background': { name: 'chip/background', cssVariable: '--tj-color-chip-background', value: '#102943', purpose: 'Inactive filter pills', collection: 'TonJam Colors' },
+  'chip/active-background': { name: 'chip/active-background', cssVariable: '--tj-color-chip-active-background', value: '#063C55', purpose: 'Active filter pills', collection: 'TonJam Colors' },
 };

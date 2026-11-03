@@ -57,20 +57,49 @@
   --tj-color-state-danger: #F16D78;
   --tj-color-overlay-glass: #0D1628;
 
+  /* =========================================================
+     DARK THEME ENHANCEMENTS — 20 NEW FIGMA COLOR VARIABLES
+     Extending TonJam Colors collection in "Value" mode
+     ========================================================= */
+  --tj-color-surface-hover: #132B49;
+  --tj-color-surface-pressed: #193657;
+  --tj-color-surface-overlay: #07182BCC;
+  --tj-color-brand-hover: #21C2E8;
+  --tj-color-brand-disabled: #24536B;
+  --tj-color-text-disabled: #64748B;
+  --tj-color-border-focus: #00B4D8;
+  --tj-color-border-interactive: #245078;
+  --tj-color-state-info: #38BDF8;
+  --tj-color-state-success-bg: #103B32;
+  --tj-color-state-warning-bg: #493516;
+  --tj-color-state-danger-bg: #451F2A;
+  --tj-color-player-background: #061426;
+  --tj-color-player-progress-track: #29415C;
+  --tj-color-navigation-background: #07172A;
+  --tj-color-navigation-active: #00B4D8;
+  --tj-color-input-background: #0B1F36;
+  --tj-color-input-placeholder: #8193A8;
+  --tj-color-chip-background: #102943;
+  --tj-color-chip-active-background: #063C55;
+
   /* Aliased TonJam colors aligned with Figma */
   --tj-bg: var(--tj-color-bg-primary);
   --tj-bg-surface: var(--tj-color-surface-default);
   --tj-bg-elevated: var(--tj-color-surface-elevated);
   --tj-surface: var(--tj-color-surface-elevated);
-  --tj-surface-hover: #17243A;
-  --tj-surface-active: #1B2C45;
+  --tj-surface-hover: var(--tj-color-surface-hover, #132B49);
+  --tj-surface-pressed: var(--tj-color-surface-pressed, #193657);
+  --tj-surface-active: var(--tj-color-surface-pressed, #193657);
+  --tj-surface-overlay: var(--tj-color-surface-overlay, #07182BCC);
   --tj-bg-deep: #080D1A;
   --tj-bg-card: rgba(10, 22, 40, 0.85);
   --tj-bg-glass: var(--tj-color-overlay-glass);
   --tj-bg-hover: rgba(255, 255, 255, 0.05);
 
   --tj-brand: #229ED9;
-  --tj-brand-hover: #168AC4;
+  --tj-brand-hover: var(--tj-color-brand-hover, #21C2E8);
+  --tj-brand-pressed: var(--tj-color-brand-pressed, #009CC0);
+  --tj-brand-disabled: var(--tj-color-brand-disabled, #24536B);
   --tj-brand-soft: rgba(34, 158, 217, 0.14);
   --tj-brand-glow: rgba(34, 158, 217, 0.22);
   --tj-accent: var(--tj-brand);
@@ -84,6 +113,7 @@
   --tj-text-primary: #F8FAFC;
   --tj-text-secondary: #A8B7CC;
   --tj-text-muted: #7F91AA;
+  --tj-text-disabled: var(--tj-color-text-disabled, #64748B);
   --tj-text-inverse: #07111F;
   --tj-text-subtle: rgba(255, 255, 255, 0.40);
 
@@ -97,24 +127,41 @@
   --tj-pink: #F472B6;
   --tj-pink-soft: rgba(244, 114, 182, 0.14);
 
+  /* Semantic State */
+  --tj-state-info: var(--tj-color-state-info, #38BDF8);
+  --tj-state-success-bg: var(--tj-color-state-success-bg, #103B32);
+  --tj-state-warning-bg: var(--tj-color-state-warning-bg, #493516);
+  --tj-state-danger-bg: var(--tj-color-state-danger-bg, #451F2A);
+
+  /* Dedicated Audio Player */
+  --tj-player-background: var(--tj-color-player-background, #061426);
+  --tj-player-progress-track: var(--tj-color-player-progress-track, #29415C);
+
+  /* Bottom Navigation */
+  --tj-navigation-background: var(--tj-color-navigation-background, #07172A);
+  --tj-navigation-active: var(--tj-color-navigation-active, #00B4D8);
+
   /* Visible but subtle borders */
   --tj-border: var(--tj-color-border-subtle);
   --tj-border-subtle: var(--tj-color-border-subtle);
-  --tj-border-visible: var(--tj-color-border-strong);
   --tj-border-strong: var(--tj-color-border-strong);
-  --tj-border-focus: var(--tj-accent);
+  --tj-border-focus: var(--tj-color-border-focus, #00B4D8);
+  --tj-border-interactive: var(--tj-color-border-interactive, #245078);
+  --tj-border-visible: var(--tj-color-border-strong);
 
   /* Input and filter tokens */
-  --input-background: transparent;
-  --input-border: var(--tj-border-subtle);
+  --input-background: var(--tj-color-input-background, #0B1F36);
+  --input-placeholder: var(--tj-color-input-placeholder, #8193A8);
+  --input-border: var(--tj-color-border-interactive, #245078);
   --input-radius: 12px;
-  --input-focus-border: var(--tj-accent);
+  --input-focus-border: var(--tj-color-border-focus, #00B4D8);
 
-  --filter-background: transparent;
-  --filter-border: var(--tj-border-subtle);
+  --filter-background: var(--tj-color-chip-background, #102943);
+  --filter-active-background: var(--tj-color-chip-active-background, #063C55);
+  --filter-border: transparent;
   --filter-radius: 999px;
   --filter-text: var(--tj-text-secondary);
-  --filter-active-border: var(--tj-accent);
+  --filter-active-border: transparent;
 
   /* Consistent component radii */
   --button-radius: 12px;
@@ -260,6 +307,28 @@
   --color-tj-state-warning: var(--tj-color-state-warning);
   --color-tj-state-danger: var(--tj-color-state-danger);
   --color-tj-overlay-glass: var(--tj-color-overlay-glass);
+
+  /* Dark Theme Enhancements — 20 New Figma Color Utilities */
+  --color-tj-surface-hover: var(--tj-color-surface-hover);
+  --color-tj-surface-pressed: var(--tj-color-surface-pressed);
+  --color-tj-surface-overlay: var(--tj-color-surface-overlay);
+  --color-tj-brand-hover: var(--tj-color-brand-hover);
+  --color-tj-brand-disabled: var(--tj-color-brand-disabled);
+  --color-tj-text-disabled: var(--tj-color-text-disabled);
+  --color-tj-border-focus: var(--tj-color-border-focus);
+  --color-tj-border-interactive: var(--tj-color-border-interactive);
+  --color-tj-state-info: var(--tj-color-state-info);
+  --color-tj-state-success-bg: var(--tj-color-state-success-bg);
+  --color-tj-state-warning-bg: var(--tj-color-state-warning-bg);
+  --color-tj-state-danger-bg: var(--tj-color-state-danger-bg);
+  --color-tj-player-background: var(--tj-color-player-background);
+  --color-tj-player-progress-track: var(--tj-color-player-progress-track);
+  --color-tj-navigation-background: var(--tj-color-navigation-background);
+  --color-tj-navigation-active: var(--tj-color-navigation-active);
+  --color-tj-input-background: var(--tj-color-input-background);
+  --color-tj-input-placeholder: var(--tj-color-input-placeholder);
+  --color-tj-chip-background: var(--tj-color-chip-background);
+  --color-tj-chip-active-background: var(--tj-color-chip-active-background);
 
   /* Spacing Scale */
   --spacing-tj-4: var(--tj-spacing-4);
