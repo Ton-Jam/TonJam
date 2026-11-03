@@ -44,14 +44,13 @@
   --tj-color-text-muted: var(--tj-text-muted);
 
   /* =========================================================
-     BORDER DISCIPLINE (NO BORDER LINES)
-     Zero-border aesthetic: transparent borders with subtle shadow depth
+     BORDER DISCIPLINE (SUBTLE SILVER 2PX BORDER)
      ========================================================= */
-  --tj-border: transparent;
-  --tj-border-subtle: transparent;
-  --tj-border-strong: transparent;
-  --tj-color-border-subtle: transparent;
-  --tj-color-border-strong: transparent;
+  --tj-border: 2px solid rgba(192, 192, 192, 0.22);
+  --tj-border-subtle: 2px solid rgba(192, 192, 192, 0.15);
+  --tj-border-strong: 2px solid rgba(192, 192, 192, 0.35);
+  --tj-color-border-subtle: rgba(192, 192, 192, 0.22);
+  --tj-color-border-strong: rgba(192, 192, 192, 0.35);
 
   /* =========================================================
      ACCENTS & EXPRESSIVE IDENTITY

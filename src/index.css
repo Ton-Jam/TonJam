@@ -50,8 +50,8 @@
   --tj-color-text-primary: #FFFFFF;
   --tj-color-text-secondary: #C2C7CD;
   --tj-color-text-muted: #8C8C8C;
-  --tj-color-border-subtle: #22374D;
-  --tj-color-border-strong: #38516B;
+  --tj-color-border-subtle: 2px solid rgba(192, 192, 192, 0.22);
+  --tj-color-border-strong: 2px solid rgba(192, 192, 192, 0.35);
   --tj-color-state-success: #35C98A;
   --tj-color-state-warning: #F4BD50;
   --tj-color-state-danger: #F16D78;

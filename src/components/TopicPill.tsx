@@ -16,10 +16,10 @@ const TopicPill: React.FC<TopicPillProps> = ({ label, onClick, isActive = false 
       aria-pressed={isActive}
       className="shrink-0 outline-none p-0 cursor-pointer border-none bg-transparent min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
     >
-      <div className={`px-3.5 py-2 rounded-full text-xs font-black tracking-widest uppercase transition-all border ${
+      <div className={`px-4 py-2 rounded-[var(--tj-radius-pill)] text-xs font-bold transition-all ${
         isActive
-          ? "bg-[#0088CC] text-white shadow-[0_0_15px_rgba(0,136,204,0.4)] border-[#c0c0c0]/40"
-          : "bg-[#0A113A]/60 hover:bg-[#0088CC]/20 text-[#9AA0AE] hover:text-white border-[#c0c0c0]/25"
+          ? "bg-[var(--tj-color-brand-primary)] text-white shadow-[0_4px_16px_rgba(34,158,217,0.35)]"
+          : "bg-[var(--tj-color-chip-background)] hover:bg-[var(--tj-color-surface-hover)] text-[var(--tj-color-text-secondary)] hover:text-white"
       }`}>
         {label}
       </div>
