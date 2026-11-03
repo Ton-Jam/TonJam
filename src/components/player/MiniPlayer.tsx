@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion, PanInfo, AnimatePresence } from "motion/react";
-import { Play, Pause, ListMusic, MoreVertical, Heart, ChevronUp, Music2 } from "lucide-react";
+import { motion, PanInfo } from "motion/react";
+import { Play, Pause, ListMusic, ChevronUp, Music2 } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
 import { useCoverColor } from "@/lib/color-utils";
@@ -127,9 +127,6 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     seek,
     setIsSeeking,
     setFullPlayerOpen,
-    setOptionsTrack,
-    likedTrackIds,
-    toggleLikeTrack,
     audioConnectionState
   } = useAudio();
 
@@ -227,11 +224,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   };
 
   const coverUrl = currentTrack?.coverUrl || getPlaceholderImage("cover");
-  const coverColor = useCoverColor(coverUrl);
+  useCoverColor(coverUrl);
 
   if (!currentTrack) return null;
-
-  const isLiked = likedTrackIds.includes(currentTrack.id);
 
   // Drag handlers: Swipe Up to expand full player, Swipe Down to drop down mini player
   const handleDragEnd = (_: any, info: PanInfo) => {
@@ -240,16 +235,6 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     } else if (info.offset.y > 40) {
       setIsDroppedDown(true);
     }
-  };
-
-  const handleOptionsClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setOptionsTrack(currentTrack);
-  };
-
-  const handleLikeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toggleLikeTrack(currentTrack.id);
   };
 
   // RENDER DROPPED-DOWN (COLLAPSED) FLOATING PILL
@@ -517,19 +502,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         </div>
 
         {/* Action Control Buttons */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-          {/* Like / Heart Button */}
-          <button
-            onClick={handleLikeClick}
-            aria-label={isLiked ? "Unlike track" : "Like track"}
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all cursor-pointer border-none bg-transparent active:scale-90 shrink-0 ${
-              isLiked ? "text-[#F16D78]" : "text-[#8C8C8C] hover:text-white hover:bg-white/10"
-            }`}
-            title={isLiked ? "Unlike" : "Like"}
-          >
-            <Heart className={`w-4 h-4 ${isLiked ? "fill-current text-[#F16D78]" : ""}`} />
-          </button>
-
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Play/Pause Button */}
           <button
             onClick={(e) => {
@@ -562,16 +535,6 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             title="Queue"
           >
             <ListMusic className="w-4 h-4" />
-          </button>
-
-          {/* Track Options Button */}
-          <button
-            onClick={handleOptionsClick}
-            aria-label="Track options"
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full text-[#8C8C8C] hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent active:scale-90 shrink-0"
-            title="More Options"
-          >
-            <MoreVertical className="w-4 h-4" />
           </button>
         </div>
       </div>

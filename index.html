@@ -102,27 +102,6 @@
           scroll-snap-align: start;
         }
     </style>
-    <script>
-      // Safe cleanup of legacy serviceWorker and stale HTTP caches to prevent chunk mismatch
-      try {
-        if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
-          navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for (var i = 0; i < registrations.length; i++) {
-              registrations[i].unregister();
-            }
-          }).catch(function() {});
-        }
-        if (typeof window !== 'undefined' && 'caches' in window && caches.keys) {
-          caches.keys().then(function(names) {
-            for (var i = 0; i < names.length; i++) {
-              if (names[i].indexOf('tonjam') !== -1) {
-                caches.delete(names[i]);
-              }
-            }
-          }).catch(function() {});
-        }
-      } catch (e) {}
-    </script>
 </head>
 <body>
     <div id="root"></div>

@@ -13,7 +13,7 @@ export const JAM_PRICE_USD = 0.052;
 export const JAM_JETTON_MASTER = "EQCxE6mNZ_9MvS_88888888888888888888888888888"; // Placeholder JAM Master Address
 
 // Official Configured TonJam Treasury Receiving Wallet Address
-export const TONJAM_TREASURY_ADDRESS = (import.meta.env.VITE_TONJAM_TREASURY_ADDRESS as string) || "EQA0jamTreasury_TonJam_Official_Ecosystem_Vault_01";
+export const TONJAM_TREASURY_ADDRESS = (import.meta.env.VITE_TONJAM_TREASURY_ADDRESS as string) || "UQD_VZD-zU7IQ4nLBDPssEzApiFbWpV6lSmkmybWxgzLFkEr";
 
 export const MOODS = [
   { id: 'chill', name: 'Chill', color: 'from-blue-400 to-indigo-500' },

@@ -775,11 +775,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                if (!isOwner && !isAuctionEnded && nft.listingType !== 'auction') {
-                  setIsQuickBuyOpen(true);
-                } else {
-                  navigate(`/nft/${nft.id}`);
-                }
+                navigate(`/nft/${nft.id}`);
               }}
               disabled={!isOwner && isAuctionEnded}
               aria-label={
@@ -787,7 +783,9 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                   ? `Owned by you: ${nft.title}`
                   : isAuctionEnded
                   ? `Sold out: ${nft.title}`
-                  : `Quick Buy ${nft.title} for ${formattedPrice} TON`
+                  : nft.listingType === 'auction'
+                  ? `Place bid on ${nft.title}`
+                  : `Buy ${nft.title} for ${formattedPrice} TON`
               }
               style={{
                 height: 'var(--card-action-height, 34px)',
@@ -799,7 +797,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                   ? "bg-white/[0.08] hover:bg-white/[0.12] text-slate-300"
                   : isAuctionEnded
                   ? "bg-white/[0.04] text-slate-500 cursor-not-allowed"
-                  : "bg-[#229ED9] hover:bg-[#168AC4] active:scale-[0.98] text-white shadow-md shadow-[#229ED9]/25"
+                  : "bg-[#0052FF] hover:bg-[#1a66ff] active:scale-[0.98] text-white shadow-md shadow-[#0052FF]/25"
               )}
             >
               {isOwner ? (
@@ -809,10 +807,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
               ) : nft.listingType === 'auction' ? (
                 "Bid"
               ) : (
-                <>
-                  <Zap className="w-3.5 h-3.5 fill-current" />
-                  <span>Quick Buy</span>
-                </>
+                "Buy"
               )}
             </button>
           }

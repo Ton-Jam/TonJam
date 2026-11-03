@@ -214,6 +214,15 @@ export const Partnerships: React.FC = () => {
       return;
     }
 
+    // Network validation
+    const connectedChain = tonConnectUI.account?.chain;
+    if (connectedChain && connectedChain !== "-239") {
+      toast.error("Wrong TON Network", {
+        description: `Connected wallet is on Testnet (Chain: ${connectedChain}). Partnership contributions require TON Mainnet (Chain: -239). Please switch your wallet to TON Mainnet.`
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setVerificationStatus('submitting');
 
@@ -242,7 +251,8 @@ export const Partnerships: React.FC = () => {
       const verifyRes = await verifyPartnershipContributionOnChain(
         ref,
         txResult.nanotons,
-        TONJAM_TREASURY_ADDRESS
+        TONJAM_TREASURY_ADDRESS,
+        userAddress
       );
 
       const generatedHash = verifyRes.txHash || `boc_${txResult.boc.substring(0, 24)}`;

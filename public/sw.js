@@ -1,8 +1,9 @@
-// TonJam Service Worker - Offline Asset Precaching & Cache Management
-// Precaches key UI assets, logo, nav icons, CSS/JS shell for robust offline capability on TON mobile network.
+// TonJam Service Worker - Offline Asset Precaching & Production Cache Management
+// Consolidated caching strategy compatible with Vite's content-hashed asset management.
 
-const CACHE_NAME = 'tonjam-cache-v4';
-const ASSETS_TO_PRECACHE = [
+const CACHE_NAME = 'tonjam-cache-v5';
+
+const CORE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
@@ -28,105 +29,144 @@ function getAssetType(urlStr) {
 function notifyClients(payload) {
   self.clients.matchAll().then((clients) => {
     clients.forEach((client) => client.postMessage(payload));
-  });
+  }).catch(() => {});
 }
 
+// Installation phase: Precache core shell assets gracefully
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log(`[TonJam SW] Precaching core application shell & UI assets into ${CACHE_NAME}:`, ASSETS_TO_PRECACHE);
-        return cache.addAll(ASSETS_TO_PRECACHE.map(url => new Request(url, { cache: 'reload' })))
-          .then(() => {
-            console.log(`[TonJam SW] Core application shell precached successfully into ${CACHE_NAME}.`);
-          })
-          .catch((err) => {
-            console.warn('[TonJam SW] Some assets failed to precache:', err);
-          });
+        return Promise.allSettled(
+          CORE_ASSETS.map((url) => cache.add(new Request(url, { cache: 'reload' })))
+        );
       })
       .then(() => self.skipWaiting())
   );
 });
 
+// Activation phase: Purge obsolete caches and claim clients immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME && key.includes('tonjam')) {
-            console.log('[TonJam SW] Purging obsolete cache:', key);
-            return caches.delete(key);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys()
+      .then((keys) => {
+        return Promise.all(
+          keys.map((key) => {
+            if (key !== CACHE_NAME) {
+              console.log('[TonJam SW] Purging obsolete cache:', key);
+              return caches.delete(key);
+            }
+          })
+        );
+      })
+      .then(() => self.clients.claim())
   );
 });
 
+// PostMessage communication interface
 self.addEventListener('message', (event) => {
-  if (event.data) {
-    if (event.data.type === 'INIT_CACHE_STRATEGY' && Array.isArray(event.data.assets)) {
-      console.log(`[TonJam SW] Initializing cache strategy with assets into ${CACHE_NAME}:`, event.data.assets);
-      caches.open(CACHE_NAME).then((cache) => {
-        cache.addAll(event.data.assets.map(url => new Request(url, { cache: 'reload' }))).then(() => {
-          console.log(`[TonJam SW] Dynamic assets successfully cached via INIT_CACHE_STRATEGY into ${CACHE_NAME}.`);
-        }).catch(() => {});
-      });
-    } else if (event.data.type === 'SET_PRECACHE_ASSETS' && Array.isArray(event.data.assets)) {
-      caches.open(CACHE_NAME).then((cache) => {
-        cache.addAll(event.data.assets.map(url => new Request(url, { cache: 'reload' }))).catch(() => {});
-      });
-    }
+  if (event.data && event.data.type === 'INIT_CACHE_STRATEGY' && Array.isArray(event.data.assets)) {
+    caches.open(CACHE_NAME).then((cache) => {
+      Promise.allSettled(
+        event.data.assets.map((assetUrl) => cache.add(new Request(assetUrl, { cache: 'reload' })))
+      ).catch(() => {});
+    });
   }
 });
 
+// Fetch phase: Strategic caching tailored for Vite hashed assets & HTML shell
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-  
-  // Skip cross-origin requests, Firebase API calls, TonConnect RPC, or WebSocket traffic
-  if (url.origin !== location.origin || url.pathname.includes('/api/') || url.pathname.includes('firestore') || url.pathname.includes('firebase')) {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip non-GET requests or non-http/https protocols
+  if (request.method !== 'GET' || !url.protocol.startsWith('http')) {
     return;
   }
 
-  // Cache-first strategy for static assets and UI shell, network fallback
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const assetType = getAssetType(event.request.url);
-      if (cachedResponse) {
-        console.log(`[TonJam SW] Cache Hit - URL: ${event.request.url} | Cache Name: ${CACHE_NAME} | Type: ${assetType}`);
-        notifyClients({ type: 'CACHE_STATUS_LOG', url: event.request.url, status: 'hit', cacheName: CACHE_NAME, assetType });
+  // Skip cross-origin APIs, Firebase, TON RPC, or Vite dev server internals
+  if (
+    url.origin !== location.origin ||
+    url.pathname.includes('/api/') ||
+    url.pathname.includes('firestore') ||
+    url.pathname.includes('firebase') ||
+    url.pathname.includes('/src/') ||
+    url.pathname.includes('@vite') ||
+    url.pathname.includes('@id') ||
+    url.pathname.endsWith('.tsx') ||
+    url.pathname.endsWith('.ts') ||
+    url.pathname.includes('.vite/deps')
+  ) {
+    return;
+  }
 
-        // Return cached asset and update in background if online
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse);
-            });
+  const assetType = getAssetType(request.url);
+
+  // 1. Navigation / Application Shell Requests (HTML): Network-First
+  // Ensures user always gets latest index.html referencing latest Vite asset hashes when online
+  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
           }
-        }).catch(() => {});
+          notifyClients({ type: 'CACHE_STATUS_LOG', url: request.url, status: 'miss', cacheName: CACHE_NAME, assetType });
+          return networkResponse;
+        })
+        .catch(() => {
+          console.warn('[TonJam SW] Network offline: serving cached application shell.');
+          notifyClients({ type: 'CACHE_STATUS_LOG', url: request.url, status: 'hit', cacheName: CACHE_NAME, assetType });
+          return caches.match(request).then((res) => res || caches.match('/index.html'));
+        })
+    );
+    return;
+  }
+
+  // 2. Vite Production Hashed Assets (/assets/*.js, /assets/*.css): Cache-First
+  // Since Vite asset filenames contain content hashes, they are immutable once built
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) {
+          notifyClients({ type: 'CACHE_STATUS_LOG', url: request.url, status: 'hit', cacheName: CACHE_NAME, assetType });
+          return cachedResponse;
+        }
+        notifyClients({ type: 'CACHE_STATUS_LOG', url: request.url, status: 'miss', cacheName: CACHE_NAME, assetType });
+        return fetch(request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          }
+          return networkResponse;
+        });
+      })
+    );
+    return;
+  }
+
+  // 3. General Static Public Assets (icons, images, audio): Stale-While-Revalidate
+  event.respondWith(
+    caches.match(request).then((cachedResponse) => {
+      const fetchPromise = fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          }
+          return networkResponse;
+        })
+        .catch(() => null);
+
+      if (cachedResponse) {
+        notifyClients({ type: 'CACHE_STATUS_LOG', url: request.url, status: 'hit', cacheName: CACHE_NAME, assetType });
         return cachedResponse;
       }
 
-      console.log(`[TonJam SW] Cache Miss - URL: ${event.request.url} | Cache Name: ${CACHE_NAME} | Type: ${assetType}`);
-      notifyClients({ type: 'CACHE_STATUS_LOG', url: event.request.url, status: 'miss', cacheName: CACHE_NAME, assetType });
-
-      return fetch(event.request).then((networkResponse) => {
-        // Cache newly fetched successful GET responses for static files
-        if (event.request.method === 'GET' && networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return networkResponse;
-      }).catch(() => {
-        // Fallback for navigation requests when offline
-        if (event.request.mode === 'navigate') {
-          console.warn('[TonJam SW] Navigation request failed offline, falling back to /index.html');
-          return caches.match('/index.html');
-        }
-        return new Response('Offline content unavailable', { status: 503, statusText: 'Service Unavailable' });
-      });
+      notifyClients({ type: 'CACHE_STATUS_LOG', url: request.url, status: 'miss', cacheName: CACHE_NAME, assetType });
+      return fetchPromise.then((netRes) => netRes || caches.match('/index.html'));
     })
   );
 });
+

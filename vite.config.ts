@@ -13,21 +13,25 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        allowedHosts: true,
+        strictPort: true,
         hmr: false,
+        watch: {
+          ignored: ['**/public/uploads/**', '**/.git/**'],
+        },
       },
       plugins: [
         react(), 
         tailwindcss(),
       ],
-      logLevel: 'silent',
+      logLevel: 'info',
       build: {
         target: 'esnext',
         minify: false,
         sourcemap: false,
         cssCodeSplit: true,
         rollupOptions: {
-          maxParallelFileOps: 1,
-          cache: false,
+          maxParallelFileOps: 16,
         }
       },
       define: {

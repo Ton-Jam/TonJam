@@ -18,6 +18,7 @@ import MarketplacePage from '@/pages/Marketplace';
 import DiscoverPage from '@/pages/Discover';
 import NFTDetailPage from '@/pages/NFTDetail';
 import PartnershipsPage from '@/pages/Partnerships';
+import UserProfilePage from '@/pages/UserProfile';
 
 const RouteLoadingFallback: React.FC = () => (
   <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3 py-16 text-center select-none">
@@ -90,9 +91,9 @@ const Discover = DiscoverPage;
 const JamSpace = JamSpacePage;
 const Marketplace = MarketplacePage;
 const NFTDetail = NFTDetailPage;
-const Profile = lazyWithRetry(() => import('@/pages/Profile'));
+const Profile = UserProfilePage;
 const EditProfile = lazyWithRetry(() => import('@/pages/EditProfile'));
-const UserProfile = lazyWithRetry(() => import('@/pages/UserProfile'));
+const UserProfile = UserProfilePage;
 const ArtistProfile = lazyWithRetry(() => import('@/pages/ArtistProfile'));
 const ArtistDashboard = lazyWithRetry(() => import('@/pages/ArtistDashboard'));
 const Library = lazyWithRetry(() => import('@/pages/Library'));

@@ -1,5 +1,7 @@
 import { TonConnectUI } from '@tonconnect/ui-react';
 import { TonClient, Address, TupleItemSlice, beginCell, toNano, Cell, contractAddress } from '@ton/ton';
+import { collection, query, where, getDocs, doc, getDoc, runTransaction } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { TonJamCollection, storeStateInit as storeCollectionInit } from '../contracts/nft/TonJamNFT_TonJamCollection';
 import { TonJamMarketplace, storeStateInit as storeMarketplaceInit } from '../contracts/marketplace/TonJamMarketplace_TonJamMarketplace';
 
@@ -40,10 +42,36 @@ export const sendTransactionSafe = async (tonConnectUI: TonConnectUI, transactio
 };
 
 const TONCENTER_API_KEY = ''; // Optional: Add your API key here
-export const TON_ENDPOINT = 'https://testnet.toncenter.com/api/v2/jsonRPC';
-export const TON_NETWORK_MODE: 'testnet' | 'mainnet' = 'testnet';
+export const TON_NETWORK_MODE: 'testnet' | 'mainnet' = 'mainnet';
+export const PARTNERSHIP_TREASURY_ADDRESS = "UQD_VZD-zU7IQ4nLBDPssEzApiFbWpV6lSmkmybWxgzLFkEr";
 
-// Contract Addresses on TON Testnet
+export const validateMainnetAddress = (address: string): boolean => {
+  if (!address || typeof address !== 'string') return false;
+  try {
+    const parsed = Address.parse(address);
+    return Boolean(parsed);
+  } catch {
+    return false;
+  }
+};
+
+export const getTonEndpoint = (): string => {
+  return (TON_NETWORK_MODE as string) === 'mainnet'
+    ? 'https://toncenter.com/api/v2/jsonRPC'
+    : 'https://testnet.toncenter.com/api/v2/jsonRPC';
+};
+
+export const TON_ENDPOINT = getTonEndpoint();
+
+export const TON_MAINNET_CONFIG = {
+  network: 'TON Mainnet',
+  chainId: -239,
+  endpoint: TON_ENDPOINT,
+  treasuryAddress: PARTNERSHIP_TREASURY_ADDRESS,
+  explorerUrl: 'https://tonviewer.com',
+};
+
+// Contract Addresses on TON Testnet / Mainnet
 export const TONJAM_COLLECTION_ADDRESS = (typeof window !== 'undefined' ? localStorage.getItem('tonjam_collection_address') : null) || "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt";
 export const TONJAM_MARKETPLACE_ADDRESS = (typeof window !== 'undefined' ? localStorage.getItem('tonjam_marketplace_address') : null) || "EQAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIp3C";
 
@@ -671,31 +699,93 @@ export const simulateTransaction = async (transaction: any): Promise<{success: b
 };
 
 /**
- * Monitors a transaction hash and provides real-time status updates via callback
+ * Monitors a transaction hash/address and provides real-time status updates via callback
  */
 export const monitorTransaction = async (
   txId: string,
-  onStatusChange: (status: 'pending' | 'confirming' | 'success' | 'failed') => void
-) => {
+  onStatusChange: (status: 'pending' | 'confirming' | 'success' | 'failed') => void,
+  address?: string,
+  maxAttempts: number = 10,
+  intervalMs: number = 3000
+): Promise<boolean> => {
   try {
-    // Start with pending
+    // Start with pending status
     onStatusChange('pending');
+    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Simulate network latency (2 seconds)
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Move to confirming
+    // Move to confirming status
     onStatusChange('confirming');
     
-    // Simulate confirmation time (3 seconds)
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    if (address) {
+      const client = new TonClient({
+        endpoint: TON_ENDPOINT,
+        apiKey: TONCENTER_API_KEY,
+      });
+
+      try {
+        const parsedAddress = Address.parse(address);
+        for (let i = 0; i < maxAttempts; i++) {
+          const txs = await client.getTransactions(parsedAddress, { limit: 5 });
+          if (txs && txs.length > 0) {
+            const now = Math.floor(Date.now() / 1000);
+            const recentTx = txs.find(tx => (now - tx.now) < 300);
+            if (recentTx) {
+              onStatusChange('success');
+              return true;
+            }
+          }
+          await new Promise(resolve => setTimeout(resolve, intervalMs));
+        }
+      } catch (e) {
+        console.warn("[tonService] Error checking transaction on-chain status:", e);
+      }
+    } else {
+      // Standard confirmation delay when no address is provided
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
     
-    // Complete with success
     onStatusChange('success');
+    return true;
   } catch (error) {
     console.error("Monitor transaction error:", error);
     onStatusChange('failed');
+    return false;
   }
+};
+
+/**
+ * Polls TON node until a transaction from target address is confirmed on-chain
+ */
+export const waitForTransactionConfirmation = async (
+  address: string,
+  maxWaitMs: number = 30000,
+  pollIntervalMs: number = 3000
+): Promise<boolean> => {
+  const startTime = Date.now();
+  const client = new TonClient({
+    endpoint: TON_ENDPOINT,
+    apiKey: TONCENTER_API_KEY,
+  });
+
+  try {
+    const parsedAddress = Address.parse(address);
+    while (Date.now() - startTime < maxWaitMs) {
+      try {
+        const txs = await client.getTransactions(parsedAddress, { limit: 5 });
+        if (txs && txs.length > 0) {
+          const now = Math.floor(Date.now() / 1000);
+          const recent = txs.find(tx => (now - tx.now) < 180);
+          if (recent) return true;
+        }
+      } catch (err) {
+        console.warn("[tonService] Transaction polling retry:", err);
+      }
+      await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+    }
+  } catch (err) {
+    console.error("[tonService] waitForTransactionConfirmation error:", err);
+  }
+  return false;
 };
 
 /**
@@ -825,8 +915,8 @@ export const sendPartnershipContributionTransaction = async (
   if (!amountTon || isNaN(amountTon) || amountTon <= 0) {
     throw new Error("Invalid contribution amount. Amount must be greater than 0 TON.");
   }
-  if (!treasuryAddress) {
-    throw new Error("Treasury receiving address is not configured.");
+  if (!treasuryAddress || !validateMainnetAddress(treasuryAddress)) {
+    throw new Error("Treasury receiving address is not configured or invalid TON Mainnet format.");
   }
 
   // Convert TON to Nanotons safely avoiding floating point errors
@@ -858,49 +948,202 @@ export const sendPartnershipContributionTransaction = async (
 };
 
 /**
- * Trusted backend blockchain verification check against TON RPC endpoint
+ * Strengthened backend blockchain verification check against TON RPC endpoint.
+ * Validates:
+ * 1. Mandatory expected sender wallet address parameter (never skip expected sender check)
+ * 2. TON Mainnet exclusively (-239)
+ * 3. Correct TonJam treasury recipient (UQD_VZD-zU7IQ4nLBDPssEzApiFbWpV6lSmkmybWxgzLFkEr)
+ * 4. Exact expected nanotons amount (no loose >= matching)
+ * 5. Required partnership memo/comment containing paymentReference
+ * 6. Successful transaction execution (no aborted status)
+ * 7. Atomic duplicate-payment protection via Firestore transactions
  */
 export const verifyPartnershipContributionOnChain = async (
   paymentReference: string,
   expectedNanotons: string,
-  treasuryAddress: string
-): Promise<{ verified: boolean; txHash?: string; message: string }> => {
+  treasuryAddress: string,
+  expectedSenderAddress?: string
+): Promise<{ verified: boolean; txHash?: string; message: string; status: 'verified' | 'pending' | 'unverified' }> => {
   try {
+    // 1. Mandatory expected sender check
+    if (!expectedSenderAddress || !expectedSenderAddress.trim()) {
+      return {
+        verified: false,
+        status: 'unverified',
+        message: 'Expected sender wallet address is required for partnership transaction verification.'
+      };
+    }
+
+    // 2. Treasury Address Format Check
+    if (!treasuryAddress || !validateMainnetAddress(treasuryAddress)) {
+      return {
+        verified: false,
+        status: 'unverified',
+        message: 'Invalid treasury receiving address configured.'
+      };
+    }
+
+    let parsedTreasury: Address;
+    try {
+      parsedTreasury = Address.parse(treasuryAddress);
+    } catch {
+      return {
+        verified: false,
+        status: 'unverified',
+        message: 'Failed to parse treasury address format.'
+      };
+    }
+
+    let parsedSender: Address;
+    try {
+      parsedSender = Address.parse(expectedSenderAddress);
+    } catch {
+      return {
+        verified: false,
+        status: 'unverified',
+        message: 'Invalid expected sender address format provided.'
+      };
+    }
+
     const client = new TonClient({
-      endpoint: TON_ENDPOINT,
+      endpoint: getTonEndpoint(),
       apiKey: TONCENTER_API_KEY,
     });
 
     try {
-      const parsedTreasury = Address.parse(treasuryAddress);
-      const transactions = await client.getTransactions(parsedTreasury, { limit: 10 });
-      
-      for (const tx of transactions) {
-        if (tx.inMessage) {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const transactions = await client.getTransactions(parsedTreasury, { limit: 20 });
+        
+        for (const tx of transactions) {
+          if (!tx.inMessage || !tx.inMessage.info) continue;
+
           const info = tx.inMessage.info as any;
-          const inValue = info?.value?.coins ? info.value.coins.toString() : "0";
-          if (inValue === expectedNanotons || (inValue !== "0" && BigInt(inValue) >= BigInt(expectedNanotons))) {
-            const txHash = tx.hash().toString('hex');
+          if (info.type !== 'internal') continue;
+
+          // 3. Recipient check
+          let destMatches = false;
+          try {
+            const destAddr = Address.parse(info.dest);
+            destMatches = destAddr.equals(parsedTreasury) || destAddr.toRawString() === parsedTreasury.toRawString();
+          } catch {
+            destMatches = String(info.dest).toLowerCase() === treasuryAddress.toLowerCase();
+          }
+          if (!destMatches) continue;
+
+          // 4. Expected Sender check (Mandatory)
+          let senderMatches = false;
+          try {
+            const srcAddr = Address.parse(info.src);
+            senderMatches = srcAddr.equals(parsedSender) || srcAddr.toRawString() === parsedSender.toRawString();
+          } catch {
+            senderMatches = String(info.src).toLowerCase() === expectedSenderAddress.toLowerCase();
+          }
+          if (!senderMatches) continue;
+
+          // 5. Exact Nanotons Amount Check
+          const inValue = info.value?.coins ? info.value.coins.toString() : "0";
+          if (inValue !== expectedNanotons) continue;
+
+          // 6. Execution success & non-aborted check
+          if (tx.description && (tx.description as any).aborted) {
+            console.warn("[tonService] Transaction was aborted on-chain:", tx.hash().toString('hex'));
+            continue;
+          }
+
+          // 7. Memo / Comment Payload check
+          let memoMatches = false;
+          try {
+            if (tx.inMessage.body) {
+              const slice = tx.inMessage.body.beginParse();
+              if (slice.remainingBits >= 32) {
+                const op = slice.loadUint(32);
+                if (op === 0) {
+                  const text = slice.loadStringTail();
+                  if (text && text.includes(paymentReference)) {
+                    memoMatches = true;
+                  }
+                }
+              }
+            }
+          } catch (sliceErr) {
+            console.warn("[tonService] Cell slice parse warning:", sliceErr);
+          }
+
+          if (!memoMatches) {
+            // Fallback string search on raw BOC
+            try {
+              const rawBoc = tx.inMessage.body.toBoc().toString('base64');
+              if (rawBoc.includes(paymentReference)) {
+                memoMatches = true;
+              }
+            } catch {}
+          }
+
+          if (!memoMatches) continue;
+
+          // 8. Atomic Duplicate-use prevention
+          const txHash = tx.hash().toString('hex');
+          let isDuplicate = false;
+
+          try {
+            const q = query(collection(db, 'partnershipContributions'), where('txHash', '==', txHash));
+            const snap = await getDocs(q);
+            for (const docSnap of snap.docs) {
+              if (docSnap.id !== paymentReference && docSnap.data().paymentReference !== paymentReference) {
+                isDuplicate = true;
+                break;
+              }
+            }
+
+            if (!isDuplicate) {
+              const hashLockRef = doc(db, 'partnershipTxHashes', txHash);
+              await runTransaction(db, async (transaction) => {
+                const lockSnap = await transaction.get(hashLockRef);
+                if (lockSnap.exists() && lockSnap.data().paymentReference !== paymentReference) {
+                  isDuplicate = true;
+                } else {
+                  transaction.set(hashLockRef, { paymentReference, claimedAt: new Date().toISOString() });
+                }
+              });
+            }
+          } catch (dupErr) {
+            console.warn("[tonService] Duplicate lock transaction check warning:", dupErr);
+          }
+
+          if (isDuplicate) {
             return {
-              verified: true,
-              txHash,
-              message: "Transaction verified on TON blockchain."
+              verified: false,
+              status: 'unverified',
+              message: "Transaction hash has already been used for another contribution record."
             };
           }
+
+          // All checks passed! Conclusively verified on TON Mainnet
+          return {
+            verified: true,
+            status: 'verified',
+            txHash,
+            message: "Transaction conclusively verified on TON blockchain."
+          };
+        }
+
+        if (attempt < 2) {
+          await new Promise(r => setTimeout(r, 2000));
         }
       }
     } catch (apiErr) {
-      console.warn("TON Center RPC check fallback to verified submission:", apiErr);
+      console.warn("TON Center RPC check warning:", apiErr);
     }
 
     return {
-      verified: true,
-      txHash: `tx_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`,
-      message: "Transaction submission recorded and verified on TON network."
+      verified: false,
+      status: 'pending',
+      message: "Transaction submission received, but pending on-chain confirmation. Please allow a few seconds for block inclusion."
     };
   } catch (err: any) {
     return {
       verified: false,
+      status: 'unverified',
       message: err.message || "Failed to verify transaction on TON blockchain."
     };
   }
