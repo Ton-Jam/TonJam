@@ -143,83 +143,20 @@ export const AutomatedArtistVerification: React.FC<AutomatedArtistVerificationPr
   // Overall automated verification status calculation
   const connectedCount = socialChecks.filter(s => s.isConnected && s.isValidFormat).length;
   
+  // Profile verification strictly from trusted backend records
   const isProfileVerified = useMemo(() => {
-    if (artist.verified || artist.isVerifiedArtist || artist.verificationStatus === 'verified') {
-      return true;
-    }
-    if (isOwnProfile && (userProfile?.verified || userProfile?.isVerifiedArtist)) {
-      return true;
-    }
-    // Automated threshold: if connected socials are present and valid (at least 1 valid connected channel)
-    return connectedCount >= 1;
-  }, [artist, isOwnProfile, userProfile, connectedCount]);
+    return Boolean(
+      artist.verified || 
+      artist.isVerifiedArtist || 
+      artist.verificationStatus === 'verified' ||
+      (isOwnProfile && (userProfile?.verified || userProfile?.isVerifiedArtist || userProfile?.verificationStatus === 'verified'))
+    );
+  }, [artist, isOwnProfile, userProfile]);
 
-  // Automated Social Accounts Verification Scanner
-  const runAutomatedVerification = async () => {
-    if (!user?.uid) {
-      toast.error('Authentication Required', {
-        description: 'Please log in to verify artist credentials.'
-      });
-      return;
-    }
-
-    setIsScanning(true);
-    setScanStep(1);
-    setScanLogs(['Initializing automated social audit protocol...']);
-
-    const logSequence = [
-      { delay: 400, text: `[1/3] Validating Twitter/X profile: ${twitterRaw || 'Scanning connected identity...'}` },
-      { delay: 900, text: `[2/3] Validating Instagram creator node: ${instagramRaw || 'Verifying media provenance...'}` },
-      { delay: 1400, text: `[3/3] Authenticating Spotify discography catalog: ${spotifyRaw || 'Parsing on-chain audio...'}` },
-      { delay: 1900, text: `[AUDIT] Cryptographic social graph matched. Issuing verified artist status.` }
-    ];
-
-    logSequence.forEach(({ delay, text }, idx) => {
-      setTimeout(() => {
-        setScanLogs(prev => [...prev, text]);
-        setScanStep(idx + 2);
-      }, delay);
-    });
-
-    setTimeout(async () => {
-      try {
-        const userRef = doc(db, 'users', user.uid);
-        const updatePayload = {
-          verified: true,
-          isVerifiedArtist: true,
-          verificationStatus: 'verified',
-          isTwitterVerified: Boolean(twitterRaw),
-          isInstagramVerified: Boolean(instagramRaw),
-          isSpotifyVerified: Boolean(spotifyRaw),
-          verifiedAt: new Date().toISOString(),
-          role: ((userProfile?.role === 'admin' ? 'admin' : 'artist') as 'admin' | 'artist')
-        };
-
-        await updateDoc(userRef, cleanUpdateData(updatePayload));
-
-        if (userProfile) {
-          setUserProfile({
-            ...userProfile,
-            ...updatePayload
-          } as any);
-        }
-
-        toast.success('Artist Verification Completed', {
-          description: 'Your social accounts have been verified. The Verified Artist badge is active.'
-        });
-
-        if (onVerificationUpdated) {
-          onVerificationUpdated(true);
-        }
-      } catch (err) {
-        console.warn('Verification state updated locally:', err);
-        toast.success('Artist Verified', {
-          description: 'Social credentials verified successfully.'
-        });
-      } finally {
-        setIsScanning(false);
-      }
-    }, 2400);
+  // Request review through official verification protocol (lifecycle: unverified -> pending)
+  const handleRequestVerification = () => {
+    setIsOpen(false);
+    window.location.href = '/artist-verification';
   };
 
   const sizeStyles = {
@@ -402,24 +339,14 @@ export const AutomatedArtistVerification: React.FC<AutomatedArtistVerificationPr
 
                 {/* Actions */}
                 <div className="space-y-2 pt-2">
-                  {isOwnProfile && (
+                  {isOwnProfile && !isProfileVerified && (
                     <button
                       type="button"
-                      disabled={isScanning}
-                      onClick={runAutomatedVerification}
-                      className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-600/20"
+                      onClick={handleRequestVerification}
+                      className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-600/20"
                     >
-                      {isScanning ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Scanning Social Credentials...</span>
-                        </>
-                      ) : (
-                        <>
-                          <RefreshCw className="w-4 h-4" />
-                          <span>Auto-Verify Connected Socials</span>
-                        </>
-                      )}
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>Submit for Verification</span>
                     </button>
                   )}
 

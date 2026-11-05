@@ -209,7 +209,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
     userProfile.isVerified || 
     userProfile.isVerifiedArtist || 
     userProfile.verified || 
-    userProfile.role === 'artist'
+    userProfile.verificationStatus === 'verified'
   );
 
   const activePendingRequest = requests.find((r) => r.status === 'pending');

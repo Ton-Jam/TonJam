@@ -14,12 +14,9 @@ service cloud.firestore {
     function existing() { return resource.data; }
     function isValidId(id) { return id is string && id.size() <= 128; }
     
-    // Admin check looks for an entry in /admins/ or a hardcoded bootstrap admin
+    // Admin check strictly verifies presence in /admins/ collection
     function isAdmin() { 
-      return isSignedIn() && (
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) || 
-        request.auth.token.email == "krusherkrupy@gmail.com"
-      ); 
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); 
     }
 
     // 🧪 PILLAR 2: Validation Blueprints

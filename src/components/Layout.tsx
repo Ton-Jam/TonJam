@@ -31,8 +31,7 @@ import {
   StarIcon,
   TicketIcon,
   SparklesIcon,
-  UserGroupIcon,
-  Bars3Icon
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 import { Sparkles as SparklesLucide, History, X, Rocket, Heart } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, TON_LOGO, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
@@ -206,8 +205,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         const diffX = endX - startX;
         const diffY = Math.abs(endY - startY);
 
-        if (startX < 32 && diffX > 60 && diffY < 50) {
-          setIsMobileSidebarOpen(true);
+        const windowWidth = window.innerWidth;
+        if ((startX > windowWidth - 36 && diffX < -50) || (startX < 32 && diffX > 60)) {
+          if (diffY < 50) {
+            setIsMobileSidebarOpen(true);
+          }
         }
       }
     };
@@ -471,48 +473,34 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               : "bg-[#0A1628]/55 backdrop-blur-[18px]"
           )}
         >
-          {/* LEFT: TonJam Logo & Brand + Mobile Menu Button */}
+          {/* LEFT: TonJam Logo & Brand */}
           <div className="flex items-center gap-1 sm:gap-2">
-            <button
-              type="button"
-              onClick={() => setIsMobileSidebarOpen(true)}
-              className="lg:hidden p-1.5 -ml-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/[0.06] active:scale-95 transition-all cursor-pointer border-none outline-none flex items-center justify-center shrink-0"
-              aria-label="Open side navigation drawer"
-            >
-              <Bars3Icon className="w-5 h-5 text-white" strokeWidth={2.4} />
-            </button>
-
             <Tooltip>
               <TooltipTrigger asChild>
                 <button 
-                  onClick={() => {
-                    if (window.innerWidth < 1024) {
-                      setIsMobileSidebarOpen(true);
-                    } else {
-                      navigate('/');
-                    }
-                  }}
-                  className="flex items-center gap-2 p-1 rounded-full hover:bg-white/5 active:scale-95 transition-all flex-shrink-0 cursor-pointer border-none outline-none group"
+                  type="button"
+                  onClick={() => navigate('/')}
+                  className="flex items-center gap-2.5 p-1 px-1.5 rounded-full hover:bg-white/5 active:scale-95 transition-all flex-shrink-0 cursor-pointer border-none outline-none group"
                   aria-label="TonJam Home"
                 >
-                  <div className="relative w-8 h-8 flex items-center justify-center rounded-full bg-[#0088CC]/10 group-hover:bg-[#0088CC]/20 transition-colors">
+                  <div className="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-[#0088CC]/15 group-hover:bg-[#0088CC]/25 transition-colors">
                     <motion.img 
                       layoutId="app-logo"
                       src={APP_LOGO} 
                       alt="TonJam Logo" 
-                      className="w-7 h-7 object-contain drop-shadow-[0_2px_8px_rgba(0,180,216,0.35)]" 
+                      className="w-6 h-6 sm:w-7 sm:h-7 object-contain drop-shadow-[0_2px_8px_rgba(0,180,216,0.35)]" 
                     />
                   </div>
-                  <span className="font-black text-sm tracking-tight text-white select-none">
+                  <span className="font-black text-base sm:text-lg tracking-tight text-white select-none">
                     TonJam
                   </span>
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">Open Navigation</TooltipContent>
+              <TooltipContent side="bottom">TonJam Home</TooltipContent>
             </Tooltip>
           </div>
 
-          {/* RIGHT: [ $TJ ] [ 🔔 ] [ Profile ] */}
+          {/* RIGHT: [ $TJ ] [ 🔔 ] [ Profile Avatar -> Opens Drawer ] */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* $TJ Coin / Earn Control */}
             <Tooltip>
@@ -559,16 +547,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Notifications */}
             <NotificationBell />
 
-            {/* Profile */}
+            {/* Profile Avatar Button -> Opens Side Drawer */}
             {user ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link 
-                    to="/profile" 
-                    className="min-w-[40px] min-h-[40px] flex items-center justify-center p-0.5 rounded-full transition-all hover:scale-105 active:scale-95 outline-none border-none shrink-0"
-                    aria-label="Your Profile"
+                  <button 
+                    type="button"
+                    onClick={() => setIsMobileSidebarOpen(true)}
+                    className="min-w-[40px] min-h-[40px] flex items-center justify-center p-0.5 rounded-full transition-all hover:scale-105 active:scale-95 outline-none border-none shrink-0 cursor-pointer"
+                    aria-label="Open Navigation Drawer"
                   >
-                    <Avatar className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-900 ring-1 ring-white/10">
+                    <Avatar className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-900 ring-2 ring-white/10 hover:ring-[#00B4D8]/60 transition-all">
                       <AvatarImage 
                         src={userProfile?.avatar || user.photoURL || ''} 
                         alt={user.displayName || 'Profile'} 
@@ -578,22 +567,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         {user.displayName ? user.displayName.slice(0, 2).toUpperCase() : (userProfile?.username ? userProfile.username.slice(0, 2).toUpperCase() : 'TJ')}
                       </AvatarFallback>
                     </Avatar>
-                  </Link>
+                  </button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">Your Profile</TooltipContent>
+                <TooltipContent side="bottom">Open Navigation Drawer</TooltipContent>
               </Tooltip>
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button 
-                    onClick={() => navigate('/login')}
+                    type="button"
+                    onClick={() => setIsMobileSidebarOpen(true)}
                     className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 active:scale-95 text-zinc-300 hover:text-white transition-all border-none outline-none cursor-pointer shrink-0"
-                    aria-label="Sign In"
+                    aria-label="Open Navigation Drawer"
                   >
                     <UserIcon className="h-4 w-4" strokeWidth={2.2} />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">Sign In</TooltipContent>
+                <TooltipContent side="bottom">Open Navigation Drawer</TooltipContent>
               </Tooltip>
             )}
           </div>

@@ -19,6 +19,68 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  /* ProtectedRoute Loading Overlay Class */
+  .protected-route-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(7, 17, 31, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .protected-route-loading-overlay .loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+  }
+
+  .protected-route-loading-overlay .spinning-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    animation: tonjam-logo-spin 3s linear infinite;
+    filter: drop-shadow(0 0 20px rgba(0, 180, 216, 0.35));
+  }
+
+  .protected-route-loading-overlay .pulsing-title {
+    font-family: var(--font-family-sans, 'Poppins', sans-serif);
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.1em;
+    margin: 0;
+    animation: tonjam-title-pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes tonjam-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes tonjam-title-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
 }
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";

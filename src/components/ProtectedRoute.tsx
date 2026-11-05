@@ -12,7 +12,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
   const { user, userProfile, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  // Block route access until authentication AND user document verification status are fully resolved from Firestore
+  if (loading || (user && !userProfile)) {
     return <LoadingScreen />;
   }
 
@@ -25,12 +26,24 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  const isAdminEmail = user?.email === 'krusherkrupy@gmail.com';
-  const userRole = isAdminEmail ? 'admin' : (userProfile?.role || 'collector');
+  // Verify role and isVerified status exclusively from the authenticated user's Firestore document
+  const isAdmin = Boolean(userProfile?.role === 'admin' || userProfile?.isAdmin === true);
+  const isVerifiedArtist = Boolean(
+    userProfile?.role === 'artist' && 
+    (userProfile?.isVerifiedArtist || userProfile?.verificationStatus === 'verified' || userProfile?.isVerified)
+  );
+  const userRole = isAdmin ? 'admin' : (isVerifiedArtist ? 'artist' : (userProfile?.role || 'collector'));
 
-  if (allowedRoles && !allowedRoles.includes(userRole as any)) {
-    // Redirect to home if role not allowed
-    return <Navigate to="/" replace />;
+  if (allowedRoles) {
+    if (allowedRoles.includes('artist') && !isAdmin && !isVerifiedArtist) {
+      // If user attempted to access artist features but is not verified in Firestore, redirect to verification flow
+      return <Navigate to="/artist-verification" replace />;
+    }
+
+    if (!allowedRoles.includes(userRole as any)) {
+      // Redirect to home if role not allowed
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <>{children}</>;

@@ -437,7 +437,7 @@ async function startServer() {
             `;
 
             const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
-                model: "gemini-3.7-flash",
+                model: "gemini-2.5-flash",
                 contents: prompt,
                 config: {
                     tools: [{ googleSearch: {} }],
@@ -547,7 +547,7 @@ async function startServer() {
             `;
 
             const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
-                model: "gemini-3.5-flash",
+                model: "gemini-2.5-flash",
                 contents: prompt,
                 config: {
                     tools: [{ googleSearch: {} }],
@@ -992,7 +992,7 @@ async function startServer() {
             `;
 
             const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
-                model: "gemini-3.8-flash",
+                model: "gemini-2.5-flash",
                 contents: [{ parts: [{ text: prompt }] }],
                 config: {
                     tools: [{ googleSearch: {} }],
@@ -1140,7 +1140,7 @@ async function startServer() {
             const audioData = fs.readFileSync(filePath);
             
             const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
-                model: "gemini-3.5-flash",
+                model: "gemini-2.5-flash",
                 contents: [{
                     parts: [
                         {
@@ -1234,7 +1234,7 @@ async function startServer() {
             contents.push({ text: promptText });
 
             const response = await rateLimitedGeminiCall(() => ai.models.generateContent({
-                model: "gemini-3.5-flash",
+                model: "gemini-2.5-flash",
                 contents: [{ parts: contents }],
                 config: {
                     responseMimeType: "application/json",

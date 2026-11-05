@@ -118,11 +118,11 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({ isOpen, onClose }) => {
 
             {/* SIDE DRAWER CONTAINER - NO BORDER LINES */}
             <motion.div
-              initial={{ x: '-100%' }}
+              initial={{ x: '100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-              className="fixed top-0 left-0 bottom-0 w-[84vw] max-w-[340px] bg-[#080D1A] z-10 flex flex-col shadow-2xl overflow-hidden"
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 32, stiffness: 320, mass: 0.8 }}
+              className="fixed top-0 right-0 bottom-0 w-[84vw] max-w-[340px] bg-[#080D1A] z-[90] flex flex-col shadow-2xl overflow-hidden"
               role="dialog"
               aria-modal="true"
               aria-label="Side Navigation Drawer"

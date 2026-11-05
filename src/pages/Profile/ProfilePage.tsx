@@ -66,24 +66,24 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
     if (isOwnProfile && currentUserProfile) {
       return {
         uid: currentUserProfile.uid,
-        name: currentUserProfile.name || 'Krupy',
-        username: currentUserProfile.username || 'krupy',
+        name: currentUserProfile.name || 'TONJAM User',
+        username: currentUserProfile.username || 'tonjam_user',
         avatar: currentUserProfile.avatar || getPlaceholderImage(`user-${currentUserProfile.uid}`),
         bannerUrl: currentUserProfile.bannerUrl || '',
         bio: currentUserProfile.bio || '',
-        memberSince: currentUserProfile.createdAt ? new Date(currentUserProfile.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : 'March 2026',
+        memberSince: currentUserProfile.createdAt ? new Date(currentUserProfile.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : '',
         walletAddress: currentUserProfile.walletAddress || '',
-        isSpotifyVerified: true,
-        isArtistVerified: currentUserProfile.isVerifiedArtist || forceArtistDashboard,
-        verificationStatus: getValidStatus(currentUserProfile.verificationStatus) || (forceArtistDashboard ? 'verified' : 'none'),
-        followers: currentUserProfile.followers || 128,
-        following: currentUserProfile.following || 42,
-        monthlyListeners: 84300,
-        totalStreams: 245900,
-        nftsOwned: currentUserProfile.ownedNftIds?.length || 3,
-        nftsSold: 0,
-        playlistsCount: currentUserProfile.createdPlaylistIds?.length || 4,
-        tjPoints: currentUserProfile.tjBalance || 100,
+        isSpotifyVerified: Boolean(currentUserProfile.isSpotifyVerified),
+        isArtistVerified: Boolean(currentUserProfile.isVerifiedArtist || currentUserProfile.isVerified),
+        verificationStatus: getValidStatus(currentUserProfile.verificationStatus),
+        followers: currentUserProfile.followers || 0,
+        following: currentUserProfile.following || 0,
+        monthlyListeners: currentUserProfile.monthlyListeners || 0,
+        totalStreams: currentUserProfile.totalStreams || 0,
+        nftsOwned: currentUserProfile.ownedNftIds?.length || 0,
+        nftsSold: currentUserProfile.nftsSold || 0,
+        playlistsCount: currentUserProfile.createdPlaylistIds?.length || 0,
+        tjPoints: currentUserProfile.tjBalance || 0,
       } as ProfileData;
     }
     
@@ -97,15 +97,15 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
           avatar: foundArtist.avatarUrl || getPlaceholderImage(`user-${foundArtist.uid}`),
           bannerUrl: foundArtist.bannerUrl || foundArtist.bannerImageUrl || '',
           bio: foundArtist.bio || '',
-          memberSince: 'March 2026',
+          memberSince: '',
           walletAddress: foundArtist.walletAddress || '',
-          isSpotifyVerified: true,
-          isArtistVerified: foundArtist.isVerifiedArtist || true,
+          isSpotifyVerified: Boolean(foundArtist.isSpotifyVerified),
+          isArtistVerified: Boolean(foundArtist.isVerifiedArtist || foundArtist.verified),
           verificationStatus: 'verified',
           followers: foundArtist.followers || 0,
           following: 0,
-          monthlyListeners: foundArtist.monthlyListeners || 5000,
-          totalStreams: 12500,
+          monthlyListeners: foundArtist.monthlyListeners || 0,
+          totalStreams: foundArtist.totalStreams || 0,
           nftsOwned: 0,
           nftsSold: 0,
           playlistsCount: 0,
@@ -115,13 +115,25 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
     }
     
     return {
-      ...MOCK_PROFILE,
-      name: 'Krupy',
-      username: 'krupy',
-      followers: 128,
-      following: 42,
-      isArtistVerified: forceArtistDashboard,
-      verificationStatus: forceArtistDashboard ? 'verified' : 'none'
+      uid: '',
+      name: 'TONJAM User',
+      username: 'tonjam_user',
+      avatar: getPlaceholderImage('user-default'),
+      bannerUrl: '',
+      bio: '',
+      memberSince: '',
+      walletAddress: '',
+      isSpotifyVerified: false,
+      isArtistVerified: false,
+      verificationStatus: 'none',
+      followers: 0,
+      following: 0,
+      monthlyListeners: 0,
+      totalStreams: 0,
+      nftsOwned: 0,
+      nftsSold: 0,
+      playlistsCount: 0,
+      tjPoints: 0,
     };
   });
   
@@ -136,14 +148,16 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
       setProfile((prev) => ({
         ...prev,
         uid: currentUserProfile.uid,
-        name: currentUserProfile.name || prev.name || 'Krupy',
-        username: currentUserProfile.username || prev.username || 'krupy',
+        name: currentUserProfile.name || prev.name,
+        username: currentUserProfile.username || prev.username,
         avatar: currentUserProfile.avatar || prev.avatar || getPlaceholderImage(`user-${currentUserProfile.uid}`),
-        bio: currentUserProfile.bio || prev.bio,
-        followers: currentUserProfile.followers ?? prev.followers ?? 128,
-        following: currentUserProfile.following ?? prev.following ?? 42,
-        isArtistVerified: currentUserProfile.isVerifiedArtist || forceArtistDashboard,
-        verificationStatus: getValidStatus(currentUserProfile.verificationStatus) || (forceArtistDashboard ? 'verified' : 'none')
+        bio: currentUserProfile.bio !== undefined ? currentUserProfile.bio : prev.bio,
+        followers: currentUserProfile.followers ?? prev.followers ?? 0,
+        following: currentUserProfile.following ?? prev.following ?? 0,
+        monthlyListeners: currentUserProfile.monthlyListeners ?? prev.monthlyListeners ?? 0,
+        totalStreams: currentUserProfile.totalStreams ?? prev.totalStreams ?? 0,
+        isArtistVerified: Boolean(currentUserProfile.isVerifiedArtist || currentUserProfile.isVerified),
+        verificationStatus: getValidStatus(currentUserProfile.verificationStatus)
       }));
     }
   }, [isOwnProfile, currentUserProfile, forceArtistDashboard]);
@@ -159,7 +173,9 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
   }, [profile.name, setHeaderTitle]);
 
   const handleCopyProfileLink = () => {
-    navigator.clipboard.writeText(`https://tonjam.app/user/${profile.username}`);
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://tonjam.app';
+    const profileUrl = `${baseUrl}/user/${profile.username || profile.uid}`;
+    navigator.clipboard.writeText(profileUrl);
     setCopiedLink(true);
     toast.success('Link Copied', 'Profile link saved to clipboard.');
     setTimeout(() => setCopiedLink(false), 2000);

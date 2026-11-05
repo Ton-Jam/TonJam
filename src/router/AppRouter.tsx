@@ -21,10 +21,7 @@ import PartnershipsPage from '@/pages/Partnerships';
 import UserProfilePage from '@/pages/UserProfile';
 
 const RouteLoadingFallback: React.FC = () => (
-  <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3 py-16 text-center select-none">
-    <div className="w-8 h-8 rounded-full border-2 border-[#0088CC]/20 border-t-[#0088CC] animate-spin" />
-    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest">Loading TonJam...</span>
-  </div>
+  <LoadingScreen />
 );
 
 const RouteErrorFallback: React.FC<{ error?: Error; onRetry?: () => void }> = ({ error, onRetry }) => (
@@ -175,11 +172,12 @@ const AppRouter: React.FC = () => {
 };
 
 const AppRouterContent: React.FC = () => {
-  const [isAppLoading, setIsAppLoading] = useState(false);
+  const { user, userProfile, loading: authLoading } = useAuth();
+  const [isBackendLoading, setIsBackendLoading] = useState(true);
   const location = useLocation();
 
-  const { user, userProfile } = useAuth();
-  
+  const isAppLoading = authLoading || isBackendLoading;
+
   // Initialize proactive data pre-fetching
   useProactivePreloader();
 
@@ -196,7 +194,7 @@ const AppRouterContent: React.FC = () => {
       } catch (error) {
         // App continues gracefully in offline/client mode
       } finally {
-        setIsAppLoading(false);
+        setIsBackendLoading(false);
       }
     };
     initBackend();

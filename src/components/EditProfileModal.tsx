@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { X, Upload, Loader2, Link2, Twitter, Instagram, Globe, MessageSquare } from 'lucide-react';
 import { UserProfile as UserProfileType } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { uploadFile } from '@/services/storageService';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -20,6 +21,7 @@ interface EditProfileModalProps {
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ user, onClose, onUpdate }) => {
   const { addNotification } = useAudio();
+  const { refreshProfile } = useAuth();
   const [name, setName] = useState(user.name);
   const [username, setUsername] = useState(user.username || '');
   const [bio, setBio] = useState(user.bio || '');
@@ -68,6 +70,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ user, onClose, onUp
       if (currentUser && currentUser.uid === user.uid) {
         const userRef = doc(db, 'users', currentUser.uid);
         await updateDoc(userRef, cleanUpdateData(updatedData));
+        await refreshProfile();
       }
 
       onUpdate({ ...user, ...updatedData });

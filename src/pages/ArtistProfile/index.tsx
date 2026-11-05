@@ -250,7 +250,7 @@ export const ArtistProfile: React.FC = () => {
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 w-full py-2.5 px-3 rounded-2xl bg-white/[0.04] backdrop-blur-md mb-5 text-center">
             <div>
               <p className="text-base sm:text-lg font-black text-white tabular-nums">
-                {formatFollowers(stats?.monthlyListeners || 18400)}
+                {formatFollowers(stats?.monthlyListeners || 0)}
               </p>
               <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 mt-0.5">
                 Listeners
@@ -258,7 +258,7 @@ export const ArtistProfile: React.FC = () => {
             </div>
             <div>
               <p className="text-base sm:text-lg font-black text-white tabular-nums">
-                {formatFollowers(artist.followers || 12400)}
+                {formatFollowers(artist.followers || 0)}
               </p>
               <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 mt-0.5">
                 Followers

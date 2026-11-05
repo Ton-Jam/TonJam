@@ -300,6 +300,8 @@ export interface Artist {
   isVerifiedArtist?: boolean;
   genre?: string;
   monthlyListeners?: number;
+  totalStreams?: number;
+  isSpotifyVerified?: boolean;
   bio?: string;
   bannerUrl?: string;
   bannerImageUrl?: string;
@@ -509,6 +511,12 @@ export interface UserProfile {
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   isVerified?: boolean;
   verificationStatus?: 'unverified' | 'pending' | 'needs_revision' | 'verified' | 'rejected';
+  isAdmin?: boolean;
+  country?: string;
+  isSpotifyVerified?: boolean;
+  monthlyListeners?: number;
+  totalStreams?: number;
+  nftsSold?: number;
   royaltyConfig?: {
     streamingSplits: RoyaltySplit[];
     nftSaleSplits: RoyaltySplit[];

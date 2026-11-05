@@ -55,7 +55,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
   className = '',
   index,
 }) => {
-  const { currentTrack, isPlaying: contextIsPlaying, playTrack, togglePlay, likedTrackIds, toggleLikeTrack, openAddToPlaylistModal } = useAudio();
+  const { currentTrack, isPlaying: contextIsPlaying, playTrack, togglePlay, likedTrackIds, toggleLikeTrack, setTrackToAddToPlaylist } = useAudio();
   const [copied, setCopied] = React.useState(false);
 
   const isCurrentTrack = currentTrack?.id === track.id;
@@ -253,7 +253,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (openAddToPlaylistModal) openAddToPlaylistModal(track);
+                    if (setTrackToAddToPlaylist) setTrackToAddToPlaylist(track);
                   }}
                   className="flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg text-[#C2C7CD] hover:text-white hover:bg-[#132B49] cursor-pointer"
                 >
@@ -362,7 +362,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (openAddToPlaylistModal) openAddToPlaylistModal(track);
+                    if (setTrackToAddToPlaylist) setTrackToAddToPlaylist(track);
                   }}
                   className="flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg text-[#C2C7CD] hover:text-white hover:bg-[#132B49] cursor-pointer"
                 >

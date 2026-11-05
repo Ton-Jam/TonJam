@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { uploadAudio, uploadCover } from "@/services/storageService";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { collection, getDocs, query, where, onSnapshot } from "firebase/firestore";
 import { 
@@ -167,7 +168,7 @@ const NftSalesAreaTooltip = ({ active, payload, label }: any) => {
 
 export default function ArtistDashboard() {
   const navigate = useNavigate();
-  const { getEarnings, addNotification, deleteTrack, updateTrack, addUserNFT, userProfile } = useAudio();
+  const { getEarnings, addNotification, deleteTrack, updateTrack, addUserTrack, addUserNFT, userProfile } = useAudio();
   const { user, isArtist, isAdmin, loading } = useAuth();
   const { 
     timeRange, 
@@ -382,71 +383,17 @@ export default function ArtistDashboard() {
     }
   };
 
-  // Chat/DM Simulator States
-  const [activeConvoId, setActiveConvoId] = useState("c1");
+  // Fan Direct Messaging States
+  const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
   const [newMessageText, setNewMessageText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [conversations, setConversations] = useState([
-    {
-      id: "c1",
-      handle: "Vitalik_TON.eth",
-      name: "Vitalik Buterin",
-      avatar: "https://image.pollinations.ai/prompt/cyberpunk%20ether%20crypto%20guy%20avatar?width=100&height=100&nologo=true",
-      status: "online",
-      badge: "Giga Collector",
-      messages: [
-        { sender: "fan", text: "Yo! Your new track is absolutely fire. The spatial mix is incredibly polished! Do you plan on dropping alternate wave stems on the protocol?", time: "2:14 PM" }
-      ]
-    },
-    {
-      id: "c2",
-      handle: "Pavel_Durov.ton",
-      name: "Durov",
-      avatar: "https://image.pollinations.ai/prompt/futuristic%20black%20tee%20crypto%20guy%20avatar?width=100&height=100&nologo=true",
-      status: "online",
-      badge: "Major Sponsor",
-      messages: [
-        { sender: "fan", text: "Stellar launch on TON Protocol! I have pinned your track in our main audio hub.", time: "Yesterday" },
-        { sender: "artist", text: "Incredibly grateful Pavel, thank you for backing our independent audio roadmap!", time: "Yesterday" }
-      ]
-    },
-    {
-      id: "c3",
-      handle: "Alice_Vance_NFT",
-      name: "Alice Vance",
-      avatar: "https://image.pollinations.ai/prompt/cyberpunk%20girl%20crypto%20collector?width=100&height=100&nologo=true",
-      status: "offline",
-      badge: "Super Fan",
-      messages: [
-        { sender: "fan", text: "Will you list exclusive collectibles of Neon Waves next week? I want the limited version!", time: "3 days ago" }
-      ]
-    }
-  ]);
+  const [conversations, setConversations] = useState<any[]>([]);
 
-  // Exclusive Drops Simulator States
+  // Exclusive Drops States
   const [exclusiveDrops, setExclusiveDrops] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem("tonjam_exclusive_drops");
-      return saved ? JSON.parse(saved) : [
-        {
-          id: "drop-1",
-          title: "Neon Pulse Vocal lead Wave Stems",
-          description: "Isolated clean vocal recordings and digital alternate mix master. Gated access key.",
-          gating: "NFT Holders Only",
-          downloads: 142,
-          date: "Yesterday",
-          type: "Acoustic Mix (High fidelity .wav)"
-        },
-        {
-          id: "drop-2",
-          title: "Behind-The-Scenes Studio Raw Session",
-          description: "Raw footage of the live modular synth improvisations for 'Echoes of Sky' track.",
-          gating: "VIP Fan Club",
-          downloads: 98,
-          date: "3 days ago",
-          type: "Video Session (.mp4)"
-        }
-      ];
+      return saved ? JSON.parse(saved) : [];
     } catch (e) {
       return [];
     }
@@ -457,12 +404,8 @@ export default function ArtistDashboard() {
   const [newDropGating, setNewDropGating] = useState("NFT Holders Only");
   const [newDropType, setNewDropType] = useState("Audio Stem (.wav)");
 
-  // NFT Sales Tracker Mock State
-  const [nftSales, setNftSales] = useState([
-    { id: "sale-1", item: "Cyberpunk Genesis #01", buyer: "Vitalik_TON.eth", price: "240 TON", royalty: "24 TON (10%)", time: "10m ago", tx: "EQC8...O1P" },
-    { id: "sale-2", item: "Neon Waves Alternate Mix", buyer: "Alice_Vance_NFT", price: "120 TON", royalty: "12 TON (10%)", time: "2h ago", tx: "EQA5...O0P" },
-    { id: "sale-3", item: "Sunset Groove Stem #04", buyer: "TON_Giga_Staker", price: "80 TON", royalty: "8 TON (10%)", time: "Yesterday", tx: "EQB1...O2P" }
-  ]);
+  // NFT Sales Tracker State
+  const [nftSales, setNftSales] = useState<any[]>([]);
 
   // Previous stream counters reference
   const tracksPrevStatsRef = useRef<Record<string, { playCount: number; likes: number }>>({});
@@ -519,19 +462,6 @@ export default function ArtistDashboard() {
       isInitialLoadRef.current = false;
       setTracks(tracksData);
       
-      setAlbums([
-        {
-          id: 'alb-1',
-          title: 'Neon Pulse',
-          artist: 'Neon Voyager',
-          artistId: user?.uid,
-          coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Neon%20Pulse?width=400&height=400&nologo=true',
-          releaseYear: 2026,
-          trackIds: tracksData.map(t => t.id).slice(0, 2),
-          genre: 'Electronic',
-          description: 'The debut album defining the digital frontier.'
-        }
-      ]);
       setIsLoading(false);
     }, (error) => {
       handleFirestoreError(error, OperationType.GET, 'tracks');
@@ -547,6 +477,15 @@ export default function ArtistDashboard() {
     try {
       if (!user) return;
       
+      // Albums
+      try {
+        const albumsQuery = query(collection(db, "albums"), where("artistId", "==", user.uid));
+        const albumSnap = await getDocs(albumsQuery);
+        setAlbums(albumSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch {
+        setAlbums([]);
+      }
+
       // NFTs
       const nftSnap = await getDocs(
         query(collection(db, "nfts"), where("artistId", "==", user.uid))
@@ -556,6 +495,20 @@ export default function ArtistDashboard() {
         ...doc.data()
       }));
       setNFTs(nftData);
+
+      // NFT Sales (query authentic marketplace sales)
+      try {
+        const salesSnap = await getDocs(
+          query(collection(db, "nft_sales"), where("artistId", "==", user.uid))
+        );
+        if (!salesSnap.empty) {
+          setNftSales(salesSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        } else {
+          setNftSales([]);
+        }
+      } catch {
+        setNftSales([]);
+      }
 
       // Earnings
       const totalEarnings = await getEarnings(user.uid);
@@ -572,56 +525,15 @@ export default function ArtistDashboard() {
     }
   };
 
-  const handleBulkMint = async () => {
+  const handleBulkMint = () => {
     const tracksToMint = tracks.filter(t => selectedTrackIds.includes(t.id) && !t.isNFT);
     if (tracksToMint.length === 0) {
       addNotification("No eligible unminted tracks selected", "warning");
       return;
     }
 
-    setIsBulkProcessing(true);
-    setBulkProcessingMsg(`Preparing mass-mint of ${tracksToMint.length} track(s)...`);
-
-    try {
-      for (let i = 0; i < tracksToMint.length; i++) {
-        const track = tracksToMint[i];
-        setBulkProcessingMsg(`[${i + 1}/${tracksToMint.length}] Broadcasting "${track.title}" onto TON Ledger...`);
-        
-        await new Promise((resolve) => setTimeout(resolve, 800));
-
-        const nftId = `nft-${Date.now()}-${track.id}`;
-        const newNft: any = {
-          id: nftId,
-          trackId: track.id,
-          title: track.title,
-          description: track.description || `Decentralized sound recording NFT collectible of "${track.title}"`,
-          owner: userProfile?.name || "Verified Creator",
-          creator: userProfile?.name || track.artistName || "Verified Creator",
-          artistId: user?.uid || track.artistId,
-          price: "2.5",
-          imageUrl: track.coverUrl || getPlaceholderImage(track.title),
-          coverUrl: track.coverUrl || getPlaceholderImage(track.title),
-          audioUrl: track.audioUrl || "",
-          edition: "Limited",
-          isNFT: true,
-          listingType: "fixed" as const,
-          mintedAt: new Date().toISOString(),
-          ownerAddress: userProfile?.walletAddress || "EQ_vault"
-        };
-
-        await addUserNFT(newNft, true);
-        await updateTrack(track.id, { isNFT: true });
-      }
-
-      addNotification(`Mass-minted ${tracksToMint.length} assets successfully compiled to the TON VM! 🌌💎`, "success");
-      setSelectedTrackIds([]);
-    } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, "bulk-mint");
-      addNotification("Mass-minting failed. Check smart contract parameters.", "error");
-    } finally {
-      setIsBulkProcessing(false);
-      setBulkProcessingMsg("");
-    }
+    addNotification(`Redirecting to TON Connect minting studio for "${tracksToMint[0].title}"`, "info");
+    navigate('/artist-minting', { state: { track: tracksToMint[0] } });
   };
 
   const handleBulkDelete = async () => {
@@ -658,8 +570,8 @@ export default function ArtistDashboard() {
     setIsEditMetadataOpen(true);
   };
 
-  // Upload track simulator with real-time validation and stage-by-stage IPFS metadata pinning
-  const handleSimulatedUpload = (e: React.FormEvent) => {
+  // Upload track with validation, storage upload and Firestore sync
+  const handleSimulatedUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Touch all fields to trigger validations and display feedback
@@ -707,118 +619,85 @@ export default function ArtistDashboard() {
     }
 
     setIsUploading(true);
-    setUploadProgress(0);
+    setUploadProgress(10);
     setUploadPhase('validating');
 
-    let currentProgress = 0;
-    const timer = setInterval(() => {
-      currentProgress += 2;
-      if (currentProgress > 100) currentProgress = 100;
+    try {
+      setUploadPhase('pinning_audio');
+      setUploadProgress(30);
+      const audioRes = await uploadAudio(uploadAudioFile, (prog) => {
+        setUploadProgress(Math.floor(20 + prog * 0.4));
+      });
 
-      setUploadProgress(currentProgress);
+      setUploadPhase('pinning_metadata');
+      setUploadProgress(65);
+      const coverRes = await uploadCover(uploadCoverFile, (prog) => {
+        setUploadProgress(Math.floor(60 + prog * 0.25));
+      });
 
-      if (currentProgress < 20) {
-        setUploadPhase('validating');
-      } else if (currentProgress < 60) {
-        setUploadPhase('pinning_audio');
-      } else if (currentProgress < 85) {
-        setUploadPhase('pinning_metadata');
-      } else if (currentProgress < 100) {
-        setUploadPhase('blockchain_sync');
-      } else {
-        clearInterval(timer);
-        setUploadPhase('success');
+      setUploadPhase('blockchain_sync');
+      setUploadProgress(90);
 
-        setTimeout(() => {
-          setIsUploading(false);
-          setUploadProgress(0);
-          setUploadPhase('idle');
+      const trackId = `track-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+      const newTrackObj: any = {
+        id: trackId,
+        songId: trackId,
+        title: uploadTitle.trim(),
+        artist: userProfile?.name || user?.displayName || "Artist",
+        artistName: userProfile?.name || user?.displayName || "Artist",
+        artistId: user?.uid,
+        genre: uploadGenre,
+        audioUrl: audioRes.downloadUrl,
+        coverUrl: coverRes.downloadUrl,
+        playCount: 0,
+        likes: 0,
+        isNFT: false,
+        createdAt: new Date().toISOString()
+      };
 
-          const newTrackId = `sim-${Date.now()}`;
-          const newTrackObj = {
-            id: newTrackId,
-            title: uploadTitle,
-            genre: uploadGenre,
-            coverUrl: uploadCoverPreview || "https://image.pollinations.ai/prompt/electronic%20ambient%20neon%20cover?width=400&height=400&nologo=true",
-            playCount: 0,
-            likes: 0,
-            isNFT: false,
-            artistId: user?.uid
-          };
+      await addUserTrack(newTrackObj);
+      setUploadPhase('success');
+      setUploadProgress(100);
 
-          setTracks(prev => [newTrackObj, ...prev]);
-          addNotification(`"${uploadTitle}" has been successfully broadcast, pinned to IPFS, and synced with TON Blockchain! 🎵🚀`, "success");
+      addNotification(`"${uploadTitle}" has been successfully published! 🎵`, "success");
 
-          // Reset form fields and validation states
-          setUploadTitle("");
-          setUploadGenre("Electronic");
-          setUploadAudioFile(null);
-          setUploadCoverFile(null);
-          setUploadCoverPreview(null);
-          setIsUploadFormTouched({ title: false, genre: false, audio: false, cover: false });
-        }, 1200);
-      }
-    }, 80);
+      // Reset form fields and validation states
+      setUploadTitle("");
+      setUploadGenre("Electronic");
+      setUploadAudioFile(null);
+      setUploadCoverFile(null);
+      setUploadCoverPreview(null);
+      setIsUploadFormTouched({ title: false, genre: false, audio: false, cover: false });
+    } catch (err) {
+      console.error(err);
+      addNotification("Upload failed. Please try again or use the full Forge Studio (/upload).", "error");
+    } finally {
+      setIsUploading(false);
+      setUploadPhase('idle');
+      setUploadProgress(0);
+    }
   };
 
   // Direct messaging action
   const handleSendMessage = () => {
-    if (!newMessageText.trim()) return;
+    if (!newMessageText.trim() || !activeConvoId) return;
 
-    // Append artist text
-    const updatedConversations = conversations.map(c => {
+    const messageText = newMessageText.trim();
+    setNewMessageText("");
+
+    // Append artist text to local state
+    setConversations(prev => prev.map(c => {
       if (c.id === activeConvoId) {
         return {
           ...c,
           messages: [
             ...c.messages,
-            { sender: "artist", text: newMessageText, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
+            { sender: "artist", text: messageText, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
           ]
         };
       }
       return c;
-    });
-
-    setConversations(updatedConversations);
-    const sent = newMessageText;
-    setNewMessageText("");
-    setIsTyping(true);
-
-    // Schedule fan organic reply
-    setTimeout(() => {
-      setIsTyping(false);
-      let replyText = "Oh wow, thanks for replying directly! 💎 I love using TonJam's direct messaging system. Best artist connection ever!";
-      const activeConvo = conversations.find(c => c.id === activeConvoId);
-
-      if (activeConvo) {
-        if (activeConvo.handle === "Vitalik_TON.eth") {
-          if (sent.toLowerCase().includes("stem") || sent.toLowerCase().includes("mix") || sent.toLowerCase().includes("vocal")) {
-            replyText = "Fascinating. Fully composable audio stems with decentralized IPFS metadata indexes represent a brilliant digital sovereignty standard. Absolute wizardry! 🚀💎";
-          } else {
-            replyText = "Absolutely. Transparent smart contracts on TON for direct artist rewards coordinate much better cultural alignment. Keep shipping!";
-          }
-        } else if (activeConvo.handle === "Pavel_Durov.ton") {
-          replyText = "Perfect! The TON community is ready. We love highly responsive creators. Keep scaling up your digital footprint! 📈";
-        } else if (activeConvo.handle === "Alice_Vance_NFT") {
-          replyText = "Oh nice, I'll fetch your next limited edition NFT as soon as it drops! Looking forward to hearing the full stem mix.";
-        }
-      }
-
-      setConversations(prev => prev.map(c => {
-        if (c.id === activeConvoId) {
-          return {
-            ...c,
-            messages: [
-              ...c.messages,
-              { sender: "fan", text: replyText, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
-            ]
-          };
-        }
-        return c;
-      }));
-
-      addNotification(`New fan connect DM from ${activeConvo?.name || "Collector"} 💬`, "success");
-    }, 1500);
+    }));
   };
 
   // Share special perk / drops form
@@ -1667,19 +1546,26 @@ export default function ArtistDashboard() {
                     <div className="w-1 h-5 bg-purple-500 rounded-full" />
                     <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.25em]">Albums & Ep collections</h2>
                   </div>
-                  <Carousel
-                    opts={{ align: "start", loop: true }}
-                    plugins={[Autoplay({ delay: 3000 })]}
-                    className="w-full bg-[#10141b]/20 p-4 rounded-[4px] border border-white/[0.02]"
-                  >
-                    <CarouselContent>
-                      {albums.map((album, index) => (
-                        <CarouselItem key={album.id} className="basis-4/5 md:basis-1/3 lg:basis-1/4">
-                          <AlbumCard key={album.id} album={album} index={index} />
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                  </Carousel>
+                  {albums.length > 0 ? (
+                    <Carousel
+                      opts={{ align: "start", loop: true }}
+                      plugins={[Autoplay({ delay: 3000 })]}
+                      className="w-full bg-[#10141b]/20 p-4 rounded-[4px] border border-white/[0.02]"
+                    >
+                      <CarouselContent>
+                        {albums.map((album, index) => (
+                          <CarouselItem key={album.id} className="basis-4/5 md:basis-1/3 lg:basis-1/4">
+                            <AlbumCard key={album.id} album={album} index={index} />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                    </Carousel>
+                  ) : (
+                    <div className="py-8 text-center bg-white/[0.01] rounded-2xl border border-dashed border-white/[0.05]">
+                      <Disc className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
+                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">No albums or EP collections released yet</p>
+                    </div>
+                  )}
                 </section>
 
                 {/* Main Music Tracks List view */}
@@ -2087,17 +1973,25 @@ export default function ArtistDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/[0.02]">
-                        {nftSales.map((sale) => (
-                          <tr key={sale.id} className="hover:bg-white/[0.01]">
-                            <td className="py-4 px-2 font-bold text-white text-[11px] truncate">{sale.item}</td>
-                            <td className="py-4 px-2 font-mono text-zinc-500 text-[10px]">{sale.buyer}</td>
-                            <td className="py-4 px-2 font-mono text-zinc-400 font-bold text-[10px]">{sale.price}</td>
-                            <td className="py-4 px-2 font-mono text-emerald-400 font-black text-[11px] flex items-center gap-1.5">
-                              <CheckCircle className="w-3.5 h-3.5" /> {sale.royalty}
+                        {nftSales.length > 0 ? (
+                          nftSales.map((sale) => (
+                            <tr key={sale.id} className="hover:bg-white/[0.01]">
+                              <td className="py-4 px-2 font-bold text-white text-[11px] truncate">{sale.item || sale.title || "NFT Edition"}</td>
+                              <td className="py-4 px-2 font-mono text-zinc-500 text-[10px]">{sale.buyer || sale.buyerAddress || "Collector"}</td>
+                              <td className="py-4 px-2 font-mono text-zinc-400 font-bold text-[10px]">{sale.price ? `${sale.price} TON` : "0 TON"}</td>
+                              <td className="py-4 px-2 font-mono text-emerald-400 font-black text-[11px] flex items-center gap-1.5">
+                                <CheckCircle className="w-3.5 h-3.5" /> {sale.royalty || `${((Number(sale.price) || 0) * 0.1).toFixed(1)} TON`}
+                              </td>
+                              <td className="py-4 px-2 text-zinc-500 text-[9px] text-right font-bold uppercase">{sale.time || "Recent"}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={5} className="py-8 text-center text-zinc-500 text-xs">
+                              No NFT sales recorded yet. Marketplace sales and royalty splits will appear here.
                             </td>
-                            <td className="py-4 px-2 text-zinc-500 text-[9px] text-right font-bold uppercase">{sale.time}</td>
                           </tr>
-                        ))}
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -2164,31 +2058,39 @@ export default function ArtistDashboard() {
                     </h3>
                     
                     <div className="space-y-2">
-                      {conversations.map((convo) => (
-                        <div
-                          key={convo.id}
-                          onClick={() => setActiveConvoId(convo.id)}
-                          className={`p-3 rounded-2xl flex items-center gap-3 cursor-pointer transition-all ${
-                            activeConvoId === convo.id 
-                              ? "bg-white/[0.06]" 
-                              : "hover:bg-white/[0.02]"
-                          }`}
-                        >
-                          <div className="relative w-9 h-9 rounded-xl overflow-hidden flex-shrink-0">
-                            <img src={convo.avatar} className="w-full h-full object-cover" alt="" />
-                            {convo.status === "online" && (
-                              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-black shadow-lg" />
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-white truncate">{convo.name}</span>
-                              <span className="text-[7.5px] px-1.5 py-0.5 bg-cyan-400/10 text-cyan-400 font-black rounded-md">{convo.badge}</span>
+                      {conversations.length > 0 ? (
+                        conversations.map((convo) => (
+                          <div
+                            key={convo.id}
+                            onClick={() => setActiveConvoId(convo.id)}
+                            className={`p-3 rounded-2xl flex items-center gap-3 cursor-pointer transition-all ${
+                              activeConvoId === convo.id 
+                                ? "bg-white/[0.06]" 
+                                : "hover:bg-white/[0.02]"
+                            }`}
+                          >
+                            <div className="relative w-9 h-9 rounded-xl overflow-hidden flex-shrink-0">
+                              <img src={convo.avatar} className="w-full h-full object-cover" alt="" />
+                              {convo.status === "online" && (
+                                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-black shadow-lg" />
+                              )}
                             </div>
-                            <p className="text-[9px] font-bold text-zinc-500 truncate mt-0.5">@{convo.handle}</p>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-white truncate">{convo.name}</span>
+                                <span className="text-[7.5px] px-1.5 py-0.5 bg-cyan-400/10 text-cyan-400 font-black rounded-md">{convo.badge}</span>
+                              </div>
+                              <p className="text-[9px] font-bold text-zinc-500 truncate mt-0.5">@{convo.handle}</p>
+                            </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="py-10 px-3 text-center text-zinc-500 text-xs space-y-2">
+                          <Users className="w-6 h-6 text-zinc-600 mx-auto" />
+                          <p className="font-semibold text-zinc-400">No active fan chats</p>
+                          <p className="text-[11px] text-zinc-600">When fans and NFT collectors message you, their chats will appear here.</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
 
@@ -2323,23 +2225,29 @@ export default function ArtistDashboard() {
                   {/* Active exclusive Perks List */}
                   <div className="space-y-2 pt-4 border-t border-white/[0.03]">
                     <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-wider mb-2">Active Exclusive Drops</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {exclusiveDrops.map((drop) => (
-                        <div key={drop.id} className="bg-black/30 p-4 rounded-2xl border border-white/[0.03] space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-black uppercase text-white tracking-wide truncate">{drop.title}</span>
-                            <span className="text-[7.5px] px-2 py-0.5 bg-purple-500/15 text-purple-400 font-black tracking-wider uppercase rounded-full">
-                              🔒 {drop.gating}
-                            </span>
+                    {exclusiveDrops.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {exclusiveDrops.map((drop) => (
+                          <div key={drop.id} className="bg-black/30 p-4 rounded-2xl border border-white/[0.03] space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-black uppercase text-white tracking-wide truncate">{drop.title}</span>
+                              <span className="text-[7.5px] px-2 py-0.5 bg-purple-500/15 text-purple-400 font-black tracking-wider uppercase rounded-full">
+                                🔒 {drop.gating}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-zinc-400 leading-relaxed font-semibold">{drop.description}</p>
+                            <div className="flex items-center justify-between text-[8px] font-mono text-zinc-500 font-black uppercase tracking-wider pt-2 border-t border-white/[0.02]">
+                              <span>Type: {drop.type}</span>
+                              <span>{drop.downloads} Downloads</span>
+                            </div>
                           </div>
-                          <p className="text-[10px] text-zinc-400 leading-relaxed font-semibold">{drop.description}</p>
-                          <div className="flex items-center justify-between text-[8px] font-mono text-zinc-500 font-black uppercase tracking-wider pt-2 border-t border-white/[0.02]">
-                            <span>Type: {drop.type}</span>
-                            <span>{drop.downloads} Downloads</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="py-8 text-center text-zinc-500 text-xs bg-black/20 rounded-2xl">
+                        No exclusive drops created yet. Deploy audio stems, alternate mixes, or backstage access above.
+                      </div>
+                    )}
                   </div>
 
                 </div>

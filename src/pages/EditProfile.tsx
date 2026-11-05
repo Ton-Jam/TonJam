@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Camera, Upload, Loader2, Link2, Twitter, Instagram, Globe, MessageSquare, ArrowLeft, Check } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudio } from '@/contexts/AudioContext';
+import LoadingScreen from '@/components/LoadingScreen';
 import { uploadFile } from '@/services/storageService';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -16,11 +17,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
 const EditProfile: React.FC = () => {
-  const { userProfile } = useAuth();
+  const { userProfile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { addNotification } = useAudio();
   
-  if (!userProfile) return null;
+  if (!userProfile) return <LoadingScreen />;
 
   const [name, setName] = useState(userProfile.name || '');
   const [username, setUsername] = useState(userProfile.username || '');
@@ -202,6 +203,7 @@ const EditProfile: React.FC = () => {
       if (currentUser && currentUser.uid === userProfile.uid) {
         const userRef = doc(db, 'users', currentUser.uid);
         await updateDoc(userRef, cleanUpdateData(updatedData));
+        await refreshProfile();
       }
 
       addNotification("Profile updated successfully.", "success");

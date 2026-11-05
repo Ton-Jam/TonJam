@@ -126,7 +126,7 @@ const ArtistVerification: React.FC = () => {
     userProfile?.isVerified ||
     userProfile?.isVerifiedArtist ||
     userProfile?.verified ||
-    userProfile?.role === 'artist'
+    userProfile?.verificationStatus === 'verified'
   );
 
   const pendingRequest = requests.find((r) => r.status === 'pending');

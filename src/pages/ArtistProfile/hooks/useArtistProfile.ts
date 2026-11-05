@@ -79,103 +79,149 @@ export const useArtistProfile = () => {
   const [trackSort, setTrackSort] = useState<"plays" | "newest" | "title">("plays");
 
   useEffect(() => {
+    let isMounted = true;
     setIsLoading(true);
-    const targetId = id ? decodeURIComponent(id).trim() : "dj-krupy";
-    const lowerTarget = targetId.toLowerCase();
-    
-    // Combine context artists and MOCK_ARTISTS
-    const allKnown = [...(artists || []), ...MOCK_ARTISTS];
-    
-    let foundArtist = allKnown.find(a => 
-      a.uid?.toLowerCase() === lowerTarget ||
-      a.username?.replace('@', '').toLowerCase() === lowerTarget ||
-      a.name?.toLowerCase() === lowerTarget ||
-      a.name?.toLowerCase().replace(/\s+/g, '-') === lowerTarget
-    );
 
-    // If still not found and target was supplied, generate dynamic profile
-    if (!foundArtist && targetId) {
-      const displayName = targetId
-        .replace(/[-_]/g, ' ')
-        .split(' ')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
+    const loadArtistData = async () => {
+      if (!id) {
+        if (isMounted) {
+          setArtist(null);
+          setIsLoading(false);
+        }
+        return;
+      }
 
-      foundArtist = {
-        uid: targetId,
-        name: displayName,
-        username: `@${targetId.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
-        walletAddress: `UQ${targetId.slice(0, 4)}...8888`,
-        avatarUrl: `https://image.pollinations.ai/prompt/${encodeURIComponent(displayName)}%20artist%20portrait%20photography%20studio?width=600&height=600&nologo=true`,
-        followers: 12400,
-        verified: true,
-        isVerifiedArtist: true,
-        genre: 'Afrobeats',
-        bio: `${displayName} is an active creator and recording artist on TonJam, minting exclusive music NFT releases and streaming live on the TON blockchain.`,
-        bannerUrl: "/default_tonjam_banner.jpg",
-        bannerImageUrl: "/default_tonjam_banner.jpg",
-        socials: { 
-          x: `https://x.com/${targetId.toLowerCase().replace(/[^a-z0-9]/g, '')}`, 
-          telegram: `https://t.me/${targetId.toLowerCase().replace(/[^a-z0-9]/g, '')}` 
-        },
-        earnings: { streaming: 320.0, nftSales: 1450.0, total: 1770.0 }
-      };
-    }
+      const targetId = decodeURIComponent(id).trim();
+      const lowerTarget = targetId.toLowerCase();
 
-    if (!foundArtist) {
-      foundArtist = MOCK_ARTISTS[0];
-    }
-    
-    if (foundArtist) {
+      // 1. Try finding in loaded AudioContext artists
+      let foundArtist: Artist | null = null;
+      if (artists && artists.length > 0) {
+        foundArtist = artists.find(a => 
+          a.uid?.toLowerCase() === lowerTarget ||
+          a.username?.replace('@', '').toLowerCase() === lowerTarget ||
+          a.name?.toLowerCase() === lowerTarget ||
+          a.name?.toLowerCase().replace(/\s+/g, '-') === lowerTarget
+        ) || null;
+      }
+
+      // 2. Query Firestore 'artists' collection if not in local context
+      if (!foundArtist) {
+        try {
+          const { doc, getDoc } = await import('firebase/firestore');
+          const { db } = await import('@/lib/firebase');
+          const artistDoc = await getDoc(doc(db, 'artists', targetId));
+          if (artistDoc.exists()) {
+            foundArtist = { uid: artistDoc.id, ...artistDoc.data() } as Artist;
+          }
+        } catch (err) {
+          console.warn('[useArtistProfile] Error fetching from artists collection:', err);
+        }
+      }
+
+      // 3. Query Firestore 'users' collection for verified artist profile
+      if (!foundArtist) {
+        try {
+          const { doc, getDoc } = await import('firebase/firestore');
+          const { db } = await import('@/lib/firebase');
+          const userDoc = await getDoc(doc(db, 'users', targetId));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            foundArtist = {
+              uid: userDoc.id,
+              name: userData.name || userData.displayName || 'Artist',
+              username: userData.username ? (userData.username.startsWith('@') ? userData.username : `@${userData.username}`) : undefined,
+              avatarUrl: userData.avatar || userData.photoURL,
+              coverPhoto: userData.bannerUrl || userData.coverUrl,
+              bio: userData.bio || '',
+              walletAddress: userData.walletAddress || '',
+              followers: userData.followers || 0,
+              verified: Boolean(userData.isVerifiedArtist || userData.isVerified || userData.verificationStatus === 'verified'),
+              isVerifiedArtist: Boolean(userData.isVerifiedArtist || userData.isVerified || userData.verificationStatus === 'verified'),
+              genre: userData.genre,
+              socials: userData.socials,
+              earnings: userData.earnings ? { streaming: 0, nftSales: 0, total: userData.earnings } : undefined
+            } as Artist;
+          }
+        } catch (err) {
+          console.warn('[useArtistProfile] Error fetching from users collection:', err);
+        }
+      }
+
+      if (!isMounted) return;
+
+      if (!foundArtist) {
+        // Honest not-found state without fabricated profiles
+        setArtist(null);
+        setTracks([]);
+        setNfts([]);
+        setAlbums([]);
+        setPlaylists([]);
+        setSingles([]);
+        setCollections([]);
+        setPosts([]);
+        setEvents([]);
+        setStats(null);
+        setIsLoading(false);
+        return;
+      }
+
       setArtist(foundArtist);
-      setStats(getArtistStats(foundArtist.uid));
-      setAlbums(getMockAlbums(foundArtist.uid));
-      setSingles(getMockSingles(foundArtist.uid));
-      setCollections(getMockCollections(foundArtist.uid));
-      setPlaylists(getMockPlaylists(foundArtist.uid));
-      setPosts(getMockPosts());
-      setEvents(getMockEvents(foundArtist.uid));
-      setMutualFollowers(getMockMutualFollowers());
-      setTopSupporters(getTopSupporters());
-      setMissions(getArtistMissions());
-      setAnalytics(getMockAnalytics());
 
-      // Filter tracks from audioContext and mock
-      const candidateTracks = (allTracks && allTracks.length > 0) ? allTracks : MOCK_TRACKS;
-      const artistTracks = candidateTracks.filter(t => 
+      // Real statistics from authentic records
+      setStats({
+        monthlyListeners: (foundArtist as any).monthlyListeners || 0,
+        followers: foundArtist.followers || 0,
+        following: 0,
+        streams: (foundArtist as any).totalStreams || (foundArtist as any).streams || 0,
+        totalStreams: (foundArtist as any).totalStreams || (foundArtist as any).streams || 0,
+        followersCount: foundArtist.followers || 0,
+        tracksCount: 0,
+        nftsCount: 0,
+        albumsCount: 0,
+        singlesCount: 0,
+        playlistsCount: 0,
+        nftCollectionsCount: 0,
+        nftOwnersCount: 0,
+        floorPrice: "0",
+        totalSales: "0"
+      });
+
+      // Genuine artist tracks from context
+      const artistTracks = (allTracks || []).filter(t => 
         t.artistId?.toLowerCase() === foundArtist!.uid.toLowerCase() ||
         t.artist?.toLowerCase() === foundArtist!.name.toLowerCase()
       );
-      
-      setTracks(artistTracks.length > 0 ? artistTracks : candidateTracks.slice(0, 5));
+      setTracks(artistTracks);
+      setSingles(artistTracks);
 
-      // Filter NFTs from audioContext and mock
-      const candidateNFTs = (allNFTs && allNFTs.length > 0) ? allNFTs : MOCK_NFTS;
-      let artistNFTs = candidateNFTs.filter(n => 
+      // Genuine artist NFTs from context
+      const artistNFTs = (allNFTs || []).filter(n => 
         n.creator?.toLowerCase() === foundArtist!.name.toLowerCase() ||
-        n.creator?.toLowerCase() === foundArtist!.uid.toLowerCase()
+        n.creator?.toLowerCase() === foundArtist!.uid.toLowerCase() ||
+        n.artistId?.toLowerCase() === foundArtist!.uid.toLowerCase()
       );
-
-      // Ensure at least 3 releases are always visible for the user to view/explore
-      if (artistNFTs.length === 0) {
-        artistNFTs = candidateNFTs.slice(0, 3).map((nft, idx) => ({
-          ...nft,
-          id: `nft-${foundArtist!.uid}-${idx + 1}`,
-          creator: foundArtist!.name,
-          title: `${foundArtist!.name} - ${nft.title || 'Genesis Single Drop'}`,
-          edition: `1 of ${25 * (idx + 1)}`
-        }));
-      }
-
       setNfts(artistNFTs);
-    }
-    
-    // Simulate slight delay to trigger skeletons elegantly
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 400);
 
-    return () => clearTimeout(timer);
+      // Genuine artist albums & playlists
+      setAlbums([]);
+      setCollections([]);
+      setPlaylists([]);
+      setPosts([]);
+      setEvents([]);
+      setMutualFollowers([]);
+      setTopSupporters([]);
+      setMissions([]);
+      setAnalytics(null);
+
+      setIsLoading(false);
+    };
+
+    loadArtistData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id, artists, allTracks, allNFTs]);
 
   // Actions

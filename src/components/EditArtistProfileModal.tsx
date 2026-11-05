@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { UserPen, X, Twitter, Send, Music, Globe, Instagram, Image as ImageIcon, Upload, Loader2, Calendar, MapPin, Ticket, Clock, PlusCircle, Trash2 } from 'lucide-react';
 import { Artist, ArtistEvent } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { uploadFile } from '@/services/storageService';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -15,6 +16,7 @@ interface EditArtistProfileModalProps {
 
 const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist, onClose }) => {
   const { addNotification, setArtists } = useAudio();
+  const { refreshProfile } = useAuth();
   const [name, setName] = useState(artist.name);
   const [username, setUsername] = useState(artist.username || '');
   const [bio, setBio] = useState(artist.bio || '');
@@ -138,6 +140,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
           socials,
           events
         }));
+        await refreshProfile();
       }
 
       addNotification("Profile updated successfully.", "success");

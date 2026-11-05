@@ -74,9 +74,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const isAdmin = userProfile?.role === 'admin';
-  const isArtist = userProfile?.role === 'artist';
-  const isCollector = userProfile?.role === 'collector' || !userProfile?.role;
+  const isAdmin = Boolean(userProfile?.role === 'admin' || userProfile?.isAdmin === true);
+  const isArtist = Boolean(userProfile?.role === 'artist' && (userProfile?.isVerifiedArtist || userProfile?.verificationStatus === 'verified' || userProfile?.isVerified));
+  const isCollector = !isAdmin && !isArtist;
 
   const setDocWithRetry = async (docRef: any, data: any, options?: any, maxRetries = 3, delayMs = 1000) => {
     let attempt = 0;
@@ -125,17 +125,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           data.createdAt = (data.createdAt as any).toDate().toISOString();
         }
         
-        // Ensure krusherkrupy@gmail.com is admin
-        if (auth.currentUser?.email === 'krusherkrupy@gmail.com' && data.role !== 'admin') {
-          try {
-            await setDocWithRetry(docRef, { role: 'admin' }, { merge: true });
-            data.role = 'admin';
-            console.log(`[AuthContext] Granted admin role to krusherkrupy@gmail.com`);
-          } catch (writeErr) {
-            console.warn("[AuthContext] Failed to update admin role in Firestore:", writeErr);
-          }
-        }
-        
         // Ensure currently logged in user has a short artist bio if missing
         if (!data.bio || data.bio.trim() === '') {
           const shortBio = "Creating the future of sound. Electronic producer and synth enthusiast.";
@@ -162,7 +151,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           followers: 0,
           following: 0,
           earnings: 0,
-          role: auth.currentUser?.email === 'krusherkrupy@gmail.com' ? 'admin' : 'collector',
+          role: 'collector',
+          verificationStatus: 'unverified',
           bio: "Creating the future of sound. Electronic producer and synth enthusiast.",
           createdAt: new Date().toISOString()
         };
@@ -191,7 +181,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           followers: 0,
           following: 0,
           earnings: 0,
-          role: auth.currentUser?.email === 'krusherkrupy@gmail.com' ? 'admin' : 'collector',
+          role: 'collector',
+          verificationStatus: 'unverified',
           bio: "Creating the future of sound. Electronic producer and synth enthusiast.",
           createdAt: new Date().toISOString()
         } as UserProfile;
@@ -383,7 +374,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         followers: 0,
         following: 0,
         earnings: 0,
-        role: email === 'krusherkrupy@gmail.com' ? 'admin' : 'collector',
+        role: 'collector',
+        verificationStatus: 'unverified',
         bio: "Creating the future of sound. Electronic producer and synth enthusiast.",
         createdAt: new Date().toISOString()
       };

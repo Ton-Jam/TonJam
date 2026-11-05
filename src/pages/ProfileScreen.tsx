@@ -56,7 +56,7 @@ const ProfileScreenContent: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { openModal } = useModal();
-  const { user: authUser, userProfile: authUserProfile } = useAuth();
+  const { user: authUser, userProfile: authUserProfile, signOut: authSignOut, refreshProfile: authRefreshProfile } = useAuth();
   const { playlists } = useAudio();
   const { nfts } = useNFT();
   
@@ -67,28 +67,52 @@ const ProfileScreenContent: React.FC = () => {
         name: authUserProfile.name || 'TONJAM User',
         username: authUserProfile.username || 'tonjam_user',
         avatar: authUserProfile.avatar || getPlaceholderImage(`user-${authUserProfile.uid}`),
-        bannerUrl: authUserProfile.bannerUrl || MOCK_PROFILE.bannerUrl,
-        bio: authUserProfile.bio || MOCK_PROFILE.bio,
-        genre: MOCK_PROFILE.genre,
-        country: MOCK_PROFILE.country,
-        memberSince: authUserProfile.createdAt ? new Date(authUserProfile.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : MOCK_PROFILE.memberSince,
-        walletAddress: authUserProfile.walletAddress || MOCK_PROFILE.walletAddress,
-        isSpotifyVerified: Boolean(authUserProfile.isVerifiedArtist),
-        isArtistVerified: Boolean(authUserProfile.isVerifiedArtist || authUserProfile.role === 'artist'),
+        bannerUrl: authUserProfile.bannerUrl || '',
+        bio: authUserProfile.bio || '',
+        genre: authUserProfile.genre || '',
+        country: authUserProfile.country || '',
+        memberSince: authUserProfile.createdAt ? new Date(authUserProfile.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : '',
+        walletAddress: authUserProfile.walletAddress || '',
+        isSpotifyVerified: Boolean(authUserProfile.isSpotifyVerified),
+        isArtistVerified: Boolean(authUserProfile.isVerifiedArtist || authUserProfile.isVerified),
         isTonVerified: Boolean(authUserProfile.walletAddress),
-        verificationStatus: authUserProfile.isVerifiedArtist ? 'verified' : 'none',
+        verificationStatus: (authUserProfile.verificationStatus as any) || (authUserProfile.isVerifiedArtist ? 'verified' : 'none'),
         followers: authUserProfile.followers || 0,
         following: authUserProfile.following || 0,
-        monthlyListeners: 1200,
-        totalStreams: 4500,
+        monthlyListeners: authUserProfile.monthlyListeners || 0,
+        totalStreams: authUserProfile.totalStreams || 0,
         nftsOwned: 0,
-        nftsSold: 0,
+        nftsSold: authUserProfile.nftsSold || 0,
         playlistsCount: 0,
-        tjPoints: authUserProfile.tjBalance || 150,
-        socials: authUserProfile.socials || MOCK_PROFILE.socials
+        tjPoints: authUserProfile.tjBalance || 0,
+        socials: authUserProfile.socials || {}
       };
     }
-    return MOCK_PROFILE;
+    return {
+      uid: authUser?.uid || '',
+      name: authUser?.displayName || 'TONJAM User',
+      username: authUser?.email?.split('@')[0] || 'tonjam_user',
+      avatar: authUser?.photoURL || getPlaceholderImage('user-default'),
+      bannerUrl: '',
+      bio: '',
+      genre: '',
+      country: '',
+      memberSince: '',
+      walletAddress: '',
+      isSpotifyVerified: false,
+      isArtistVerified: false,
+      isTonVerified: false,
+      verificationStatus: 'none',
+      followers: 0,
+      following: 0,
+      monthlyListeners: 0,
+      totalStreams: 0,
+      nftsOwned: 0,
+      nftsSold: 0,
+      playlistsCount: 0,
+      tjPoints: 0,
+      socials: {}
+    };
   });
 
   const [activeTab, setActiveTab] = useState<string>('overview');
@@ -118,14 +142,14 @@ const ProfileScreenContent: React.FC = () => {
             name: data.name || prev.name,
             username: data.username || prev.username,
             avatar: data.avatar || prev.avatar,
-            bannerUrl: data.bannerUrl || prev.bannerUrl,
+            bannerUrl: data.bannerUrl !== undefined ? data.bannerUrl : prev.bannerUrl,
             bio: data.bio !== undefined ? data.bio : prev.bio,
-            genre: data.genre || prev.genre,
-            country: data.country || prev.country,
+            genre: data.genre !== undefined ? data.genre : prev.genre,
+            country: data.country !== undefined ? data.country : prev.country,
             memberSince: data.memberSince || (data.createdAt ? new Date(data.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : prev.memberSince),
-            walletAddress: data.walletAddress || prev.walletAddress,
+            walletAddress: data.walletAddress !== undefined ? data.walletAddress : prev.walletAddress,
             isSpotifyVerified: Boolean(data.isSpotifyVerified ?? prev.isSpotifyVerified),
-            isArtistVerified: Boolean(data.isArtistVerified || data.isVerifiedArtist || data.role === 'artist' || prev.isArtistVerified),
+            isArtistVerified: Boolean(data.isVerifiedArtist || data.isVerified || (data.role === 'artist' && data.verificationStatus === 'verified')),
             isTonVerified: Boolean(data.isTonVerified ?? (data.walletAddress ? true : prev.isTonVerified)),
             verificationStatus: data.verificationStatus || (data.isVerifiedArtist ? 'verified' : prev.verificationStatus),
             followers: typeof data.followers === 'number' ? data.followers : prev.followers,
@@ -152,8 +176,8 @@ const ProfileScreenContent: React.FC = () => {
       (nft) =>
         nft.ownerId === targetUid ||
         (profile.walletAddress && nft.owner === profile.walletAddress) ||
-        nft.owner === profile.name ||
-        nft.owner === profile.username
+        (profile.name && nft.owner === profile.name) ||
+        (profile.username && nft.owner === profile.username)
     );
   }, [nfts, targetUid, profile.walletAddress, profile.name, profile.username]);
 
@@ -161,8 +185,8 @@ const ProfileScreenContent: React.FC = () => {
   const userPlaylists = useMemo(() => {
     return playlists.filter(
       (pl) =>
-        pl.creator === profile.name ||
-        pl.creator === profile.username ||
+        (profile.name && pl.creator === profile.name) ||
+        (profile.username && pl.creator === profile.username) ||
         (pl as any).creatorId === targetUid ||
         (pl as any).userId === targetUid
     );
@@ -171,8 +195,8 @@ const ProfileScreenContent: React.FC = () => {
   // Keep stats in sync with computed NFTs and Playlists count
   const dynamicProfile: ProfileData = useMemo(() => ({
     ...profile,
-    nftsOwned: ownedNfts.length > 0 ? ownedNfts.length : profile.nftsOwned,
-    playlistsCount: userPlaylists.length > 0 ? userPlaylists.length : profile.playlistsCount
+    nftsOwned: ownedNfts.length,
+    playlistsCount: userPlaylists.length
   }), [profile, ownedNfts.length, userPlaylists.length]);
 
   // Apply Theme Toggle Class
@@ -185,55 +209,56 @@ const ProfileScreenContent: React.FC = () => {
     }
   }, [isDarkMode]);
 
-  // Pull to refresh simulation
-  const handleRefresh = () => {
+  // Authentic Firestore refresh handler
+  const handleRefresh = async () => {
+    if (isRefreshing) return;
     setIsRefreshing(true);
-    setTimeout(() => {
+    try {
+      if (authRefreshProfile) {
+        await authRefreshProfile();
+      }
+      toast.success('Profile Refreshed', 'User records synchronized with Firestore');
+    } catch (err) {
+      toast.error('Sync Failed', 'Could not refresh profile from server');
+    } finally {
       setIsRefreshing(false);
-      toast.success('Profile Refreshed', 'Ecosystem synchronization completed');
-    }, 1200);
+    }
   };
 
+  // Secure Artist Verification application - only sets 'pending'
   const handleBecomeArtist = async () => {
-    setProfile(prev => ({ ...prev, verificationStatus: 'pending' }));
-    toast.info('Application Pending', 'Verification application submitted successfully');
-    
-    try {
-      if (targetUid) {
-        const userRef = doc(db, 'users', targetUid);
-        await updateDoc(userRef, cleanUpdateData({
-          verificationStatus: 'pending'
-        }));
-      }
-    } catch (err) {
-      console.warn('Could not update pending status:', err);
+    if (!targetUid) {
+      toast.error('Authentication Required', 'Please log in to apply for artist verification.');
+      return;
     }
-    
-    // Auto-approve after 4 seconds to show transition layout animation
-    setTimeout(async () => {
-      setProfile(prev => ({ 
-        ...prev, 
-        verificationStatus: 'verified',
-        isArtistVerified: true 
+
+    if (profile.verificationStatus === 'pending') {
+      toast.info('Application Already Pending', 'Your verification request is currently under review.');
+      return;
+    }
+
+    if (profile.verificationStatus === 'verified' || profile.isArtistVerified) {
+      toast.info('Already Verified', 'Your account is already a verified TonJam artist.');
+      return;
+    }
+
+    try {
+      const userRef = doc(db, 'users', targetUid);
+      await updateDoc(userRef, cleanUpdateData({
+        verificationStatus: 'pending'
       }));
-      toast.success('Verification Complete', 'Congratulations! You are now a verified TonJam artist');
-      try {
-        if (targetUid) {
-          const userRef = doc(db, 'users', targetUid);
-          await updateDoc(userRef, cleanUpdateData({
-            verificationStatus: 'verified',
-            isArtistVerified: true,
-            role: 'artist'
-          }));
-        }
-      } catch (e) {
-        console.warn('Could not persist verified artist state:', e);
-      }
-    }, 4500);
+      setProfile(prev => ({ ...prev, verificationStatus: 'pending' }));
+      toast.success('Application Submitted', 'Your artist verification application is now pending review.');
+    } catch (err) {
+      console.error('Could not submit artist verification application:', err);
+      toast.error('Submission Failed', 'Could not submit verification request. Please try again.');
+    }
   };
 
   const handleCopyProfileLink = () => {
-    navigator.clipboard.writeText(`https://tonjam.app/user/${dynamicProfile.username}`);
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://tonjam.app';
+    const profileUrl = `${baseUrl}/user/${dynamicProfile.username || dynamicProfile.uid}`;
+    navigator.clipboard.writeText(profileUrl);
     setCopiedLink(true);
     toast.success('Link Copied', 'Profile URL copied to clipboard');
     setTimeout(() => setCopiedLink(false), 2000);
@@ -278,7 +303,7 @@ const ProfileScreenContent: React.FC = () => {
       case 'nfts':
         return (
           <NFTTab 
-            nfts={ownedNfts.length > 0 ? ownedNfts : undefined}
+            nfts={ownedNfts}
             onSelectNFT={(id) => {
               navigate(`/nft/${id}`);
             }} 
@@ -287,7 +312,7 @@ const ProfileScreenContent: React.FC = () => {
       case 'playlists':
         return (
           <PlaylistTab 
-            playlists={userPlaylists.length > 0 ? userPlaylists : undefined}
+            playlists={userPlaylists}
             onSelectPlaylist={(id) => {
               navigate(`/playlist/${id}`);
             }} 
@@ -511,7 +536,17 @@ const ProfileScreenContent: React.FC = () => {
           <div className="h-px bg-white/5 my-3" />
 
           <button
-            onClick={() => { toast.success('Logged Out', 'Successfully disconnected from node'); setShowSettings(false); }}
+            onClick={async () => {
+              try {
+                await authSignOut();
+                toast.success('Logged Out', 'Successfully logged out of TonJam');
+              } catch (err) {
+                toast.error('Logout Failed', 'Could not sign out completely');
+              } finally {
+                setShowSettings(false);
+                navigate('/');
+              }
+            }}
             className="w-full flex items-center gap-4 px-4 py-3 hover:bg-red-500/10 active:bg-red-500/20 text-red-400 rounded-xl transition-colors text-left text-sm font-bold cursor-pointer"
           >
             <LogOut className="w-5 h-5" />

@@ -89,33 +89,33 @@ export const UserProfile: React.FC = () => {
               bannerUrl: foundArtist.bannerUrl || foundArtist.bannerImageUrl || '',
               bio: foundArtist.bio || '',
               walletAddress: foundArtist.walletAddress || '',
-              isVerifiedArtist: true,
+              isVerifiedArtist: Boolean(foundArtist.isVerifiedArtist || foundArtist.verified),
               role: 'artist',
-              followers: foundArtist.followers || 1420,
-              following: 12,
+              followers: foundArtist.followers || 0,
+              following: 0,
               earnings: 0,
               createdAt: new Date().toISOString(),
-              tjBalance: 500,
-              monthlyListeners: 34500,
-              totalStreams: 182000
+              tjBalance: 0,
+              monthlyListeners: (foundArtist as any).monthlyListeners || 0,
+              totalStreams: (foundArtist as any).totalStreams || 0
             } as UserProfileType);
           } else {
             // 3. Fallback collector profile
             setUser({
               uid: id,
-              name: 'TONJam Explorer',
+              name: 'TONJam Collector',
               username: `user_${id.slice(0, 6)}`,
               avatar: getPlaceholderImage(`user-${id}`),
               bannerUrl: '',
-              bio: 'Active on-chain music collector and listener on TonJam ecosystem.',
-              walletAddress: id.startsWith('EQ') ? id : `EQD${id.slice(0, 6)}...${id.slice(-4)}`,
+              bio: '',
+              walletAddress: id.startsWith('EQ') || id.startsWith('UQ') ? id : '',
               isVerifiedArtist: false,
               role: 'collector',
-              followers: 12,
-              following: 48,
+              followers: 0,
+              following: 0,
               earnings: 0,
               createdAt: new Date().toISOString(),
-              tjBalance: 150
+              tjBalance: 0
             } as UserProfileType);
           }
         }
@@ -127,12 +127,12 @@ export const UserProfile: React.FC = () => {
           username: 'collector',
           avatar: getPlaceholderImage(`user-${id || 'guest'}`),
           bannerUrl: '',
-          bio: 'Music and NFT Enthusiast.',
+          bio: '',
           walletAddress: '',
           followers: 0,
           following: 0,
           earnings: 0,
-          tjBalance: 100
+          tjBalance: 0
         } as UserProfileType);
       } finally {
         setLoading(false);
@@ -189,11 +189,8 @@ export const UserProfile: React.FC = () => {
       return merged;
     }
 
-    if (directOwned.length === 0 && !isArtist) {
-      return (allNFTs && allNFTs.length > 0 ? allNFTs : nfts).slice(0, 6);
-    }
     return directOwned;
-  }, [user, nfts, isOwnProfile, userNFTs, isArtist, allNFTs]);
+  }, [user, nfts, isOwnProfile, userNFTs]);
 
   const uploadedTracks = useMemo(() => {
     if (!user) return [];
@@ -284,14 +281,14 @@ export const UserProfile: React.FC = () => {
                   user={user}
                   isOwnProfile={isOwnProfile}
                   activeTab={activeTab}
-                  tracks={uploadedTracks.length > 0 ? uploadedTracks : allTracks.slice(0, 5)}
+                  tracks={uploadedTracks}
                   nfts={ownedNfts}
                   playlists={userPlaylists}
                   posts={userPosts}
                   stats={{
-                    monthlyListeners: (user as any).monthlyListeners || 48200,
-                    totalStreams: (user as any).totalStreams || 124900,
-                    followers: user.followers,
+                    monthlyListeners: (user as any).monthlyListeners || 0,
+                    totalStreams: (user as any).totalStreams || 0,
+                    followers: user.followers || 0,
                   }}
                   currentTrack={currentTrack}
                   isPlaying={isPlaying}

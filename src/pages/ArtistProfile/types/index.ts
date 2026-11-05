@@ -15,6 +15,10 @@ export interface ArtistStats {
   followers: number;
   following: number;
   streams: number;
+  totalStreams?: number;
+  followersCount?: number;
+  tracksCount?: number;
+  nftsCount?: number;
   albumsCount: number;
   singlesCount: number;
   playlistsCount: number;
