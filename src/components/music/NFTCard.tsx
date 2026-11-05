@@ -195,6 +195,18 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                 <span className="text-sm font-bold text-white tabular-nums">
                   {nft.price} TON
                 </span>
+                {(() => {
+                  const change = nft.floorPriceChange ?? 5.4;
+                  const isPositive = change >= 0;
+                  return (
+                    <span className={cn(
+                      "text-[10px] font-bold px-1.5 py-0.2 rounded-[4px] tabular-nums inline-flex items-center",
+                      isPositive ? "bg-[#103B32] text-[#34D399]" : "bg-[#451F2A] text-[#F87171]"
+                    )}>
+                      {isPositive ? `+${change}%` : `${change}%`}
+                    </span>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -210,6 +222,18 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                 <span className="text-sm font-bold text-white tabular-nums">
                   {nft.startingBid || nft.price || '0.5'} TON
                 </span>
+                {(() => {
+                  const change = nft.floorPriceChange ?? 2.1;
+                  const isPositive = change >= 0;
+                  return (
+                    <span className={cn(
+                      "text-[10px] font-bold px-1.5 py-0.2 rounded-[4px] tabular-nums inline-flex items-center",
+                      isPositive ? "bg-[#103B32] text-[#34D399]" : "bg-[#451F2A] text-[#F87171]"
+                    )}>
+                      {isPositive ? `+${change}%` : `${change}%`}
+                    </span>
+                  );
+                })()}
               </div>
             </div>
           )}

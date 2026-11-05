@@ -37,29 +37,7 @@ import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { useTrendingSearches } from '@/hooks/useTrendingSearches';
 import { ArtistLeaderboard } from '@/components/ArtistLeaderboard';
 import { FeaturedArtistCard } from '@/components/FeaturedArtistCard';
-
-interface SpotifyCategory {
-  id: string;
-  title: string;
-  query: string;
-  gradient: string;
-  imgUrl: string;
-}
-
-const SPOTIFY_CATEGORIES: SpotifyCategory[] = [
-  { id: 'cat-1', title: 'Phonk & Drift', query: 'Phonk', gradient: 'bg-gradient-to-br from-emerald-600 to-teal-900', imgUrl: 'https://picsum.photos/seed/phonk/300/300' },
-  { id: 'cat-2', title: 'Synthwave & Cyber', query: 'Synthwave', gradient: 'bg-gradient-to-br from-purple-600 to-indigo-900', imgUrl: 'https://picsum.photos/seed/synthwave/300/300' },
-  { id: 'cat-3', title: 'Afro-TON Beats', query: 'Afro-TON', gradient: 'bg-gradient-to-br from-amber-500 to-rose-800', imgUrl: 'https://picsum.photos/seed/afro/300/300' },
-  { id: 'cat-4', title: 'Electronic & House', query: 'Electronic', gradient: 'bg-gradient-to-br from-blue-600 to-cyan-900', imgUrl: 'https://picsum.photos/seed/electronic/300/300' },
-  { id: 'cat-5', title: 'Hip Hop & Rap', query: 'Hip Hop', gradient: 'bg-gradient-to-br from-rose-600 to-pink-900', imgUrl: 'https://picsum.photos/seed/hiphop/300/300' },
-  { id: 'cat-6', title: 'Pop & Chart Hits', query: 'Pop', gradient: 'bg-gradient-to-br from-fuchsia-600 to-pink-800', imgUrl: 'https://picsum.photos/seed/pophits/300/300' },
-  { id: 'cat-7', title: 'Rock & Metal', query: 'Rock', gradient: 'bg-gradient-to-br from-red-700 to-slate-900', imgUrl: 'https://picsum.photos/seed/rock/300/300' },
-  { id: 'cat-8', title: 'Chill & Lo-Fi', query: 'Ambient', gradient: 'bg-gradient-to-br from-teal-600 to-emerald-900', imgUrl: 'https://picsum.photos/seed/lofi/300/300' },
-  { id: 'cat-9', title: 'New Drops', query: 'New', gradient: 'bg-gradient-to-br from-cyan-600 to-blue-900', imgUrl: 'https://picsum.photos/seed/newdrops/300/300' },
-  { id: 'cat-10', title: 'Music NFTs', query: 'NFT', gradient: 'bg-gradient-to-br from-purple-600 to-indigo-950', imgUrl: 'https://picsum.photos/seed/musicnft/300/300' },
-  { id: 'cat-11', title: 'Live Spaces', query: 'Live', gradient: 'bg-gradient-to-br from-orange-600 to-red-900', imgUrl: 'https://picsum.photos/seed/livespaces/300/300' },
-  { id: 'cat-12', title: 'Top Charts 50', query: 'Top', gradient: 'bg-gradient-to-br from-yellow-600 to-amber-900', imgUrl: 'https://picsum.photos/seed/topcharts/300/300' }
-];
+import { DISCOVER_CATEGORIES, DiscoverCategory } from '@/constants/genres';
 
 const FILTER_PILLS = [
   { id: 'all', label: 'All' },
@@ -351,10 +329,14 @@ export const Discover: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pb-32 relative select-none w-full max-w-full overflow-x-hidden">
-      <PageHeader title="Search" showBack={true} />
+      <PageHeader title="Discover Music" showBack={true} />
       
       {/* Search Content Input Area */}
-      <div className="pt-2 pb-3 px-4 sm:px-6 lg:px-8 space-y-3">
+      <div className="pt-2 pb-3 px-4 sm:px-6 lg:px-8 space-y-4">
+        <div className="space-y-1">
+          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">Discover Music</h1>
+          <p className="text-xs sm:text-sm text-zinc-400">Find your sound. Explore your world.</p>
+        </div>
 
         {/* Main Search Input Bar - High border radius with subtle blue border */}
         <div className="w-full relative">
@@ -588,10 +570,10 @@ export const Discover: React.FC = () => {
           <div className="space-y-10">
             {/* 1. Browse All Categories */}
             <section className="space-y-3.5">
-              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Browse All</h3>
+              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Explore All Genres</h3>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
-                {SPOTIFY_CATEGORIES.map((category) => (
+                {DISCOVER_CATEGORIES.map((category) => (
                   <motion.div
                     key={category.id}
                     whileHover={{ scale: 1.02 }}

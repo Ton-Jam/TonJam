@@ -20,6 +20,7 @@ export interface MusicNFTData {
   audioUrl?: string;
   status?: string;
   owner?: string;
+  floorPriceChange?: number;
   royaltySplits?: Array<{ address: string; percentage: number }>;
 }
 
@@ -158,7 +159,21 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
       {/* Bottom Part: Pricing, Edition & CTA */}
       <div className="mt-3 pt-3 flex items-end justify-between gap-2">
         <div>
-          <TonPriceLabel price={nft.price} label="Price" size="sm" />
+          <div className="flex items-center gap-2">
+            <TonPriceLabel price={nft.price} label="Price" size="sm" />
+            {(() => {
+              const change = nft.floorPriceChange ?? 4.8;
+              const isPositive = change >= 0;
+              return (
+                <span className={cn(
+                  "text-[9px] font-bold px-1.5 py-0.2 rounded-[4px] tabular-nums inline-flex items-center mt-3",
+                  isPositive ? "bg-[#103B32] text-[#34D399]" : "bg-[#451F2A] text-[#F87171]"
+                )}>
+                  {isPositive ? `+${change}%` : `${change}%`}
+                </span>
+              );
+            })()}
+          </div>
           {nft.edition && (
             <span className="text-[10px] text-[#9BAAC5] block mt-0.5">
               {nft.edition.includes("of") ? nft.edition : `${nft.edition} editions`}
