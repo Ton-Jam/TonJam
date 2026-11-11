@@ -10,7 +10,24 @@ import fs from 'fs';
 import cors from 'cors';
 import FormData from 'form-data';
 import { GoogleGenAI, Type } from "@google/genai";
-import { verifyFirebaseToken, AuthRequest } from './src/middleware/authMiddleware';
+import { 
+    verifyFirebaseToken, 
+    requireAuth, 
+    optionalAuth, 
+    requireAdmin, 
+    createRateLimiter, 
+    validateSafeRemoteUrl, 
+    AuthRequest 
+} from './src/middleware/authMiddleware';
+import { getAuthAdmin, getFirestoreAdmin } from './src/lib/firebase-admin';
+import { TonClient, Address } from '@ton/ton';
+import { 
+    TON_NETWORK_MODE, 
+    TON_MAINNET_CONFIG, 
+    TON_TESTNET_CONFIG, 
+    getTonEndpoint, 
+    validateTonAddress 
+} from './src/services/tonService';
 
 dotenv.config();
 
@@ -108,6 +125,40 @@ if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+// Allowed MIME types and strictly blocked executable extensions
+const ALLOWED_MIME_TYPES = new Set([
+    'audio/mpeg',
+    'audio/mp3',
+    'audio/wav',
+    'audio/x-wav',
+    'audio/ogg',
+    'audio/flac',
+    'audio/x-m4a',
+    'audio/aac',
+    'audio/mp4',
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/svg+xml',
+    'application/json'
+]);
+
+const BLOCKED_EXTENSIONS = new Set([
+    '.exe', '.sh', '.bat', '.cmd', '.bin', '.msi', '.js', '.mjs', '.cjs',
+    '.py', '.php', '.vbs', '.scr', '.com', '.jar', '.apk', '.wsf', '.hta'
+]);
+
+const ALLOWED_EXTENSIONS = new Set([
+    '.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac',
+    '.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg',
+    '.json'
+]);
+
+const sanitizeFileName = (originalName: string) => {
+    return originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
+};
+
 // Multer config
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -115,13 +166,37 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        const cleanName = sanitizeFileName(path.basename(file.originalname));
+        cb(null, file.fieldname + '-' + uniqueSuffix + '-' + cleanName);
     }
 });
 
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+    fileFilter: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (BLOCKED_EXTENSIONS.has(ext)) {
+            return cb(new Error(`Security Alert: Executable upload (${ext}) is strictly prohibited.`));
+        }
+        if (!ALLOWED_EXTENSIONS.has(ext) && !ALLOWED_MIME_TYPES.has(file.mimetype)) {
+            return cb(new Error(`Invalid file type: ${ext} is not permitted.`));
+        }
+        cb(null, true);
+    }
+});
+
+// Sensitive endpoint rate limiters
+const aiRateLimiter = createRateLimiter({
+    windowMs: 60000,
+    maxRequests: 30,
+    message: 'Too many AI requests. Please slow down.'
+});
+
+const uploadRateLimiter = createRateLimiter({
+    windowMs: 60000,
+    maxRequests: 20,
+    message: 'Upload rate limit reached. Please wait before uploading more files.'
 });
 
 async function startServer() {
@@ -139,31 +214,96 @@ async function startServer() {
     app.use(express.json({ limit: '50mb' }));
     app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+    // Socket.io Authentication Middleware
+    io.use(async (socket, next) => {
+        try {
+            const token = socket.handshake.auth?.token || 
+                          socket.handshake.headers?.authorization?.replace(/^Bearer\s+/i, '');
+            if (token && typeof token === 'string') {
+                const authAdmin = getAuthAdmin();
+                if (authAdmin) {
+                    const decoded = await authAdmin.verifyIdToken(token);
+                    (socket as any).user = {
+                        uid: decoded.uid,
+                        email: decoded.email,
+                        name: decoded.name || decoded.email?.split('@')[0] || 'User',
+                        emailVerified: decoded.email_verified,
+                        isAdmin: decoded.admin === true
+                    };
+                    (socket as any).authenticated = true;
+                }
+            }
+        } catch (err: any) {
+            console.warn(`[Socket.io] Auth token validation rejected for socket ${socket.id}:`, err?.message || err);
+        }
+        next();
+    });
+
+    const socketMessageBuckets = new Map<string, { count: number; lastReset: number }>();
+    function checkSocketRateLimit(socketId: string, limit = 8, windowMs = 4000): boolean {
+        const now = Date.now();
+        const record = socketMessageBuckets.get(socketId) || { count: 0, lastReset: now };
+        if (now - record.lastReset > windowMs) {
+            record.count = 1;
+            record.lastReset = now;
+            socketMessageBuckets.set(socketId, record);
+            return true;
+        }
+        if (record.count >= limit) {
+            return false;
+        }
+        record.count++;
+        socketMessageBuckets.set(socketId, record);
+        return true;
+    }
+
     // Socket.io Logic
     io.on('connection', (socket) => {
         console.log('User connected:', socket.id);
 
         socket.on('join-room', (roomId) => {
+            if (!roomId || typeof roomId !== 'string' || roomId.length > 128) return;
             socket.join(roomId);
             console.log(`User ${socket.id} joined room ${roomId}`);
         });
 
         socket.on('leave-room', (roomId) => {
+            if (!roomId || typeof roomId !== 'string') return;
             socket.leave(roomId);
             console.log(`User ${socket.id} left room ${roomId}`);
         });
 
         socket.on('send-message', (payload: any) => {
-            const { roomId, message, user, type, tipAmount, replyTo, isArtist, isVip, isQuestion, questionId, reaction } = payload || {};
+            if (!checkSocketRateLimit(socket.id)) {
+                socket.emit('error-notice', { message: 'Message rate limit exceeded. Please wait a moment.' });
+                return;
+            }
+
+            const { roomId, message, user, type, tipAmount, replyTo, isQuestion, questionId, reaction } = payload || {};
+            if (!roomId || typeof roomId !== 'string') return;
+
+            // Enforce message length bounds (max 1000 characters)
+            const messageText = typeof message === 'string' ? message.slice(0, 1000) : '';
+
+            // Derive user identity securely if authenticated socket
+            const socketUser = (socket as any).user;
+            const authenticatedUser = socketUser ? {
+                id: socketUser.uid,
+                uid: socketUser.uid,
+                name: socketUser.name,
+                username: socketUser.name,
+                avatar: user?.avatar || ''
+            } : user;
+
             const chatMessage = {
                 id: Math.random().toString(36).substring(7),
-                text: message,
-                user: user,
+                text: messageText,
+                user: authenticatedUser,
                 type: type || 'chat',
                 tipAmount: tipAmount || null,
                 replyTo: replyTo || null,
-                isArtist: !!isArtist,
-                isVip: !!isVip,
+                isArtist: !!socketUser?.isAdmin,
+                isVip: false,
                 isQuestion: !!isQuestion,
                 questionId: questionId || null,
                 reaction: reaction || null,
@@ -173,9 +313,10 @@ async function startServer() {
         });
 
         socket.on('send-reaction', ({ roomId, reaction, messageId, user }) => {
+            if (!roomId || !reaction || typeof reaction !== 'string') return;
             io.to(roomId).emit('new-reaction', {
                 id: Math.random().toString(36).substring(7),
-                reaction,
+                reaction: reaction.slice(0, 50),
                 messageId: messageId || null,
                 user,
                 timestamp: new Date().toISOString()
@@ -183,6 +324,7 @@ async function startServer() {
         });
 
         socket.on('pin-message', ({ roomId, message }) => {
+            if (!roomId || !message) return;
             io.to(roomId).emit('message-pinned', message);
         });
 
@@ -192,19 +334,21 @@ async function startServer() {
             io.to(roomId).emit('message-reported', {
                 messageId,
                 reportedUserId,
-                reason,
-                details,
+                reason: String(reason || '').slice(0, 200),
+                details: String(details || '').slice(0, 500),
                 reporter,
                 timestamp: new Date().toISOString()
             });
         });
 
         socket.on('delete-message', ({ roomId, messageId }) => {
+            if (!roomId || !messageId) return;
             console.log(`[Moderation] Message deleted in ${roomId}: ${messageId}`);
             io.to(roomId).emit('message-deleted', { messageId });
         });
 
         socket.on('disconnect', () => {
+            socketMessageBuckets.delete(socket.id);
             console.log('User disconnected:', socket.id);
         });
     });
@@ -1115,23 +1259,233 @@ async function startServer() {
         return res.json({ price: cachedTonPrice });
     });
 
-    app.post('/api/upload', upload.fields([
+    // 🌐 Public TON Network Configuration (safe for client, no secrets)
+    app.get('/api/ton/network-config', (req, res) => {
+        const activeNetwork = TON_NETWORK_MODE;
+        const config = activeNetwork === 'mainnet' ? TON_MAINNET_CONFIG : TON_TESTNET_CONFIG;
+        res.json({
+            network: activeNetwork,
+            chainId: config.chainId,
+            endpoint: config.endpoint,
+            treasuryAddress: config.treasuryAddress,
+            collectionAddress: config.collectionAddress,
+            marketplaceAddress: config.marketplaceAddress,
+            explorerUrl: config.explorerUrl,
+            scanUrl: config.scanUrl
+        });
+    });
+
+    // 💰 Query real on-chain TON balance from trusted server endpoint
+    app.get('/api/ton/balance/:address', async (req, res) => {
+        const { address } = req.params;
+        if (!address || !validateTonAddress(address)) {
+            return res.status(400).json({ error: 'Invalid TON wallet address format' });
+        }
+
+        try {
+            const client = new TonClient({
+                endpoint: getTonEndpoint(),
+                apiKey: process.env.TONCENTER_API_KEY || undefined,
+            });
+
+            const parsedAddress = Address.parse(address);
+            const balanceNanotons = await client.getBalance(parsedAddress);
+            const balanceTON = Number(BigInt(balanceNanotons.toString())) / 1e9;
+
+            res.json({
+                address,
+                balanceTON,
+                nanotons: balanceNanotons.toString(),
+                network: TON_NETWORK_MODE
+            });
+        } catch (error: any) {
+            console.warn('[Server TON Balance Error]:', error?.message || error);
+            res.json({
+                address,
+                balanceTON: 0,
+                nanotons: "0",
+                network: TON_NETWORK_MODE
+            });
+        }
+    });
+
+    // 🛡️ Trusted Server-side TON Financial Transaction Verification
+    app.post('/api/ton/verify-transaction', optionalAuth, async (req: AuthRequest, res) => {
+        const { 
+            txHash, 
+            expectedSender, 
+            expectedRecipient, 
+            expectedNanotons, 
+            paymentReference,
+            network 
+        } = req.body || {};
+
+        if (!expectedRecipient || !validateTonAddress(expectedRecipient)) {
+            return res.status(400).json({ verified: false, error: 'Valid expected recipient address is required' });
+        }
+
+        if (!expectedSender || !validateTonAddress(expectedSender)) {
+            return res.status(400).json({ verified: false, error: 'Valid expected sender wallet address is required' });
+        }
+
+        if (!expectedNanotons || typeof expectedNanotons !== 'string') {
+            return res.status(400).json({ verified: false, error: 'Exact expected nanotons string amount is required' });
+        }
+
+        // Verify correct network
+        const targetNetwork = network === 'testnet' ? 'testnet' : 'mainnet';
+        if (targetNetwork !== TON_NETWORK_MODE) {
+            return res.status(400).json({ 
+                verified: false, 
+                error: `Network mismatch: Transaction submitted for ${targetNetwork}, but server is running in ${TON_NETWORK_MODE}` 
+            });
+        }
+
+        // Idempotency check via Firestore Admin
+        const firestoreAdmin = getFirestoreAdmin();
+        if (txHash && firestoreAdmin) {
+            try {
+                const lockDoc = await firestoreAdmin.collection('partnershipTxHashes').doc(txHash).get();
+                if (lockDoc.exists && lockDoc.data()?.paymentReference !== paymentReference) {
+                    return res.status(409).json({
+                        verified: false,
+                        error: 'Conflict: This transaction hash has already been settled and processed'
+                    });
+                }
+            } catch (err) {
+                console.warn('[Server TON Verify] Lock document check notice:', err);
+            }
+        }
+
+        try {
+            const client = new TonClient({
+                endpoint: getTonEndpoint(targetNetwork),
+                apiKey: process.env.TONCENTER_API_KEY || undefined,
+            });
+
+            const parsedRecipient = Address.parse(expectedRecipient);
+            const parsedSender = Address.parse(expectedSender);
+
+            const transactions = await client.getTransactions(parsedRecipient, { limit: 25 });
+            
+            for (const tx of transactions) {
+                if (!tx.inMessage || !tx.inMessage.info) continue;
+                const info = tx.inMessage.info as any;
+                if (info.type !== 'internal') continue;
+
+                // 1. Recipient check
+                let destMatches = false;
+                try {
+                    const destAddr = Address.parse(info.dest);
+                    destMatches = destAddr.equals(parsedRecipient) || destAddr.toRawString() === parsedRecipient.toRawString();
+                } catch {
+                    destMatches = String(info.dest).toLowerCase() === expectedRecipient.toLowerCase();
+                }
+                if (!destMatches) continue;
+
+                // 2. Sender check
+                let senderMatches = false;
+                try {
+                    const srcAddr = Address.parse(info.src);
+                    senderMatches = srcAddr.equals(parsedSender) || srcAddr.toRawString() === parsedSender.toRawString();
+                } catch {
+                    senderMatches = String(info.src).toLowerCase() === expectedSender.toLowerCase();
+                }
+                if (!senderMatches) continue;
+
+                // 3. Amount check
+                const inCoins = info.value?.coins ? info.value.coins.toString() : "0";
+                if (inCoins !== expectedNanotons) continue;
+
+                // 4. Execution check (must not be aborted)
+                if (tx.description && (tx.description as any).aborted) continue;
+
+                // 5. Memo / Reference check
+                let memoMatches = !paymentReference; // If no memo specified, skip memo check
+                if (paymentReference && tx.inMessage.body) {
+                    try {
+                        const slice = tx.inMessage.body.beginParse();
+                        if (slice.remainingBits >= 32) {
+                            const op = slice.loadUint(32);
+                            if (op === 0) {
+                                const text = slice.loadStringTail();
+                                if (text && text.includes(paymentReference)) {
+                                    memoMatches = true;
+                                }
+                            }
+                        }
+                    } catch {}
+
+                    if (!memoMatches) {
+                        try {
+                            const rawBoc = tx.inMessage.body.toBoc().toString('base64');
+                            if (rawBoc.includes(paymentReference)) {
+                                memoMatches = true;
+                            }
+                        } catch {}
+                    }
+                }
+
+                if (!memoMatches) continue;
+
+                // Conclusively confirmed on blockchain!
+                const matchedTxHash = tx.hash().toString('hex');
+
+                // Idempotently record lock in Firestore Admin
+                if (firestoreAdmin) {
+                    try {
+                        await firestoreAdmin.collection('partnershipTxHashes').doc(matchedTxHash).set({
+                            paymentReference: paymentReference || null,
+                            verifiedAt: new Date().toISOString(),
+                            recipient: expectedRecipient,
+                            sender: expectedSender,
+                            nanotons: expectedNanotons,
+                            network: targetNetwork
+                        }, { merge: true });
+                    } catch (lockErr) {
+                        console.warn('[Server TON Verify] Failed to write Firestore idempotency lock:', lockErr);
+                    }
+                }
+
+                return res.json({
+                    verified: true,
+                    status: 'confirmed',
+                    txHash: matchedTxHash,
+                    network: targetNetwork,
+                    timestamp: new Date().toISOString(),
+                    message: 'Transaction successfully verified on TON blockchain'
+                });
+            }
+
+            return res.json({
+                verified: false,
+                status: 'pending',
+                network: targetNetwork,
+                message: 'Transaction is pending on-chain confirmation. Please allow a few seconds for block inclusion.'
+            });
+        } catch (error: any) {
+            console.error('[Server TON Verify Error]:', error);
+            res.status(500).json({ verified: false, error: error?.message || 'TON verification RPC failure' });
+        }
+    });
+
+    app.post('/api/upload', uploadRateLimiter, upload.fields([
         { name: 'audio', maxCount: 1 },
         { name: 'cover', maxCount: 1 }
     ]), (req, res) => {
         const files = req.files as { [fieldname: string]: Express.Multer.File[] };
         
-        if (!files || !files.audio) {
+        if (!files || !files.audio || files.audio.length === 0) {
             return res.status(400).json({ error: 'Audio file is required' });
         }
 
         const audioUrl = `/uploads/${files.audio[0].filename}`;
-        const coverUrl = files.cover ? `/uploads/${files.cover[0].filename}` : null;
+        const coverUrl = files.cover && files.cover.length > 0 ? `/uploads/${files.cover[0].filename}` : null;
 
         res.json({ audioUrl, coverUrl, audioFilename: files.audio[0].filename });
     });
 
-    app.post('/api/analyze-audio-file', upload.single('audio'), async (req, res) => {
+    app.post('/api/analyze-audio-file', uploadRateLimiter, upload.single('audio'), async (req, res) => {
         if (!req.file) return res.status(400).json({ error: 'Audio file is required' });
         
         const filePath = req.file.path;
@@ -1167,7 +1521,7 @@ async function startServer() {
             }));
 
             // Clean up: Delete the temporary file
-            fs.unlinkSync(filePath);
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
             res.json(JSON.parse(response.text!));
         } catch (error) {
@@ -1180,9 +1534,9 @@ async function startServer() {
         }
     });
 
-    app.post('/api/gemini/analyze-tone', upload.single('audio'), async (req, res) => {
+    app.post('/api/gemini/analyze-tone', aiRateLimiter, upload.single('audio'), async (req, res) => {
         const filePath = req.file?.path;
-        const audioUrl = req.body.audioUrl;
+        const audioUrl = req.body?.audioUrl;
         
         try {
             let audioData: Buffer | null = null;
@@ -1191,19 +1545,33 @@ async function startServer() {
             if (filePath && fs.existsSync(filePath)) {
                 audioData = fs.readFileSync(filePath);
                 if (req.file?.mimetype) mimeType = req.file.mimetype;
-            } else if (audioUrl) {
+            } else if (audioUrl && typeof audioUrl === 'string') {
                 if (audioUrl.startsWith('/uploads/')) {
-                    const localPath = path.join(process.cwd(), 'public', audioUrl);
+                    const safeRelative = path.normalize(audioUrl).replace(/^(\.\.[\/\\])+/, '');
+                    const localPath = path.join(process.cwd(), 'public', safeRelative);
                     if (fs.existsSync(localPath)) {
                         audioData = fs.readFileSync(localPath);
                         if (audioUrl.endsWith('.wav')) mimeType = 'audio/wav';
                         else if (audioUrl.endsWith('.ogg')) mimeType = 'audio/ogg';
                         else if (audioUrl.endsWith('.m4a')) mimeType = 'audio/x-m4a';
                     }
-                } else if (audioUrl.startsWith('http')) {
-                    const response = await axios.get(audioUrl, { responseType: 'arraybuffer', timeout: 8000 });
-                    audioData = Buffer.from(response.data);
+                } else if (audioUrl.startsWith('http://') || audioUrl.startsWith('https://')) {
+                    // Anti-SSRF check: disallow private/internal IPs, localhost, cloud metadata
+                    const safeCheck = validateSafeRemoteUrl(audioUrl);
+                    if (!safeCheck.valid) {
+                        return res.status(400).json({ error: `Security Error: Remote audio source rejected (${safeCheck.reason})` });
+                    }
+
+                    const response = await axios.get(audioUrl, { 
+                        responseType: 'arraybuffer', 
+                        timeout: 8000,
+                        maxContentLength: 30 * 1024 * 1024 // 30MB limit
+                    });
                     const contentType = response.headers['content-type'];
+                    if (contentType && !contentType.startsWith('audio/') && !contentType.startsWith('application/octet-stream')) {
+                        return res.status(400).json({ error: 'Invalid remote file content type: expected audio stream' });
+                    }
+                    audioData = Buffer.from(response.data);
                     if (contentType) mimeType = contentType;
                 }
             }
@@ -1855,7 +2223,7 @@ async function startServer() {
             </html>
         `);
     });
-    app.post('/api/pinata/upload', upload.single('file'), async (req, res) => {
+    app.post('/api/pinata/upload', uploadRateLimiter, upload.single('file'), async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
@@ -1927,7 +2295,7 @@ async function startServer() {
         }
     });
 
-    app.post('/api/pinata/upload-json', async (req, res) => {
+    app.post('/api/pinata/upload-json', uploadRateLimiter, async (req, res) => {
         const metadata = req.body;
         if (!metadata) {
             return res.status(400).json({ error: 'No metadata JSON provided' });
@@ -2352,9 +2720,24 @@ async function startServer() {
     });
 
     // Clear task error logs
-    app.delete('/api/monitoring/task-errors', (req, res) => {
+    app.delete('/api/monitoring/task-errors', optionalAuth, (req: AuthRequest, res) => {
+        if (req.user && req.user.admin !== true && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Administrative privileges required to clear monitoring logs' });
+        }
         taskErrorLogs.length = 0;
         res.json({ success: true, message: 'Task error monitoring buffer cleared' });
+    });
+
+    // Global Express Error Handler for Multer & Security Errors
+    app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+        console.error('[Server Internal Error]:', err?.message || err);
+        if (err instanceof multer.MulterError) {
+            return res.status(400).json({ error: `Upload error: ${err.message}` });
+        }
+        if (err?.message?.includes('Security Alert') || err?.message?.includes('Invalid file type')) {
+            return res.status(400).json({ error: err.message });
+        }
+        res.status(500).json({ error: 'Internal Server Error' });
     });
 
     const isVercel = !!process.env.VERCEL;

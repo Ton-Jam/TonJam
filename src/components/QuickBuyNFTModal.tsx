@@ -21,6 +21,7 @@ import { useTonPrice } from '@/contexts/TonPriceContext';
 import { useGramPrice } from '@/contexts/GramPriceContext';
 import { getPlaceholderImage } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export interface QuickBuyNFTData {
   id: string;
@@ -162,9 +163,14 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
     if (!nft) return;
 
     if (!isWalletConnected) {
+      toast.warning("Please connect your TON wallet to purchase this NFT.");
       handleConnectWallet();
       return;
     }
+
+    const toastId = toast.loading(`Authorizing purchase of "${nft.title}"...`, {
+      description: "Please confirm the transaction in your TON wallet..."
+    });
 
     try {
       setIsProcessing(true);
@@ -183,6 +189,10 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
       );
 
       setIsSuccess(true);
+      toast.success(`Successfully collected "${nft.title}"!`, {
+        id: toastId,
+        description: `Acquired for ${formattedPriceStr}. Added to your collection.`
+      });
       addNotification(`Successfully collected ${nft.title}!`, 'success');
       if (onSuccess) {
         onSuccess(nft);
@@ -191,6 +201,7 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
       console.error('Quick Buy transaction error:', err);
       const msg = err?.message || 'Transaction was canceled or could not be completed on TON.';
       setErrorMessage(msg);
+      toast.error(`Purchase failed: ${msg}`, { id: toastId });
       addNotification('Purchase failed or canceled', 'error');
     } finally {
       setIsProcessing(false);
@@ -209,7 +220,7 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
         artist: nft.artist,
         artwork: nft.imageUrl,
         coverUrl: nft.imageUrl,
-        audioUrl: nft.audioUrl || 'https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3',
+        audioUrl: nft.audioUrl || '/tonjam-offline-audio.mp3',
         duration: 180,
         isNFT: true,
         price: `${numericPrice} TON`,

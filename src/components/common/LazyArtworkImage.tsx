@@ -18,7 +18,7 @@ export const LazyArtworkImage = React.forwardRef<HTMLImageElement, LazyArtworkIm
   placeholderSrc,
   className,
   containerClassName,
-  rootMargin = '250px 150px',
+  rootMargin = '500px 400px',
   fadeIn = true,
   onLoad,
   onError,

@@ -91,7 +91,7 @@ export const useMarketplace = () => {
               creator: data.creator || data.artist || "Unknown Artist",
               imageUrl: data.imageUrl || data.coverUrl || "",
               coverUrl: data.coverUrl || data.imageUrl || "",
-              audioUrl: data.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+              audioUrl: data.audioUrl || "/tonjam-offline-audio.mp3",
               price: data.price ? (data.price.includes("TON") ? data.price : `${data.price} TON`) : "2.5 TON",
               listingType: data.listingType || "fixed",
               isNFT: true,

@@ -32,7 +32,7 @@ const CURATED_TRENDING_NFTS: MusicNFTData[] = [
     genre: "Afrobeats",
     badge: "EXCLUSIVE",
     imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+    audioUrl: "/tonjam-offline-audio.mp3",
     status: "Instant Collect",
   },
   {
@@ -71,7 +71,7 @@ const CURATED_TRENDING_NFTS: MusicNFTData[] = [
     genre: "Soul & Jazz",
     badge: "EXCLUSIVE",
     imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+    audioUrl: "/tonjam-offline-audio.mp3",
     status: "Instant Collect",
   },
   {
@@ -97,7 +97,7 @@ const CURATED_TRENDING_NFTS: MusicNFTData[] = [
     genre: "R&B",
     badge: "EXCLUSIVE",
     imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+    audioUrl: "/tonjam-offline-audio.mp3",
     status: "Instant Collect",
   },
 ];
@@ -145,7 +145,7 @@ export default function MarketplacePage() {
       genre: item.genre || "Music NFT",
       badge: item.rarity === "Legendary" ? "EXCLUSIVE" : "LIMITED",
       imageUrl: item.imageUrl || item.coverUrl || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80",
-      audioUrl: item.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+      audioUrl: item.audioUrl || "/tonjam-offline-audio.mp3",
       status: "Instant Collect",
     }));
 
@@ -242,7 +242,7 @@ export default function MarketplacePage() {
         artist: nft.artist,
         artwork: nft.imageUrl,
         coverUrl: nft.imageUrl,
-        audioUrl: nft.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+        audioUrl: nft.audioUrl || "/tonjam-offline-audio.mp3",
         duration: 180,
         isNFT: true,
         price: typeof nft.price === "number" ? `${nft.price} TON` : nft.price,

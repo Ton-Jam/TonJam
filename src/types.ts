@@ -604,6 +604,7 @@ export interface Transaction {
   timestamp: string;
   status: 'pending' | 'completed' | 'failed';
   txHash?: string;
+  network?: string;
 }
 
 export interface SponsoredContent {

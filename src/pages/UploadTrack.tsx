@@ -25,6 +25,7 @@ import { BackButton } from "@/components/BackButton";
 import { RoyaltySplit } from "@/types";
 import { GoogleDriveImportModal } from "@/components/GoogleDriveImportModal";
 import { Folder } from "lucide-react";
+import { toast } from "sonner";
 
 export default function UploadTrackScreen() {
   const navigate = useNavigate();
@@ -373,9 +374,22 @@ export default function UploadTrackScreen() {
 
   const handleMint = async () => {
     if (!audioFile || !coverFile || !title || !genre) {
+      toast.warning("Please fill in basic track title, genre, cover, and audio master first");
       addNotification("Please fill in basic track info first", "warning");
       return;
     }
+
+    const wallet = tonConnectUI.wallet?.account.address;
+    if (!wallet) {
+      toast.warning("Please connect your TON wallet to mint this track as an NFT");
+      addNotification("Please connect your TON wallet first", "warning");
+      tonConnectUI.openModal();
+      return;
+    }
+
+    const toastId = toast.loading(`Minting "${title}" on TON blockchain...`, {
+      description: "Uploading media to IPFS & awaiting signature..."
+    });
 
     setIsUploading(true);
     setUploadStep('uploading');
@@ -400,13 +414,6 @@ export default function UploadTrackScreen() {
         ]
       };
       const metadataRes = await uploadMetadata(metadata);
-
-      const wallet = tonConnectUI.wallet?.account.address;
-      if (!wallet) {
-        addNotification("Please connect your GRAM wallet first", "warning");
-        setIsUploading(false);
-        return;
-      }
 
       await mintTonJamNFT(tonConnectUI, wallet, metadataRes.downloadUrl);
 
@@ -440,14 +447,20 @@ export default function UploadTrackScreen() {
       await addUserTrack(newTrack);
 
       setUploadStep('success');
+      toast.success(`🎉 "${title}" minted as an NFT successfully!`, {
+        id: toastId,
+        description: "Registered on TON and added to your creator catalog."
+      });
       addNotification("NFT minted successfully!", "success");
       
       setTimeout(() => {
         navigate('/profile');
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Minting failed:", error);
-      addNotification("Minting failed. Please try again.", "error");
+      const errMsg = error?.message || "Minting failed. Please check wallet connection and try again.";
+      toast.error(`Minting failed: ${errMsg}`, { id: toastId });
+      addNotification(errMsg, "error");
       setUploadStep('idle');
     } finally {
       setIsUploading(false);
@@ -457,7 +470,7 @@ export default function UploadTrackScreen() {
   const overallUploadProgress = Math.round((audioUploadProgress + coverUploadProgress) / 2);
 
   return (
-    <div className="min-h-screen bg-black text-white pb-48 relative overflow-y-auto overflow-x-hidden scroll-smooth transition-all duration-300">
+    <div className="min-h-screen bg-[#080D1A] text-white pb-48 relative overflow-y-auto overflow-x-hidden scroll-smooth transition-all duration-300">
       <div className="fixed inset-0 opacity-10 blur-[120px] pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500 rounded-full translate-y-1/2 -translate-x-1/2" />

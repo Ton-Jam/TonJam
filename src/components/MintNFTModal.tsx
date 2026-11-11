@@ -257,41 +257,50 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
 
   const handleInitiateMint = async () => {
     if (!userAddress) {
+      toast.warning("Please connect your TON wallet first to mint an NFT");
       addNotification("Please connect your TON wallet first", "warning");
       tonConnectUI.openModal();
       return;
     }
 
     if (!title.trim()) {
+      toast.error("Please enter a track title for your NFT");
       addNotification("Title is required", "error");
       setStep(1);
       return;
     }
 
     if (!preselectedTrack && !audioFile && !audioPreview) {
+      toast.error("Please upload an audio master file for your NFT");
       addNotification("Please upload an audio file", "error");
       setStep(1);
       return;
     }
 
     if (!coverPreview) {
+      toast.error("Please upload or generate cover artwork for your NFT");
       addNotification("Please upload or generate cover art", "error");
       setStep(1);
       return;
     }
 
     if (totalRoyalty !== 100) {
+      toast.error(`Royalty splits must total exactly 100% (currently ${totalRoyalty}%)`);
       addNotification(`Royalty splits must total exactly 100%. Current total: ${totalRoyalty}%`, "error");
       setStep(3);
       return;
     }
 
     if (!termsConfirmed) {
+      toast.warning("Please confirm ownership and copyright attestation to proceed");
       addNotification("Please confirm copyright ownership attestation to proceed", "warning");
       return;
     }
 
     const activeTrackId = preselectedTrack?.id || `track-mint-${Date.now()}`;
+    const toastId = toast.loading(`Minting "${title}" on TON blockchain...`, {
+      description: "Uploading media to IPFS & awaiting wallet signature..."
+    });
     setIsProcessing(true);
     setIsMinting(true);
     setStep(4);
@@ -464,6 +473,10 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
 
       setOverallProgress(100);
       setProgressMsg("Minting successful!");
+      toast.success(`🎉 "${title}" successfully minted as an NFT on TON!`, {
+        id: toastId,
+        description: `Edition 1 of ${editions} is registered on the TON blockchain.`
+      });
       addNotification(`"${title}" minted as an NFT on TonJam!`, "success");
       
       if (onSuccess) {
@@ -472,12 +485,16 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
       setStep(5);
     } catch (e: any) {
       console.error(e);
+      const errorMsg = e?.message || "Minting process failed";
       updateMintingStatus(activeTrackId, {
         step: 'error',
-        message: e.message || "Minting process failed",
-        error: e.message || String(e)
+        message: errorMsg,
+        error: errorMsg
       });
-      addNotification(e.message || "Minting process failed", "error");
+      toast.error(`Minting failed: ${errorMsg}`, {
+        id: toastId
+      });
+      addNotification(errorMsg, "error");
       setStep(1);
     } finally {
       setIsProcessing(false);

@@ -366,6 +366,10 @@ export const MintNFT: React.FC = () => {
     setMintProgress(5);
     setMintStatusText('Preparing decentralized Pinata IPFS channels...');
 
+    const toastId = toast.loading(`Minting "${title}" on TON blockchain...`, {
+      description: 'Preparing decentralized IPFS assets & metadata...'
+    });
+
     const updateMilestone = (id: string, done: boolean, inProgress: boolean, progressVal: number, statusMsg: string) => {
       setMintingMilestones(prev => prev.map(m => m.id === id ? { ...m, done, inProgress } : m));
       setMintProgress(progressVal);
@@ -419,6 +423,10 @@ export const MintNFT: React.FC = () => {
 
       // 4. TON Blockchain Smart Contract Minting
       updateMilestone('ton_tx', false, true, 80, 'Broadcasting transaction to TON Blockchain. Please confirm in your wallet...');
+      toast.loading("Broadcasting transaction to TON Blockchain...", {
+        id: toastId,
+        description: "Please confirm and sign the transaction in your TON wallet..."
+      });
       const mintSuccess = await mintTonJamNFT(tonConnectUI, activeWallet, ipfsMetadataUrl);
       if (!mintSuccess) {
         throw new Error('Transaction declined or not completed on TON Blockchain.');
@@ -520,13 +528,16 @@ export const MintNFT: React.FC = () => {
         origin: { y: 0.6 }
       });
 
-      toast.success(`"${title}" successfully minted as an NFT on TON!`);
+      toast.success(`"${title}" successfully minted as an NFT on TON!`, {
+        id: toastId,
+        description: `Supply: ${editions} edition${Number(editions) > 1 ? 's' : ''} • Price: ${price} TON. Recorded on TON blockchain.`
+      });
     } catch (err: any) {
       console.error('Minting error:', err);
       setIsMinting(false);
       const errMsg = err?.message || 'Minting transaction failed. Please ensure your TON wallet is connected and has sufficient gas balance.';
       setMintError(errMsg);
-      toast.error(errMsg);
+      toast.error(`Minting failed: ${errMsg}`, { id: toastId });
     }
   };
 

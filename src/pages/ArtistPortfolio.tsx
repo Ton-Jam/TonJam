@@ -69,7 +69,7 @@ export default function ArtistPortfolio() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#080D1A] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -77,7 +77,7 @@ export default function ArtistPortfolio() {
 
   if (!userProfile) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-[#080D1A] flex flex-col items-center justify-center p-6 text-center">
         <User className="w-12 h-12 text-zinc-800 mb-4" />
         <h2 className="text-xl font-bold text-white mb-2">Authentication Required</h2>
         <p className="text-zinc-500 text-sm max-w-xs mb-6">
@@ -132,7 +132,7 @@ export default function ArtistPortfolio() {
   }, [currentSales, currentListeners]);
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20">
+    <div className="min-h-screen bg-[#080D1A] text-white pb-20">
       {/* Cover Photo Banner */}
       <div className="relative h-[130px] md:h-[170px] w-full overflow-hidden">
         {userProfile.coverPhoto ? (

@@ -44,13 +44,13 @@ export const MusicNftCard: React.FC<MusicNftCardProps> = ({
       (t) => t.id === nft.trackId || t.songId === nft.trackId || t.title.toLowerCase() === nft.title.toLowerCase()
     );
     if (matchedTrack?.audioUrl) return matchedTrack.audioUrl;
-    return 'https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3';
+    return '/tonjam-offline-audio.mp3';
   }, [nft, allTracks]);
 
   // Audio setup
   useEffect(() => {
     const audio = new Audio();
-    audio.preload = 'metadata';
+    audio.preload = 'none'; // Don't preload immediately to avoid unneeded network and decoding errors
     audio.src = audioSource;
     audio.volume = 0;
     audioRef.current = audio;
@@ -73,16 +73,25 @@ export const MusicNftCard: React.FC<MusicNftCardProps> = ({
       audio.play().catch(() => {});
     };
 
+    const handleError = () => {
+      // Auto-fallback if the external audio file fails to decode
+      if (audio.src && !audio.src.includes('tonjam-offline-audio')) {
+        audio.src = '/tonjam-offline-audio.mp3';
+      }
+    };
+
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
 
     return () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
       audio.pause();
-      audio.src = '';
+      audio.removeAttribute('src');
     };
   }, [audioSource]);
 

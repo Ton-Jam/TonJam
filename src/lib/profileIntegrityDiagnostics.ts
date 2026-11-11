@@ -125,15 +125,13 @@ export async function verifyUserProfileIntegrity(options?: {
   }
 
   // 3. Compute derived administrative flags
-  const isKrusherAdmin = userEmail === 'krusherkrupy@gmail.com';
-  
   const firestoreRole: string = String(firestoreProfile?.role || 'collector');
-  const firestoreIsAdmin = firestoreProfile?.isAdmin === true || firestoreRole === 'admin' || isKrusherAdmin;
+  const firestoreIsAdmin = firestoreProfile?.isAdmin === true || firestoreRole === 'admin';
   const firestoreVerified = firestoreProfile?.verified === true || firestoreProfile?.isVerified === true || firestoreProfile?.isVerifiedArtist === true;
   const firestoreVerificationStatus = String(firestoreProfile?.verificationStatus || (firestoreVerified ? 'verified' : 'unverified'));
 
   const cachedRole: string = String(activeLocalState?.role || 'collector');
-  const cachedIsAdmin = (activeLocalState as any)?.isAdmin === true || cachedRole === 'admin' || isKrusherAdmin;
+  const cachedIsAdmin = (activeLocalState as any)?.isAdmin === true || cachedRole === 'admin';
   const cachedVerified = activeLocalState?.verified === true || activeLocalState?.isVerified === true || activeLocalState?.isVerifiedArtist === true;
   const cachedVerificationStatus = String(activeLocalState?.verificationStatus || (cachedVerified ? 'verified' : 'unverified'));
 

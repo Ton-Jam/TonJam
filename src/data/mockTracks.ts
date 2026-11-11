@@ -17,7 +17,7 @@ export const MOCK_TESTING_TRACKS: MockTrack[] = [
     artist: "Alex Synth",
     coverArtUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&h=300&q=80",
     coverUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&h=300&q=80",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+    audioUrl: "/tonjam-offline-audio.mp3",
     duration: 184,
     album: "Synthwave Dreams",
     genre: "Synthwave"

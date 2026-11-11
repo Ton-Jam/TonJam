@@ -377,7 +377,7 @@ export const ArtistVerificationWizard: React.FC<ArtistVerificationWizardProps> =
                         <input
                           type="email"
                           required
-                          placeholder="krusherkrupy@gmail.com"
+                          placeholder="artist@tonjam.app"
                           value={contactEmail}
                           onChange={(e) => setContactEmail(e.target.value)}
                           className="w-full bg-slate-950/40 border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:border-[#0052FF] transition-all"

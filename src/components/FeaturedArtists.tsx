@@ -5,18 +5,23 @@ import { useNavigate } from 'react-router-dom';
 import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 import ArtistCard from '@/components/ArtistCard';
 import { cardTokens } from '@/design';
+import { useSmartRecommendations } from '@/hooks/useSmartRecommendations';
 
 const FeaturedArtists: React.FC = () => {
   const { artists } = useAudio();
+  const { recommendedArtists } = useSmartRecommendations();
   const navigate = useNavigate();
   const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
-  // Get top 8 artists by followers (mock or real)
+  // Use recommended artists ranked by discovery engine, fallback to follower count
   const featuredArtists = useMemo(() => {
+    if (recommendedArtists && recommendedArtists.length > 0) {
+      return recommendedArtists.slice(0, 8);
+    }
     return [...(artists || [])]
       .sort((a, b) => (b.followers || 0) - (a.followers || 0))
       .slice(0, 8);
-  }, [artists]);
+  }, [recommendedArtists, artists]);
 
   if (!featuredArtists || featuredArtists.length === 0) return null;
 

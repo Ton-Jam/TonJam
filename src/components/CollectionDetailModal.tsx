@@ -24,31 +24,16 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
 }) => {
   const [nfts, setNfts] = useState<NFTItem[]>([]);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
-  const [audio] = useState(new Audio());
-  const audioContext = React.useRef<AudioContext | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Setup Web Audio API disabled to prevent CORS-related muting issues of external audio assets
-    /*
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    audioContext.current = ctx;
-
-    const compressor = ctx.createDynamicsCompressor();
-    compressor.threshold.setValueAtTime(-50, ctx.currentTime);
-    compressor.knee.setValueAtTime(40, ctx.currentTime);
-    compressor.ratio.setValueAtTime(12, ctx.currentTime);
-    compressor.attack.setValueAtTime(0, ctx.currentTime);
-    compressor.release.setValueAtTime(0.25, ctx.currentTime);
-    compressor.connect(ctx.destination);
-
-    const source = ctx.createMediaElementSource(audio);
-    source.connect(compressor);
-
     return () => {
-      ctx.close();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.removeAttribute('src');
+      }
     };
-    */
-  }, [audio]);
+  }, []);
 
   useEffect(() => {
     if (collection && collection.nftIds) {
@@ -63,26 +48,39 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
   }, [collection]);
 
   const togglePlay = (nft: NFTItem) => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+    }
+    const audio = audioRef.current;
+
     if (playingTrackId === nft.id) {
       audio.pause();
       setPlayingTrackId(null);
     } else {
-      if (nft.audioUrl) {
-        audio.src = nft.audioUrl;
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch((err) => {
-            if (err?.name !== "AbortError" && !err?.message?.includes("interrupted")) {
-              console.error("Audio playback error:", err);
-            }
-          });
-        }
-        setPlayingTrackId(nft.id);
-        setTimeout(() => {
-          audio.pause();
+      const srcUrl = nft.audioUrl || "/tonjam-offline-audio.mp3";
+      audio.src = srcUrl;
+      audio.onerror = () => {
+        if (audio.src && !audio.src.includes('tonjam-offline-audio')) {
+          audio.src = '/tonjam-offline-audio.mp3';
+          audio.play().catch(() => {});
+        } else {
           setPlayingTrackId(null);
-        }, 30000); // 30 seconds
+        }
+      };
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          if (err?.name !== "AbortError" && !err?.message?.includes("interrupted")) {
+            console.warn("Audio playback error:", err);
+          }
+        });
       }
+      setPlayingTrackId(nft.id);
+      setTimeout(() => {
+        audio.pause();
+        setPlayingTrackId(null);
+      }, 30000); // 30 seconds
     }
   };
 

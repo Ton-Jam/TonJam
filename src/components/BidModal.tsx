@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import ConfirmationModal from './ConfirmationModal';
 import { AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface BidModalProps {
   nft: NFTItem;
@@ -64,11 +65,13 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
 
   const handlePlaceBid = async () => {
     if (!userAddress) {
+      toast.warning("Please connect your TON wallet to place a bid.");
       addNotification("Connect wallet to place bid.", "warning");
       return;
     }
 
     if (validationError) {
+      toast.error(validationError);
       addNotification(validationError, "error");
       return;
     }
@@ -77,6 +80,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
     if (nft.auctionEndTime) {
       const isEnded = new Date(nft.auctionEndTime).getTime() <= Date.now();
       if (isEnded) {
+        toast.error("This auction has expired. Bids are no longer being accepted.");
         addNotification("This auction has expired. Bids are no longer being accepted.", "error");
         onClose();
         return;
@@ -84,6 +88,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
     }
 
     if (parseFloat(bidAmount) < parseFloat(minBid)) {
+      toast.warning(`Minimum bid is ${minBid} TON`);
       addNotification(`Minimum bid is ${minBid} GRAMS`, "warning");
       return;
     }
@@ -94,6 +99,9 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
     setIsConfirmOpen(false);
     setIsProcessing(true);
     addNotification("Broadcasting bid to neural relay...", "info");
+    const toastId = toast.loading(`Submitting bid of ${bidAmount} TON for "${nft.title}"...`, {
+      description: "Please confirm the transaction in your TON wallet..."
+    });
     
     try {
       await placeBid(tonConnectUI, nft.owner, bidAmount);
@@ -107,13 +115,19 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
       };
       /* Update NFT with new offer and update current price to reflect highest bid */
       updateNFT(nft.id, { price: bidAmount, offers: [newOffer, ...(nft.offers || [])] });
+      toast.success(`🎉 Bid of ${bidAmount} TON placed for "${nft.title}"!`, {
+        id: toastId,
+        description: "Your offer is now the active highest bid."
+      });
       addNotification(`Bid of ${bidAmount} GRAMS placed!`, "success", 5000, `Your offer for "${nft.title}" is now the active high watermark.`);
       if (onBidPlaced) {
         onBidPlaced();
       }
       onClose();
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      const errMsg = e?.message || "Bid transaction failed or was rejected on TON.";
+      toast.error(`Bid failed: ${errMsg}`, { id: toastId });
       addNotification("Bid broadcast failed.", "error");
     } finally {
       setIsProcessing(false);

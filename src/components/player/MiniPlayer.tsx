@@ -246,13 +246,15 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         exit={{ y: 40, opacity: 0, scale: 0.9 }}
         transition={{ type: "spring", stiffness: 350, damping: 25 }}
         className={`fixed right-3 sm:right-6 z-40 transition-all duration-300 ease-in-out ${
-          isMobileNavHidden ? "bottom-3 sm:bottom-6" : "bottom-20 lg:bottom-6"
+          isMobileNavHidden
+            ? "is-nav-hidden bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] lg:bottom-6"
+            : "bottom-[var(--tonjam-collapsed-player-bottom,calc(var(--tj-nav-height,64px)+env(safe-area-inset-bottom,0px)+12px))] lg:bottom-6"
         }`}
         id="tonjam-dropped-down-player"
       >
         <div 
           onClick={() => setIsDroppedDown(false)}
-          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.8)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden bg-[var(--tj-color-player-background,#061426)]"
+          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-2 border-[rgba(192,202,214,0.22)] shadow-[0_8px_30px_rgba(0,0,0,0.8)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden bg-[var(--tj-color-player-background,#061426)]"
           style={{
             backgroundColor: "var(--tj-color-player-background, #061426)",
             opacity: 1,
@@ -366,7 +368,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       onClick={() => setFullPlayerOpen(true)}
       whileTap={{ scale: 0.995 }}
       className={`fixed left-0 right-0 lg:left-64 text-[#FFFFFF] font-sans border-none select-none z-40 flex flex-col overflow-hidden shadow-[0_-8px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out cursor-pointer bg-[var(--tj-color-player-background,#061426)] ${
-        isMobileNavHidden ? "bottom-0" : "bottom-[60px] lg:bottom-0"
+        isMobileNavHidden
+          ? "is-nav-hidden bottom-0 pb-[env(safe-area-inset-bottom,0px)]"
+          : "bottom-[var(--tonjam-mini-player-bottom,calc(var(--tj-nav-height,64px)+env(safe-area-inset-bottom,0px)))] lg:bottom-0"
       }`}
       style={{
         touchAction: "none",
@@ -441,14 +445,14 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       </div>
 
       {/* Main Content Row */}
-      <div className="relative z-10 flex items-center justify-between px-3.5 py-2 sm:px-5 sm:py-2.5 gap-3">
+      <div className="relative z-10 flex items-center justify-between px-3.5 py-2 sm:px-5 sm:py-2.5 gap-3.5">
         {/* Artwork + Title + Artist */}
         <div className="flex items-center gap-3 flex-1 min-w-0" id="mini-metadata-area">
-          <div className="relative shrink-0 flex items-center justify-center">
+          <div className="relative shrink-0 flex items-center justify-center -translate-y-0.5">
             <img
               src={coverUrl}
               alt={currentTrack.title}
-              className="w-10 h-10 sm:w-11 sm:h-11 object-cover rounded-[10px] shrink-0 shadow-md bg-[#0A1628]"
+              className="w-10 h-10 sm:w-11 sm:h-11 object-cover rounded-[2px] shrink-0 shadow-md bg-[#0A1628]"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
               }}
@@ -471,7 +475,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             />
           </div>
 
-          <div className="flex flex-col min-w-0 justify-center flex-1">
+          <div className="flex flex-col min-w-0 justify-center flex-1 gap-0.5">
             <div className="flex items-center gap-1.5 min-w-0">
               <ScrollingText
                 text={currentTrack.title}
@@ -510,7 +514,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               togglePlay();
             }}
             aria-label={isPlaying ? "Pause track" : "Play track"}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#00B4D8] hover:bg-[#009CC0] text-white flex items-center justify-center transition-transform active:scale-90 shadow-md shadow-[#00B4D8]/30 cursor-pointer border-none shrink-0"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#00B4D8] hover:bg-[#009CC0] text-white flex items-center justify-center transition-transform active:scale-90 shadow-md shadow-[#00B4D8]/30 cursor-pointer border-none shrink-0 -translate-y-0.5"
             title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (

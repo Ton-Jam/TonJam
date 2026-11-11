@@ -64,7 +64,7 @@ export const NFTAudioPreviewPlayer: React.FC<NFTAudioPreviewPlayerProps> = ({
     }
 
     // High quality fallback audio for preview
-    return 'https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3';
+    return '/tonjam-offline-audio.mp3';
   }, [customAudioUrl, nft, trackId, customTitle]);
 
   const displayTitle = customTitle || nft?.title || 'Sonic NFT Master';
@@ -124,11 +124,18 @@ export const NFTAudioPreviewPlayer: React.FC<NFTAudioPreviewPlayerProps> = ({
 
     const handleWaiting = () => setIsLoading(true);
     const handleCanPlay = () => setIsLoading(false);
+    const handleError = () => {
+      if (audio.src && !audio.src.includes('tonjam-offline-audio')) {
+        audio.src = '/tonjam-offline-audio.mp3';
+      }
+      setIsLoading(false);
+    };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('waiting', handleWaiting);
     audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('error', handleError);
 
     return () => {
       audio.pause();
@@ -136,7 +143,8 @@ export const NFTAudioPreviewPlayer: React.FC<NFTAudioPreviewPlayerProps> = ({
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('waiting', handleWaiting);
       audio.removeEventListener('canplay', handleCanPlay);
-      audio.src = '';
+      audio.removeEventListener('error', handleError);
+      audio.removeAttribute('src');
       if ((window as any).__activeNFTPreviewStop === stopAudio) {
         (window as any).__activeNFTPreviewStop = null;
       }

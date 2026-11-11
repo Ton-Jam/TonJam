@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { ReactLenis } from 'lenis/react';
 import { motion, useTransform, useScroll } from 'motion/react';
+import { LazyArtworkImage } from '@/components/common/LazyArtworkImage';
 
 interface HorizontalScrollProps {
   children?: React.ReactNode;
@@ -67,11 +68,10 @@ export default function HorizontalScroll({ children, items }: HorizontalScrollPr
                     
                     {item.image && (
                       <div className="absolute inset-0 z-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300 hover:scale-105 duration-700">
-                        <img 
+                        <LazyArtworkImage 
                           src={item.image} 
                           alt={item.title} 
                           className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
                         />
                       </div>
                     )}

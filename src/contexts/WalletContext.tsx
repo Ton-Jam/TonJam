@@ -1,6 +1,13 @@
-import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { useTonAddress, useTonWallet, useTonConnectUI } from '@tonconnect/ui-react';
+import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
+import { useTonAddress, useTonWallet, useTonConnectUI, CHAIN } from '@tonconnect/ui-react';
 import { safeLocalStorage } from '@/lib/safeStorage';
+import { 
+  getTonBalance, 
+  getJettonBalance, 
+  TON_NETWORK_MODE, 
+  TonNetwork,
+  TONJAM_COLLECTION_ADDRESS 
+} from '@/services/tonService';
 
 export interface WalletContextType {
   address: string;
@@ -11,20 +18,29 @@ export interface WalletContextType {
   disconnectWallet: () => Promise<void>;
   evmAddress?: string | null;
   isEvmConnected?: boolean;
+
+  // Real TON Blockchain states
+  tonBalance: number;
+  jettonBalance: number;
+  isLoadingBalance: boolean;
+  balanceError: string | null;
+  refreshBalance: () => Promise<void>;
+
+  // Network detection & separation
+  network: TonNetwork;
+  isTestnet: boolean;
+  isMainnet: boolean;
+  networkMismatch: boolean;
+  expectedNetwork: TonNetwork;
+
+  // Transaction lifecycle
+  txStatus: 'idle' | 'pending' | 'success' | 'failed' | 'rejected';
+  lastTxHash: string | null;
+  setTxStatus: (status: 'idle' | 'pending' | 'success' | 'failed' | 'rejected') => void;
+  setLastTxHash: (hash: string | null) => void;
 }
 
 const WalletContext = createContext<WalletContextType | null>(null);
-
-const FALLBACK_WALLET_CONTEXT: WalletContextType = {
-  address: '',
-  wallet: null,
-  isConnected: false,
-  tonConnectUI: null as any,
-  connectWallet: () => {},
-  disconnectWallet: async () => {},
-  evmAddress: null,
-  isEvmConnected: false,
-};
 
 export const useWallet = () => {
   const context = useContext(WalletContext);
@@ -38,6 +54,15 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const address = useTonAddress();
   const wallet = useTonWallet();
   const [tonConnectUI] = useTonConnectUI();
+  
+  const [tonBalance, setTonBalance] = useState<number>(0);
+  const [jettonBalance, setJettonBalance] = useState<number>(0);
+  const [isLoadingBalance, setIsLoadingBalance] = useState<boolean>(false);
+  const [balanceError, setBalanceError] = useState<string | null>(null);
+
+  const [txStatus, setTxStatus] = useState<'idle' | 'pending' | 'success' | 'failed' | 'rejected'>('idle');
+  const [lastTxHash, setLastTxHash] = useState<string | null>(null);
+
   const [evmAddress, setEvmAddress] = useState<string | null>(() => {
     try {
       return safeLocalStorage.getItem('tonjam_simulated_evm_address');
@@ -59,6 +84,60 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const isConnected = !!address || !!wallet || !!evmAddress;
 
+  // Detect active network from wallet connection or fallback to app configured network
+  const walletChain = wallet?.account?.chain;
+  const isWalletOnTestnet = walletChain === CHAIN.TESTNET || walletChain === '-3';
+  const network: TonNetwork = wallet ? (isWalletOnTestnet ? 'testnet' : 'mainnet') : TON_NETWORK_MODE;
+  
+  const expectedNetwork: TonNetwork = TON_NETWORK_MODE;
+  const isTestnet = network === 'testnet';
+  const isMainnet = network === 'mainnet';
+  const networkMismatch = Boolean(wallet && network !== expectedNetwork);
+
+  // Fetch real on-chain balance whenever address or network changes
+  const refreshBalance = useCallback(async () => {
+    if (!address) {
+      setTonBalance(0);
+      setJettonBalance(0);
+      setIsLoadingBalance(false);
+      setBalanceError(null);
+      return;
+    }
+
+    setIsLoadingBalance(true);
+    setBalanceError(null);
+
+    try {
+      const realBalance = await getTonBalance(address);
+      setTonBalance(realBalance);
+
+      // Attempt to retrieve Jetton balance if master is set
+      try {
+        const jBalance = await getJettonBalance(address, TONJAM_COLLECTION_ADDRESS);
+        setJettonBalance(jBalance);
+      } catch {
+        setJettonBalance(0);
+      }
+    } catch (err: any) {
+      console.warn('[WalletContext] Failed to retrieve real TON balance:', err);
+      setBalanceError(err?.message || 'Failed to fetch on-chain balance');
+      setTonBalance(0);
+    } finally {
+      setIsLoadingBalance(false);
+    }
+  }, [address]);
+
+  useEffect(() => {
+    refreshBalance();
+    // Poll every 30 seconds while connected
+    const interval = setInterval(() => {
+      if (address) {
+        refreshBalance();
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [address, refreshBalance]);
+
   const connectWallet = () => {
     if (tonConnectUI) {
       try {
@@ -77,6 +156,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         console.warn("[WalletContext] Error disconnecting TON wallet:", err);
       }
     }
+    setTonBalance(0);
+    setJettonBalance(0);
     setEvmAddress(null);
     try {
       safeLocalStorage.removeItem('tonjam_simulated_evm_address');
@@ -96,11 +177,23 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         disconnectWallet,
         evmAddress,
         isEvmConnected: !!evmAddress,
+        tonBalance,
+        jettonBalance,
+        isLoadingBalance,
+        balanceError,
+        refreshBalance,
+        network,
+        isTestnet,
+        isMainnet,
+        networkMismatch,
+        expectedNetwork,
+        txStatus,
+        lastTxHash,
+        setTxStatus,
+        setLastTxHash
       }}
     >
       {children}
     </WalletContext.Provider>
   );
 };
-
-

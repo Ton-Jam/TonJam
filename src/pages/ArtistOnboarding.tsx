@@ -117,7 +117,7 @@ const ArtistOnboarding: React.FC = () => {
     setIsLoading(true);
 
     try {
-      let audioUrl = 'https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3';
+      let audioUrl = '/tonjam-offline-audio.mp3';
       let coverUrl = trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track');
 
       if (trackData.audioFile) {

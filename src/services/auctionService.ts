@@ -1,22 +1,37 @@
-import { collection, query, where, getDocs, doc, writeBatch, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { NFTItem, NFTOffer, Transaction } from '../types';
 import { processNFTSaleRoyalty } from './royaltyService';
 
 export const resolveEndedAuctions = async () => {
   try {
+    // If the browser or environment is offline, skip background auction resolution
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      return;
+    }
+
     const currentUser = auth.currentUser;
     if (!currentUser) return; // Only signed-in users can execute writes
 
-    const isAdmin = currentUser.email === 'krusherkrupy@gmail.com';
+    let isAdmin = false;
+    try {
+      const adminDoc = await getDoc(doc(db, 'admins', currentUser.uid));
+      isAdmin = adminDoc.exists();
+    } catch (adminErr: any) {
+      // If offline or permission denied, fallback to false without crashing
+      const msg = adminErr?.message || String(adminErr);
+      if (msg.includes('offline') || adminErr?.code === 'unavailable') {
+        return;
+      }
+      isAdmin = false;
+    }
+
     const today = new Date().toISOString();
     // Query for all active auctions
     const nftsRef = collection(db, 'nfts');
     const q = query(
       nftsRef,
       where('listingType', '==', 'auction')
-      // Note: Firestore inequalities might require an index, so we do client-side filtering 
-      // or set up a proper compound index. We'll filter client-side just in case for the MVP
     );
 
     const snapshot = await getDocs(q);
@@ -94,7 +109,19 @@ export const resolveEndedAuctions = async () => {
     if (hasChanges) {
       await batch.commit();
     }
-  } catch (error) {
-    console.error("Error resolving ended auctions:", error);
+  } catch (error: any) {
+    const errorMsg = error?.message || String(error);
+    const errorCode = error?.code;
+    if (
+      errorMsg.includes('offline') ||
+      errorCode === 'unavailable' ||
+      errorMsg.includes('client is offline') ||
+      errorMsg.includes('network')
+    ) {
+      // Gracefully handle offline Firestore state
+      console.info("[auctionService] Network offline, skipping auction resolution until reconnected.");
+    } else {
+      console.warn("[auctionService] Auction resolution check notice:", errorMsg);
+    }
   }
 };

@@ -20,6 +20,25 @@
     display: none;
   }
 
+  .swipe-scroll-container {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .swipe-scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+  .swipe-scroll-item {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+
   /* ProtectedRoute Loading Overlay Class */
   .protected-route-loading-overlay {
     position: fixed;
@@ -352,7 +371,7 @@
   --opacity-subtle: 0.40;
 }
 
-@theme {
+@theme inline {
   /* TonJam Figma Semantic Utilities */
   --color-tj-bg-primary: var(--tj-color-bg-primary);
   --color-tj-bg-secondary: var(--tj-color-bg-secondary);
@@ -475,10 +494,13 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
   --radius-xs: 3px;
-  --radius-sm: var(--tj-radius-sm);
-  --radius-md: var(--tj-radius-md);
-  --radius-lg: var(--tj-radius-lg);
-  --radius-xl: var(--tj-radius-xl);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
   --radius-pill: var(--tj-radius-pill);
   --radius-button: var(--tj-radius-sm);
   --radius-card: var(--tj-radius-md);
@@ -579,10 +601,11 @@
     border-top: none !important;
   }
 
-  /* Subtle bottom navigation bar top border line */
+  /* Borderless bottom navigation bar */
   #tonjam-mobile-nav-bar,
   #tonjam-bottom-navigation {
-    border-top: 1px solid rgba(192, 192, 192, 0.28) !important;
+    border: none !important;
+    border-top: none !important;
   }
 
   /* Borderless design for standalone inputs, textareas, and select elements */
@@ -1751,29 +1774,41 @@ button,
 
 /* Dynamic Spacing Engine for MiniPlayer & Navigation bar */
 :root {
-  --tonjam-nav-height: var(--tj-nav-height); /* 64px standard navigation bar height */
+  --tonjam-nav-height: var(--tj-nav-height, 64px); /* 64px standard navigation bar height */
   --tonjam-safe-bottom: env(safe-area-inset-bottom, 0px);
   --tonjam-mini-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom));
-  --tonjam-collapsed-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom) + var(--tj-space-3));
+  --tonjam-collapsed-player-bottom: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom) + var(--tj-space-3, 12px));
 }
 
-/* Apply CSS variables to Navigation and Player elements */
-#tonjam-mobile-nav {
+/* Apply CSS variables to Navigation and Player elements (strictly borderless) */
+#tonjam-mobile-nav,
+#tonjam-bottom-navigation {
   height: calc(var(--tonjam-nav-height) + var(--tonjam-safe-bottom)) !important;
   padding-bottom: var(--tonjam-safe-bottom) !important;
+  border: none !important;
+  border-top: none !important;
 }
 
 #tonjam-mobile-nav-bar {
-  border-top: 1px solid rgba(192, 192, 192, 0.28) !important;
+  border: none !important;
+  border-top: none !important;
 }
 
 @media screen and (max-width: 1023.98px) {
-  #tonjam-mini-player.bottom-16 {
+  #tonjam-mini-player:not(.is-nav-hidden) {
     bottom: var(--tonjam-mini-player-bottom) !important;
   }
 
-  #tonjam-dropped-down-player.bottom-20 {
+  #tonjam-mini-player.is-nav-hidden {
+    bottom: 0 !important;
+  }
+
+  #tonjam-dropped-down-player:not(.is-nav-hidden) {
     bottom: var(--tonjam-collapsed-player-bottom) !important;
+  }
+
+  #tonjam-dropped-down-player.is-nav-hidden {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem) !important;
   }
 }
 

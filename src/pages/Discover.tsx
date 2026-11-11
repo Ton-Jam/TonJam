@@ -328,15 +328,11 @@ export const Discover: React.FC = () => {
   }, [artists]);
 
   return (
-    <div className="min-h-screen bg-black text-white pb-32 relative select-none w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-[#080D1A] text-white pb-32 relative select-none w-full max-w-full overflow-x-hidden">
       <PageHeader title="Discover Music" showBack={true} />
       
       {/* Search Content Input Area */}
       <div className="pt-2 pb-3 px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">Discover Music</h1>
-          <p className="text-xs sm:text-sm text-zinc-400">Find your sound. Explore your world.</p>
-        </div>
 
         {/* Main Search Input Bar - High border radius with subtle blue border */}
         <div className="w-full relative">
@@ -502,10 +498,8 @@ export const Discover: React.FC = () => {
                   key={pill.id}
                   onClick={() => setActiveFilter(pill.id)}
                   aria-pressed={isActive}
-                  className={`pill border-0 !border-none px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none cursor-pointer ${
-                    isActive
-                      ? 'active bg-[#00B4D8] text-white font-bold'
-                      : 'bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white'
+                  className={`filter-pill border-0 !border-none px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all select-none cursor-pointer ${
+                    isActive ? 'active' : ''
                   }`}
                 >
                   {pill.label}
@@ -522,7 +516,7 @@ export const Discover: React.FC = () => {
                   type="button"
                   key={vibe.query}
                   onClick={() => handleSelectSearchTerm(vibe.query)}
-                  className="pill border-0 !border-none px-3 py-1 rounded-full text-[11px] font-medium shrink-0 transition-all select-none bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white cursor-pointer"
+                  className="filter-pill border-0 !border-none px-3 py-1 rounded-full text-[11px] font-medium shrink-0 transition-all select-none cursor-pointer"
                 >
                   {vibe.label}
                 </button>
@@ -570,9 +564,9 @@ export const Discover: React.FC = () => {
           <div className="space-y-10">
             {/* 1. Browse All Categories */}
             <section className="space-y-3.5">
-              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Explore All Genres</h3>
+              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight px-4 sm:px-0">Explore All Genres</h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4 -mx-4 px-3 sm:mx-0 sm:px-0">
                 {DISCOVER_CATEGORIES.map((category) => (
                   <motion.div
                     key={category.id}

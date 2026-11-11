@@ -240,12 +240,14 @@ export const ArtistMinting: React.FC = () => {
     }
 
     if (!termsConfirmed) {
+      toast.warning("Please confirm ownership and copyright attestation to proceed");
       addNotification("Please confirm ownership and copyright attestation to proceed", "warning");
       return;
     }
 
     const wallet = tonConnectUI.wallet?.account.address || connectedAddress;
     if (!wallet) {
+      toast.warning("Please connect your TON wallet to mint");
       addNotification("Please connect your TON wallet to mint", "warning");
       tonConnectUI.openModal();
       return;
@@ -254,6 +256,9 @@ export const ArtistMinting: React.FC = () => {
     setIsLoading(true);
     setLoadingType('upload');
     setLoadingMessage('Deploying audio & visual media to IPFS via Pinata...');
+    const toastId = toast.loading(`Minting "${trackData.title}" on TON blockchain...`, {
+      description: "Broadcasting metadata & preparing smart contract."
+    });
     
     setMintingSteps(steps => steps.map(s => ({ ...s, status: 'pending' })));
     setOverallProgress(5);
@@ -415,13 +420,21 @@ export const ArtistMinting: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 800));
 
       setIsLoading(false);
+      toast.success(`🎉 "${trackData.title}" successfully minted as an NFT on TON!`, {
+        id: toastId,
+        description: `Your music NFT is live on the TON blockchain and cataloged in your dashboard.`
+      });
       addNotification(`"${trackData.title}" successfully minted as an NFT on TON!`, "success");
       navigate('/artist-dashboard');
     } catch (error: any) {
       console.error("Minting failed:", error);
       setMintingSteps(steps => steps.map(s => s.status === 'processing' ? { ...s, status: 'error' } : s));
       setIsLoading(false);
-      addNotification(error.message || "Minting process failed. Check wallet connection.", "error");
+      const errMsg = error?.message || "Minting process failed. Check wallet connection.";
+      toast.error(`Minting failed: ${errMsg}`, {
+        id: toastId
+      });
+      addNotification(errMsg, "error");
     }
   };
 

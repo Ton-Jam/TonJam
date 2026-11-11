@@ -202,7 +202,7 @@ const AppRouterContent: React.FC = () => {
 
   useEffect(() => {
     const checkAndSeed = async () => {
-      if (user && (user.email === 'krusherkrupy@gmail.com' || userProfile?.role === 'admin')) {
+      if (user && (userProfile?.role === 'admin' || userProfile?.isAdmin === true)) {
         try {
           await seedDatabase();
         } catch (error) {

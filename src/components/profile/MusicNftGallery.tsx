@@ -96,7 +96,7 @@ export const MusicNftGallery: React.FC<MusicNftGalleryProps> = ({
         audioUrl:
           nft.audioUrl ||
           matched?.audioUrl ||
-          'https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3',
+          '/tonjam-offline-audio.mp3',
         coverUrl: nft.imageUrl || nft.coverUrl || '',
         duration: 210,
         isNFT: true,

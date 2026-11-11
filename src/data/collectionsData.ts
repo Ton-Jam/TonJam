@@ -319,7 +319,7 @@ export const PRIMARY_COLLECTIONS: DetailedCollection[] = [
         id: 'n4',
         trackId: '6',
         title: 'Prism Shift: Monolith #001',
-        owner: 'krusherkrupy@gmail.com',
+        owner: 'collector@tonjam.app',
         creator: 'Prism Core',
         artist: 'Prism Core',
         price: '14.0',

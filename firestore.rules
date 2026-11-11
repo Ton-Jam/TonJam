@@ -163,10 +163,11 @@ service cloud.firestore {
         isAdmin()
       );
       allow update: if isSignedIn() && isValidListing(incoming()) && (
-        isAdmin() || (
+        isAdmin() ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes']) ||
+        (
           !incoming().diff(existing()).affectedKeys().hasAny(['sellerId', 'nftId', 'nftAddress']) && (
-            isOwner(existing().sellerId) ||
-            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes']) ||
+            ('sellerId' in existing() && isOwner(existing().sellerId)) ||
             (
               request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes', 'bids', 'highestBid', 'highestBidder', 'status']) &&
               isValidBidUpdate()
@@ -174,7 +175,7 @@ service cloud.firestore {
           )
         )
       );
-      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().sellerId));
+      allow delete: if isAdmin() || (isSignedIn() && 'sellerId' in existing() && isOwner(existing().sellerId));
     }
 
     // 👤 USERS
@@ -190,12 +191,14 @@ service cloud.firestore {
           (!incoming().keys().contains('verificationStatus') || incoming().verificationStatus == 'unverified' || incoming().verificationStatus == 'pending') &&
           (!incoming().keys().contains('creatorPerks') || incoming().creatorPerks == null) &&
           (!incoming().keys().contains('tjBalance') || incoming().tjBalance == 0) &&
-          (!incoming().keys().contains('jamBalance') || incoming().jamBalance == 0)
+          (!incoming().keys().contains('jamBalance') || incoming().jamBalance == 0) &&
+          (!incoming().keys().contains('balance') || incoming().balance == 0) &&
+          (!incoming().keys().contains('earnings') || incoming().earnings == 0)
         )
       );
       allow update: if isSignedIn() && (isOwner(userId) || isAdmin()) && (
         isAdmin() || (
-          // Non-admins CANNOT change role, isAdmin, verified flags, OR balance/earnings fields
+          // Non-admins CANNOT change role, isAdmin, verified flags
           !incoming().diff(existing()).affectedKeys().hasAny([
             'role', 
             'isAdmin', 
@@ -207,11 +210,7 @@ service cloud.firestore {
             'resolvedAt',
             'reviewerId',
             'reviewerNotes',
-            'verificationDate',
-            'tjBalance',
-            'jamBalance',
-            'balance',
-            'earnings'
+            'verificationDate'
           ]) &&
           // Non-admins can only set verificationStatus to 'pending' or keep existing, NEVER directly to 'verified'
           (
@@ -222,6 +221,11 @@ service cloud.firestore {
         )
       );
       allow delete: if isAdmin();
+
+      // Subcollections under users/{userId} (e.g. taskState, dailyMissions, notifications, priceAlerts, searchHistory, bookmarks)
+      match /{subcollection}/{docId} {
+        allow read, write: if isSignedIn() && isOwner(userId);
+      }
     }
 
     // 🎨 ARTISTS
@@ -239,11 +243,11 @@ service cloud.firestore {
         isAdmin()
       );
       allow update: if isSignedIn() && (
-        isOwner(existing().artistId) || 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plays', 'streams', 'likes', 'playCount', 'likeCount']) ||
         isAdmin() || 
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plays', 'streams', 'likes', 'playCount', 'likeCount'])
+        ('artistId' in existing() && isOwner(existing().artistId))
       );
-      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().artistId));
+      allow delete: if isAdmin() || (isSignedIn() && 'artistId' in existing() && isOwner(existing().artistId));
     }
 
     // 🖼 NFTS
@@ -255,7 +259,9 @@ service cloud.firestore {
         isAdmin()
       );
       allow update: if isSignedIn() && isValidNFT(incoming()) && (
-        isAdmin() || (
+        isAdmin() ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes']) ||
+        (
           !incoming().diff(existing()).affectedKeys().hasAny([
             'creatorId',
             'creator',
@@ -264,10 +270,9 @@ service cloud.firestore {
             'contractAddress',
             'id'
           ]) && (
-            isOwner(existing().creatorId) ||
-            isOwner(existing().ownerId) ||
-            isOwner(existing().owner) ||
-            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes'])
+            ('creatorId' in existing() && isOwner(existing().creatorId)) ||
+            ('ownerId' in existing() && isOwner(existing().ownerId)) ||
+            ('owner' in existing() && isOwner(existing().owner))
           )
         )
       );
@@ -358,8 +363,23 @@ service cloud.firestore {
 
     match /collections/{collectionId} {
       allow read: if true;
-      allow create, update: if isSignedIn();
-      allow delete: if isAdmin();
+      allow create: if isSignedIn() && (
+        isAdmin() ||
+        (!incoming().keys().contains('creatorId') || incoming().creatorId == request.auth.uid) ||
+        (!incoming().keys().contains('ownerId') || incoming().ownerId == request.auth.uid)
+      );
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (existing().keys().contains('creatorId') && isOwner(existing().creatorId)) ||
+        (existing().keys().contains('ownerId') && isOwner(existing().ownerId)) ||
+        (existing().keys().contains('userId') && isOwner(existing().userId))
+      );
+      allow delete: if isAdmin() || (
+        isSignedIn() && (
+          (existing().keys().contains('creatorId') && isOwner(existing().creatorId)) ||
+          (existing().keys().contains('ownerId') && isOwner(existing().ownerId))
+        )
+      );
     }
 
     match /reactions/{id} {
@@ -374,7 +394,10 @@ service cloud.firestore {
     }
 
     match /verificationRequests/{requestId} {
-      allow read: if isSignedIn();
+      allow read: if isSignedIn() && (
+        isAdmin() ||
+        (resource.data.keys().contains('userId') && resource.data.userId == request.auth.uid)
+      );
       allow create: if isSignedIn() && (
         isAdmin() || (
           incoming().userId == request.auth.uid &&
@@ -429,22 +452,42 @@ service cloud.firestore {
       allow create, update, delete: if isSignedIn();
     }
 
-    // 💰 ROYALTIES
+    // 💰 ROYALTIES - Users cannot create or alter balances; only trusted backend / admin operations
     match /royalties/{royaltyId} {
-      allow read: if true;
-      allow create, update: if isSignedIn();
-      allow delete: if isAdmin();
+      allow read: if isSignedIn() && (
+        isAdmin() ||
+        (resource.data.keys().contains('artistId') && resource.data.artistId == request.auth.uid) ||
+        (resource.data.keys().contains('userId') && resource.data.userId == request.auth.uid)
+      );
+      allow create, update, delete: if isAdmin();
     }
 
-    // 💸 TRANSACTIONS
+    // 💸 TRANSACTIONS - Settlement and status transitions strictly managed by trusted backend
     match /transactions/{txId} {
-      allow read: if true;
-      allow create: if isSignedIn() && (
-        !incoming().keys().contains('userId') || 
-        incoming().userId == request.auth.uid || 
-        isAdmin()
+      allow read: if isSignedIn() && (
+        isAdmin() ||
+        (resource.data.keys().contains('userId') && resource.data.userId == request.auth.uid) ||
+        (resource.data.keys().contains('buyerId') && resource.data.buyerId == request.auth.uid) ||
+        (resource.data.keys().contains('sellerId') && resource.data.sellerId == request.auth.uid) ||
+        (resource.data.keys().contains('participants') && request.auth.uid in resource.data.participants)
       );
-      allow update, delete: if false;
+      allow create: if isSignedIn() && (
+        isAdmin() || (
+          (!incoming().keys().contains('userId') || incoming().userId == request.auth.uid) &&
+          (!incoming().keys().contains('status') || incoming().status == 'pending' || incoming().status == 'initiated')
+        )
+      );
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // 💎 REWARD LEDGER (ROOT) - Backend only
+    match /rewardLedger/{entryId} {
+      allow read: if isSignedIn() && (
+        isAdmin() ||
+        (resource.data.keys().contains('userId') && resource.data.userId == request.auth.uid)
+      );
+      allow write: if isAdmin();
     }
 
     match /nftSales/{id} {
@@ -501,7 +544,8 @@ service cloud.firestore {
     }
 
     match /users/{userId}/rewardLedger/{rewardId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
     }
 
     match /users/{userId}/playlists/{playlistId} {
@@ -549,6 +593,10 @@ service cloud.firestore {
       allow read, write: if isOwner(userId) || isAdmin();
     }
 
+    match /users/{userId}/listeningHistory/{historyId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
     // 🚀 SPONSORED CONTENT & TASKS
     match /sponsoredContent/{id} {
       allow read: if true;
@@ -576,7 +624,7 @@ service cloud.firestore {
     }
 
     match /admins/{userId} {
-      allow read: if true;
+      allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
       allow write: if isAdmin();
     }
 
@@ -779,7 +827,10 @@ service cloud.firestore {
 
     // 🤝 PARTNERSHIP CONTRIBUTIONS & TRANSACTIONS
     match /partnershipContributions/{contributionId} {
-      allow read: if true;
+      allow read: if isSignedIn() && (
+        isAdmin() ||
+        (resource.data.keys().contains('userId') && resource.data.userId == request.auth.uid)
+      );
       allow create: if isSignedIn() && (
         isAdmin() || (
           (!incoming().keys().contains('userId') || incoming().userId == request.auth.uid || incoming().senderAddress != null) &&
@@ -788,20 +839,13 @@ service cloud.firestore {
           (!incoming().keys().contains('treasuryAddress') || incoming().treasuryAddress == 'UQD_VZD-zU7IQ4nLBDPssEzApiFbWpV6lSmkmybWxgzLFkEr')
         )
       );
-      allow update: if isAdmin() || (
-        isSignedIn() &&
-        existing().status == 'pending' &&
-        (incoming().status == 'verified' || incoming().status == 'confirmed') &&
-        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'txHash', 'confirmedAt', 'updatedAt', 'verificationDetails']) &&
-        incoming().amountTon == existing().amountTon &&
-        incoming().treasuryAddress == existing().treasuryAddress
-      );
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
     match /partnershipTxHashes/{txHash} {
-      allow read: if true;
-      allow write: if isSignedIn();
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
   }
 }

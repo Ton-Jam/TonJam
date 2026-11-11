@@ -127,12 +127,12 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   return (
     <nav 
       id="tonjam-bottom-navigation"
-      className={`fixed bottom-0 left-0 right-0 z-50 bg-[var(--tj-color-navigation-background,#07172A)]/95 backdrop-blur-[18px] border-none shadow-[0_-8px_24px_rgba(0,0,0,0.45)] pb-[calc(env(safe-area-inset-bottom,0px)+8px)] select-none transition-all duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 z-50 bg-[var(--tj-color-navigation-background,#07172A)]/95 backdrop-blur-[18px] border-t-2 border-slate-300/20 shadow-[0_-1px_0_rgba(226,232,240,0.08),0_-8px_24px_rgba(0,0,0,0.45)] pb-[env(safe-area-inset-bottom,0px)] select-none transition-all duration-300 ${
         isHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
       }`}
       aria-label="Bottom Navigation"
     >
-      <div className="max-w-lg mx-auto h-[60px] px-2 flex items-center justify-around relative">
+      <div className="max-w-lg mx-auto h-[var(--tj-nav-height,64px)] px-1 min-[360px]:px-2 pl-[max(0.25rem,env(safe-area-inset-left,0px))] pr-[max(0.25rem,env(safe-area-inset-right,0px))] flex items-center justify-around relative">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentTab === tab.id;
@@ -143,7 +143,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               onClick={() => handleTabClick(tab)}
               onMouseDown={(e) => triggerRipple(tab.id, e)}
               onTouchStart={(e) => triggerRipple(tab.id, e)}
-              className="flex flex-col items-center justify-center flex-1 h-full min-h-[44px] min-w-[44px] relative cursor-pointer group overflow-hidden border-none bg-transparent active:scale-95 transition-transform"
+              className="flex flex-col items-center justify-center flex-1 h-full min-h-[44px] min-w-0 relative cursor-pointer group overflow-hidden border-none bg-transparent active:scale-95 transition-transform"
               aria-label={tab.label}
               aria-current={isActive ? 'page' : undefined}
             >
@@ -199,7 +199,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 
               {/* Text label */}
               <span
-                className={`text-[10px] font-medium tracking-tight mt-1 transition-colors pointer-events-none truncate max-w-full px-0.5 ${
+                className={`text-[9px] min-[360px]:text-[10px] font-medium tracking-tight mt-0.5 transition-colors pointer-events-none truncate max-w-full px-0.5 ${
                   isActive ? 'text-[var(--tj-color-navigation-active,#00B4D8)] font-bold' : 'text-[#8C8C8C] group-hover:text-[#C2C7CD]'
                 }`}
               >

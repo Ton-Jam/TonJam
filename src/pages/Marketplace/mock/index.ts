@@ -145,7 +145,7 @@ export const MOCK_TRACKS: NFTItem[] = Array.from({ length: 300 }).map((_, i) => 
     creator: artist.name,
     imageUrl: COVER_PHOTOS[(i + 3) % COVER_PHOTOS.length],
     coverUrl: COVER_PHOTOS[(i + 3) % COVER_PHOTOS.length],
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+    audioUrl: "/tonjam-offline-audio.mp3",
     duration: randomRange(110, 310),
     genre,
     mood,

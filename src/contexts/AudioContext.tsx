@@ -43,6 +43,7 @@ import { audioCacheService } from "@/services/audioCacheService";
 import { indexedDbService } from "@/services/indexedDbService";
 import { localAudioService } from "@/services/localAudioService";
 import { updateEngagementScore } from "@/services/engagementService";
+import { recordListeningActivity } from "@/services/recommendationService";
 import {
   db,
   auth,
@@ -158,6 +159,8 @@ interface AudioContextType {
   toggleSmartShuffle: () => void;
   setSmartShuffleMode: (mode: 'mood' | 'genre') => void;
   toggleRepeat: () => void;
+  crossfadeEnabled: boolean;
+  toggleCrossfade: () => void;
   addNotification: (
     message: string,
     type?: "success" | "info" | "error" | "warning",
@@ -716,6 +719,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
+
+  const [crossfadeEnabled, setCrossfadeEnabled] = useState(true);
+  const toggleCrossfade = () => setCrossfadeEnabled(prev => !prev);
 
   const [audioConnectionState, setAudioConnectionState] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [isLoading, setIsLoading] = useState(false);
@@ -2125,6 +2131,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const mintNFT = async (trackId: string, tonConnectUI: any) => {
     setIsLoading(true);
+    const toastId = toast.loading("Minting NFT on TON...", {
+      description: "Preparing smart contract call and blockchain transaction."
+    });
     try {
       if (!auth.currentUser) throw new Error("User must be logged in");
 
@@ -2184,6 +2193,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         updateTaskProgress("3", genesisTask.progress + 1);
       }
 
+      toast.success(`🎉 Successfully minted edition #${mintedCount + 1} of "${track.title}" on TON!`, {
+        id: toastId,
+        description: "Your music NFT is live on TON and added to your collection."
+      });
       addNotification(
         `Successfully minted edition #${mintedCount + 1} of ${track.title}`,
         "success",
@@ -2191,7 +2204,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       return { success: true };
     } catch (error: any) {
       console.error("Minting error:", error);
-      addNotification(error.message || "Minting failed", "error");
+      const errMsg = error?.message || "Minting failed. Transaction was canceled or could not be completed.";
+      toast.error(`Minting failed: ${errMsg}`, {
+        id: toastId
+      });
+      addNotification(errMsg, "error");
       return { success: false, error: error.message };
     } finally {
       setIsLoading(false);
@@ -2385,7 +2402,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       for (const nft of expiredEmptyAuctions) {
         const currentWallet = tonAddress || userProfile?.walletAddress;
         const isOwnerOfNFT = nft.owner === currentWallet || nft.owner === userProfile?.uid || nft.ownerId === userProfile?.uid || nft.artistId === userProfile?.uid;
-        const isUserAdmin = userProfile?.role === 'admin' || auth.currentUser?.email === 'krusherkrupy@gmail.com';
+        const isUserAdmin = userProfile?.role === 'admin' || userProfile?.isAdmin === true;
 
         if (isOwnerOfNFT || isUserAdmin) {
           console.log(
@@ -2514,6 +2531,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const handleStreamError = (e: any) => {
       console.warn("Audio connection blocked or failed:", e);
+      // Auto-recover if the audio failed to load because source was invalid, empty, or 403
+      if (audio && (!audio.src || audio.src.includes("codeskulptor") || !audio.src.includes("tonjam-offline-audio"))) {
+        console.info("[Audio] Attempting auto-recovery with local offline audio source...");
+        try {
+          audio.removeAttribute("crossorigin");
+          audio.src = "/tonjam-offline-audio.mp3";
+          audio.load();
+          audio.play().catch(() => {});
+          return;
+        } catch (recoverErr) {
+          console.warn("[Audio] Recovery attempt failed:", recoverErr);
+        }
+      }
       setAudioConnectionState("error");
       setIsLoading(false);
     };
@@ -2545,7 +2575,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.src = "";
+        audioRef.current.removeAttribute("src");
       }
       if (audioContextRef.current && audioContextRef.current.state !== "closed") {
         audioContextRef.current.close().catch(() => {});
@@ -3277,28 +3307,35 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const purchaseTrack = async (trackId: string) => {
     if (!auth.currentUser) {
+      toast.warning("Please log in to purchase tracks");
       addNotification("Please log in to purchase tracks", "warning");
       return;
     }
 
     const track = allTracks.find((t) => t.id === trackId);
     if (!track) {
+      toast.error("Track not found");
       addNotification("Track artifact not found", "error");
       return;
     }
 
     if (!track.price || parseFloat(track.price) <= 0) {
+      toast.info("This track is available for free");
       addNotification("This artifact is available for free", "info");
       return;
     }
 
     const price = parseFloat(track.price);
     if (userProfile.tonBalance && userProfile.tonBalance < price) {
+      toast.error("Insufficient TON balance in your wallet");
       addNotification("Insufficient TON balance in your neural link", "error");
       return;
     }
 
     setIsLoading(true);
+    const toastId = toast.loading(`Purchasing "${track.title}"...`, {
+      description: "Distributing royalties and transferring track ownership."
+    });
     try {
       const userId = auth.currentUser.uid;
       const artistId = track.artistId;
@@ -3325,6 +3362,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         updateTaskProgress("3", genesisTask.progress + 1);
       }
 
+      toast.success(`🎉 Successfully acquired "${track.title}"!`, {
+        id: toastId,
+        description: `Purchased for ${price} TON. Added to your collection.`
+      });
       addNotification(
         `Neural acquisition complete: "${track.title}"`,
         "success",
@@ -3335,7 +3376,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         ...prev,
         tonBalance: (prev.tonBalance || 0) - price,
       }));
-    } catch (error) {
+    } catch (error: any) {
+      toast.error(`Purchase failed: ${error?.message || "Transaction could not be completed on TON."}`, {
+        id: toastId
+      });
       handleFirestoreError(
         error,
         OperationType.WRITE,
@@ -3418,6 +3462,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       return [track, ...filtered].slice(0, 10);
     });
 
+    if (auth.currentUser?.uid) {
+      recordListeningActivity(auth.currentUser.uid, track).catch((err) => {
+        console.warn("Could not record listening activity:", err);
+      });
+    }
+
     // Increment stream task progress
     const streamTask = tasks.find((t) => t.id === "1");
     if (streamTask && !streamTask.completed) {
@@ -3444,12 +3494,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         playCount: increment(1),
       }).catch(console.warn);
 
-      let sourceUrl =
-        track.audioUrl ||
-        "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+      let sourceUrl = track.audioUrl || "/tonjam-offline-audio.mp3";
 
-      if (sourceUrl.includes("tonjam.io")) {
-        sourceUrl = "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+      if (sourceUrl.includes("tonjam.io") || sourceUrl.includes("codeskulptor") || sourceUrl.includes("bgm_gui.mp3")) {
+        sourceUrl = "/tonjam-offline-audio.mp3";
       }
 
       // 1. Direct handling for Local device tracks and Blob/Data URLs
@@ -3509,37 +3557,62 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
       try {
         const fallbacks = [
-          // Fallback 1: Same URL but without crossOrigin (fixes CORS but disables frequencies visualizer)
+          // Fallback 1: Source URL without crossOrigin
           { url: sourceUrl, crossOrigin: false },
-          // Fallback 2: Local offline audio files (guaranteed to succeed offline)
+          // Fallback 2: Guaranteed local offline MP3 (packaged in public)
           { url: "/tonjam-offline-audio.mp3", crossOrigin: false },
+          // Fallback 3: Guaranteed local offline WAV
           { url: "/tonjam-offline-audio.wav", crossOrigin: false },
-          // Fallback 3: Stable public asset URL (CORS allowed)
-          { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: true },
-          // Fallback 4: Stable public asset URL (no CORS)
-          { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: false },
-          // Fallback 5: Silent data URI (failsafe offline backup)
+          // Fallback 4: Silent data URI failsafe backup
           { url: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=", crossOrigin: false }
         ];
 
         let fallbackIndex = 0;
 
-        const playWithFallback = (url: string, useCrossOrigin: boolean) => {
+        const playWithCrossfade = async (url: string, useCrossOrigin: boolean) => {
           if (!audioRef.current) return;
+          const audio = audioRef.current;
+          const targetVolume = isMuted ? 0 : volume;
+
+          if (isPlaying && !audio.paused && crossfadeEnabled) {
+            const fadeSteps = 12;
+            const fadeInterval = 40; // ms
+            const stepVol = audio.volume / fadeSteps;
+            for (let i = fadeSteps; i >= 0; i--) {
+              if (!audioRef.current) break;
+              audioRef.current.volume = Math.max(0, i * stepVol);
+              await new Promise(r => setTimeout(r, fadeInterval));
+            }
+          }
+
           try {
             setAudioConnectionState("connecting");
-            audioRef.current.pause();
+            audio.pause();
             if (useCrossOrigin && url.startsWith("http")) {
-              audioRef.current.crossOrigin = "anonymous";
+              audio.crossOrigin = "anonymous";
             } else {
-              audioRef.current.removeAttribute("crossorigin");
+              audio.removeAttribute("crossorigin");
             }
-            audioRef.current.src = url;
-            console.log("[Audio] Playing source:", url);
-            audioRef.current.load();
+            audio.src = url;
+            console.log("[Audio] Playing source with crossfade:", url);
+            audio.load();
+            audio.volume = 0;
 
-            const promise = audioRef.current.play();
+            const promise = audio.play();
             playPromiseRef.current = promise;
+
+            if (crossfadeEnabled) {
+              const fadeSteps = 12;
+              const fadeInterval = 40;
+              const stepVol = targetVolume / fadeSteps;
+              for (let i = 1; i <= fadeSteps; i++) {
+                if (!audioRef.current) break;
+                audioRef.current.volume = Math.min(targetVolume, i * stepVol);
+                await new Promise(r => setTimeout(r, fadeInterval));
+              }
+            } else {
+              audio.volume = targetVolume;
+            }
 
             if (promise !== undefined) {
               promise.catch((error) => {
@@ -3548,35 +3621,27 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
                   error.message?.includes("interrupted");
 
                 if (!isInterrupted) {
-                  console.warn(
-                    `[Audio] Playback failed for source ${url}:`,
-                    error
-                  );
+                  console.warn(`[Audio] Playback failed for source ${url}:`, error);
                   if (fallbackIndex < fallbacks.length) {
                     const next = fallbacks[fallbackIndex++];
                     console.log(`[Audio] Switching to fallback index ${fallbackIndex}...`);
-                    playWithFallback(next.url, next.crossOrigin);
+                    playWithCrossfade(next.url, next.crossOrigin);
                   } else {
                     console.error("[Audio] All fallbacks failed:", error);
                     setAudioConnectionState("error");
-                    addNotification(
-                      "Playback protocol failed. Signal lost.",
-                      "error"
-                    );
+                    addNotification("Playback protocol failed. Signal lost.", "error");
                     setIsPlaying(false);
                   }
                 }
               });
             }
           } catch (err) {
-            console.error("[Audio] Error setting up audio source:", err);
+            console.error("[Audio] Error setting up audio source with crossfade:", err);
             setAudioConnectionState("error");
           }
         };
 
-        const isRemote = sourceUrl.startsWith("http");
-        // Always try playing without crossOrigin first for stable and seamless playback of external audio assets
-        playWithFallback(sourceUrl, false);
+        playWithCrossfade(sourceUrl, false);
 
         setIsPlaying(true);
 
@@ -3635,10 +3700,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         const currentSrc = audioRef.current.src;
-        if (!currentSrc || currentSrc === "" || currentSrc === window.location.href || currentSrc === window.location.origin || currentSrc.endsWith("/") || currentSrc.includes("tonjam.io")) {
-          let trackSourceUrl = currentTrack.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
-          if (trackSourceUrl.includes("tonjam.io")) {
-            trackSourceUrl = "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+        if (!currentSrc || currentSrc === "" || currentSrc === window.location.href || currentSrc === window.location.origin || currentSrc.endsWith("/") || currentSrc.includes("tonjam.io") || currentSrc.includes("codeskulptor") || currentSrc.includes("bgm_gui.mp3")) {
+          let trackSourceUrl = currentTrack.audioUrl || "/tonjam-offline-audio.mp3";
+          if (!trackSourceUrl || trackSourceUrl.includes("tonjam.io") || trackSourceUrl.includes("codeskulptor") || trackSourceUrl.includes("bgm_gui.mp3")) {
+            trackSourceUrl = "/tonjam-offline-audio.mp3";
           }
           
           if (isOffline) {
@@ -3666,16 +3731,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
               if (currentTrack) {
                 console.warn("[Audio] Attempting recovery during toggle...");
                 
-                let trackSourceUrl = currentTrack.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
-                if (trackSourceUrl.includes("tonjam.io")) {
-                  trackSourceUrl = "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+                let trackSourceUrl = currentTrack.audioUrl || "/tonjam-offline-audio.mp3";
+                if (!trackSourceUrl || trackSourceUrl.includes("tonjam.io") || trackSourceUrl.includes("codeskulptor") || trackSourceUrl.includes("bgm_gui.mp3")) {
+                  trackSourceUrl = "/tonjam-offline-audio.mp3";
                 }
 
                 const toggleFallbacks = [
                   { url: trackSourceUrl, crossOrigin: false },
-                  { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: true },
-                  { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: false },
-                  { url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", crossOrigin: false },
+                  { url: "/tonjam-offline-audio.mp3", crossOrigin: false },
+                  { url: "/tonjam-offline-audio.wav", crossOrigin: false },
                   { url: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=", crossOrigin: false }
                 ];
 
@@ -4107,7 +4171,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         await playPromiseRef.current.catch(() => {});
       }
       audioRef.current.pause();
-      audioRef.current.src = "";
+      audioRef.current.removeAttribute("src");
     }
     setCurrentTrack(null);
     setIsPlaying(false);
@@ -5022,6 +5086,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleSmartShuffle,
         setSmartShuffleMode,
         toggleRepeat,
+        crossfadeEnabled,
+        toggleCrossfade,
         addNotification,
         setTrackToAddToPlaylist,
         setOptionsTrack,

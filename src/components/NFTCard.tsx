@@ -47,6 +47,7 @@ import {
 
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { buyNFT } from '@/services/tonService';
+import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { cardTokens } from '@/design';
 import MediaCard from '@/components/common/MediaCard';
@@ -249,9 +250,21 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
       togglePlay().catch((err) => console.error("Error pausing main audio:", err));
     }
 
-    const audioUrl = nft.audioUrl || associatedTrack?.audioUrl || "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3";
+    let audioUrl = nft.audioUrl || associatedTrack?.audioUrl || "/tonjam-offline-audio.mp3";
+    if (audioUrl.includes("codeskulptor") || audioUrl.includes("bgm_gui.mp3")) {
+      audioUrl = "/tonjam-offline-audio.mp3";
+    }
     const audio = new Audio(audioUrl);
     audioRef.current = audio;
+
+    audio.onerror = () => {
+      if (audio.src && !audio.src.includes('tonjam-offline-audio')) {
+        audio.src = '/tonjam-offline-audio.mp3';
+        audio.play().catch(() => {});
+      } else {
+        stopPreview();
+      }
+    };
 
     // Register active preview stop callback globally
     (window as any)._activePreviewStop = stopPreview;
@@ -358,6 +371,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
     } else if (!isAuctionEnded) {
       // BUY / COLLECT flow - trigger confirmation modal first to prevent accidental purchase
       if (!tonConnectUI.connected) {
+        toast.warning('Please connect your TON wallet to purchase this NFT');
         addNotification('Please connect your wallet first', 'error');
         tonConnectUI.openModal();
         return;
@@ -368,6 +382,10 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
 
   const executeDirectPurchase = async () => {
     setIsConfirmPurchaseOpen(false);
+    const toastId = toast.loading(`Purchasing "${nft.title}"...`, {
+      description: "Please confirm in your TON wallet..."
+    });
+
     try {
       setIsPurchasing(true);
       addNotification('Initiating purchase...', 'info');
@@ -380,9 +398,15 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
         nft.royaltySplits || []
       );
       
+      toast.success(`Successfully purchased "${nft.title}"!`, {
+        id: toastId,
+        description: `Acquired for ${nft.price} TON. Added to your collection.`
+      });
       addNotification('Purchase successful!', 'success');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Purchase failed', err);
+      const msg = err?.message || 'Transaction was canceled or could not be verified on TON.';
+      toast.error(`Purchase failed: ${msg}`, { id: toastId });
       addNotification('Purchase failed or rejected', 'error');
     } finally {
       setIsPurchasing(false);

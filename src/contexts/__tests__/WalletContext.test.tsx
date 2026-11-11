@@ -9,6 +9,10 @@ vi.mock('@tonconnect/ui-react', () => ({
   useTonAddress: vi.fn(),
   useTonWallet: vi.fn(),
   useTonConnectUI: vi.fn(),
+  CHAIN: {
+    MAINNET: '-239',
+    TESTNET: '-3',
+  },
 }));
 
 describe('WalletContext - Unit, Integration & Race Condition Suite', () => {

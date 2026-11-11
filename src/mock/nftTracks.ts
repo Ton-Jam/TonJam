@@ -13,7 +13,7 @@ export const mockNFTs: NFTItem[] = [
     price: "125",
     imageUrl: "/src/assets/images/tonjam_cover_abstract_1782827351935.jpg",
     coverUrl: "/src/assets/images/tonjam_cover_abstract_1782827351935.jpg",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+    audioUrl: "/tonjam-offline-audio.mp3",
     edition: "Unique",
     supply: 1,
     minted: 1,
@@ -55,7 +55,7 @@ export const mockNFTs: NFTItem[] = [
       { id: "off-n1-2", offerer: "UQC_Emeka_LagosVibes_9911_v8s2", price: "110", duration: "1 day", timestamp: "2026-07-11T18:00:00Z" }
     ],
     exclusiveContent: [
-      { id: "ex-1", title: "City Boys Stems (Bass, Drums, Vocals)", type: "track", url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", description: "Studio stems for production." },
+      { id: "ex-1", title: "City Boys Stems (Bass, Drums, Vocals)", type: "track", url: "/tonjam-offline-audio.mp3", description: "Studio stems for production." },
       { id: "ex-2", title: "VIP Access Ticket", type: "document", url: "https://tonjam.io/vip-burna-001", description: "Virtual show VIP access pass." }
     ]
   },
@@ -71,7 +71,7 @@ export const mockNFTs: NFTItem[] = [
     price: "45",
     imageUrl: "/src/assets/images/tonjam_cover_type_1782827384693.jpg",
     coverUrl: "/src/assets/images/tonjam_cover_type_1782827384693.jpg",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+    audioUrl: "/tonjam-offline-audio.mp3",
     edition: "Limited Gold",
     supply: 100,
     minted: 42,
@@ -115,7 +115,7 @@ export const mockNFTs: NFTItem[] = [
     price: "80",
     imageUrl: "/src/assets/images/tonjam_cover_city_1782827373498.jpg",
     coverUrl: "/src/assets/images/tonjam_cover_city_1782827373498.jpg",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+    audioUrl: "/tonjam-offline-audio.mp3",
     edition: "Rare VIP",
     supply: 10,
     minted: 7,
@@ -159,7 +159,7 @@ export const mockNFTs: NFTItem[] = [
     price: "12",
     imageUrl: "https://image.pollinations.ai/prompt/music%20nft%20Solar%20Pulse%20Genesis%20Mythic%20Rare?width=600&height=600&nologo=true",
     coverUrl: "https://image.pollinations.ai/prompt/music%20nft%20Solar%20Pulse%20Genesis%20Mythic%20Rare?width=600&height=600&nologo=true",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3",
+    audioUrl: "/tonjam-offline-audio.mp3",
     edition: "Unique",
     supply: 1,
     minted: 1,

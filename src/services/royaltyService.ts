@@ -8,7 +8,15 @@ import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, in
  * This service handles the calculation and distribution of royalties.
  */
 
-export const PLATFORM_FEE_PERCENTAGE = 0.10; // 10% platform fee (5% from buyer + 5% from seller equivalent for off-chain calcs)
+export const PLATFORM_FEE_PERCENTAGE = 0.05; // Standardized TonJam platform fee of 5%
+
+export function calculatePlatformFee(amount: number): number {
+  return amount * PLATFORM_FEE_PERCENTAGE;
+}
+
+export function calculateArtistRoyalty(amount: number, royaltyBps: number): number {
+  return (amount * royaltyBps) / 10000;
+}
 
 export interface DistributionResult {
   platformFee: number;
@@ -140,7 +148,7 @@ export async function distributeNFTRoyaltiesWithSeller(
   royaltySplits: RoyaltySplit[],
   metadata: Partial<Transaction> = {}
 ): Promise<void> {
-  // 10% platform fee
+  // 5% standardized platform fee
   const platformFee = amount * PLATFORM_FEE_PERCENTAGE;
   
   // Calculate royalty commission (e.g. 10%)
@@ -261,13 +269,18 @@ export async function processStreamRoyalty(track: Track) {
 /**
  * Process an NFT sale royalty
  */
-export async function processNFTSaleRoyalty(nft: NFTItem, salePrice: number, sellerId?: string) {
+export async function processNFTSaleRoyalty(
+  nft: NFTItem, 
+  salePrice: number, 
+  sellerId?: string,
+  txMetadata: Partial<Transaction> = {}
+) {
   const actualSellerId = sellerId || nft.ownerId || nft.owner || nft.creator || 'system_seller';
   await distributeNFTRoyaltiesWithSeller(
     salePrice,
     nft.artistId || nft.creator,
     actualSellerId,
     nft.royaltySplits || [],
-    { nftId: nft.id, trackId: nft.trackId }
+    { nftId: nft.id, trackId: nft.trackId, ...txMetadata }
   );
 }

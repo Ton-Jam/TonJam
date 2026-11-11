@@ -637,9 +637,31 @@
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "paymentReference", "partnerName", "contactEmail", "partnershipType", "status", "createdAt"]
+    },
+    "ListeningHistoryItem": {
+      "title": "ListeningHistoryItem",
+      "description": "User track playback history record",
+      "type": "object",
+      "properties": {
+        "trackId": { "type": "string" },
+        "title": { "type": "string" },
+        "artist": { "type": "string" },
+        "artistId": { "type": "string" },
+        "genre": { "type": "string" },
+        "playCount": { "type": "number" },
+        "lastPlayed": { "type": "string", "format": "date-time" },
+        "coverUrl": { "type": "string" },
+        "audioUrl": { "type": "string" },
+        "duration": { "type": "number" }
+      },
+      "required": ["trackId", "title", "artist", "lastPlayed"]
     }
   },
   "firestore": {
+    "/users/{userId}/listeningHistory/{historyId}": {
+      "schema": "ListeningHistoryItem",
+      "description": "User listening history tracks subcollection"
+    },
     "/partnershipContributions/{contributionId}": {
       "schema": "PartnershipContribution",
       "description": "Ecosystem contributions and partnership inquiries for TonJam Treasury"

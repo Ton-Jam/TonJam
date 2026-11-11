@@ -92,8 +92,11 @@ export const buyNFT = async (
     updatedAt: new Date().toISOString()
   });
 
-  // 4. Record transaction and distribute royalties
-  await processNFTSaleRoyalty(nft, parseFloat(listing.price), listing.sellerId);
+  // 4. Record transaction and distribute royalties with real blockchain transaction hash
+  await processNFTSaleRoyalty(nft, parseFloat(listing.price), listing.sellerId, {
+    txHash: txId,
+    network: 'ton'
+  });
 
   return txId;
 };

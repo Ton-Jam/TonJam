@@ -63,6 +63,7 @@ import { CollabRequestsManager } from "@/components/CollabRequestsManager";
 
 import SongRequestsTab from "@/components/SongRequestsTab";
 import AlbumCard from "@/components/AlbumCard";
+import { toast } from "sonner";
 import Autoplay from "embla-carousel-autoplay";
 import ManageNFTModal from "@/components/ManageNFTModal";
 import { ChartAreaInteractive } from "@/components/ChartAreaInteractive";
@@ -528,10 +529,12 @@ export default function ArtistDashboard() {
   const handleBulkMint = () => {
     const tracksToMint = tracks.filter(t => selectedTrackIds.includes(t.id) && !t.isNFT);
     if (tracksToMint.length === 0) {
+      toast.warning("No eligible unminted tracks selected to mint");
       addNotification("No eligible unminted tracks selected", "warning");
       return;
     }
 
+    toast.info(`Opening TON Connect minting studio for "${tracksToMint[0].title}"`);
     addNotification(`Redirecting to TON Connect minting studio for "${tracksToMint[0].title}"`, "info");
     navigate('/artist-minting', { state: { track: tracksToMint[0] } });
   };
@@ -738,7 +741,7 @@ export default function ArtistDashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24 relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#080D1A] text-white pb-24 relative overflow-x-hidden">
       {/* Dynamic Ambient Blur Backgrounds */}
       <div className="fixed inset-0 opacity-10 blur-[130px] pointer-events-none z-0">
         <div className="absolute top-10 right-10 w-80 h-80 bg-cyan-500 rounded-full" />

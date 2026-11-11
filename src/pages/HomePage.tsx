@@ -22,6 +22,9 @@ import { HomePlaylistsSection, HomeCollectionsSection } from "@/components/home/
 import { LiveSpacesSection } from "@/components/home/LiveSpacesSection";
 import { HomeFooter } from "@/components/home/HomeFooter";
 import { TrendingNowWidget } from "@/components/home/TrendingNowWidget";
+import { RecommendedNFTTracksSection } from "@/components/home/RecommendedNFTTracksSection";
+import { SponsoredBannerCarousel } from "@/components/home/SponsoredBannerCarousel";
+import { RecommendedTracksSection } from "@/components/home/RecommendedTracksSection";
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -91,6 +94,21 @@ export const HomePage: React.FC = () => {
             activeCategory={activeCategory}
             onSelectCategory={setActiveCategory}
           />
+
+          {/* 4. RECOMMENDED NFT TRACKS */}
+          {(activeCategory === "All" || activeCategory === "NFTs") && (
+            <RecommendedNFTTracksSection />
+          )}
+
+          {/* 5. SPONSORED BANNER CAROUSEL */}
+          {(activeCategory === "All" || activeCategory === "Music" || activeCategory === "NFTs") && (
+            <SponsoredBannerCarousel />
+          )}
+
+          {/* 6. RECOMMENDED TRACKS (SMART DISCOVERY) */}
+          {(activeCategory === "All" || activeCategory === "Music") && (
+            <RecommendedTracksSection />
+          )}
 
           {/* 3. QUICK "JUMP BACK IN" CARD (IF TRACK ACTIVE) */}
           {currentTrack && (
