@@ -94,7 +94,7 @@ export const JamSpaceMain: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#030B17] text-white pb-32">
+    <div className="min-h-screen bg-transparent text-white pb-32">
       {/* Global Page Header */}
       <PageHeader 
         title="JamSpace" 

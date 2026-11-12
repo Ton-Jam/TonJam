@@ -655,9 +655,29 @@
         "duration": { "type": "number" }
       },
       "required": ["trackId", "title", "artist", "lastPlayed"]
+    },
+    "Royalty": {
+      "title": "Royalty",
+      "description": "Creator royalties, pending withdrawals, and earnings ledger",
+      "type": "object",
+      "properties": {
+        "artistId": { "type": "string" },
+        "userId": { "type": "string" },
+        "unclaimedAmount": { "type": "number" },
+        "totalClaimed": { "type": "number" },
+        "totalEarned": { "type": "number" },
+        "pendingWithdrawal": { "type": "number" },
+        "totalPaidOut": { "type": "number" },
+        "lastPayoutAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
+    "/royalties/{royaltyId}": {
+      "schema": "Royalty",
+      "description": "Creator and collaborator royalties balance records"
+    },
     "/users/{userId}/listeningHistory/{historyId}": {
       "schema": "ListeningHistoryItem",
       "description": "User listening history tracks subcollection"

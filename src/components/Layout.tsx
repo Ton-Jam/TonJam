@@ -448,12 +448,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </main>
       ) : (
-        <div className="flex min-h-[100dvh] w-full bg-[#080D1A] text-foreground transition-colors duration-300 relative overflow-x-hidden">
+        <div className="flex min-h-[100dvh] w-full bg-transparent text-foreground transition-colors duration-300 relative overflow-x-hidden">
           {/* Ambient Background Effects */}
       <div 
         className="fixed inset-0 z-0 pointer-events-none overflow-hidden" 
         style={{
-          background: "radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.14) 0%, rgba(0, 136, 204, 0.05) 40%, transparent 70%), #080D1A"
+          background: "radial-gradient(circle at 50% -10%, rgba(0, 180, 216, 0.22), transparent 50%), linear-gradient(180deg, #0e285a 0%, #071533 100%)"
         }}
       />
 

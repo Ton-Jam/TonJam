@@ -90,20 +90,20 @@ const Wallet: React.FC = () => {
   // Fetch unclaimed royalties from Firestore
   useEffect(() => {
     const fetchRoyalties = async () => {
-      if (auth.currentUser) {
-        try {
-          const royaltyRef = doc(db, 'royalties', auth.currentUser.uid);
-          const snap = await getDoc(royaltyRef);
-          if (snap.exists()) {
-            setUnclaimedRoyalty(snap.data().unclaimedAmount || 0);
-          }
-        } catch (error) {
-          console.error("Error reading creator royalties:", error);
+      const currentUid = auth.currentUser?.uid || userProfile?.uid;
+      if (!currentUid) return;
+      try {
+        const royaltyRef = doc(db, 'royalties', currentUid);
+        const snap = await getDoc(royaltyRef);
+        if (snap.exists()) {
+          setUnclaimedRoyalty(snap.data().unclaimedAmount || 0);
         }
+      } catch (error) {
+        console.warn("Creator royalties record pending initialization:", error);
       }
     };
     fetchRoyalties();
-  }, []);
+  }, [userProfile?.uid]);
 
   const handlePurchaseJAM = async (priceTon: string, jamAmount: string) => {
     setIsProcessing(true);

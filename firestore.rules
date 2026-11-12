@@ -452,14 +452,27 @@ service cloud.firestore {
       allow create, update, delete: if isSignedIn();
     }
 
-    // 💰 ROYALTIES - Users cannot create or alter balances; only trusted backend / admin operations
+    // 💰 ROYALTIES - Creator & collaborator earnings
     match /royalties/{royaltyId} {
       allow read: if isSignedIn() && (
         isAdmin() ||
-        (resource.data.keys().contains('artistId') && resource.data.artistId == request.auth.uid) ||
-        (resource.data.keys().contains('userId') && resource.data.userId == request.auth.uid)
+        royaltyId == request.auth.uid ||
+        (resource != null && resource.data != null && (
+          (resource.data.keys().contains('artistId') && resource.data.artistId == request.auth.uid) ||
+          (resource.data.keys().contains('userId') && resource.data.userId == request.auth.uid)
+        ))
       );
-      allow create, update, delete: if isAdmin();
+      allow create: if isSignedIn() && isValidRoyalty(incoming()) && (
+        isAdmin() ||
+        royaltyId == request.auth.uid ||
+        (!incoming().keys().contains('artistId') || incoming().artistId == royaltyId)
+      );
+      allow update: if isSignedIn() && isValidRoyalty(incoming()) && (
+        isAdmin() ||
+        royaltyId == request.auth.uid ||
+        (!incoming().keys().contains('artistId') || incoming().artistId == royaltyId)
+      );
+      allow delete: if isAdmin();
     }
 
     // 💸 TRANSACTIONS - Settlement and status transitions strictly managed by trusted backend

@@ -261,7 +261,7 @@ export default function MarketplacePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070D20] text-[#F5F8FF] pb-36 pt-2 px-0 sm:px-4 md:px-8 max-w-7xl mx-auto space-y-7">
+    <div className="min-h-screen bg-transparent text-[#F5F8FF] pb-36 pt-2 px-0 sm:px-4 md:px-8 max-w-7xl mx-auto space-y-7">
       {/* 2. SCREEN HEADER */}
       <MarketplaceHeader
         searchTerm={searchTerm}

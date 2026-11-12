@@ -122,7 +122,7 @@
      Source of truth aligned with Figma
      ========================================================= */
   /* Semantic Tokens */
-  --tj-color-bg-primary: #080D1A;
+  --tj-color-bg-primary: #0e285a;
   --tj-color-bg-secondary: #0D1628;
   --tj-color-surface-default: #0D1628;
   --tj-color-surface-elevated: #111F36;
@@ -172,7 +172,7 @@
   --tj-surface-pressed: var(--tj-color-surface-pressed, #193657);
   --tj-surface-active: var(--tj-color-surface-pressed, #193657);
   --tj-surface-overlay: var(--tj-color-surface-overlay, #07182BCC);
-  --tj-bg-deep: #080D1A;
+  --tj-bg-deep: #0e285a;
   --tj-bg-card: rgba(10, 22, 40, 0.85);
   --tj-bg-glass: var(--tj-color-overlay-glass);
   --tj-bg-hover: rgba(255, 255, 255, 0.05);
@@ -801,8 +801,8 @@
 
   html {
     @apply font-sans;
-    background-color: #080D1A !important;
-    background: #080D1A !important;
+    background-color: #0e285a !important;
+    background: radial-gradient(circle at 50% -10%, rgba(0, 180, 216, 0.22), transparent 50%), linear-gradient(180deg, #0e285a 0%, #071533 100%) !important;
     min-height: 100vh;
     min-height: 100dvh;
     width: 100%;
@@ -812,8 +812,8 @@
   }
 
   body {
-    background-color: #080D1A !important;
-    background: radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.14) 0%, rgba(0, 136, 204, 0.05) 40%, transparent 70%), #080D1A !important;
+    background-color: #0e285a !important;
+    background: radial-gradient(circle at 50% -10%, rgba(0, 180, 216, 0.22), transparent 50%), linear-gradient(180deg, #0e285a 0%, #071533 100%) !important;
     background-attachment: fixed;
     color: var(--tj-text-primary);
     min-height: 100vh;
@@ -826,7 +826,7 @@
   }
 
   #root {
-    background-color: #080D1A !important;
+    background-color: transparent !important;
     min-height: 100vh;
     min-height: 100dvh;
     width: 100%;
@@ -842,8 +842,8 @@
 
   /* TonJam Dark UI Theme for entire App */
   .dark {
-    background: #080D1A !important;
-    background-color: #080D1A !important;
+    background: radial-gradient(circle at 50% -10%, rgba(0, 180, 216, 0.22), transparent 50%), linear-gradient(180deg, #0e285a 0%, #071533 100%) !important;
+    background-color: #0e285a !important;
   }
   .dark body,
   .dark .bg-background,
@@ -854,10 +854,15 @@
   .dark [class*="bg-[#050505]"],
   .dark [class*="bg-[#0a0a0a]"],
   .dark [class*="bg-[#080d2d]"],
+  .dark [class*="bg-[#080D1A]"],
+  .dark [class*="bg-[#080d1a]"],
+  .dark [class*="bg-[#030B17]"],
+  .dark [class*="bg-[#030b17]"],
+  .dark [class*="bg-[#070D20]"],
+  .dark [class*="bg-[#070d20]"],
   .dark .bg-zinc-950,
   .dark .bg-black {
-    background: #080D1A !important;
-    background-color: #080D1A !important;
+    background: transparent !important;
   }
 
   /* Full Player Header Always Transparent */
