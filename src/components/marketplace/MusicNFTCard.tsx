@@ -6,6 +6,7 @@ import { ProgressiveImage } from "@/components/common/ProgressiveImage";
 import { VerifiedArtistLabel } from "./VerifiedArtistLabel";
 import { TonPriceLabel } from "./TonPriceLabel";
 import { FavouriteButton } from "./FavouriteButton";
+import MediaCard from "@/components/common/MediaCard";
 
 export interface MusicNFTData {
   id: string;
@@ -49,15 +50,6 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
     if (onViewNFT) onViewNFT(nft);
   };
 
-  const handleCollectClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onCollect) {
-      onCollect(nft);
-    } else if (onViewNFT) {
-      onViewNFT(nft);
-    }
-  };
-
   const handleQuickBuyClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onQuickBuy) {
@@ -75,125 +67,76 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
   };
 
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
+    <MediaCard
+      type="nft"
+      isActive={isPlaying}
       onClick={handleCardClick}
-      className={cn(
-        "w-[260px] sm:w-[280px] shrink-0 snap-start flex flex-col justify-between",
-        "bg-[#101A32] hover:bg-[#152440] rounded-2xl p-3 shadow-lg shadow-black/25 cursor-pointer transition-colors duration-200 select-none",
-        className
-      )}
-    >
-      {/* Top Part: Artwork + Metadata */}
-      <div>
-        {/* Square Album Artwork */}
-        <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#070D20] group">
+      className={cn("snap-start shrink-0", className)}
+      role="button"
+      tabIndex={0}
+      aria-label={`View NFT: ${nft.title} by ${nft.artist}`}
+      artwork={
+        <>
           <ProgressiveImage
             src={nft.imageUrl}
             alt={nft.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
 
-          {/* Top Artwork Bar: Badge & Favourite */}
-          <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
-            <span className="pointer-events-auto px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase bg-[#070D20]/75 backdrop-blur-md text-[#65B8FF]">
+          {/* Top Artwork Badge */}
+          <div className="absolute top-2 left-2 z-10 pointer-events-none">
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase bg-black/65 backdrop-blur-md text-[#65B8FF]">
               {badgeText}
             </span>
-            <div className="pointer-events-auto">
-              <FavouriteButton size="sm" />
-            </div>
           </div>
 
-          {/* Play Preview Floating Action */}
+          {/* Spotify-style Floating Action Button */}
           {nft.audioUrl && (
+            <div className={cn(
+              "absolute bottom-2 right-2 transition-all duration-200 z-10",
+              isPlaying 
+                ? "opacity-100 translate-y-0" 
+                : "opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0"
+            )}>
+              <button 
+                type="button"
+                className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 hover:scale-105 active:scale-95 transition-all cursor-pointer border-none"
+                onClick={handlePlayClick}
+                aria-label={isPlaying ? "Pause preview" : "Play preview"}
+              >
+                {isPlaying ? (
+                  <Pause className="h-4 w-4 fill-current" />
+                ) : (
+                  <Play className="h-4 w-4 fill-current ml-0.5" />
+                )}
+              </button>
+            </div>
+          )}
+        </>
+      }
+      title={nft.title}
+      subtitle={
+        <span className="inline-flex items-center gap-1 truncate w-full">
+          <span className="truncate">{nft.artist}</span>
+          <VerifiedArtistLabel artist={nft.artist} verified={nft.artistVerified ?? true} />
+        </span>
+      }
+      meta={
+        <div className="flex items-center justify-between pt-1">
+          <TonPriceLabel price={nft.price} label="" size="sm" />
+          {onQuickBuy && (
             <button
               type="button"
-              onClick={handlePlayClick}
-              aria-label={isPlaying ? "Pause preview" : "Play preview"}
-              className={cn(
-                "absolute bottom-2.5 right-2.5 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer border-none outline-none shadow-md",
-                isPlaying
-                  ? "bg-[#3390EC] text-white scale-105"
-                  : "bg-[#070D20]/80 hover:bg-[#3390EC] text-white backdrop-blur-md opacity-90 group-hover:opacity-100"
-              )}
+              onClick={handleQuickBuyClick}
+              className="px-2.5 py-1 rounded-lg bg-[#229ED9] hover:bg-[#168AC4] text-white text-[10px] font-bold uppercase tracking-wider border-none cursor-pointer transition-transform active:scale-95"
+              title="Quick Buy"
             >
-              {isPlaying ? (
-                <Pause className="w-4 h-4 fill-current" />
-              ) : (
-                <Play className="w-4 h-4 fill-current translate-x-0.5" />
-              )}
+              Buy
             </button>
           )}
-
-          {/* Subtle Waveform Motif when playing */}
-          {isPlaying && (
-            <div className="absolute bottom-2.5 left-2.5 flex items-end gap-0.5 h-4 px-2 py-1 rounded bg-[#070D20]/80 backdrop-blur-sm">
-              <span className="w-0.5 h-3 bg-[#65B8FF] animate-pulse rounded-full" />
-              <span className="w-0.5 h-4 bg-[#3390EC] animate-pulse delay-75 rounded-full" />
-              <span className="w-0.5 h-2 bg-[#65B8FF] animate-pulse delay-150 rounded-full" />
-              <span className="w-0.5 h-3.5 bg-[#3390EC] animate-pulse delay-100 rounded-full" />
-            </div>
-          )}
         </div>
-
-        {/* Track & Artist Info */}
-        <div className="mt-3 space-y-1">
-          <h3 className="text-sm font-bold text-[#F5F8FF] truncate leading-tight">
-            {nft.title}
-          </h3>
-          <div className="flex items-center justify-between text-xs">
-            <VerifiedArtistLabel
-              artist={nft.artist}
-              verified={nft.artistVerified ?? true}
-            />
-            {nft.genre && (
-              <span className="text-[11px] text-[#9BAAC5]/70 shrink-0 ml-2">
-                {nft.genre}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Part: Pricing, Edition & CTA */}
-      <div className="mt-3 pt-3 flex items-end justify-between gap-2">
-        <div>
-          <div className="flex items-center gap-2">
-            <TonPriceLabel price={nft.price} label="Price" size="sm" />
-            {(() => {
-              const change = nft.floorPriceChange ?? 4.8;
-              const isPositive = change >= 0;
-              return (
-                <span className={cn(
-                  "text-[9px] font-bold px-1.5 py-0.2 rounded-[4px] tabular-nums inline-flex items-center mt-3",
-                  isPositive ? "bg-[#103B32] text-[#34D399]" : "bg-[#451F2A] text-[#F87171]"
-                )}>
-                  {isPositive ? `+${change}%` : `${change}%`}
-                </span>
-              );
-            })()}
-          </div>
-          {nft.edition && (
-            <span className="text-[10px] text-[#9BAAC5] block mt-0.5">
-              {nft.edition.includes("of") ? nft.edition : `${nft.edition} editions`}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            type="button"
-            onClick={handleQuickBuyClick}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#229ED9] hover:bg-[#168AC4] active:scale-95 text-white transition-all text-xs font-bold cursor-pointer border-none outline-none shadow-sm shadow-[#229ED9]/25 shrink-0"
-            title="Quick Buy without leaving marketplace"
-          >
-            <Zap className="w-3 h-3 fill-current" />
-            <span>Quick Buy</span>
-          </button>
-        </div>
-      </div>
-    </motion.div>
+      }
+    />
   );
 };
 
