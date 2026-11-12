@@ -103,13 +103,13 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   };
 
   return (
-    <div className="relative w-full text-white overflow-hidden bg-[#080D1A]">
-      {/* 1. Page Header (Maintains navy background color #080D1A) */}
+    <div className="relative w-full text-white overflow-hidden bg-transparent">
+      {/* 1. Page Header */}
       <PageHeader
         title="Profile"
         showBack={true}
-        transparent={false}
-        className="bg-[#080D1A]/90 backdrop-blur-xl"
+        transparent={true}
+        className="bg-transparent backdrop-blur-none"
         rightContent={
           <div className="flex items-center gap-1">
             <button
@@ -142,19 +142,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080D1A] via-transparent to-black/30" />
-
-        {isOwnProfile && (
-          <button
-            type="button"
-            onClick={onEditCover || (() => navigate('/edit-profile'))}
-            className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all cursor-pointer shadow-lg"
-            title="Edit Cover Picture"
-          >
-            <Camera className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Change Cover</span>
-          </button>
-        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0e285a] via-transparent to-black/30" />
       </div>
 
       {/* 3. Mobile-Optimized Profile Info & Avatar Block */}

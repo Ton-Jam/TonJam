@@ -20,7 +20,7 @@ export const JamFeedHeader: React.FC<JamFeedHeaderProps> = ({
   onSearchChange
 }) => {
   return (
-    <div className="sticky top-0 z-30 backdrop-blur-xl bg-[#0e285a]/80 pt-1 pb-2">
+    <div className="sticky top-0 z-30 bg-transparent backdrop-blur-none backdrop-filter-none pt-1 pb-2">
       <div className="flex items-center justify-between gap-4">
         {/* Primary Feed Tabs: For You & Following */}
         <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-full">

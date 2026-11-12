@@ -328,7 +328,7 @@ export const Discover: React.FC = () => {
   }, [artists]);
 
   return (
-    <div className="min-h-screen bg-[#080D1A] text-white pb-32 relative select-none w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-transparent text-white pb-32 relative select-none w-full max-w-full overflow-x-hidden">
       <PageHeader title="Discover Music" showBack={true} />
       
       {/* Search Content Input Area */}

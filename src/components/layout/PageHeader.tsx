@@ -38,7 +38,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         "w-full h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between z-30 transition-all select-none border-none",
         sticky ? "sticky top-0" : "relative",
         transparent
-          ? "bg-transparent"
+          ? "bg-transparent backdrop-blur-none backdrop-filter-none"
           : "bg-[#0e285a]/85 backdrop-blur-xl",
         className
       )}

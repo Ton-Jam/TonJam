@@ -99,6 +99,8 @@ export const JamSpaceMain: React.FC = () => {
       <PageHeader 
         title="JamSpace" 
         showBack={false}
+        transparent={true}
+        className="bg-transparent backdrop-blur-none backdrop-filter-none"
         rightContent={
           <button 
             type="button"

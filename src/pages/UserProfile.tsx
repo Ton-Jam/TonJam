@@ -231,7 +231,7 @@ export const UserProfile: React.FC = () => {
 
   if (loading) {
     return (
-      <PageContainer animate={false} className="min-h-screen bg-[#050A24] text-white p-6 flex items-center justify-center">
+      <PageContainer animate={false} className="min-h-screen bg-transparent text-white p-6 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-[#0052FF]/20 flex items-center justify-center">
             <div className="w-6 h-6 rounded-full border-2 border-[#0052FF] border-t-transparent animate-spin" />
@@ -245,7 +245,7 @@ export const UserProfile: React.FC = () => {
   if (!user) return null;
 
   return (
-    <PageContainer animate={true} hasPlayerSpacing={true} className="min-h-screen bg-[#080D1A] text-white font-sans pb-32">
+    <PageContainer animate={true} hasPlayerSpacing={true} className="min-h-screen bg-transparent text-white font-sans pb-32">
       
       {/* 1. Mobile-Optimized Profile Header */}
       <ProfileHeader

@@ -13,9 +13,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export type PlaylistArtworkStyle = 'single' | 'collage';
+export type PlaylistCardVariant = 'compact' | 'expanded';
 
 export interface PlaylistCardProps {
   playlist: Playlist;
+  variant?: PlaylistCardVariant;
   artworkStyle?: PlaylistArtworkStyle;
   collageImages?: string[];
   showStatusIndicator?: boolean;
@@ -30,6 +32,7 @@ export interface PlaylistCardProps {
 
 export const PlaylistCard: React.FC<PlaylistCardProps> = ({
   playlist,
+  variant = 'expanded',
   artworkStyle = 'single',
   collageImages,
   showStatusIndicator = true,
@@ -113,6 +116,117 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
   };
 
   const trackCount = playlist.trackCount || (playlist.trackIds ? playlist.trackIds.length : 0);
+
+  // Compact Variant (Horizontal list item matching TrackCard)
+  if (variant === 'compact') {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handleCardClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
+        className={cn(
+          'group relative flex items-center justify-between gap-3 p-2.5 rounded-[14px] transition-all duration-200 select-none cursor-pointer',
+          'bg-[#0F1C32] hover:bg-[#132B49] active:bg-[#193657]',
+          'shadow-[0_4px_16px_rgba(0,0,0,0.25)]',
+          isPlaying && 'bg-[#132B49]',
+          className
+        )}
+        data-testid="playlist-card-compact"
+        data-playlist-id={playlist.id}
+        data-playing={isPlaying}
+      >
+        {/* Left Section: Artwork & Info */}
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="relative shrink-0">
+            <AlbumArtwork
+              src={playlist.coverUrl}
+              alt={playlist.title}
+              shape="rounded"
+              size="thumbnail"
+              fallbackType="playlist"
+              showPlayOverlay={false}
+              isPlaying={isPlaying}
+            />
+            <button
+              type="button"
+              onClick={handlePlayToggle}
+              aria-label={isPlaying ? `Pause ${playlist.title}` : `Play ${playlist.title}`}
+              className={cn(
+                'absolute inset-0 z-20 flex items-center justify-center rounded-[14px] bg-black/45 text-white transition-opacity duration-150 border-none cursor-pointer',
+                isPlaying ? 'opacity-100 bg-[#00B4D8]/80' : 'opacity-0 group-hover:opacity-100'
+              )}
+            >
+              {isPlaying ? (
+                <Pause className="w-4 h-4 fill-current" />
+              ) : (
+                <Play className="w-4 h-4 fill-current translate-x-0.5" />
+              )}
+            </button>
+          </div>
+
+          <div className="min-w-0 flex-1 flex flex-col justify-center">
+            <h4 className={cn(
+              'text-sm font-semibold truncate transition-colors duration-150',
+              isPlaying ? 'text-[#00B4D8]' : 'text-white group-hover:text-white'
+            )}>
+              {playlist.title}
+            </h4>
+            <div className="flex items-center gap-1.5 text-xs text-[#C2C7CD] truncate mt-0.5">
+              <span className="truncate max-w-[120px] sm:max-w-[160px]">{playlist.creator ? `By ${playlist.creator}` : 'TonJam'}</span>
+              <span className="text-[#64748B]" aria-hidden="true">·</span>
+              <span className="tabular-nums text-[#8193A8] shrink-0">
+                {trackCount} {trackCount === 1 ? 'track' : 'tracks'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Section: Actions */}
+        <div className="flex items-center gap-1 shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onOptionsClick) onOptionsClick(playlist);
+                }}
+                aria-label="Playlist options"
+                className="p-1.5 rounded-full text-[#A8B7CC] hover:text-white hover:bg-white/10 transition-colors border-none cursor-pointer"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-48 bg-[#0F1C32] text-white shadow-[0_12px_32px_rgba(0,0,0,0.6)] rounded-[12px] p-1.5 border-none"
+            >
+              <DropdownMenuItem
+                onClick={handleShare}
+                className="flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg text-[#C2C7CD] hover:text-white hover:bg-[#132B49] cursor-pointer"
+              >
+                <Share2 className="w-4 h-4 text-[#00B4D8]" />
+                <span>Share playlist</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleCopyLink}
+                className="flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg text-[#C2C7CD] hover:text-white hover:bg-[#132B49] cursor-pointer"
+              >
+                {copied ? <Check className="w-4 h-4 text-[#34D399]" /> : <Copy className="w-4 h-4 text-[#00B4D8]" />}
+                <span>{copied ? 'Copied!' : 'Copy link'}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
