@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ImportSpotifyPlaylistModal } from './ImportSpotifyPlaylistModal';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface LibraryImporterProps {
   importTracks: (tracks: { title: string; artist: string; album?: string; coverUrl?: string; duration?: number }[]) => void;
@@ -29,88 +30,6 @@ interface ExternalTrack {
   coverUrl: string;
   duration: number;
 }
-
-// Highly detailed realistic demo datasets
-const DEMO_SPOTIFY_PLAYLISTS: ExternalPlaylist[] = [
-  {
-    id: 'sp-pl-1',
-    name: 'Web3 Late Night Coding',
-    description: 'Deconstruct smart contracts with deep synthwave rhythms and atmospheric electronic frequencies.',
-    images: [{ url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=300&h=300&q=80' }],
-    tracks: { total: 5 },
-    tracksList: [
-      { title: 'Sovereign Nodes', artist: 'DJ Krupy', album: 'TON Genesis', duration: 198 },
-      { title: 'Neon Horizon', artist: 'Satoshi Sync', album: 'Future Ledger', duration: 225 },
-      { title: 'Consensus Drift', artist: 'Hyperion', album: 'Ethereal Orbit', duration: 182 },
-      { title: 'Gas Price Chill', artist: 'EVM Demigod', album: 'Mempool Melodies', duration: 210 },
-      { title: 'Distributed Grooves', artist: 'Satoshi Sync', album: 'Distributed Hearts', duration: 245 }
-    ]
-  },
-  {
-    id: 'sp-pl-2',
-    name: 'DeFi Summer Chill Vibes',
-    description: 'Smooth lo-fi and gentle hip-hop beats to calm your yield farming anxiety.',
-    images: [{ url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=300&h=300&q=80' }],
-    tracks: { total: 4 },
-    tracksList: [
-      { title: 'Blockchain Romance', artist: 'Satoshi Sync', album: 'Distributed Hearts', duration: 245 },
-      { title: 'Liquid Royalty', artist: 'DJ Krupy', album: 'TON Genesis', duration: 211 },
-      { title: 'Smart Contract Love', artist: 'Satoshi Sync', album: 'Distributed Hearts', duration: 228 },
-      { title: 'Degen Serenade', artist: 'Durov Collective', album: 'The Telegram Way', duration: 176 }
-    ]
-  },
-  {
-    id: 'sp-pl-3',
-    name: 'Proof of Workout',
-    description: 'High-energy electronic, psy-trance, and club bangers to burn that gas limit.',
-    images: [{ url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=300&h=300&q=80' }],
-    tracks: { total: 4 },
-    tracksList: [
-      { title: 'Gas Limit Overflow', artist: 'EVM Demigod', album: 'Mempool Melodies', duration: 164 },
-      { title: 'Gram Gram Vibing', artist: 'Durov Collective', album: 'The Telegram Way', duration: 191 },
-      { title: 'Sovereign Nodes (Remix)', artist: 'DJ Krupy', album: 'TON Genesis Extra', duration: 215 },
-      { title: 'EVM Firestorm', artist: 'Hyperion', album: 'Ethereal Orbit', duration: 198 }
-    ]
-  }
-];
-
-const DEMO_SPOTIFY_LIKED: ExternalTrack[] = [
-  { id: 'sp-tr-1', title: 'Sovereign Nodes', artist: 'DJ Krupy', album: 'TON Genesis', coverUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=150&h=150&q=80', duration: 198 },
-  { id: 'sp-tr-2', title: 'Blockchain Romance', artist: 'Satoshi Sync', album: 'Distributed Hearts', coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=150&h=150&q=80', duration: 245 },
-  { id: 'sp-tr-3', title: 'Consensus Drift', artist: 'Hyperion', album: 'Ethereal Orbit', coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=150&h=150&q=80', duration: 182 },
-  { id: 'sp-tr-4', title: 'Liquid Royalty', artist: 'DJ Krupy', album: 'TON Genesis', coverUrl: 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?auto=format&fit=crop&w=150&h=150&q=80', duration: 211 },
-  { id: 'sp-tr-5', title: 'Smart Contract Love', artist: 'Satoshi Sync', album: 'Distributed Hearts', coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=150&h=150&q=80', duration: 228 },
-  { id: 'sp-tr-6', title: 'Gas Limit Overflow', artist: 'EVM Demigod', album: 'Mempool Melodies', coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=150&h=150&q=80', duration: 164 },
-  { id: 'sp-tr-7', title: 'Gram Gram Vibing', artist: 'Durov Collective', album: 'The Telegram Way', coverUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=150&h=150&q=80', duration: 191 }
-];
-
-const DEMO_APPLE_PLAYLISTS: ExternalPlaylist[] = [
-  {
-    id: 'ap-pl-1',
-    name: 'Spatial Chill Experience',
-    description: 'Immersive Dolby Atmos music curation featuring experimental lo-fi and organic acoustics.',
-    images: [{ url: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=300&h=300&q=80' }],
-    tracks: { total: 4 },
-    tracksList: [
-      { title: 'Satoshi Serenity', artist: 'Satoshi Sync', album: 'Distributed Hearts', duration: 212 },
-      { title: 'Atmospheric Vault', artist: 'Hyperion', album: 'Ethereal Orbit', duration: 254 },
-      { title: 'Decentralized Whisper', artist: 'DJ Krupy', album: 'TON Genesis', duration: 189 },
-      { title: 'Bounty Hunters', artist: 'EVM Demigod', album: 'Mempool Melodies', duration: 195 }
-    ]
-  },
-  {
-    id: 'ap-pl-2',
-    name: 'Decentralized Classical Remixed',
-    description: 'Symphonies blended with subtle granular synthesis and digital glitches.',
-    images: [{ url: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=300&h=300&q=80' }],
-    tracks: { total: 3 },
-    tracksList: [
-      { title: 'Bach Crypto Fugue', artist: 'Satoshi Sync', album: 'Polyphony', duration: 280 },
-      { title: 'Vivaldi Node Autumn', artist: 'DJ Krupy', album: 'The Four Ledgers', duration: 195 },
-      { title: 'Consensus Waltz', artist: 'Hyperion', album: 'Block Harmony', duration: 230 }
-    ]
-  }
-];
 
 export const LibraryImporter: React.FC<LibraryImporterProps> = ({ 
   importTracks, 
@@ -146,33 +65,33 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
   const [showSpotifyCredentialsGuide, setShowSpotifyCredentialsGuide] = useState(false);
   const [showSpotifyUrlModal, setShowSpotifyUrlModal] = useState(false);
 
-  // Read persisted connection stats
+  // Read persisted real Spotify connection only (purge legacy demo cache)
   useEffect(() => {
     const savedSpUser = localStorage.getItem('tonjam_spotify_user');
     const savedSpToken = localStorage.getItem('tonjam_spotify_token');
     const savedSpMode = localStorage.getItem('tonjam_spotify_mode');
-    const savedApUser = localStorage.getItem('tonjam_apple_user');
-    const savedApMode = localStorage.getItem('tonjam_apple_mode');
 
-    if (savedSpUser && savedSpToken) {
-      setSpotifyUser(JSON.parse(savedSpUser));
-      setSpotifyToken(savedSpToken);
-      setSpotifyMode((savedSpMode as any) || 'real');
-    } else if (savedSpMode === 'demo') {
-      setSpotifyUser({ display_name: 'Collector Demo', images: [{ url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80' }] });
-      setSpotifyMode('demo');
+    if (savedSpMode === 'demo' || savedSpToken === 'demo-token') {
+      localStorage.removeItem('tonjam_spotify_user');
+      localStorage.removeItem('tonjam_spotify_token');
+      localStorage.removeItem('tonjam_spotify_mode');
+    } else if (savedSpUser && savedSpToken) {
+      try {
+        setSpotifyUser(JSON.parse(savedSpUser));
+        setSpotifyToken(savedSpToken);
+        setSpotifyMode('real');
+      } catch {
+        localStorage.removeItem('tonjam_spotify_user');
+      }
     }
 
-    if (savedApUser) {
-      setAppleUser(JSON.parse(savedApUser));
-      setAppleMode((savedApMode as any) || 'demo');
-    }
+    localStorage.removeItem('tonjam_apple_user');
+    localStorage.removeItem('tonjam_apple_mode');
   }, []);
 
   // Listen for Spotify OAuth message from callback popup
   useEffect(() => {
     const handleSpotifyMessage = (event: MessageEvent) => {
-      // Validate origin
       const origin = event.origin;
       if (!origin.endsWith('.run.app') && !origin.includes('localhost')) {
         return;
@@ -204,69 +123,47 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
 
   // Sync Spotify data if logged in
   useEffect(() => {
-    if (activeService === 'spotify') {
-      if (spotifyMode === 'real' && spotifyToken) {
-        loadSpotifyData(spotifyToken);
-      } else if (spotifyMode === 'demo') {
-        setLoadingMedia(true);
-        setTimeout(() => {
-          setPlaylists(DEMO_SPOTIFY_PLAYLISTS);
-          setLikedSongs(DEMO_SPOTIFY_LIKED);
-          setLoadingMedia(false);
-        }, 600);
-      }
-    } else if (activeService === 'apple') {
-      setLoadingMedia(true);
-      setTimeout(() => {
-        setPlaylists(DEMO_APPLE_PLAYLISTS);
-        setLikedSongs(DEMO_SPOTIFY_LIKED.slice(0, 5)); // reusable
-        setLoadingMedia(false);
-      }, 600);
+    if (activeService === 'spotify' && spotifyMode === 'real' && spotifyToken) {
+      loadSpotifyData(spotifyToken);
     }
-  }, [activeService, spotifyMode, appleMode]);
+  }, [activeService, spotifyMode, spotifyToken]);
 
   const loadSpotifyData = async (token: string) => {
     setLoadingMedia(true);
     try {
-      // Fetch playlists from API
       const playlistsRes = await fetch(`/api/spotify/playlists?token=${encodeURIComponent(token)}`);
-      if (!playlistsRes.ok) throw new Error('Failed to fetch playlists');
+      if (!playlistsRes.ok) throw new Error('Failed to fetch playlists from Spotify');
       const playlistsData = await playlistsRes.json();
 
-      // Fetch liked songs
       const songsRes = await fetch(`/api/spotify/liked-songs?token=${encodeURIComponent(token)}`);
-      if (!songsRes.ok) throw new Error('Failed to fetch liked songs');
+      if (!songsRes.ok) throw new Error('Failed to fetch liked songs from Spotify');
       const songsData = await songsRes.json();
 
-      // Format playlists
       const formattedPlaylists: ExternalPlaylist[] = (playlistsData.items || []).map((p: any) => ({
         id: p.id,
         name: p.name,
         description: p.description || 'Spotify playlist',
         images: p.images || [],
         tracks: { total: p.tracks?.total || 0 },
-        tracksList: [] // lazy load
+        tracksList: []
       }));
 
-      // Format liked songs
       const formattedLiked: ExternalTrack[] = (songsData.items || []).map((item: any) => ({
         id: item.track.id,
         title: item.track.name,
         artist: item.track.artists?.map((a: any) => a.name).join(', ') || 'Unknown',
         album: item.track.album?.name || 'Unknown',
-        coverUrl: item.track.album?.images?.[0]?.url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80',
-        duration: Math.round(item.track.duration_ms / 1000)
+        coverUrl: item.track.album?.images?.[0]?.url || getPlaceholderImage(`track-${item.track?.id || 'spotify'}`),
+        duration: Math.round((item.track.duration_ms || 0) / 1000)
       }));
 
       setPlaylists(formattedPlaylists);
       setLikedSongs(formattedLiked);
     } catch (err: any) {
       console.error(err);
-      toast.error('Spotify API Warning', 'Could not query Spotify servers directly. Switching to fully interactive Sandbox Mode.');
-      // Fallback to high-fidelity Sandbox mode
-      setPlaylists(DEMO_SPOTIFY_PLAYLISTS);
-      setLikedSongs(DEMO_SPOTIFY_LIKED);
-      setSpotifyMode('demo');
+      toast.error('Spotify API Error', err?.message || 'Could not query Spotify servers. Please reconnect.');
+      setPlaylists([]);
+      setLikedSongs([]);
     } finally {
       setLoadingMedia(false);
     }
@@ -279,7 +176,7 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
       if (!response.ok) {
         if (response.status === 500) {
           setShowSpotifyCredentialsGuide(true);
-          throw new Error('Spotify is currently unconfigured. Read the setup instruction below.');
+          throw new Error('Spotify OAuth is not configured on the server.');
         }
         throw new Error('Failed to get Spotify authorization URL');
       }
@@ -300,37 +197,8 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
     }
   };
 
-  // Connect Demo Spotify
-  const handleConnectSpotifyDemo = () => {
-    const mockProfile = {
-      display_name: 'Soundwave Collector (Demo)',
-      images: [{ url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80' }]
-    };
-    setSpotifyUser(mockProfile);
-    setSpotifyMode('demo');
-    localStorage.setItem('tonjam_spotify_user', JSON.stringify(mockProfile));
-    localStorage.setItem('tonjam_spotify_mode', 'demo');
-    localStorage.setItem('tonjam_spotify_token', 'demo-token');
-
-    toast.success('Connected (Sandbox Mode)', 'Connected to simulated Spotify vault.');
-    setActiveService('spotify');
-    setActiveSection('playlists');
-  };
-
-  // Connect Demo Apple Music
-  const handleConnectAppleDemo = () => {
-    const mockProfile = {
-      display_name: 'Apple Music Fan (Demo)',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'
-    };
-    setAppleUser(mockProfile);
-    setAppleMode('demo');
-    localStorage.setItem('tonjam_apple_user', JSON.stringify(mockProfile));
-    localStorage.setItem('tonjam_apple_mode', 'demo');
-
-    toast.success('Apple Music Connected (Sandbox)', 'Connected to simulated Apple Music vault.');
-    setActiveService('apple');
-    setActiveSection('playlists');
+  const handleConnectAppleUnavailable = () => {
+    toast.info('Apple Music Integration', 'Apple Music MusicKit developer credentials are not configured yet.');
   };
 
   // Disconnect Account
@@ -357,52 +225,46 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
 
   // Single Playlist Sync
   const handleSyncPlaylist = async (playlist: ExternalPlaylist) => {
+    if (!spotifyToken || activeService !== 'spotify') {
+      toast.error('Not Connected', 'Connect your Spotify account to sync playlists.');
+      return;
+    }
+
     setSyncingPlaylistId(playlist.id);
-    
-    // Simulate mapping & importing delay
-    setTimeout(async () => {
-      let tracksList = playlist.tracksList;
+    try {
+      const tracksRes = await fetch(`/api/spotify/playlist-tracks?token=${encodeURIComponent(spotifyToken)}&playlistId=${playlist.id}`);
+      if (!tracksRes.ok) {
+        throw new Error('Failed to fetch playlist tracks from Spotify');
+      }
+      const data = await tracksRes.json();
+      const tracksList = (data.items || []).map((item: any) => ({
+        title: item.track.name,
+        artist: item.track.artists?.map((a: any) => a.name).join(', ') || 'Unknown',
+        album: item.track.album?.name || 'Unknown',
+        coverUrl: item.track.album?.images?.[0]?.url || '',
+        duration: Math.round((item.track.duration_ms || 0) / 1000)
+      }));
 
-      // Real query for tracks if connected on real Spotify
-      if (spotifyMode === 'real' && activeService === 'spotify' && spotifyToken) {
-        try {
-          const tracksRes = await fetch(`/api/spotify/playlist-tracks?token=${encodeURIComponent(spotifyToken)}&playlistId=${playlist.id}`);
-          if (tracksRes.ok) {
-            const data = await tracksRes.json();
-            tracksList = (data.items || []).map((item: any) => ({
-              title: item.track.name,
-              artist: item.track.artists?.map((a: any) => a.name).join(', ') || 'Unknown',
-              album: item.track.album?.name || 'Unknown',
-              coverUrl: item.track.album?.images?.[0]?.url || '',
-              duration: Math.round(item.track.duration_ms / 1000)
-            }));
-          }
-        } catch (err) {
-          console.error('Real tracks query failed, using static list', err);
-        }
+      if (tracksList.length === 0) {
+        toast.info('Empty Playlist', 'No tracks found in this playlist.');
+        return;
       }
 
-      // Default fallback if tracksList is empty or unpopulated
-      if (!tracksList || tracksList.length === 0) {
-        tracksList = [
-          { title: 'Sovereign Nodes', artist: 'DJ Krupy', album: 'TON Genesis', duration: 198 },
-          { title: 'Blockchain Romance', artist: 'Satoshi Sync', album: 'Distributed Hearts', duration: 245 }
-        ];
-      }
-
-      const coverUrl = playlist.images?.[0]?.url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80';
-      
+      const coverUrl = playlist.images?.[0]?.url || getPlaceholderImage(`playlist-${playlist.id}`);
       importPlaylistWithTracks(playlist.name, coverUrl, tracksList);
+    } catch (err: any) {
+      console.error('Real tracks query failed', err);
+      toast.error('Sync Failed', err?.message || 'Could not retrieve playlist tracks.');
+    } finally {
       setSyncingPlaylistId(null);
-    }, 1800);
+    }
   };
 
   // Multiple Songs Sync
   const handleSyncSelectedLiked = () => {
     if (selectedTrackIds.length === 0) return;
     setIsSyncingAllLiked(true);
-
-    setTimeout(() => {
+    try {
       const selectedTracks = likedSongs.filter(t => selectedTrackIds.includes(t.id));
       importTracks(selectedTracks.map(t => ({
         title: t.title,
@@ -412,8 +274,9 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
         duration: t.duration
       })));
       setSelectedTrackIds([]);
+    } finally {
       setIsSyncingAllLiked(false);
-    }, 2000);
+    }
   };
 
   const toggleSelectTrack = (trackId: string) => {
@@ -473,14 +336,14 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
             <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img 
-                  src={spotifyUser.images?.[0]?.url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80'} 
+                  src={spotifyUser.images?.[0]?.url || getPlaceholderImage('spotify-user')} 
                   alt="Spotify profile"
                   className="w-10 h-10 rounded-full border border-white/10"
                 />
                 <div>
                   <h4 className="text-xs font-bold text-white">{spotifyUser.display_name}</h4>
                   <p className="text-[10px] text-slate-400 uppercase tracking-widest font-extrabold">
-                    Spotify {spotifyMode === 'demo' ? 'Sandbox Account' : 'Partner linked'}
+                    Spotify Partner linked
                   </p>
                 </div>
               </div>
@@ -518,17 +381,9 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
                 >
                   <Link2 className="w-4 h-4 text-[#0088CC]" /> Link
                 </button>
-                <button
-                  type="button"
-                  onClick={handleConnectSpotifyDemo}
-                  className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1"
-                  title="Connect via simulated sandbox account"
-                >
-                  <Sparkles className="w-4 h-4" /> Sandbox
-                </button>
               </div>
               <p className="text-[10px] text-slate-500 leading-normal text-center">
-                Secure integration via standard Spotify API credentials. Sandbox mode allows instant testing.
+                Authenticate via Spotify OAuth to import your playlists and saved tracks.
               </p>
             </div>
           )}
@@ -557,7 +412,7 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
               </span>
             ) : (
               <span className="px-2.5 py-1 bg-slate-800 text-slate-400 text-[10px] font-extrabold uppercase tracking-widest rounded-full border border-white/5">
-                Disconnected
+                Unavailable
               </span>
             )}
           </div>
@@ -566,24 +421,18 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
             <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img 
-                  src={appleUser.avatar} 
+                  src={appleUser.avatar || getPlaceholderImage('apple-user')} 
                   alt="Apple profile"
                   className="w-10 h-10 rounded-full border border-white/10"
                 />
                 <div>
                   <h4 className="text-xs font-bold text-white">{appleUser.display_name}</h4>
                   <p className="text-[10px] text-slate-400 uppercase tracking-widest font-extrabold">
-                    Apple Music Sandbox
+                    Apple Music Connected
                   </p>
                 </div>
               </div>
               <div className="flex gap-2">
-                <button
-                  onClick={() => setActiveService(activeService === 'apple' ? null : 'apple')}
-                  className="px-3 py-1.5 bg-[#FC3C44] hover:bg-[#ff4f56] text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
-                >
-                  {activeService === 'apple' ? 'Hide Vault' : 'Explore Vault'}
-                </button>
                 <button
                   onClick={() => handleDisconnect('apple')}
                   className="p-1.5 bg-slate-800 hover:bg-red-500/20 hover:text-red-400 text-slate-400 rounded-lg transition-colors cursor-pointer"
@@ -596,13 +445,14 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
           ) : (
             <div className="flex flex-col gap-3">
               <button
-                onClick={handleConnectAppleDemo}
-                className="w-full py-2.5 bg-[#FC3C44] hover:bg-[#ff4f56] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+                type="button"
+                onClick={handleConnectAppleUnavailable}
+                className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                <Sparkles className="w-4 h-4" /> Connect Apple Music (Sandbox)
+                <Key className="w-4 h-4" /> Connect Apple Music
               </button>
               <p className="text-[10px] text-slate-500 leading-normal text-center">
-                Sandbox connection allows you to experience fully-featured synced compilation pipelines instantly.
+                Requires MusicKit JS developer credentials to access your Apple Music library.
               </p>
             </div>
           )}
@@ -623,21 +473,20 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
               <div className="space-y-1.5">
                 <h4 className="text-xs font-extrabold text-amber-500 uppercase tracking-widest">Spotify API Unconfigured</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  To connect your real Spotify account, the server needs your standard Spotify Client ID and Secrets. This is normal during development in AI Studio.
+                  To connect your real Spotify account, the server needs your standard Spotify Client ID and Secret configured.
                 </p>
               </div>
             </div>
 
             <div className="bg-black/20 rounded-xl p-4 text-xs font-mono text-slate-300 space-y-3.5 leading-relaxed border border-white/5">
-              <p className="text-white font-bold border-b border-white/5 pb-2">📋 Spotify Developer Portal Setup Steps:</p>
+              <p className="text-white font-bold border-b border-white/5 pb-2">Spotify Developer Portal Setup Steps:</p>
               <ol className="list-decimal list-inside space-y-2 text-slate-400">
-                <li>Go to <a href="https://developer.spotify.com/dashboard" target="_blank" className="text-[#1DB954] underline">developer.spotify.com/dashboard</a> and create an App.</li>
+                <li>Go to <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noreferrer" className="text-[#1DB954] underline">developer.spotify.com/dashboard</a> and create an App.</li>
                 <li>Set the Redirect URI to: <code className="text-white bg-slate-800 px-1.5 py-0.5 rounded text-[11px] font-bold">{`${window.location.origin}/api/auth/spotify/callback`}</code></li>
-                <li>Open the settings icon in AI Studio Build.</li>
-                <li>Add these environment variables:
+                <li>Configure these server environment variables:
                   <div className="mt-2 pl-4 space-y-1 text-[11px] text-white font-bold">
-                    <div>• <code className="text-green-400">SPOTIFY_CLIENT_ID</code> = <span className="text-slate-400">Your Spotify Client ID</span></div>
-                    <div>• <code className="text-green-400">SPOTIFY_CLIENT_SECRET</code> = <span className="text-slate-400">Your Spotify Client Secret</span></div>
+                    <div>• <code className="text-green-400">SPOTIFY_CLIENT_ID</code></div>
+                    <div>• <code className="text-green-400">SPOTIFY_CLIENT_SECRET</code></div>
                   </div>
                 </li>
               </ol>
@@ -649,15 +498,6 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
               >
                 Close Guide
-              </button>
-              <button
-                onClick={() => {
-                  setShowSpotifyCredentialsGuide(false);
-                  handleConnectSpotifyDemo();
-                }}
-                className="px-4 py-2 bg-[#1DB954] hover:bg-[#1ed760] text-black text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-              >
-                <Sparkles className="w-3.5 h-3.5" /> Launch Sandbox Instead
               </button>
             </div>
           </motion.div>
@@ -725,7 +565,7 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
                         className="bg-slate-950 border border-white/5 rounded-xl p-4 flex items-center gap-4 hover:border-white/10 transition-colors"
                       >
                         <img 
-                          src={playlist.images?.[0]?.url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=150&h=150&q=80'} 
+                          src={playlist.images?.[0]?.url || getPlaceholderImage(`playlist-${playlist.id}`)} 
                           alt={playlist.name}
                           className="w-16 h-16 rounded-lg object-cover border border-white/5"
                         />
@@ -818,7 +658,7 @@ export const LibraryImporter: React.FC<LibraryImporterProps> = ({
                                 {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                               </div>
                               <img 
-                                src={song.coverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=50&h=50&q=80'} 
+                                src={song.coverUrl || getPlaceholderImage(`track-${song.id}`)} 
                                 alt={song.title}
                                 className="w-10 h-10 rounded object-cover border border-white/5"
                               />

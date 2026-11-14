@@ -1,5 +1,6 @@
-import { MOCK_TRACKS } from "../constants";
-import { Playlist } from "../types";
+import { Playlist, Track } from "../types";
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
+import { collection, getDocs, limit, query } from "firebase/firestore";
 
 export interface GenerateAIPlaylistResult {
   playlist: Playlist;
@@ -13,39 +14,59 @@ export interface UserContext {
   userDescription?: string;
 }
 
-export async function generateAIPlaylist(userContext: UserContext): Promise<GenerateAIPlaylistResult> {
-  const availableTracks = MOCK_TRACKS.map(t => ({
+export async function generateAIPlaylist(
+  userContext: UserContext,
+  tracksInput?: Track[]
+): Promise<GenerateAIPlaylistResult> {
+  let sourceTracks: Track[] = tracksInput || [];
+
+  if (sourceTracks.length === 0) {
+    try {
+      const snap = await getDocs(query(collection(db, "tracks"), limit(60)));
+      sourceTracks = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Track));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, "tracks");
+    }
+  }
+
+  const availableTracks = sourceTracks.map((t) => ({
     id: t.id,
     title: t.title,
     artist: t.artist,
     genre: t.genre,
-    mood: t.mood
+    mood: t.mood,
   }));
 
   try {
-    const response = await fetch('/api/gemini/generate-playlist', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userContext, availableTracks })
+    const response = await fetch("/api/gemini/generate-playlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userContext, availableTracks }),
     });
 
-    if (!response.ok) throw new Error('Server returned error for AI playlist generation');
-    
+    if (!response.ok) throw new Error("Server returned error for AI playlist generation");
+
     return await response.json();
   } catch (error) {
     console.error("AI Playlist generation failed:", error);
-    const fallbackIds = [...MOCK_TRACKS].sort(() => 0.5 - Math.random()).slice(0, 5).map(t => t.id);
+    const fallbackIds = [...sourceTracks].slice(0, 5).map((t) => t.id);
     return {
       playlist: {
         id: `ai-fallback-${Date.now()}`,
-        title: "AI Quick Picks",
-        coverUrl: "https://image.pollinations.ai/prompt/abstract%20digital%20sound%20waves?width=600&height=600&nologo=true",
+        title: "Quick Picks",
+        coverUrl: "/placeholders/playlist-placeholder.webp",
         trackCount: fallbackIds.length,
-        creator: "TonJam AI",
-        description: "A quick selection based on your general profile.",
-        trackIds: fallbackIds
+        creator: "TonJam",
+        description:
+          fallbackIds.length > 0
+            ? "Selection curated from available tracks."
+            : "No tracks available in catalog yet.",
+        trackIds: fallbackIds,
       },
-      explanation: "We hit a snag connecting to our neural core, but here are some tracks you might like!"
+      explanation:
+        fallbackIds.length > 0
+          ? "Created from currently available Firestore tracks."
+          : "No tracks uploaded yet.",
     };
   }
 }

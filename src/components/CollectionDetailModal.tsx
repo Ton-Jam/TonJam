@@ -57,15 +57,10 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
       audio.pause();
       setPlayingTrackId(null);
     } else {
-      const srcUrl = nft.audioUrl || "/tonjam-offline-audio.mp3";
-      audio.src = srcUrl;
+      if (!nft.audioUrl) return;
+      audio.src = nft.audioUrl;
       audio.onerror = () => {
-        if (audio.src && !audio.src.includes('tonjam-offline-audio')) {
-          audio.src = '/tonjam-offline-audio.mp3';
-          audio.play().catch(() => {});
-        } else {
-          setPlayingTrackId(null);
-        }
+        setPlayingTrackId(null);
       };
 
       const playPromise = audio.play();
@@ -96,7 +91,9 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-          <img src={collection.coverUrl} alt={collection.name} className="w-full h-60 object-cover rounded-xl" />
+          {collection.coverUrl && (
+            <img src={collection.coverUrl} alt={collection.name} className="w-full h-60 object-cover rounded-xl" />
+          )}
           
           <div className="flex gap-8 py-4 border-y border-white/10">
             <div>
@@ -105,11 +102,11 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
             </div>
             <div>
               <div className="text-zinc-400 text-xs uppercase tracking-wider">Floor Price</div>
-              <div className="font-bold text-lg">0.5 TON</div>
+              <div className="font-bold text-lg">{collection.floorPrice || (nfts.length > 0 && nfts[0].price ? nfts[0].price : '—')}</div>
             </div>
             <div>
-              <div className="text-zinc-400 text-xs uppercase tracking-wider">Followers</div>
-              <div className="font-bold text-lg">1.2K</div>
+              <div className="text-zinc-400 text-xs uppercase tracking-wider">Items</div>
+              <div className="font-bold text-lg">{collection.nftIds?.length ?? nfts.length}</div>
             </div>
           </div>
 

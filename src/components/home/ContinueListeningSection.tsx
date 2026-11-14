@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { ChevronRight, Disc } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import ContinueListeningCard from "@/components/ContinueListeningCard";
-import { MOCK_TRACKS } from "@/constants";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 export const ContinueListeningSection: React.FC = () => {
@@ -13,7 +12,7 @@ export const ContinueListeningSection: React.FC = () => {
 
   const displayTracks = (recentlyPlayed && recentlyPlayed.length > 0)
     ? recentlyPlayed.slice(0, 6)
-    : (allTracks && allTracks.length > 0 ? allTracks.slice(0, 6) : MOCK_TRACKS.slice(0, 6));
+    : (allTracks && allTracks.length > 0 ? allTracks.slice(0, 6) : []);
 
   if (!displayTracks || displayTracks.length === 0) return null;
 

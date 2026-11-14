@@ -1,26 +1,70 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Layers } from 'lucide-react';
 import { CollectionCard } from '@/components/marketplace/CollectionCard';
-import { PRIMARY_COLLECTIONS } from '@/data/collectionsData';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { collection, onSnapshot, query, limit } from 'firebase/firestore';
+
+interface FirestoreCollectionCard {
+  id: string;
+  name: string;
+  creatorName: string;
+  floorPrice: string;
+  volume: string;
+  coverUrl: string;
+  itemCount: number;
+  verified: boolean;
+}
 
 export const Collections: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [collections, setCollections] = useState<FirestoreCollectionCard[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Filter collections based on search
-  const filteredCollections = useMemo(() => {
-    if (!searchQuery.trim()) return PRIMARY_COLLECTIONS;
-    const q = searchQuery.toLowerCase();
-    return PRIMARY_COLLECTIONS.filter(
-      c => c.name.toLowerCase().includes(q) || c.creatorName.toLowerCase().includes(q)
+  useEffect(() => {
+    const q = query(collection(db, 'collections'), limit(50));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const loaded: FirestoreCollectionCard[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          const itemCount =
+            Number(data.totalNFTs || data.itemsCount || data.itemCount || 0) ||
+            (Array.isArray(data.nftIds) ? data.nftIds.length : 0);
+          return {
+            id: docSnap.id,
+            name: data.name || 'Untitled Collection',
+            creatorName: data.creatorName || data.creator || data.artistName || 'Artist',
+            floorPrice: String(data.floorPrice || '0'),
+            volume: String(data.volume || '0'),
+            coverUrl: data.coverUrl || data.imageUrl || '',
+            itemCount,
+            verified: Boolean(data.verified ?? data.creatorVerified ?? false),
+          };
+        });
+        setCollections(loaded);
+        setIsLoading(false);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'collections');
+        setIsLoading(false);
+      }
     );
-  }, [searchQuery]);
+
+    return () => unsubscribe();
+  }, []);
+
+  const filteredCollections = useMemo(() => {
+    if (!searchQuery.trim()) return collections;
+    const q = searchQuery.toLowerCase();
+    return collections.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.creatorName.toLowerCase().includes(q)
+    );
+  }, [collections, searchQuery]);
 
   return (
     <div className="min-h-screen bg-[#070B18] text-white pb-32 overflow-x-hidden selection:bg-blue-600/30">
-      
-      {/* Clean Screen Header: [Back] Collections */}
       <div className="sticky top-0 z-30 bg-[#070B18]/90 backdrop-blur-md px-4 sm:px-6 py-3 flex items-center justify-between gap-3 border-none">
         <button
           onClick={() => navigate(-1)}
@@ -37,14 +81,10 @@ export const Collections: React.FC = () => {
           </h2>
         </div>
 
-        {/* Spacer to balance header */}
         <div className="w-10 shrink-0" />
       </div>
 
-      {/* Main Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 space-y-6">
-        
-        {/* Title and Search */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
@@ -52,7 +92,7 @@ export const Collections: React.FC = () => {
               Music NFT Collections
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
-              Explore curated music collectibles and audio drops on TON
+              Explore music collectibles and audio drops on TON
             </p>
           </div>
 
@@ -68,36 +108,41 @@ export const Collections: React.FC = () => {
           </div>
         </div>
 
-        {/* Collections Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
-          {filteredCollections.map((col) => (
-            <CollectionCard
-              key={col.id}
-              collection={{
-                id: col.id,
-                name: col.name,
-                creator: col.creatorName,
-                floorPrice: col.floorPrice,
-                volume: col.volume,
-                imageUrl: col.coverUrl,
-                itemCount: col.items?.length || col.totalSupply,
-                verified: col.verified,
-                change: '+5.2%'
-              }}
-              onClick={() => navigate(`/collections/${col.id}`)}
-            />
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {filteredCollections.length === 0 && (
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-72 rounded-2xl bg-[#0B112C] animate-pulse" />
+            ))}
+          </div>
+        ) : filteredCollections.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+            {filteredCollections.map((col) => (
+              <CollectionCard
+                key={col.id}
+                collection={{
+                  id: col.id,
+                  name: col.name,
+                  creator: col.creatorName,
+                  floorPrice: `${col.floorPrice} TON`,
+                  volume: col.volume,
+                  imageUrl: col.coverUrl,
+                  itemCount: col.itemCount,
+                  verified: col.verified,
+                }}
+                onClick={() => navigate(`/collections/${col.id}`)}
+              />
+            ))}
+          </div>
+        ) : (
           <div className="py-20 text-center bg-[#0B112C] rounded-[10px] space-y-3">
             <Layers className="w-10 h-10 text-slate-500 mx-auto" />
             <h3 className="text-sm font-black text-white uppercase tracking-wider">
               No Collections Found
             </h3>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              No music collections match "{searchQuery}". Try a different search term.
+              {searchQuery.trim()
+                ? `No music collections match "${searchQuery}". Try a different search term.`
+                : 'No music NFT collections have been published to Firestore yet.'}
             </p>
           </div>
         )}

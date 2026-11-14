@@ -9,6 +9,7 @@ import {
 import { toast } from "sonner";
 import { useAudio } from "@/contexts/AudioContext";
 import { motion, AnimatePresence } from "motion/react";
+import { getPlaceholderImage } from "@/lib/utils";
 
 interface DiscographyTabProps {
   artist: Artist;
@@ -223,7 +224,7 @@ export const DiscographyTab: React.FC<DiscographyTabProps> = ({
 
                                 <div className="flex items-center gap-4 shrink-0">
                                   <span className="text-xs text-neutral-400 font-mono">
-                                    {Math.floor((track.duration || 210) / 60)}:{(String((track.duration || 210) % 60)).padStart(2, "0")}
+                                    {Math.floor((track.duration || 0) / 60)}:{(String((track.duration || 0) % 60)).padStart(2, "0")}
                                   </span>
                                   <button
                                     onClick={(e) => toggleLike(track.id, e)}
@@ -304,7 +305,7 @@ export const DiscographyTab: React.FC<DiscographyTabProps> = ({
                     </h4>
                     <div className="flex items-center justify-between text-[11px] text-neutral-400">
                       <span>Single</span>
-                      <span className="font-mono">{(single.playCount || 54200).toLocaleString()} plays</span>
+                      <span className="font-mono">{(single.playCount || 0).toLocaleString()} plays</span>
                     </div>
                   </div>
                 </div>
@@ -335,15 +336,17 @@ export const DiscographyTab: React.FC<DiscographyTabProps> = ({
               >
                 <div className="relative aspect-square rounded-xl overflow-hidden bg-neutral-950 shadow-md">
                   <img 
-                    src={nft.imageUrl || (nft as any).image || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop"} 
+                    src={nft.imageUrl || (nft as any).image || getPlaceholderImage('nft')} 
                     alt={(nft as any).name || nft.title}
                     className="w-full h-full object-cover" 
                   />
-                  <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-white">
-                    {nft.edition || "1 of 10"}
-                  </div>
+                  {nft.edition && (
+                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-white">
+                      {nft.edition}
+                    </div>
+                  )}
                   <div className="absolute bottom-2 right-2 bg-[#0098EA] text-white px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold shadow-md">
-                    {nft.price} TON
+                    {nft.price || '0'} TON
                   </div>
                 </div>
 
@@ -352,8 +355,10 @@ export const DiscographyTab: React.FC<DiscographyTabProps> = ({
                     {(nft as any).name || nft.title}
                   </h4>
                   <div className="flex items-center justify-between text-[11px] text-neutral-400">
-                    <span>{nft.rarity || "Rare Master"}</span>
-                    <span className="text-[#1DB954] font-semibold">Royalty: 10%</span>
+                    <span>{nft.rarity || "Standard"}</span>
+                    {(nft as any).royaltyPercentage !== undefined && (
+                      <span className="text-[#1DB954] font-semibold">Royalty: {(nft as any).royaltyPercentage}%</span>
+                    )}
                   </div>
                 </div>
               </div>

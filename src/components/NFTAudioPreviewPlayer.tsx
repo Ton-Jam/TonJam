@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Volume2, VolumeX, Music, Sparkles, Disc3, Headphones, Zap } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
-import { MOCK_TRACKS } from '@/constants';
 import { NFTItem, Track } from '@/types';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,7 +28,7 @@ export const NFTAudioPreviewPlayer: React.FC<NFTAudioPreviewPlayerProps> = ({
   artist: customArtist,
   onPlayStateChange
 }) => {
-  const { isPlaying: isGlobalPlaying, togglePlay: toggleGlobalPlay, addNotification } = useAudio();
+  const { isPlaying: isGlobalPlaying, togglePlay: toggleGlobalPlay, addNotification, allTracks = [] } = useAudio();
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -50,22 +49,21 @@ export const NFTAudioPreviewPlayer: React.FC<NFTAudioPreviewPlayerProps> = ({
     // Check by trackId or NFT id
     const targetTrackId = trackId || nft?.trackId || nft?.id;
     if (targetTrackId) {
-      const matched = MOCK_TRACKS.find(t => t.id === targetTrackId || t.songId === targetTrackId);
+      const matched = allTracks.find(t => t.id === targetTrackId || t.songId === targetTrackId);
       if (matched?.audioUrl) return matched.audioUrl;
     }
     
     // Check by title
     const searchTitle = (customTitle || nft?.title || '').toLowerCase().trim();
     if (searchTitle) {
-      const matchedByTitle = MOCK_TRACKS.find(t => 
+      const matchedByTitle = allTracks.find(t => 
         searchTitle.includes(t.title.toLowerCase()) || t.title.toLowerCase().includes(searchTitle)
       );
       if (matchedByTitle?.audioUrl) return matchedByTitle.audioUrl;
     }
 
-    // High quality fallback audio for preview
-    return '/tonjam-offline-audio.mp3';
-  }, [customAudioUrl, nft, trackId, customTitle]);
+    return '';
+  }, [customAudioUrl, nft, trackId, customTitle, allTracks]);
 
   const displayTitle = customTitle || nft?.title || 'Sonic NFT Master';
   const displayArtist = customArtist || nft?.artist || nft?.creator || 'Verified Artist';
@@ -125,9 +123,6 @@ export const NFTAudioPreviewPlayer: React.FC<NFTAudioPreviewPlayerProps> = ({
     const handleWaiting = () => setIsLoading(true);
     const handleCanPlay = () => setIsLoading(false);
     const handleError = () => {
-      if (audio.src && !audio.src.includes('tonjam-offline-audio')) {
-        audio.src = '/tonjam-offline-audio.mp3';
-      }
       setIsLoading(false);
     };
 
@@ -155,7 +150,10 @@ export const NFTAudioPreviewPlayer: React.FC<NFTAudioPreviewPlayerProps> = ({
   const togglePlay = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
 
-    if (!audioRef.current) return;
+    if (!audioRef.current || !resolvedAudioUrl) {
+      addNotification("No audio preview available for this NFT", "info");
+      return;
+    }
 
     if (isPlaying) {
       audioRef.current.pause();

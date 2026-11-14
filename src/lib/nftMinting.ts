@@ -309,8 +309,9 @@ export function useTrackMinting() {
           from: '0x0000000000000000000000000000000000000000',
           to: userProfile.name || 'Unknown',
           date: new Date().toISOString(),
-          price: finalPrice
-        }]
+          price: finalPrice,
+          txHash: txResult
+        } as any]
       };
 
       await addUserNFT(newNFT);

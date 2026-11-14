@@ -17,6 +17,7 @@ import {
 import { useAudio } from '@/contexts/AudioContext';
 import { Track } from '@/types';
 import { toast } from 'sonner';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface AnalyzedTrack {
   id: string;
@@ -116,16 +117,9 @@ export const TrendingMusicWidget: React.FC<TrendingMusicWidgetProps> = ({ classN
     setExpandedTrackId(prev => (prev === trackId ? null : trackId));
   };
 
-  // Helper to select cover/avatar illustration based on genre
-  const getCoverPlaceholder = (genre: string, index: number) => {
-    const covers = [
-      "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=150",
-      "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=150",
-      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=150",
-      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=150",
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=150"
-    ];
-    return covers[index % covers.length];
+  // Helper to resolve cover image from matched catalog track or static placeholder
+  const getCoverPlaceholder = (_genre: string, _index: number, matched?: Track | null) => {
+    return matched?.coverUrl || getPlaceholderImage('track');
   };
 
   if (loading) {
@@ -213,7 +207,7 @@ export const TrendingMusicWidget: React.FC<TrendingMusicWidgetProps> = ({ classN
                   {/* Album Cover with Play Hover overlay */}
                   <div className="relative w-11 h-11 rounded-xl overflow-hidden group shrink-0 shadow-md">
                     <img
-                      src={getCoverPlaceholder(track.genre, idx)}
+                      src={getCoverPlaceholder(track.genre, idx, matched)}
                       alt={track.title}
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover"

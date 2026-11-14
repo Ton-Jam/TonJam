@@ -1,7 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getPlaceholderImage } from "@/lib/utils";
 import { NFTOffer } from "@/types";
 
 interface RecentBidsListProps {
@@ -42,7 +42,7 @@ export const RecentBidsList: React.FC<RecentBidsListProps> = ({ offers, highestO
                 <div className="relative">
                   <div className="w-10 h-10 rounded-xl bg-muted overflow-hidden flex-shrink-0 border border-white/10">
                     <img
-                      src={`https://picsum.photos/100/100?seed=${offer.offerer}`}
+                      src={getPlaceholderImage(`offerer-${offer.offerer}`)}
                       className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                       alt=""
                     />

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "@/contexts/AudioContext";
 import { useLibrary } from "@/contexts/LibraryContext";
 import TrackCard from "@/components/TrackCard";
-import { MOCK_TRACKS } from "@/constants";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 export const NewDropsSection: React.FC = () => {
@@ -16,48 +15,33 @@ export const NewDropsSection: React.FC = () => {
   const { scrollRef: genreScrollRef, handlers: genreHandlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const baseTracks = useMemo(() => {
-    const list = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
-    return list;
+    if (!allTracks || allTracks.length === 0) return [];
+    return [...allTracks].sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
   }, [allTracks]);
 
   const filteredDrops = useMemo(() => {
     if (!selectedGenre || selectedGenre === 'All') {
-      const repeated = [...baseTracks];
-      while (repeated.length < 12 && baseTracks.length > 0) {
-        repeated.push(...baseTracks.map((t, idx) => ({ ...t, id: `${t.id}-drop-${idx}` })));
-      }
-      return repeated.slice(0, 12);
+      return baseTracks.slice(0, 12);
     }
 
-    // Filter by genre
     const lowerGenre = selectedGenre.toLowerCase();
-    const matched = baseTracks.filter(t => {
-      const trackGenre = (t.genre || '').toLowerCase();
-      const trackMood = (t.mood || '').toLowerCase();
-      const trackTitle = (t.title || '').toLowerCase();
-      return (
-        trackGenre.includes(lowerGenre) || 
-        lowerGenre.includes(trackGenre) ||
-        trackMood.includes(lowerGenre) ||
-        trackTitle.includes(lowerGenre)
-      );
-    });
-
-    if (matched.length > 0) {
-      const repeated = [...matched];
-      while (repeated.length < 8 && repeated.length > 0) {
-        repeated.push(...matched.map((t, idx) => ({ ...t, id: `${t.id}-${lowerGenre}-${idx}` })));
-      }
-      return repeated.slice(0, 12);
-    }
-
-    // If no exact match found in base list, generate genre-attributed new drops from available catalog
-    return baseTracks.slice(0, 6).map((t, idx) => ({
-      ...t,
-      id: `${t.id}-drop-${lowerGenre}-${idx}`,
-      genre: selectedGenre,
-      title: `${t.title} (${selectedGenre} Mix)`
-    }));
+    return baseTracks
+      .filter((t) => {
+        const trackGenre = (t.genre || '').toLowerCase();
+        const trackMood = (t.mood || '').toLowerCase();
+        const trackTitle = (t.title || '').toLowerCase();
+        return (
+          trackGenre.includes(lowerGenre) ||
+          (trackGenre.length > 0 && lowerGenre.includes(trackGenre)) ||
+          trackMood.includes(lowerGenre) ||
+          trackTitle.includes(lowerGenre)
+        );
+      })
+      .slice(0, 12);
   }, [baseTracks, selectedGenre]);
 
   const handleSelectGenre = (genre: string) => {
@@ -67,9 +51,10 @@ export const NewDropsSection: React.FC = () => {
     }
   };
 
+  if (baseTracks.length === 0) return null;
+
   return (
     <section className="space-y-3.5 text-left w-full">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary animate-pulse" />
@@ -90,7 +75,6 @@ export const NewDropsSection: React.FC = () => {
         </button>
       </div>
 
-      {/* Dynamic Horizontal Scroll Genre Filter Bar */}
       <div 
         ref={genreScrollRef}
         {...genreHandlers}
@@ -116,7 +100,6 @@ export const NewDropsSection: React.FC = () => {
         })}
       </div>
 
-      {/* Horizontal Scroll Track Cards */}
       <div 
         ref={scrollRef}
         {...handlers}

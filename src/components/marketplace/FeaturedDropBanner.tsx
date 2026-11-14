@@ -3,7 +3,7 @@ import { Sparkles, ArrowRight, Play, Pause } from "lucide-react";
 import { motion } from "motion/react";
 import { ProgressiveImage } from "@/components/common/ProgressiveImage";
 import { TonPriceLabel } from "./TonPriceLabel";
-import { cn } from "@/lib/utils";
+import { cn, getPlaceholderImage } from "@/lib/utils";
 
 interface FeaturedDropBannerProps {
   onExploreDrop?: () => void;
@@ -24,14 +24,10 @@ export const FeaturedDropBanner: React.FC<FeaturedDropBannerProps> = ({
   onPlayPreview,
   isPlaying = false,
   className,
-  dropInfo = {
-    title: "Midnight Frequency",
-    artist: "Krupy Vibez",
-    price: "3.5 TON",
-    edition: "1 of 50",
-    imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80",
-  },
+  dropInfo,
 }) => {
+  if (!dropInfo) return null;
+
   return (
     <div
       className={cn(
@@ -42,7 +38,7 @@ export const FeaturedDropBanner: React.FC<FeaturedDropBannerProps> = ({
       {/* Background Album Art with Dark Blue Overlay & Soft Highlights */}
       <div className="absolute inset-0 z-0">
         <ProgressiveImage
-          src={dropInfo.imageUrl}
+          src={dropInfo.imageUrl || getPlaceholderImage('nft')}
           alt={dropInfo.title}
           className="w-full h-full object-cover scale-105 filter blur-xl opacity-30"
         />

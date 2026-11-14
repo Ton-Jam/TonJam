@@ -105,45 +105,44 @@ export const Interactive3DViewer: React.FC<Interactive3DViewerProps> = ({
       {/* Dynamic ambient background glow matching the artwork colors */}
       <div 
         className={cn(
-          "absolute -inset-4 bg-gradient-to-tr from-blue-600/20 via-indigo-500/10 to-pink-500/25 rounded-full blur-[40px] opacity-60 transition-all duration-700",
-          isHovered ? "scale-110 opacity-80" : "scale-100"
+          "absolute -inset-6 bg-gradient-to-tr from-[#00B4D8]/30 via-indigo-500/20 to-purple-600/30 rounded-full blur-[50px] opacity-70 transition-all duration-700 pointer-events-none",
+          isHovered ? "scale-115 opacity-90" : "scale-100"
         )}
       />
 
       {/* 3D Vinyl Record sliding out behind the sleeve */}
       <motion.div
-        className="absolute top-[8%] bottom-[8%] right-2 aspect-square rounded-full bg-[#0d0f1a] shadow-2xl flex items-center justify-center border border-white/5"
+        className="absolute top-[6%] bottom-[6%] right-3 aspect-square rounded-full bg-[#070913] shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex items-center justify-center border-0 overflow-hidden"
         animate={{
-          x: isHovered ? '28%' : '0%',
-          rotate: isPlaying ? 360 : isHovered ? 45 : 0,
+          x: isHovered ? '32%' : '0%',
+          rotate: isPlaying ? 360 : isHovered ? 30 : 0,
         }}
         transition={{
-          x: { type: 'spring', damping: 20, stiffness: 100 },
+          x: { type: 'spring', damping: 22, stiffness: 110 },
           rotate: isPlaying 
-            ? { repeat: Infinity, duration: 6, ease: 'linear' }
+            ? { repeat: Infinity, duration: 4.5, ease: 'linear' }
             : { type: 'spring', damping: 15 }
         }}
         style={{ zIndex: 0 }}
       >
-        {/* Vinyl Grooves */}
-        <div className="absolute inset-2 rounded-full border border-black/80 opacity-80" />
-        <div className="absolute inset-4 rounded-full border border-black/70 opacity-70" />
-        <div className="absolute inset-6 rounded-full border border-black/60 opacity-60" />
-        <div className="absolute inset-8 rounded-full border border-black/50 opacity-50" />
-        <div className="absolute inset-10 rounded-full border border-black/40 opacity-40" />
-        <div className="absolute inset-12 rounded-full border border-white/5 opacity-30" />
-        <div className="absolute inset-16 rounded-full border border-black/90 opacity-90" />
+        {/* Vinyl Grooves & Specular Reflection Ring */}
+        <div className="absolute inset-1.5 rounded-full border border-white/[0.04]" />
+        <div className="absolute inset-4 rounded-full border border-white/[0.03]" />
+        <div className="absolute inset-7 rounded-full border border-white/[0.04]" />
+        <div className="absolute inset-10 rounded-full border border-white/[0.03]" />
+        <div className="absolute inset-14 rounded-full border border-white/[0.05]" />
+        <div className="absolute inset-20 rounded-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none opacity-40 animate-pulse" />
 
         {/* Center label image */}
-        <div className="w-[32%] h-[32%] rounded-full bg-[#111322] border-4 border-[#07080f] overflow-hidden flex items-center justify-center relative">
+        <div className="w-[34%] h-[34%] rounded-full bg-[#0d1224] overflow-hidden flex items-center justify-center relative shadow-inner">
           <img
             src={imageUrl}
             alt="Vinyl Center Label"
-            className="w-full h-full object-cover opacity-85"
+            className="w-full h-full object-cover opacity-90 scale-110"
             referrerPolicy="no-referrer"
           />
           {/* Spindle hole */}
-          <div className="absolute w-3 h-3 rounded-full bg-[#050a24] shadow-inner border border-black/60" />
+          <div className="absolute w-3.5 h-3.5 rounded-full bg-[#04060d] shadow-2xl" />
         </div>
       </motion.div>
 
@@ -156,7 +155,7 @@ export const Interactive3DViewer: React.FC<Interactive3DViewerProps> = ({
           transformStyle: 'preserve-3d',
           zIndex: 10,
         }}
-        className="relative w-full h-full rounded-2xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] bg-neutral-950/80 backdrop-blur-md border border-white/10 transition-shadow duration-300 flex items-center justify-center group"
+        className="relative w-full h-full rounded-3xl overflow-hidden shadow-[0_35px_70px_rgba(0,0,0,0.85)] bg-slate-950/90 backdrop-blur-xl transition-shadow duration-300 flex items-center justify-center group border-0"
       >
         {/* High-fidelity artwork image with interactive Framer Motion hover scale-up effect */}
         <motion.img
@@ -164,12 +163,12 @@ export const Interactive3DViewer: React.FC<Interactive3DViewerProps> = ({
           alt={title}
           className="w-full h-full object-cover"
           animate={{
-            scale: isHovered ? 1.05 : 1,
+            scale: isHovered ? 1.06 : 1,
           }}
           transition={{
             type: "spring",
-            stiffness: 150,
-            damping: 25
+            stiffness: 160,
+            damping: 24
           }}
           style={{ transform: 'translateZ(0px)' }}
           referrerPolicy="no-referrer"
@@ -177,7 +176,7 @@ export const Interactive3DViewer: React.FC<Interactive3DViewerProps> = ({
 
         {/* Dynamic gloss / holographic glare overlay */}
         <motion.div
-          className="absolute inset-0 pointer-events-none mix-blend-color-dodge opacity-30"
+          className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-40"
           style={{
             background: glareBackground
           }}
@@ -186,20 +185,20 @@ export const Interactive3DViewer: React.FC<Interactive3DViewerProps> = ({
         {/* Playback / Pause Action Overlay */}
         <div
           className={cn(
-            "absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[4px] transition-all duration-500",
+            "absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[6px] transition-all duration-500",
             isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
           )}
           style={{ transform: 'translateZ(30px)' }}
         >
           <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-20 h-20 rounded-full bg-blue-600/95 backdrop-blur-md flex items-center justify-center shadow-[0_0_35px_rgba(37,99,235,0.7)] border border-white/20 transition-all"
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.94 }}
+            className="w-20 h-20 rounded-full bg-[#00B4D8] text-white flex items-center justify-center shadow-[0_0_40px_rgba(0,180,216,0.6)] transition-all"
           >
             {isActive && isPlaying ? (
-              <Pause className="h-8 w-8 text-white fill-current animate-pulse" />
+              <Pause className="h-8 w-8 fill-current animate-pulse" />
             ) : (
-              <Play className="h-8 w-8 text-white fill-current ml-2" />
+              <Play className="h-8 w-8 fill-current ml-1" />
             )}
           </motion.div>
         </div>

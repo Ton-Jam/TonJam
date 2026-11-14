@@ -1,13 +1,64 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { Megaphone, ExternalLink, Play } from "lucide-react";
+import { Megaphone, ExternalLink } from "lucide-react";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
+import { getPlaceholderImage } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
-const SPONSORED_CONTENT = [
-  { id: '1', title: 'The Sound of TON', artist: 'Blockchain Beats', banner: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=800&q=80' },
-  { id: '2', title: 'Genesis Mint Now', artist: 'TonJam DAO', banner: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80' },
-];
+interface SponsoredCampaignItem {
+  id: string;
+  title: string;
+  artist: string;
+  banner: string;
+  targetUrl?: string;
+}
 
 export const SponsoredJamFeed: React.FC = () => {
+  const navigate = useNavigate();
+  const [campaigns, setCampaigns] = useState<SponsoredCampaignItem[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    const fetchCampaigns = async () => {
+      try {
+        const q = query(
+          collection(db, "sponsoredCampaigns"),
+          where("status", "==", "active")
+        );
+        const snap = await getDocs(q);
+        if (!active) return;
+        const now = Date.now();
+        const items: SponsoredCampaignItem[] = [];
+        snap.forEach((docSnap) => {
+          const data = docSnap.data();
+          const start = data.startDate ? new Date(data.startDate).getTime() : 0;
+          const end = data.endDate ? new Date(data.endDate).getTime() : Infinity;
+          if ((!start || now >= start) && (!end || now <= end)) {
+            items.push({
+              id: docSnap.id,
+              title: data.title || data.campaignName || "Sponsored Release",
+              artist: data.artist || data.sponsorName || "",
+              banner: data.bannerUrl || data.imageUrl || getPlaceholderImage("banner"),
+              targetUrl: data.targetUrl || data.link,
+            });
+          }
+        });
+        setCampaigns(items);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.LIST, "sponsoredCampaigns");
+      }
+    };
+    fetchCampaigns();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (campaigns.length === 0) {
+    return null;
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
@@ -20,30 +71,37 @@ export const SponsoredJamFeed: React.FC = () => {
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide px-1">
-        {SPONSORED_CONTENT.map((item) => (
+        {campaigns.map((item) => (
           <motion.div
             key={item.id}
             whileHover={{ y: -2 }}
+            onClick={() => {
+              if (item.targetUrl) {
+                if (item.targetUrl.startsWith("/")) {
+                  navigate(item.targetUrl);
+                } else {
+                  window.open(item.targetUrl, "_blank", "noopener,noreferrer");
+                }
+              }
+            }}
             className="w-72 shrink-0 bg-[#0c133a] rounded-[12px] overflow-hidden group cursor-pointer"
           >
             <div className="relative h-32 w-full overflow-hidden">
-              <img 
-                src={item.banner} 
-                alt={item.title} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+              <img
+                src={item.banner}
+                alt={item.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0c133a] to-transparent opacity-60" />
-              <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-2 py-1 rounded-[6px]">
-                <Play className="w-3 h-3 text-[#00B4D8] fill-[#00B4D8]" />
-                <span className="text-[8px] font-black text-white uppercase tracking-widest">Play Clip</span>
-              </div>
             </div>
             <div className="p-4 flex items-center justify-between">
               <div className="min-w-0">
                 <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#00B4D8] transition-colors">
                   {item.title}
                 </h4>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.artist}</p>
+                {item.artist && (
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.artist}</p>
+                )}
               </div>
               <div className="text-[#00B4D8]">
                 <ExternalLink className="w-4 h-4" />

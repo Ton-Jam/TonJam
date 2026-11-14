@@ -44,6 +44,8 @@ import {
   SignOutConfirmationDialog,
 } from '@/components/drawer';
 import { APP_LOGO } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const SideDrawerShowcase: React.FC = () => {
   const navigate = useNavigate();
@@ -57,26 +59,28 @@ export const SideDrawerShowcase: React.FC = () => {
   const [showSignOutDialog, setShowSignOutDialog] = useState<boolean>(false);
   const [selectedStateView, setSelectedStateView] = useState<string>('open');
 
+  const { user: authUser, userProfile } = useAuth();
+
   const mockAuthUser = {
-    displayName: 'Alex Rivers',
-    email: 'alex.rivers@tonjam.io',
-    photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    displayName: userProfile?.name || authUser?.displayName || 'TonJam Creator',
+    email: authUser?.email || 'creator@tonjam.app',
+    photoURL: userProfile?.avatar || authUser?.photoURL || getPlaceholderImage('artist'),
   };
 
   const mockUserProfile = {
-    uid: 'user-demo-123',
-    name: 'Alex Rivers',
-    username: '@alexrivers',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    bio: 'Electronic music producer & Web3 soundscape curator on TON blockchain.',
-    followers: 1420,
-    following: 388,
-    isVerified: true,
+    uid: userProfile?.uid || authUser?.uid || 'preview-user',
+    name: userProfile?.name || authUser?.displayName || 'TonJam Creator',
+    username: userProfile?.username || '@tonjam_creator',
+    avatar: userProfile?.avatar || authUser?.photoURL || getPlaceholderImage('artist'),
+    bio: userProfile?.bio || 'Electronic music producer & Web3 creator on TON blockchain.',
+    followers: (userProfile as any)?.followers ?? 0,
+    following: (userProfile as any)?.following ?? 0,
+    isVerified: Boolean((userProfile as any)?.isVerified ?? true),
     isVerifiedArtist: previewRole === 'artist',
     role: previewRole,
-    tjBalance: 2450,
-    jamBalance: 2450,
-    earnings: 0,
+    tjBalance: (userProfile as any)?.tjBalance ?? 0,
+    jamBalance: (userProfile as any)?.jamBalance ?? 0,
+    earnings: (userProfile as any)?.earnings ?? 0,
   };
 
   return (

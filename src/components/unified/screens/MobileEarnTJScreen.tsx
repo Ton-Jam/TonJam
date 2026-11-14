@@ -1,15 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import confetti from 'canvas-confetti';
-import {
-  Sparkles,
-  Award,
-  ChevronRight,
-  Info,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  Radio,
-} from 'lucide-react';
+import { Info } from 'lucide-react';
 import {
   TonJamHeader,
   TJRewardsCard,
@@ -18,10 +8,10 @@ import {
   TaskCard,
   BottomSheet,
   EmptyState,
-  ErrorState,
-  SkeletonRow,
 } from '../index';
 import { UnifiedTask, TaskCategoryType } from '../types';
+import { useTask } from '@/contexts/TaskContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { toast } from 'sonner';
 
 interface MobileEarnTJScreenProps {
@@ -30,103 +20,51 @@ interface MobileEarnTJScreenProps {
   showBack?: boolean;
 }
 
-const INITIAL_TASKS: UnifiedTask[] = [
-  {
-    id: 'task-feat-1',
-    title: 'Stream 3 Genesis Music NFTs',
-    description: 'Listen to 3 verified master edition tracks in the Genesis collection for at least 45 seconds each.',
-    category: 'Music',
-    reward: 250,
-    status: 'in_progress',
-    progress: { current: 2, total: 3 },
-    isFeatured: true,
-    iconType: 'music',
-  },
-  {
-    id: 'task-1',
-    title: 'Daily Check-In',
-    description: 'Launch TonJam and connect to the decentralized audio stream to maintain your listening streak.',
-    category: 'Daily',
-    reward: 50,
-    status: 'claimable',
-    iconType: 'daily',
-  },
-  {
-    id: 'task-2',
-    title: 'Music Discovery Session',
-    description: 'Listen to 5 different emerging indie electronic tracks from the Discover weekly curated playlist.',
-    category: 'Music',
-    reward: 120,
-    status: 'in_progress',
-    progress: { current: 3, total: 5 },
-    iconType: 'music',
-  },
-  {
-    id: 'task-3',
-    title: 'Community Participation',
-    description: 'Drop a constructive feedback comment or heart reaction in an active live JamSpace room.',
-    category: 'Community',
-    reward: 80,
-    status: 'available',
-    iconType: 'community',
-  },
-  {
-    id: 'task-4',
-    title: 'Complete Your Profile',
-    description: 'Upload your listener avatar, write a bio, and link your Telegram account handle.',
-    category: 'Profile',
-    reward: 100,
-    status: 'completed',
-    completedAt: 'Yesterday',
-    iconType: 'profile',
-  },
-  {
-    id: 'task-5',
-    title: 'Discover 3 New Artists',
-    description: 'Follow 3 verified artists from the Trending Leaderboard to expand your Web3 feed.',
-    category: 'Community',
-    reward: 90,
-    status: 'available',
-    iconType: 'community',
-  },
-  {
-    id: 'task-6',
-    title: 'Exclusive Auction Watcher',
-    description: 'Add a rare 1-of-1 master NFT auction to your watchlist to unlock market watcher bonus points.',
-    category: 'Music',
-    reward: 60,
-    status: 'locked',
-    iconType: 'music',
-  },
-];
-
 export const MobileEarnTJScreen: React.FC<MobileEarnTJScreenProps> = ({
-  onNavigate,
   onBack,
   showBack = false,
 }) => {
-  const [tasks, setTasks] = useState<UnifiedTask[]>(INITIAL_TASKS);
-  const [balance, setBalance] = useState<number>(2450);
+  const { tasks: contextTasks, claimTaskReward } = useTask();
+  const { userProfile } = useAudio();
+
   const [activeCategory, setActiveCategory] = useState<TaskCategoryType>('All Tasks');
   const [selectedTask, setSelectedTask] = useState<UnifiedTask | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [simulatedState, setSimulatedState] = useState<'normal' | 'loading' | 'error'>('normal');
 
-  // Daily statistics
+  const tasks = useMemo<UnifiedTask[]>(() => {
+    return contextTasks.map((t, index) => ({
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      category: (t.category === 'Music' ? 'Music' : (t.category === 'Community' || t.category === 'Social') ? 'Community' : 'Daily') as UnifiedTask['category'],
+      reward: t.rewardAmount || 0,
+      status: t.status,
+      progress: t.total ? { current: t.progress || 0, total: t.total } : undefined,
+      isFeatured: t.isFeatured ?? index === 0,
+      iconType: (t.iconName === 'music' ? 'music' : t.iconName === 'community' ? 'community' : t.iconName === 'profile' ? 'profile' : 'daily') as UnifiedTask['iconType'],
+    }));
+  }, [contextTasks]);
+
+  const balance = Number(userProfile?.tjBalance ?? userProfile?.jamBalance ?? 0);
+
+  const dailyPointsEarned = useMemo(() => {
+    return tasks
+      .filter((t) => t.category === 'Daily' && t.status === 'completed')
+      .reduce((sum, t) => sum + t.reward, 0);
+  }, [tasks]);
+
   const completedDailyCount = useMemo(() => {
     return tasks.filter((t) => t.category === 'Daily' && t.status === 'completed').length;
   }, [tasks]);
 
   const totalDailyCount = useMemo(() => {
-    return tasks.filter((t) => t.category === 'Daily').length || 2;
+    return tasks.filter((t) => t.category === 'Daily').length;
   }, [tasks]);
 
-  // Featured task
   const featuredTask = useMemo(() => {
     return tasks.find((t) => t.isFeatured) || tasks[0];
   }, [tasks]);
 
-  // Filter tasks
   const filteredTasks = useMemo(() => {
     return tasks.filter((t) => {
       if (t.isFeatured) return false;
@@ -140,78 +78,22 @@ export const MobileEarnTJScreen: React.FC<MobileEarnTJScreenProps> = ({
     setIsSheetOpen(true);
   };
 
-  const handleTaskAction = (task: UnifiedTask, e?: React.MouseEvent) => {
+  const handleTaskAction = async (task: UnifiedTask, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
 
     if (task.status === 'claimable') {
-      // Confetti celebratory explosion
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#2E8CEB', '#9B7CFF', '#FFC857', '#34D399'],
-      });
-
-      setBalance((prev) => prev + task.reward);
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === task.id ? { ...t, status: 'completed', completedAt: 'Just now' } : t
-        )
-      );
-
-      toast.success(`Claimed +${task.reward} TJ rewards!`);
+      await claimTaskReward(task.id);
       if (selectedTask?.id === task.id) {
         setIsSheetOpen(false);
       }
       return;
     }
 
-    if (task.status === 'available') {
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === task.id
-            ? { ...t, status: 'in_progress', progress: { current: 1, total: 3 } }
-            : t
-        )
-      );
-      toast.info(`Started: ${task.title}`);
-      return;
-    }
-
-    if (task.status === 'in_progress') {
-      // Advance progress or complete
-      if (task.progress && task.progress.current + 1 >= task.progress.total) {
-        setTasks((prev) =>
-          prev.map((t) => (t.id === task.id ? { ...t, status: 'claimable' } : t))
-        );
-        toast.success(`Task objective complete! Ready to claim.`);
-      } else if (task.progress) {
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.id === task.id
-              ? {
-                  ...t,
-                  progress: {
-                    current: (t.progress?.current || 0) + 1,
-                    total: t.progress?.total || 3,
-                  },
-                }
-              : t
-          )
-        );
-        toast.info(`Progress updated on ${task.title}`);
-      }
-      return;
-    }
-
-    if (task.status === 'locked') {
-      toast.warning('This quest unlocks after reaching Listener Level 2');
-    }
+    toast.info(task.description || 'Complete objective in app to unlock claim');
   };
 
   return (
     <div className="w-full flex flex-col bg-[#080D1A] text-white select-none pb-24 text-left">
-      {/* SCREEN HEADER */}
       <TonJamHeader
         title="Earn TJ"
         subtitle="Complete tasks. Earn rewards."
@@ -230,27 +112,24 @@ export const MobileEarnTJScreen: React.FC<MobileEarnTJScreenProps> = ({
       />
 
       <div className="px-4 space-y-4 pt-1">
-        {/* BALANCE CARD */}
         <TJRewardsCard
           balance={balance}
           completedTasksCount={completedDailyCount}
           totalTasksCount={totalDailyCount}
-          dailyPointsEarned={150}
+          dailyPointsEarned={dailyPointsEarned}
         />
 
-        {/* CATEGORY FILTER PILLS */}
         <TaskCategoryPill
           activeCategory={activeCategory}
           onSelectCategory={setActiveCategory}
           counts={{
-            'All Tasks': tasks.length - 1,
+            'All Tasks': Math.max(0, tasks.length - (featuredTask ? 1 : 0)),
             Daily: tasks.filter((t) => t.category === 'Daily' && !t.isFeatured).length,
             Music: tasks.filter((t) => t.category === 'Music' && !t.isFeatured).length,
             Community: tasks.filter((t) => t.category === 'Community' && !t.isFeatured).length,
           }}
         />
 
-        {/* FEATURED MISSION */}
         {activeCategory === 'All Tasks' && featuredTask && (
           <div className="space-y-1 pt-1">
             <FeaturedTaskCard
@@ -261,7 +140,6 @@ export const MobileEarnTJScreen: React.FC<MobileEarnTJScreenProps> = ({
           </div>
         )}
 
-        {/* TASK FEED BODY */}
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-bold uppercase tracking-wider text-[#91A8C5]">
@@ -269,18 +147,10 @@ export const MobileEarnTJScreen: React.FC<MobileEarnTJScreenProps> = ({
             </span>
           </div>
 
-          {simulatedState === 'loading' ? (
-            <SkeletonRow count={4} />
-          ) : simulatedState === 'error' ? (
-            <ErrorState
-              title="Failed to load tasks"
-              message="Check your network connection and retry."
-              onRetry={() => setSimulatedState('normal')}
-            />
-          ) : filteredTasks.length === 0 ? (
+          {filteredTasks.length === 0 ? (
             <EmptyState
               heading="No active tasks in this category"
-              supportingText="Check back tomorrow for fresh daily and music discovery rewards."
+              supportingText="Check back later for new missions and rewards."
               buttonText="View All Tasks"
               onAction={() => setActiveCategory('All Tasks')}
             />
@@ -297,7 +167,6 @@ export const MobileEarnTJScreen: React.FC<MobileEarnTJScreenProps> = ({
         </div>
       </div>
 
-      {/* TASK DETAILS BOTTOM SHEET */}
       <BottomSheet
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
@@ -365,9 +234,7 @@ export const MobileEarnTJScreen: React.FC<MobileEarnTJScreenProps> = ({
                 ? `Claim +${selectedTask.reward} TJ Rewards`
                 : selectedTask.status === 'completed'
                 ? 'Completed'
-                : selectedTask.status === 'in_progress'
-                ? 'Continue Objective'
-                : 'Start Mission'}
+                : 'In Progress'}
             </button>
           </div>
         )}

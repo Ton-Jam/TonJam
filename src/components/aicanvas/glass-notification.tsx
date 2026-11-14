@@ -16,48 +16,7 @@ interface Notification {
   time: string
 }
 
-const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: 1,
-    icon: ChatCircle,
-    color: '#3A86FF',
-    title: 'New Message',
-    message: 'Alex sent you a photo',
-    time: '2m ago',
-  },
-  {
-    id: 2,
-    icon: Heart,
-    color: '#FF7B54',
-    title: 'New Like',
-    message: 'Sarah liked your post',
-    time: '5m ago',
-  },
-  {
-    id: 3,
-    icon: ShieldCheck,
-    color: '#06D6A0',
-    title: 'Security',
-    message: 'New login from MacBook Pro',
-    time: '12m ago',
-  },
-  {
-    id: 4,
-    icon: ArrowUp,
-    color: '#B388FF',
-    title: 'Update Available',
-    message: 'Version 4.2 is ready to install',
-    time: '1h ago',
-  },
-  {
-    id: 5,
-    icon: Bell,
-    color: '#FFBE0B',
-    title: 'Reminder',
-    message: 'Team standup in 15 minutes',
-    time: '1h ago',
-  },
-]
+const INITIAL_NOTIFICATIONS: Notification[] = []
 
 function NotificationCard({
   notification,

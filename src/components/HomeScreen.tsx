@@ -1,19 +1,13 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Play, 
-  ChevronRight, 
-  ShoppingBag, 
-  Sparkles, 
-  Activity, 
-  Disc, 
-  ArrowUpRight, 
-  CheckCircle,
-  Volume2
-} from "lucide-react";
+import { ChevronRight, Sparkles, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "@/contexts/AudioContext";
-import { TJ_COIN_ICON, TON_LOGO, MOCK_TRACKS, MOCK_PLAYLISTS } from "@/constants";
+import { useNFT } from "@/contexts/NFTContext";
+import { useTask } from "@/contexts/TaskContext";
+import { collection, limit, onSnapshot, query } from "firebase/firestore";
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
+import { getPlaceholderImage } from "@/lib/utils";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { TrackCard, NFTCard, PlaylistCard } from "@/components/music";
@@ -30,271 +24,139 @@ import LatestMarketActivity from "./LatestMarketActivity";
 import TrendingTracks from "./TrendingTracks";
 import RecentlyMintedNFTs from "./RecentlyMintedNFTs";
 
-// Detailed interface for collections & listings 
-interface NFTCollection {
-  id: string;
-  name: string;
-  artist: string;
-  coverUrl: string;
-  floorPrice: string;
-  mintedCount: number;
-  totalLimit: number;
-}
-
-interface SponsoredPromo {
+interface LiveSpaceItem {
   id: string;
   title: string;
-  description: string;
-  artwork: string;
-  badge: "LAUNCH" | "NFT DROP" | "SPONSORED" | "LIVE";
-  ctaText: string;
-}
-
-interface TopicPillData {
-  id: string;
-  label: string;
-  count: string;
-}
-
-interface MarketplacePickData {
-  id: string;
-  title: string;
-  artist: string;
-  price: string;
-  likes: number;
-  image: string;
-  badge: string;
-}
-
-interface CommunityActivityData {
-  id: string;
-  username: string;
-  action: string;
-  target: string;
-  time: string;
-  avatar: string;
-  accentColor: string;
+  host: string;
+  listeners: string;
 }
 
 const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { 
-    playTrack, 
-    userProfile, 
+  const {
+    playTrack,
+    userProfile,
     allTracks,
+    allNFTs,
+    playlists,
+    collections,
+    artists,
+    posts,
     recentlyPlayed,
-    likedTrackIds,
-    userNFTs
+    followedUserIds,
+    toggleFollowUser,
   } = useAudio();
+  const { nfts } = useNFT();
+  const { tasks } = useTask();
 
-  // 10 mock Collections
-  const mockCollections: NFTCollection[] = [
-    { id: "col-1", name: "Genesis Beats", artist: "DJ Krupy", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20genesis%20beats%20neon%20orange?width=300&height=300&nologo=true", floorPrice: "12.5", mintedCount: 420, totalLimit: 500 },
-    { id: "col-2", name: "Neon Nights", artist: "Byte Beat", coverUrl: "https://image.pollinations.ai/prompt/dubstep%20music%20album%20cover%20neon%20green%20laser%20retro?width=300&height=300&nologo=true", floorPrice: "4.8", mintedCount: 180, totalLimit: 300 },
-    { id: "col-3", name: "Deep Abyssal", artist: "Echo Phase", coverUrl: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true", floorPrice: "8.0", mintedCount: 95, totalLimit: 120 },
-    { id: "col-4", name: "Dreamweaver", artist: "Luna Ray", coverUrl: "https://image.pollinations.ai/prompt/dreamy%20pink%20clouds%20golden%20moon%20synthesizer%20art?width=300&height=300&nologo=true", floorPrice: "15.0", mintedCount: 220, totalLimit: 250 },
-    { id: "col-5", name: "Ghost City", artist: "City Ghost", coverUrl: "https://image.pollinations.ai/prompt/futuristic%20rainy%20alley%20lofi%20synthwave%20album%20cover?width=300&height=300&nologo=true", floorPrice: "3.2", mintedCount: 390, totalLimit: 400 },
-    { id: "col-6", name: "Golden Horizon", artist: "Retro Vibes", coverUrl: "https://image.pollinations.ai/prompt/golden%20hour%20sunrise%20retro%20car%20lofi%20beats%20cover?width=300&height=300&nologo=true", floorPrice: "2.9", mintedCount: 140, totalLimit: 200 },
-    { id: "col-7", name: "Amapiano Wave", artist: "Major Sound", coverUrl: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=300&height=300&nologo=true", floorPrice: "9.5", mintedCount: 75, totalLimit: 100 },
-    { id: "col-8", name: "Cyber Rap", artist: "Lil Crypto", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20rapper%20gold%20teeth%20hologram%20neon%20art?width=300&height=300&nologo=true", floorPrice: "24.0", mintedCount: 11, totalLimit: 50 },
-    { id: "col-9", name: "Bass Boosters", artist: "Dr. Osc", coverUrl: "https://image.pollinations.ai/prompt/subwoofer%20exploding%20with%20cosmic%20purple%20nebula%20cover?width=300&height=300&nologo=true", floorPrice: "6.0", mintedCount: 190, totalLimit: 250 },
-    { id: "col-10", name: "Interstellar", artist: "Cosmic Key", coverUrl: "https://image.pollinations.ai/prompt/galaxy%20retro%20organ%20scifi%20music%20album%20art?width=300&height=300&nologo=true", floorPrice: "18.5", mintedCount: 45, totalLimit: 80 }
-  ];
-
-  // Sponsored feeds
-  const sponsoredPromos: SponsoredPromo[] = [
-    { id: "promo-1", title: "Solar Pulse Reloaded", description: "Collect the exclusive diamond release NFT drop by DJ Krupy.", artwork: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=600&height=400&nologo=true", badge: "NFT DROP", ctaText: "Mint Now" },
-    { id: "promo-2", title: "TON Producers Summit", description: "Tune in live tomorrow at 18:00 UTC with top music artists.", artwork: "https://image.pollinations.ai/prompt/futuristic%20audio%20synthesizer%20control%20deck%20concert%20neon?width=600&height=400&nologo=true", badge: "LIVE", ctaText: "Join Room" },
-    { id: "promo-3", title: "Amapiano Wave 2026", description: "Discover high volume soundscapes straight from Lagos to Miami.", artwork: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=600&height=400&nologo=true", badge: "LAUNCH", ctaText: "Listen First" },
-    { id: "promo-4", title: "Retro Sound Lab Sponsor", description: "Promoting next-gen digital instruments on TON Blockchain.", artwork: "https://image.pollinations.ai/prompt/retro%20lofi%20cassette%20player%20floating%20in%20purple%20space?width=600&height=400&nologo=true", badge: "SPONSORED", ctaText: "Claim Free Box" }
-  ];
-
-  const mockNewDrops = useMemo(() => {
-    const list = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
-    const repeated = [...list];
-    while (repeated.length < 12) {
-      repeated.push(...list.map(t => ({ ...t, id: `${t.id}-${Date.now()}-${Math.random()}` })));
-    }
-    return repeated.slice(0, 12);
-  }, [allTracks]);
-
-
-
-  const genres = [
-    "All",
-    "Afrobeats",
-    "Hip-Hop",
-    "Electronic",
-    "R&B",
-    "Pop",
-    "Amapiano",
-    "Reggae",
-    "Dancehall"
-  ];
+  const genres = ["All", "Afrobeats", "Hip-Hop", "Electronic", "R&B", "Pop", "Amapiano", "Reggae", "Dancehall"];
   const [selectedGenre, setSelectedGenre] = useState<string>("All");
-
-  const trendingArtists = [
-    { id: "art-1", name: "DJ Krupy", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=krupy", followers: "142.5k", verified: true, isVerified: true, followed: true },
-    { id: "art-2", name: "Drakee", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=drake", followers: "1.2M", verified: true, isVerified: true, followed: false },
-    { id: "art-3", name: "Ayra Starr", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=ayra", followers: "840k", verified: true, isVerified: true, followed: false },
-    { id: "art-4", name: "Wizkiid", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=wizkid", followers: "2.1M", verified: true, isVerified: true, followed: true },
-    { id: "art-5", name: "Jayzzz", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=jayz", followers: "3.4M", verified: true, isVerified: true, followed: false },
-    { id: "art-6", name: "Luna Ray", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=luna", followers: "92.0k", verified: true, isVerified: true, followed: true }
-  ];
-
-  const [artistFollowStates, setArtistFollowStates] = useState<Record<string, boolean>>({
-    "art-1": true,
-    "art-4": true,
-  });
-
-  const toggleFollow = (artId: string) => {
-    setArtistFollowStates(prev => {
-      const next = !prev[artId];
-      if (next) {
-        confetti({ particleCount: 12, spread: 20 });
-      }
-      return { ...prev, [artId]: next };
-    });
-  };
-
-  const liveSpaces = [
-    { id: "space-1", title: "Afrobeats Producers Lounge 🌍", host: "Ayra Starr", listeners: "1.4k" },
-    { id: "space-2", title: "TON Creators Hub - Minting Future 🚀", host: "DJ Krupy", listeners: "920" },
-    { id: "space-3", title: "Music NFT Masterclass v2 💎", host: "Cyber Lord", listeners: "410" }
-  ];
-
-  const recommendedTracks = useMemo(() => {
-    return (allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 4);
-  }, [allTracks]);
-
-  const recommendedNFTs = [
-    { id: "nft-r1", title: "Deep Oceans #04", price: "4.5 TON", owner: "Echo Phase", cover: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true" },
-    { id: "nft-r2", title: "Solar Drift Signature", price: "12.0 TON", owner: "DJ Krupy", cover: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true" },
-  ];
-
-  const marketplacePicks: MarketplacePickData[] = [
-    { id: "pick-1", title: "Aura Beat Legendary #02", artist: "Luna Ray", price: "25.0 TON", likes: 340, image: "https://image.pollinations.ai/prompt/glowing%20aesthetic%20crystal%20sound%20waves%20artwork?width=300&height=300&nologo=true", badge: "Trending" },
-    { id: "pick-2", title: "Cybernetic Echo Synth", artist: "Dr. Osc", price: "9.0 TON", likes: 112, image: "https://image.pollinations.ai/prompt/cybernetic%20abstract%20holographic%20music%20key?width=300&height=300&nologo=true", badge: "Highest Volume" }
-  ];
-
-  const trendingTopics: TopicPillData[] = [
-    { id: "t1", label: "#Afrobeats", count: "12k" },
-    { id: "t2", label: "#TONMusic", count: "89k" },
-    { id: "t3", label: "#HipHop", count: "45k" },
-    { id: "t4", label: "#MusicNFT", count: "10k" },
-  ];
-
-  const [recentlyMintedNFTs, setRecentlyMintedNFTs] = useState([
-    { id: "mint-1", name: "Pulse Beat Core", artist: "DJ Krupy", price: "2.5 TON", cover: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true", minted: false },
-    { id: "mint-2", name: "Retro Sunset Drifter", artist: "Retro Vibes", price: "1.8 TON", cover: "https://image.pollinations.ai/prompt/golden%20hour%20sunrise%20retro%20car%20lofi%20beats%20cover?width=300&height=300&nologo=true", minted: false }
-  ]);
-
-  const handleMintNFTClick = (id: string) => {
-    setRecentlyMintedNFTs(prev => prev.map(n => n.id === id ? { ...n, minted: true } : n));
-    confetti({ particleCount: 30, spread: 40 });
-  };
-
-  const [activities, setActivities] = useState<CommunityActivityData[]>([
-    { id: "act-1", username: "Davido", action: "minted a new NFT", target: "OBO Genesis Edition #01", time: "Just now", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=davido", accentColor: "#2BE08C" },
-    { id: "act-2", username: "Ayra Starr", action: "released a track", target: "Bloody Samaritan", time: "3 mins ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=ayra", accentColor: "#5B6BFF" }
-  ]);
-
-  const loadMore = () => {
-    setActivities(prev => [
-      ...prev,
-      { id: `act-${Date.now()}`, username: "DJ Nova", action: "started a Space", target: "TON Creators Hub Live", time: "10m ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=nova", accentColor: "#FF3A5C" }
-    ]);
-  };
-
+  const [sponsoredPromos, setSponsoredPromos] = useState<any[]>([]);
+  const [liveSpaces, setLiveSpaces] = useState<LiveSpaceItem[]>([]);
   const [promoIndex, setPromoIndex] = useState(0);
+
   useEffect(() => {
-    const timer = setInterval(() => {
-      setPromoIndex(p => (p + 1) % sponsoredPromos.length);
-    }, 5000);
-    return () => clearInterval(timer);
+    const promoQ = query(collection(db, "sponsoredContent"), limit(10));
+    const unsubPromos = onSnapshot(
+      promoQ,
+      (snap) => {
+        const now = new Date().toISOString();
+        const active: any[] = [];
+        snap.forEach((docSnap) => {
+          const data = docSnap.data() as any;
+          const approved = data.status === "approved" || data.active === true;
+          const afterStart = !data.startDate || data.startDate <= now;
+          const beforeEnd = !data.endDate || data.endDate >= now;
+          if (approved && afterStart && beforeEnd) {
+            active.push({ id: docSnap.id, ...data });
+          }
+        });
+        setSponsoredPromos(active);
+      },
+      (error) => handleFirestoreError(error, OperationType.LIST, "sponsoredContent")
+    );
+
+    const spacesQ = query(collection(db, "liveStreams"), limit(5));
+    const unsubSpaces = onSnapshot(
+      spacesQ,
+      (snap) => {
+        const rows: LiveSpaceItem[] = [];
+        snap.forEach((docSnap) => {
+          const d = docSnap.data() as any;
+          if (d.status === "live" || d.isLive) {
+            rows.push({
+              id: docSnap.id,
+              title: d.title || "Live Audio Room",
+              host: d.hostName || d.artistName || "Artist",
+              listeners: String(d.viewersCount ?? d.listeners ?? 0),
+            });
+          }
+        });
+        setLiveSpaces(rows);
+      },
+      (error) => handleFirestoreError(error, OperationType.LIST, "liveStreams")
+    );
+
+    return () => {
+      unsubPromos();
+      unsubSpaces();
+    };
   }, []);
 
-  const [recommendedTrackList, setRecommendedTrackList] = useState<any[]>([]);
-  const [recommendationReason, setRecommendationReason] = useState<string>("Tuning DJ Krupy's AI matrix to recommend on-chain gems for you...");
-  const [recommendationsLoading, setRecommendationsLoading] = useState<boolean>(true);
+  useEffect(() => {
+    if (sponsoredPromos.length <= 1) return;
+    const timer = setInterval(() => {
+      setPromoIndex((p) => (p + 1) % sponsoredPromos.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [sponsoredPromos.length]);
 
-  const fetchRecommendations = async () => {
-    setRecommendationsLoading(true);
-    try {
-      const response = await fetch('/api/gemini/similar-tracks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recentlyPlayed: recentlyPlayed || [],
-          likedTracks: likedTrackIds || [],
-          purchasedNFTs: userNFTs || [],
-          availableTracks: allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS
-        })
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.recommendedTrackIds && Array.isArray(data.recommendedTrackIds)) {
-          const matched = (allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).filter(t => 
-            data.recommendedTrackIds.includes(t.id)
-          );
-          if (matched.length > 0) {
-            setRecommendedTrackList(matched);
-          } else {
-            setRecommendedTrackList((allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 5));
-          }
-        } else {
-          setRecommendedTrackList((allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 5));
-        }
-        if (data.explanation) {
-          setRecommendationReason(data.explanation);
-        } else {
-          setRecommendationReason("A custom blend of premium audio tracks chosen based on your library and previously purchased NFTs on the TON network.");
-        }
-      } else {
-        throw new Error("Failed recommendation response");
-      }
-    } catch (err) {
-      console.error("AI recommendations failed", err);
-      setRecommendedTrackList((allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 5));
-      setRecommendationReason("DJ Krupy's primary relay is resting, but these premium on-chain frequencies are perfectly tuned for your ears.");
-    } finally {
-      setRecommendationsLoading(false);
+  const activeTrackForResume = recentlyPlayed[0] || allTracks[0] || null;
+
+  const newDrops = useMemo(() => {
+    const filtered = selectedGenre === "All"
+      ? allTracks
+      : allTracks.filter((t) => (t.genre || "").toLowerCase().includes(selectedGenre.toLowerCase()));
+    return [...filtered]
+      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+      .slice(0, 12);
+  }, [allTracks, selectedGenre]);
+
+  const nftCatalog = allNFTs.length > 0 ? allNFTs : nfts;
+  const completedTasks = tasks.filter((t) => t.status === "completed").length;
+
+  const toggleFollow = (artId: string) => {
+    toggleFollowUser?.(artId);
+    if (!followedUserIds.includes(artId)) {
+      confetti({ particleCount: 12, spread: 20 });
     }
   };
-
-  useEffect(() => {
-    fetchRecommendations();
-  }, [likedTrackIds?.length, recentlyPlayed?.length, userNFTs?.length, allTracks?.length]);
 
   return (
     <div className="space-y-8 select-none">
-      
-      {/* SECTION 1: WELCOME HERO */}
       <div className="space-y-4">
         <div className="space-y-1">
           <h1 className="text-2xl font-black text-white flex items-center gap-1.5 leading-none pt-2">
             Good Evening 👋
           </h1>
           <p className="text-base font-extrabold text-[#9AA0AE]">
-            Welcome Back, {userProfile?.username || "Collector"}
+            Welcome Back, {userProfile?.username || userProfile?.name || "Listener"}
           </p>
           <p className="text-xs text-[#9AA0AE]/80">
             Discover new sounds, collect music NFTs and earn rewards.
           </p>
         </div>
 
-        <ContinueListeningCard
-          title="Solar Pulse"
-          artist="DJ Krupy"
-          coverUrl="https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true"
-          onPlay={() => {
-            const track = MOCK_TRACKS.find(t => t.id === "1") || MOCK_TRACKS[0];
-            playTrack(track);
-          }}
-        />
+        {activeTrackForResume && (
+          <ContinueListeningCard
+            title={activeTrackForResume.title}
+            artist={activeTrackForResume.artist}
+            coverUrl={activeTrackForResume.coverUrl || getPlaceholderImage(`track-${activeTrackForResume.id}`)}
+            onPlay={() => playTrack(activeTrackForResume)}
+          />
+        )}
       </div>
 
-      {/* GENRE FILTER */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
         {genres.map((genre) => (
           <TopicPill
@@ -306,400 +168,244 @@ const HomeScreen: React.FC = () => {
         ))}
       </div>
 
-      {/* TRENDING SPACE TOPICS TICKER */}
-      <div className="bg-[#0A113A]/50 px-3.5 py-2.5 rounded-2xl flex items-center gap-2.5 overflow-hidden">
-        <div className="flex items-center gap-1 shrink-0 text-[#00B4D8] text-[10px] font-black uppercase tracking-wider">
-          <Sparkles className="w-3 h-3" />
-          <span>Space:</span>
-        </div>
-        <div className="text-[11px] font-semibold text-slate-300 truncate flex items-center gap-3 overflow-x-auto no-scrollbar">
-          <span>🔥 Wizkiid just minted a new exclusive NFT!</span>
-          <span className="text-white/20">•</span>
-          <span>🚀 Drakee hits 1M streams!</span>
-          <span className="text-white/20">•</span>
-          <span>💎 Ayra drops her latest Jam!</span>
-        </div>
-      </div>
-
-      {/* SECTION 12: TRENDING TOPICS */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-        {trendingTopics.map(topic => (
-          <TopicPill
-            key={topic.id}
-            label={topic.label}
-            onClick={() => confetti({ particleCount: 5 })}
-          />
-        ))}
-      </div>
-
-      {/* SECTION 9: REWARDS PREVIEW */}
       <RewardPreviewCard
-        completedTasks={3}
-        totalTasks={5}
-        balance={userProfile?.tjBalance || 125430}
+        completedTasks={completedTasks}
+        totalTasks={tasks.length || 5}
+        balance={userProfile?.tjBalance || 0}
         onViewTasks={() => navigate("/tasks")}
       />
 
-      {/* SECTION 3: SPONSORED SLIDER CAROUSEL */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-black text-white">
-          Featured Launches & Updates
-        </h2>
-        <div className="relative h-[170px] overflow-hidden rounded-2xl bg-[#0A113A]/50">
-          <AnimatePresence mode="wait">
-            {sponsoredPromos.map((promo, idx) => (
-              idx === promoIndex && (
-                <motion.div
-                  key={promo.id}
-                  initial={{ opacity: 0, x: 15 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -15 }}
-                  transition={{ duration: 0.3 }}
-                  className="absolute inset-0"
-                >
-                  <SponsoredFeedCard
-                    title={promo.title}
-                    description={promo.description}
-                    artwork={promo.artwork}
-                    badge={promo.badge}
-                    ctaText={promo.ctaText}
-                    onClick={() => navigate("/marketplace")}
-                  />
-                </motion.div>
-              )
-            ))}
-          </AnimatePresence>
-          <div className="absolute bottom-2 right-4 z-10 flex gap-0.5 items-center">
-            {sponsoredPromos.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setPromoIndex(idx)}
-                aria-label={`Promo slide ${idx + 1}`}
-                className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border-none bg-transparent p-0 cursor-pointer"
-              >
-                <span
-                  className={`h-1.5 rounded-full transition-all block ${
-                    idx === promoIndex ? "bg-[#0098EA] w-4" : "bg-white/20 w-1.5"
-                  }`}
-                />
-              </button>
-            ))}
+      {sponsoredPromos.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-black text-white">Featured Launches & Updates</h2>
+          <div className="relative h-[170px] overflow-hidden rounded-2xl bg-[#0A113A]/50">
+            <AnimatePresence mode="wait">
+              {sponsoredPromos.map((promo, idx) => (
+                idx === promoIndex && (
+                  <motion.div
+                    key={promo.id}
+                    initial={{ opacity: 0, x: 15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -15 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute inset-0"
+                  >
+                    <SponsoredFeedCard
+                      title={promo.title}
+                      description={promo.description}
+                      artwork={promo.imageUrl || getPlaceholderImage(`promo-${promo.id}`)}
+                      badge="SPONSORED"
+                      ctaText="View Release"
+                      onClick={() => navigate(promo.link || "/marketplace")}
+                    />
+                  </motion.div>
+                )
+              ))}
+            </AnimatePresence>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* LATEST MARKET ACTIVITY SECTION */}
       <LatestMarketActivity />
 
-      {/* SECTION 2: TRENDING NFT COLLECTIONS */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-white">Trending NFT Collections</h2>
-          <button
-            onClick={() => navigate("/collections")}
-            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#0098EA] border-none bg-transparent cursor-pointer"
-            aria-label="View all trending NFT collections"
-          >
-            All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
-          </button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          {mockCollections.map(col => (
-            <NFTCollectionCard
-              key={col.id}
-              id={String(col.id)}
-              name={col.name}
-              artist={col.artist}
-              coverUrl={col.coverUrl}
-              floorPrice={col.floorPrice}
-              mintedCount={col.mintedCount}
-              totalLimit={col.totalLimit}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* SECTION 4: NEW DROPS */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-white">New Drops</h2>
-          <button
-            onClick={() => navigate("/search")}
-            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#00B4D8] border-none bg-transparent cursor-pointer"
-            aria-label="View all new drops"
-          >
-            All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
-          </button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          {mockNewDrops.map(track => (
-            <div key={track.id} className="w-[170px] sm:w-[190px] shrink-0 snap-start">
-              <TrackCard
-                track={track}
-                variant="expanded"
-                showVerifiedBadge={true}
-                showDuration={true}
-                showGenre={true}
+      {collections.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-black text-white">Trending NFT Collections</h2>
+            <button
+              onClick={() => navigate("/collections")}
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#0098EA] border-none bg-transparent cursor-pointer"
+              aria-label="View all trending NFT collections"
+            >
+              All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
+            </button>
+          </div>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+            {collections.map((col) => (
+              <NFTCollectionCard
+                key={col.id}
+                id={String(col.id)}
+                name={col.name}
+                artist={(col as any).creator || "Creator"}
+                coverUrl={col.coverUrl || getPlaceholderImage(`col-${col.id}`)}
+                floorPrice={String((col as any).floorPrice || "0")}
+                mintedCount={col.nftIds?.length || 0}
+                totalLimit={(col as any).totalSupply || col.nftIds?.length || 0}
               />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* FEATURED PLAYLISTS */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-white">Featured Playlists</h2>
-          <button
-            onClick={() => navigate("/library")}
-            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#00B4D8] border-none bg-transparent cursor-pointer"
-            aria-label="View all playlists"
-          >
-            All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
-          </button>
+      {newDrops.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-black text-white">New Drops</h2>
+            <button
+              onClick={() => navigate("/search")}
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#00B4D8] border-none bg-transparent cursor-pointer"
+              aria-label="View all new drops"
+            >
+              All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
+            </button>
+          </div>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+            {newDrops.map((track) => (
+              <div key={track.id} className="w-[170px] sm:w-[190px] shrink-0 snap-start">
+                <TrackCard
+                  track={track}
+                  variant="expanded"
+                  showVerifiedBadge={true}
+                  showDuration={true}
+                  showGenre={true}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          {MOCK_PLAYLISTS.map((playlist, idx) => (
-            <div key={playlist.id} className="w-[180px] sm:w-[200px] shrink-0 snap-start">
-              <PlaylistCard
-                playlist={playlist}
-                artworkStyle={idx % 2 === 0 ? "single" : "collage"}
-                showStatusIndicator={true}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
 
-      {/* SECTION 5: TRENDING TRACKS */}
+      {playlists.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-black text-white">Featured Playlists</h2>
+            <button
+              onClick={() => navigate("/library")}
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#00B4D8] border-none bg-transparent cursor-pointer"
+              aria-label="View all playlists"
+            >
+              All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
+            </button>
+          </div>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+            {playlists.map((playlist, idx) => (
+              <div key={playlist.id} className="w-[180px] sm:w-[200px] shrink-0 snap-start">
+                <PlaylistCard
+                  playlist={playlist}
+                  artworkStyle={idx % 2 === 0 ? "single" : "collage"}
+                  showStatusIndicator={true}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <TrendingTracks />
 
-      {/* SECTION 6: TRENDING ARTISTS */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-black text-white">Trending Artists</h2>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          {trendingArtists.map(art => {
-            const hasFollowed = artistFollowStates[art.id] || false;
-            return (
-              <div
-                key={art.id}
-                className="w-[125px] shrink-0 rounded-2xl bg-[#0A113A]/50 p-3.5 flex flex-col items-center justify-between space-y-3 text-center"
-              >
-                <div className="w-14 h-14 rounded-full bg-[#050A24] flex items-center justify-center overflow-hidden">
-                  <img src={art.avatar} alt="" className="w-12 h-12" />
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="flex items-center gap-1">
-                    <h4 className="text-xs font-black text-white truncate max-w-[90px]">{art.name}</h4>
-                    {(art.verified || art.isVerified) && <CheckCircle className="w-3 h-3 text-blue-400 fill-current" />}
-                  </div>
-                  <span className="text-[9px] text-[#9AA0AE]">{art.followers} fans</span>
-                </div>
-                <button
-                  onClick={() => toggleFollow(art.id)}
-                  className={`w-full min-h-[44px] text-[9px] font-black uppercase tracking-widest rounded-xl border-none cursor-pointer flex items-center justify-center transition-all active:scale-95 ${
-                    hasFollowed ? "bg-white/5 text-[#9AA0AE]" : "bg-[#5B6BFF] text-white"
-                  }`}
+      {artists.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-black text-white">Trending Artists</h2>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+            {artists.slice(0, 8).map((art) => {
+              const hasFollowed = followedUserIds.includes(art.uid);
+              return (
+                <div
+                  key={art.uid}
+                  onClick={() => navigate(`/artist/${art.uid}`)}
+                  className="w-[125px] shrink-0 rounded-2xl bg-[#0A113A]/50 p-3.5 flex flex-col items-center justify-between space-y-3 text-center cursor-pointer"
                 >
-                  {hasFollowed ? "Following" : "Follow"}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* SECTION 7: LIVE SPACES */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-black text-white">Live Spaces</h2>
-        <div className="space-y-2.5">
-          {liveSpaces.map(space => (
-            <LiveSpaceCard
-              key={space.id}
-              title={space.title}
-              host={space.host}
-              listeners={space.listeners}
-              onJoin={() => confetti({ particleCount: 30 })}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* SECTION 8: RECOMMENDED FOR YOU */}
-      <div className="space-y-3.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-black text-white">Recommended For You</h2>
-            <span className="px-2 py-0.5 text-[8px] font-black bg-indigo-500/10 text-indigo-400 rounded-full uppercase tracking-widest">
-              AI Powered
-            </span>
-          </div>
-          <button 
-            onClick={() => {
-              fetchRecommendations();
-              confetti({ particleCount: 15, spread: 30 });
-            }}
-            disabled={recommendationsLoading}
-            className="flex items-center gap-1.5 px-3.5 min-h-[44px] min-w-[44px] bg-indigo-500/10 text-indigo-400 rounded-xl hover:bg-indigo-500/20 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-none disabled:opacity-50 active:scale-95"
-          >
-            <Sparkles className={`w-3.5 h-3.5 ${recommendationsLoading ? 'animate-spin' : ''}`} />
-            Recalibrate
-          </button>
-        </div>
-
-        {/* DJ Krupy's Speech Bubble (Flat styling - no borders!) */}
-        <div className="bg-[#0A113A]/35 p-4 rounded-2xl flex items-start gap-3 relative overflow-hidden">
-          <div className="w-8 h-8 rounded-full bg-indigo-600/20 flex items-center justify-center shrink-0 text-indigo-400">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div className="space-y-0.5">
-            <span className="text-[10px] font-black text-[#5B6BFF] uppercase tracking-widest">DJ Krupy AI</span>
-            <p className="text-xs text-slate-300 leading-relaxed italic">
-              "{recommendationReason}"
-            </p>
-          </div>
-        </div>
-
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          {recommendationsLoading ? (
-            // Custom high fidelity loading skeleton
-            [1, 2, 3, 4].map(i => (
-              <div
-                key={i}
-                className="relative overflow-hidden w-[145px] shrink-0 rounded-2xl bg-[#0A113A]/30 p-3 flex flex-col justify-between space-y-2.5"
-              >
-                <div className="absolute inset-0 animate-shimmer pointer-events-none" />
-                <div className="relative">
-                  <div className="relative aspect-square rounded-xl bg-white/5 overflow-hidden mb-2.5" />
-                  <div className="h-3 bg-white/10 rounded w-3/4 mb-2.5" />
-                  <div className="h-6 bg-white/5 rounded-xl w-full" />
-                </div>
-              </div>
-            ))
-          ) : (
-            <>
-              {recommendedTrackList.map(track => (
-                <div key={track.id} className="w-[170px] sm:w-[190px] shrink-0 snap-start">
-                  <TrackCard
-                    track={track}
-                    variant="expanded"
-                    showVerifiedBadge={true}
-                    showDuration={true}
-                    showGenre={true}
-                  />
-                </div>
-              ))}
-              {recommendedNFTs.map(nft => (
-                <div key={nft.id} className="w-[170px] sm:w-[190px] shrink-0 snap-start">
-                  <NFTCard
-                    nft={{
-                      id: nft.id,
-                      trackId: nft.id,
-                      title: nft.title,
-                      artist: nft.owner,
-                      creator: nft.owner,
-                      owner: nft.owner,
-                      price: nft.price.replace(" TON", "").trim(),
-                      imageUrl: nft.cover,
-                      rarity: "Rare",
-                      edition: "1 of 25",
-                      artistVerified: true,
+                  <div className="w-14 h-14 rounded-full bg-[#050A24] flex items-center justify-center overflow-hidden">
+                    <img
+                      src={art.avatarUrl || getPlaceholderImage(`artist-${art.uid}`)}
+                      alt={art.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center gap-1">
+                      <h4 className="text-xs font-black text-white truncate max-w-[90px]">{art.name}</h4>
+                      {(art.verified || art.isVerifiedArtist) && <CheckCircle className="w-3 h-3 text-blue-400 fill-current" />}
+                    </div>
+                    <span className="text-[9px] text-[#9AA0AE]">{(art.followers || 0).toLocaleString()} fans</span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFollow(art.uid);
                     }}
-                    variant="sale"
-                  />
+                    className={`w-full min-h-[44px] text-[9px] font-black uppercase tracking-widest rounded-xl border-none cursor-pointer flex items-center justify-center transition-all active:scale-95 ${
+                      hasFollowed ? "bg-white/5 text-[#9AA0AE]" : "bg-[#5B6BFF] text-white"
+                    }`}
+                  >
+                    {hasFollowed ? "Following" : "Follow"}
+                  </button>
                 </div>
-              ))}
-            </>
-          )}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* SECTION 10: TOP MARKETPLACE PICKS */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-white">Top Marketplace Picks</h2>
-          <button
-            onClick={() => navigate("/marketplace")}
-            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#00B4D8] border-none bg-transparent cursor-pointer"
-            aria-label="View all marketplace picks"
-          >
-            All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
-          </button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          {marketplacePicks.map((pick, idx) => (
-            <div key={pick.id} className="w-[175px] sm:w-[195px] shrink-0 snap-start">
-              <NFTCard
-                nft={{
-                  id: pick.id,
-                  trackId: pick.id,
-                  title: pick.title,
-                  artist: pick.artist,
-                  creator: pick.artist,
-                  owner: pick.artist,
-                  price: pick.price.replace(" TON", "").trim(),
-                  imageUrl: pick.image,
-                  rarity: pick.badge === "Trending" ? "Legendary" : "Epic",
-                  edition: "1 of 50",
-                  artistVerified: true,
-                  isAuction: idx % 2 === 1,
-                  startingBid: idx % 2 === 1 ? pick.price.replace(" TON", "").trim() : undefined,
-                }}
-                variant={idx % 2 === 1 ? "auction" : "sale"}
+      {liveSpaces.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-black text-white">Live Spaces</h2>
+          <div className="space-y-2.5">
+            {liveSpaces.map((space) => (
+              <LiveSpaceCard
+                key={space.id}
+                title={space.title}
+                host={space.host}
+                listeners={space.listeners}
+                onJoin={() => navigate("/jamspace")}
               />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* SECTION 11: FAVORITE ARTISTS */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-black text-[#9AA0AE]">Favorite Artists Updates</h2>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar">
-          {trendingArtists.filter(a => artistFollowStates[a.id]).map(art => (
-            <div
-              key={art.id}
-              onClick={() => navigate(`/artist/${art.id}`)}
-              className="w-[100px] shrink-0 flex flex-col items-center p-2 rounded-2xl bg-[#0A113A]/30 cursor-pointer min-h-[44px] hover:bg-[#0A113A]/50 transition-colors"
+      {nftCatalog.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-black text-white">Top Marketplace Picks</h2>
+            <button
+              onClick={() => navigate("/marketplace")}
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-end px-2 text-xs font-bold text-[#00B4D8] border-none bg-transparent cursor-pointer"
+              aria-label="View all marketplace picks"
             >
-              <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center">
-                <img src={art.avatar} alt="" className="w-full h-full object-cover" />
+              All <ChevronRight className="w-3.5 h-3.5 inline ml-0.5" />
+            </button>
+          </div>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+            {nftCatalog.slice(0, 6).map((pick) => (
+              <div key={pick.id} className="w-[175px] sm:w-[195px] shrink-0 snap-start">
+                <NFTCard
+                  nft={pick}
+                  variant={pick.listingType === "auction" ? "auction" : "sale"}
+                />
               </div>
-              <h4 className="text-[11px] font-bold mt-1 text-white truncate max-w-[80px]">{art.name}</h4>
-              <span className="text-[8px] text-[#2BE08C]">Just Active</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* SECTION 13: RECENTLY ADDED MUSIC NFTs */}
       <RecentlyMintedNFTs title="Recently Added" />
 
-      {/* SECTION 14: COMMUNITY ACTIVITY FEED */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-black text-white">Community Activity</h2>
-        <div className="rounded-2xl bg-[#0A113A]/50 p-4 space-y-3.5">
-          {activities.map(act => (
-            <CommunityFeedCard
-              key={act.id}
-              username={act.username}
-              action={act.action}
-              target={act.target}
-              time={act.time}
-              avatar={act.avatar}
-              accentColor={act.accentColor}
-            />
-          ))}
-          <Button
-            size="sm"
-            onClick={loadMore}
-            className="w-full min-h-[44px] text-[10px] font-black bg-white/[0.04] hover:bg-white/[0.08] text-[#9AA0AE] hover:text-white border-none flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
-          >
-            Load Older Stream Activities
-          </Button>
+      {posts.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-black text-white">Community Activity</h2>
+          <div className="rounded-2xl bg-[#0A113A]/50 p-4 space-y-3.5">
+            {posts.slice(0, 5).map((post) => (
+              <CommunityFeedCard
+                key={post.id}
+                username={post.userName || "Creator"}
+                action="shared a post"
+                target={post.content?.slice(0, 60) || "JamSpace Update"}
+                time={post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "Recent"}
+                avatar={post.userAvatar || getPlaceholderImage(`user-${post.userId}`)}
+                accentColor="#5B6BFF"
+              />
+            ))}
+            <Button
+              size="sm"
+              onClick={() => navigate("/jamspace")}
+              className="w-full min-h-[44px] text-[10px] font-black bg-white/[0.04] hover:bg-white/[0.08] text-[#9AA0AE] hover:text-white border-none flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
+            >
+              Explore All Community Activity
+            </Button>
+          </div>
         </div>
-      </div>
-
+      )}
     </div>
   );
 };
@@ -714,5 +420,5 @@ export {
   MarketplaceCard,
   TopicPill,
   CommunityFeedCard,
-  RecentlyMintedNFTs
+  RecentlyMintedNFTs,
 };

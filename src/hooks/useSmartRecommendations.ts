@@ -3,7 +3,6 @@ import { useAudio } from '@/contexts/AudioContext';
 import { useNFT } from '@/contexts/NFTContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Track, NFTItem, Artist } from '@/types';
-import { MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS } from '@/constants';
 import {
   rankRecommendedTracks,
   rankRecommendedNFTs,
@@ -96,10 +95,11 @@ export function useSmartRecommendations(): UseSmartRecommendationsReturn {
 
   // Compute recommendations with caching
   const recommendedTracks = useMemo<Track[]>(() => {
-    const pool = (allTracks && allTracks.length > 0) ? allTracks : MOCK_TRACKS;
+    const pool = allTracks || [];
+    if (pool.length === 0) return [];
     const cacheKey = `rec_tracks_${userId || 'guest'}_${refreshKey}`;
     const cached = getCachedRecommendations<Track[]>(cacheKey);
-    if (cached) return cached;
+    if (cached && cached.length > 0) return cached;
 
     const ranked = rankRecommendedTracks(pool, userContext, {
       limit: 14,
@@ -110,10 +110,11 @@ export function useSmartRecommendations(): UseSmartRecommendationsReturn {
   }, [allTracks, userContext, userId, refreshKey]);
 
   const recommendedNFTs = useMemo<NFTItem[]>(() => {
-    const pool = (nfts && nfts.length > 0) ? nfts : MOCK_NFTS;
+    const pool = nfts || [];
+    if (pool.length === 0) return [];
     const cacheKey = `rec_nfts_${userId || 'guest'}_${refreshKey}`;
     const cached = getCachedRecommendations<NFTItem[]>(cacheKey);
-    if (cached) return cached;
+    if (cached && cached.length > 0) return cached;
 
     const ranked = rankRecommendedNFTs(pool, userContext, {
       limit: 12,
@@ -123,10 +124,11 @@ export function useSmartRecommendations(): UseSmartRecommendationsReturn {
   }, [nfts, userContext, userId, refreshKey]);
 
   const recommendedArtists = useMemo<Artist[]>(() => {
-    const pool = (artists && artists.length > 0) ? artists : MOCK_ARTISTS;
+    const pool = artists || [];
+    if (pool.length === 0) return [];
     const cacheKey = `rec_artists_${userId || 'guest'}_${refreshKey}`;
     const cached = getCachedRecommendations<Artist[]>(cacheKey);
-    if (cached) return cached;
+    if (cached && cached.length > 0) return cached;
 
     const ranked = rankRecommendedArtists(pool, userContext, {
       limit: 8,

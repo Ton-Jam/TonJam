@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 import { ArtistEvent } from '@/types';
+import { getPlaceholderImage } from '@/lib/utils';
 
 export interface TourEventExtended extends ArtistEvent {
   eventType?: 'Headline Tour' | 'Festival' | 'Acoustic Set' | 'Metaverse Livestream' | 'VIP Party';
@@ -47,76 +48,7 @@ interface LiveTourManagerProps {
   isArtistView?: boolean;
 }
 
-const DEFAULT_TOUR_STOPS: TourEventExtended[] = [
-  {
-    id: 'tour-evt-1',
-    artistId: 'current-artist',
-    title: 'Solar Pulse World Tour 2026 - Opening Night',
-    date: '2026-09-18',
-    time: '20:00 GMT',
-    venue: 'O2 Academy Brixton',
-    location: 'London, United Kingdom',
-    eventType: 'Headline Tour',
-    ticketUrl: 'https://tonjam.io/tickets/solar-pulse-london',
-    bannerImageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&auto=format&fit=crop&q=80',
-    status: 'upcoming',
-    ticketStatus: 'Selling Fast',
-    ticketPrice: '25 TON / $120',
-    subscribersCount: 1420,
-    vipPerk: 'Free Backstage VIP Access for Gold Fan Token Holders'
-  },
-  {
-    id: 'tour-evt-2',
-    artistId: 'current-artist',
-    title: 'Aether Waves Red Rocks Experience',
-    date: '2026-10-04',
-    time: '19:30 MST',
-    venue: 'Red Rocks Amphitheatre',
-    location: 'Morrison, Colorado, USA',
-    eventType: 'Festival',
-    ticketUrl: 'https://tonjam.io/tickets/red-rocks-aether',
-    bannerImageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&auto=format&fit=crop&q=80',
-    status: 'upcoming',
-    ticketStatus: 'General On-Sale',
-    ticketPrice: '30 TON / $145',
-    subscribersCount: 890,
-    vipPerk: 'Exclusive Signed Vinyl & Meet & Greet'
-  },
-  {
-    id: 'tour-evt-3',
-    artistId: 'current-artist',
-    title: 'Hyperdrive Tokyo Metaverse & Live Stream',
-    date: '2026-11-12',
-    time: '21:00 JST',
-    venue: 'Zepp DiverCity & VR Dome',
-    location: 'Tokyo, Japan',
-    eventType: 'Metaverse Livestream',
-    ticketUrl: 'https://tonjam.io/tickets/tokyo-metaverse',
-    bannerImageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&auto=format&fit=crop&q=80',
-    status: 'upcoming',
-    ticketStatus: 'VIP Only',
-    ticketPrice: '10 TON / $50',
-    subscribersCount: 2310,
-    vipPerk: 'Claimable 3D Cyberpunk Wearable NFT'
-  },
-  {
-    id: 'tour-evt-4',
-    artistId: 'current-artist',
-    title: 'Echoes in the Park - Acoustic Session',
-    date: '2026-06-10',
-    time: '18:00 CEST',
-    venue: 'Tempelhof Feld',
-    location: 'Berlin, Germany',
-    eventType: 'Acoustic Set',
-    ticketUrl: 'https://tonjam.io/tickets/berlin-echoes',
-    bannerImageUrl: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&auto=format&fit=crop&q=80',
-    status: 'past',
-    ticketStatus: 'Sold Out',
-    ticketPrice: '15 TON',
-    subscribersCount: 1650,
-    vipPerk: 'Digital Live Recording NFT Airdrop'
-  }
-];
+const DEFAULT_TOUR_STOPS: TourEventExtended[] = [];
 
 export const LiveTourManager: React.FC<LiveTourManagerProps> = ({
   artistId = 'current-artist',
@@ -143,9 +75,9 @@ export const LiveTourManager: React.FC<LiveTourManagerProps> = ({
   const [subscribedEventIds, setSubscribedEventIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem(`tonjam_subscribed_tours_${userProfile?.uid || 'guest'}`);
-      return saved ? JSON.parse(saved) : ['tour-evt-1'];
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return ['tour-evt-1'];
+      return [];
     }
   });
 
@@ -180,7 +112,7 @@ export const LiveTourManager: React.FC<LiveTourManagerProps> = ({
     ticketPrice: '20 TON',
     ticketStatus: 'General On-Sale',
     vipPerk: '',
-    bannerImageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&auto=format&fit=crop&q=80'
+    bannerImageUrl: getPlaceholderImage('banner')
   });
 
   // Sync to localStorage
@@ -275,12 +207,12 @@ export const LiveTourManager: React.FC<LiveTourManagerProps> = ({
         ticketUrl: formData.ticketUrl || `https://tonjam.io/tickets/${Date.now()}`,
         bannerImageUrl:
           formData.bannerImageUrl ||
-          'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&auto=format&fit=crop&q=80',
+          getPlaceholderImage('banner'),
         status: new Date(formData.date!) >= new Date() ? 'upcoming' : 'past',
         ticketStatus: formData.ticketStatus || 'General On-Sale',
         ticketPrice: formData.ticketPrice || '20 TON',
-        subscribersCount: 1,
-        vipPerk: formData.vipPerk || 'Exclusive VIP Access'
+        subscribersCount: 0,
+        vipPerk: formData.vipPerk || ''
       };
       setEvents((prev) => [newEvent, ...prev]);
       addNotification(`Added new tour stop "${newEvent.title}" to live timeline! 📍🎟️`, 'success');
@@ -299,7 +231,7 @@ export const LiveTourManager: React.FC<LiveTourManagerProps> = ({
       ticketPrice: '20 TON',
       ticketStatus: 'General On-Sale',
       vipPerk: '',
-      bannerImageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&auto=format&fit=crop&q=80'
+      bannerImageUrl: getPlaceholderImage('banner')
     });
   };
 
@@ -314,7 +246,7 @@ export const LiveTourManager: React.FC<LiveTourManagerProps> = ({
     e.preventDefault();
     if (!broadcastMessage.trim()) return;
 
-    const totalSubs = events.reduce((acc, curr) => acc + (curr.subscribersCount || 0), 1200);
+    const totalSubs = events.reduce((acc, curr) => acc + (curr.subscribersCount || 0), 0);
     addNotification(
       `Broadcast sent! Alerted ${totalSubs} subscribed fans about: "${broadcastMessage.substring(0, 40)}..." 📣💎`,
       'success'
@@ -483,7 +415,7 @@ export const LiveTourManager: React.FC<LiveTourManagerProps> = ({
                       ticketPrice: '20 TON',
                       ticketStatus: 'General On-Sale',
                       vipPerk: '',
-                      bannerImageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&auto=format&fit=crop&q=80'
+                      bannerImageUrl: getPlaceholderImage('banner')
                     });
                     setIsAddModalOpen(true);
                   }}

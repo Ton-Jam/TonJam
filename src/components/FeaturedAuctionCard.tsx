@@ -6,6 +6,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import ShareNFTDialog from '@/components/ShareNFTDialog';
 import BidModal from '@/components/BidModal';
+import { getPlaceholderImage } from '@/lib/utils';
 
 export interface FeaturedAuctionCardProps {
   nft?: Partial<NFTItem> & {
@@ -33,24 +34,23 @@ export const FeaturedAuctionCard: React.FC<FeaturedAuctionCardProps> = ({
   const navigate = useNavigate();
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
 
-  // Fallback defaults matching prompt spec
   const cardData = useMemo(() => {
     return {
-      id: nft?.id || 'featured-auction-1',
-      title: nft?.title || 'Ethereal Harmonics #042',
-      creator: nft?.creator || nft?.artist || 'Aura Synth Labs',
-      imageUrl: nft?.imageUrl || nft?.coverUrl || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&q=80',
-      audioUrl: nft?.audioUrl || 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
-      currentBid: nft?.currentBid || nft?.price || '42 Grams',
-      floorPrice: nft?.floorPrice || '35 Grams',
-      endTime: nft?.auctionEndTime || nft?.auctionEndsAt || '2026-12-31T23:59:59.000Z',
-      owner: nft?.owner || 'EQD_FeaturedAuctionOwner_Wallet_Address_777777777',
-      price: nft?.price || nft?.currentBid || '42',
+      id: nft?.id || '',
+      title: nft?.title || 'Untitled NFT',
+      creator: nft?.creator || nft?.artist || 'Artist',
+      imageUrl: nft?.imageUrl || nft?.coverUrl || getPlaceholderImage('nft'),
+      audioUrl: nft?.audioUrl || '',
+      currentBid: nft?.currentBid || nft?.price || '0 TON',
+      floorPrice: nft?.floorPrice || nft?.price || '0 TON',
+      endTime: nft?.auctionEndTime || nft?.auctionEndsAt || '',
+      owner: nft?.owner || '',
+      price: nft?.price || nft?.currentBid || '0',
     };
   }, [nft]);
 
   // Countdown Timer State
-  const [timeLeftStr, setTimeLeftStr] = useState<string>('02h : 45m : 12s');
+  const [timeLeftStr, setTimeLeftStr] = useState<string>('-- : -- : --');
   // Tooltip State for Bid History
   const [showHistory, setShowHistory] = useState<boolean>(false);
   // Share Modal State
@@ -60,11 +60,11 @@ export const FeaturedAuctionCard: React.FC<FeaturedAuctionCardProps> = ({
 
   // Real-time bid pulse animation trigger
   const [isBidPulsing, setIsBidPulsing] = useState<boolean>(false);
-  const prevBidRef = useRef<string>(nft?.currentBid || nft?.price || '42 Grams');
+  const prevBidRef = useRef<string>(nft?.currentBid || nft?.price || '');
 
   useEffect(() => {
-    const newBid = nft?.currentBid || nft?.price || '42 Grams';
-    if (newBid !== prevBidRef.current) {
+    const newBid = nft?.currentBid || nft?.price || '';
+    if (newBid && newBid !== prevBidRef.current) {
       prevBidRef.current = newBid;
       setIsBidPulsing(true);
       const timer = setTimeout(() => {
@@ -76,7 +76,7 @@ export const FeaturedAuctionCard: React.FC<FeaturedAuctionCardProps> = ({
 
   // Dynamic Live Auction & Timer State based on Metadata
   const [isAuctionEnded, setIsAuctionEnded] = useState<boolean>(false);
-  const [isLive, setIsLive] = useState<boolean>(true);
+  const [isLive, setIsLive] = useState<boolean>(Boolean(nft?.isLiveAuction));
 
   useEffect(() => {
     const endTime = nft?.auctionEndTime || nft?.auctionEndsAt || cardData.endTime;
@@ -86,30 +86,31 @@ export const FeaturedAuctionCard: React.FC<FeaturedAuctionCardProps> = ({
       setIsAuctionEnded(ended);
       setIsLive(!ended && (nft?.isLiveAuction !== false));
     } else {
-      setIsLive(nft?.isLiveAuction !== false);
+      setIsLive(Boolean(nft?.isLiveAuction));
     }
   }, [nft?.auctionEndTime, nft?.auctionEndsAt, cardData.endTime, nft?.isLiveAuction]);
 
-  // Compute Last Three Bids
+  // Compute Last Three Bids from real offers
   const recentBids = useMemo(() => {
     if (nft?.offers && nft.offers.length > 0) {
       return nft.offers.slice(0, 3).map((offer, idx) => ({
-        amount: `${offer.price} Grams`,
-        bidder: offer.offerer ? `${offer.offerer.slice(0, 4)}...${offer.offerer.slice(-4)}` : `@bidder${idx + 1}`,
-        time: offer.timestamp || `${(idx + 1) * 18}m ago`,
+        amount: `${offer.price} TON`,
+        bidder: offer.offerer ? `${offer.offerer.slice(0, 4)}...${offer.offerer.slice(-4)}` : `Bidder #${idx + 1}`,
+        time: offer.timestamp || '',
       }));
     }
-    const val = parseFloat(cardData.currentBid.replace(/[^0-9.]/g, '')) || 42;
-    return [
-      { amount: `${val} Grams`, bidder: 'EQB3...9x2A', time: '12m ago' },
-      { amount: `${(val * 0.92).toFixed(1)} Grams`, bidder: 'EQC7...1m4P', time: '45m ago' },
-      { amount: `${(val * 0.85).toFixed(1)} Grams`, bidder: 'EQD9...8k3L', time: '2h ago' },
-    ];
-  }, [nft?.offers, cardData.currentBid]);
+    return [];
+  }, [nft?.offers]);
 
   useEffect(() => {
+    if (!cardData.endTime) {
+      setTimeLeftStr('-- : -- : --');
+      return;
+    }
+
     const updateTimer = () => {
       const targetTime = new Date(cardData.endTime).getTime();
+      if (isNaN(targetTime)) return;
       const now = Date.now();
       const diff = targetTime - now;
 
@@ -138,11 +139,12 @@ export const FeaturedAuctionCard: React.FC<FeaturedAuctionCardProps> = ({
 
   // Track playing state logic
   const isThisPlaying = useMemo(() => {
-    return isPlaying && currentTrack?.id === cardData.id;
+    return isPlaying && Boolean(cardData.id) && currentTrack?.id === cardData.id;
   }, [isPlaying, currentTrack?.id, cardData.id]);
 
   const handleTogglePreview = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!cardData.audioUrl) return;
     if (isThisPlaying) {
       togglePlay();
     } else {
@@ -151,26 +153,32 @@ export const FeaturedAuctionCard: React.FC<FeaturedAuctionCardProps> = ({
         songId: cardData.id,
         title: cardData.title,
         artist: cardData.creator,
-        artistId: 'artist_featured',
+        artistId: nft?.artistId || '',
         coverUrl: cardData.imageUrl,
         audioUrl: cardData.audioUrl,
-        duration: 180,
-        genre: 'Electronic',
-        playCount: 1000,
-        likes: 100,
-        createdAt: new Date().toISOString(),
+        duration: (nft as any)?.duration || 0,
+        genre: (nft as any)?.genre || '',
+        playCount: (nft as any)?.playCount || 0,
+        likes: (nft as any)?.likes || 0,
+        createdAt: nft?.createdAt || new Date().toISOString(),
       } as unknown as Track);
     }
   };
 
   const handleCardClick = () => {
-    navigate(`/nft/${cardData.id}`);
+    if (cardData.id) navigate(`/nft/${cardData.id}`);
   };
 
   const handleBidClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/nft/${cardData.id}`);
+    if (onPlaceBid && nft?.id) {
+      onPlaceBid(nft as NFTItem);
+    } else if (cardData.id) {
+      navigate(`/nft/${cardData.id}`);
+    }
   };
+
+  if (!nft || !nft.id) return null;
 
   return (
     <motion.div
@@ -358,27 +366,31 @@ export const FeaturedAuctionCard: React.FC<FeaturedAuctionCardProps> = ({
               </div>
 
               <div className="space-y-1.5">
-                {recentBids.map((bid, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-xl bg-zinc-950/70"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0 animate-pulse" />
-                      <span className="font-mono font-bold text-zinc-200 text-[11px] truncate">
-                        {bid.bidder}
-                      </span>
+                {recentBids.length === 0 ? (
+                  <div className="text-[11px] text-zinc-400 py-2 text-center">No bids placed yet</div>
+                ) : (
+                  recentBids.map((bid, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-xl bg-zinc-950/70"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0 animate-pulse" />
+                        <span className="font-mono font-bold text-zinc-200 text-[11px] truncate">
+                          {bid.bidder}
+                        </span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="font-mono font-black text-blue-400 text-[11px] block">
+                          {bid.amount}
+                        </span>
+                        <span className="text-[9px] font-semibold text-zinc-500 block">
+                          {bid.time}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <span className="font-mono font-black text-blue-400 text-[11px] block">
-                        {bid.amount}
-                      </span>
-                      <span className="text-[9px] font-semibold text-zinc-500 block">
-                        {bid.time}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </motion.div>
           )}

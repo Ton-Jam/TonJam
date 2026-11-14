@@ -52,33 +52,6 @@ export const MintingStatus: React.FC<MintingStatusProps> = ({
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  // Default sample pending mint if none exists in state so artist always sees a rich status UI
-  useEffect(() => {
-    const keys = Object.keys(mintingStatus);
-    if (keys.length === 0) {
-      // Seed a sample active mint request
-      const sampleId = 'sample-mint-01';
-      updateMintingStatus(sampleId, {
-        trackId: sampleId,
-        step: 'blockchain',
-        progress: 72,
-        message: 'Broadcasting Jetton mint transaction to TON Mainnet Ledger...',
-        title: 'Cosmic Frequencies #01',
-        artist: userProfile?.name || 'Verified Creator',
-        coverUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80',
-        txHash: 'EQD928f09238f4a18b76c5221e892c90a1f284e31100aa81',
-        ipfsHash: 'ipfs://QmXp9z8Q7kY3vM2N1L5a9C4R8T1u6W3E2V5b7A1b8C9d',
-        timestamp: Date.now() - 32000,
-        price: '15.0 TON',
-        editions: '1 of 1',
-        royaltySplits: [
-          { address: 'EQA...3821', percentage: 90 },
-          { address: 'EQB...9910', percentage: 10 }
-        ]
-      });
-    }
-  }, []);
-
   const itemsList = Object.values(mintingStatus);
 
   const filteredItems = itemsList.filter((item) => {
@@ -106,63 +79,6 @@ export const MintingStatus: React.FC<MintingStatusProps> = ({
     setCopiedKey(key);
     addNotification('Copied to clipboard!', 'success');
     setTimeout(() => setCopiedKey(null), 2000);
-  };
-
-  // Handler to trigger simulated mint
-  const handleSimulateMint = () => {
-    const newId = `mint-sim-${Date.now()}`;
-    const titles = [
-      'Neon Sunset Serenade',
-      'Quantum Rhythm Vol. II',
-      'Aether Waves - Genesis',
-      'Hyperdrive Echoes'
-    ];
-    const randomTitle = titles[Math.floor(Math.random() * titles.length)];
-
-    updateMintingStatus(newId, {
-      trackId: newId,
-      step: 'uploading',
-      progress: 15,
-      message: 'Uploading 24-bit audio stems & hi-res artwork to IPFS Gateway...',
-      title: randomTitle,
-      artist: userProfile?.name || 'Verified Artist',
-      coverUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80',
-      timestamp: Date.now(),
-      price: `${(Math.random() * 20 + 5).toFixed(1)} TON`,
-      editions: '1 of 10'
-    });
-
-    addNotification(`Started live mint simulation for "${randomTitle}"`, 'info');
-
-    // Simulate Step 1 -> Step 2
-    setTimeout(() => {
-      updateMintingStatus(newId, {
-        step: 'metadata',
-        progress: 45,
-        message: 'Formatting TEP-64 JSON metadata & configuring royalty contract...',
-        ipfsHash: `ipfs://Qm${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 10)}`
-      });
-    }, 3500);
-
-    // Simulate Step 2 -> Step 3
-    setTimeout(() => {
-      updateMintingStatus(newId, {
-        step: 'blockchain',
-        progress: 75,
-        message: 'Broadcasting smart contract transaction to TON Mainnet...',
-        txHash: `EQ${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
-      });
-    }, 7000);
-
-    // Simulate Step 3 -> Step 4 / Complete
-    setTimeout(() => {
-      updateMintingStatus(newId, {
-        step: 'completed',
-        progress: 100,
-        message: 'NFT successfully minted & indexed on TonJam marketplace!'
-      });
-      addNotification(`Minting completed for "${randomTitle}"! 💎`, 'success');
-    }, 11000);
   };
 
   const toggleExpand = (trackId: string) => {
@@ -249,15 +165,8 @@ export const MintingStatus: React.FC<MintingStatusProps> = ({
 
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={handleSimulateMint}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black uppercase tracking-wider rounded-xl flex items-center gap-1.5 transition-all active:scale-95 shadow-lg shadow-blue-600/20"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              Simulate Test Mint
-            </button>
-            <button
-              onClick={() => navigate('/upload-track')}
-              className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-[11px] font-black uppercase tracking-wider rounded-xl flex items-center gap-1.5 transition-all active:scale-95"
+              onClick={() => navigate('/mint')}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black uppercase tracking-wider rounded-xl flex items-center gap-1.5 transition-all active:scale-95"
             >
               <Plus className="w-3.5 h-3.5" />
               Mint NFT
@@ -330,13 +239,13 @@ export const MintingStatus: React.FC<MintingStatusProps> = ({
               No minting requests in this filter
             </p>
             <p className="text-[11px] text-zinc-500 mt-1 max-w-sm mx-auto">
-              Start a new mint from the Creator Dashboard or run a test simulation to see live real-time pipeline steps.
+              Start a new mint from the Mint studio to see live pipeline steps.
             </p>
             <button
-              onClick={handleSimulateMint}
+              onClick={() => navigate('/mint')}
               className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black uppercase tracking-wider rounded-xl inline-flex items-center gap-2"
             >
-              <Sparkles className="w-3.5 h-3.5" /> Start Test Mint
+              <Plus className="w-3.5 h-3.5" /> Mint NFT
             </button>
           </div>
         ) : (
@@ -364,12 +273,9 @@ export const MintingStatus: React.FC<MintingStatusProps> = ({
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="relative shrink-0">
                       <img
-                        src={
-                          item.coverUrl ||
-                          'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80'
-                        }
+                        src={item.coverUrl || ''}
                         alt={item.title || 'NFT'}
-                        className="w-12 h-12 rounded-xl object-cover shadow-lg"
+                        className="w-12 h-12 rounded-xl object-cover shadow-lg bg-zinc-900"
                       />
                       {isProcessing && (
                         <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-blue-500 rounded-full animate-ping" />

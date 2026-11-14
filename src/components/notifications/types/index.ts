@@ -80,6 +80,7 @@ export interface TonJamNotification {
   musicPreview?: MusicPreviewData;
   nftPreview?: NFTPreviewData;
   socialPreview?: SocialPreviewData;
+  link?: string;
   quickAction?: NotificationQuickAction;
   metadata?: {
     trackId?: string;

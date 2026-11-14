@@ -16,9 +16,10 @@ import {
 } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 import { ArtistVerificationBadge } from '@/components/ArtistVerificationBadge';
-import { db } from '@/lib/firebase';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
-import { MOCK_ARTISTS, MOCK_TRACKS, TON_LOGO } from '@/constants';
+import { TON_LOGO } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 import { Track } from '@/types';
 
 export interface TopCreator {
@@ -49,7 +50,6 @@ export interface TopArtistsSectionProps {
 
 export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
   title = "Top Artists",
-  subtitle = "Most active & highest-volume creators on Tonjam marketplace",
   limit = 12,
   showFilters = true,
   variant = 'scroll',
@@ -74,36 +74,28 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Real-time Firestore listener for marketplace transactions and track activity
   useEffect(() => {
-    let unsubscribeTx: (() => void) | undefined;
-    let unsubscribeTracks: (() => void) | undefined;
-    let unsubscribeNfts: (() => void) | undefined;
-
-    try {
-      // 1. Subscribe to NFT Sales / Transactions in real-time
-      const txQuery = query(collection(db, "transactions"));
-      unsubscribeTx = onSnapshot(txQuery, (snapshot) => {
+    const unsubscribeSales = onSnapshot(
+      query(collection(db, "nftSales")),
+      (snapshot) => {
         const salesAcc: Record<string, number> = {};
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
-          if (data.type === 'nft_sale' || data.type === 'jam_purchase' || data.type === 'mint' || data.type === 'trade') {
-            const artistId = data.artistId || data.creatorId || data.sellerId || data.participants?.[0];
-            const amount = Number(data.amount || data.price || 0);
-            if (artistId) {
-              salesAcc[artistId] = (salesAcc[artistId] || 0) + amount;
-            }
+          const artistId = data.artistId || data.creatorId || data.sellerId;
+          const amount = Number(data.salePrice ?? data.amount ?? data.price ?? 0);
+          if (artistId) {
+            salesAcc[artistId] = (salesAcc[artistId] || 0) + amount;
           }
         });
         setRealtimeSalesMap(salesAcc);
         setIsLiveSynced(true);
-      }, (err) => {
-        console.warn("Realtime transactions snapshot listener notice:", err);
-      });
+      },
+      (err) => handleFirestoreError(err, OperationType.LIST, "nftSales")
+    );
 
-      // 2. Subscribe to Tracks for active NFT counts and play counts
-      const tracksQuery = query(collection(db, "tracks"));
-      unsubscribeTracks = onSnapshot(tracksQuery, (snapshot) => {
+    const unsubscribeTracks = onSnapshot(
+      query(collection(db, "tracks")),
+      (snapshot) => {
         const listingsAcc: Record<string, number> = {};
         const streamsAcc: Record<string, number> = {};
         snapshot.docs.forEach((doc) => {
@@ -116,17 +108,17 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
         });
         setRealtimeListingsMap(prev => ({ ...prev, ...listingsAcc }));
         setRealtimeStreamsMap(prev => ({ ...prev, ...streamsAcc }));
-      }, (err) => {
-        console.warn("Realtime tracks snapshot listener notice:", err);
-      });
+      },
+      (err) => handleFirestoreError(err, OperationType.LIST, "tracks")
+    );
 
-      // 3. Subscribe to NFTs collection for active listings
-      const nftsQuery = query(collection(db, "nfts"));
-      unsubscribeNfts = onSnapshot(nftsQuery, (snapshot) => {
+    const unsubscribeNfts = onSnapshot(
+      query(collection(db, "nfts")),
+      (snapshot) => {
         const nftListings: Record<string, number> = {};
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
-          const artistId = data.artistId || data.creator || data.owner;
+          const artistId = data.artistId || data.creatorId || data.creator;
           if (artistId) {
             nftListings[artistId] = (nftListings[artistId] || 0) + 1;
           }
@@ -138,55 +130,45 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
           });
           return merged;
         });
-      }, (err) => {
-        console.warn("Realtime nfts snapshot listener notice:", err);
-      });
-
-    } catch (err) {
-      console.warn("Firestore listeners initialization fallback:", err);
-    }
+      },
+      (err) => handleFirestoreError(err, OperationType.LIST, "nfts")
+    );
 
     return () => {
-      if (unsubscribeTx) unsubscribeTx();
-      if (unsubscribeTracks) unsubscribeTracks();
-      if (unsubscribeNfts) unsubscribeNfts();
+      unsubscribeSales();
+      unsubscribeTracks();
+      unsubscribeNfts();
     };
   }, []);
 
-  // Process & Compute Top Creators List dynamically
   const topCreators = useMemo(() => {
-    const pool = artists.length > 0 ? artists : (MOCK_ARTISTS as any[]);
-    const poolTracks: Track[] = allTracks.length > 0 ? allTracks : (MOCK_TRACKS as Track[]);
+    if (!artists || artists.length === 0) return [];
 
-    const compiled: TopCreator[] = pool.map((art: any, idx) => {
-      const uid = art.uid || art.id || `art-${idx + 1}`;
-      const name = art.name || "Unknown Artist";
+    const compiled: TopCreator[] = artists.map((art: any) => {
+      const uid = art.uid || art.id;
+      const name = art.name || "Artist";
       const username = art.username || name.toLowerCase().replace(/\s+/g, '_');
-      const avatar = art.avatarUrl || art.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${username}`;
+      const avatar = art.avatarUrl || art.avatar || getPlaceholderImage(`artist-${uid}`);
       const isVerified = Boolean(art.verified || art.isVerifiedArtist);
 
-      // Find all tracks by this creator
-      const creatorTracks = poolTracks.filter(t => 
+      const creatorTracks = allTracks.filter(t => 
         t.artistId === uid || 
         t.artist?.toLowerCase() === name.toLowerCase() ||
         (t as any).creator?.toLowerCase() === name.toLowerCase()
       );
 
-      // Highest-played top track for audio preview
       const topTrack = creatorTracks.length > 0
         ? [...creatorTracks].sort((a, b) => (b.playCount || 0) - (a.playCount || 0))[0]
-        : poolTracks[idx % poolTracks.length];
+        : undefined;
 
-      // Dynamic real-time calculation
       const liveSales = realtimeSalesMap[uid] || 0;
-      const liveListings = realtimeListingsMap[uid] || creatorTracks.length;
-      const liveStreams = realtimeStreamsMap[uid] || creatorTracks.reduce((sum, t) => sum + (t.playCount || 0), 0);
+      const liveListings = realtimeListingsMap[uid] || 0;
+      const liveStreams = realtimeStreamsMap[uid] ?? creatorTracks.reduce((sum, t) => sum + (t.playCount || 0), 0);
 
-      // Baseline fallback values if fresh
-      const volumeTON = liveSales > 0 ? liveSales : (art.earnings?.nftSales || Math.floor((idx + 1) * 280 + 140));
-      const activeNFTsCount = liveListings > 0 ? liveListings : Math.max(creatorTracks.length, Math.floor((100 - idx) * 0.8) + 3);
-      const totalStreams = liveStreams > 0 ? liveStreams : (art.playCount || art.monthlyListeners || Math.floor((100 - idx) * 12500 + 8500));
-      const followersCount = art.followers || Math.floor((100 - idx) * 850 + 1200);
+      const volumeTON = liveSales > 0 ? liveSales : (typeof art.earnings === 'number' ? art.earnings : (art.earnings?.nftSales || 0));
+      const activeNFTsCount = liveListings;
+      const totalStreams = liveStreams || art.playCount || art.monthlyListeners || 0;
+      const followersCount = art.followers || 0;
 
       return {
         id: uid,
@@ -203,18 +185,15 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
       };
     });
 
-    // Sort based on active metric
     compiled.sort((a, b) => {
       if (sortMetric === 'volume') return b.volumeTON - a.volumeTON;
       if (sortMetric === 'active') return b.activeNFTsCount - a.activeNFTsCount;
       if (sortMetric === 'streams') return b.totalStreams - a.totalStreams;
-      // Trending: weighted formula (Volume * 10 + ActiveNFTs * 50 + Streams * 0.01)
       const scoreA = (a.volumeTON * 10) + (a.activeNFTsCount * 50) + (a.totalStreams * 0.01);
       const scoreB = (b.volumeTON * 10) + (b.activeNFTsCount * 50) + (b.totalStreams * 0.01);
       return scoreB - scoreA;
     });
 
-    // Assign rank
     return compiled.slice(0, limit).map((creator, i) => ({
       ...creator,
       rank: i + 1
@@ -239,20 +218,17 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
   };
 
   const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -260, behavior: 'smooth' });
-    }
+    scrollContainerRef.current?.scrollBy({ left: -260, behavior: 'smooth' });
   };
 
   const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 260, behavior: 'smooth' });
-    }
+    scrollContainerRef.current?.scrollBy({ left: 260, behavior: 'smooth' });
   };
+
+  if (topCreators.length === 0) return null;
 
   return (
     <div className={`w-full space-y-3.5 text-left ${className}`} id="top-artists-section">
-      {/* Header Section */}
       <div className="flex items-center justify-between">
         <div className="space-y-0.5 min-w-0">
           <div className="flex items-center gap-2">
@@ -269,7 +245,6 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
           </div>
         </div>
 
-        {/* Filter Pills & Navigation Actions */}
         <div className="flex items-center gap-2 shrink-0">
           {showFilters && (
             <div className="hidden md:flex items-center gap-1 bg-[#0A0A0A] p-1 rounded-[3px] border border-white/12">
@@ -327,7 +302,6 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
         </div>
       </div>
 
-      {/* Mobile Filter Chips (visible on small screens) */}
       {showFilters && (
         <div className="flex md:hidden items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
           {[
@@ -356,7 +330,6 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
         </div>
       )}
 
-      {/* HORIZONTAL SCROLLABLE ROW */}
       {variant === 'scroll' ? (
         <div 
           ref={scrollContainerRef}
@@ -382,7 +355,6 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                 onClick={() => navigate(`/artist/${creator.uid}`)}
                 className="w-[200px] sm:w-[220px] shrink-0 bg-[#0A0A0A] rounded-[3px] p-3 transition-colors flex flex-col justify-between space-y-2.5 cursor-pointer group relative overflow-hidden border border-white/12 hover:border-white/20"
               >
-                {/* Top Row: Rank Badge & Follow Action */}
                 <div className="flex items-center justify-between z-10">
                   <div className={`px-1.5 py-0.5 rounded-[3px] text-[8px] uppercase tracking-wider flex items-center gap-1 ${rankBg}`}>
                     {isTop3 && <Crown className="w-3 h-3 shrink-0" />}
@@ -402,7 +374,6 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                   </button>
                 </div>
 
-                {/* Avatar & Creator Info */}
                 <div className="flex flex-col items-center text-center space-y-1.5 z-10 pt-0.5">
                   <div className="relative">
                     <img
@@ -435,11 +406,12 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                   </div>
                 </div>
 
-                {/* Volume & Activity Box */}
                 <div className="w-full bg-[#101010] rounded-[3px] p-2 space-y-1 z-10 border border-white/5">
                   <div className="flex items-center justify-between">
                     <span className="text-[8px] font-medium text-white/50 uppercase tracking-wider">Volume Traded</span>
-                    <span className="text-[8px] font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-1 py-0.2 rounded-[2px]">+3.8%</span>
+                    <span className="text-[8px] font-mono text-slate-400 font-semibold px-1 py-0.2 rounded-[2px]">
+                      {formatNumber(creator.followersCount)} Fans
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0088CC] font-mono">
                     <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5 shrink-0 opacity-80" />
@@ -452,7 +424,6 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                   </div>
                 </div>
 
-                {/* Top Track Quick Listen Preview */}
                 {creator.topTrack && (
                   <button
                     onClick={(e) => handleTogglePlayTrack(e, creator.topTrack)}
@@ -467,7 +438,6 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
           })}
         </div>
       ) : (
-        /* GRID VIEW FALLBACK */
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {topCreators.map((creator) => {
             const isFollowed = followedUserIds.includes(creator.uid);
@@ -543,4 +513,3 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
 };
 
 export default TopArtistsSection;
-

@@ -134,27 +134,11 @@ export default function HorizontalScroll({ children, items }: HorizontalScrollPr
   );
 }
 
-const DEFAULT_SCROLL_ITEMS = [
-  {
-    id: "item-1",
-    title: "NFT Collectibles",
-    subtitle: "Digital Souvenirs",
-    description: "Exclusive limited-edition music tracks and album art minted directly on the TON blockchain as immutable assets.",
-    image: "/dist/default_tonjam_banner.jpg",
-    color: "#0088cc",
-  },
-  {
-    id: "item-2",
-    title: "In-Browser Studio",
-    subtitle: "Collaborative Mixing",
-    description: "Live browser-based virtual synthesizer allowing producers and fans to jam in real-time, share files, and co-create hits.",
-    color: "#8b5cf6",
-  },
-  {
-    id: "item-3",
-    title: "Instant Royalty Flows",
-    subtitle: "Automated Splits",
-    description: "Smart contracts autonomously distribute song revenue streams to artists, collaborators, and token-holders in fractions of a second.",
-    color: "#10b981",
-  }
-];
+const DEFAULT_SCROLL_ITEMS: Array<{
+  id: string;
+  title: string;
+  subtitle?: string;
+  image?: string;
+  description?: string;
+  color?: string;
+}> = [];

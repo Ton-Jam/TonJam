@@ -43,7 +43,7 @@ import { AboutTab } from '@/components/profile/AboutTab';
 import { ArtistAnalyticsSection } from '@/components/profile/ArtistAnalyticsSection';
 import { ArtistDashboardCard } from '@/components/profile/ArtistDashboardCard';
 import { TonWalletVerification } from '@/components/profile/TonWalletVerification';
-import { MOCK_PROFILE, ProfileData } from '@/components/profile/ProfileTypes';
+import { ProfileData } from '@/components/profile/ProfileTypes';
 import EditProfileModal from '@/components/EditProfileModal';
 
 // Import layout components and contexts

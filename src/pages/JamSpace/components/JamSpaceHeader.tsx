@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Search, Users, Sparkles, Hash, ArrowUpRight, Check, Plus, Volume2 } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Search, Users, Sparkles, Hash, ArrowUpRight, Check, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Community, Artist } from '../types';
-import { MOCK_COMMUNITIES, MOCK_ARTISTS } from '../mock';
 import { useAudio } from '@/contexts/AudioContext';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { collection, onSnapshot, query, limit } from 'firebase/firestore';
 
 interface JamSpaceHeaderProps {
   searchQuery: string;
@@ -19,23 +20,40 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
   setSearchQuery,
   onJoinCommunity,
   joinedCommunityIds = [],
-  activeCategory,
-  setActiveCategory
+  setActiveCategory,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [communities, setCommunities] = useState<Community[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { addNotification } = useAudio();
+  const { addNotification, artists: contextArtists, posts: contextPosts, allTracks = [], allNFTs = [] } = useAudio();
 
-  // Static list of trending topics
-  const trendingTopics = [
-    { tag: '#TONGenesis', posts: '1.2k shared', category: 'All' },
-    { tag: '#Amapiano', posts: '850 active', category: 'Amapiano' },
-    { tag: '#TONNFT', posts: '430 minted', category: 'NFTs' },
-    { tag: '#Synthwave', posts: '310 streaming', category: 'Electronic' },
-    { tag: '#Afrobeats', posts: '1.4k vibes', category: 'Afrobeats' }
-  ];
+  useEffect(() => {
+    const q = query(collection(db, 'communities'), limit(15));
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        const list: Community[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            name: data.name || 'Community',
+            description: data.description || '',
+            category: data.category || 'General',
+            memberCount: Number(data.memberCount || 0),
+            liveSpacesCount: Number(data.liveSpacesCount || 0),
+            imageUrl: data.imageUrl || data.coverUrl || '',
+            joined: Boolean(data.joined),
+          };
+        });
+        setCommunities(list);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'communities');
+      }
+    );
+    return () => unsub();
+  }, []);
 
-  // Click outside listener
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -46,25 +64,59 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Filter recommendations based on search
+  const mappedArtists: Artist[] = useMemo(() => {
+    return (contextArtists || []).map((a) => ({
+      id: a.uid,
+      name: a.name,
+      handle: a.username || a.name.toLowerCase().replace(/\s+/g, ''),
+      avatar: a.avatarUrl || '',
+      genre: a.genre || 'Music',
+      followersCount: Number(a.followers || 0),
+      trackCount: allTracks.filter((t) => t.artistId === a.uid).length,
+      nftCount: allNFTs.filter((n) => n.artistId === a.uid || n.creatorId === a.uid).length,
+      isVerified: Boolean(a.isVerifiedArtist || a.verified),
+    }));
+  }, [contextArtists, allTracks, allNFTs]);
+
+  const trendingTopics = useMemo(() => {
+    const counts = new Map<string, number>();
+    (contextPosts || []).forEach((p: any) => {
+      const text = String(p.content || '');
+      const matches = text.match(/#[a-zA-Z0-9_]+/g) || [];
+      matches.forEach((tag) => {
+        counts.set(tag, (counts.get(tag) || 0) + 1);
+      });
+    });
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([tag, count]) => ({
+        tag,
+        posts: `${count} posts`,
+        category: 'All',
+      }));
+  }, [contextPosts]);
+
   const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
   const filteredCommunities = safeSearchQuery.trim()
-    ? MOCK_COMMUNITIES.filter(c =>
-        c.name.toLowerCase().includes(safeSearchQuery.toLowerCase()) ||
-        c.description.toLowerCase().includes(safeSearchQuery.toLowerCase()) ||
-        c.category.toLowerCase().includes(safeSearchQuery.toLowerCase())
+    ? communities.filter(
+        (c) =>
+          c.name.toLowerCase().includes(safeSearchQuery.toLowerCase()) ||
+          c.description.toLowerCase().includes(safeSearchQuery.toLowerCase()) ||
+          c.category.toLowerCase().includes(safeSearchQuery.toLowerCase())
       )
-    : MOCK_COMMUNITIES.slice(0, 2); // Show top 2 when empty
+    : communities.slice(0, 3);
 
   const filteredArtists = safeSearchQuery.trim()
-    ? MOCK_ARTISTS.filter(a =>
-        a.name.toLowerCase().includes(safeSearchQuery.toLowerCase()) ||
-        a.genre.toLowerCase().includes(safeSearchQuery.toLowerCase())
+    ? mappedArtists.filter(
+        (a) =>
+          a.name.toLowerCase().includes(safeSearchQuery.toLowerCase()) ||
+          a.genre.toLowerCase().includes(safeSearchQuery.toLowerCase())
       )
-    : MOCK_ARTISTS.slice(0, 2); // Show top 2 when empty
+    : mappedArtists.slice(0, 3);
 
   const filteredTopics = safeSearchQuery.trim()
-    ? trendingTopics.filter(t => t.tag.toLowerCase().includes(safeSearchQuery.toLowerCase()))
+    ? trendingTopics.filter((t) => t.tag.toLowerCase().includes(safeSearchQuery.toLowerCase()))
     : trendingTopics;
 
   const hasResults = filteredCommunities.length > 0 || filteredArtists.length > 0 || filteredTopics.length > 0;
@@ -96,13 +148,16 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
         <span className="text-sm font-bold text-white">Search Feed</span>
       </div>
 
-      {/* Highly Interactive Search Bar Component with Auto-Suggestions Dropdown */}
       <div ref={containerRef} className="relative flex-1 max-w-lg w-full">
-        <div className={`relative flex items-center bg-[#07111F] rounded-[12px] border border-[#22374D] hover:border-[#38516B] transition-all duration-300 ${isFocused ? 'border-[#00B4D8] ring-1 ring-[#00B4D8]' : ''}`}>
+        <div
+          className={`relative flex items-center bg-[#07111F] rounded-[12px] border border-[#22374D] hover:border-[#38516B] transition-all duration-300 ${
+            isFocused ? 'border-[#00B4D8] ring-1 ring-[#00B4D8]' : ''
+          }`}
+        >
           <Search className="absolute left-4 w-4 h-4 text-[#8C8C8C]" />
           <input
             type="text"
-            placeholder="Search communities, artists, or specific trending topics..."
+            placeholder="Search communities, artists, or trending topics..."
             value={searchQuery}
             onFocus={() => setIsFocused(true)}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -121,7 +176,6 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
           )}
         </div>
 
-        {/* Suggestion dropdown overlay */}
         <AnimatePresence>
           {isFocused && (
             <motion.div
@@ -137,12 +191,11 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
                 </div>
               ) : (
                 <div className="text-[10px] text-slate-500 font-mono tracking-wider uppercase mb-3">
-                  🔥 Recommended for You
+                  Suggested from Firestore
                 </div>
               )}
 
               <div className="space-y-4">
-                {/* 1. COMMUNITIES */}
                 {filteredCommunities.length > 0 && (
                   <div>
                     <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-[#0052FF] mb-2 px-1">
@@ -159,15 +212,23 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
                             onClick={() => handleSelectCommunity(community)}
                           >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
-                              <img
-                                src={community.imageUrl}
-                                alt={community.name}
-                                referrerPolicy="no-referrer"
-                                className="w-8 h-8 rounded-[6px] object-cover shrink-0"
-                              />
+                              {community.imageUrl ? (
+                                <img
+                                  src={community.imageUrl}
+                                  alt={community.name}
+                                  referrerPolicy="no-referrer"
+                                  className="w-8 h-8 rounded-[6px] object-cover shrink-0"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 rounded-[6px] bg-slate-800 flex items-center justify-center shrink-0">
+                                  <Users className="w-4 h-4 text-slate-400" />
+                                </div>
+                              )}
                               <div className="min-w-0">
                                 <h4 className="text-xs font-bold text-white truncate">{community.name}</h4>
-                                <p className="text-[10px] text-slate-500 truncate">{community.memberCount.toLocaleString()} members</p>
+                                <p className="text-[10px] text-slate-500 truncate">
+                                  {community.memberCount.toLocaleString()} members
+                                </p>
                               </div>
                             </div>
                             <button
@@ -202,7 +263,6 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
                   </div>
                 )}
 
-                {/* 2. ARTISTS */}
                 {filteredArtists.length > 0 && (
                   <div>
                     <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-[#0052FF] mb-2 px-1">
@@ -218,10 +278,10 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <img
-                              src={artist.avatar}
+                              src={artist.avatar || '/default-avatar.png'}
                               alt={artist.name}
                               referrerPolicy="no-referrer"
-                              className="w-8 h-8 rounded-full object-cover shrink-0"
+                              className="w-8 h-8 rounded-full object-cover shrink-0 bg-slate-800"
                             />
                             <div className="min-w-0">
                               <div className="flex items-center gap-1">
@@ -232,7 +292,9 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[10px] text-slate-500 truncate">{artist.genre} • {artist.followersCount.toLocaleString()} followers</p>
+                              <p className="text-[10px] text-slate-500 truncate">
+                                {artist.genre} • {artist.followersCount.toLocaleString()} followers
+                              </p>
                             </div>
                           </div>
                           <ArrowUpRight className="w-3.5 h-3.5 text-slate-600 hover:text-white" />
@@ -242,7 +304,6 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
                   </div>
                 )}
 
-                {/* 3. TRENDING TOPICS */}
                 {filteredTopics.length > 0 && (
                   <div>
                     <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-[#0052FF] mb-2 px-1">
@@ -258,7 +319,9 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
                         >
                           <div className="min-w-0">
                             <div className="text-xs font-bold text-white">{topic.tag}</div>
-                            <div className="text-[9px] text-slate-500 font-mono tracking-wide uppercase">{topic.posts}</div>
+                            <div className="text-[9px] text-slate-500 font-mono tracking-wide uppercase">
+                              {topic.posts}
+                            </div>
                           </div>
                           <ArrowUpRight className="w-3 h-3 text-slate-600" />
                         </div>
@@ -269,7 +332,9 @@ export const JamSpaceHeader: React.FC<JamSpaceHeaderProps> = ({
 
                 {!hasResults && (
                   <div className="text-center py-6 text-slate-500 text-xs">
-                    No communities, artists, or topics found for "{searchQuery}"
+                    {searchQuery.trim()
+                      ? `No communities, artists, or topics found for "${searchQuery}"`
+                      : 'No communities or topics yet.'}
                   </div>
                 )}
               </div>

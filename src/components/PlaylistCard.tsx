@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Play, Pause, MoreVertical, Sparkles } from 'lucide-react';
+import { Play, Pause, MoreVertical } from 'lucide-react';
 import { Playlist } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
-import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
 import { getPlaceholderImage, cn } from '@/lib/utils';
 import PlaylistCoverGenerator from './PlaylistCoverGenerator';
 import PlaylistOptionsModal from './PlaylistOptionsModal';
@@ -23,20 +22,17 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
   onClick, 
   className = '' 
 }) => {
-  const { allTracks, playlistFolders, movePlaylistToFolder, deletePlaylist, currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
+  const { allTracks, artists, userProfile, playlistFolders, movePlaylistToFolder, deletePlaylist, currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const navigate = useNavigate();
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
 
-  const isOwner = playlist.creator === MOCK_USER.name;
-
-  // Check if any track from this playlist is currently active in audio player
   const isPlaylistActive = Boolean(
     currentTrack && playlist.trackIds && Array.isArray(playlist.trackIds) && playlist.trackIds.includes(currentTrack.id)
   );
   const isPlaylistPlaying = isPlaylistActive && isPlaying;
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = () => {
     if (onClick) {
       onClick();
     } else {
@@ -68,7 +64,6 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
     deletePlaylist(playlist.id);
   };
 
-  // Get cover images from the first 4 tracks
   const playlistTracks = (playlist.trackIds || [])
     .map(id => allTracks.find(t => t.id === id))
     .filter(Boolean)
@@ -109,7 +104,6 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
       );
     }
 
-    // 2x2 Grid for 4 or more tracks
     return (
       <div className={`${sizeClass} grid grid-cols-2 gap-0 transition-transform duration-500 group-hover:scale-105 bg-neutral-800`}>
         {playlistTracks.map((track, i) => (
@@ -125,7 +119,6 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
     );
   };
 
-  // Horizontal list row variant matching TrackCard 'row' / 'compact'
   if (variant === 'row' || variant === 'compact') {
     return (
       <>
@@ -192,7 +185,6 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
     );
   }
 
-  // Default Grid / Shelf Card Variant strictly matching TrackCard
   return (
     <>
       <MediaCard
@@ -207,7 +199,6 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
           <>
             {renderCover()}
             
-            {/* Spotify-style Floating Action Button strictly matching TrackCard */}
             <div className={cn(
               "absolute bottom-2 right-2 transition-all duration-200 z-10",
               isPlaylistPlaying 
@@ -228,7 +219,6 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
               </button>
             </div>
 
-            {/* Quick Options Button on Hover */}
             <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
               <button 
                 type="button"
@@ -247,10 +237,10 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
             className="hover:text-white cursor-pointer inline-flex items-center gap-1 truncate w-full"
             onClick={(e) => {
               e.stopPropagation();
-              const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);
+              const artist = artists.find(a => a.name === playlist.creator);
               if (artist) {
                 navigate(`/artist/${artist.uid}`);
-              } else if (playlist.creator === MOCK_USER.name) {
+              } else if (playlist.creator === userProfile.name) {
                 navigate('/profile');
               }
             }}
@@ -284,4 +274,3 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
 };
 
 export default PlaylistCard;
-

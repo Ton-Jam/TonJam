@@ -1,71 +1,56 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAudio } from '@/contexts/AudioContext';
+import { useNFT } from '@/contexts/NFTContext';
 import { useToast } from '@/components/layout/ToastProvider';
-import { 
-  cacheTrackInServiceWorker, 
-  removeTrackFromServiceWorker, 
-  getCachedTrackIdsSet, 
-  syncInitialOfflineTracks 
+import {
+  cacheTrackInServiceWorker,
+  removeTrackFromServiceWorker,
+  getCachedTrackIdsSet,
+  syncInitialOfflineTracks,
 } from '@/services/serviceWorkerCacheService';
 import { audioCacheService } from '@/services/audioCacheService';
-import { 
-  LibraryTrack, LibraryArtist, LibraryAlbum, LibraryNFT, LibraryPlaylist, 
-  HistoryEvent, QueueItem, LibraryAnalytics 
+import {
+  LibraryTrack,
+  LibraryArtist,
+  LibraryAlbum,
+  LibraryNFT,
+  LibraryPlaylist,
+  HistoryEvent,
+  QueueItem,
+  LibraryAnalytics,
 } from '../types';
-import { 
-  MOCK_LIBRARY_TRACKS, MOCK_LIBRARY_ARTISTS, MOCK_LIBRARY_ALBUMS, 
-  MOCK_LIBRARY_NFTS, MOCK_LIBRARY_PLAYLISTS, MOCK_HISTORY_EVENTS, 
-  MOCK_QUEUE, MOCK_LIBRARY_ANALYTICS 
-} from '../mock';
 
 export const useLibraryData = () => {
   const toast = useToast();
-  const { 
-    currentTrack, 
-    isPlaying, 
-    playTrack, 
-    togglePlay,
+  const {
+    allTracks,
+    artists: audioArtists,
+    collections: audioCollections,
     playlists: audioPlaylists,
+    recentlyPlayed,
+    queue: audioQueue,
+    likedTrackIds,
+    followedUserIds,
+    userProfile,
+    playTrack,
+    toggleLikeTrack: audioToggleLikeTrack,
     createNewPlaylist: audioCreateNewPlaylist,
     deletePlaylist: audioDeletePlaylist,
-    setIsCreatePlaylistModalOpen
+    setIsCreatePlaylistModalOpen,
+    removeFromQueue: audioRemoveFromQueue,
+    clearQueue: audioClearQueue,
+    addToQueue: audioAddToQueue,
+    clearRecentlyPlayed,
   } = useAudio();
+  const { nfts: firestoreNfts } = useNFT();
 
-  // Loading state for skeletons
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Filter Chips and Search
+  const [isLoading, setIsLoading] = useState(false);
   const [activeChip, setActiveChip] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'recently-added' | 'alphabetical' | 'artist'>('recently-added');
-  
-  // Storage and collections state
-  const [tracks, setTracks] = useState<LibraryTrack[]>(() => {
-    const local = localStorage.getItem('tonjam_library_tracks');
-    if (local) {
-      try {
-        return JSON.parse(local);
-      } catch (e) {}
-    } else {
-      localStorage.setItem('tonjam_library_tracks', JSON.stringify(MOCK_LIBRARY_TRACKS));
-    }
-    return MOCK_LIBRARY_TRACKS;
-  });
-  const [artists, setArtists] = useState<LibraryArtist[]>(MOCK_LIBRARY_ARTISTS);
-  const [albums, setAlbums] = useState<LibraryAlbum[]>(MOCK_LIBRARY_ALBUMS);
-  const [nfts, setNfts] = useState<LibraryNFT[]>(() => {
-    const local = localStorage.getItem('tonjam_library_nfts');
-    if (local) {
-      try {
-        return JSON.parse(local);
-      } catch (e) {}
-    } else {
-      localStorage.setItem('tonjam_library_nfts', JSON.stringify(MOCK_LIBRARY_NFTS));
-    }
-    return MOCK_LIBRARY_NFTS;
-  });
 
-  // Pinned playlist IDs persisted in local storage
+  const [downloadedTrackIds, setDownloadedTrackIds] = useState<Set<string>>(new Set());
+
   const [pinnedPlaylistIds, setPinnedPlaylistIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('tonjam_pinned_playlists');
@@ -75,49 +60,202 @@ export const useLibraryData = () => {
     }
   });
 
+  const [downloadQuality, setDownloadQuality] = useState<'High' | 'Lossless' | 'Dolby Atmos'>('Lossless');
+  const [isOfflineOnly, setIsOfflineOnly] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('tonjam_library_offline_only') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [cachedTrackIds, setCachedTrackIds] = useState<Set<string>>(new Set());
+
+  const tracks: LibraryTrack[] = useMemo(() => {
+    const ownedSet = new Set(userProfile?.ownedTrackIds || []);
+    const likedSet = new Set(likedTrackIds || []);
+    return (allTracks || []).map((t) => ({
+      id: t.id,
+      title: t.title,
+      artist: t.artist,
+      artistId: t.artistId || '',
+      album: t.album || t.genre || 'Single',
+      coverUrl: t.coverUrl || '/placeholders/track-placeholder.webp',
+      duration: t.duration || 0,
+      plays: Number(t.playCount || t.streams || 0),
+      isLiked: likedSet.has(t.id),
+      isDownloaded: downloadedTrackIds.has(t.id) || cachedTrackIds.has(t.id),
+      isOfflineAvailable: cachedTrackIds.has(t.id) || downloadedTrackIds.has(t.id),
+      downloadQuality: cachedTrackIds.has(t.id) ? downloadQuality : undefined,
+      releaseDate: t.releaseDate || '',
+      audioUrl: t.audioUrl,
+      isOwned: ownedSet.has(t.id),
+    }));
+  }, [allTracks, likedTrackIds, userProfile?.ownedTrackIds, downloadedTrackIds, cachedTrackIds, downloadQuality]);
+
+  const artists: LibraryArtist[] = useMemo(() => {
+    const followedSet = new Set(followedUserIds || []);
+    return (audioArtists || []).map((a) => ({
+      id: a.uid,
+      name: a.name,
+      avatarUrl: a.avatarUrl || '/placeholders/artist-placeholder.webp',
+      followersCount: a.followers || 0,
+      isFollowed: followedSet.has(a.uid),
+      verified: Boolean(a.verified || a.isVerifiedArtist),
+      genres: a.genre ? [a.genre] : ['Electronic'],
+    }));
+  }, [audioArtists, followedUserIds]);
+
+  const albums: LibraryAlbum[] = useMemo(() => {
+    return (audioCollections || []).map((col) => {
+      const artistObj = audioArtists.find((a) => a.uid === col.artistId);
+      return {
+        id: col.id,
+        title: col.name,
+        artist: artistObj?.name || 'Artist',
+        artistId: col.artistId,
+        coverUrl: col.coverUrl || '/placeholders/album-placeholder.webp',
+        tracksCount: col.nftIds?.length || 0,
+        releaseYear: col.createdAt ? new Date(col.createdAt).getFullYear() : new Date().getFullYear(),
+        isLiked: false,
+        isDownloaded: false,
+      };
+    });
+  }, [audioCollections, audioArtists]);
+
+  const nfts: LibraryNFT[] = useMemo(() => {
+    const uid = userProfile?.uid;
+    const wallet = userProfile?.walletAddress?.toLowerCase();
+    const ownedIds = new Set(userProfile?.ownedNftIds || []);
+
+    const userOwnedNfts = (firestoreNfts || []).filter((n) => {
+      if (ownedIds.has(n.id)) return true;
+      if (uid && (n.ownerId === uid || n.artistId === uid)) return true;
+      if (wallet && (n.owner || '').toLowerCase() === wallet) return true;
+      return false;
+    });
+
+    const source = userOwnedNfts;
+    return source.map((n) => ({
+      id: n.id,
+      tokenId: n.edition || `#${n.id.slice(0, 4)}`,
+      title: n.title,
+      artist: n.artist || n.creator || 'Artist',
+      coverUrl: n.coverUrl || n.imageUrl || '/placeholders/nft-placeholder.webp',
+      collectionName: n.nftCollection || 'TonJam Collectibles',
+      floorPriceTon: parseFloat(String(n.price || '0')) || 0,
+      royaltyPercent: Number(n.royalty || 10),
+      rarity: (n.rarity as any) || 'Common',
+      ownerAddress: n.owner || '',
+      musicFileUrl: n.audioUrl || '',
+    }));
+  }, [firestoreNfts, userProfile?.uid, userProfile?.walletAddress, userProfile?.ownedNftIds]);
+
   const togglePinPlaylist = (id: string) => {
-    setPinnedPlaylistIds(prev => {
-      const next = prev.includes(id) ? prev.filter(pId => pId !== id) : [...prev, id];
+    setPinnedPlaylistIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((pId) => pId !== id) : [...prev, id];
       localStorage.setItem('tonjam_pinned_playlists', JSON.stringify(next));
       return next;
     });
   };
 
-  // Synced with AudioContext for seamless cross-app playlist creation, editing, and persistence
   const playlists: LibraryPlaylist[] = useMemo(() => {
-    if (audioPlaylists && audioPlaylists.length > 0) {
-      return audioPlaylists.map(pl => ({
-        id: pl.id,
-        title: pl.title,
-        creator: pl.creator || 'You',
-        coverUrl: pl.coverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80',
-        tracksCount: pl.trackCount ?? (pl.trackIds?.length || 0),
-        isPinned: pinnedPlaylistIds.includes(pl.id),
-        isDownloaded: false,
-        isCustom: true
-      }));
-    }
-    return MOCK_LIBRARY_PLAYLISTS.map(pl => ({
-      ...pl,
-      isPinned: pinnedPlaylistIds.includes(pl.id)
+    return (audioPlaylists || []).map((pl) => ({
+      id: pl.id,
+      title: pl.title,
+      creator: pl.creator || 'TonJam',
+      coverUrl: pl.coverUrl || '/placeholders/playlist-placeholder.webp',
+      tracksCount: pl.trackCount ?? (pl.trackIds?.length || 0),
+      isPinned: pinnedPlaylistIds.includes(pl.id),
+      isDownloaded: false,
+      isCustom: true,
     }));
   }, [audioPlaylists, pinnedPlaylistIds]);
-  const [history, setHistory] = useState<HistoryEvent[]>(MOCK_HISTORY_EVENTS);
-  const [queue, setQueue] = useState<QueueItem[]>(MOCK_QUEUE);
-  const [analytics, setAnalytics] = useState<LibraryAnalytics>(MOCK_LIBRARY_ANALYTICS);
-  const [downloadQuality, setDownloadQuality] = useState<'High' | 'Lossless' | 'Dolby Atmos'>('Lossless');
 
-  // Service Worker Offline Filtering Toggle
-  const [isOfflineOnly, setIsOfflineOnly] = useState<boolean>(() => {
-    return localStorage.getItem('tonjam_library_offline_only') === 'true';
-  });
-  const [cachedTrackIds, setCachedTrackIds] = useState<Set<string>>(new Set());
+  const history: HistoryEvent[] = useMemo(() => {
+    return (recentlyPlayed || []).map((t, idx) => ({
+      id: `hist-${t.id}-${idx}`,
+      trackId: t.id,
+      title: t.title,
+      artist: t.artist,
+      coverUrl: t.coverUrl || '/placeholders/track-placeholder.webp',
+      playedAt: t.releaseDate || '',
+      duration: t.duration || 0,
+    }));
+  }, [recentlyPlayed]);
 
-  // Initialize and synchronize with Service Worker CacheStorage
+  const queue: QueueItem[] = useMemo(() => {
+    return (audioQueue || []).map((t, idx) => ({
+      id: `q-${t.id}-${idx}`,
+      trackId: t.id,
+      title: t.title,
+      artist: t.artist,
+      coverUrl: t.coverUrl || '/placeholders/track-placeholder.webp',
+      duration: t.duration || 0,
+      addedBy: 'user',
+    }));
+  }, [audioQueue]);
+
+  const analytics: LibraryAnalytics = useMemo(() => {
+    const genreCounts = new Map<string, number>();
+    const artistCounts = new Map<string, { name: string; playCount: number; avatarUrl: string }>();
+    const songCounts = new Map<string, { title: string; artist: string; plays: number; coverUrl: string }>();
+    let totalSeconds = 0;
+
+    (recentlyPlayed || []).forEach((t) => {
+      totalSeconds += Number(t.duration || 0);
+      const genre = t.genre || 'Electronic';
+      genreCounts.set(genre, (genreCounts.get(genre) || 0) + 1);
+
+      const artistObj = (audioArtists || []).find((a) => a.uid === t.artistId || a.name === t.artist);
+      const existingArtist = artistCounts.get(t.artist) || {
+        name: t.artist,
+        playCount: 0,
+        avatarUrl: artistObj?.avatarUrl || t.artistAvatar || t.coverUrl || '/placeholders/artist-placeholder.webp',
+      };
+      existingArtist.playCount += 1;
+      artistCounts.set(t.artist, existingArtist);
+
+      const existingSong = songCounts.get(t.id) || {
+        title: t.title,
+        artist: t.artist,
+        plays: Number(t.playCount || t.streams || 1),
+        coverUrl: t.coverUrl || '/placeholders/track-placeholder.webp',
+      };
+      songCounts.set(t.id, existingSong);
+    });
+
+    const totalGenreCount = Array.from(genreCounts.values()).reduce((a, b) => a + b, 0);
+    const favoriteGenres = Array.from(genreCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([genre, count]) => ({
+        genre,
+        count,
+        percentage: totalGenreCount > 0 ? Math.round((count / totalGenreCount) * 100) : 0,
+      }));
+
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const totalListeningHours = Number((totalSeconds / 3600).toFixed(1));
+    const weeklyHours = days.map((day) => ({ day, hours: 0 }));
+
+    return {
+      weeklyHours,
+      favoriteGenres,
+      favoriteArtists: Array.from(artistCounts.values())
+        .sort((a, b) => b.playCount - a.playCount)
+        .slice(0, 5),
+      topSongs: Array.from(songCounts.values())
+        .sort((a, b) => b.plays - a.plays)
+        .slice(0, 5),
+      listeningStreakDays: (recentlyPlayed || []).length > 0 ? 1 : 0,
+      totalListeningHours,
+    };
+  }, [recentlyPlayed, audioArtists]);
+
+  // Synchronize with Service Worker CacheStorage
   useEffect(() => {
     let isMounted = true;
     const syncCache = async () => {
-      // Ensure initial downloaded tracks are in service worker cache
       await syncInitialOfflineTracks(tracks);
       const ids = await getCachedTrackIdsSet();
       if (isMounted) {
@@ -128,7 +266,7 @@ export const useLibraryData = () => {
     syncCache();
 
     const handleCacheUpdated = () => {
-      getCachedTrackIdsSet().then(ids => {
+      getCachedTrackIdsSet().then((ids) => {
         if (isMounted) setCachedTrackIds(ids);
       });
     };
@@ -141,14 +279,11 @@ export const useLibraryData = () => {
   }, [tracks]);
 
   const toggleOfflineMode = () => {
-    setIsOfflineOnly(prev => {
+    setIsOfflineOnly((prev) => {
       const next = !prev;
       localStorage.setItem('tonjam_library_offline_only', String(next));
       if (next) {
-        toast.info(
-          'Offline Mode Enabled',
-          'Showing tracks stored in Service Worker Cache.'
-        );
+        toast.info('Offline Mode Enabled', 'Showing tracks stored in Service Worker Cache.');
       } else {
         toast.info('Offline Mode Disabled', 'Showing full online library.');
       }
@@ -156,58 +291,12 @@ export const useLibraryData = () => {
     });
   };
 
-  // Trigger fake initial loading for beautiful skeletons
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Sync to localStorage
-  useEffect(() => {
-    localStorage.setItem('tonjam_library_tracks', JSON.stringify(tracks));
-    window.dispatchEvent(new Event('tonjam_library_updated'));
-  }, [tracks]);
-
-  useEffect(() => {
-    localStorage.setItem('tonjam_library_nfts', JSON.stringify(nfts));
-    window.dispatchEvent(new Event('tonjam_library_updated'));
-  }, [nfts]);
-
-  // Synchronize with external changes (e.g. JamSpace bookmarks)
-  useEffect(() => {
-    const handleSync = () => {
-      const localTracksStr = localStorage.getItem('tonjam_library_tracks');
-      if (localTracksStr && localTracksStr !== JSON.stringify(tracks)) {
-        try {
-          setTracks(JSON.parse(localTracksStr));
-        } catch (e) {}
-      }
-      const localNftsStr = localStorage.getItem('tonjam_library_nfts');
-      if (localNftsStr && localNftsStr !== JSON.stringify(nfts)) {
-        try {
-          setNfts(JSON.parse(localNftsStr));
-        } catch (e) {}
-      }
-    };
-
-    window.addEventListener('tonjam_library_updated', handleSync);
-    window.addEventListener('storage', handleSync);
-    return () => {
-      window.removeEventListener('tonjam_library_updated', handleSync);
-      window.removeEventListener('storage', handleSync);
-    };
-  }, [tracks, nfts]);
-
-  // Filter lists based on the active chip and search query
   const filteredTracks = useMemo(() => {
-    return tracks.filter(track => {
-      const matchesSearch = 
+    return tracks.filter((track) => {
+      const matchesSearch =
         track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         track.artist.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // If offline toggle is active, only show tracks cached in service worker storage
+
       if (isOfflineOnly) {
         const isCached = cachedTrackIds.has(track.id) || track.isDownloaded || track.isOfflineAvailable;
         if (!isCached) return false;
@@ -216,13 +305,15 @@ export const useLibraryData = () => {
       if (activeChip === 'All') return matchesSearch;
       if (activeChip === 'Tracks') return matchesSearch;
       if (activeChip === 'Favorites') return matchesSearch && track.isLiked;
-      if (activeChip === 'Downloads' || activeChip === 'Offline') return matchesSearch && (track.isDownloaded || cachedTrackIds.has(track.id));
+      if (activeChip === 'Downloads' || activeChip === 'Offline') {
+        return matchesSearch && (track.isDownloaded || cachedTrackIds.has(track.id));
+      }
       return false;
     });
   }, [tracks, activeChip, searchQuery, isOfflineOnly, cachedTrackIds]);
 
   const filteredPlaylists = useMemo(() => {
-    return playlists.filter(playlist => {
+    return playlists.filter((playlist) => {
       const matchesSearch = playlist.title.toLowerCase().includes(searchQuery.toLowerCase());
       if (isOfflineOnly && !playlist.isDownloaded) return false;
       if (activeChip === 'All') return matchesSearch;
@@ -234,8 +325,8 @@ export const useLibraryData = () => {
   }, [playlists, activeChip, searchQuery, isOfflineOnly]);
 
   const filteredAlbums = useMemo(() => {
-    return albums.filter(album => {
-      const matchesSearch = 
+    return albums.filter((album) => {
+      const matchesSearch =
         album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         album.artist.toLowerCase().includes(searchQuery.toLowerCase());
       if (isOfflineOnly && !album.isDownloaded) return false;
@@ -248,10 +339,12 @@ export const useLibraryData = () => {
   }, [albums, activeChip, searchQuery, isOfflineOnly]);
 
   const filteredArtists = useMemo(() => {
-    return artists.filter(artist => {
+    return artists.filter((artist) => {
       const matchesSearch = artist.name.toLowerCase().includes(searchQuery.toLowerCase());
       if (isOfflineOnly) {
-        const hasCachedTrack = tracks.some(t => t.artistId === artist.id && (cachedTrackIds.has(t.id) || t.isDownloaded));
+        const hasCachedTrack = tracks.some(
+          (t) => t.artistId === artist.id && (cachedTrackIds.has(t.id) || t.isDownloaded)
+        );
         if (!hasCachedTrack) return false;
       }
       if (activeChip === 'All') return matchesSearch;
@@ -262,8 +355,8 @@ export const useLibraryData = () => {
   }, [artists, activeChip, searchQuery, isOfflineOnly, tracks, cachedTrackIds]);
 
   const filteredNfts = useMemo(() => {
-    return nfts.filter(nft => {
-      const matchesSearch = 
+    return nfts.filter((nft) => {
+      const matchesSearch =
         nft.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         nft.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
         nft.collectionName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -277,66 +370,49 @@ export const useLibraryData = () => {
     });
   }, [nfts, activeChip, searchQuery, isOfflineOnly, cachedTrackIds]);
 
-  // Actions
   const toggleLikeTrack = (id: string) => {
-    setTracks(prev => prev.map(track => {
-      if (track.id === id) {
-        const nextState = !track.isLiked;
-        toast.success(
-          nextState ? 'Added to Liked Songs' : 'Removed from Liked Songs',
-          `"${track.title}" has been ${nextState ? 'saved to' : 'removed from'} your favorites.`
-        );
-        return { ...track, isLiked: nextState };
-      }
-      return track;
-    }));
+    audioToggleLikeTrack(id);
   };
 
-  const toggleDownloadTrack = (id: string) => {
-    setTracks(prev => prev.map(track => {
-      if (track.id === id) {
-        const nextState = !track.isDownloaded;
-        if (nextState) {
-          toast.info(
-            'Caching audio track...',
-            `Storing "${track.title}" in Service Worker Cache.`
-          );
-          // Store in Service Worker CacheStorage and IndexedDB
-          setTimeout(async () => {
-            await Promise.all([
-              cacheTrackInServiceWorker({
-                id: track.id,
-                title: track.title,
-                artist: track.artist,
-                audioUrl: '/tonjam-offline-audio.mp3',
-                quality: downloadQuality
-              }),
-              audioCacheService.cacheTrack(track.id, '/tonjam-offline-audio.mp3')
-            ]);
+  const toggleDownloadTrack = async (id: string) => {
+    const track = allTracks.find((t) => t.id === id);
+    if (!track) return;
 
-            setTracks(current => current.map(t => t.id === id ? { 
-              ...t, 
-              isDownloaded: true, 
-              downloadSize: '5.4 MB', 
-              downloadQuality: downloadQuality,
-              isOfflineAvailable: true 
-            } : t));
-            
-            toast.success(
-              'Download Cached',
-              `"${track.title}" is now available offline in Service Worker storage.`
-            );
-          }, 400);
-          return track;
-        } else {
-          removeTrackFromServiceWorker(track.id);
-          audioCacheService.removeCachedTrack(track.id);
-          toast.success('Removed Download', `"${track.title}" deleted from Service Worker cache.`);
-          return { ...track, isDownloaded: false, downloadSize: undefined, isOfflineAvailable: false };
-        }
+    const isDownloaded = downloadedTrackIds.has(id) || cachedTrackIds.has(id);
+    if (!isDownloaded) {
+      if (!track.audioUrl) {
+        toast.error('Unavailable', 'No audio URL found for offline caching.');
+        return;
       }
-      return track;
-    }));
+      toast.info('Caching audio track...', `Storing "${track.title}" in Service Worker Cache.`);
+      await Promise.all([
+        cacheTrackInServiceWorker({
+          id: track.id,
+          title: track.title,
+          artist: track.artist,
+          audioUrl: track.audioUrl,
+          quality: downloadQuality,
+        }),
+        audioCacheService.cacheTrack(track.id, track.audioUrl),
+      ]);
+      setDownloadedTrackIds((prev) => new Set(prev).add(id));
+      setCachedTrackIds((prev) => new Set(prev).add(id));
+      toast.success('Download Cached', `"${track.title}" is available offline.`);
+    } else {
+      await removeTrackFromServiceWorker(track.id);
+      await audioCacheService.removeCachedTrack(track.id);
+      setDownloadedTrackIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      setCachedTrackIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      toast.success('Removed Download', `"${track.title}" deleted from offline cache.`);
+    }
   };
 
   const createPlaylist = (title: string, description?: string, coverUrl?: string) => {
@@ -351,69 +427,44 @@ export const useLibraryData = () => {
   };
 
   const handlePlayTrack = (track: LibraryTrack) => {
-    // Map LibraryTrack to context Track format
-    const contextTrack = {
-      id: track.id,
-      title: track.title,
-      artist: track.artist,
-      coverUrl: track.coverUrl,
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // default test file
-      duration: track.duration,
-      streams: track.plays || 0,
-      playCount: track.plays || 0,
-      album: track.album
-    };
-    
-    playTrack(contextTrack as any);
-    
-    // Add to history
-    const newHistoryEvent: HistoryEvent = {
-      id: `he-${Date.now()}`,
-      trackId: track.id,
-      title: track.title,
-      artist: track.artist,
-      coverUrl: track.coverUrl,
-      playedAt: new Date().toISOString(),
-      duration: track.duration
-    };
-    setHistory(prev => [newHistoryEvent, ...prev.slice(0, 20)]);
+    const matched = allTracks.find((t) => t.id === track.id);
+    if (matched) {
+      playTrack(matched);
+      return;
+    }
+    if ((track as any).audioUrl) {
+      playTrack(track as any);
+    }
   };
 
   const clearHistory = () => {
-    setHistory([]);
-    toast.success('History Cleared', 'Your local listening history has been wiped.');
+    clearRecentlyPlayed();
+    toast.success('History Cleared', 'Your local listening history has been cleared.');
   };
 
   const addToQueue = (track: LibraryTrack) => {
-    const newItem: QueueItem = {
-      id: `qi-${Date.now()}`,
-      trackId: track.id,
-      title: track.title,
-      artist: track.artist,
-      coverUrl: track.coverUrl,
-      duration: track.duration,
-      addedBy: 'user'
-    };
-    setQueue(prev => [...prev, newItem]);
-    toast.success('Added to Queue', `"${track.title}" added to play next.`);
+    const matched = allTracks.find((t) => t.id === track.id);
+    if (matched) {
+      audioAddToQueue(matched);
+      toast.success('Added to Queue', `"${track.title}" added to queue.`);
+    }
   };
 
   const removeFromQueue = (id: string) => {
-    setQueue(prev => prev.filter(item => item.id !== id));
+    const trackId = id.startsWith('q-') ? id.split('-')[1] : id;
+    audioRemoveFromQueue(trackId);
   };
 
   const clearQueue = () => {
-    setQueue([]);
+    audioClearQueue();
     toast.success('Queue Cleared', 'All upcoming tracks removed from active queue.');
   };
 
-  // Stats calculation
   const totalDownloadedSize = useMemo(() => {
-    // Calculate simulated storage based on downloaded tracks and albums
-    let trackSize = tracks.filter(t => t.isDownloaded).length * 5.8; // average 5.8 MB
-    let albumSize = albums.filter(a => a.isDownloaded).length * 68.0; // average 68 MB
-    let playlistSize = playlists.filter(p => p.isDownloaded).length * 135.0; // average 135 MB
-    return ((trackSize + albumSize + playlistSize) / 1024).toFixed(2); // in GB
+    const trackSize = tracks.filter((t) => t.isDownloaded).length * 5.8;
+    const albumSize = albums.filter((a) => a.isDownloaded).length * 68.0;
+    const playlistSize = playlists.filter((p) => p.isDownloaded).length * 135.0;
+    return ((trackSize + albumSize + playlistSize) / 1024).toFixed(2);
   }, [tracks, albums, playlists]);
 
   const totalNftsFloorValue = useMemo(() => {
@@ -428,15 +479,13 @@ export const useLibraryData = () => {
     setSearchQuery,
     sortBy,
     setSortBy,
-    
-    // Offline Service Worker Cache Mode
     isOfflineOnly,
     setIsOfflineOnly,
     toggleOfflineMode,
     cachedTrackIds,
-    cachedTrackCount: tracks.filter(t => cachedTrackIds.has(t.id) || t.isDownloaded || t.isOfflineAvailable).length,
-
-    // Data lists
+    cachedTrackCount: tracks.filter(
+      (t) => cachedTrackIds.has(t.id) || t.isDownloaded || t.isOfflineAvailable
+    ).length,
     tracks: filteredTracks,
     rawTracks: tracks,
     artists: filteredArtists,
@@ -450,16 +499,12 @@ export const useLibraryData = () => {
     analytics,
     downloadQuality,
     setDownloadQuality,
-    
-    // Aggregated Stats
     totalDownloadedSize,
     totalNftsFloorValue,
-    likedCount: tracks.filter(t => t.isLiked).length,
-    downloadCount: tracks.filter(t => t.isDownloaded).length,
+    likedCount: tracks.filter((t) => t.isLiked).length,
+    downloadCount: tracks.filter((t) => t.isDownloaded).length,
     nftCount: nfts.length,
     playlistCount: playlists.length,
-    
-    // Methods
     toggleLikeTrack,
     toggleDownloadTrack,
     createPlaylist,
@@ -471,80 +516,18 @@ export const useLibraryData = () => {
     addToQueue,
     removeFromQueue,
     clearQueue,
-    importTracks: (newTracksToImport: Omit<LibraryTrack, 'isLiked' | 'isDownloaded' | 'isOfflineAvailable'>[]) => {
-      setTracks(prev => {
-        const updated = [...prev];
-        let importedCount = 0;
-        newTracksToImport.forEach(newTrack => {
-          const existingIdx = updated.findIndex(t => t.title.toLowerCase() === newTrack.title.toLowerCase() && t.artist.toLowerCase() === newTrack.artist.toLowerCase());
-          if (existingIdx >= 0) {
-            // Mark existing track as liked
-            if (!updated[existingIdx].isLiked) {
-              updated[existingIdx] = { ...updated[existingIdx], isLiked: true };
-              importedCount++;
-            }
-          } else {
-            // Add as new track
-            const id = `tr-imported-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-            updated.push({
-              id,
-              title: newTrack.title,
-              artist: newTrack.artist,
-              artistId: newTrack.artistId || 'art-imported',
-              album: newTrack.album || 'Imported Compilation',
-              coverUrl: newTrack.coverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80',
-              duration: newTrack.duration || 180,
-              plays: 0,
-              isLiked: true,
-              isDownloaded: false,
-              isOfflineAvailable: false
-            });
-            importedCount++;
-          }
-        });
-        if (importedCount > 0) {
-          toast.success('Library Sync Complete', `Synced ${importedCount} songs into your TonJam favorites.`);
-        } else {
-          toast.info('Sync Check', 'All selected songs are already present in your Library.');
-        }
-        return updated;
-      });
-    },
-    importPlaylistWithTracks: (playlistTitle: string, playlistCoverUrl: string, tracksList: { title: string; artist: string; album?: string; coverUrl?: string; duration?: number }[]) => {
-      // 1. Create the playlist in unified audio context & firestore
+    importTracks: () => {},
+    importPlaylistWithTracks: (
+      playlistTitle: string,
+      _playlistCoverUrl: string,
+      tracksList: { title: string; artist: string }[]
+    ) => {
       audioCreateNewPlaylist(
-        playlistTitle, 
-        `Imported playlist with ${tracksList.length} tracks`, 
-        undefined, 
-        playlistCoverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80'
+        playlistTitle,
+        `Imported playlist with ${tracksList.length} tracks`,
+        undefined,
+        _playlistCoverUrl
       );
-
-      // 2. Add any missing tracks to our master list
-      setTracks(prev => {
-        const updated = [...prev];
-        tracksList.forEach(t => {
-          const exists = updated.some(et => et.title.toLowerCase() === t.title.toLowerCase() && et.artist.toLowerCase() === t.artist.toLowerCase());
-          if (!exists) {
-            const id = `tr-imported-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-            updated.push({
-              id,
-              title: t.title,
-              artist: t.artist,
-              artistId: 'art-imported',
-              album: t.album || playlistTitle,
-              coverUrl: t.coverUrl || playlistCoverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80',
-              duration: t.duration || 180,
-              plays: 0,
-              isLiked: false,
-              isDownloaded: false,
-              isOfflineAvailable: false
-            });
-          }
-        });
-        return updated;
-      });
-
-      toast.success('Playlist Synced', `"${playlistTitle}" was imported with ${tracksList.length} tracks.`);
-    }
+    },
   };
 };

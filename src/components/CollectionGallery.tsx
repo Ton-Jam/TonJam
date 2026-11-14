@@ -7,95 +7,11 @@ import {
   Layers, Flame, Check, ShieldCheck, Music, RefreshCw
 } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
+import { useNFT } from '@/contexts/NFTContext';
 import { useToast } from '@/components/layout/ToastProvider';
 import { NFTItem, Track } from '@/types';
 import { getMusicNftRarity } from '@/lib/nftRarity';
-
-// Default mock collection if none provided
-const MOCK_USER_GALLERY_NFTS: NFTItem[] = [
-  {
-    id: 'gallery-nft-1',
-    trackId: 'track-gen-1',
-    title: 'TonJam Genesis Pass #001',
-    owner: 'You (collector@tonjam.app)',
-    creator: 'DJ Krupy',
-    artist: 'DJ Krupy',
-    price: '25.0',
-    imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-    edition: '#001 / 250',
-    supply: 250,
-    minted: 1,
-    artistVerified: true,
-    description: 'First edition of the Genesis Master Anthem with embedded lossless stem rights and VIP backstage pass.',
-    traits: [
-      { trait_type: 'Rarity', value: 'Legendary' },
-      { trait_type: 'Audio Quality', value: 'FLAC 24-bit 96kHz' },
-      { trait_type: 'Utility', value: 'VIP Staking 2.5x' }
-    ]
-  },
-  {
-    id: 'gallery-nft-2',
-    trackId: 'track-cyb-2',
-    title: 'Neural Beat Matrix #012',
-    owner: 'You (collector@tonjam.app)',
-    creator: 'ElectroX Lab',
-    artist: 'ElectroX',
-    price: '15.0',
-    imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-    edition: '#012 / 100',
-    supply: 100,
-    minted: 12,
-    artistVerified: true,
-    description: 'Glitch hop beats crafted for festival sound systems with interactive visualizer tokens.',
-    traits: [
-      { trait_type: 'Rarity', value: 'Epic' },
-      { trait_type: 'Genre', value: 'Glitch Hop' },
-      { trait_type: 'BPM', value: 128 }
-    ]
-  },
-  {
-    id: 'gallery-nft-3',
-    trackId: 'track-abs-1',
-    title: 'Binaural Drift Artifact #005',
-    owner: 'You (collector@tonjam.app)',
-    creator: 'Luna Vibes',
-    artist: 'Luna Vibes',
-    price: '8.5',
-    imageUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-    edition: '#005 / 075',
-    supply: 75,
-    minted: 5,
-    artistVerified: false,
-    description: 'Relaxing binaural beat designed for focus and deep work sessions with 432Hz tuning.',
-    traits: [
-      { trait_type: 'Rarity', value: 'Rare' },
-      { trait_type: 'Frequency', value: '432 Hz' }
-    ]
-  },
-  {
-    id: 'gallery-nft-4',
-    trackId: 'track-gen-4',
-    title: 'Sonic Quantum Echo #088',
-    owner: 'You (collector@tonjam.app)',
-    creator: 'DJ Krupy',
-    artist: 'DJ Krupy',
-    price: '35.0',
-    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
-    edition: '#088 / 250',
-    supply: 250,
-    minted: 88,
-    artistVerified: true,
-    description: 'Ultra rare quantum echo frequency composition with 1% perpetual revenue share.',
-    traits: [
-      { trait_type: 'Rarity', value: 'Legendary' },
-      { trait_type: 'BPM', value: 140 }
-    ]
-  }
-];
+import { getPlaceholderImage } from '@/lib/utils';
 
 export interface CollectionGalleryProps {
   userId?: string;
@@ -116,9 +32,10 @@ export const CollectionGallery: React.FC<CollectionGalleryProps> = ({
   const navigate = useNavigate();
   const toast = useToast();
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
+  const { nfts: firestoreNfts } = useNFT();
 
   // State
-  const [galleryItems, setGalleryItems] = useState<NFTItem[]>(items || MOCK_USER_GALLERY_NFTS);
+  const [galleryItems, setGalleryItems] = useState<NFTItem[]>(items || firestoreNfts || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [rarityFilter, setRarityFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc' | 'rarity'>('newest');
@@ -130,12 +47,10 @@ export const CollectionGallery: React.FC<CollectionGalleryProps> = ({
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [hoverAudioPlayingId, setHoverAudioPlayingId] = useState<string | null>(null);
 
-  // Update items if prop changes
+  // Update items if prop or Firestore NFTs change
   useEffect(() => {
-    if (items) {
-      setGalleryItems(items);
-    }
-  }, [items]);
+    setGalleryItems(items || firestoreNfts || []);
+  }, [items, firestoreNfts]);
 
   // Clean up audio element on unmount
   useEffect(() => {
@@ -234,18 +149,23 @@ export const CollectionGallery: React.FC<CollectionGalleryProps> = ({
       setHoverAudioPlayingId(null);
     }
 
+    if (!item.audioUrl) {
+      toast.error(`No audio stream available for "${item.title}"`);
+      return;
+    }
+
     const trackObj: Track = {
       id: item.id,
       songId: item.trackId || item.id,
       title: item.title,
       artist: item.artist || item.creator || 'TonJam Artist',
-      coverUrl: item.imageUrl,
-      audioUrl: item.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+      coverUrl: item.imageUrl || getPlaceholderImage(`nft-${item.id}`),
+      audioUrl: item.audioUrl,
       duration: 210,
       genre: 'Music NFT',
       isNFT: true,
       nftPrice: item.price,
-      artistId: item.artistId || 'dj-krupy',
+      artistId: item.artistId || '',
       createdAt: Date.now()
     };
 

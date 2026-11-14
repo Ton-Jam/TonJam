@@ -1,4 +1,5 @@
 // Utility & storage manager for User Listen Streak & Reward NFT Badges
+import { getPlaceholderImage } from './utils';
 
 export interface ListenStreakBadge {
   id: string;
@@ -34,7 +35,7 @@ export const STREAK_BADGES: ListenStreakBadge[] = [
     rarity: 'Common',
     description: 'Awarded for tuning into TON JAM audio frequencies for 3 consecutive days.',
     perk: '+5% JamPoints Multiplier & Bronze Profile Aura',
-    badgeImageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop',
+    badgeImageUrl: getPlaceholderImage('nft'),
     color: '#D97706',
     gradient: 'from-amber-600 via-orange-500 to-yellow-600',
     accentBorder: 'border-amber-500/40',
@@ -48,7 +49,7 @@ export const STREAK_BADGES: ListenStreakBadge[] = [
     rarity: 'Rare',
     description: 'Maintained a full 1-week continuous listening loop on TON JAM on-chain soundscapes.',
     perk: '+15% JamPoints Multiplier & Early Access to Drops',
-    badgeImageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop',
+    badgeImageUrl: getPlaceholderImage('nft'),
     color: '#38BDF8',
     gradient: 'from-cyan-500 via-blue-600 to-indigo-600',
     accentBorder: 'border-cyan-400/40',
@@ -62,7 +63,7 @@ export const STREAK_BADGES: ListenStreakBadge[] = [
     rarity: 'Epic',
     description: 'Achieved a 2-week uninterrupted audio streak across active community broadcasts.',
     perk: '+25% JamPoints Multiplier & Gold Halo Badge',
-    badgeImageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop',
+    badgeImageUrl: getPlaceholderImage('nft'),
     color: '#EAB308',
     gradient: 'from-yellow-400 via-amber-500 to-orange-600',
     accentBorder: 'border-yellow-400/40',
@@ -76,7 +77,7 @@ export const STREAK_BADGES: ListenStreakBadge[] = [
     rarity: 'Legendary',
     description: 'A legendary 1-month continuous music journey. Your listening node is unbreakable.',
     perk: '+50% JamPoints Multiplier & Zero Gas Marketplace Mint Fee',
-    badgeImageUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&h=400&fit=crop',
+    badgeImageUrl: getPlaceholderImage('nft'),
     color: '#A855F7',
     gradient: 'from-purple-500 via-fuchsia-600 to-pink-600',
     accentBorder: 'border-purple-400/40',
@@ -90,7 +91,7 @@ export const STREAK_BADGES: ListenStreakBadge[] = [
     rarity: 'Mythic',
     description: 'The highest acoustic honor on TON JAM. 60 consecutive days of unwavering audio passion.',
     perk: '+100% JamPoints Multiplier & Mythic Crown Avatar Effect',
-    badgeImageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=400&fit=crop',
+    badgeImageUrl: getPlaceholderImage('nft'),
     color: '#F43F5E',
     gradient: 'from-rose-500 via-red-600 to-amber-500',
     accentBorder: 'border-rose-500/50',
@@ -114,13 +115,13 @@ export function getYesterdayIsoDate(): string {
 export function getInitialListenStreakData(): ListenStreakData {
   if (typeof window === 'undefined') {
     return {
-      currentStreak: 5,
-      longestStreak: 12,
-      lastListenDate: getTodayIsoDate(),
-      historyDates: [getTodayIsoDate(), getYesterdayIsoDate()],
-      claimedBadgeIds: ['streak-3'],
+      currentStreak: 0,
+      longestStreak: 0,
+      lastListenDate: '',
+      historyDates: [],
+      claimedBadgeIds: [],
       streakFrozen: false,
-      totalDaysListened: 18
+      totalDaysListened: 0
     };
   }
 
@@ -128,12 +129,12 @@ export function getInitialListenStreakData(): ListenStreakData {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed: ListenStreakData = JSON.parse(raw);
-      
+
       // Calculate date difference from last listen date
       const today = getTodayIsoDate();
       const yesterday = getYesterdayIsoDate();
 
-      if (parsed.lastListenDate !== today && parsed.lastListenDate !== yesterday) {
+      if (parsed.lastListenDate && parsed.lastListenDate !== today && parsed.lastListenDate !== yesterday) {
         // If more than 1 day missed and not frozen, reset current streak to 0
         if (!parsed.streakFrozen) {
           parsed.currentStreak = 0;
@@ -145,29 +146,19 @@ export function getInitialListenStreakData(): ListenStreakData {
     console.error('Failed to parse listen streak data:', err);
   }
 
-  // Default seed data for immediate vibrant preview
+  // Clean zeroed initial state until user genuinely listens to a track
   const defaultData: ListenStreakData = {
-    currentStreak: 5,
-    longestStreak: 12,
-    lastListenDate: getTodayIsoDate(),
-    historyDates: generateRecentDates(5),
-    claimedBadgeIds: ['streak-3'],
+    currentStreak: 0,
+    longestStreak: 0,
+    lastListenDate: '',
+    historyDates: [],
+    claimedBadgeIds: [],
     streakFrozen: false,
-    totalDaysListened: 18
+    totalDaysListened: 0
   };
 
   saveListenStreakData(defaultData);
   return defaultData;
-}
-
-function generateRecentDates(daysCount: number): string[] {
-  const dates: string[] = [];
-  for (let i = 0; i < daysCount; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    dates.push(d.toISOString().split('T')[0]);
-  }
-  return dates;
 }
 
 export function saveListenStreakData(data: ListenStreakData): void {

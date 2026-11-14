@@ -18,13 +18,6 @@ interface EditUserProfileModalProps {
   onUpdate: (updatedUser: UserProfileType) => void;
 }
 
-const AVATAR_OPTIONS = [
-  'https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png',
-  'https://image.pollinations.ai/prompt/young%20woman%20avatar%20with%20cool%20glasses%20and%20headphones?width=400&height=400&nologo=true',
-  'https://image.pollinations.ai/prompt/young%20man%20avatar%20with%20streetwear%20and%20cap?width=400&height=400&nologo=true',
-  'https://image.pollinations.ai/prompt/digital%20humanoid%20avatar%20glitch%20art?width=400&height=400&nologo=true',
-];
-
 const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ user, onClose, onUpdate }) => {
   const { addNotification } = useAudio();
   const [name, setName] = useState(user.name);
@@ -115,19 +108,9 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ user, onClo
               </div>
               <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} className="hidden" accept={ALLOWED_IMAGE_TYPES.join(',')} />
             </div>
-            
-            <div className="flex gap-2">
-              {AVATAR_OPTIONS.map((avatar) => (
-                <button
-                  key={avatar}
-                  type="button"
-                  className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all ${avatarUrl === avatar ? 'border-blue-500' : 'border-transparent'}`}
-                  onClick={() => setAvatarUrl(avatar)}
-                >
-                  <img src={avatar} alt="Avatar Option" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+              Click image above to upload a profile picture
+            </p>
           </div>
 
           <div className="space-y-4">

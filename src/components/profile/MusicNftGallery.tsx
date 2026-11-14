@@ -93,17 +93,14 @@ export const MusicNftGallery: React.FC<MusicNftGalleryProps> = ({
         title: nft.title,
         artist: nft.artist || nft.creator || 'TonJam Artist',
         artistId: nft.artistId || '',
-        audioUrl:
-          nft.audioUrl ||
-          matched?.audioUrl ||
-          '/tonjam-offline-audio.mp3',
+        audioUrl: nft.audioUrl || matched?.audioUrl || '',
         coverUrl: nft.imageUrl || nft.coverUrl || '',
-        duration: 210,
+        duration: matched?.duration || 0,
         isNFT: true,
         nftId: nft.id,
-        price: nft.price || '2.5',
+        price: nft.price || '0',
         genre: 'Electronic',
-        rarity: nft.rarity || 'Rare',
+        rarity: nft.rarity || 'Common',
       } as Track;
     });
 

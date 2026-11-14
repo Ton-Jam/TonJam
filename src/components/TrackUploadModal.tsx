@@ -3,7 +3,6 @@ import { X, Upload, Music, Image as ImageIcon, CheckCircle2, Loader2, FileAudio,
 import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { Track } from '@/types';
-import { MOCK_USER } from '@/constants';
 import { uploadAudio, uploadCover, uploadToPinata, uploadJSONToPinata } from '@/services/storageService';
 import { mintTonJamNFT } from '@/services/tonService';
 import { useTonConnectUI } from '@tonconnect/ui-react';
@@ -119,13 +118,9 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
         updateStepStatus('ipfs', 'processing');
         setMintingMessage("Broadcasting frequency to IPFS nodes...");
         
-        // Progress simulation for better UX since axios onUploadProgress might be too fast for small files
-        const progressInterval = setInterval(() => {
-          setOverallProgress(prev => Math.min(prev + 1, 45));
-        }, 200);
-
         const [audioIpfs, coverIpfs, audioFirebase, coverFirebase] = await Promise.all([
           uploadToPinata(audioFile!, (p) => {
+             setOverallProgress(Math.max(10, Math.min(48, Math.round(p * 0.48))));
              if (p > 90) updateStepStatus('ipfs', 'completed');
           }),
           uploadToPinata(coverFile!),
@@ -133,7 +128,6 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
           uploadCover(coverFile!, setCoverProgress)
         ]);
 
-        clearInterval(progressInterval);
         setOverallProgress(50);
         updateStepStatus('ipfs', 'completed', "Files stabilized in IPFS matrix");
 
@@ -190,7 +184,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
             // Simulate/Monitor actual blockchain confirmation
             await new Promise<void>((resolve, reject) => {
               import('@/services/tonService').then(m => {
-                m.monitorTransaction('mock-tx-hash', (status) => {
+                m.monitorTransaction(metadataIpfsUrl, (status) => {
                   if (status === 'confirming') {
                     setMintingMessage("Neural network confirming transaction...");
                     setOverallProgress(95);
@@ -224,8 +218,8 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
         id: trackId,
         songId: `song-${trackId}`,
         title: formData.title,
-        artist: userProfile?.name || MOCK_USER.name,
-        artistId: userProfile?.uid || MOCK_USER.uid,
+        artist: userProfile?.name || 'TonJam Artist',
+        artistId: userProfile?.uid || '',
         coverUrl: coverUrl,
         audioUrl: audioUrl,
         audioIpfsUrl: audioIpfsUrl || audioUrl,
@@ -243,7 +237,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
         likes: 0,
         releaseDate: new Date().toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
-        artistVerified: true,
+        artistVerified: !!userProfile?.isVerifiedArtist,
         isDrmProtected: formData.isDrmProtected,
         watermarkText: formData.isDrmProtected ? formData.watermarkText : undefined,
       };

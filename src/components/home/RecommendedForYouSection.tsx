@@ -2,43 +2,30 @@ import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, ChevronRight } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
+import { useNFT } from "@/contexts/NFTContext";
 import TrackCard from "@/components/TrackCard";
 import NFTCard from "@/components/NFTCard";
-import { MOCK_TRACKS } from "@/constants";
-import { NFTItem } from "@/types";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
-
-const STATIC_RECOMMENDED_NFTS = [
-  { id: "nft-r1", title: "Deep Oceans #04", price: "4.5 TON", owner: "Echo Phase", cover: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true" },
-  { id: "nft-r2", title: "Solar Drift Signature", price: "12.0 TON", owner: "DJ Krupy", cover: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true" },
-  { id: "nft-r3", title: "Cosmic Gate Keyframe", price: "2.8 TON", owner: "Luna Ray", cover: "https://image.pollinations.ai/prompt/galaxy%20retro%20organ%20scifi%20music%20album%20art?width=300&height=300&nologo=true" }
-];
 
 export const RecommendedForYouSection: React.FC = () => {
   const navigate = useNavigate();
-  const { allTracks } = useAudio();
+  const { allTracks, allNFTs } = useAudio();
+  const { nfts } = useNFT();
   const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const recommendedTracks = useMemo(() => {
-    return (allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 6);
+    if (!allTracks || allTracks.length === 0) return [];
+    return allTracks.slice(0, 6);
   }, [allTracks]);
 
-  const mappedRecommendedNFTs: NFTItem[] = useMemo(() => {
-    return STATIC_RECOMMENDED_NFTS.map(nft => ({
-      id: nft.id,
-      trackId: "",
-      title: nft.title,
-      owner: nft.owner,
-      creator: nft.owner,
-      artist: nft.owner,
-      price: nft.price,
-      imageUrl: nft.cover,
-      coverUrl: nft.cover,
-      edition: "Limited Edition",
-      type: "track",
-      url: "",
-    } as any));
-  }, []);
+  const recommendedNFTs = useMemo(() => {
+    const source = (allNFTs && allNFTs.length > 0) ? allNFTs : (nfts || []);
+    return source.slice(0, 4);
+  }, [allNFTs, nfts]);
+
+  if (recommendedTracks.length === 0 && recommendedNFTs.length === 0) {
+    return null;
+  }
 
   return (
     <section className="space-y-3 text-left w-full">
@@ -77,7 +64,7 @@ export const RecommendedForYouSection: React.FC = () => {
           </div>
         ))}
 
-        {mappedRecommendedNFTs.map((nft) => (
+        {recommendedNFTs.map((nft) => (
           <div
             key={nft.id}
             style={{ width: 'var(--card-width, 168px)', scrollSnapAlign: 'start' }}

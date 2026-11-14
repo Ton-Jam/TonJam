@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { VerifiedBadge } from "./VerifiedBadge";
 import { colors, typography } from "@/design";
+import { getPlaceholderImage } from "@/lib/utils";
 
 interface CollectionCardProps {
   id?: string;
@@ -16,13 +17,13 @@ interface CollectionCardProps {
 }
 
 export function CollectionCard({
-  id = "genesis-pass",
-  name = "Genesis Jam Passes",
-  creator = "TonJam Official",
-  floorPrice = "150 TON",
-  itemCount = 250,
-  image = "https://images.unsplash.com/photo-1614680376593-902f74fa0d41?q=80&w=400",
-  isVerified = true,
+  id = "",
+  name = "Collection",
+  creator = "Creator",
+  floorPrice = "0 TON",
+  itemCount = 0,
+  image = getPlaceholderImage("album"),
+  isVerified = false,
   onClick,
 }: CollectionCardProps) {
   const navigate = useNavigate();

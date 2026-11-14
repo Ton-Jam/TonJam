@@ -14,8 +14,9 @@ interface ChartArtistCardProps {
 const ChartArtistCard: React.FC<ChartArtistCardProps> = ({ artist, rank }) => {
   const navigate = useNavigate();
   const { followedUserIds = [], toggleFollowUser } = useAudio();
-  const isUp = Math.random() > 0.3;
-  const trendValue = Math.floor(Math.random() * 20 + 1);
+  const trend = (artist as any).trend as number | undefined;
+  const isUp = typeof trend === 'number' ? trend >= 0 : true;
+  const trendValue = typeof trend === 'number' ? Math.abs(trend) : null;
 
   const isFollowing = followedUserIds.includes(artist.uid);
 
@@ -58,7 +59,7 @@ const ChartArtistCard: React.FC<ChartArtistCardProps> = ({ artist, rank }) => {
         </h4>
         <div className="flex items-center gap-2 mt-2 min-w-0">
           <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest truncate">
-            {artist.followers || Math.floor(Math.random() * 10000)} Followers
+            {(artist.followers || 0).toLocaleString()} Followers
           </p>
         </div>
       </div>
@@ -86,12 +87,14 @@ const ChartArtistCard: React.FC<ChartArtistCardProps> = ({ artist, rank }) => {
       </button>
 
       {/* Trend */}
-      <div className="text-right flex-shrink-0 ml-1">
-        <div className={`flex items-center justify-end gap-1 text-[10px] font-bold uppercase tracking-widest font-mono ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
-          {isUp ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-          <span>{isUp ? '+' : '-'}{trendValue}</span>
+      {trendValue !== null && (
+        <div className="text-right flex-shrink-0 ml-1">
+          <div className={`flex items-center justify-end gap-1 text-[10px] font-bold uppercase tracking-widest font-mono ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
+            {isUp ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            <span>{isUp ? '+' : '-'}{trendValue}</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

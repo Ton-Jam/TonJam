@@ -1,25 +1,20 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, ChevronRight, Crown, CheckCircle, TrendingUp } from "lucide-react";
+import { Sparkles, ChevronRight, Crown, CheckCircle, Users } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
 import { useAudio } from "@/contexts/AudioContext";
-import { TON_LOGO, MOCK_ARTISTS } from "@/constants";
+import { TON_LOGO } from "@/constants";
 import { getPlaceholderImage } from "@/lib/utils";
 import LazyArtworkImage from "@/components/common/LazyArtworkImage";
-import { Artist } from "@/types";
 
 export const TrendingArtistsLeaderboardSection: React.FC = () => {
   const navigate = useNavigate();
   const { artists: globalArtists, followedUserIds, toggleFollowUser } = useAudio();
-  const [trendingMetric, setTrendingMetric] = useState<'sales' | 'growth'>('sales');
+  const [trendingMetric, setTrendingMetric] = useState<'sales' | 'followers'>('sales');
 
   const getIsFollowing = (artId: string) => {
-    if (!followedUserIds) return ["art-1", "art-4", "art-9"].includes(artId);
-    if (followedUserIds.length === 0 && ["art-1", "art-4", "art-9"].includes(artId)) {
-      return true;
-    }
-    return followedUserIds.includes(artId);
+    return Array.isArray(followedUserIds) && followedUserIds.includes(artId);
   };
 
   const toggleFollow = (artId: string) => {
@@ -35,33 +30,30 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
   };
 
   const rankedTrendingCreators = useMemo(() => {
-    const baseArtists = globalArtists && globalArtists.length > 0 ? globalArtists : MOCK_ARTISTS;
-    
-    const enriched = baseArtists.map((artist) => {
-      const nftSales = artist.earnings?.nftSales || Math.round((artist.followers * 0.015) + (artist.uid.charCodeAt(0) % 250));
-      
-      let hash = 0;
-      for (let i = 0; i < artist.name.length; i++) {
-        hash = artist.name.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const seed = Math.abs(hash);
-      const growthPercent = (seed % 14) + 4.2;
-      const followersGained = Math.round(artist.followers * (growthPercent / 100));
-      
+    if (!globalArtists || globalArtists.length === 0) return [];
+
+    const enriched = globalArtists.map((artist) => {
+      const nftSales = typeof artist.earnings === 'number'
+        ? artist.earnings
+        : (artist.earnings?.nftSales || 0);
+      const followersCount = artist.followers || 0;
+
       return {
         ...artist,
         nftSales,
-        growthPercent,
-        followersGained,
+        followersCount,
       };
     });
 
     if (trendingMetric === 'sales') {
       return [...enriched].sort((a, b) => b.nftSales - a.nftSales).slice(0, 5);
-    } else {
-      return [...enriched].sort((a, b) => b.followersGained - a.followersGained).slice(0, 5);
     }
+    return [...enriched].sort((a, b) => b.followersCount - a.followersCount).slice(0, 5);
   }, [globalArtists, trendingMetric]);
+
+  if (rankedTrendingCreators.length === 0) {
+    return null;
+  }
 
   return (
     <section className="space-y-4 text-left w-full">
@@ -81,7 +73,6 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
           </button>
         </div>
         
-        {/* Metric Toggle Buttons */}
         <div className="flex bg-white/[0.04] p-1 rounded-xl w-full gap-1">
           <button
             onClick={() => setTrendingMetric('sales')}
@@ -95,15 +86,15 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
             NFT Sales Volume
           </button>
           <button
-            onClick={() => setTrendingMetric('growth')}
-            aria-pressed={trendingMetric === 'growth'}
+            onClick={() => setTrendingMetric('followers')}
+            aria-pressed={trendingMetric === 'followers'}
             className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-semibold rounded-lg transition-all cursor-pointer outline-none border ${
-              trendingMetric === 'growth'
+              trendingMetric === 'followers'
                 ? "bg-primary text-black border-[#c0c0c0]/40"
                 : "text-zinc-400 hover:text-white bg-transparent border-[#c0c0c0]/25"
             }`}
           >
-            Follower Growth
+            Followers
           </button>
         </div>
       </div>
@@ -124,7 +115,6 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
                 onClick={() => navigate(`/artist/${artist.uid}`)}
                 className="group flex items-center justify-between py-2.5 px-2 bg-transparent hover:bg-white/[0.03] transition-all duration-200 rounded-xl cursor-pointer"
               >
-                {/* Left: Rank, Avatar, Name & Handle */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="w-6 flex-shrink-0 flex items-center justify-center font-mono">
                     {rank === 1 ? (
@@ -162,7 +152,6 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Right: Metric Value & Action */}
                 <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 text-right">
                   <div className="flex flex-col items-end justify-center min-w-[70px]">
                     {trendingMetric === 'sales' ? (
@@ -172,12 +161,12 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
                       </div>
                     ) : (
                       <div className="flex items-center gap-1 text-[11px] font-black text-emerald-400 font-mono">
-                        <TrendingUp className="h-3 w-3 text-emerald-400" />
-                        <span>+{artist.followersGained.toLocaleString()}</span>
+                        <Users className="h-3 w-3 text-emerald-400" />
+                        <span>{artist.followersCount.toLocaleString()}</span>
                       </div>
                     )}
                     <span className="text-[7.5px] font-bold text-zinc-500 uppercase tracking-wider">
-                      {trendingMetric === 'sales' ? 'TON Sales' : `${artist.growthPercent.toFixed(1)}% Growth`}
+                      {trendingMetric === 'sales' ? 'TON Sales' : 'Followers'}
                     </span>
                   </div>
 

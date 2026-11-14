@@ -22,7 +22,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { NFTItem, Track } from '@/types';
 import { useToast } from '@/components/layout/ToastProvider';
 import { useAudio } from '@/contexts/AudioContext';
+import { useNavigate } from 'react-router-dom';
 import { BuyNFTButton } from '../visitor/BuyNFTButton';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface NFTSectionProps {
   nfts: NFTItem[];
@@ -33,6 +35,7 @@ export const NFTSection: React.FC<NFTSectionProps> = ({
   nfts: propNfts = [],
   isOwnProfile = false
 }) => {
+  const navigate = useNavigate();
   const toast = useToast();
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,12 +61,12 @@ export const NFTSection: React.FC<NFTSectionProps> = ({
         title: nft.title,
         artist: nft.artist || nft.creator || 'TONJAM Creator',
         artistId: nft.artistId || 'unknown',
-        coverUrl: nft.coverUrl || nft.imageUrl || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop',
+        coverUrl: nft.coverUrl || nft.imageUrl || getPlaceholderImage('nft'),
         audioUrl: nft.audioUrl || '',
-        duration: 180,
+        duration: (nft as any).duration || 0,
         genre: 'Music NFT',
         isNFT: true,
-        price: nft.price || '1.0',
+        price: nft.price || '0',
         createdAt: new Date().toISOString()
       };
 
@@ -242,7 +245,7 @@ export const NFTSection: React.FC<NFTSectionProps> = ({
                     <div>
                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Floor Price</span>
                       <span className="text-xs font-black text-slate-100 flex items-center gap-1">
-                        {nft.price || '1.0'} TON
+                        {nft.price || '0'} TON
                       </span>
                     </div>
                     <div className="text-right">
@@ -256,27 +259,23 @@ export const NFTSection: React.FC<NFTSectionProps> = ({
                     <BuyNFTButton 
                       nftId={nft.id} 
                       nftName={nft.title} 
-                      priceTon={parseFloat(nft.price || '1.0')} 
+                      priceTon={parseFloat(nft.price || '0')} 
                     />
                   ) : (
                     <div className="grid grid-cols-2 gap-2">
                       <button
-                        onClick={() => {
-                          toast.info('Initiating Transfer', 'Connecting to secure TON peer tunnel to transfer token...');
-                        }}
+                        onClick={() => navigate(`/nft/${nft.id}`)}
                         className="py-2.5 px-3 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1"
                       >
                         <ArrowRightLeft className="w-3 h-3" />
-                        <span>Transfer</span>
+                        <span>Manage</span>
                       </button>
                       <button
-                        onClick={() => {
-                          toast.success('Listing Updated', 'NFT updated with latest public market pricing.');
-                        }}
+                        onClick={() => navigate(`/nft/${nft.id}`)}
                         className="py-2.5 px-3 bg-gradient-to-r from-[#00B4D8] to-[#009CC0] text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-[0_0_12px_rgba(0,180,216,0.3)] hover:shadow-[0_0_20px_rgba(0,180,216,0.5)]"
                       >
                         <Award className="w-3.5 h-3.5" />
-                        <span>Relist</span>
+                        <span>View NFT</span>
                       </button>
                     </div>
                   )}

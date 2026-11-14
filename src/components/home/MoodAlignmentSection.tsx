@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { Sparkles, Moon, Zap, Target, Smile, Frown } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import MoodPlaylist from "@/components/MoodPlaylist";
-import { MOCK_TRACKS } from "@/constants";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 const MOODS = [
@@ -28,12 +27,11 @@ export const MoodAlignmentSection: React.FC = () => {
   }), []);
 
   const curatedMoodTracks = useMemo(() => {
-    if (!selectedMood) return [];
+    if (!selectedMood || !allTracks || allTracks.length === 0) return [];
     
     const mappedGenres = MOOD_GENRES_MAP[selectedMood] || [];
-    const tracksSource = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
     
-    return tracksSource.filter((track) => {
+    return allTracks.filter((track) => {
       const trackMoodLower = track.mood?.toLowerCase() || '';
       const isMoodMatch = trackMoodLower === selectedMood || trackMoodLower.includes(selectedMood);
       
@@ -69,7 +67,6 @@ export const MoodAlignmentSection: React.FC = () => {
         </span>
       </div>
 
-      {/* Mood Selector Pills (Horizontal Scroll) */}
       <div 
         ref={scrollRef}
         {...handlers}
@@ -100,7 +97,6 @@ export const MoodAlignmentSection: React.FC = () => {
         })}
       </div>
 
-      {/* Curated Dynamic Playlist Section (Renders when a mood is selected) */}
       {selectedMood && (
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <MoodPlaylist

@@ -16,7 +16,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
   onClose,
   onSubmit
 }) => {
-  const { addNotification } = useAudio();
+  const { addNotification, allTracks: tracks } = useAudio();
   const { user, userProfile } = useAuth();
   const [content, setContent] = useState('');
   const [showPoll, setShowPoll] = useState(false);
@@ -82,12 +82,16 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
     let attachments: any[] | undefined = undefined;
     if (attachmentType !== 'none') {
+      if (!attachmentData.url.trim()) {
+        addNotification(`Please enter a valid ${attachmentType} URL`, 'warning');
+        return;
+      }
       attachments = [{
         type: attachmentType,
-        title: attachmentData.title || 'Broadcast Track',
-        artist: attachmentData.artist || 'Direct Creator',
-        price: attachmentData.price || '5.5 TON',
-        url: attachmentData.url || (attachmentType === 'image' ? 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80' : '')
+        title: attachmentData.title.trim() || 'Attached Media',
+        artist: attachmentData.artist.trim() || userProfile?.name || 'Creator',
+        price: attachmentData.price.trim() || '',
+        url: attachmentData.url.trim()
       }];
     }
 
@@ -184,10 +188,10 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 onClick={() => {
                   setAttachmentType(attachmentType === 'image' ? 'none' : 'image');
                   setAttachmentData({
-                    title: 'Aesthetic Stage Vibe',
-                    artist: 'TonJam Live',
+                    title: '',
+                    artist: userProfile?.name || '',
                     price: '',
-                    url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80'
+                    url: ''
                   });
                 }}
                 aria-pressed={attachmentType === 'image'}
@@ -206,10 +210,10 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 onClick={() => {
                   setAttachmentType(attachmentType === 'track' ? 'none' : 'track');
                   setAttachmentData({
-                    title: 'Sunset Jam Session',
-                    artist: 'Pioneer Jammer',
+                    title: '',
+                    artist: userProfile?.name || '',
                     price: '',
-                    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+                    url: ''
                   });
                 }}
                 aria-pressed={attachmentType === 'track'}
@@ -228,10 +232,10 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 onClick={() => {
                   setAttachmentType(attachmentType === 'nft' ? 'none' : 'nft');
                   setAttachmentData({
-                    title: 'Decentralized Track Token #08',
-                    artist: 'TON Master',
-                    price: '15 TON',
-                    url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80'
+                    title: '',
+                    artist: userProfile?.name || '',
+                    price: '',
+                    url: ''
                   });
                 }}
                 aria-pressed={attachmentType === 'nft'}
@@ -314,80 +318,29 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   </div>
                 )}
 
-                {/* Preset quick selection suggestions */}
-                <div className="space-y-1.5 pt-1">
-                  <span className="text-[9px] text-zinc-400 font-mono uppercase tracking-wider block">Quick Presets:</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {attachmentType === 'image' && (
-                      <>
+                {/* Real library tracks picker when attaching a track */}
+                {attachmentType === 'track' && tracks.length > 0 && (
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[9px] text-zinc-400 font-mono uppercase tracking-wider block">Pick from TonJam Catalog:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {tracks.slice(0, 4).map((t) => (
                         <button
+                          key={t.id}
                           type="button"
-                          onClick={() => setAttachmentData(d => ({ ...d, title: 'Concert Scene', url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80' }))}
-                          className="px-2.5 py-1 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg text-[10px] text-zinc-300 hover:text-white transition-colors cursor-pointer border-none"
+                          onClick={() => setAttachmentData({
+                            title: t.title,
+                            artist: t.artist,
+                            price: '',
+                            url: t.audioUrl || ''
+                          })}
+                          className="px-2.5 py-1 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg text-[10px] text-zinc-300 hover:text-white transition-colors cursor-pointer border-none truncate max-w-[160px]"
                         >
-                          🎸 Concert
+                          {t.title}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setAttachmentData(d => ({ ...d, title: 'Studio Session', url: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=800&q=80' }))}
-                          className="px-2.5 py-1 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg text-[10px] text-zinc-300 hover:text-white transition-colors cursor-pointer border-none"
-                        >
-                          🎙️ Studio
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setAttachmentData(d => ({ ...d, title: 'Vinyl Spin', url: 'https://images.unsplash.com/photo-1487180142328-054b783fc471?auto=format&fit=crop&w=800&q=80' }))}
-                          className="px-2.5 py-1 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg text-[10px] text-zinc-300 hover:text-white transition-colors cursor-pointer border-none"
-                        >
-                          💿 Vinyl
-                        </button>
-                      </>
-                    )}
-                    {attachmentType === 'track' && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setAttachmentData(d => ({ ...d, title: 'Deep Vibes Mix', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' }))}
-                          className="px-2.5 py-1 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg text-[10px] text-zinc-300 hover:text-white transition-colors cursor-pointer border-none"
-                        >
-                          🎵 Beat 1
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setAttachmentData(d => ({ ...d, title: 'Summer Breeze Stems', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' }))}
-                          className="px-2.5 py-1 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg text-[10px] text-zinc-300 hover:text-white transition-colors cursor-pointer border-none"
-                        >
-                          🎶 Beat 2
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setAttachmentData(d => ({ ...d, title: 'Cyberpunk Drone', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' }))}
-                          className="px-2.5 py-1 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg text-[10px] text-zinc-300 hover:text-white transition-colors cursor-pointer border-none"
-                        >
-                          🎹 Beat 3
-                        </button>
-                      </>
-                    )}
-                    {attachmentType === 'nft' && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setAttachmentData(d => ({ ...d, title: 'Neon Vinyl Token #12', price: '12 TON', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80' }))}
-                          className="px-2.5 py-1 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg text-[10px] text-zinc-300 hover:text-white transition-colors cursor-pointer border-none"
-                        >
-                          ⚡ Neon NFT
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setAttachmentData(d => ({ ...d, title: 'Golden Master Disc #03', price: '45 TON', url: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=300&q=80' }))}
-                          className="px-2.5 py-1 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg text-[10px] text-zinc-300 hover:text-white transition-colors cursor-pointer border-none"
-                        >
-                          🏆 Gold NFT
-                        </button>
-                      </>
-                    )}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           )}

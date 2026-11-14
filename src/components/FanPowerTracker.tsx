@@ -101,10 +101,7 @@ export const FanPowerTracker: React.FC<FanPowerTrackerProps> = ({ artist }) => {
     } else {
       // Calculate from recentlyPlayed context list matching artist
       const matchHistoryCount = recentlyPlayed.filter(t => t.artistId === artist.uid || t.artist === artist.name).length;
-      // Seed initial engagement if they have some listens
-      const initialSeedPlays = matchHistoryCount > 0 ? matchHistoryCount : Math.floor(Math.random() * 4);
-      setTrackPlays(initialSeedPlays);
-      localStorage.setItem(localPlayKey, initialSeedPlays.toString());
+      setTrackPlays(matchHistoryCount);
     }
 
     setLoading(false);

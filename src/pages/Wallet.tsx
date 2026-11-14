@@ -32,6 +32,7 @@ import { TON_LOGO, JAM_PRICE_USD, TJ_COIN_ICON } from '@/constants';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { TestnetHubModal } from '@/components/TestnetHubModal';
 import { toast } from 'sonner';
+import { getPlaceholderImage } from '@/lib/utils';
 
 const TON_PRICE_USD = 5.30;
 
@@ -588,7 +589,7 @@ const Wallet: React.FC = () => {
                   >
                     <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-black/40">
                       <img
-                        src={nft.imageUrl || nft.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300'}
+                        src={nft.imageUrl || nft.coverUrl || getPlaceholderImage('nft')}
                         alt={nft.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />

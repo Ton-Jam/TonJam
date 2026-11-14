@@ -1,29 +1,27 @@
 import React, { useState } from 'react';
-import { Play, Disc, Music, SlidersHorizontal, Search, FolderHeart } from 'lucide-react';
+import { Play, SlidersHorizontal, Search } from 'lucide-react';
 import { Playlist } from '@/types';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface PlaylistTabProps {
   onSelectPlaylist: (playlistId: string) => void;
   playlists?: (Playlist | any)[];
 }
 
-const MOCK_PLAYLISTS = [
-  { id: 'pl_1', title: 'Late Night Drive Frequencies', creator: 'DJ Krupy', trackCount: 18, coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80', duration: '1h 24m' },
-  { id: 'pl_2', title: 'Supersonic Workouts', creator: 'DJ Krupy', trackCount: 25, coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=300&h=300&q=80', duration: '1h 48m' },
-  { id: 'pl_3', title: 'Chill & Construct Ambient', creator: 'DJ Krupy', trackCount: 12, coverUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=300&h=300&q=80', duration: '54m' }
-];
-
 export const PlaylistTab: React.FC<PlaylistTabProps> = ({ onSelectPlaylist, playlists }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { playlists: contextPlaylists } = useAudio();
 
-  const displayList = (playlists && playlists.length > 0) ? playlists.map(pl => ({
+  const sourcePlaylists = playlists !== undefined ? playlists : contextPlaylists;
+
+  const displayList = (sourcePlaylists || []).map(pl => ({
     id: pl.id,
     title: pl.title || pl.name || 'Playlist',
-    creator: pl.creator || pl.author || 'Curator',
+    creator: pl.creator || pl.author || pl.ownerName || 'Curator',
     trackCount: pl.trackCount || pl.trackIds?.length || pl.tracks?.length || 0,
-    coverUrl: pl.coverUrl || pl.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80',
+    coverUrl: pl.coverUrl || pl.imageUrl || '',
     duration: pl.duration || `${pl.trackCount || pl.trackIds?.length || 0} tracks`
-  })) : (playlists !== undefined ? [] : MOCK_PLAYLISTS);
+  }));
 
   const filteredPlaylists = displayList.filter(pl =>
     pl.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -41,10 +39,10 @@ export const PlaylistTab: React.FC<PlaylistTabProps> = ({ onSelectPlaylist, play
             placeholder="Search playlists..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#101A3B] border border-white/5 rounded-full pl-10 pr-4 py-2.5 text-xs font-medium outline-none focus:border-[#0052FF] transition-all placeholder:text-slate-500"
+            className="w-full bg-[#101A3B] rounded-full pl-10 pr-4 py-2.5 text-xs font-medium outline-none transition-all placeholder:text-slate-500"
           />
         </div>
-        <button className="p-2.5 bg-[#101A3B] border border-white/5 rounded-full hover:bg-[#15234f] transition-all cursor-pointer">
+        <button className="p-2.5 bg-[#101A3B] rounded-full hover:bg-[#15234f] transition-all cursor-pointer">
           <SlidersHorizontal className="w-4 h-4 text-slate-400" />
         </button>
       </div>
@@ -56,10 +54,12 @@ export const PlaylistTab: React.FC<PlaylistTabProps> = ({ onSelectPlaylist, play
             <div
               key={pl.id}
               onClick={() => onSelectPlaylist(pl.id)}
-              className="bg-[#101A3B] border border-white/5 rounded-[12px] overflow-hidden group hover:bg-[#15234f] transition-all cursor-pointer flex flex-col h-full"
+              className="bg-[#101A3B] rounded-[12px] overflow-hidden group hover:bg-[#15234f] transition-all cursor-pointer flex flex-col h-full"
             >
               <div className="aspect-square w-full bg-slate-900 overflow-hidden relative">
-                <img src={pl.coverUrl} alt={pl.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                {pl.coverUrl && (
+                  <img src={pl.coverUrl} alt={pl.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                )}
                 <button className="absolute bottom-3 right-3 p-2 bg-[#0052FF] text-white rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-lg shadow-[#0052FF]/20">
                   <Play className="w-4 h-4 fill-current text-white" />
                 </button>
@@ -80,7 +80,7 @@ export const PlaylistTab: React.FC<PlaylistTabProps> = ({ onSelectPlaylist, play
             </div>
           ))
         ) : (
-          <div className="col-span-full text-center py-16 bg-[#101A3B] border border-white/5 rounded-[12px] p-6 text-slate-400 text-sm font-semibold uppercase tracking-wider">
+          <div className="col-span-full text-center py-16 bg-[#101A3B] rounded-[12px] p-6 text-slate-400 text-sm font-semibold uppercase tracking-wider">
             No playlists found.
           </div>
         )}

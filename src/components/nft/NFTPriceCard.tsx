@@ -31,7 +31,7 @@ interface NFTPriceCardProps {
   priceAlertPercent: number;
   onTogglePriceAlert: () => void;
   onPercentChange: (percent: number) => void;
-  onSimulateDrop: () => void;
+  onSimulateDrop?: () => void;
   showGlow?: boolean;
 }
 
@@ -117,9 +117,6 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold text-slate-300 font-mono px-3 py-1 bg-white/[0.04] rounded-full">
               ≈ ${usdEquivalent} USD
-            </span>
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-              +12.4% 24h Vol
             </span>
           </div>
         </div>
@@ -284,15 +281,6 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {priceAlertEnabled && (
-              <button
-                onClick={onSimulateDrop}
-                className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-colors flex items-center gap-1 cursor-pointer"
-                title="Simulate sudden drop"
-              >
-                <TrendingDown className="h-3 w-3" /> Test Alert
-              </button>
-            )}
 
             <button
               onClick={onTogglePriceAlert}

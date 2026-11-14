@@ -27,8 +27,7 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
   const { artists, getArtistById, getArtistNFTs } = useArtist();
   const { allTracks = [], playTrack, togglePlay, currentTrack, isPlaying } = useAudio();
   
-  // Use either the provided artistId, or default to the first artist's ID
-  const activeId = artistId || (artists.length > 0 ? artists[0].uid : 'dj-krupy');
+  const activeId = artistId || (artists.length > 0 ? artists[0].uid : '');
   
   const [currentArtist, setCurrentArtist] = useState<Artist | null>(null);
   const [artistNfts, setArtistNfts] = useState<NFTItem[]>([]);
@@ -86,88 +85,32 @@ export const ArtistProfile: React.FC<ArtistProfileProps> = ({
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      const art = getArtistById(activeId);
-      if (art) {
-        setCurrentArtist(art);
-        setArtistNfts(getArtistNFTs(activeId));
-      } else if (artists.length > 0) {
-        // Fallback to first artist if not found
-        setCurrentArtist(artists[0]);
-        setArtistNfts(getArtistNFTs(artists[0].uid));
-      }
-
-      // Filter or generate discography tracks for this artist
-      const artistName = art?.name || artists[0]?.name || '';
-      const matchedTracks = allTracks.filter(
-        t => t.artistId === activeId || 
-             (artistName && t.artist?.toLowerCase() === artistName.toLowerCase())
-      );
-
-      if (matchedTracks.length > 0) {
-        setDiscographyTracks(matchedTracks);
-      } else {
-        // High quality fallback discography items if no tracks in global context match
-        const fallbackDiscography: Track[] = [
-          {
-            id: `disc-${activeId}-1`,
-            songId: `disc-${activeId}-1`,
-            title: `${art?.name || 'Artist'} - Genesis Master Anthem`,
-            artist: art?.name || 'Verified Artist',
-            artistId: activeId,
-            coverUrl: art?.avatarUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600',
-            audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-            duration: 215,
-            genre: art?.genre || 'Electronic Synth',
-            playCount: 18450,
-            streams: 18450,
-            likes: 1240,
-            isNFT: true,
-            nftPrice: '15',
-            createdAt: Date.now()
-          },
-          {
-            id: `disc-${activeId}-2`,
-            songId: `disc-${activeId}-2`,
-            title: `${art?.name || 'Artist'} - Cyber Resonance Wave`,
-            artist: art?.name || 'Verified Artist',
-            artistId: activeId,
-            coverUrl: art?.bannerUrl || art?.avatarUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600',
-            audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-            duration: 198,
-            genre: art?.genre || 'Ambient Future',
-            playCount: 12300,
-            streams: 12300,
-            likes: 980,
-            isNFT: true,
-            nftPrice: '20',
-            createdAt: Date.now() - 86400000
-          },
-          {
-            id: `disc-${activeId}-3`,
-            songId: `disc-${activeId}-3`,
-            title: `${art?.name || 'Artist'} - TON Decentralized Pulse`,
-            artist: art?.name || 'Verified Artist',
-            artistId: activeId,
-            coverUrl: art?.avatarUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600',
-            audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-            duration: 240,
-            genre: art?.genre || 'Deep House',
-            playCount: 9600,
-            streams: 9600,
-            likes: 710,
-            isNFT: false,
-            createdAt: Date.now() - 172800000
-          }
-        ];
-        setDiscographyTracks(fallbackDiscography);
-      }
-
+    if (!activeId) {
+      setCurrentArtist(null);
+      setArtistNfts([]);
+      setDiscographyTracks([]);
       setIsLoading(false);
-    }, 450);
+      return;
+    }
 
-    return () => clearTimeout(timer);
+    const art = getArtistById(activeId) || (artists.length > 0 ? artists[0] : null);
+    if (art) {
+      setCurrentArtist(art);
+      setArtistNfts(getArtistNFTs(art.uid));
+    } else {
+      setCurrentArtist(null);
+      setArtistNfts([]);
+    }
+
+    const targetId = art?.uid || activeId;
+    const artistName = art?.name || '';
+    const matchedTracks = allTracks.filter(
+      t => t.artistId === targetId ||
+           (artistName && t.artist?.toLowerCase() === artistName.toLowerCase())
+    );
+
+    setDiscographyTracks(matchedTracks);
+    setIsLoading(false);
   }, [activeId, artists, getArtistById, getArtistNFTs, allTracks]);
 
   const getSocialIcon = (platform: string) => {

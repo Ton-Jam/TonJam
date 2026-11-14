@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingBag, ChevronRight } from "lucide-react";
 import NFTCard from "@/components/NFTCard";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
+import { useNFT } from "@/contexts/NFTContext";
 
 export interface MarketplacePick {
   id: string;
@@ -14,15 +15,26 @@ export interface MarketplacePick {
   badge: string;
 }
 
-const STATIC_MARKETPLACE_PICKS: MarketplacePick[] = [
-  { id: "pick-1", title: "Aura Beat Legendary #02", artist: "Luna Ray", price: "25.0 TON", likes: 340, image: "https://image.pollinations.ai/prompt/glowing%20aesthetic%20crystal%20sound%20waves%20artwork?width=300&height=300&nologo=true", badge: "Trending" },
-  { id: "pick-2", title: "Cybernetic Echo Synth", artist: "Dr. Osc", price: "9.0 TON", likes: 112, image: "https://image.pollinations.ai/prompt/cybernetic%20abstract%20holographic%20music%20key?width=300&height=300&nologo=true", badge: "Highest Volume" },
-  { id: "pick-3", title: "Amapiano Golden Sceptre #01", artist: "Major Sound", price: "45.0 TON", likes: 780, image: "https://image.pollinations.ai/prompt/gold%20african%20tribal%20future%20crown%20shield?width=300&height=300&nologo=true", badge: "Live Auction" }
-];
-
-export const MarketplacePicksSection: React.FC<{ picks?: MarketplacePick[] }> = ({ picks = STATIC_MARKETPLACE_PICKS }) => {
+export const MarketplacePicksSection: React.FC<{ picks?: MarketplacePick[] }> = ({ picks }) => {
   const navigate = useNavigate();
   const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
+  const { nfts } = useNFT();
+
+  const resolvedPicks = useMemo(() => {
+    if (picks && picks.length > 0) return picks;
+    return nfts.slice(0, 8).map((n) => ({
+      id: n.id,
+      title: n.title,
+      artist: n.artist || n.creator,
+      price: n.price || '0',
+      likes: n.likes || 0,
+      image: n.imageUrl || n.coverUrl || '',
+      badge: n.isAuction ? 'Auction' : 'Listed',
+      rawNft: n,
+    }));
+  }, [picks, nfts]);
+
+  if (resolvedPicks.length === 0) return null;
 
   return (
     <section className="space-y-3 text-left w-full">
@@ -47,14 +59,14 @@ export const MarketplacePicksSection: React.FC<{ picks?: MarketplacePick[] }> = 
         className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
-        {picks.map((pick) => (
+        {resolvedPicks.map((pick: any) => (
           <div
             key={pick.id}
             style={{ width: 'var(--card-width, 168px)', scrollSnapAlign: 'start' }}
             className="w-[168px] shrink-0 snap-start"
           >
             <NFTCard 
-              nft={{
+              nft={pick.rawNft || {
                 id: pick.id,
                 trackId: pick.id,
                 title: pick.title,
@@ -63,7 +75,7 @@ export const MarketplacePicksSection: React.FC<{ picks?: MarketplacePick[] }> = 
                 artist: pick.artist,
                 price: pick.price,
                 imageUrl: pick.image,
-                edition: 'Limited Edition',
+                edition: '1/1',
                 description: '',
                 isAuction: false
               } as any}

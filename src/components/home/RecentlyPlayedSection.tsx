@@ -99,15 +99,13 @@ export const RecentlyPlayedSection: React.FC = () => {
           title: item.title || "Untitled Track",
           artist: item.artist || "Unknown Artist",
           artistId: item.artistId || "",
-          audioUrl: (item.audioUrl && !item.audioUrl.includes("codeskulptor") && !item.audioUrl.includes("tonjam.io"))
-            ? item.audioUrl
-            : "/tonjam-offline-audio.mp3",
+          audioUrl: item.audioUrl || "",
           genre: item.genre || "Electronic",
-          bpm: item.bpm || 120,
-          mood: item.mood || "Chill",
+          bpm: item.bpm || 0,
+          mood: item.mood || "",
           isNFT: Boolean(item.isNFT),
-          artistVerified: item.artistVerified ?? true,
-          playCount: item.playCount || 1,
+          artistVerified: Boolean(item.artistVerified),
+          playCount: item.playCount || 0,
           createdAt: typeof item.lastPlayed === "string" ? item.lastPlayed : new Date().toISOString(),
         } as Track;
       });

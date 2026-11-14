@@ -21,11 +21,12 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudio } from '@/contexts/AudioContext';
 import { useTonWallet, useTonConnectUI } from '@tonconnect/ui-react';
-import { db } from '@/lib/firebase';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { NFTItem, Track } from '@/types';
 import { MusicNftCard } from '@/components/profile/MusicNftCard';
+import { getPlaceholderImage } from '@/lib/utils';
 
 export const SecureUserNFTDashboard: React.FC = () => {
   const { user, userProfile, isAdmin } = useAuth();
@@ -76,7 +77,7 @@ export const SecureUserNFTDashboard: React.FC = () => {
         setLoadingNFTs(false);
       },
       (error) => {
-        console.error('Error fetching owned NFTs:', error);
+        handleFirestoreError(error, OperationType.LIST, 'nfts');
         setLoadingNFTs(false);
       }
     );
@@ -117,18 +118,18 @@ export const SecureUserNFTDashboard: React.FC = () => {
         artist: nft.artist || nft.creator || 'TonJam Artist',
         artistId: nft.artistId || '',
         audioUrl: nft.audioUrl,
-        coverUrl: nft.imageUrl || nft.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=400',
+        coverUrl: nft.imageUrl || nft.coverUrl || getPlaceholderImage('nft'),
         album: 'Exclusive Music NFT',
-        duration: 180,
-        genre: 'Electronic',
+        duration: (nft as any).duration || 0,
+        genre: (nft as any).genre || '',
         isNFT: true,
         nftId: nft.id,
         rarity: nft.rarity || 'Rare',
-        price: nft.price || '1.5',
+        price: nft.price || '0',
         playCount: 0,
         streams: 0,
         likes: 0,
-        createdAt: new Date().toISOString()
+        createdAt: nft.createdAt || new Date().toISOString()
       } as Track);
     }
   };
@@ -137,8 +138,8 @@ export const SecureUserNFTDashboard: React.FC = () => {
   const effectiveNFTs = useMemo(() => {
     if (ownedNFTs.length > 0) return ownedNFTs;
     if (userNFTs && userNFTs.length > 0) return userNFTs;
-    return (allNFTs && allNFTs.length > 0 ? allNFTs : []).slice(0, 6);
-  }, [ownedNFTs, userNFTs, allNFTs]);
+    return [];
+  }, [ownedNFTs, userNFTs]);
 
   const totalFloorValue = useMemo(() => {
     return effectiveNFTs.reduce((acc, nft) => {

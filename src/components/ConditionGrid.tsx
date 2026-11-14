@@ -9,34 +9,9 @@ interface ProjectsTypes {
   des: string;
 }
 
-const projects: ProjectsTypes[] = [
-  {
-    id: '01',
-    img: 'https://images.unsplash.com/photo-1543508282-6319a3e2621f?q=80&w=1200&auto=format&fit=crop',
-    title: 'Distrokings',
-    des: 'We make your logo communicate with your customers more than words ever could',
-  },
-  {
-    id: '02',
-    img: 'https://images.unsplash.com/photo-1704677982215-a2248af6009b?q=80&w=1200&auto=format&fit=crop',
-    title: 'Profitables',
-    des: 'We are dedicated to unlocking your business potential through precision development',
-  },
-  {
-    id: '03',
-    img: 'https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=800&auto=format&fit=crop',
-    title: 'Topserve-copiers',
-    des: 'We are dedicated to unlocking your business potential through precision development',
-  },
-  {
-    id: '04',
-    img: 'https://images.unsplash.com/photo-1605733160314-4fc7dac4bb16?q=80&w=800&auto=format&fit=crop',
-    title: 'Labramart.',
-    des: 'We specialize in crafting marketing solutions that propel your brand to new heights',
-  },
-];
+export default function ConditionGrid({ projects = [] }: { projects?: ProjectsTypes[] }) {
+  if (projects.length === 0) return null;
 
-export default function ConditionGrid() {
   return (
     <>
       <div className='grid grid-cols-12 gap-4 overflow-hidden px-5 lg:pb-5 pb-2'>

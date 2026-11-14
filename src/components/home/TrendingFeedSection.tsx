@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Flame, ChevronRight } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import TrackCard from "@/components/TrackCard";
-import { MOCK_TRACKS } from "@/constants";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 
 export const TrendingFeedSection: React.FC = () => {
@@ -12,9 +11,11 @@ export const TrendingFeedSection: React.FC = () => {
   const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const trendingTracks = useMemo(() => {
-    const list = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
-    return [...list].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 10);
+    if (!allTracks || allTracks.length === 0) return [];
+    return [...allTracks].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 10);
   }, [allTracks]);
+
+  if (trendingTracks.length === 0) return null;
 
   return (
     <section className="space-y-3 text-left w-full">

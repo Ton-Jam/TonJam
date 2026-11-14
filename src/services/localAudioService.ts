@@ -1,5 +1,6 @@
 import { Track } from '@/types';
 import { indexedDbService } from './indexedDbService';
+import { getPlaceholderImage } from '@/lib/utils';
 
 const AUDIO_EXTENSIONS = [
   '.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac', 
@@ -75,35 +76,30 @@ function getAudioDuration(file: Blob, fileName = 'audio'): Promise<number> {
       };
 
       timeout = setTimeout(() => {
-        console.warn(`[LocalAudioService] Metadata probe timeout (3000ms) for "${fileName}". Defaulting to 180s.`);
         cleanup();
-        resolve(180);
+        resolve(0);
       }, 3000);
 
       audio.onloadedmetadata = () => {
         clearTimeout(timeout);
         const dur = audio.duration;
         cleanup();
-        const finalDuration = dur && !isNaN(dur) && isFinite(dur) && dur > 0 ? Math.round(dur) : 180;
-        console.log(`[LocalAudioService] Metadata parsed: "${fileName}", duration: ${finalDuration}s`);
+        const finalDuration = dur && !isNaN(dur) && isFinite(dur) && dur > 0 ? Math.round(dur) : 0;
         resolve(finalDuration);
       };
 
       audio.onerror = () => {
         clearTimeout(timeout);
-        const errCode = audio.error?.code || 'unknown';
-        console.warn(`[LocalAudioService] Audio metadata error for "${fileName}" (Code: ${errCode}): ${audio.error?.message || 'Unsupported format or decode error'}`);
         cleanup();
-        resolve(180);
+        resolve(0);
       };
 
       audio.src = url;
     } catch (err) {
-      console.warn(`[LocalAudioService] Failed to create object URL for duration probe "${fileName}":`, err);
       if (url) {
         try { URL.revokeObjectURL(url); } catch (e) {}
       }
-      resolve(180);
+      resolve(0);
     }
   });
 }
@@ -225,7 +221,7 @@ export const localAudioService = {
           duration,
           streams: 0,
           playCount: 0,
-          coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=300&h=300&q=80',
+          coverUrl: getPlaceholderImage('track'),
           audioUrl: objectUrl,
           genre: 'Local Audio',
           isNFT: false,

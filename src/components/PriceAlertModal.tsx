@@ -29,7 +29,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAudio } from "@/contexts/AudioContext";
 import { useNotification } from "@/contexts/NotificationContext";
 import { priceAlertService } from "@/services/priceAlertService";
-import { cn } from "@/lib/utils";
+import { cn, getPlaceholderImage } from "@/lib/utils";
 
 interface PriceAlertModalProps {
   isOpen: boolean;
@@ -210,7 +210,7 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({ isOpen, onClos
           {/* NFT Preview (borderless surface) */}
           <div className="flex items-center gap-3.5 p-3.5 bg-white/[0.04] rounded-2xl">
             <img 
-              src={nft.imageUrl || nft.coverUrl || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&fit=crop&q=80'} 
+              src={nft.imageUrl || nft.coverUrl || getPlaceholderImage('nft')} 
               alt={nft.title} 
               className="w-14 h-14 rounded-xl object-cover shadow-md shrink-0"
             />

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Radio, Users, Calendar, ArrowUpRight, Check, ChevronRight, Plus } from 'lucide-react';
 import { Space } from '../types';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface LiveSpacesProps {
   spaces: Space[];
@@ -70,7 +71,7 @@ export const LiveSpaces: React.FC<LiveSpacesProps> = ({
 
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400" title="Community members">
                     <Users className="w-3.5 h-3.5 text-blue-400" />
-                    <span>{((sp.memberCount !== undefined ? sp.memberCount : (sp.listenerCount ? sp.listenerCount * 3 + 45 : 120))).toLocaleString()} members</span>
+                    <span>{(sp.memberCount ?? sp.listenerCount ?? 0).toLocaleString()} members</span>
                   </div>
                 </div>
 
@@ -80,7 +81,7 @@ export const LiveSpaces: React.FC<LiveSpacesProps> = ({
                   </h4>
                   <div className="flex items-center gap-2">
                     <img 
-                      src={sp.host.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Host'} 
+                      src={sp.host.avatar || getPlaceholderImage(`host-${sp.id}`)} 
                       className="w-5 h-5 rounded-full border border-white/10" 
                       alt={sp.host.name} 
                     />

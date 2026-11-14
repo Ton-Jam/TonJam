@@ -47,38 +47,24 @@ export const cacheTrackInServiceWorker = async (track: {
   quality?: string;
 }): Promise<boolean> => {
   try {
-    const targetUrl = track.audioUrl || `/offline-audio/${track.id}`;
+    if (!track.audioUrl) return false;
+    const targetUrl = track.audioUrl;
     
-    // Store in browser CacheStorage if available
+    // Store genuine fetched audio response in browser CacheStorage if available
     if (isCacheStorageAvailable()) {
       try {
-        const cache = await caches.open(SW_OFFLINE_AUDIO_CACHE);
-        // Put a synthetic or real cached response in CacheStorage
-        const metadataHeader = JSON.stringify({
-          id: track.id,
-          title: track.title,
-          artist: track.artist,
-          cachedAt: new Date().toISOString()
-        });
-        
-        const responseToStore = new Response(new Blob(['offline-audio-stream'], { type: 'audio/mpeg' }), {
-          status: 200,
-          statusText: 'OK',
-          headers: {
-            'Content-Type': 'audio/mpeg',
-            'X-TonJam-Track-Id': track.id,
-            'X-TonJam-Track-Title': encodeURIComponent(track.title),
-            'X-TonJam-Metadata': metadataHeader
-          }
-        });
-        
-        await cache.put(new Request(targetUrl), responseToStore);
-        
-        // Also cache in main tonjam-cache-v1
-        const mainCache = await caches.open(SW_CACHE_NAME);
-        await mainCache.put(new Request(`/api/tracks/${track.id}/offline`), responseToStore.clone());
+        const res = await fetch(targetUrl);
+        if (res.ok) {
+          const cache = await caches.open(SW_OFFLINE_AUDIO_CACHE);
+          await cache.put(new Request(targetUrl), res.clone());
+          const mainCache = await caches.open(SW_CACHE_NAME);
+          await mainCache.put(new Request(`/api/tracks/${track.id}/offline`), res);
+        } else {
+          return false;
+        }
       } catch (cacheErr) {
-        console.warn('CacheStorage put error:', cacheErr);
+        console.warn('CacheStorage fetch/put error:', cacheErr);
+        return false;
       }
     }
 

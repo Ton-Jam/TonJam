@@ -12,7 +12,7 @@ export interface CreateSpaceParams {
 }
 
 /**
- * Creates a new JamSpace in Firestore under 'spaces' collection
+ * Creates a new JamSpace in Firestore under 'liveStreams' collection
  */
 export const createSpaceInFirestore = async (params: CreateSpaceParams): Promise<{ id: string } | null> => {
   try {
@@ -39,10 +39,10 @@ export const createSpaceInFirestore = async (params: CreateSpaceParams): Promise
       updatedAt: serverTimestamp()
     };
 
-    const docRef = await addDoc(collection(db, 'spaces'), spaceData);
+    const docRef = await addDoc(collection(db, 'liveStreams'), spaceData);
     return { id: docRef.id };
   } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, 'spaces');
+    handleFirestoreError(error, OperationType.CREATE, 'liveStreams');
     return null;
   }
 };

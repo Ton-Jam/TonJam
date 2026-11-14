@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { UserProfile } from '@/types';
-import { MOCK_USER } from '@/constants';
+import { GUEST_USER_PROFILE } from '@/lib/resetMockCache';
 import { getSafeLocalStorage } from '@/lib/safeStorage';
 
 interface UserState {
@@ -15,14 +15,15 @@ interface UserState {
   setLikedTrackIds: (ids: string[] | ((prev: string[]) => string[])) => void;
   toggleFollowUser: (userId: string) => void;
   toggleLikeTrack: (trackId: string) => void;
+  resetUserState: () => void;
 }
 
 export const useUserStore = create<UserState>()(
   persist(
     (set, get) => ({
-      userProfile: MOCK_USER,
-      followedUserIds: MOCK_USER.followedUserIds || [],
-      likedTrackIds: MOCK_USER.likedTrackIds || [],
+      userProfile: GUEST_USER_PROFILE,
+      followedUserIds: [],
+      likedTrackIds: [],
 
       setUserProfile: (profile) => set((state) => ({
         userProfile: typeof profile === 'function' ? profile(state.userProfile) : profile
@@ -52,10 +53,22 @@ export const useUserStore = create<UserState>()(
         } else {
           set({ likedTrackIds: [...likedTrackIds, trackId] });
         }
-      }
+      },
+
+      resetUserState: () => set({
+        userProfile: GUEST_USER_PROFILE,
+        followedUserIds: [],
+        likedTrackIds: [],
+      })
     }),
     {
       name: 'tonjam-user-storage',
+      version: 2,
+      migrate: () => ({
+        userProfile: GUEST_USER_PROFILE,
+        followedUserIds: [],
+        likedTrackIds: [],
+      }),
       storage: createJSONStorage(() => getSafeLocalStorage()),
       partialize: (state) => ({
         userProfile: state.userProfile,

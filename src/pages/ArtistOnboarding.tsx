@@ -4,15 +4,15 @@ import { Music, Image, Info, Box, Upload, Loader2, Camera, Image as ImageIcon } 
 import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { uploadFile, uploadAudio, uploadCover } from '@/services/storageService';
-import { Track, NFTItem } from '@/types';
+import { Track } from '@/types';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { MOCK_USER, APP_LOGO } from '@/constants';
+import { APP_LOGO } from '@/constants';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 
 const ArtistOnboarding: React.FC = () => {
   const navigate = useNavigate();
-  const { userProfile, setUserProfile, addUserTrack, addUserNFT, addNotification } = useAudio();
+  const { userProfile, setUserProfile, addUserTrack, addNotification } = useAudio();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -82,30 +82,43 @@ const ArtistOnboarding: React.FC = () => {
     e.preventDefault();
     
     const user = auth.currentUser;
-    if (user) {
-      try {
-        setIsLoading(true);
-        const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, cleanUpdateData({
-          ...profileData,
-          isVerifiedArtist: true,
-          role: 'artist'
-        }));
-        
-        setUserProfile({ ...userProfile, ...profileData, isVerifiedArtist: true, role: 'artist' });
-        addNotification("Artist profile initialized", "success");
-        setStep(2);
-      } catch (error) {
-        handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      // Fallback for non-logged in users (shouldn't happen with onboarding)
-      setUserProfile({ ...userProfile, ...profileData, isVerifiedArtist: true });
-      addNotification("Artist profile initialized (local)", "success");
-      setStep(2);
+    if (!user) {
+      addNotification("Please sign in to save your artist profile", "error");
+      return;
     }
+
+    try {
+      setIsLoading(true);
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, cleanUpdateData({
+        ...profileData,
+        verificationStatus: userProfile.isVerifiedArtist ? 'verified' : 'pending'
+      }));
+      
+      setUserProfile({ ...userProfile, ...profileData });
+      addNotification("Artist profile saved", "success");
+      setStep(2);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getAudioDuration = (file: File): Promise<number> => {
+    return new Promise((resolve) => {
+      const objectUrl = URL.createObjectURL(file);
+      const audio = new Audio(objectUrl);
+      audio.onloadedmetadata = () => {
+        const dur = Number.isFinite(audio.duration) ? Math.round(audio.duration) : 0;
+        URL.revokeObjectURL(objectUrl);
+        resolve(dur);
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(0);
+      };
+    });
   };
 
   const handleTrackSubmit = async (e: React.FormEvent) => {
@@ -114,24 +127,25 @@ const ArtistOnboarding: React.FC = () => {
       addNotification("Please fill in required track details", "error");
       return;
     }
+    if (!trackData.audioFile) {
+      addNotification("Please select an audio file to upload", "error");
+      return;
+    }
     setIsLoading(true);
 
     try {
-      let audioUrl = '/tonjam-offline-audio.mp3';
-      let coverUrl = trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track');
+      const measuredDuration = await getAudioDuration(trackData.audioFile);
 
-      if (trackData.audioFile) {
-        addNotification("Adding audio file...", "info");
-        const { downloadUrl } = await uploadAudio(trackData.audioFile);
-        audioUrl = downloadUrl;
-        addNotification("Audio file added successfully", "success");
-      }
+      addNotification("Uploading audio file...", "info");
+      const { downloadUrl: audioUrl } = await uploadAudio(trackData.audioFile);
+      addNotification("Audio file uploaded successfully", "success");
 
+      let coverUrl = getPlaceholderImage(trackData.title || 'onboarding-track');
       if (trackData.coverFile) {
-        addNotification("Adding cover image...", "info");
+        addNotification("Uploading cover image...", "info");
         const { downloadUrl } = await uploadCover(trackData.coverFile);
         coverUrl = downloadUrl;
-        addNotification("Cover image added successfully", "success");
+        addNotification("Cover image uploaded successfully", "success");
       }
 
       const newTrackId = Date.now().toString();
@@ -143,17 +157,17 @@ const ArtistOnboarding: React.FC = () => {
         artistId: userProfile.uid,
         coverUrl,
         audioUrl,
-        duration: 180, /* Mock duration */
+        duration: measuredDuration,
         genre: trackData.genre,
         isNFT: false,
-        artistVerified: true,
+        artistVerified: Boolean(userProfile.isVerifiedArtist),
         price: trackData.price,
         releaseDate: new Date().toISOString(),
         createdAt: new Date().toISOString()
       };
-      addUserTrack(newTrack);
+      await addUserTrack(newTrack);
       setTrackData(prev => ({ ...prev, createdTrackId: newTrackId, coverPreview: coverUrl }));
-      addNotification("Track added successfully", "success");
+      addNotification("Track uploaded successfully", "success");
       setStep(3);
     } catch (error) {
       console.error("Track upload failed:", error);
@@ -165,30 +179,14 @@ const ArtistOnboarding: React.FC = () => {
 
   const handleMintSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      /* Create NFT from the track */
-      const newNFT: NFTItem = {
-        id: Date.now().toString(),
-        trackId: trackData.createdTrackId || Date.now().toString(),
+    navigate('/mint', {
+      state: {
+        trackId: trackData.createdTrackId,
         title: trackData.title,
-        owner: profileData.name,
-        creator: profileData.name,
         price: mintData.price,
-        imageUrl: trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track'),
-        edition: `1 of ${mintData.supply}`,
-        royaltySplits: mintData.royaltySplits,
-        description: trackData.description,
-        listingType: mintData.listingType,
-        history: [
-          { event: 'Minted', from: 'NullAddress', to: profileData.name, date: new Date().toISOString(), price: mintData.price }
-        ]
-      };
-      addUserNFT(newNFT);
-      addNotification("Genesis NFT minted successfully", "success");
-      setIsLoading(false);
-      navigate('/artist-dashboard');
-    }, 2000);
+        royaltySplits: mintData.royaltySplits
+      }
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'cover' | 'audio') => {
@@ -423,7 +421,7 @@ const ArtistOnboarding: React.FC = () => {
                 <Info className="h-4 w-4 text-blue-400 mt-4" />
                 <div>
                   <h4 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">Smart Contract Deployment</h4>
-                  <p className="text-[10px] text-muted-foreground/80 leading-relaxed"> By confirming, you will deploy a new smart contract for this asset on the GRAM blockchain. This action is irreversible and requires a small gas fee (simulated). </p>
+                  <p className="text-[10px] text-muted-foreground/80 leading-relaxed"> Continue to the on-chain Mint studio to deploy your NFT via your connected TON wallet and IPFS metadata. </p>
                 </div>
               </div>
               <div className="pt-4 flex flex-col md:flex-row gap-4">
@@ -433,12 +431,12 @@ const ArtistOnboarding: React.FC = () => {
                   {isLoading ? (
                     <>
                       <img src={APP_LOGO} className="w-5 h-5 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." />
-                      <span>Minting...</span>
+                      <span>Preparing...</span>
                     </>
                   ) : (
                     <>
                       <Box className="h-4 w-4" />
-                      <span>Mint Genesis NFT</span>
+                      <span>Continue to Mint NFT</span>
                     </>
                   )}
                 </button>

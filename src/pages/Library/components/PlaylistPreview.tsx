@@ -1,5 +1,6 @@
 import React from 'react';
 import type { SpotifyPlaylistPreview } from './ImportSpotifyPlaylistModal';
+import { getPlaceholderImage } from '@/lib/utils';
 
 export interface PlaylistPreviewProps {
   playlist: SpotifyPlaylistPreview;
@@ -16,7 +17,7 @@ function formatDuration(secondsOrMs?: number): string | null {
 }
 
 export const PlaylistPreview: React.FC<PlaylistPreviewProps> = ({ playlist }) => {
-  const fallbackCover = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&h=400&q=80';
+  const fallbackCover = getPlaceholderImage(`playlist-${playlist.id || playlist.name}`);
   const remainingCount = Math.max((playlist.trackCount || 0) - 5, 0);
 
   return (

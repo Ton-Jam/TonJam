@@ -3,7 +3,6 @@ import { X, Verified, UserPlus, UserCheck, Music, Disc, ExternalLink, Play, Paus
 import { Artist, Track } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
-import { MOCK_TRACKS } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -14,15 +13,15 @@ interface ArtistDetailModalProps {
 
 const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }) => {
   const navigate = useNavigate();
-  const { followedUserIds, toggleFollowUser, playTrack, currentTrack, isPlaying, togglePlay } = useAudio();
+  const { allTracks, followedUserIds, toggleFollowUser, playTrack, currentTrack, isPlaying, togglePlay } = useAudio();
   const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
   const isFollowing = followedUserIds.includes(artist.uid);
 
   const artistTracks = useMemo(() => {
-    return MOCK_TRACKS
+    return (allTracks || [])
       .filter(t => t.artistId === artist.uid || t.artist === artist.name)
       .sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
-  }, [artist]);
+  }, [allTracks, artist]);
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();

@@ -5,7 +5,39 @@ import { db } from '../lib/firebase';
 import { TonJamCollection, storeStateInit as storeCollectionInit } from '../contracts/nft/TonJamNFT_TonJamCollection';
 import { TonJamMarketplace, storeStateInit as storeMarketplaceInit } from '../contracts/marketplace/TonJamMarketplace_TonJamMarketplace';
 
-export const sendTransactionSafe = async (tonConnectUI: TonConnectUI, transaction: any) => {
+export const verifyWalletNetwork = (tonConnectUI: TonConnectUI, expectedNetwork: TonNetwork = TON_NETWORK_MODE) => {
+  const wallet = tonConnectUI?.wallet || (tonConnectUI as any)?.connector?.wallet;
+  if (!wallet) return;
+  const rawChain = wallet.account?.chain;
+  if (rawChain !== undefined && rawChain !== null) {
+    const chainStr = String(rawChain);
+    const isTestnetWallet = chainStr === '-3';
+    const isMainnetWallet = chainStr === '-239';
+    if (expectedNetwork === 'testnet' && isMainnetWallet) {
+      throw new Error("Network mismatch: Connected wallet is configured for TON Mainnet (-239), but TonJam is currently operating in Testnet mode (-3). Please switch your wallet to Testnet.");
+    }
+    if (expectedNetwork === 'mainnet' && isTestnetWallet) {
+      throw new Error("Network mismatch: Connected wallet is configured for TON Testnet (-3), but TonJam is operating in Mainnet mode (-239). Please switch your wallet to Mainnet.");
+    }
+  }
+};
+
+export const extractTxHashFromBoc = (boc?: string): string => {
+  if (!boc) {
+    throw new Error("Transaction execution did not return a valid BOC payload from wallet.");
+  }
+  try {
+    const cell = Cell.fromBase64(boc);
+    const hash = cell.hash().toString('hex');
+    if (!hash) throw new Error("Computed transaction hash is empty");
+    return hash;
+  } catch (err: any) {
+    console.error("Failed to parse transaction BOC:", err);
+    throw new Error(`Unable to extract transaction hash from wallet BOC: ${err.message || String(err)}`);
+  }
+};
+
+export const sendTransactionSafe = async (tonConnectUI: TonConnectUI, transaction: any, expectedNetwork: TonNetwork = TON_NETWORK_MODE) => {
   const isConnected = Boolean(
     tonConnectUI &&
     tonConnectUI.connected &&
@@ -20,6 +52,9 @@ export const sendTransactionSafe = async (tonConnectUI: TonConnectUI, transactio
     }
     throw new Error("Wallet is not connected. Please connect your TON wallet to send transactions.");
   }
+
+  // Strictly enforce network match between applet mode and connected wallet
+  verifyWalletNetwork(tonConnectUI, expectedNetwork);
 
   try {
     return await tonConnectUI.sendTransaction(transaction);
@@ -91,24 +126,42 @@ export const getTonEndpoint = (network: TonNetwork = TON_NETWORK_MODE): string =
 
 export const TON_ENDPOINT = getTonEndpoint();
 
+// Strictly isolated Mainnet configuration
+const MAINNET_COLLECTION = (typeof process !== 'undefined' ? process.env?.VITE_TON_MAINNET_COLLECTION_ADDRESS : '') ||
+                           (typeof import.meta !== 'undefined' ? (import.meta as any).env?.VITE_TON_MAINNET_COLLECTION_ADDRESS : '') ||
+                           "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt";
+
+const MAINNET_MARKETPLACE = (typeof process !== 'undefined' ? process.env?.VITE_TON_MAINNET_MARKETPLACE_ADDRESS : '') ||
+                            (typeof import.meta !== 'undefined' ? (import.meta as any).env?.VITE_TON_MAINNET_MARKETPLACE_ADDRESS : '') ||
+                            "";
+
 export const TON_MAINNET_CONFIG = {
   network: 'TON Mainnet',
   chainId: -239,
   endpoint: getTonEndpoint('mainnet'),
   treasuryAddress: PARTNERSHIP_TREASURY_MAINNET,
-  collectionAddress: "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt",
-  marketplaceAddress: "EQAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIp3C",
+  collectionAddress: MAINNET_COLLECTION,
+  marketplaceAddress: MAINNET_MARKETPLACE,
   explorerUrl: 'https://tonviewer.com',
   scanUrl: 'https://tonscan.org'
 };
+
+// Strictly isolated Testnet configuration (never reuse Mainnet contract address on Testnet)
+const TESTNET_COLLECTION = (typeof process !== 'undefined' ? process.env?.VITE_TON_TESTNET_COLLECTION_ADDRESS : '') ||
+                           (typeof import.meta !== 'undefined' ? (import.meta as any).env?.VITE_TON_TESTNET_COLLECTION_ADDRESS : '') ||
+                           "kQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiU_";
+
+const TESTNET_MARKETPLACE = (typeof process !== 'undefined' ? process.env?.VITE_TON_TESTNET_MARKETPLACE_ADDRESS : '') ||
+                            (typeof import.meta !== 'undefined' ? (import.meta as any).env?.VITE_TON_TESTNET_MARKETPLACE_ADDRESS : '') ||
+                            "";
 
 export const TON_TESTNET_CONFIG = {
   network: 'TON Testnet',
   chainId: -3,
   endpoint: getTonEndpoint('testnet'),
   treasuryAddress: PARTNERSHIP_TREASURY_TESTNET,
-  collectionAddress: "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt",
-  marketplaceAddress: "EQAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIp3C",
+  collectionAddress: TESTNET_COLLECTION,
+  marketplaceAddress: TESTNET_MARKETPLACE,
   faucetBotUrl: 'https://t.me/testgiver_ton_bot',
   faucetWebUrl: 'https://ton.org/faucet',
   explorerUrl: 'https://testnet.tonviewer.com',
@@ -257,12 +310,18 @@ export const listNFTOnMarketplace = async (
   nftAddress: string,
   price: string
 ): Promise<boolean> => {
+  if (!TONJAM_MARKETPLACE_ADDRESS || !validateTonAddress(TONJAM_MARKETPLACE_ADDRESS)) {
+    throw new Error(`TonJam Marketplace contract is not configured or deployed on ${TON_NETWORK_MODE}.`);
+  }
+  if (!nftAddress || !validateTonAddress(nftAddress)) {
+    throw new Error("Invalid NFT contract address provided for listing.");
+  }
+
   try {
     const priceInNanotons = toNano(price);
     
     // In custodial pattern, we transfer the NFT to the marketplace
     // and provide the price in the forward_payload.
-    // message Transfer { query_id: uint64; new_owner: Address; response_destination: Address; custom_payload: Cell; forward_amount: coins; forward_payload: Slice; }
     const forwardPayload = beginCell().storeCoins(priceInNanotons).endCell();
     
     const body = beginCell()
@@ -304,13 +363,19 @@ export const buyNFTFromMarketplace = async (
   nftAddress: string,
   price: string
 ): Promise<string> => {
+  if (!TONJAM_MARKETPLACE_ADDRESS || !validateTonAddress(TONJAM_MARKETPLACE_ADDRESS)) {
+    throw new Error(`TonJam Marketplace contract is not configured or deployed on ${TON_NETWORK_MODE}.`);
+  }
+  if (!nftAddress || !validateTonAddress(nftAddress)) {
+    throw new Error("Invalid NFT contract address provided for purchase.");
+  }
+
   try {
     const priceInNanotons = toNano(price);
     const buyerFee = (priceInNanotons * 5n) / 100n;
     const totalAmount = priceInNanotons + buyerFee + toNano("0.1"); // Price + 5% Fee + Gas
     
     // Construct the BuyNFT message body
-    // message BuyNFT { query_id: Int as uint64; nft_address: Address; }
     const body = beginCell()
       .storeUint(112407828, 32) // Opcode for BuyNFT (0x06b32314)
       .storeUint(0, 64) // query_id
@@ -330,15 +395,8 @@ export const buyNFTFromMarketplace = async (
 
     const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Purchase Transaction sent:", result);
-    let txHash = '';
-    try {
-      if (result.boc) {
-        txHash = Cell.fromBase64(result.boc).hash().toString('hex');
-      }
-    } catch {
-      txHash = `tx_${Date.now()}`;
-    }
-    return txHash || result.boc;
+    const txHash = extractTxHashFromBoc(result.boc);
+    return txHash;
   } catch (error) {
     console.error("Error buying NFT:", error);
     throw error;
@@ -356,15 +414,19 @@ export const buyNFT = async (
   nftTitle: string,
   royaltySplits: any[] = []
 ): Promise<string> => {
+  if (!ownerAddress || !validateTonAddress(ownerAddress)) {
+    throw new Error("Invalid NFT seller wallet address for direct purchase.");
+  }
+
   try {
     const rawNumeric = parseFloat(price.replace(/[^\d.]/g, '')) || 0;
     const priceInNanotons = toNano(rawNumeric.toString());
-    const platformFee = (priceInNanotons * 5n) / 100n; // 5% platform fee
+    const platformFee = (priceInNanotons * 5n) / 100n; // 5% standardized platform fee
     const sellerAmount = priceInNanotons - platformFee;
 
     const messages: any[] = [
       {
-        address: validateTonAddress(ownerAddress) ? ownerAddress : PARTNERSHIP_TREASURY_ADDRESS,
+        address: ownerAddress,
         amount: sellerAmount.toString(),
       },
       {
@@ -379,15 +441,8 @@ export const buyNFT = async (
     };
 
     const result = await sendTransactionSafe(tonConnectUI, transaction);
-    let txHash = '';
-    try {
-      if (result.boc) {
-        txHash = Cell.fromBase64(result.boc).hash().toString('hex');
-      }
-    } catch {
-      txHash = `tx_${Date.now()}`;
-    }
-    return txHash || result.boc;
+    const txHash = extractTxHashFromBoc(result.boc);
+    return txHash;
   } catch (error) {
     console.error("Error in buyNFT:", error);
     throw error;
@@ -401,8 +456,14 @@ export const cancelNFTListing = async (
   tonConnectUI: TonConnectUI,
   nftAddress: string
 ): Promise<string> => {
+  if (!TONJAM_MARKETPLACE_ADDRESS || !validateTonAddress(TONJAM_MARKETPLACE_ADDRESS)) {
+    throw new Error(`TonJam Marketplace contract is not configured or deployed on ${TON_NETWORK_MODE}.`);
+  }
+  if (!nftAddress || !validateTonAddress(nftAddress)) {
+    throw new Error("Invalid NFT contract address provided for cancelling listing.");
+  }
+
   try {
-    // Construct the CancelSale message body
     const body = beginCell()
       .storeUint(1393330205, 32) // Opcode for CancelSale (0x530c881d)
       .storeUint(0, 64) // query_id
@@ -422,15 +483,7 @@ export const cancelNFTListing = async (
 
     const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Cancel Transaction sent:", result);
-    let txHash = '';
-    try {
-      if (result.boc) {
-        txHash = Cell.fromBase64(result.boc).hash().toString('hex');
-      }
-    } catch {
-      txHash = `cancel_${Date.now()}`;
-    }
-    return txHash;
+    return extractTxHashFromBoc(result.boc);
   } catch (error) {
     console.error("Error cancelling NFT listing:", error);
     throw error;
@@ -450,6 +503,10 @@ export const mintTonJamNFT = async (
       throw new Error("Receiver address and metadata URL are required for NFT minting");
     }
 
+    if (!TONJAM_COLLECTION_ADDRESS || !validateTonAddress(TONJAM_COLLECTION_ADDRESS)) {
+      throw new Error(`TonJam Collection contract address is not configured or deployed on ${TON_NETWORK_MODE}.`);
+    }
+
     // Construct the Mint message body
     const content = beginCell().storeStringTail(metadataUrl).endCell();
 
@@ -464,12 +521,7 @@ export const mintTonJamNFT = async (
       }
     }
 
-    let collAddress = TONJAM_COLLECTION_ADDRESS;
-    try {
-      Address.parse(collAddress);
-    } catch {
-      collAddress = TON_MAINNET_CONFIG.collectionAddress;
-    }
+    const collAddress = TONJAM_COLLECTION_ADDRESS;
     
     const body = beginCell()
       .storeUint(1048761405, 32) // Opcode for Mint (0x3e7f45bd)
@@ -491,15 +543,8 @@ export const mintTonJamNFT = async (
 
     const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("NFT Minting Transaction sent:", result);
-    let txHash = '';
-    try {
-      if (result.boc) {
-        txHash = Cell.fromBase64(result.boc).hash().toString('hex');
-      }
-    } catch {
-      txHash = `mint_${Date.now()}`;
-    }
-    return txHash || result.boc;
+    const txHash = extractTxHashFromBoc(result.boc);
+    return txHash;
   } catch (error) {
     console.error("Error minting TonJam NFT:", error);
     throw error;
@@ -535,8 +580,12 @@ export const placeBid = async (
   contractAddress: string,
   amount: string
 ): Promise<string> => {
+  const destAddress = contractAddress || TONJAM_MARKETPLACE_ADDRESS;
+  if (!destAddress || !validateTonAddress(destAddress)) {
+    throw new Error(`Auction / Marketplace contract is not configured on ${TON_NETWORK_MODE}.`);
+  }
+
   try {
-    const destAddress = contractAddress || TONJAM_MARKETPLACE_ADDRESS;
     const transaction = {
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
@@ -549,15 +598,7 @@ export const placeBid = async (
 
     const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("Bid Transaction sent:", result);
-    let txHash = '';
-    try {
-      if (result.boc) {
-        txHash = Cell.fromBase64(result.boc).hash().toString('hex');
-      }
-    } catch {
-      txHash = `bid_${Date.now()}`;
-    }
-    return txHash;
+    return extractTxHashFromBoc(result.boc);
   } catch (error) {
     console.error("Error placing bid:", error);
     throw error;
@@ -565,18 +606,23 @@ export const placeBid = async (
 };
 
 /**
- * Simulates accepting a bid on an NFT auction
+ * Accepts a bid on an NFT auction using the verified auction or escrow contract.
+ * Rejects placeholder destinations and validates settlement destination.
  */
 export const acceptBid = async (
   tonConnectUI: TonConnectUI,
   contractAddress: string
-): Promise<boolean> => {
+): Promise<{ boc: string; txHash: string }> => {
+  if (!contractAddress || contractAddress.startsWith("EQAA_PLATFORM_WALLET_ADDRESS") || !validateTonAddress(contractAddress)) {
+    throw new Error("Valid auction or settlement contract address is required to accept bids on-chain. Destination must be a deployed contract, not an individual wallet.");
+  }
+
   try {
     const transaction = {
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
         {
-          address: contractAddress || "EQAA_PLATFORM_WALLET_ADDRESS_8888888888888888", // Replace with actual auction contract
+          address: contractAddress,
           amount: "10000000", // Minimal gas fee for accepting
         },
       ],
@@ -584,7 +630,8 @@ export const acceptBid = async (
 
     const result = await sendTransactionSafe(tonConnectUI, transaction);
     console.log("Accept Bid Transaction sent:", result);
-    return true;
+    const txHash = extractTxHashFromBoc(result.boc);
+    return { boc: result.boc, txHash };
   } catch (error) {
     console.error("Error accepting bid:", error);
     throw error;
@@ -599,7 +646,7 @@ export const depositTON = async (
       validUntil: Math.floor(Date.now() / 1000) + 60, // 60 seconds
       messages: [
         {
-          address: "EQAA_PLATFORM_WALLET_ADDRESS_8888888888888888", // Replace with real platform wallet
+          address: PARTNERSHIP_TREASURY_ADDRESS,
           amount: (Number(amount) * 1e9).toString(), // Convert TON to nanoTON
           payload: "te6cckEBAQEAAgAAAEQ=", // Optional payload (e.g., 'Deposit')
         },
@@ -625,7 +672,7 @@ export const purchaseJAM = async (
       validUntil: Math.floor(Date.now() / 1000) + 60, // 60 seconds
       messages: [
         {
-          address: "EQAA_PLATFORM_WALLET_ADDRESS_8888888888888888", // Replace with real platform wallet
+          address: PARTNERSHIP_TREASURY_ADDRESS,
           amount: (parseFloat(amount) * 1000000000).toString(), // Convert to nanotons
         },
       ],
@@ -746,7 +793,7 @@ export const subscribePremium = async (
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
         {
-          address: "EQAA_PLATFORM_WALLET_ADDRESS_8888888888888888",
+          address: PARTNERSHIP_TREASURY_ADDRESS,
           amount: (parseFloat(amount) * 1000000000).toString(),
         },
       ],
@@ -766,32 +813,25 @@ export const subscribePremium = async (
  * For this prototype, we simulate the fee or use basic network assessment
  */
 export const getEstimatedGasFee = async (): Promise<number> => {
-  try {
-    // In a real app, query a reliable TON API like tonapi.io or calculate based on network load
-    // Mock simulation
-    return 0.05 + Math.random() * 0.02;
-  } catch (error) {
-    console.error("Error fetching gas fee:", error);
-    return 0.05; // Fallback
-  }
+  return 0.05;
 };
+
 /**
- * Performs a dry-run/simulation of a transaction against the TON testnet.
+ * Validates a transaction structure before wallet dispatch.
  */
 export const simulateTransaction = async (transaction: any): Promise<{success: boolean, message: string}> => {
   try {
-    // Mock simulation delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Simulate real-world checks (success/failure)
-    const success = Math.random() > 0.1;
+    const validMessages = Array.isArray(transaction?.messages) && transaction.messages.length > 0;
+    const allAddressesValid = validMessages && transaction.messages.every((m: any) => Boolean(m?.address && m?.amount));
     return {
-      success,
-      message: success ? "Transaction simulation successful! Ready to commit." : "Simulation failed: Likely out of gas or contract error."
+      success: Boolean(allAddressesValid),
+      message: allAddressesValid
+        ? "Transaction payload verified and ready to sign."
+        : "Invalid transaction payload: missing destination address or amount."
     };
   } catch (error) {
-    console.error("Error simulating transaction:", error);
-    return { success: false, message: "Simulation error." };
+    console.error("Error verifying transaction:", error);
+    return { success: false, message: "Transaction verification error." };
   }
 };
 
@@ -901,6 +941,10 @@ export const stakeMusicNFT = async (
   nftAddress: string,
   lockPeriodDays: number = 30
 ): Promise<boolean> => {
+  if (!nftAddress || nftAddress.startsWith("EQAA_MOCK_NFT_ADDRESS") || !validateTonAddress(nftAddress)) {
+    throw new Error("A valid, deployed Music NFT contract address is required for staking.");
+  }
+
   try {
     const lockPeriodSeconds = lockPeriodDays * 86400;
     
@@ -915,7 +959,7 @@ export const stakeMusicNFT = async (
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
         {
-          address: nftAddress || "EQAA_MOCK_NFT_ADDRESS_FOR_STAKING_123456",
+          address: nftAddress,
           amount: toNano("0.05").toString(),
           payload: body.toBoc().toString('base64'),
         },
@@ -938,6 +982,10 @@ export const unstakeMusicNFT = async (
   tonConnectUI: TonConnectUI,
   nftAddress: string
 ): Promise<boolean> => {
+  if (!nftAddress || nftAddress.startsWith("EQAA_MOCK_NFT_ADDRESS") || !validateTonAddress(nftAddress)) {
+    throw new Error("A valid, deployed Music NFT contract address is required for unstaking.");
+  }
+
   try {
     // Construct UnstakeNFT message body (opcode: 0x738d22ef)
     const body = beginCell()
@@ -949,7 +997,7 @@ export const unstakeMusicNFT = async (
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
         {
-          address: nftAddress || "EQAA_MOCK_NFT_ADDRESS_FOR_STAKING_123456",
+          address: nftAddress,
           amount: toNano("0.05").toString(),
           payload: body.toBoc().toString('base64'),
         },
@@ -972,6 +1020,10 @@ export const claimNFTStakingRewards = async (
   tonConnectUI: TonConnectUI,
   nftAddress: string
 ): Promise<boolean> => {
+  if (!nftAddress || nftAddress.startsWith("EQAA_MOCK_NFT_ADDRESS") || !validateTonAddress(nftAddress)) {
+    throw new Error("A valid, deployed Music NFT contract address is required for claiming rewards.");
+  }
+
   try {
     // Construct ClaimStakingRewards message body (opcode: 0x3a19e8fc)
     const body = beginCell()
@@ -983,7 +1035,7 @@ export const claimNFTStakingRewards = async (
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
         {
-          address: nftAddress || "EQAA_MOCK_NFT_ADDRESS_FOR_STAKING_123456",
+          address: nftAddress,
           amount: toNano("0.05").toString(),
           payload: body.toBoc().toString('base64'),
         },
@@ -1244,6 +1296,84 @@ export const verifyPartnershipContributionOnChain = async (
       message: err.message || "Failed to verify transaction on TON blockchain."
     };
   }
+};
+
+/**
+ * Strict Blockchain Transaction Lifecycle
+ */
+export type BlockchainTransactionState = 
+  | 'created'
+  | 'awaiting_wallet_approval'
+  | 'submitted'
+  | 'pending_confirmation'
+  | 'confirmed'
+  | 'failed'
+  | 'expired';
+
+export interface BlockchainTransactionRecord {
+  id: string;
+  txHash?: string;
+  status: BlockchainTransactionState;
+  type: string;
+  network: TonNetwork;
+  amount?: string;
+  senderAddress?: string;
+  recipientAddress?: string;
+  contractAddress?: string;
+  explorerUrl?: string;
+  scanUrl?: string;
+  error?: string;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const createTransactionLifecycleRecord = (
+  type: string,
+  details: {
+    amount?: string;
+    senderAddress?: string;
+    recipientAddress?: string;
+    contractAddress?: string;
+    metadata?: Record<string, any>;
+  }
+): BlockchainTransactionRecord => {
+  const id = `tx_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  return {
+    id,
+    status: 'created',
+    type,
+    network: TON_NETWORK_MODE,
+    ...details,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+};
+
+export const updateTransactionLifecycleState = (
+  record: BlockchainTransactionRecord,
+  nextState: BlockchainTransactionState,
+  updates?: { txHash?: string; error?: string; metadata?: Record<string, any> }
+): BlockchainTransactionRecord => {
+  const updated: BlockchainTransactionRecord = {
+    ...record,
+    status: nextState,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (updates?.txHash) {
+    updated.txHash = updates.txHash;
+    updated.explorerUrl = getTonViewerUrl(updates.txHash, true, record.network);
+    updated.scanUrl = getTonScanUrl(updates.txHash, true, record.network);
+  }
+  if (updates?.error) {
+    updated.error = updates.error;
+  }
+  if (updates?.metadata) {
+    updated.metadata = { ...(record.metadata || {}), ...updates.metadata };
+  }
+
+  return updated;
 };
 
 export * from './tonGasService';

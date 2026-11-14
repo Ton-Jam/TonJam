@@ -9,7 +9,11 @@ import {
   TON_MAINNET_CONFIG,
   TON_TESTNET_CONFIG,
   PARTNERSHIP_TREASURY_MAINNET,
-  PARTNERSHIP_TREASURY_TESTNET
+  PARTNERSHIP_TREASURY_TESTNET,
+  verifyWalletNetwork,
+  extractTxHashFromBoc,
+  createTransactionLifecycleRecord,
+  updateTransactionLifecycleState
 } from '../services/tonService';
 import { PLATFORM_FEE_PERCENTAGE, calculatePlatformFee, calculateArtistRoyalty } from '../services/royaltyService';
 import { Cell, toNano, beginCell } from '@ton/ton';
@@ -122,6 +126,80 @@ describe('TON Production Integration Phase 2 Unit Tests', () => {
       const tonHalf = 0.5;
       const nanoHalf = toNano(tonHalf.toString());
       expect(nanoHalf.toString()).toBe('500000000'); // 5e8 nanotons
+    });
+  });
+
+  describe('6. Wallet Network Mismatch Guards', () => {
+    it('rejects Mainnet wallet when app is in Testnet mode', () => {
+      const mockMainnetTonConnect: any = {
+        wallet: { account: { address: 'EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt', chain: '-239' } }
+      };
+      expect(() => verifyWalletNetwork(mockMainnetTonConnect, 'testnet')).toThrow(/Network mismatch.*Testnet/);
+    });
+
+    it('rejects Testnet wallet when app is in Mainnet mode', () => {
+      const mockTestnetTonConnect: any = {
+        wallet: { account: { address: 'kQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiU_', chain: '-3' } }
+      };
+      expect(() => verifyWalletNetwork(mockTestnetTonConnect, 'mainnet')).toThrow(/Network mismatch.*Mainnet/);
+    });
+
+    it('passes when wallet chain matches expected network mode', () => {
+      const mockMainnetTonConnect: any = {
+        wallet: { account: { address: 'EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt', chain: '-239' } }
+      };
+      expect(() => verifyWalletNetwork(mockMainnetTonConnect, 'mainnet')).not.toThrow();
+
+      const mockTestnetTonConnect: any = {
+        wallet: { account: { address: 'kQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiU_', chain: '-3' } }
+      };
+      expect(() => verifyWalletNetwork(mockTestnetTonConnect, 'testnet')).not.toThrow();
+    });
+  });
+
+  describe('7. Genuine BOC Hash Extraction & Error Handling', () => {
+    it('throws descriptive error on missing or empty BOC', () => {
+      expect(() => extractTxHashFromBoc('')).toThrow(/valid BOC payload/);
+      expect(() => extractTxHashFromBoc(undefined)).toThrow(/valid BOC payload/);
+    });
+
+    it('extracts genuine hash from cell BOC', () => {
+      const testCell = beginCell().storeUint(42, 32).endCell();
+      const boc = testCell.toBoc().toString('base64');
+      const hash = extractTxHashFromBoc(boc);
+      expect(hash).toBe(testCell.hash().toString('hex'));
+      expect(hash.length).toBe(64);
+    });
+  });
+
+  describe('8. Blockchain Transaction State Lifecycle Management', () => {
+    it('creates record with initial "created" state and preserves attributes', () => {
+      const record = createTransactionLifecycleRecord('nft_mint', {
+        amount: '1.5',
+        recipientAddress: 'EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt'
+      });
+
+      expect(record.status).toBe('created');
+      expect(record.type).toBe('nft_mint');
+      expect(record.amount).toBe('1.5');
+      expect(record.id).toMatch(/^tx_/);
+    });
+
+    it('transitions through lifecycle states to confirmed with explorer URLs', () => {
+      let record = createTransactionLifecycleRecord('nft_sale', { amount: '5.0' });
+
+      record = updateTransactionLifecycleState(record, 'awaiting_wallet_approval');
+      expect(record.status).toBe('awaiting_wallet_approval');
+
+      record = updateTransactionLifecycleState(record, 'submitted');
+      expect(record.status).toBe('submitted');
+
+      const mockHash = 'a1b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcdef0';
+      record = updateTransactionLifecycleState(record, 'confirmed', { txHash: mockHash });
+      expect(record.status).toBe('confirmed');
+      expect(record.txHash).toBe(mockHash);
+      expect(record.explorerUrl).toContain(mockHash);
+      expect(record.scanUrl).toContain(mockHash);
     });
   });
 });

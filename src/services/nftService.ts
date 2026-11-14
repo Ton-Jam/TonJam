@@ -1,74 +1,85 @@
 import { NFTItem } from '@/types';
-import { MOCK_NFTS } from '@/constants';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  where,
+} from 'firebase/firestore';
 
 /**
- * Simulates fetching NFT metadata from the blockchain or an API
+ * Fetches NFT metadata from Firestore by ID or contract address
  */
 export const fetchNFTMetadata = async (nftIdOrAddress: string): Promise<NFTItem | null> => {
+  if (!nftIdOrAddress) return null;
   try {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Find the NFT in our mock data
-    const nft = MOCK_NFTS.find(n => n.id === nftIdOrAddress || n.contractAddress === nftIdOrAddress);
-    
-    if (!nft) {
-      // Logic for real TON addresses in the prototype
-      if (nftIdOrAddress && (nftIdOrAddress.startsWith('EQ') || nftIdOrAddress.startsWith('UQ'))) {
-        return {
-          ...MOCK_NFTS[0],
-          id: `onchain-${nftIdOrAddress}`,
-          contractAddress: nftIdOrAddress,
-          title: `On-Chain Audio Asset ${nftIdOrAddress.slice(0, 4)}...${nftIdOrAddress.slice(-4)}`,
-          owner: 'TON Blockchain',
-          price: '0.0',
-          history: [
-            { event: 'Minted', from: 'System', to: 'Vault', date: '2026-05-16' }
-          ]
-        };
-      }
-      console.warn(`NFT with ID or Address ${nftIdOrAddress} not found`);
-      return null;
+    const directRef = doc(db, 'nfts', nftIdOrAddress);
+    const directSnap = await getDoc(directRef);
+    if (directSnap.exists()) {
+      return { id: directSnap.id, ...directSnap.data() } as NFTItem;
     }
-    
-    return nft;
+
+    const byContract = query(
+      collection(db, 'nfts'),
+      where('contractAddress', '==', nftIdOrAddress),
+      limit(1)
+    );
+    const contractSnap = await getDocs(byContract);
+    if (!contractSnap.empty) {
+      const d = contractSnap.docs[0];
+      return { id: d.id, ...d.data() } as NFTItem;
+    }
+
+    return null;
   } catch (error) {
-    console.error("Error fetching NFT metadata:", error);
+    handleFirestoreError(error, OperationType.GET, `nfts/${nftIdOrAddress}`);
     return null;
   }
 };
 
 /**
- * Fetches floor price history for a given collection address over the last 30 days
- * Simulates data from TON blockchain
+ * Fetches recorded NFT sale price points from Firestore `nftSales` collection.
  */
-export const fetchFloorPriceHistory = async (collectionAddress: string): Promise<{ date: string; price: number }[]> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 600));
+export const fetchFloorPriceHistory = async (
+  collectionAddress: string
+): Promise<{ date: string; price: number }[]> => {
+  if (!collectionAddress) return [];
+  try {
+    const salesQuery = query(
+      collection(db, 'nftSales'),
+      orderBy('timestamp', 'asc'),
+      limit(60)
+    );
+    const snap = await getDocs(salesQuery);
+    if (snap.empty) return [];
 
-  // Generate 30 days of mock data
-  const data = [];
-  const now = new Date();
-  
-  // Base price for the collection (randomized for realism)
-  // Seed based on address string length or content to be deterministic for the session
-  const seed = collectionAddress.length * 10;
-  let currentPrice = 5 + (seed % 15); 
-
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(now.getDate() - i);
-    
-    // Random fluctuation (±3-5% daily)
-    const daySeed = Math.sin(seed + i) * 10000;
-    const fluctuation = (daySeed - Math.floor(daySeed) - 0.48) * 0.08; 
-    currentPrice = Math.max(0.1, currentPrice * (1 + fluctuation));
-    
-    data.push({
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      price: parseFloat(currentPrice.toFixed(2))
+    const points: { date: string; price: number }[] = [];
+    snap.forEach((docSnap) => {
+      const data = docSnap.data() as any;
+      if (
+        !data.collectionAddress ||
+        data.collectionAddress === collectionAddress ||
+        data.nftId === collectionAddress
+      ) {
+        const priceNum = parseFloat(String(data.price || data.amount || 0));
+        if (!isNaN(priceNum) && priceNum > 0) {
+          const ts = data.timestamp?.toDate
+            ? data.timestamp.toDate()
+            : new Date(data.timestamp || Date.now());
+          points.push({
+            date: ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            price: parseFloat(priceNum.toFixed(2)),
+          });
+        }
+      }
     });
+    return points;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.LIST, 'nftSales');
+    return [];
   }
-
-  return data;
 };

@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { Track } from '@/types';
 import { indexedDbService } from '@/services/indexedDbService';
 import { localAudioService } from '@/services/localAudioService';
+import { getPlaceholderImage } from '@/lib/utils';
 
 /**
  * Recognized audio extensions and MIME types
@@ -149,16 +150,16 @@ function probeAudioFileMetadata(file: File): Promise<{ duration: number; error?:
 
       // Set a resilient 3.5s timeout to prevent freezing the UI on obscure codecs
       timeoutId = setTimeout(() => {
-        logScanner('warn', `Metadata probe timed out after 3500ms for file: "${file.name}" (${formatBytes(file.size)}). Falling back to default duration.`);
+        logScanner('warn', `Metadata probe timed out after 3500ms for file: "${file.name}" (${formatBytes(file.size)}).`);
         cleanup();
-        resolve({ duration: 180, error: 'Metadata extraction timed out (browser audio decoder did not respond in 3500ms)' });
+        resolve({ duration: 0, error: 'Metadata extraction timed out (browser audio decoder did not respond in 3500ms)' });
       }, 3500);
 
       audio.onloadedmetadata = () => {
         const rawDur = audio.duration;
         const validDuration = (rawDur && !isNaN(rawDur) && isFinite(rawDur) && rawDur > 0)
           ? Math.round(rawDur)
-          : 180;
+          : 0;
         
         logScanner('success', `Audio metadata loaded for "${file.name}": duration=${validDuration}s, channels=${(audio as any).channelCount || 'unknown'}`);
         cleanup();
@@ -172,13 +173,13 @@ function probeAudioFileMetadata(file: File): Promise<{ duration: number; error?:
         
         logScanner('warn', `Audio element encountered error for "${file.name}" [code ${code}]: ${reason}`);
         cleanup();
-        resolve({ duration: 180, error: `Media error [code ${code}]: ${reason}` });
+        resolve({ duration: 0, error: `Media error [code ${code}]: ${reason}` });
       };
 
       audio.onabort = () => {
         logScanner('warn', `Audio metadata load aborted for "${file.name}"`);
         cleanup();
-        resolve({ duration: 180, error: 'Metadata load aborted' });
+        resolve({ duration: 0, error: 'Metadata load aborted' });
       };
 
       audio.src = objectUrl;
@@ -187,7 +188,7 @@ function probeAudioFileMetadata(file: File): Promise<{ duration: number; error?:
       if (objectUrl) {
         try { URL.revokeObjectURL(objectUrl); } catch {}
       }
-      resolve({ duration: 180, error: err?.message || 'Object URL creation error' });
+      resolve({ duration: 0, error: err?.message || 'Object URL creation error' });
     }
   });
 }
@@ -412,7 +413,7 @@ export function useLibraryScanner() {
           duration,
           streams: 0,
           playCount: 0,
-          coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=300&h=300&q=80',
+          coverUrl: getPlaceholderImage('track'),
           audioUrl: objectUrl,
           genre: 'Local Audio',
           isNFT: false,

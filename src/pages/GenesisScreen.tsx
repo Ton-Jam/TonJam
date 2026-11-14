@@ -17,20 +17,22 @@ import {
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_NFTS, MOCK_ARTISTS, TON_LOGO, TJ_COIN_ICON } from '@/constants';
+import { TON_LOGO, TJ_COIN_ICON } from '@/constants';
+import { useAudio } from '@/contexts/AudioContext';
 import NFTCard from '@/components/NFTCard';
 import { cn } from '@/lib/utils';
 
 const GenesisScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { allNFTs, artists } = useAudio();
 
   const genesisNFTs = useMemo(() => {
-    return MOCK_NFTS.filter(nft => nft.title.toLowerCase().includes('genesis') || nft.edition === 'Unique');
-  }, []);
+    return allNFTs.filter(nft => nft.title.toLowerCase().includes('genesis') || nft.edition === 'Unique');
+  }, [allNFTs]);
 
   const featuredArtists = useMemo(() => {
-    return MOCK_ARTISTS.slice(0, 4);
-  }, []);
+    return artists.slice(0, 4);
+  }, [artists]);
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-blue-500/30 overflow-x-hidden">

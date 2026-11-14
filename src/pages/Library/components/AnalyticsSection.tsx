@@ -9,7 +9,7 @@ interface AnalyticsSectionProps {
 
 export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ analytics }) => {
   // SVG Chart calculation variables
-  const maxHours = Math.max(...analytics.weeklyHours.map(d => d.hours));
+  const maxHours = Math.max(1, ...analytics.weeklyHours.map(d => d.hours));
   const chartHeight = 120;
   const chartWidth = 360;
 
@@ -99,9 +99,11 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ analytics })
               {/* Bars rendering */}
               {analytics.weeklyHours.map((data, index) => {
                 const barWidth = 32;
-                const barGap = (chartWidth - barWidth * analytics.weeklyHours.length) / (analytics.weeklyHours.length - 1);
+                const barGap = analytics.weeklyHours.length > 1
+                  ? (chartWidth - barWidth * analytics.weeklyHours.length) / (analytics.weeklyHours.length - 1)
+                  : 0;
                 const x = index * (barWidth + barGap);
-                const barHeight = (data.hours / maxHours) * (chartHeight - 20);
+                const barHeight = Math.max(0, (data.hours / maxHours) * (chartHeight - 20));
                 const y = chartHeight - 20 - barHeight;
 
                 return (

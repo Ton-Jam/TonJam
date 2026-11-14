@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Radio, Users, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { collection, onSnapshot, query, limit } from "firebase/firestore";
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
 import confetti from "canvas-confetti";
 
 export interface LiveSpaceItem {
@@ -12,14 +14,41 @@ export interface LiveSpaceItem {
   status: "LIVE" | "UPCOMING";
 }
 
-const STATIC_LIVE_SPACES: LiveSpaceItem[] = [
-  { id: "space-1", title: "Afrobeats Producers Lounge 🌍", host: "Ayra Starr", listeners: "1.4k", status: "LIVE" },
-  { id: "space-2", title: "TON Creators Hub - Minting Future 🚀", host: "DJ Krupy", listeners: "920", status: "LIVE" },
-  { id: "space-3", title: "Music NFT Masterclass v2 💎", host: "Cyber Lord", listeners: "410", status: "LIVE" }
-];
-
-export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spaces = STATIC_LIVE_SPACES }) => {
+export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spaces }) => {
   const navigate = useNavigate();
+  const [firestoreSpaces, setFirestoreSpaces] = useState<LiveSpaceItem[]>([]);
+
+  useEffect(() => {
+    if (spaces) return;
+    const q = query(collection(db, "liveStreams"), limit(5));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const items: LiveSpaceItem[] = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data() as any;
+          const statusRaw = String(data.status || "").toUpperCase();
+          if (statusRaw === "LIVE" || statusRaw === "UPCOMING" || data.isLive) {
+            items.push({
+              id: docSnap.id,
+              title: data.title || "Live Audio Room",
+              host: data.hostName || data.artistName || data.host || "Artist",
+              listeners: String(data.viewersCount ?? data.listeners ?? 0),
+              status: statusRaw === "UPCOMING" ? "UPCOMING" : "LIVE",
+            });
+          }
+        });
+        setFirestoreSpaces(items);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, "liveStreams");
+      }
+    );
+    return () => unsubscribe();
+  }, [spaces]);
+
+  const activeSpaces = spaces ?? firestoreSpaces;
+  if (!activeSpaces || activeSpaces.length === 0) return null;
 
   return (
     <section className="space-y-3 text-left w-full">
@@ -44,7 +73,7 @@ export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spac
       </div>
 
       <div className="space-y-1.5 px-4 sm:px-6 lg:px-8 w-full">
-        {spaces.map((room) => (
+        {activeSpaces.map((room) => (
           <div
             key={room.id}
             className="p-3 sm:p-3.5 rounded-xl bg-transparent hover:bg-white/[0.03] flex items-center justify-between gap-3 border-none transition-colors"

@@ -14,7 +14,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import { MOCK_ARTISTS } from '@/constants';
 
 interface NFTOptionsModalProps {
   nft: NFTItem;
@@ -29,13 +28,13 @@ interface NFTOptionsModalProps {
 
 const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend, onList, onBuy, onHistory, onAddToFolder, onShare }) => {
   const navigate = useNavigate();
-  const { addNotification, userProfile, setAnthem } = useAudio();
+  const { addNotification, userProfile, setAnthem, artists } = useAudio();
 
-  const isOwner = nft.owner === userProfile.walletAddress;
+  const isOwner = Boolean(userProfile?.walletAddress && nft.owner === userProfile.walletAddress);
   const isAnthem = userProfile.anthemId === nft.id;
   
-  const artist = MOCK_ARTISTS.find(a => a.name === nft.creator || a.name === nft.artist);
-  const isVerified = artist?.verified || artist?.isVerifiedArtist;
+  const artist = (artists || []).find(a => a.name === nft.creator || a.name === nft.artist);
+  const isVerified = nft.artistVerified || artist?.verified || artist?.isVerifiedArtist;
 
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = React.useState(false);
 
@@ -77,7 +76,6 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
         onClose();
         break;
       case 'tonscan':
-        window.open(`https://testnet.tonscan.org/nft/${nft.contractAddress || nft.id}`, '_blank');
         onClose();
         break;
       case 'copy-id':
@@ -132,7 +130,9 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
   }
 
   options.push({ id: 'swap', icon: ArrowUpDown, label: 'Swap NFT on DEX', color: 'text-blue-400 font-bold', iconColor: 'text-blue-400', action: async () => { navigate(`/swap?nftId=${nft.id}`); onClose(); } });
-  options.push({ id: 'tonscan', icon: ExternalLink, label: 'View on TonScan (Testnet)', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('tonscan') });
+  if (nft.contractAddress) {
+    options.push({ id: 'tonscan', icon: ExternalLink, label: 'View on TonScan', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('tonscan') });
+  }
   options.push({ id: 'copy-id', icon: Copy, label: 'Copy NFT ID', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('copy-id') });
   options.push({ id: 'share', icon: Share2, label: 'Share NFT', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('share') });
 
@@ -184,20 +184,39 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
             </DrawerHeader>
             
             <div className="space-y-0.5 max-h-[45vh] overflow-y-auto no-scrollbar py-1">
-              {options.map((option, index) => (
-                <button
-                  key={option.id}
-                  onClick={option.action} 
-                  className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/5 active:bg-white/10 transition-colors text-left group focus-visible:outline-none"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <option.icon className={`h-4 w-4 ${option.iconColor} transition-transform group-hover:scale-105`} />
-                    <span className={`text-xs font-medium ${option.color}`}>
-                      {option.label}
-                    </span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
+              {options.map((option) => (
+                option.id === 'tonscan' && nft.contractAddress ? (
+                  <a
+                    key={option.id}
+                    href={`https://tonviewer.com/${nft.contractAddress}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => onClose()}
+                    className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/5 active:bg-white/10 transition-colors text-left group focus-visible:outline-none"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <option.icon className={`h-4 w-4 ${option.iconColor} transition-transform group-hover:scale-105`} />
+                      <span className={`text-xs font-medium ${option.color}`}>
+                        {option.label}
+                      </span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </a>
+                ) : (
+                  <button
+                    key={option.id}
+                    onClick={option.action} 
+                    className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/5 active:bg-white/10 transition-colors text-left group focus-visible:outline-none"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <option.icon className={`h-4 w-4 ${option.iconColor} transition-transform group-hover:scale-105`} />
+                      <span className={`text-xs font-medium ${option.color}`}>
+                        {option.label}
+                      </span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
+                )
               ))}
             </div>
 

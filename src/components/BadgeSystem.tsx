@@ -49,17 +49,16 @@ export const BadgeSystem: React.FC<BadgeSystemProps> = ({ user, isOwnProfile }) 
   const { recentlyPlayed, allNFTs, playlists, playTrack, allTracks, addNotification, posts = [] } = useAudio();
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
 
-  // Read JamPoints state from localStorage (sync with JamPointsTracker)
   const tracksListenedCount = useMemo(() => {
-    if (typeof window === 'undefined') return 2;
+    if (typeof window === 'undefined') return recentlyPlayed?.length || 0;
     const val = localStorage.getItem('jampoints_tracks_count');
-    return val ? parseInt(val, 10) : 2;
-  }, []);
+    return val ? parseInt(val, 10) : (recentlyPlayed?.length || 0);
+  }, [recentlyPlayed?.length]);
 
   const nftsExploredCount = useMemo(() => {
-    if (typeof window === 'undefined') return 3;
+    if (typeof window === 'undefined') return 0;
     const val = localStorage.getItem('jampoints_nfts_count');
-    return val ? parseInt(val, 10) : 3;
+    return val ? parseInt(val, 10) : 0;
   }, []);
 
   const hasCheckedInStatus = useMemo(() => {
@@ -71,11 +70,11 @@ export const BadgeSystem: React.FC<BadgeSystemProps> = ({ user, isOwnProfile }) 
     return posts.filter((p: any) => p.userId === user.uid).length;
   }, [posts, user.uid]);
 
-  const [bonusPoints, setBonusPoints] = useState<number>(() => {
-    if (typeof window === 'undefined') return 150;
+  const bonusPoints = useMemo<number>(() => {
+    if (typeof window === 'undefined') return 0;
     const val = localStorage.getItem('jampoints_vip_bonus');
-    return val ? parseInt(val, 10) : 150; // default 150 points bonus to kick off Bronze VIP level
-  });
+    return val ? parseInt(val, 10) : 0;
+  }, []);
 
   const baseJamPoints = (Math.min(tracksListenedCount, 5) * 40) +
                         (Math.min(nftsExploredCount, 6) * 25) +
@@ -97,51 +96,23 @@ export const BadgeSystem: React.FC<BadgeSystemProps> = ({ user, isOwnProfile }) 
     return { level: 0, name: 'STANDARD COLLECTOR', label: 'VIP Level 0', color: '#A1A1AA', req: 0, perk: 'Accumulate JamPoints to enter VIP protocol' };
   }, [accumulatedPoints]);
 
-  const handleClaimPoints = () => {
-    const nextBonus = bonusPoints + 150;
-    setBonusPoints(nextBonus);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('jampoints_vip_bonus', nextBonus.toString());
-    }
-    addNotification(`Acquired +150 LP! Leveling up telemetry. Current balance: ${baseJamPoints + nextBonus} JamPoints.`, 'success');
-  };
-
-  const resetPoints = () => {
-    setBonusPoints(0);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('jampoints_vip_bonus', '0');
-    }
-    addNotification('Recalibrated VIP telemetry points registry.', 'info');
-  };
-
   // Compute dynamic stats based on user context
   const badgesList = useMemo<Badge[]>(() => {
-    // 1. Top Fan Badge Calculations
-    // Own profile uses live recently played tracks count. Others use pre-set realistic constants.
-    const listeningCount = isOwnProfile 
-      ? recentlyPlayed?.length || 0 
-      : (user.uid === 'u2' ? 14 : user.uid === 'u3' ? 8 : 1);
+    const listeningCount = isOwnProfile ? (recentlyPlayed?.length || 0) : 0;
     const targetListening = 5;
     const topFanProgress = Math.min(100, Math.round((listeningCount / targetListening) * 100));
 
-    // 2. Super Collector Badge Calculations
-    const nftCount = isOwnProfile
-      ? allNFTs.filter(nft => nft.owner === user.walletAddress || nft.owner === user.name).length
-      : (user.uid === 'u2' ? 5 : user.uid === 'u3' ? 1 : 0);
+    const nftCount = allNFTs.filter(
+      nft => (user.walletAddress && nft.owner === user.walletAddress) || nft.owner === user.name || nft.ownerId === user.uid
+    ).length;
     const targetCollector = 2;
     const superCollectorProgress = Math.min(100, Math.round((nftCount / targetCollector) * 100));
 
-    // 3. Vibe Curator Badge Calculations
-    const playlistCount = isOwnProfile
-      ? playlists.filter(p => p.creator === user.name).length
-      : (user.uid === 'u2' ? 2 : user.uid === 'u3' ? 1 : 0);
+    const playlistCount = playlists.filter(p => p.creator === user.name || p.creatorId === user.uid).length;
     const targetCurator = 2;
     const curatorProgress = Math.min(100, Math.round((playlistCount / targetCurator) * 100));
 
-    // 4. Pioneer Member Badge Calculations
-    const isPioneer = isOwnProfile
-      ? (user.tjBalance && user.tjBalance > 0) || (user.stakedJam && user.stakedJam > 0) || true
-      : (user.uid === 'u2' || user.uid === 'u3');
+    const isPioneer = Boolean((user.tjBalance && user.tjBalance > 0) || (user.stakedJam && user.stakedJam > 0));
     const pioneerProgress = isPioneer ? 100 : 0;
 
     // Normal Community Badges
@@ -280,21 +251,10 @@ export const BadgeSystem: React.FC<BadgeSystemProps> = ({ user, isOwnProfile }) 
     return items;
   }, [recentlyPlayed, allNFTs, playlists, user, isOwnProfile, accumulatedPoints]);
 
-  const handleSimulatedPlay = () => {
-    if (allTracks.length > 0) {
-      const randomIdx = Math.floor(Math.random() * allTracks.length);
-      const randomTrack = allTracks[randomIdx];
-      playTrack(randomTrack);
-      addNotification(`Streaming "${randomTrack.title}" directly from Badge Control`, 'success');
-      setSelectedBadge(null);
-    } else {
-      navigate('/discover');
-    }
-  };
-
   const handleBadgeAction = (badge: Badge) => {
-    if (badge.id === 'top-fan' && isOwnProfile) {
-      handleSimulatedPlay();
+    if (badge.id === 'top-fan' && isOwnProfile && allTracks.length > 0) {
+      playTrack(allTracks[0]);
+      setSelectedBadge(null);
       return;
     }
     if (badge.actionPath) {
@@ -325,23 +285,6 @@ export const BadgeSystem: React.FC<BadgeSystemProps> = ({ user, isOwnProfile }) 
               Perk Level unlocked: <span className="text-white font-black">{vipTierInfo.perk}</span>
             </p>
           </div>
-          
-          {isOwnProfile && (
-            <div className="flex gap-1.5 shrink-0">
-              <button
-                onClick={handleClaimPoints}
-                className="px-4 py-2 text-[8px] font-black uppercase tracking-widest bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-all cursor-pointer shadow-[0_4px_12px_rgba(59,130,246,0.3)] border-none"
-              >
-                +150 LP Test Points
-              </button>
-              <button
-                onClick={resetPoints}
-                className="px-3.5 py-2 text-[8px] font-black uppercase tracking-widest bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-full transition-all cursor-pointer border-none"
-              >
-                Reset
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Dynamic score summary */}

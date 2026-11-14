@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { MOCK_TESTING_TRACKS, MockTrack } from '@/data/mockTracks';
 import { Track } from '@/types';
 import { GENRES } from '@/constants';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface LibraryContextType {
-  testingTracks: MockTrack[];
+  testingTracks: Track[];
   injectTestingTracks: () => { success: boolean; count: number; message: string };
   clearTestingTracks: () => { success: boolean; message: string };
   isTestingTracksInjected: boolean;
@@ -18,8 +18,8 @@ const LibraryContext = createContext<LibraryContextType | null>(null);
 
 const FALLBACK_LIBRARY_CONTEXT: LibraryContextType = {
   testingTracks: [],
-  injectTestingTracks: () => ({ success: true, count: 0, message: '' }),
-  clearTestingTracks: () => ({ success: true, message: '' }),
+  injectTestingTracks: () => ({ success: false, count: 0, message: 'Mock testing tracks are disabled.' }),
+  clearTestingTracks: () => ({ success: true, message: 'Library is clear.' }),
   isTestingTracksInjected: false,
   recentlyPlayed: [],
   selectedGenre: 'All',
@@ -36,160 +36,53 @@ export const useLibrary = () => {
 };
 
 export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isTestingTracksInjected, setIsTestingTracksInjected] = useState(false);
+  const { recentlyPlayed: audioRecentlyPlayed } = useAudio();
   const [selectedGenre, setSelectedGenre] = useState<string>('All');
-  const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>(() => {
-    try {
-      const saved = localStorage.getItem('tonjam_recently_played');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
-  });
+  const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>(audioRecentlyPlayed || []);
+
+  useEffect(() => {
+    setRecentlyPlayed(audioRecentlyPlayed || []);
+  }, [audioRecentlyPlayed]);
 
   const availableGenres = useMemo(() => {
     const genreSet = new Set<string>();
     genreSet.add('All');
-    GENRES.forEach(g => genreSet.add(g.name));
+    GENRES.forEach((g) => genreSet.add(g.name));
     return Array.from(genreSet);
   }, []);
 
-  // Check if testing tracks are already present in localStorage on mount
-  useEffect(() => {
-    const checkInjectionStatus = () => {
-      try {
-        const localTracksStr = localStorage.getItem('tonjam_library_tracks');
-        if (localTracksStr) {
-          const currentTracks = JSON.parse(localTracksStr);
-          const hasAll = MOCK_TESTING_TRACKS.every(mt => 
-            currentTracks.some((t: any) => t.id === mt.id)
-          );
-          setIsTestingTracksInjected(hasAll);
-        }
-      } catch (e) {
-        setIsTestingTracksInjected(false);
-      }
-    };
-
-    const handleStorageChange = () => {
-      try {
-        const saved = localStorage.getItem('tonjam_recently_played');
-        if (saved) {
-          setRecentlyPlayed(JSON.parse(saved));
-        }
-      } catch (e) {}
-      checkInjectionStatus();
-    };
-
-    checkInjectionStatus();
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('tonjam_library_updated', handleStorageChange);
-    window.addEventListener('tonjam_audio_updated', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('tonjam_library_updated', handleStorageChange);
-      window.removeEventListener('tonjam_audio_updated', handleStorageChange);
-    };
-  }, []);
-
-  const injectTestingTracks = () => {
-    let localTracksStr = '[]';
-    try {
-      localTracksStr = localStorage.getItem('tonjam_library_tracks') || '[]';
-    } catch {}
-    try {
-      const currentTracks = JSON.parse(localTracksStr);
-      let addedCount = 0;
-
-      const updatedTracks = [...currentTracks];
-      MOCK_TESTING_TRACKS.forEach(mock => {
-        const exists = updatedTracks.some((t: any) => t.id === mock.id);
-        if (!exists) {
-          // Map mock track fields to the LibraryTrack expected format
-          updatedTracks.unshift({
-            id: mock.id,
-            title: mock.title,
-            artist: mock.artist,
-            artistId: 'art-mock-testing',
-            album: mock.album || 'Testing Album',
-            coverUrl: mock.coverArtUrl, // both variants
-            duration: mock.duration,
-            plays: 42,
-            isLiked: true,
-            isDownloaded: true, // make them immediately offline available for testing
-            isOfflineAvailable: true,
-            downloadSize: '4.8 MB',
-            downloadQuality: 'Lossless'
-          });
-          addedCount++;
-        }
-      });
-
-      localStorage.setItem('tonjam_library_tracks', JSON.stringify(updatedTracks));
-      setIsTestingTracksInjected(true);
-      
-      // Dispatch custom events to notify other contexts or hooks
-      window.dispatchEvent(new Event('tonjam_library_updated'));
-      window.dispatchEvent(new Event('storage'));
-
-      return {
-        success: true,
-        count: addedCount,
-        message: addedCount > 0 
-          ? `Successfully injected ${addedCount} testing tracks into local state.`
-          : 'Testing tracks are already loaded in state.'
-      };
-    } catch (err) {
-      console.error('Failed to inject testing tracks:', err);
-      return {
-        success: false,
-        count: 0,
-        message: 'Could not write tracks to application state.'
-      };
-    }
-  };
+  const injectTestingTracks = () => ({
+    success: false,
+    count: 0,
+    message: 'Mock testing tracks are disabled. Library uses live Firestore tracks.',
+  });
 
   const clearTestingTracks = () => {
-    const localTracksStr = localStorage.getItem('tonjam_library_tracks');
-    if (!localTracksStr) return { success: true, message: 'Library is already clear.' };
-
     try {
-      const currentTracks = JSON.parse(localTracksStr);
-      const mockIds = MOCK_TESTING_TRACKS.map(m => m.id);
-      const filtered = currentTracks.filter((t: any) => !mockIds.includes(t.id));
-
-      localStorage.setItem('tonjam_library_tracks', JSON.stringify(filtered));
-      setIsTestingTracksInjected(false);
-
-      // Dispatch synchronization events
-      window.dispatchEvent(new Event('tonjam_library_updated'));
-      window.dispatchEvent(new Event('storage'));
-
-      return {
-        success: true,
-        message: 'Successfully purged testing tracks from local state.'
-      };
-    } catch (err) {
-      console.error('Failed to clear testing tracks:', err);
-      return {
-        success: false,
-        message: 'Purge operation failed.'
-      };
+      localStorage.removeItem('tonjam_library_tracks');
+      localStorage.removeItem('tonjam_library_nfts');
+    } catch {
+      // Ignore storage errors
     }
+    return {
+      success: true,
+      message: 'Cleared cached library data.',
+    };
   };
 
   return (
-    <LibraryContext.Provider value={{
-      testingTracks: MOCK_TESTING_TRACKS,
-      injectTestingTracks,
-      clearTestingTracks,
-      isTestingTracksInjected,
-      recentlyPlayed,
-      selectedGenre,
-      setSelectedGenre,
-      availableGenres
-    }}>
+    <LibraryContext.Provider
+      value={{
+        testingTracks: [],
+        injectTestingTracks,
+        clearTestingTracks,
+        isTestingTracksInjected: false,
+        recentlyPlayed,
+        selectedGenre,
+        setSelectedGenre,
+        availableGenres,
+      }}
+    >
       {children}
     </LibraryContext.Provider>
   );

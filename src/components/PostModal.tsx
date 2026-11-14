@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { X, Image, Share2, Sparkles, Music, Check, Send, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MOCK_USER, APP_LOGO } from "@/constants";
+import { APP_LOGO } from "@/constants";
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES, shareContent } from "@/lib/utils";
 import { uploadPostImage } from "@/services/storageService";
@@ -19,7 +19,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
   const [showTrackPicker, setShowTrackPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { addNotification, allTracks } = useAudio();
+  const { addNotification, allTracks, userProfile } = useAudio();
   const maxLength = 280;
 
   const handleSubmit = async () => {
@@ -95,7 +95,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
           <div className="flex gap-4">
             <div className="flex-shrink-0">
               <img
-                src={MOCK_USER.avatar || getPlaceholderImage(`user-${MOCK_USER.uid}`)}
+                src={userProfile?.avatar || getPlaceholderImage(`user-${userProfile?.uid || 'guest'}`)}
                 className="w-10 h-10 rounded-full object-cover border-none"
                 alt="Your avatar"
               />

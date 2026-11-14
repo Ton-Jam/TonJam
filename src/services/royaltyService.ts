@@ -118,18 +118,9 @@ export async function distributeRoyalties(
     };
     batch.set(txRef, txData);
 
-    // 3. Update Treasury Fees
-    if (distribution.platformFee > 0) {
-      const treasuryRef = doc(db, 'system/treasury');
-      batch.set(treasuryRef, {
-        balance: increment(distribution.platformFee),
-        totalFeesCollected: increment(distribution.platformFee),
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-    }
-
+    // 3. Record Transaction with platform fee accounting
     await batch.commit();
-    console.log(`Royalty distribution complete for ${type}. Artist Share: ${distribution.artistShare}`);
+    console.log(`Royalty distribution complete for ${type}. Artist Share: ${distribution.artistShare}, Platform Fee: ${distribution.platformFee}`);
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'royalties');
   }
@@ -137,9 +128,9 @@ export async function distributeRoyalties(
 
 /**
  * Distributes NFT resale royalties automatically.
- * Platform Fee: 10%
+ * Platform Fee: 5% (Standard TonJam platform fee)
  * Royalty Commission (Original Artist/Collabs): e.g. 10% (from splits, or fallback)
- * Seller (Current Owner) Proceeds: 80% (remaining)
+ * Seller (Current Owner) Proceeds: remaining after platform fee and royalty
  */
 export async function distributeNFTRoyaltiesWithSeller(
   amount: number,
@@ -161,17 +152,10 @@ export async function distributeNFTRoyaltiesWithSeller(
   try {
     const batch = writeBatch(db);
 
-    // 1. Credit the platform treasury
-    if (platformFee > 0) {
-      const treasuryRef = doc(db, 'system/treasury');
-      batch.set(treasuryRef, {
-        balance: increment(platformFee),
-        totalFeesCollected: increment(platformFee),
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-    }
+    // Platform fee accounting is tracked in the immutable transaction record.
+    // Direct writes to system/treasury are restricted to administrative authority.
 
-    // 2. Credit the Original Artist (split)
+    // 1. Credit the Original Artist (split)
     // If no custom splits, artist gets 100% of the royalty commission
     if (!royaltySplits || royaltySplits.length === 0) {
       const artistRef = doc(db, 'royalties', artistId);

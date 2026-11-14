@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LazyArtworkImage from "@/components/common/LazyArtworkImage";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
 
 export interface SponsoredPromo {
   id: string;
@@ -13,55 +14,57 @@ export interface SponsoredPromo {
   artwork: string;
   badge: "LAUNCH" | "NFT DROP" | "SPONSORED" | "LIVE";
   ctaText: string;
+  link?: string;
 }
 
-export const SPONSORED_PROMOS: SponsoredPromo[] = [
-  { 
-    id: "promo-1", 
-    title: "Solar Pulse Reloaded", 
-    description: "Collect the exclusive diamond release NFT drop by DJ Krupy.", 
-    artwork: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=600&height=400&nologo=true", 
-    badge: "NFT DROP", 
-    ctaText: "Mint Now" 
-  },
-  { 
-    id: "promo-2", 
-    title: "TON Producers Summit", 
-    description: "Tune in live with top audio architects & Web3 producers.", 
-    artwork: "https://image.pollinations.ai/prompt/futuristic%20audio%20synthesizer%20control%20deck%20concert%20neon?width=600&height=400&nologo=true", 
-    badge: "LIVE", 
-    ctaText: "Join Room" 
-  },
-  { 
-    id: "promo-3", 
-    title: "Amapiano Wave 2026", 
-    description: "Discover high volume soundscapes straight from Lagos to Miami.", 
-    artwork: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=600&height=400&nologo=true", 
-    badge: "LAUNCH", 
-    ctaText: "Listen First" 
-  },
-  { 
-    id: "promo-4", 
-    title: "Retro Sound Lab Sponsor", 
-    description: "Promoting next-gen digital instruments on TON Blockchain.", 
-    artwork: "https://image.pollinations.ai/prompt/retro%20lofi%20cassette%20player%20floating%20in%20purple%20space?width=600&height=400&nologo=true", 
-    badge: "SPONSORED", 
-    ctaText: "Claim Free Box" 
-  }
-];
-
-export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = ({ promos = SPONSORED_PROMOS }) => {
+export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = ({ promos }) => {
   const navigate = useNavigate();
+  const [livePromos, setLivePromos] = useState<SponsoredPromo[]>([]);
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    if (isPaused) return;
+    if (promos !== undefined) return;
+
+    const q = query(collection(db, "sponsoredContent"), where("isActive", "==", true));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const items: SponsoredPromo[] = snap.docs.map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            title: data.title || "",
+            description: data.description || data.subtitle || "",
+            artwork: data.artwork || data.imageUrl || data.bannerUrl || "",
+            badge: (data.badge || "SPONSORED") as SponsoredPromo["badge"],
+            ctaText: data.ctaText || "Explore",
+            link: data.link || data.ctaLink,
+          };
+        }).filter((p) => Boolean(p.title));
+        setLivePromos(items);
+      },
+      (err) => {
+        handleFirestoreError(err, OperationType.LIST, "sponsoredContent");
+      }
+    );
+
+    return () => unsub();
+  }, [promos]);
+
+  const activePromos = promos !== undefined ? promos : livePromos;
+
+  useEffect(() => {
+    if (isPaused || activePromos.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentPromoIndex((prev) => (prev + 1) % promos.length);
+      setCurrentPromoIndex((prev) => (prev + 1) % activePromos.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [promos.length, isPaused]);
+  }, [activePromos.length, isPaused]);
+
+  if (activePromos.length === 0) return null;
+
+  const safeIndex = currentPromoIndex % activePromos.length;
 
   return (
     <section className="space-y-3 text-left w-full">
@@ -83,8 +86,8 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
           onTouchEnd={() => setIsPaused(false)}
         >
         <AnimatePresence mode="wait">
-          {promos.map((item, idx) => {
-            if (idx !== currentPromoIndex) return null;
+          {activePromos.map((item, idx) => {
+            if (idx !== safeIndex) return null;
             return (
               <motion.div
                 key={item.id}
@@ -94,11 +97,13 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
                 transition={{ duration: 0.35, ease: "easeOut" }}
                 className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 pr-16 sm:pr-24"
               >
-                <LazyArtworkImage 
-                  src={item.artwork} 
-                  alt="" 
-                  className="absolute inset-0 w-full h-full object-cover opacity-40 scale-105 transition-transform duration-700" 
-                />
+                {item.artwork && (
+                  <LazyArtworkImage 
+                    src={item.artwork} 
+                    alt="" 
+                    className="absolute inset-0 w-full h-full object-cover opacity-40 scale-105 transition-transform duration-700" 
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
                 
                 <div className="relative z-10 space-y-1 min-w-0">
@@ -116,8 +121,9 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
                     <Button
                       size="sm"
                       onClick={() => {
-                        if (item.badge === "LIVE") {
-                          confetti({ particleCount: 50, spread: 60 });
+                        if (item.link) {
+                          navigate(item.link);
+                        } else if (item.badge === "LIVE") {
                           navigate("/jamspace");
                         } else {
                           navigate("/marketplace");
@@ -136,13 +142,13 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
 
         {/* Pagination Indicators */}
         <div className="absolute bottom-3.5 right-4 sm:bottom-4 sm:right-5 z-10 flex gap-1.5 items-center">
-          {promos.map((_, idx) => (
+          {activePromos.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentPromoIndex(idx)}
               aria-label={`Slide ${idx + 1}`}
               className={`h-1.5 rounded-full transition-all cursor-pointer border-none p-0 outline-none ${
-                idx === currentPromoIndex ? "bg-primary w-5" : "bg-white/20 w-1.5 hover:bg-white/40"
+                idx === safeIndex ? "bg-primary w-5" : "bg-white/20 w-1.5 hover:bg-white/40"
               }`}
             />
           ))}

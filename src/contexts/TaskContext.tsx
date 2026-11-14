@@ -1,98 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Task, TaskCategory, TaskStatus } from '@/components/earn/types';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
-import { doc, setDoc, updateDoc, increment, onSnapshot } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { collection, doc, setDoc, updateDoc, increment, onSnapshot, getDocs } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { showTaskCompletionToast } from '@/components/earn/TaskToast';
 import { reportTaskError, TaskErrorPayload } from '@/utils/taskErrorMonitor';
 import { logError, ErrorMetadata } from '@/lib/logger';
 import { useTaskErrorLogger } from '@/hooks/useTaskErrorLogger';
 
-export const INITIAL_TASKS: Task[] = [
-  {
-    id: 't-featured-1',
-    title: 'Discover New Music',
-    description: 'Listen to music and explore new artists on TonJam.',
-    reward: '+50 TJ',
-    rewardAmount: 50,
-    category: 'Music',
-    status: 'available',
-    iconName: 'music',
-    actionLabel: 'Start Task',
-    isFeatured: true,
-    actionTarget: '/discover',
-    eligibility: 'Open to all music listeners. Stream 2 new tracks on the Discover page.',
-  },
-  {
-    id: 't-1',
-    title: 'Listen to Music',
-    description: 'Discover tracks from the TonJam community.',
-    reward: '+25 TJ',
-    rewardAmount: 25,
-    category: 'Music',
-    status: 'available',
-    progress: 1,
-    total: 3,
-    iconName: 'music',
-    actionLabel: 'Start',
-    actionTarget: '/',
-    eligibility: 'Stream any 3 songs in full on TonJam.',
-  },
-  {
-    id: 't-2',
-    title: 'Complete Your Profile',
-    description: 'Add the details that help listeners discover you.',
-    reward: '+50 TJ',
-    rewardAmount: 50,
-    category: 'Daily',
-    status: 'in_progress',
-    progress: 2,
-    total: 3,
-    iconName: 'profile',
-    actionLabel: 'Complete',
-    actionTarget: '/edit-profile',
-    eligibility: 'Set avatar, bio, and social handles in your profile.',
-  },
-  {
-    id: 't-3',
-    title: 'Join the Community',
-    description: 'Explore conversations and connect with other listeners.',
-    reward: '+30 TJ',
-    rewardAmount: 30,
-    category: 'Community',
-    status: 'available',
-    iconName: 'community',
-    actionLabel: 'Explore',
-    actionTarget: '/jamspace',
-    eligibility: 'Visit JamSpace and post or comment on a thread.',
-  },
-  {
-    id: 't-4',
-    title: 'Discover a New Artist',
-    description: 'Find music from an artist you have not explored before.',
-    reward: '+20 TJ',
-    rewardAmount: 20,
-    category: 'Social',
-    status: 'claimable',
-    iconName: 'artist',
-    actionLabel: 'Claim Reward',
-    actionTarget: '/discover',
-    eligibility: 'Follow 1 new verified artist on TonJam.',
-  },
-  {
-    id: 't-5',
-    title: 'Daily Check-In',
-    description: "Visit TonJam and see what's new today.",
-    reward: '+10 TJ',
-    rewardAmount: 10,
-    category: 'Daily',
-    status: 'completed',
-    iconName: 'daily',
-    actionLabel: 'Check In',
-    eligibility: 'Log into TonJam daily to claim streak points.',
-    completedAt: new Date(Date.now() - 7200000).toISOString(),
-  },
-];
+export const INITIAL_TASKS: Task[] = [];
 
 export interface TaskContextType {
   tasks: Task[];
@@ -114,7 +31,7 @@ export const useTask = (): TaskContextType => {
   const context = useContext(TaskContext);
   if (!context) {
     return {
-      tasks: INITIAL_TASKS,
+      tasks: [],
       isLoading: false,
       isSyncing: false,
       error: null,
@@ -139,72 +56,95 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     wrapTaskAction,
   } = useTaskErrorLogger();
 
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    try {
-      const cached = localStorage.getItem('tonjam_earn_tj_tasks_v2');
-      if (cached) {
-        return JSON.parse(cached);
-      }
-    } catch (e) {
-      console.warn('Error reading task cache:', e);
-    }
-    return INITIAL_TASKS;
-  });
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [templateTasks, setTemplateTasks] = useState<Task[]>([]);
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Sync state to local storage & Firestore real-time listener
+  // Sync global task templates & user task progress from Firestore
   useEffect(() => {
-    let unsubscribe: (() => void) | null = null;
-    const currentUser = auth.currentUser;
+    let unsubscribeDoc: (() => void) | null = null;
+    let unsubscribeTemplates: (() => void) | null = null;
+    let latestTemplates: Task[] = [];
+    let latestUserTasks: Task[] | null = null;
 
-    if (currentUser) {
-      setIsSyncing(true);
-      const userTasksDocRef = doc(db, 'users', currentUser.uid, 'taskState', 'userTasks');
+    const mergeTasks = (templates: Task[], userTasks: Task[] | null): Task[] => {
+      if (!userTasks || userTasks.length === 0) return templates;
+      if (templates.length === 0) return userTasks;
+      const userMap = new Map(userTasks.map((t) => [t.id, t]));
+      return templates.map((tpl) => {
+        const existing = userMap.get(tpl.id);
+        return existing ? { ...tpl, progress: existing.progress ?? tpl.progress, status: existing.status ?? tpl.status, completedAt: existing.completedAt } : tpl;
+      });
+    };
 
-      unsubscribe = onSnapshot(
-        userTasksDocRef,
-        (snap) => {
-          setIsSyncing(false);
-          if (snap.exists()) {
-            const data = snap.data();
-            if (Array.isArray(data.tasks) && data.tasks.length > 0) {
-              setTasks(data.tasks);
-              try {
-                localStorage.setItem('tonjam_earn_tj_tasks_v2', JSON.stringify(data.tasks));
-              } catch (e) {}
+    unsubscribeTemplates = onSnapshot(
+      collection(db, 'tasks'),
+      (snap) => {
+        latestTemplates = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Task, 'id'>) }));
+        setTemplateTasks(latestTemplates);
+        setTasks(mergeTasks(latestTemplates, latestUserTasks));
+        setIsLoading(false);
+      },
+      (err) => {
+        setIsLoading(false);
+        handleFirestoreError(err, OperationType.LIST, 'tasks');
+      }
+    );
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+        unsubscribeDoc = null;
+      }
+
+      if (currentUser) {
+        setIsSyncing(true);
+        const userTasksDocRef = doc(db, 'users', currentUser.uid, 'taskState', 'userTasks');
+
+        unsubscribeDoc = onSnapshot(
+          userTasksDocRef,
+          (snap) => {
+            setIsSyncing(false);
+            if (snap.exists()) {
+              const data = snap.data();
+              if (Array.isArray(data.tasks)) {
+                latestUserTasks = data.tasks;
+                setTasks(mergeTasks(latestTemplates, latestUserTasks));
+              }
+            } else {
+              latestUserTasks = [];
+              setTasks(latestTemplates);
             }
-          } else {
-            // Seed default tasks document in Firestore
-            setDoc(userTasksDocRef, {
-              tasks: INITIAL_TASKS,
-              updatedAt: new Date().toISOString(),
-            }).catch((err) => {
-              console.warn('Failed to initialize user tasks doc in Firestore:', err);
+          },
+          (err) => {
+            setIsSyncing(false);
+            handleFirestoreError(err, OperationType.GET, `users/${currentUser.uid}/taskState/userTasks`);
+            reportTaskError({
+              eventType: 'TASK_SYNC_FAILED',
+              error: err,
+              message: 'Real-time synchronization for user task state failed',
+              severity: 'warning',
+              context: {
+                userId: currentUser.uid,
+                path: `users/${currentUser.uid}/taskState/userTasks`,
+              },
             });
           }
-        },
-        (err) => {
-          setIsSyncing(false);
-          handleFirestoreError(err, OperationType.GET, `users/${currentUser.uid}/taskState/userTasks`);
-          reportTaskError({
-            eventType: 'TASK_SYNC_FAILED',
-            error: err,
-            message: 'Real-time synchronization for user task state failed',
-            severity: 'warning',
-            context: {
-              userId: currentUser.uid,
-              path: `users/${currentUser.uid}/taskState/userTasks`,
-            },
-          });
-        }
-      );
-    }
+        );
+      } else {
+        setIsSyncing(false);
+        latestUserTasks = null;
+        setTasks(latestTemplates);
+      }
+    });
 
     return () => {
-      if (unsubscribe) unsubscribe();
+      unsubscribeAuth();
+      if (unsubscribeDoc) unsubscribeDoc();
+      if (unsubscribeTemplates) unsubscribeTemplates();
     };
   }, []);
 
@@ -488,10 +428,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [wrapTaskAction, persistTasks]
   );
 
-  // Reset tasks to default
+  // Reset tasks to Firestore templates
   const resetTasks = useCallback(async () => {
-    await persistTasks(INITIAL_TASKS);
-  }, [persistTasks]);
+    await persistTasks(templateTasks);
+  }, [persistTasks, templateTasks]);
 
   const value = useMemo(
     () => ({

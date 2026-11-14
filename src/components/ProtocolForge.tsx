@@ -39,6 +39,10 @@ const ProtocolForge: React.FC = () => {
   const [deploymentStep, setDeploymentStep] = useState(0); /* 0: None, 1: Compiling, 2: Broadcasting, 3: Indexing */
   const logEndRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [logs]);
+
   if (!userProfile.isVerifiedArtist) {
     return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center animate-in fade-in duration-700">
@@ -59,10 +63,6 @@ const ProtocolForge: React.FC = () => {
     );
   }
 
-  useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
-
   const addLog = (msg: string) => {
     setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}]: ${msg}`]);
   };
@@ -77,23 +77,22 @@ const ProtocolForge: React.FC = () => {
   };
 
   const handleLinkProtocol = () => {
-    if (!inputAddress) {
+    if (!inputAddress.trim()) {
       addNotification("Please enter a contract address.", "warning");
       return;
     }
     try {
-      Address.parse(inputAddress);
+      const parsed = Address.parse(inputAddress.trim());
+      const formatted = parsed.toString();
       setIsSyncing(true);
-      addLog(`Connecting to existing protocol: ${inputAddress.slice(0, 12)}...`);
-      setTimeout(() => {
-        setGenesisContractAddress(inputAddress);
-        setIsSyncing(false);
-        addNotification("Protocol Linked Successfully", "success");
-        addLog(`SUCCESS: Local relay synchronized with Genesis Contract.`);
-      }, 1500);
-    } catch (e) {
+      addLog(`Verifying contract address: ${formatted.slice(0, 12)}...`);
+      setGenesisContractAddress(formatted);
+      setIsSyncing(false);
+      addNotification("Protocol Linked Successfully", "success");
+      addLog(`SUCCESS: Linked Genesis Contract ${formatted}.`);
+    } catch {
       addNotification("Invalid TON address format.", "error");
-      addLog("ERROR: Pulse frequency mismatch. Invalid address.");
+      addLog("ERROR: Invalid TON contract address.");
     }
   };
 
@@ -102,46 +101,44 @@ const ProtocolForge: React.FC = () => {
       addNotification("Connect wallet to forge protocol.", "warning");
       return;
     }
+    const configuredFactory = import.meta.env.VITE_TON_GENESIS_FACTORY_ADDRESS;
+    if (!configuredFactory) {
+      addNotification("No factory contract configured. Link an existing deployed TON NFT collection address below.", "warning");
+      addLog("ERROR: Automated factory deployment is unavailable because VITE_TON_GENESIS_FACTORY_ADDRESS is not configured. Link your deployed collection address instead.");
+      return;
+    }
+
     setIsDeploying(true);
     setDeploymentStep(1);
-    addLog("Phase 1: Initializing Tact Compiler...");
-    addLog("Compiling TonJamGenesis.tact...");
+    addLog("Phase 1: Preparing TonJamGenesis deployment transaction...");
 
-    setTimeout(async () => {
+    try {
+      Address.parse(configuredFactory);
       setDeploymentStep(2);
-      addLog("Phase 2: Generating BoC (Bag of Cells)...");
-      addLog("Signing transaction for contract deployment...");
+      addLog("Phase 2: Requesting wallet signature...");
 
       const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 120,
         messages: [
           {
-            address: "kQDNv_tD_N0R6K6u5-pXy8M4QnO-vD_N0R6K6u5-pXy8M88",
+            address: configuredFactory,
             amount: toNano("0.1").toString(),
             payload: beginCell().storeUint(0, 32).storeStringTail("TONJAM_GENESIS_DEPLOY").endCell().toBoc().toString('base64'),
           },
         ],
       };
 
-      try {
-        await sendTransactionSafe(tonConnectUI, transaction);
-        setDeploymentStep(3);
-        addLog("Phase 3: Transaction broadcasted to TON Testnet.");
-        const mockNewAddress = "EQ_TJ_GENESIS_" + Math.random().toString(16).slice(2, 10).toUpperCase();
-        addLog(`Indexing new address: ${mockNewAddress}`);
-        setTimeout(() => {
-          setGenesisContractAddress(mockNewAddress);
-          setIsDeploying(false);
-          setDeploymentStep(0);
-          addNotification("Genesis Protocol Online", "success");
-          addLog("[FINAL]: Protocol synchronization complete.");
-        }, 2500);
-      } catch (e) {
-        addLog("ERROR: Deployment aborted by user or timeout.");
-        setIsDeploying(false);
-        setDeploymentStep(0);
-      }
-    }, 2000);
+      await sendTransactionSafe(tonConnectUI, transaction);
+      setDeploymentStep(3);
+      addLog("Phase 3: Transaction submitted to TON. Link the resulting deployed collection address once confirmed on-chain.");
+      addNotification("Deployment transaction submitted. Link the confirmed contract address once indexed.", "info");
+    } catch {
+      addLog("ERROR: Deployment aborted by user or transaction failed.");
+      addNotification("Deployment aborted or failed.", "error");
+    } finally {
+      setIsDeploying(false);
+      setDeploymentStep(0);
+    }
   };
   return (
     <div className="animate-in fade-in duration-1000 min-h-screen pb-20 w-full max-w-full px-6 pt-12">

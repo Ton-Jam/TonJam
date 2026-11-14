@@ -1,6 +1,6 @@
 import React from 'react';
 import { BadgeCheck } from 'lucide-react';
-import { MOCK_ARTISTS } from '@/constants';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface VerifiedArtistBadgeProps {
   isVerified?: boolean;
@@ -11,56 +11,19 @@ interface VerifiedArtistBadgeProps {
   showTooltip?: boolean;
 }
 
-const TOP_VERIFIED_ARTIST_NAMES = new Set([
-  'tiwa savage',
-  'dj krupy',
-  'neon voyager',
-  'byte beat',
-  'echo phase',
-  'prism core',
-  'smooth operator',
-  'city ghost',
-  'cosmic echo',
-  'elena rostova',
-  'cyber nomad',
-  'sasha nova',
-  'ton prodigy',
-  'durov beats',
-  'telegram sounds',
-  'ton diamond records',
-  'tonjam editorial',
-  'tonjam curators',
-  'tonjam official'
-]);
-
 export const checkIsArtistVerified = (
   nameOrId?: string, 
   explicitVerified?: boolean,
   artistList?: Array<{ uid?: string; name?: string; verified?: boolean; isVerifiedArtist?: boolean }>
 ): boolean => {
   if (explicitVerified === true) return true;
-  if (!nameOrId) return false;
+  if (!nameOrId || !artistList || artistList.length === 0) return false;
 
   const normalized = nameOrId.trim().toLowerCase();
-  if (TOP_VERIFIED_ARTIST_NAMES.has(normalized)) return true;
-
-  const foundInMock = MOCK_ARTISTS.find(
-    (a) => a.uid.toLowerCase() === normalized || a.name.toLowerCase() === normalized
+  const foundInList = artistList.find(
+    (a) => a.uid?.toLowerCase() === normalized || a.name?.toLowerCase() === normalized
   );
-  if (foundInMock && (foundInMock.verified || foundInMock.isVerifiedArtist)) {
-    return true;
-  }
-
-  if (artistList) {
-    const foundInList = artistList.find(
-      (a) => a.uid?.toLowerCase() === normalized || a.name?.toLowerCase() === normalized
-    );
-    if (foundInList && (foundInList.verified || foundInList.isVerifiedArtist)) {
-      return true;
-    }
-  }
-
-  return false;
+  return Boolean(foundInList && (foundInList.verified || foundInList.isVerifiedArtist));
 };
 
 export const VerifiedArtistBadge: React.FC<VerifiedArtistBadgeProps> = ({
@@ -71,7 +34,8 @@ export const VerifiedArtistBadge: React.FC<VerifiedArtistBadgeProps> = ({
   className = '',
   showTooltip = true,
 }) => {
-  const verified = isVerified ?? checkIsArtistVerified(artistName || artistId);
+  const { artists } = useAudio();
+  const verified = isVerified ?? checkIsArtistVerified(artistId || artistName, isVerified, artists);
   if (!verified) return null;
 
   const sizeMap = {

@@ -51,6 +51,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [confirmedTxId, setConfirmedTxId] = useState<string>('');
   const price = parseFloat(nft.price) || 0;
   const platformFeeFromBuyer = price * 0.05;
   const platformFeeFromSeller = price * 0.05;
@@ -93,6 +94,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
 
       // 2. Execute buy through marketplace service
       const txId = await buyNFT(tonConnectUI, listing, nft);
+      setConfirmedTxId(txId || '');
       
       await monitorTransaction(txId, (status) => {
         if (status === 'pending') {
@@ -170,8 +172,9 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   };
 
   const handleShare = () => {
-    // Simple mock sharing
-    addNotification("Broadcast link copied to clipboard.", "info");
+    const url = `${window.location.origin}/#/nft/${nft.id}`;
+    navigator.clipboard?.writeText(url);
+    addNotification("NFT link copied to clipboard.", "info");
   };
 
   return (
@@ -335,7 +338,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-background p-3 rounded-xl border">
                      <p className="text-[7px] font-black text-muted-foreground/40 uppercase tracking-widest mb-1">TX.ID</p>
-                     <p className="text-[9px] font-mono text-primary truncate">EQ{Math.random().toString(36).substring(7).toUpperCase()}...</p>
+                     <p className="text-[9px] font-mono text-primary truncate">{confirmedTxId || nft.contractAddress || nft.id}</p>
                   </div>
                   <div className="bg-background p-3 rounded-xl border">
                      <p className="text-[7px] font-black text-muted-foreground/40 uppercase tracking-widest mb-1">COST</p>

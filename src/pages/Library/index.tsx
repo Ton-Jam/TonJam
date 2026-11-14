@@ -462,7 +462,7 @@ const LibraryPage: React.FC = () => {
                           <div key={track.id} className="py-3.5 flex items-center justify-between first:pt-0 last:pb-0">
                             <div className="flex items-center gap-3">
                               <img
-                                src={track.coverArtUrl}
+                                src={track.coverUrl}
                                 alt={track.title}
                                 className="w-10 h-10 rounded-lg object-cover"
                               />
@@ -483,7 +483,7 @@ const LibraryPage: React.FC = () => {
                                     title: track.title,
                                     artist: track.artist,
                                     album: track.album || 'Single',
-                                    coverUrl: track.coverArtUrl,
+                                    coverUrl: track.coverUrl,
                                     duration: track.duration,
                                     plays: 100,
                                     isLiked: true,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { 
   Heart, 
   KeyRound, 
@@ -16,25 +16,50 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "@/contexts/AudioContext";
 import { Artist } from "@/types";
-import { MOCK_ARTISTS, TON_LOGO, TJ_COIN_ICON } from "@/constants";
+import { TON_LOGO, TJ_COIN_ICON } from "@/constants";
+import { getPlaceholderImage } from "@/lib/utils";
 import ArtistTippingModal from "@/components/fan/ArtistTippingModal";
 import TokenGatedVault from "@/components/fan/TokenGatedVault";
 import VIPArtistChat from "@/components/fan/VIPArtistChat";
 
 export const FanEngagement: React.FC = () => {
-  const { userProfile, artists } = useAudio();
-  const activeArtists = artists.length > 0 ? artists : MOCK_ARTISTS;
+  const { userProfile, artists, transactions } = useAudio();
+  const activeArtists = artists;
 
   const [activeTab, setActiveTab] = useState<"vault" | "vip_chat" | "tipping_leaderboard">("vip_chat");
   const [selectedTipArtist, setSelectedTipArtist] = useState<Artist | null>(null);
 
-  // Supporter Leaderboard Data
-  const topSupporters = [
-    { rank: 1, name: "Alex.ton", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80", tippedTon: "45.0", badge: "Diamond Supporter" },
-    { rank: 2, name: "Elena_Vibes", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80", tippedTon: "32.5", badge: "Gold Supporter" },
-    { rank: 3, name: "CryptoMusician", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=100&q=80", tippedTon: "28.0", badge: "Gold Supporter" },
-    { rank: 4, name: userProfile.name || "You", avatar: userProfile.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80", tippedTon: "12.5", badge: "Silver Supporter" },
-  ];
+  // Derive real Supporter Leaderboard Data from Firestore tip transactions
+  const topSupporters = useMemo(() => {
+    const tipMap = new Map<string, { name: string; avatar: string; total: number }>();
+    transactions
+      .filter((tx: any) => tx.type === 'tip' || tx.category === 'tip')
+      .forEach((tx: any) => {
+        const senderKey = tx.senderId || tx.userId || tx.from || 'unknown';
+        const amount = parseFloat(String(tx.amount || 0)) || 0;
+        const existing = tipMap.get(senderKey);
+        if (existing) {
+          existing.total += amount;
+        } else {
+          tipMap.set(senderKey, {
+            name: tx.senderName || tx.userName || (senderKey === userProfile.uid ? (userProfile.name || 'You') : `${senderKey.slice(0, 8)}...`),
+            avatar: tx.senderAvatar || (senderKey === userProfile.uid ? userProfile.avatar : '') || getPlaceholderImage('artist'),
+            total: amount,
+          });
+        }
+      });
+
+    return Array.from(tipMap.values())
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10)
+      .map((entry, idx) => ({
+        rank: idx + 1,
+        name: entry.name,
+        avatar: entry.avatar,
+        tippedTon: entry.total.toFixed(1),
+        badge: entry.total >= 40 ? 'Diamond Supporter' : entry.total >= 20 ? 'Gold Supporter' : 'Supporter',
+      }));
+  }, [transactions, userProfile.uid, userProfile.name, userProfile.avatar]);
 
   return (
     <div className="min-h-screen pb-28 pt-6 px-4 max-w-7xl mx-auto space-y-6">
@@ -62,7 +87,7 @@ export const FanEngagement: React.FC = () => {
             <div className="text-center space-y-0.5">
               <p className="text-[10px] text-[#9AA0AE] font-bold uppercase">Fan Score</p>
               <p className="text-lg font-black text-[#0098EA]">
-                {userProfile.fanEngagementScore || 420} pts
+                {userProfile.fanEngagementScore || 0} pts
               </p>
             </div>
             <div className="h-8 w-[1px] bg-white/10" />
@@ -70,7 +95,7 @@ export const FanEngagement: React.FC = () => {
               <p className="text-[10px] text-[#9AA0AE] font-bold uppercase">Fan Tier</p>
               <p className="text-lg font-black text-amber-400 flex items-center gap-1 justify-center">
                 <Crown className="w-4 h-4 fill-amber-400" />
-                {userProfile.collectorTier || "Gold"}
+                {userProfile.collectorTier || "Bronze"}
               </p>
             </div>
           </div>
@@ -125,34 +150,40 @@ export const FanEngagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {activeArtists.map((artist) => (
-                  <div
-                    key={artist.uid}
-                    className="p-4 rounded-xl bg-[#050A24] flex items-center justify-between gap-3 hover:bg-[#0A1242] transition-all"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <img
-                        src={artist.avatarUrl}
-                        alt={artist.name}
-                        className="w-12 h-12 rounded-xl object-cover shrink-0 ring-2 ring-[#0098EA]/30"
-                      />
-                      <div className="min-w-0">
-                        <h3 className="text-xs font-black text-white truncate">{artist.name}</h3>
-                        <p className="text-[10px] text-[#9AA0AE]">{artist.genre || "Electronic Artist"}</p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => setSelectedTipArtist(artist)}
-                      className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 text-white font-black text-xs shrink-0 flex items-center gap-1 shadow-md"
+              {activeArtists.length === 0 ? (
+                <div className="p-6 rounded-xl bg-[#050A24] text-center text-xs text-[#9AA0AE]">
+                  No artists available yet.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {activeArtists.map((artist) => (
+                    <div
+                      key={artist.uid}
+                      className="p-4 rounded-xl bg-[#050A24] flex items-center justify-between gap-3 hover:bg-[#0A1242] transition-all"
                     >
-                      <Heart className="w-3.5 h-3.5 fill-white" />
-                      Tip
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img
+                          src={artist.avatarUrl || getPlaceholderImage('artist')}
+                          alt={artist.name}
+                          className="w-12 h-12 rounded-xl object-cover shrink-0 ring-2 ring-[#0098EA]/30"
+                        />
+                        <div className="min-w-0">
+                          <h3 className="text-xs font-black text-white truncate">{artist.name}</h3>
+                          <p className="text-[10px] text-[#9AA0AE]">{artist.genre || "Electronic Artist"}</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setSelectedTipArtist(artist)}
+                        className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 text-white font-black text-xs shrink-0 flex items-center gap-1 shadow-md"
+                      >
+                        <Heart className="w-3.5 h-3.5 fill-white" />
+                        Tip
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Supporter Leaderboard */}
@@ -162,32 +193,38 @@ export const FanEngagement: React.FC = () => {
                 <h2 className="text-base font-black text-white">Top Supporter Leaderboard</h2>
               </div>
 
-              <div className="space-y-2">
-                {topSupporters.map((sup) => (
-                  <div
-                    key={sup.rank}
-                    className="p-3.5 rounded-xl bg-[#050A24] flex items-center justify-between gap-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`w-6 text-center text-xs font-black ${
-                        sup.rank === 1 ? "text-amber-400" : sup.rank === 2 ? "text-slate-300" : "text-amber-700"
-                      }`}>
-                        #{sup.rank}
-                      </span>
-                      <img src={sup.avatar} alt="" className="w-9 h-9 rounded-lg object-cover" />
-                      <div>
-                        <p className="text-xs font-bold text-white">{sup.name}</p>
-                        <span className="text-[10px] text-[#0098EA] font-semibold">{sup.badge}</span>
+              {topSupporters.length === 0 ? (
+                <div className="p-6 rounded-xl bg-[#050A24] text-center text-xs text-[#9AA0AE]">
+                  No supporter tips recorded yet. Send the first TON tip to appear on the leaderboard.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {topSupporters.map((sup) => (
+                    <div
+                      key={sup.rank}
+                      className="p-3.5 rounded-xl bg-[#050A24] flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`w-6 text-center text-xs font-black ${
+                          sup.rank === 1 ? "text-amber-400" : sup.rank === 2 ? "text-slate-300" : "text-amber-700"
+                        }`}>
+                          #{sup.rank}
+                        </span>
+                        <img src={sup.avatar} alt="" className="w-9 h-9 rounded-lg object-cover" />
+                        <div>
+                          <p className="text-xs font-bold text-white">{sup.name}</p>
+                          <span className="text-[10px] text-[#0098EA] font-semibold">{sup.badge}</span>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="text-xs font-black text-emerald-400">+{sup.tippedTon} TON</span>
+                        <p className="text-[9px] text-[#9AA0AE]">Total Tipped</p>
                       </div>
                     </div>
-
-                    <div className="text-right">
-                      <span className="text-xs font-black text-emerald-400">+{sup.tippedTon} TON</span>
-                      <p className="text-[9px] text-[#9AA0AE]">Total Tipped</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

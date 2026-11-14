@@ -16,7 +16,6 @@ import {
 import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem } from '@/types';
 import { Interactive3DViewer } from './Interactive3DViewer';
-import { MOCK_TRACKS } from '@/constants';
 import { toast } from 'sonner';
 
 interface NFT3DViewerModalProps {
@@ -26,7 +25,7 @@ interface NFT3DViewerModalProps {
 }
 
 export const NFT3DViewerModal: React.FC<NFT3DViewerModalProps> = ({ nft, isOpen, onClose }) => {
-  const { playTrack, currentTrack, isPlaying } = useAudio();
+  const { allTracks, playTrack, currentTrack, isPlaying } = useAudio();
   const [spinSpeed, setSpinSpeed] = useState<number>(45); // RPM (33, 45, 78)
   const [tiltSensitivity, setTiltSensitivity] = useState<number>(1); // multiplier
   const [visualFilter, setVisualFilter] = useState<'none' | 'cyber' | 'holo' | 'vintage'>('none');
@@ -45,7 +44,7 @@ export const NFT3DViewerModal: React.FC<NFT3DViewerModalProps> = ({ nft, isOpen,
 
   if (!isOpen) return null;
 
-  const associatedTrack = MOCK_TRACKS.find((t) => t.id === nft.trackId);
+  const associatedTrack = allTracks.find((t) => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
   const isCurrentlyPlaying = isActive && isPlaying;
 
@@ -100,7 +99,7 @@ export const NFT3DViewerModal: React.FC<NFT3DViewerModalProps> = ({ nft, isOpen,
               isPlaying={isCurrentlyPlaying}
               handlePlayClick={handlePlayToggle}
               edition={nft.edition}
-              minted={nft.supply ? Math.round(nft.supply * 0.8) : undefined}
+              minted={nft.minted}
               supply={nft.supply}
               isAuction={nft.listingType === 'auction'}
             />

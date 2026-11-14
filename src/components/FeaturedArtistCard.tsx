@@ -19,32 +19,23 @@ const FeaturedArtistCardContent: React.FC<FeaturedArtistCardProps> = ({ artistId
   const { followedUserIds = [], toggleFollowUser } = useAudio();
   const analytics = useArtistAnalytics();
 
-  // Find target artist or default to first
+  // Find target artist or first real artist
   const artist = useMemo(() => {
     if (artistId) {
       const found = artists.find(a => a.uid === artistId);
       if (found) return found;
     }
-    return artists[0] || {
-      uid: 'dj-krupy',
-      name: 'DJ Krupy',
-      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=krupy',
-      followers: 142500,
-      verified: true,
-      genre: 'Electronic / Phonk'
-    };
+    return artists[0] || null;
   }, [artists, artistId]);
 
-  const isFollowing = followedUserIds.includes(artist.uid);
+  const isFollowing = artist ? followedUserIds.includes(artist.uid) : false;
 
   // Top track analytics preview
-  const topTrack = analytics.topTracks[0] || {
-    title: 'Midnight In TON',
-    streams: 48500,
-    trend: 15.4
-  };
+  const topTrack = analytics.topTracks[0] || null;
 
   const sparklineData = analytics.streamData.slice(-10);
+
+  if (!artist) return null;
 
   return (
     <motion.div
@@ -77,7 +68,7 @@ const FeaturedArtistCardContent: React.FC<FeaturedArtistCardProps> = ({ artistId
               {artist.genre || 'Web3 Sonic Creator'}
             </p>
             <p className="text-[10px] text-zinc-500 font-mono mt-0.5">
-              {(artist.followers || 14200).toLocaleString()} followers
+              {(artist.followers || 0).toLocaleString()} followers
             </p>
           </div>
         </div>
@@ -105,15 +96,17 @@ const FeaturedArtistCardContent: React.FC<FeaturedArtistCardProps> = ({ artistId
             <Disc className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} />
             <div className="min-w-0">
               <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 block">Top Track</span>
-              <span className="text-xs font-black text-white truncate block">{topTrack.title}</span>
+              <span className="text-xs font-black text-white truncate block">{topTrack?.title || 'No tracks yet'}</span>
             </div>
           </div>
 
           <div className="text-right shrink-0">
-            <span className="text-xs font-black text-emerald-400 flex items-center justify-end gap-1">
-              <TrendingUp className="w-3 h-3" /> +{topTrack.trend || 14.2}%
-            </span>
-            <span className="text-[9px] font-mono text-zinc-500">{topTrack.streams.toLocaleString()} streams</span>
+            {topTrack && typeof topTrack.trend === 'number' && (
+              <span className="text-xs font-black text-emerald-400 flex items-center justify-end gap-1">
+                <TrendingUp className="w-3 h-3" /> {topTrack.trend >= 0 ? '+' : ''}{topTrack.trend}%
+              </span>
+            )}
+            <span className="text-[9px] font-mono text-zinc-500">{(topTrack?.streams || 0).toLocaleString()} streams</span>
           </div>
         </div>
 

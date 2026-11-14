@@ -1,31 +1,29 @@
 import React, { useState } from 'react';
-import { Search, SlidersHorizontal, Eye, ExternalLink, BadgeCheck } from 'lucide-react';
+import { Search, SlidersHorizontal, BadgeCheck } from 'lucide-react';
 import { NFTItem } from '@/types';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface NFTTabProps {
   onSelectNFT: (nftId: string) => void;
   nfts?: (NFTItem | any)[];
 }
 
-const MOCK_NFTS_LIST = [
-  { id: 'nft_1', title: 'Sonic Resonance #04', creator: 'DJ Krupy', coverUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=400&h=400&q=80', edition: '04/25', valueTon: 15.0, contractAddress: 'EQCt...5_fN' },
-  { id: 'nft_2', title: 'Ethereal Escape #12', creator: 'DJ Starlight', coverUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&h=400&q=80', edition: '12/50', valueTon: 8.5, contractAddress: 'EQAx...9k1w' },
-  { id: 'nft_3', title: 'Retro Wave #09', creator: 'Cyber Beats', coverUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=400&h=400&q=80', edition: '09/100', valueTon: 25.0, contractAddress: 'EQBv...K5w9' },
-  { id: 'nft_4', title: 'Cyberpunk Skyline #01', creator: 'Aero Static', coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=400&h=400&q=80', edition: '01/10', valueTon: 75.0, contractAddress: 'EQD3...W3Fi' }
-];
-
 export const NFTTab: React.FC<NFTTabProps> = ({ onSelectNFT, nfts }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { userNFTs } = useAudio();
 
-  const displayList = (nfts && nfts.length > 0) ? nfts.map(nft => ({
+  const sourceNfts = nfts !== undefined ? nfts : userNFTs;
+
+  const displayList = (sourceNfts || []).map(nft => ({
     id: nft.id,
     title: nft.title || 'Music NFT Collectible',
     creator: nft.creator || nft.artist || 'Creator',
-    coverUrl: nft.coverUrl || nft.imageUrl || nft.image || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=400&h=400&q=80',
+    coverUrl: nft.coverUrl || nft.imageUrl || nft.image || '',
     edition: nft.edition || '1/1',
-    valueTon: typeof nft.price === 'number' ? nft.price : parseFloat(nft.price || '5.0') || 5.0,
-    contractAddress: nft.contractAddress || 'TON Blockchain'
-  })) : (nfts !== undefined ? [] : MOCK_NFTS_LIST);
+    valueTon: typeof nft.price === 'number' ? nft.price : (parseFloat(nft.price || '0') || 0),
+    contractAddress: nft.contractAddress || 'TON Blockchain',
+    verified: !!nft.artistVerified,
+  }));
 
   const filteredNfts = displayList.filter(nft =>
     nft.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -43,10 +41,10 @@ export const NFTTab: React.FC<NFTTabProps> = ({ onSelectNFT, nfts }) => {
             placeholder="Search owned NFTs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#101A3B] border border-white/5 rounded-full pl-10 pr-4 py-2.5 text-xs font-medium outline-none focus:border-[#0052FF] transition-all placeholder:text-slate-500"
+            className="w-full bg-[#101A3B] rounded-full pl-10 pr-4 py-2.5 text-xs font-medium outline-none transition-all placeholder:text-slate-500"
           />
         </div>
-        <button className="p-2.5 bg-[#101A3B] border border-white/5 rounded-full hover:bg-[#15234f] transition-all cursor-pointer">
+        <button className="p-2.5 bg-[#101A3B] rounded-full hover:bg-[#15234f] transition-all cursor-pointer">
           <SlidersHorizontal className="w-4 h-4 text-slate-400" />
         </button>
       </div>
@@ -58,15 +56,17 @@ export const NFTTab: React.FC<NFTTabProps> = ({ onSelectNFT, nfts }) => {
             <div
               key={nft.id}
               onClick={() => onSelectNFT(nft.id)}
-              className="bg-[#101A3B] border border-white/5 rounded-[12px] overflow-hidden group hover:bg-[#15234f] transition-all cursor-pointer flex flex-col h-full"
+              className="bg-[#101A3B] rounded-[12px] overflow-hidden group hover:bg-[#15234f] transition-all cursor-pointer flex flex-col h-full"
             >
               {/* Cover Aspect Ratio Square */}
               <div className="aspect-square w-full bg-slate-900 overflow-hidden relative">
-                <img 
-                  src={nft.coverUrl} 
-                  alt={nft.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                />
+                {nft.coverUrl && (
+                  <img 
+                    src={nft.coverUrl} 
+                    alt={nft.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                  />
+                )}
                 <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/60 rounded-md text-[9px] font-bold font-mono uppercase tracking-wider text-slate-200">
                   {nft.edition}
                 </div>
@@ -82,19 +82,21 @@ export const NFTTab: React.FC<NFTTabProps> = ({ onSelectNFT, nfts }) => {
                     <span className="text-[10px] text-slate-400 truncate uppercase tracking-wider">
                       by {nft.creator}
                     </span>
-                    <BadgeCheck className="w-3.5 h-3.5 text-[#0052FF] shrink-0" />
+                    {nft.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#0052FF] shrink-0" />}
                   </div>
                 </div>
 
-                <div className="mt-3.5 pt-2.5 border-t border-white/5 flex items-center justify-between text-[11px]">
+                <div className="mt-3.5 pt-2.5 flex items-center justify-between text-[11px]">
                   <span className="text-slate-400 uppercase tracking-wider font-bold">Valuation</span>
-                  <span className="font-bold text-[#0052FF] font-mono">{nft.valueTon} TON</span>
+                  <span className="font-bold text-[#0052FF] font-mono">
+                    {nft.valueTon > 0 ? `${nft.valueTon} TON` : 'Unlisted'}
+                  </span>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <div className="col-span-full text-center py-16 bg-[#101A3B] border border-white/5 rounded-[12px] p-6 text-slate-400 text-sm font-semibold uppercase tracking-wider">
+          <div className="col-span-full text-center py-16 bg-[#101A3B] rounded-[12px] p-6 text-slate-400 text-sm font-semibold uppercase tracking-wider">
             No digital assets found in your vault.
           </div>
         )}

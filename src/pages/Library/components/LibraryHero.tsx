@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, Heart, Download, Zap, Disc, Clock, Music } from 'lucide-react';
 import { motion } from 'motion/react';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface LibraryHeroProps {
   userAvatar: string;
@@ -47,7 +48,7 @@ export const LibraryHero: React.FC<LibraryHeroProps> = ({
       <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
         {/* User avatar with dynamic outline ring */}
         <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-[#0052FF]/40 p-0.5 shrink-0 bg-slate-900">
-          <img src={userAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'} alt={userName} className="w-full h-full object-cover rounded-full" referrerPolicy="no-referrer" />
+          <img src={userAvatar || getPlaceholderImage(`user-${userName || 'collector'}`)} alt={userName} className="w-full h-full object-cover rounded-full" referrerPolicy="no-referrer" />
         </div>
 
         <div className="space-y-1">

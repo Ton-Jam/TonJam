@@ -18,6 +18,7 @@ import {
   QueryDocumentSnapshot
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { getPlaceholderImage } from '@/lib/utils';
 import { 
   SocialPost, 
   PostAuthor, 
@@ -53,7 +54,7 @@ export function normalizePostDoc(docSnap: DocumentSnapshot): SocialPost {
     uid: data.authorId || data.userId || 'anonymous',
     name: data.author?.name || data.authorName || data.userName || data.user?.name || 'TonJam Creator',
     username: data.author?.username || data.username || data.user?.username || '@tonjam',
-    avatar: data.author?.avatar || data.authorPhoto || data.userAvatar || data.user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    avatar: data.author?.avatar || data.authorPhoto || data.userAvatar || data.user?.avatar || getPlaceholderImage('artist'),
     isVerified: !!(data.author?.isVerified || data.isVerified || data.user?.isVerified),
     role: data.author?.role || data.role || data.user?.role || 'creator'
   };

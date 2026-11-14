@@ -1,23 +1,14 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { Artist, Track, NFTItem } from "@/types";
-import { MOCK_ARTISTS, MOCK_TRACKS, MOCK_NFTS } from "@/constants";
 import { useAudio } from "@/contexts/AudioContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTonConnectUI } from "@tonconnect/ui-react";
+import { sendTransactionSafe, validateTonAddress, extractTxHashFromBoc } from "@/services/tonService";
+import { toNano } from "@ton/ton";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { toast } from "sonner";
-import { 
-  getArtistStats, 
-  getMockAlbums, 
-  getMockSingles, 
-  getMockCollections, 
-  getMockPlaylists, 
-  getMockPosts, 
-  getMockEvents, 
-  getMockMutualFollowers, 
-  getTopSupporters, 
-  getArtistMissions, 
-  getMockAnalytics 
-} from "../mock";
 import { 
   ArtistStats, 
   AlbumData, 
@@ -34,6 +25,7 @@ import {
 export const useArtistProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const [tonConnectUI] = useTonConnectUI();
   const { 
     addNotification, 
     userProfile, 
@@ -251,16 +243,58 @@ export const useArtistProfile = () => {
   }, [tracks, playAll, artist]);
 
   const handleSupportArtist = useCallback(async (amount: string) => {
-    if (!amount || parseFloat(amount) <= 0) return;
-    setIsSupporting(true);
-    // Simulate TON blockchain transaction
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSupporting(false);
-    toast.success(`Successfully sent ${amount} TJ Coins to ${artist?.name || 'Artist'}!`);
-    if (addNotification) {
-      addNotification(`Sent ${amount} TJ Coins to ${artist?.name}!`, "success");
+    const parsedAmount = parseFloat(amount);
+    if (!amount || Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+      toast.error("Please enter a valid positive amount.");
+      return;
     }
-  }, [artist, addNotification]);
+    if (!artist?.walletAddress || !validateTonAddress(artist.walletAddress)) {
+      toast.error("This artist has not configured a valid TON payout wallet.");
+      return;
+    }
+
+    setIsSupporting(true);
+    try {
+      const txResult = await sendTransactionSafe(tonConnectUI, {
+        validUntil: Math.floor(Date.now() / 1000) + 300,
+        messages: [
+          {
+            address: artist.walletAddress,
+            amount: toNano(parsedAmount.toString()).toString()
+          }
+        ]
+      });
+
+      const txHash = extractTxHashFromBoc(txResult?.boc);
+      if (user) {
+        const txId = `tip-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        await setDoc(doc(db, "transactions", txId), {
+          id: txId,
+          userId: user.uid,
+          participants: [user.uid, artist.uid].filter(Boolean),
+          type: "tip",
+          amount: parsedAmount,
+          currency: "TON",
+          platformFee: 0,
+          artistShare: parsedAmount,
+          recipientAddress: artist.walletAddress,
+          trackTitle: `Support ${artist.name}`,
+          txHash,
+          status: "pending",
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      toast.success(`Tip transaction submitted (${parsedAmount} TON to ${artist.name}).`);
+      if (addNotification) {
+        addNotification(`Submitted ${parsedAmount} TON tip to ${artist.name}`, "success");
+      }
+    } catch (error: any) {
+      toast.error(error?.message || "Tip transaction could not be completed.");
+    } finally {
+      setIsSupporting(false);
+    }
+  }, [artist, addNotification, tonConnectUI, user]);
 
   const handleLikePost = useCallback((postId: string) => {
     setPosts(prev => prev.map(post => {

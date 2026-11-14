@@ -3,6 +3,7 @@ import { Track } from "@/types";
 import { Play, Pause, Heart, Download, Gem } from "lucide-react";
 import { toast } from "sonner";
 import { useAudio } from "@/contexts/AudioContext";
+import { getPlaceholderImage } from "@/lib/utils";
 
 interface SinglesTabProps {
   singles: Track[];
@@ -48,7 +49,7 @@ export const SinglesTab: React.FC<SinglesTabProps> = ({ singles, onPlayTrack }) 
               >
                 <div className="relative aspect-square bg-neutral-950 rounded-lg overflow-hidden shadow-md">
                   <img 
-                    src={single.coverUrl || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop"} 
+                    src={single.coverUrl || getPlaceholderImage('track')} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                     alt={single.title} 
                   />
@@ -80,9 +81,9 @@ export const SinglesTab: React.FC<SinglesTabProps> = ({ singles, onPlayTrack }) 
                     {single.title}
                   </h4>
                   <div className="flex items-center justify-between text-xs text-neutral-400">
-                    <span>2026 • Single</span>
+                    <span>Single</span>
                     <span className="font-mono text-[10px]">
-                      {Math.floor((single.duration || 210) / 60)}:{(String((single.duration || 210) % 60)).padStart(2, "0")}
+                      {Math.floor((single.duration || 0) / 60)}:{(String((single.duration || 0) % 60)).padStart(2, "0")}
                     </span>
                   </div>
                 </div>

@@ -33,52 +33,48 @@ export const MusicNotificationPreview: React.FC<MusicNotificationPreviewProps> =
       return;
     }
 
-    // Find existing track or fallback construct
     const found = allTracks.find(
       (t) =>
         t.id === preview.trackId ||
         t.title.toLowerCase() === preview.title.toLowerCase()
     );
 
-    if (found) {
+    if (found && found.audioUrl) {
       playTrack(found);
       toast.success('Playing Track', { description: `${preview.title} • ${preview.artist}` });
-    } else {
-      const fallbackAudio = allTracks[0]?.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-      const syntheticTrack = {
+    } else if (preview.audioUrl) {
+      playTrack({
         id: preview.trackId || `track-${Date.now()}`,
         title: preview.title,
         artist: preview.artist,
-        coverUrl: preview.artwork || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&fit=crop&q=80',
-        audioUrl: preview.audioUrl || fallbackAudio,
-        duration: preview.duration || 198,
-        genre: 'Electronic / Afrobeat',
-        plays: 240,
-        likes: 85,
+        coverUrl: preview.artwork || '',
+        audioUrl: preview.audioUrl,
+        duration: preview.duration || 0,
+        genre: 'Music',
         isNFT: false,
         createdAt: new Date().toISOString(),
-      };
-      playTrack(syntheticTrack as any);
+      } as any);
       toast.success('Playing Track', { description: `${preview.title} • ${preview.artist}` });
+    } else {
+      toast.info('Audio preview unavailable');
     }
   };
 
   return (
     <div
       onClick={onPreviewClick}
-      className="mt-2 w-full flex items-center justify-between p-2 rounded-xl bg-[#080D1A]/70 hover:bg-[#080D1A] transition-colors border border-white/[0.04] group cursor-pointer"
+      className="mt-2 w-full flex items-center justify-between p-2 rounded-xl bg-[#080D1A]/70 hover:bg-[#080D1A] transition-colors group cursor-pointer"
     >
       <div className="flex items-center gap-2.5 min-w-0 pr-2">
         <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-[#16243E]">
-          <img
-            src={
-              preview.artwork ||
-              'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&fit=crop&q=80'
-            }
-            alt={preview.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+          {preview.artwork && (
+            <img
+              src={preview.artwork}
+              alt={preview.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          )}
           {isCurrentPlaying && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <span className="w-2 h-2 rounded-full bg-[#9B7CFF] animate-ping" />

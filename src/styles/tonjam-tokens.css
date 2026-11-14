@@ -44,11 +44,11 @@
   --tj-color-text-muted: var(--tj-text-muted);
 
   /* =========================================================
-     BORDER DISCIPLINE (SUBTLE SILVER 2PX BORDER)
+     BORDER DISCIPLINE (SUBTLE SILVER 1PX BORDER)
      ========================================================= */
-  --tj-border: 2px solid rgba(192, 192, 192, 0.22);
-  --tj-border-subtle: 2px solid rgba(192, 192, 192, 0.15);
-  --tj-border-strong: 2px solid rgba(192, 192, 192, 0.35);
+  --tj-border: 1px solid rgba(192, 192, 192, 0.22);
+  --tj-border-subtle: 1px solid rgba(192, 192, 192, 0.15);
+  --tj-border-strong: 1px solid rgba(192, 192, 192, 0.35);
   --tj-color-border-subtle: rgba(192, 192, 192, 0.22);
   --tj-color-border-strong: rgba(192, 192, 192, 0.35);
 

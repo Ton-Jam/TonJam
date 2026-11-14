@@ -8,8 +8,10 @@ import ArtistCard from '@/components/ArtistCard';
 import NFTCard from '@/components/NFTCard';
 import PlaylistListItem from '@/components/PlaylistListItem';
 import ArtistListItem from '@/components/ArtistListItem';
-import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO, CURATED_PLAYLISTS, MOCK_USERS } from '@/constants';
+import { APP_LOGO } from '@/constants';
 import { useAudio } from '@/contexts/AudioContext';
+import { collection, getDocs, query, limit } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import PlaylistCard from '@/components/PlaylistCard';
 import NoResultsState from '@/components/NoResultsState';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
@@ -43,11 +45,27 @@ const ExploreList: React.FC = () => {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(24);
 
   /* Initial load */
   useEffect(() => {
-    setLoading(true);
+    let active = true;
+    setVisibleCount(24);
+
+    if (type === 'users') {
+      setLoading(true);
+      getDocs(query(collection(db, 'users'), limit(50)))
+        .then((snap) => {
+          if (!active) return;
+          setItems(snap.docs.map(d => ({ uid: d.id, ...d.data() })));
+        })
+        .catch((err) => handleFirestoreError(err, OperationType.LIST, 'users'))
+        .finally(() => {
+          if (active) setLoading(false);
+        });
+      return () => { active = false; };
+    }
+
     let initialData: any[] = [];
 
     if (type === 'tracks') {
@@ -58,62 +76,60 @@ const ExploreList: React.FC = () => {
       } else if (filter === 'trending') {
         initialData = getTrendingTracks();
       } else if (filter === 'new') {
-        // Mock logic for new releases
-        initialData = MOCK_TRACKS.slice(0, 20);
+        initialData = [...allTracks]
+          .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+          .slice(0, 20);
       } else if (filter === 'my_tracks') {
         initialData = userTracks;
       } else if (filter === 'recommended') {
         initialData = getRecommendations().recommendedTracks;
       } else {
-        initialData = [...userTracks, ...MOCK_TRACKS];
+        initialData = Array.from(new Map([...userTracks, ...allTracks].map(t => [t.id, t])).values());
       }
     } else if (type === 'artists') {
       if (filter === 'followed') {
         initialData = artists.filter(a => followedUserIds.includes(a.uid));
       } else if (filter === 'friends') {
-        // Mock friends logic
         initialData = artists.filter(a => userProfile.friends?.includes(a.uid));
       } else if (filter === 'recommended') {
         initialData = artists.filter(a => !followedUserIds.includes(a.uid)).slice(0, 10);
       } else if (filter === 'rising') {
-        initialData = artists.slice(0, 5);
+        initialData = [...artists].slice(0, 5);
       } else {
         initialData = artists;
       }
     } else if (type === 'nfts') {
       if (filter === 'owned' || filter === 'my_nfts') {
-        initialData = allNFTs.filter(n => n.owner === userProfile.walletAddress || n.owner === userProfile.name);
+        initialData = allNFTs.filter(n => n.owner === userProfile.walletAddress || n.owner === userProfile.name || n.ownerId === userProfile.uid);
       } else if (filter === 'top_nfts') {
-        initialData = getTopNFTTracks(); // This returns tracks, but we need NFTs. 
-        // Fallback to mock top NFTs
-        initialData = MOCK_NFTS.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+        initialData = [...allNFTs].sort((a, b) => parseFloat(String(b.price || 0)) - parseFloat(String(a.price || 0)));
       } else if (filter === 'new_nfts') {
-        initialData = MOCK_NFTS.slice(0, 10);
+        initialData = [...allNFTs]
+          .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+          .slice(0, 20);
       } else if (filter === 'trending_nfts') {
-         initialData = MOCK_NFTS.slice(0, 10);
+        initialData = [...allNFTs]
+          .sort((a, b) => (b.offers?.length || 0) - (a.offers?.length || 0))
+          .slice(0, 20);
       } else if (filter === 'recommended') {
-         initialData = getRecommendations().recommendedNFTs;
+        initialData = getRecommendations().recommendedNFTs;
       } else {
-        initialData = [...userNFTs, ...MOCK_NFTS];
+        initialData = Array.from(new Map([...userNFTs, ...allNFTs].map(n => [n.id, n])).values());
       }
     } else if (type === 'playlists') {
       if (filter === 'curated') {
-        initialData = CURATED_PLAYLISTS;
+        initialData = allPlaylists.filter(p => (p as any).isCurated || !p.isPrivate);
       } else if (filter === 'my_playlists') {
-        initialData = allPlaylists.filter(p => p.creator === userProfile.name || p.creator === 'You');
+        initialData = allPlaylists.filter(p => p.creator === userProfile.name || (p as any).creatorId === userProfile.uid || p.creator === 'You');
       } else {
-        initialData = [...allPlaylists, ...CURATED_PLAYLISTS];
+        initialData = allPlaylists;
       }
-    } else if (type === 'users') {
-      initialData = MOCK_USERS;
     }
 
-    /* Simulate API delay */
-    setTimeout(() => {
-      setItems(initialData);
-      setLoading(false);
-    }, 800);
-  }, [type, filter, userTracks, userNFTs, artists, recentlyPlayed, likedTrackIds, followedUserIds, userProfile, allPlaylists, allTracks, allNFTs, getRecommendations]);
+    setItems(initialData);
+    setLoading(false);
+    return () => { active = false; };
+  }, [type, filter, userTracks, userNFTs, artists, recentlyPlayed, likedTrackIds, followedUserIds, userProfile, allPlaylists, allTracks, allNFTs, getRecommendations, getTrendingTracks]);
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -123,15 +139,11 @@ const ExploreList: React.FC = () => {
     });
   }, [items, search]);
 
+  const visibleItems = useMemo(() => filteredItems.slice(0, visibleCount), [filteredItems, visibleCount]);
+
   const loadMore = () => {
-    if (loading) return;
-    setLoading(true);
-    /* Simulate infinite scroll by appending more mock data */
-    setTimeout(() => {
-      setItems(prev => [...prev, ...prev.slice(0, 6)]);
-      setPage(prev => prev + 1);
-      setLoading(false);
-    }, 1000);
+    if (loading || visibleCount >= filteredItems.length) return;
+    setVisibleCount(prev => prev + 24);
   };
 
   const sentinelRef = useInfiniteScroll(loadMore);
@@ -181,7 +193,7 @@ const ExploreList: React.FC = () => {
             ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
             : 'grid-cols-1'
       }`}>
-        {filteredItems.map((item, idx) => (
+        {visibleItems.map((item, idx) => (
           <div key={`${item.uid || item.id}-${idx}`} className="animate-in fade-in duration-500 slide-in-from-bottom-2">
             {type === 'tracks' && <TrackCard track={item} variant="row" />}
             {type === 'nfts' && <NFTCard nft={item} />}

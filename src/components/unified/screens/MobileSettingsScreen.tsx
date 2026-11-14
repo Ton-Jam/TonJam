@@ -44,6 +44,7 @@ import {
 } from '../index';
 import { ProfileData } from '../types';
 import { toast } from 'sonner';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface MobileSettingsScreenProps {
   profile?: ProfileData;
@@ -54,12 +55,12 @@ interface MobileSettingsScreenProps {
 
 export const MobileSettingsScreen: React.FC<MobileSettingsScreenProps> = ({
   profile = {
-    name: 'Alex Rivers',
-    username: 'alexrivers',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    isVerified: true,
-    role: 'Artist',
-    walletAddress: 'EQB...4f2a',
+    name: 'TonJam Listener',
+    username: 'listener',
+    avatar: getPlaceholderImage('artist'),
+    isVerified: false,
+    role: 'Listener',
+    walletAddress: '',
   },
   onNavigate,
   onBack,

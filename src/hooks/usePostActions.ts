@@ -3,6 +3,7 @@ import { SocialPost, PostAuthor } from '@/types/social';
 import { jamSpaceService } from '@/services/jamSpaceService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudio } from '@/contexts/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 
 export function usePostActions(onPostUpdated?: (postId: string, updater: (p: SocialPost) => SocialPost) => void) {
   const { user, userProfile } = useAuth();
@@ -16,7 +17,7 @@ export function usePostActions(onPostUpdated?: (postId: string, updater: (p: Soc
     uid: user?.uid || 'guest',
     name: userProfile?.name || user?.displayName || 'TonJam Pioneer',
     username: userProfile?.username || '@pioneer',
-    avatar: userProfile?.avatar || user?.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    avatar: userProfile?.avatar || user?.photoURL || getPlaceholderImage('artist'),
     isVerified: !!userProfile?.verified || !!userProfile?.isVerifiedArtist,
     role: userProfile?.role || 'fan'
   };

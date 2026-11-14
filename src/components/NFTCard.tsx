@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers, History, RotateCw, Bell, Zap } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { useGramPrice } from '@/contexts/GramPriceContext';
-import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
+import { TON_LOGO } from '@/constants';
 import { useAudio } from '@/contexts/AudioContext';
 import { cn, getPlaceholderImage, shareContent } from '@/lib/utils';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -69,18 +69,15 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
   const [tonConnectUI] = useTonConnectUI();
   const { convertPrice, localCurrencyEnabled } = useGramPrice();
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const { playTrack, currentTrack, isPlaying, togglePlay, setOptionsTrack, userProfile, setAnthem, addNotification, collections, seek, progress, artists } = useAudio();
+  const { playTrack, currentTrack, isPlaying, togglePlay, setOptionsTrack, userProfile, setAnthem, addNotification, collections, seek, progress, artists, allTracks } = useAudio();
 
   const handleArtistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const matched = MOCK_ARTISTS.find(a => 
-      a.name.toLowerCase() === nft.creator?.toLowerCase() || 
-      a.uid?.toLowerCase() === nft.creator?.toLowerCase()
-    ) || artists?.find(a => 
+    const matched = artists?.find(a => 
       a.name.toLowerCase() === nft.creator?.toLowerCase() || 
       a.uid?.toLowerCase() === nft.creator?.toLowerCase()
     );
-    const targetId = matched?.uid || nft.creator?.toLowerCase().replace(/\s+/g, '-');
+    const targetId = matched?.uid || nft.artistId || nft.creator?.toLowerCase().replace(/\s+/g, '-');
     if (targetId) {
       navigate(`/artist/${targetId}`);
     }
@@ -180,7 +177,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isRowImageLoaded, setIsRowImageLoaded] = useState(false);
 
-  const associatedTrack = MOCK_TRACKS.find(t => t.id === nft.trackId);
+  const associatedTrack = allTracks?.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
   const isOwner = Boolean(userProfile?.walletAddress && nft.owner && nft.owner === userProfile.walletAddress);
   const isAnthem = userProfile.anthemId === nft.id;
@@ -190,7 +187,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                           nft.attributes?.find(t => t.trait_type.toLowerCase() === 'collection' || t.trait_type.toLowerCase() === 'series')?.value as string;
   const collectionName = nftCollection?.name || traitCollection || (nft.title.includes(':') ? nft.title.split(':')[0] : null);
 
-  const artist = MOCK_ARTISTS.find(a => a.name.toLowerCase() === nft.creator.toLowerCase() || a.name.toLowerCase() === nft.artist?.toLowerCase());
+  const artist = artists?.find(a => a.name.toLowerCase() === nft.creator?.toLowerCase() || a.name.toLowerCase() === nft.artist?.toLowerCase());
   const isVerified = nft.artistVerified || artist?.verified || artist?.isVerifiedArtist;
   
   const isAuctionEnded = React.useMemo(() => {
@@ -250,20 +247,16 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
       togglePlay().catch((err) => console.error("Error pausing main audio:", err));
     }
 
-    let audioUrl = nft.audioUrl || associatedTrack?.audioUrl || "/tonjam-offline-audio.mp3";
-    if (audioUrl.includes("codeskulptor") || audioUrl.includes("bgm_gui.mp3")) {
-      audioUrl = "/tonjam-offline-audio.mp3";
+    const audioUrl = nft.audioUrl || associatedTrack?.audioUrl || "";
+    if (!audioUrl) {
+      addNotification("No audio preview available for this NFT", "info");
+      return;
     }
     const audio = new Audio(audioUrl);
     audioRef.current = audio;
 
     audio.onerror = () => {
-      if (audio.src && !audio.src.includes('tonjam-offline-audio')) {
-        audio.src = '/tonjam-offline-audio.mp3';
-        audio.play().catch(() => {});
-      } else {
-        stopPreview();
-      }
+      stopPreview();
     };
 
     // Register active preview stop callback globally

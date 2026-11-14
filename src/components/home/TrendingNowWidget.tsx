@@ -7,9 +7,7 @@ import {
   Calendar, 
   Globe, 
   Music, 
-  ArrowRight,
-  ShieldCheck,
-  Zap
+  ArrowRight
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
@@ -35,39 +33,6 @@ interface TrendingData {
   trendingTags: string[];
 }
 
-const DEFAULT_FALLBACK_TRENDS: TrendingData = {
-  headline: "TON Web3 Music Renaissance",
-  overview: "Independent artists and collectors are driving record-breaking Music NFT volume across TON and decentralized audio networks this week.",
-  drops: [
-    {
-      artistName: "Satoshi Beats",
-      title: "Genesis LP",
-      date: "Dropping Friday",
-      platform: "TonJam Launchpad",
-      description: "Exclusive acoustic-electronic fusion minted directly on TON."
-    },
-    {
-      artistName: "Neon Phonk Club",
-      title: "Cyberpunk Melancholy EP",
-      date: "Live Now",
-      platform: "TON NFTs",
-      description: "Limited edition audio-visual collectibles with streaming royalty splits."
-    },
-    {
-      artistName: "Astro Beats",
-      title: "Midnight Frequency",
-      date: "Dropping Soon",
-      platform: "TonJam Marketplace",
-      description: "High-resonance ambient Afrobeats digital collectible."
-    }
-  ],
-  trendingTags: ["#TONMusic", "#Web3Audio", "#MusicNFTs"],
-  sources: [
-    { title: "TON Foundation Music Ecosystem", uri: "https://ton.org" },
-    { title: "Web3 Music Guild Weekly", uri: "https://web3music.xyz" }
-  ]
-};
-
 export const TrendingNowWidget: React.FC = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<TrendingData | null>(null);
@@ -90,11 +55,10 @@ export const TrendingNowWidget: React.FC = () => {
       if (json && json.drops && json.drops.length > 0) {
         setData(json);
       } else {
-        setData(DEFAULT_FALLBACK_TRENDS);
+        setData(null);
       }
-    } catch (err) {
-      console.warn("Using curated Web3 music trends due to fetch response:", err);
-      setData(DEFAULT_FALLBACK_TRENDS);
+    } catch {
+      setData(null);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -129,6 +93,10 @@ export const TrendingNowWidget: React.FC = () => {
     );
   }
 
+  if (!data) {
+    return null;
+  }
+
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 my-4">
       <motion.div 
@@ -137,11 +105,9 @@ export const TrendingNowWidget: React.FC = () => {
         transition={{ duration: 0.4 }}
         className="bg-[#111C30]/90 backdrop-blur-2xl rounded-2xl p-5 sm:p-6 shadow-2xl shadow-black/40 text-left overflow-hidden relative"
       >
-        {/* Subtle background ambient glow */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#229ED9]/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#9B7CFF]/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 relative z-10">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-2xl bg-gradient-to-br from-[#229ED9]/20 to-[#9B7CFF]/25 text-[#229ED9] shadow-inner shrink-0">
@@ -183,7 +149,6 @@ export const TrendingNowWidget: React.FC = () => {
           </div>
         </div>
 
-        {/* Overview Summary */}
         {data?.overview && (
           <div className="mb-5 p-4 rounded-xl bg-white/[0.03] text-[#F5F7FB] text-xs sm:text-sm leading-relaxed relative z-10">
             <div className="font-bold text-[#FFC857] mb-1 flex items-center gap-1.5">
@@ -194,7 +159,6 @@ export const TrendingNowWidget: React.FC = () => {
           </div>
         )}
 
-        {/* Trending Drops Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mb-5 relative z-10">
           {data?.drops?.map((drop, idx) => (
             <motion.div
@@ -236,7 +200,6 @@ export const TrendingNowWidget: React.FC = () => {
           ))}
         </div>
 
-        {/* Trending Tags & Grounding Sources Footer */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-white/[0.06] relative z-10 text-[11px]">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[#94A3B8] font-medium">Trending Tags:</span>

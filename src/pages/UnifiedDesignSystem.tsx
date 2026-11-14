@@ -52,6 +52,7 @@ import {
 } from '../components/unified';
 import { TJ_COIN_ICON } from '@/constants';
 import { toast } from 'sonner';
+import { getPlaceholderImage } from '@/lib/utils';
 
 export const UnifiedDesignSystem: React.FC = () => {
   const navigate = useNavigate();
@@ -120,7 +121,7 @@ export const UnifiedDesignSystem: React.FC = () => {
             <div className="w-full h-14 rounded-2xl bg-[#111C30]/95 backdrop-blur-md px-3.5 flex items-center justify-between gap-3 shadow-lg select-none">
               <div className="flex items-center gap-3 min-w-0">
                 <img
-                  src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80"
+                  src={getPlaceholderImage('track')}
                   alt="Now Playing"
                   className="w-9 h-9 rounded-xl object-cover shrink-0"
                 />
@@ -500,7 +501,7 @@ export const UnifiedDesignSystem: React.FC = () => {
                     profile={{
                       name: 'Alex Rivers',
                       username: 'alexrivers',
-                      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+                      avatar: getPlaceholderImage('artist'),
                       isVerified: true,
                       role: 'Artist',
                     }}
@@ -562,11 +563,11 @@ export const UnifiedDesignSystem: React.FC = () => {
                     description: 'released "TON Odyssey (VIP Club Mix)"',
                     senderName: 'CYBERPUNK TON',
                     senderHandle: 'cyberpunkton',
-                    senderAvatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&auto=format&fit=crop&q=80',
+                    senderAvatar: getPlaceholderImage('artist'),
                     isVerified: true,
                     timestamp: '5m ago',
                     read: false,
-                    previewImageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80',
+                    previewImageUrl: getPlaceholderImage('track'),
                     previewTitle: 'TON Odyssey (VIP Club Mix)',
                     previewSubtitle: 'Single · Lossless Master Stems',
                     actionLabel: 'Listen Now',
@@ -583,11 +584,11 @@ export const UnifiedDesignSystem: React.FC = () => {
                     description: 'Sold for 42.0 TON ($231 USD)',
                     senderName: 'TonJam Marketplace',
                     senderHandle: 'tonjam_market',
-                    senderAvatar: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80',
+                    senderAvatar: getPlaceholderImage('artist'),
                     isVerified: true,
                     timestamp: '5h ago',
                     read: true,
-                    previewImageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80',
+                    previewImageUrl: getPlaceholderImage('nft'),
                     previewTitle: 'Midnight Waves #01 (1/1 Master)',
                     previewSubtitle: 'Royalties credited to wallet',
                   }}

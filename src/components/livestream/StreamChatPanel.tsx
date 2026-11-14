@@ -67,7 +67,7 @@ export const StreamChatPanel: React.FC<StreamChatPanelProps> = ({
     if (!trimmed) return;
 
     const senderName = userProfile?.name || userProfile?.username || user?.displayName || 'TonJam Listener';
-    const senderAvatar = userProfile?.avatar || user?.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.uid || 'fan'}`;
+    const senderAvatar = userProfile?.avatar || user?.photoURL || '';
     const senderAddress = address || userProfile?.walletAddress;
 
     try {
@@ -214,11 +214,17 @@ export const StreamChatPanel: React.FC<StreamChatPanelProps> = ({
                       className="cursor-pointer hover:opacity-80 transition-opacity shrink-0"
                       title={msg.userNfts?.length ? `View ${msg.userName}'s ${msg.userNfts.length} NFTs` : msg.userName}
                     >
-                      <img
-                        src={msg.userAvatar}
-                        alt={msg.userName}
-                        className="w-5 h-5 rounded-full object-cover bg-black"
-                      />
+                      {msg.userAvatar ? (
+                        <img
+                          src={msg.userAvatar}
+                          alt={msg.userName}
+                          className="w-5 h-5 rounded-full object-cover bg-black"
+                        />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-white/10 text-[9px] font-bold text-white flex items-center justify-center uppercase">
+                          {(msg.userName || 'L').slice(0, 1)}
+                        </div>
+                      )}
                     </button>
 
                     <span className="text-xs font-bold text-white truncate">

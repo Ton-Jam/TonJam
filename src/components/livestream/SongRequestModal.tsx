@@ -37,7 +37,7 @@ export const SongRequestModal: React.FC<SongRequestModalProps> = ({
     setIsSubmitting(true);
     try {
       const requesterName = userProfile?.name || userProfile?.username || user?.displayName || 'TonJam Fan';
-      const requesterAvatar = userProfile?.avatar || user?.photoURL || 'https://api.dicebear.com/7.x/bottts/svg?seed=requester';
+      const requesterAvatar = userProfile?.avatar || user?.photoURL || '';
 
       await submitStreamSongRequest(stream.id, {
         streamId: stream.id,

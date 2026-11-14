@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { DailyMission } from '@/types';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, increment, onSnapshot } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { triggerHaptic } from '@/lib/haptics';
@@ -31,7 +32,7 @@ export const useTJ = () => {
       timeUntilReset: '',
       claimDailyMissionReward: async () => false,
       recordMissionProgress: async () => {},
-      dailyStreak: 1,
+      dailyStreak: 0,
       dailyCompletedCount: 0,
       allDailyCompleted: false,
       hasClaimedDailyBonus: false,
@@ -147,9 +148,9 @@ export const TJProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [dailyStreak, setDailyStreak] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('tonjam_daily_streak');
-      return saved ? parseInt(saved, 10) || 7 : 7;
+      return saved ? parseInt(saved, 10) || 0 : 0;
     } catch {
-      return 7;
+      return 0;
     }
   });
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
@@ -185,77 +186,71 @@ export const TJProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   // Load / Initialize Missions for current activeDateKey
   useEffect(() => {
-    let unsubscribe: (() => void) | null = null;
+    let unsubscribeDoc: (() => void) | null = null;
     const storageKey = `tonjam_daily_missions_${activeDateKey}`;
     const bonusStorageKey = `tonjam_daily_bonus_${activeDateKey}`;
 
-    // 1. Initial local fallback load
-    let cachedMissionsStr: string | null = null;
-    let cachedBonus = false;
-    try {
-      cachedMissionsStr = localStorage.getItem(storageKey);
-      cachedBonus = localStorage.getItem(bonusStorageKey) === 'true';
-    } catch {}
-    setHasClaimedDailyBonus(cachedBonus);
+    const defaultMissions = createDefaultDailyMissions(activeDateKey);
+    setHasClaimedDailyBonus(false);
+    setDailyMissions(defaultMissions);
 
-    let initialMissions: DailyMission[] = [];
-    if (cachedMissionsStr) {
-      try {
-        initialMissions = JSON.parse(cachedMissionsStr);
-      } catch (e) {
-        console.error('Error parsing cached daily missions', e);
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+        unsubscribeDoc = null;
       }
-    }
 
-    if (!initialMissions || initialMissions.length === 0) {
-      initialMissions = createDefaultDailyMissions(activeDateKey);
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(initialMissions));
-      } catch {}
-    }
-    setDailyMissions(initialMissions);
+      if (currentUser) {
+        setIsSyncing(true);
+        const missionDocRef = doc(db, 'users', currentUser.uid, 'dailyMissions', activeDateKey);
 
-    // 2. Real-time Firestore sync if authenticated
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      setIsSyncing(true);
-      const missionDocRef = doc(db, 'users', currentUser.uid, 'dailyMissions', activeDateKey);
-
-      unsubscribe = onSnapshot(
-        missionDocRef,
-        (snap) => {
-          setIsSyncing(false);
-          if (snap.exists()) {
-            const data = snap.data();
-            if (Array.isArray(data.missions) && data.missions.length > 0) {
-              setDailyMissions(data.missions);
-              localStorage.setItem(storageKey, JSON.stringify(data.missions));
+        unsubscribeDoc = onSnapshot(
+          missionDocRef,
+          (snap) => {
+            setIsSyncing(false);
+            if (snap.exists()) {
+              const data = snap.data();
+              if (Array.isArray(data.missions) && data.missions.length > 0) {
+                setDailyMissions(data.missions);
+                try {
+                  localStorage.setItem(storageKey, JSON.stringify(data.missions));
+                } catch {}
+              }
+              if (data.bonusClaimed !== undefined) {
+                setHasClaimedDailyBonus(!!data.bonusClaimed);
+                try {
+                  localStorage.setItem(bonusStorageKey, String(!!data.bonusClaimed));
+                } catch {}
+              }
+            } else {
+              setDailyMissions(defaultMissions);
+              setHasClaimedDailyBonus(false);
+              setDoc(missionDocRef, {
+                dateKey: activeDateKey,
+                missions: defaultMissions,
+                bonusClaimed: false,
+                updatedAt: new Date().toISOString(),
+              }).catch((err) => {
+                handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.uid}/dailyMissions/${activeDateKey}`);
+              });
             }
-            if (data.bonusClaimed !== undefined) {
-              setHasClaimedDailyBonus(!!data.bonusClaimed);
-              localStorage.setItem(bonusStorageKey, String(!!data.bonusClaimed));
-            }
-          } else {
-            // Write initial state to Firestore
-            setDoc(missionDocRef, {
-              dateKey: activeDateKey,
-              missions: initialMissions,
-              bonusClaimed: false,
-              updatedAt: new Date().toISOString(),
-            }).catch((err) => {
-              console.warn('Error creating daily missions doc in Firestore:', err);
-            });
+          },
+          (error) => {
+            setIsSyncing(false);
+            handleFirestoreError(error, OperationType.GET, `users/${currentUser.uid}/dailyMissions/${activeDateKey}`);
           }
-        },
-        (error) => {
-          setIsSyncing(false);
-          handleFirestoreError(error, OperationType.GET, `users/${currentUser.uid}/dailyMissions/${activeDateKey}`);
-        }
-      );
-    }
+        );
+      } else {
+        setIsSyncing(false);
+        setDailyMissions(defaultMissions);
+        setHasClaimedDailyBonus(false);
+        setDailyStreak(0);
+      }
+    });
 
     return () => {
-      if (unsubscribe) unsubscribe();
+      unsubscribeAuth();
+      if (unsubscribeDoc) unsubscribeDoc();
     };
   }, [activeDateKey]);
 

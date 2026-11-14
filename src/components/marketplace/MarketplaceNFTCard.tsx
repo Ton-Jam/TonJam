@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { Play, Pause, BadgeCheck, Disc, Wallet, Eye, RotateCw, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAudio } from "@/contexts/AudioContext";
-import { MOCK_TRACKS, MOCK_ARTISTS } from "@/constants";
 import { cn, shareContent } from "@/lib/utils";
 import { MarqueeTitle } from "../MarqueeTitle";
 import { AuctionCountdownTimer } from "../AuctionCountdownTimer";
@@ -36,13 +35,17 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
   const navigate = useNavigate();
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [is3DModalOpen, setIs3DModalOpen] = useState(false);
-  const { playTrack, currentTrack, isPlaying, togglePlay, addNotification } = useAudio();
+  const { playTrack, currentTrack, isPlaying, togglePlay, addNotification, allTracks, artists } = useAudio();
   const { convertPrice } = useGramPrice();
 
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [previewSeconds, setPreviewSeconds] = useState(30);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<any>(null);
+
+  const associatedTrack = allTracks.find((t) => t.id === nft.trackId);
+  const isActive = currentTrack?.id === nft.trackId;
+  const isCurrentlyPlaying = isActive && isPlaying;
 
   const stopPreview = () => {
     if (audioRef.current) {
@@ -65,7 +68,12 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
       return;
     }
 
-    // Stop any other previews globally
+    const audioUrl = nft.audioUrl || associatedTrack?.audioUrl;
+    if (!audioUrl) {
+      addNotification("No audio preview available for this NFT", "error");
+      return;
+    }
+
     if ((window as any)._activePreviewStop) {
       try {
         (window as any)._activePreviewStop();
@@ -74,16 +82,13 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
       }
     }
 
-    // Pause primary audio if playing
     if (isPlaying) {
       togglePlay().catch((err) => console.error("Error pausing main audio:", err));
     }
 
-    const audioUrl = nft.audioUrl || associatedTrack?.audioUrl || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
     const audio = new Audio(audioUrl);
     audioRef.current = audio;
 
-    // Register active preview stop callback globally
     (window as any)._activePreviewStop = stopPreview;
 
     const playPromise = audio.play();
@@ -132,10 +137,6 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
     };
   }, []);
 
-  const associatedTrack = MOCK_TRACKS.find((t) => t.id === nft.trackId);
-  const isActive = currentTrack?.id === nft.trackId;
-  const isCurrentlyPlaying = isActive && isPlaying;
-
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (associatedTrack) {
@@ -163,7 +164,6 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
 
   const handleMintClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addNotification(`Minting process started for ${nft.title}!`, "success");
     navigate(`/nft/${nft.id}`);
   };
 
@@ -188,7 +188,6 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
           className
         )}
       >
-      {/* Artwork Image */}
       <div className="relative aspect-square w-full overflow-hidden bg-black/40">
         {!isImageLoaded && (
           <div className="absolute inset-0 bg-neutral-900/90 overflow-hidden flex flex-col items-center justify-center z-0 select-none">
@@ -211,7 +210,6 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
           )}
         />
 
-        {/* Hover overlay with detail look trigger */}
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
           <button
             onClick={handlePlayClick}
@@ -250,7 +248,6 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
           </button>
         </div>
 
-        {/* Real-time Streaming status indicator tab */}
         {isCurrentlyPlaying && (
           <div className={cn(
             "absolute top-3 bg-[#2BE08C] text-black text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1 z-10",
@@ -261,14 +258,12 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
           </div>
         )}
 
-        {/* Real-time Auction Countdown timer */}
         {nft.listingType === 'auction' && (
           <div className="absolute top-3 left-3 z-10">
             <AuctionCountdownTimer nft={nft as any} variant="badge" />
           </div>
         )}
 
-        {/* Edition tracker watermark */}
         {nft.edition && (
           <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold tracking-widest uppercase px-2 py-0.5 rounded z-10">
             {nft.edition}
@@ -276,18 +271,15 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
         )}
       </div>
 
-      {/* Info Body */}
       <div className="p-4 flex flex-col flex-grow">
-        {/* Title */}
         <h3 className="text-[13px] font-bold text-white uppercase tracking-tight line-clamp-1 mb-0.5 group-hover:text-[#5B6BFF] transition-colors">
           {nft.title}
         </h3>
 
-        {/* Artist Line with Verified Tag */}
         <div 
           onClick={(e) => {
             e.stopPropagation();
-            const artist = MOCK_ARTISTS.find(a => a.name.toLowerCase() === nft.creator.toLowerCase());
+            const artist = artists.find(a => a.name.toLowerCase() === nft.creator.toLowerCase());
             if (artist) {
               navigate(`/artist/${artist.uid}`);
             }
@@ -297,10 +289,9 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
           <div className="flex-1 min-w-0">
             <MarqueeTitle text={nft.creator} className="text-[10px] text-[#9AA0AE] font-semibold tracking-wider uppercase" />
           </div>
-          <BadgeCheck className="w-3.5 h-3.5 text-[#5B6BFF] fill-current shrink-0" />
+          {nft.artistVerified && <BadgeCheck className="w-3.5 h-3.5 text-[#5B6BFF] fill-current shrink-0" />}
         </div>
 
-        {/* 30s Audio Preview Button */}
         <button
           onClick={handlePreviewToggle}
           className={cn(
@@ -327,7 +318,6 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
           )}
         </button>
 
-        {/* Floor Pricing & Quick Controls Grid */}
         <div className="mt-auto pt-3 flex items-center justify-between border-t border-white/[0.04]">
           <div className="flex flex-col">
             <span className="text-[8px] uppercase tracking-widest text-[#9AA0AE] font-semibold">
@@ -339,7 +329,6 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5">
-            {/* Stream trigger */}
             <button
               onClick={handlePlayClick}
               className={cn(
@@ -356,13 +345,12 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
               )}
             </button>
 
-            {/* Quick Mint trigger */}
             <button
               onClick={handleMintClick}
               className="px-2.5 py-1.5 bg-[#5B6BFF] hover:bg-[#5B6BFF]/90 text-white rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1 transition-all"
             >
               <Wallet className="w-3 h-3" />
-              Mint
+              View
             </button>
           </div>
         </div>

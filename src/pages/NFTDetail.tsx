@@ -63,11 +63,7 @@ import { toast } from "sonner";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useModal } from "@/components/layout/ModalProvider";
 import {
-  MOCK_NFTS,
-  MOCK_USER,
-  MOCK_TRACKS,
   TON_LOGO,
-  MOCK_ARTISTS,
   APP_LOGO,
   TJ_COIN_ICON,
 } from "@/constants";
@@ -75,6 +71,7 @@ import { useAudio } from "@/contexts/AudioContext";
 import { useTokenGating } from "@/hooks/useTokenGating";
 import { NFTItem, Track, NFTOffer } from "@/types";
 import { fetchNFTMetadata, fetchFloorPriceHistory } from "@/services/nftService";
+import { sendTransactionSafe } from "@/services/tonService";
 import { db } from "@/lib/firebase";
 import { doc, onSnapshot, updateDoc, increment } from "firebase/firestore";
 import {
@@ -130,6 +127,8 @@ const NFTDetail: React.FC = () => {
     isPlaying,
     playTrack,
     allNFTs,
+    allTracks,
+    artists,
     collections, // Added collections
     transactions, // Added transactions
     updateNFT,
@@ -239,20 +238,6 @@ const NFTDetail: React.FC = () => {
     
     // Reverse to get chronological order if history is newest-first
     const soldEvents = [...localNft.history].reverse().filter(h => h.event === "Sold" && h.price);
-    
-    if (soldEvents.length === 0) {
-      // Return mock data if there are no actual sales to show the chart
-      const basePrice = parseInt(localNft.price || "20");
-      return [
-        { date: "Day 1", value: Math.max(1, basePrice * 0.5) },
-        { date: "Day 5", value: Math.max(1, basePrice * 0.7) },
-        { date: "Day 10", value: Math.max(1, basePrice * 0.65) },
-        { date: "Day 15", value: Math.max(1, basePrice * 0.8) },
-        { date: "Day 20", value: Math.max(1, basePrice * 1.1) },
-        { date: "Day 25", value: Math.max(1, basePrice * 0.95) },
-        { date: "Today", value: basePrice }
-      ];
-    }
     
     return soldEvents.map(h => ({
       date: h.date,
@@ -386,39 +371,6 @@ const NFTDetail: React.FC = () => {
     }
   };
 
-  const handleSimulateDrop = () => {
-    if (!localNft) return;
-    const currentPrice = parseFloat(localNft.price) || 1.0;
-    const dropAmount = (currentPrice * priceAlertPercent) / 100;
-    const newPrice = (currentPrice - dropAmount).toFixed(2);
-
-    addNotification(
-      `Price Alert: ${localNft.title}'s valuation node recorded a ${priceAlertPercent}% drop down to ${newPrice} GRAMS.`,
-      "warning"
-    );
-
-    import('sonner').then(({ toast }) => {
-      toast.custom((t) => (
-        <div className="flex bg-[#030712] rounded-[4px] p-4 shadow-2xl items-center gap-3">
-          <div className="bg-rose-500/10 p-2 rounded-full flex items-center justify-center text-rose-400">
-            <TrendingDown className="h-5 w-5 animate-pulse" />
-          </div>
-          <div className="flex flex-col text-left">
-            <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-1.5">
-              Price Alert Triggered
-            </p>
-            <p className="text-[11px] text-white font-bold uppercase tracking-tight mt-0.5">
-              {localNft.title} dropped by {priceAlertPercent}%!
-            </p>
-            <p className="text-[9px] font-mono text-zinc-400 mt-1">
-              Initial: <span className="line-through">{currentPrice} GRAM</span> → New: <span className="text-emerald-400 font-bold font-mono">{newPrice} GRAM</span>
-            </p>
-          </div>
-        </div>
-      ), { duration: 5000 });
-    });
-  };
-
   const loadMetadata = () => {
     if (localNft?.contractAddress) {
       setIsFetchingMetadata(true);
@@ -440,12 +392,12 @@ const NFTDetail: React.FC = () => {
   useEffect(() => {
     if (localNft) {
       setAssociatedTrack(
-        MOCK_TRACKS.find((t) => t.id === localNft.trackId) || null,
+        allTracks.find((t) => t.id === localNft.trackId) || null,
       );
       /* Fetch dynamic metadata */
       loadMetadata();
     }
-  }, [id, localNft?.id]);
+  }, [id, localNft?.id, allTracks]);
 
   // Sync specific NFT history from Firestore
   useEffect(() => {
@@ -483,84 +435,6 @@ const NFTDetail: React.FC = () => {
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [isEndingSoon, setIsEndingSoon] = useState<boolean>(false);
   const { openModal } = useModal();
-
-  // Live bid stream simulation for active auctions
-  useEffect(() => {
-    if (!localNft || !isAuction || isAuctionEnded) return;
-
-    // Simulation runs every 35-55 seconds randomly
-    const runSimulation = () => {
-      // Don't simulate if the user is currently placing a bid
-      if (isPlacingBid) return;
-
-      const randomOfferers = [
-        "UQDa_SarahJ_Collector_x9y1_7384",
-        "UQC_Emeka_LagosVibes_9911_v8s2",
-        "UQC_Alex_KrupyFan_4831_m1s9",
-        "UQD_VaporWave_Lord_1109_p4k8",
-        "UQCc_Arseny_RaveMaster_2281_f92k"
-      ];
-      // Exclude current user from simulated bidders
-      const userWallet = userProfile?.walletAddress || "";
-      const filteredOfferers = randomOfferers.filter(o => o !== userWallet);
-      const randomOfferer = filteredOfferers[Math.floor(Math.random() * filteredOfferers.length)];
-      
-      const currentHighest = localNft.offers && localNft.offers.length > 0 
-        ? parseFloat(localNft.offers[0].price) 
-        : parseFloat(localNft.price);
-      
-      const bidIncrease = 1 + (Math.floor(Math.random() * 4) + 2) / 100; // 2% to 5% increase
-      const simulatedBid = (currentHighest * bidIncrease).toFixed(2);
-
-      const newOffer = {
-        id: `offer-sim-${Date.now()}`,
-        offerer: randomOfferer,
-        price: simulatedBid,
-        timestamp: new Date().toISOString(),
-        duration: "24h",
-      };
-
-      const newHistoryItem = {
-        id: `hist-sim-${Date.now()}`,
-        event: 'Bid',
-        price: `${simulatedBid} GRAM`,
-        from: randomOfferer,
-        to: localNft.owner || 'Auction Smart Contract',
-        date: new Date().toISOString(),
-      };
-
-      updateNFT(localNft.id, {
-        price: simulatedBid,
-        offers: [newOffer, ...(localNft.offers || [])],
-        history: [newHistoryItem, ...(localNft.history || [])],
-      });
-
-      addNotification(
-        `New network bid: @${randomOfferer.slice(0, 8)}... bid ${simulatedBid} GRAM`,
-        "info"
-      );
-
-      // Flash a toast for visual transparency feedback
-      import('sonner').then(({ toast }) => {
-        toast.info("Live Bid Received", {
-          description: `@${randomOfferer.slice(0, 8)}... placed a bid of ${simulatedBid} GRAM.`,
-        });
-      });
-    };
-
-    // Organic random delay: first bid in 20-40 seconds, then every 35-55s
-    const initialDelay = 20000 + Math.random() * 20000;
-    const initialTimer = setTimeout(() => {
-      runSimulation();
-      
-      const interval = setInterval(runSimulation, 35000 + Math.random() * 20000);
-      return () => clearInterval(interval);
-    }, initialDelay);
-
-    return () => {
-      clearTimeout(initialTimer);
-    };
-  }, [localNft?.id, isAuction, isAuctionEnded, isPlacingBid, userProfile?.walletAddress]);
 
   useEffect(() => {
     if (!isAuction || !localNft?.auctionEndTime) return;
@@ -628,7 +502,7 @@ const NFTDetail: React.FC = () => {
 
   const relatedNfts = useMemo(() => {
     if (!localNft || !associatedTrack) return [];
-    const relatedTrackIds = MOCK_TRACKS.filter(
+    const relatedTrackIds = allTracks.filter(
       (t) => t.genre === associatedTrack.genre,
     ).map((t) => t.id);
 
@@ -642,27 +516,49 @@ const NFTDetail: React.FC = () => {
       );
     }
     return filtered.slice(0, 4);
-  }, [localNft, associatedTrack, allNFTs, relatedSort]);
+  }, [localNft, associatedTrack, allTracks, allNFTs, relatedSort]);
 
-  const handleTip = (amount: number) => {
+  const handleTip = async (amount: number) => {
     setIsTipping(false);
+    if (!tonConnectUI.connected) {
+      addNotification("Connect your TON wallet to tip the creator.", "warning");
+      tonConnectUI.openModal();
+      return;
+    }
+    const creatorArtist = artists.find(
+      (a) => a.uid === localNft?.artistId || a.name === localNft?.creator
+    );
+    const recipient = (localNft as any)?.creatorAddress || creatorArtist?.walletAddress;
+    if (!recipient) {
+      addNotification("Creator has not configured a TON wallet address.", "warning");
+      return;
+    }
 
-    // Simulate transaction
     addNotification(`Sending ${amount} GRAM to ${localNft?.creator}...`, "info");
-
-    setTimeout(() => {
+    try {
+      await sendTransactionSafe(tonConnectUI, {
+        validUntil: Math.floor(Date.now() / 1000) + 120,
+        messages: [
+          {
+            address: recipient,
+            amount: BigInt(Math.round(amount * 1e9)).toString(),
+          },
+        ],
+      });
       confetti({
         particleCount: 150,
         spread: 70,
         origin: { y: 0.6 },
         colors: ["#3b82f6", "#ffffff", "#60a5fa"],
       });
-
       addNotification(
         `You sent ${amount} GRAM to ${localNft?.creator}. Thank you for supporting the artist!`,
         "success",
       );
-    }, 1500);
+    } catch (err: any) {
+      console.error("Tip transaction failed:", err);
+      addNotification(err?.message || "Tip transaction cancelled or failed.", "error");
+    }
   };
 
   if (allNFTs.length === 0)
@@ -722,40 +618,28 @@ const NFTDetail: React.FC = () => {
     addNotification("Broadcasting bid to neural relay...", "info");
 
     try {
-      // Simulate transaction delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
       const newOffer = {
         id: `offer-${Date.now()}`,
         offerer: userAddress,
         price: bidValue.toString(),
-        timestamp: "Just now",
+        timestamp: new Date().toISOString(),
         duration: "24h",
       };
 
-      // Check if there was a previous highest bidder to notify
       const previousHighestOffer = localNft.offers && localNft.offers.length > 0 ? localNft.offers[0] : null;
       
-      updateNFT(localNft.id, {
+      await updateNFT(localNft.id, {
         price: bidValue.toString(),
         offers: [newOffer, ...(localNft.offers || [])],
       });
 
-      // Notify previous bidder if applicable (simulated)
-      if (previousHighestOffer && previousHighestOffer.offerer !== userAddress) {
-        console.log(`Simulating outbid notification for ${previousHighestOffer.offerer}`);
-        // In a real app, this would be a server-side notification trigger.
-        // For now, we'll just show a toast if the current user IS the one who was outbid.
-        if (previousHighestOffer.offerer === userProfile.walletAddress) {
-            import('sonner').then(({ toast }) => {
-              toast.error("You've been outbid!", {
-                description: `Your bid of ${previousHighestOffer.price} GRAMS on ${localNft.title} has been surpassed.`,
-              });
-            });
-            
-            // Still using addNotification context if needed
-            addNotification(`You've been outbid on ${localNft.title}!`, "warning");
-        }
+      if (previousHighestOffer && previousHighestOffer.offerer === userProfile.walletAddress && previousHighestOffer.offerer !== userAddress) {
+        import('sonner').then(({ toast }) => {
+          toast.error("You've been outbid!", {
+            description: `Your bid of ${previousHighestOffer.price} GRAMS on ${localNft.title} has been surpassed.`,
+          });
+        });
+        addNotification(`You've been outbid on ${localNft.title}!`, "warning");
       }
 
       addNotification(`Bid of ${bidValue} GRAMS placed!`, "success");
@@ -793,22 +677,21 @@ const NFTDetail: React.FC = () => {
 
     addNotification(`Accepting offer from ${offerToAccept.offerer}...`, "info");
 
-    // Simulate blockchain delay
-    setTimeout(() => {
-      // Update NFT owner and clear listing
-      updateNFT(localNft.id, {
+    try {
+      await updateNFT(localNft.id, {
         owner: offerToAccept.offerer,
         listingType: undefined,
         price: offerToAccept.price,
-        offers: [], // Clear offers after sale
+        offers: [],
       });
 
       addNotification("Asset ownership transfer protocol complete.", "success");
       setOfferToAccept(null);
-      setTimeout(() => {
-        navigate("/profile");
-      }, 1000);
-    }, 1500);
+      navigate("/profile");
+    } catch (err) {
+      console.error("Failed to accept offer:", err);
+      addNotification("Failed to accept offer.", "error");
+    }
   };
 
   const handleDeclineOffer = (offerer: string) => {
@@ -859,18 +742,21 @@ const NFTDetail: React.FC = () => {
     setIsCancelBidConfirmOpen(true);
   };
 
-  const confirmCancelBid = () => {
+  const confirmCancelBid = async () => {
     if (!localNft || !userAddress) return;
 
     addNotification("Initiating bid withdrawal protocol...", "info");
 
-    setTimeout(() => {
+    try {
       const newOffers =
         localNft.offers?.filter((o) => o.offerer !== userAddress) || [];
-      updateNFT(localNft.id, { offers: newOffers });
+      await updateNFT(localNft.id, { offers: newOffers });
       addNotification("Bid signal withdrawn from the relay.", "success");
       setIsCancelBidConfirmOpen(false);
-    }, 1500);
+    } catch (err) {
+      console.error("Failed to withdraw bid:", err);
+      addNotification("Failed to withdraw bid.", "error");
+    }
   };
 
   const handleShare = () => {
@@ -995,7 +881,6 @@ const NFTDetail: React.FC = () => {
                 priceAlertPercent={priceAlertPercent}
                 onTogglePriceAlert={handleTogglePriceAlert}
                 onPercentChange={handlePercentChange}
-                onSimulateDrop={handleSimulateDrop}
                 showGlow={showGlow}
               />
             </div>
@@ -1225,7 +1110,7 @@ const NFTDetail: React.FC = () => {
                               Minted Date
                             </span>
                             <span className="text-sm font-black text-foreground uppercase tracking-tight">
-                              OCT 14, 2023
+                              {localNft.createdAt ? new Date(localNft.createdAt).toLocaleDateString() : 'Unknown'}
                             </span>
                           </div>
                           <div className="flex flex-col gap-2">
@@ -1347,7 +1232,7 @@ const NFTDetail: React.FC = () => {
                                   className={`w-12 h-12 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden`}
                                 >
                                   <img
-                                    src={`https://picsum.photos/100/100?seed=${o.offerer}`}
+                                    src={getPlaceholderImage(o.offerer || o.id, 100, 100)}
                                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                                     alt=""
                                   />

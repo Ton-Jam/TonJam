@@ -3,6 +3,7 @@ import { Track } from "@/types";
 import { Play, Pause, Heart, Download, Share2, Plus, MoreHorizontal, ArrowUpDown, AlertCircle, Gem } from "lucide-react";
 import { toast } from "sonner";
 import { useAudio } from "@/contexts/AudioContext";
+import { getPlaceholderImage } from "@/lib/utils";
 
 interface MusicTabProps {
   tracks: Track[];
@@ -17,7 +18,7 @@ export const MusicTab: React.FC<MusicTabProps> = ({
   trackSort,
   onSortChange
 }) => {
-  const { currentTrack, isPlaying } = useAudio();
+  const { currentTrack, isPlaying, downloadTrackForOffline } = useAudio();
   const [likedTracks, setLikedTracks] = React.useState<Record<string, boolean>>({});
 
   const toggleLike = (trackId: string, e: React.MouseEvent) => {
@@ -31,7 +32,7 @@ export const MusicTab: React.FC<MusicTabProps> = ({
 
   const handleDownload = (track: Track, e: React.MouseEvent) => {
     e.stopPropagation();
-    toast.success(`Downloading: ${track.title}`);
+    downloadTrackForOffline(track);
   };
 
   const handleShare = (track: Track, e: React.MouseEvent) => {
@@ -105,7 +106,7 @@ export const MusicTab: React.FC<MusicTabProps> = ({
                   </div>
 
                   <img 
-                    src={track.coverUrl || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop"} 
+                    src={track.coverUrl || getPlaceholderImage('track')} 
                     className="w-10 h-10 object-cover rounded-md shrink-0 shadow-md" 
                     alt="" 
                   />
@@ -130,7 +131,7 @@ export const MusicTab: React.FC<MusicTabProps> = ({
                 {/* Middle: Stream count */}
                 <div className="hidden sm:block text-right px-4">
                   <span className="text-xs font-mono text-neutral-400">
-                    {(track.playCount || track.streams || 48200).toLocaleString()}
+                    {(track.playCount || track.streams || 0).toLocaleString()}
                   </span>
                 </div>
 
@@ -149,7 +150,7 @@ export const MusicTab: React.FC<MusicTabProps> = ({
                   </button>
 
                   <span className="text-xs text-neutral-400 font-mono w-10 text-right">
-                    {Math.floor((track.duration || 220) / 60)}:{(String((track.duration || 220) % 60)).padStart(2, "0")}
+                    {Math.floor((track.duration || 0) / 60)}:{(String((track.duration || 0) % 60)).padStart(2, "0")}
                   </span>
 
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

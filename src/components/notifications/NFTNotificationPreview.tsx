@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink, Tag } from 'lucide-react';
 import { NFTPreviewData } from './types';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface NFTNotificationPreviewProps {
   preview: NFTPreviewData;
@@ -64,10 +65,7 @@ export const NFTNotificationPreview: React.FC<NFTNotificationPreviewProps> = ({
       <div className="flex items-center gap-2.5 min-w-0 pr-2">
         <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-[#16243E] border border-white/[0.04]">
           <img
-            src={
-              preview.thumbnailUrl ||
-              'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&fit=crop&q=80'
-            }
+            src={preview.thumbnailUrl || getPlaceholderImage('nft')}
             alt={preview.title}
             className="w-full h-full object-cover"
             loading="lazy"

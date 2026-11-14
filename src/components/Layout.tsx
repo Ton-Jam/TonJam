@@ -34,7 +34,7 @@ import {
   UserGroupIcon
 } from '@heroicons/react/24/outline';
 import { Sparkles as SparklesLucide, History, X, Rocket, Heart } from 'lucide-react';
-import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, TON_LOGO, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
+import { APP_LOGO, TJ_COIN_ICON, TON_LOGO, JAM_PRICE_USD } from '@/constants';
 import { useAudio, useUserRole } from '@/contexts/AudioContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTonPrice } from '@/contexts/TonPriceContext';
@@ -282,7 +282,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [activeFilterSubMenu, setActiveFilterSubMenu] = useState<string | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     const saved = localStorage.getItem('tonjam_search_history') || localStorage.getItem('recentSearches');
-    return saved ? JSON.parse(saved) : ['Lo-fi hip hop', 'Cyberpunk Beats', 'Phonk Vibes', 'Genesis NFT'];
+    return saved ? JSON.parse(saved) : [];
   });
   const trendingTopics = useMemo(() => {
     const topTracks = allTracks.sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 3).map(t => t.title);
@@ -868,7 +868,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate, onOpenTestnetM
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[9px] font-bold text-green-500 uppercase tracking-widest" aria-label="Price change">+2.4%</p>
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest" aria-label="Token symbol">JAM</p>
           </div>
         </div>
         

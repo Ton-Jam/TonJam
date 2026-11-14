@@ -26,7 +26,7 @@ import { toast } from 'sonner';
 import { addComment, reportPost } from '@/services/socialService';
 import { db, OperationType, handleFirestoreError } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { MOCK_ARTISTS } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface PostCardProps {
   post: Post;
@@ -51,10 +51,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   const handleAuthorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     const isArtist = post.user.role === 'artist' || post.user.isVerified;
-    const matchedArtist = MOCK_ARTISTS.find(a => 
-      a.uid === post.user.id || 
-      a.name.toLowerCase() === post.user.name?.toLowerCase()
-    ) || artists?.find(a => 
+    const matchedArtist = artists?.find(a => 
       a.uid === post.user.id || 
       a.name.toLowerCase() === post.user.name?.toLowerCase()
     );
@@ -103,9 +100,9 @@ export const PostCard: React.FC<PostCardProps> = ({
               id: data.userId || 'anon',
               name: data.userName || data.authorName || 'Jammer',
               username: data.username || (data.userName ? `@${data.userName.toLowerCase().replace(/\s+/g, '')}` : '@jammer'),
-              avatar: data.userAvatar || data.authorPhoto || data.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+              avatar: data.userAvatar || data.authorPhoto || data.avatar || getPlaceholderImage(`user-${data.userId || docSnap.id}`),
               isVerified: !!data.isVerified,
-              contributionPoints: data.contributionPoints || 50,
+              contributionPoints: data.contributionPoints || 0,
               badges: data.badges || [],
               role: data.role || 'fan'
             },
@@ -140,10 +137,14 @@ export const PostCard: React.FC<PostCardProps> = ({
   }, [post.replies, localReplies, firestoreReplies]);
 
   const handleReport = async () => {
+    if (!currentUserId) {
+      toast.info('Please sign in to report posts');
+      return;
+    }
     setShowMoreMenu(false);
     setIsReported(true);
     try {
-      await reportPost(post.id, currentUserId || 'current-user');
+      await reportPost(post.id, currentUserId);
       toast.success('Post Flagged for Review', {
         description: 'This post has been reported and flagged for our moderation team.',
       });
@@ -158,21 +159,25 @@ export const PostCard: React.FC<PostCardProps> = ({
 
   const handleShare = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(`https://tonjam.audio/post/${post.id}`);
+      navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
       addNotification('Link copied to clipboard!', 'success');
     } else {
-      addNotification('Shared signal simulated', 'success');
+      addNotification('Sharing is unavailable on this browser', 'info');
     }
   };
 
   const handlePlayAttachment = (att: any) => {
+    if (!att.url) {
+      addNotification('Audio stream unavailable for this attachment', 'info');
+      return;
+    }
     const playItem = new Track();
     playItem.id = att.id || 'att-song';
     playItem.songId = att.id || 'att-song';
     playItem.title = att.title || 'Attached Track';
     playItem.artist = att.artist || post.user.name;
-    playItem.coverUrl = post.user.avatar; // fallback to user avatar
-    playItem.audioUrl = att.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+    playItem.coverUrl = post.user.avatar;
+    playItem.audioUrl = att.url;
     playItem.duration = 180;
     playItem.isNFT = att.type === 'nft';
     playItem.genre = post.category;
@@ -183,11 +188,15 @@ export const PostCard: React.FC<PostCardProps> = ({
   const submitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentText.trim()) return;
+    if (!currentUserId) {
+      toast.info('Please sign in to post a reply');
+      return;
+    }
 
     const textToSubmit = commentText.trim();
     const replyId = `r-${Date.now()}`;
-    const authorName = userProfile?.name || 'You (Jammer)';
-    const authorAvatar = userProfile?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+    const authorName = userProfile?.name || 'TonJam Member';
+    const authorAvatar = userProfile?.avatar || getPlaceholderImage(`user-${currentUserId}`);
 
     const newReply: Reply = {
       id: replyId,
@@ -195,12 +204,12 @@ export const PostCard: React.FC<PostCardProps> = ({
       user: {
         id: currentUserId,
         name: authorName,
-        username: '@you',
+        username: userProfile?.username || '@you',
         avatar: authorAvatar,
-        isVerified: true,
-        contributionPoints: 120,
-        badges: ['⚡ Active Composer'],
-        role: 'fan'
+        isVerified: Boolean(userProfile?.isVerified),
+        contributionPoints: 0,
+        badges: [],
+        role: userProfile?.role === 'artist' ? 'artist' : userProfile?.role === 'admin' ? 'moderator' : 'fan'
       },
       content: textToSubmit,
       timestamp: 'Just now',
@@ -253,8 +262,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         const artistName = att.artist || post.user.name;
-                        const matched = MOCK_ARTISTS.find(a => a.name.toLowerCase() === artistName.toLowerCase()) ||
-                                      artists?.find(a => a.name.toLowerCase() === artistName.toLowerCase());
+                        const matched = artists?.find(a => a.name.toLowerCase() === artistName.toLowerCase());
                         const artistId = matched?.uid || artistName.toLowerCase().replace(/\s+/g, '-');
                         navigate(`/artist/${artistId}`);
                       }}
@@ -282,7 +290,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                 className="flex flex-col sm:flex-row items-stretch bg-white/[0.03] hover:bg-white/[0.05] rounded-xl overflow-hidden border-none transition-colors"
               >
                 <img 
-                  src={att.url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80'} 
+                  src={att.url || getPlaceholderImage(`nft-${att.id || idx}`)} 
                   alt="NFT Graphic"
                   className="w-full sm:w-28 h-28 object-cover shrink-0 cursor-pointer"
                   onClick={() => navigate(`/nft/${att.id || 'n1'}`)}
@@ -303,8 +311,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         const artistName = att.artist || post.user.name;
-                        const matched = MOCK_ARTISTS.find(a => a.name.toLowerCase() === artistName.toLowerCase()) ||
-                                      artists?.find(a => a.name.toLowerCase() === artistName.toLowerCase());
+                        const matched = artists?.find(a => a.name.toLowerCase() === artistName.toLowerCase());
                         const artistId = matched?.uid || artistName.toLowerCase().replace(/\s+/g, '-');
                         navigate(`/artist/${artistId}`);
                       }}

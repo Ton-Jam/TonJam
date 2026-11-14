@@ -36,7 +36,9 @@ import { useTonPrice } from '@/contexts/TonPriceContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { toNano } from '@ton/ton';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, getPlaceholderImage } from '@/lib/utils';
+import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 
 export interface SecondarySaleRecord {
   id: string;
@@ -68,68 +70,56 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
   const userAddress = useTonAddress() || userProfile?.walletAddress;
 
   const [timeframe, setTimeframe] = useState<'7d' | '30d' | 'all'>('30d');
-  const [isClaiming, setIsClaiming] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [simulatedResellPrice, setSimulatedResellPrice] = useState('45');
-  const [showSimulateModal, setShowSimulateModal] = useState(false);
 
-  // Initial mock/state for secondary sales with royalties
-  const [salesHistory, setSalesHistory] = useState<SecondarySaleRecord[]>(() => [
-    {
-      id: 'sec_sale_1',
-      nftId: 'nft_neon_pulse',
-      nftTitle: 'Cybernetic Echoes #04',
-      nftImageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80',
-      resellPrice: 60,
-      royaltyRate: 0.075,
-      royaltyAmount: 4.5,
-      seller: 'EQD...8a12',
-      buyer: 'EQB...41f9',
-      timestamp: new Date(Date.now() - 3600000 * 4).toISOString(),
-      status: 'pending'
-    },
-    {
-      id: 'sec_sale_2',
-      nftId: 'nft_synth_wave',
-      nftTitle: 'Midnight Synthesizer Genesis',
-      nftImageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop&q=80',
-      resellPrice: 35,
-      royaltyRate: 0.075,
-      royaltyAmount: 2.625,
-      seller: 'EQC...91b0',
-      buyer: 'EQA...33c4',
-      timestamp: new Date(Date.now() - 3600000 * 18).toISOString(),
-      status: 'pending'
-    },
-    {
-      id: 'sec_sale_3',
-      nftId: 'nft_gram_jam',
-      nftTitle: 'TonJam Founding Edition',
-      nftImageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80',
-      resellPrice: 120,
-      royaltyRate: 0.075,
-      royaltyAmount: 9.0,
-      seller: 'EQF...77a8',
-      buyer: 'EQE...12d5',
-      timestamp: new Date(Date.now() - 3600000 * 52).toISOString(),
-      status: 'settled'
-    },
-    {
-      id: 'sec_sale_4',
-      nftId: 'nft_cosmic_beat',
-      nftTitle: 'Deep Space Basslines #12',
-      nftImageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80',
-      resellPrice: 28,
-      royaltyRate: 0.075,
-      royaltyAmount: 2.1,
-      seller: 'EQA...09b4',
-      buyer: 'EQD...66f2',
-      timestamp: new Date(Date.now() - 3600000 * 96).toISOString(),
-      status: 'settled'
-    }
-  ]);
+  const [salesHistory, setSalesHistory] = useState<SecondarySaleRecord[]>([]);
 
-  // Compute pending (upcoming) and settled payouts
+  React.useEffect(() => {
+    let active = true;
+    const loadRoyaltyTransactions = async () => {
+      if (!userProfile?.uid) return;
+      try {
+        const q = query(
+          collection(db, 'transactions'),
+          where('participants', 'array-contains', userProfile.uid),
+          orderBy('timestamp', 'desc'),
+          limit(30)
+        );
+        const snap = await getDocs(q);
+        if (!active) return;
+        const rows: SecondarySaleRecord[] = [];
+        snap.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (data.type === 'nft_sale' || data.type === 'nft_resale_royalty') {
+            const resellPrice = Number(data.amount || 0);
+            const royaltyAmount = Number(data.artistShare || 0);
+            const royaltyRate = resellPrice > 0 ? royaltyAmount / resellPrice : 0.075;
+            rows.push({
+              id: docSnap.id,
+              nftId: data.nftId || '',
+              nftTitle: data.trackTitle || data.nftTitle || 'Music NFT Sale',
+              nftImageUrl: data.imageUrl || getPlaceholderImage('nft'),
+              resellPrice,
+              royaltyRate,
+              royaltyAmount,
+              seller: data.senderAddress || '',
+              buyer: data.recipientAddress || '',
+              timestamp: data.timestamp || new Date().toISOString(),
+              status: data.status === 'completed' || data.status === 'settled' ? 'settled' : 'pending',
+            });
+          }
+        });
+        setSalesHistory(rows);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.LIST, 'transactions');
+      }
+    };
+    loadRoyaltyTransactions();
+    return () => {
+      active = false;
+    };
+  }, [userProfile?.uid]);
+
   const pendingPayoutTON = useMemo(() => {
     return salesHistory
       .filter(s => s.status === 'pending')
@@ -146,43 +136,39 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
     return salesHistory.reduce((sum, s) => sum + s.resellPrice, 0);
   }, [salesHistory]);
 
-  const defaultRoyaltyRatePercent = 7.5; // Standard 7.5% royalty split on resales
+  const defaultRoyaltyRatePercent = 7.5;
 
-  // Accrued royalties available for withdrawal
   const withdrawableAmountTON = useMemo(() => {
-    return pendingPayoutTON > 0 ? pendingPayoutTON : (settledPayoutTON > 0 ? settledPayoutTON : 0);
-  }, [pendingPayoutTON, settledPayoutTON]);
+    return pendingPayoutTON > 0 ? pendingPayoutTON : 0;
+  }, [pendingPayoutTON]);
 
-  // 30-Day Historical Royalty Earnings Data for Recharts
   const historicalEarningsData = useMemo(() => {
     const data = [];
     const now = new Date();
     let runningTotal = 0;
-    
+
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
+      const dayKey = d.toISOString().split('T')[0];
       const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      
-      const dayOfWeek = d.getDay();
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-      const baseVal = (i % 7 === 0 ? 4.2 : (i % 3 === 0 ? 2.6 : 1.4)) + (isWeekend ? 1.8 : 0.6);
-      const noise = Math.sin(i * 0.7) * 0.9;
-      const dailyEarnings = parseFloat(Math.max(0.5, baseVal + noise).toFixed(2));
-      
+
+      const dailyEarnings = salesHistory
+        .filter((s) => (s.timestamp || '').startsWith(dayKey))
+        .reduce((acc, s) => acc + s.royaltyAmount, 0);
+
       runningTotal = parseFloat((runningTotal + dailyEarnings).toFixed(2));
-      
+
       data.push({
         date: dateStr,
-        dailyGrams: dailyEarnings,
+        dailyGrams: parseFloat(dailyEarnings.toFixed(2)),
         cumulativeGrams: runningTotal,
         usdValue: parseFloat((dailyEarnings * tonPriceUsd).toFixed(2))
       });
     }
     return data;
-  }, [tonPriceUsd]);
+  }, [salesHistory, tonPriceUsd]);
 
-  // Immediate Blockchain Withdrawal to connected TON wallet
   const handleWithdrawAll = async () => {
     const amountToWithdraw = withdrawableAmountTON;
 
@@ -191,7 +177,7 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
       return;
     }
 
-    if (!tonConnectUI.connected) {
+    if (!tonConnectUI.connected || !userAddress) {
       addNotification('Please connect your TON wallet to withdraw accrued royalties.', 'info');
       try {
         tonConnectUI.openModal();
@@ -211,30 +197,28 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
         nanoValue = Math.floor(amountToWithdraw * 1e9).toString();
       }
 
-      const recipient = userAddress || 'UQCc_TonJam_Artist_Wallet_Primary';
-
       const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 300,
         messages: [
           {
-            address: recipient,
+            address: userAddress,
             amount: nanoValue,
           }
         ]
       };
 
-      const result = await sendTransactionSafe(tonConnectUI, transaction);
+      await sendTransactionSafe(tonConnectUI, transaction);
 
       setSalesHistory(prev =>
         prev.map(s => ({ ...s, status: 'settled' }))
       );
 
-      const shortAddr = recipient.length > 12 
-        ? `${recipient.substring(0, 6)}...${recipient.substring(recipient.length - 4)}` 
-        : recipient;
+      const shortAddr = userAddress.length > 12 
+        ? `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}` 
+        : userAddress;
 
       addNotification(
-        `Withdrawal of ${amountToWithdraw.toFixed(2)} TON secondary market royalties successfully sent to wallet ${shortAddr} on the TON blockchain!`,
+        `Withdrawal of ${amountToWithdraw.toFixed(2)} TON secondary market royalties sent to wallet ${shortAddr}.`,
         'success'
       );
     } catch (err: any) {
@@ -242,73 +226,11 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
       if (err?.message?.includes('User rejected') || err?.message?.includes('canceled')) {
         addNotification('Withdrawal transaction was canceled in your wallet.', 'info');
       } else {
-        // Fallback for mock/preview mode or simulated wallet
-        setSalesHistory(prev =>
-          prev.map(s => ({ ...s, status: 'settled' }))
-        );
-        addNotification(
-          `Withdrawal transaction of ${amountToWithdraw.toFixed(2)} TON processed on TON network!`,
-          'success'
-        );
+        addNotification(err?.message || 'Withdrawal transaction failed.', 'error');
       }
     } finally {
       setIsWithdrawing(false);
     }
-  };
-
-  // Handle Payout Claim
-  const handleClaimPayout = () => {
-    if (pendingPayoutTON <= 0) {
-      addNotification('No pending secondary royalties to claim right now.', 'info');
-      return;
-    }
-
-    setIsClaiming(true);
-
-    setTimeout(() => {
-      setSalesHistory(prev =>
-        prev.map(s => (s.status === 'pending' ? { ...s, status: 'settled' } : s))
-      );
-      setIsClaiming(false);
-      addNotification(
-        `Successfully claimed ${pendingPayoutTON.toFixed(2)} TON in secondary market royalties directly to your connected wallet!`,
-        'success'
-      );
-    }, 1200);
-  };
-
-  // Simulate Secondary Resale
-  const handleSimulateResale = () => {
-    const priceNum = parseFloat(simulatedResellPrice) || 50;
-    const sampleNft = allNFTs[0] || {
-      id: `nft_sim_${Date.now()}`,
-      title: 'Vaporwave Sunset Remix',
-      imageUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=300&auto=format&fit=crop&q=80'
-    };
-
-    const royaltyRate = 0.075;
-    const royaltyAmt = priceNum * royaltyRate;
-
-    const newSale: SecondarySaleRecord = {
-      id: `sec_sale_${Date.now()}`,
-      nftId: sampleNft.id,
-      nftTitle: sampleNft.title,
-      nftImageUrl: sampleNft.imageUrl,
-      resellPrice: priceNum,
-      royaltyRate: royaltyRate,
-      royaltyAmount: royaltyAmt,
-      seller: `EQ${Math.random().toString(36).substring(2, 6).toUpperCase()}...${Math.random().toString(36).substring(2, 6)}`,
-      buyer: `EQ${Math.random().toString(36).substring(2, 6).toUpperCase()}...${Math.random().toString(36).substring(2, 6)}`,
-      timestamp: new Date().toISOString(),
-      status: 'pending'
-    };
-
-    setSalesHistory(prev => [newSale, ...prev]);
-    setShowSimulateModal(false);
-    addNotification(
-      `New Secondary Resale detected for "${sampleNft.title}" at ${priceNum} TON! +${royaltyAmt.toFixed(2)} TON pending royalty added.`,
-      'success'
-    );
   };
 
   // Export Payout History to CSV
@@ -533,15 +455,6 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
               {salesHistory.length} Total Secondary Resales Logged
             </p>
           </div>
-
-          <Button
-            variant="outline"
-            onClick={() => setShowSimulateModal(true)}
-            className="w-full py-2.5 bg-purple-500/10 border-purple-500/30 hover:bg-purple-500/20 text-purple-300 font-black uppercase text-[10px] tracking-widest rounded-xl flex items-center justify-center gap-1.5"
-          >
-            <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Simulate NFT Resale</span>
-          </Button>
         </div>
       </div>
 
@@ -724,72 +637,13 @@ export const RoyaltyStatusCard: React.FC<RoyaltyStatusCardProps> = ({
               </div>
             </div>
           ))}
+          {salesHistory.length === 0 && (
+            <div className="p-8 text-center text-xs text-white/50">
+              No secondary market resales recorded yet.
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Simulation Modal */}
-      <AnimatePresence>
-        {showSimulateModal && (
-          <div className="fixed inset-0 z-[220] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
-              onClick={() => setShowSimulateModal(false)}
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-sm bg-[#0A113A] border border-purple-500/40 rounded-3xl p-5 shadow-2xl space-y-4"
-            >
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <ShoppingBag className="w-4 h-4 text-purple-400" />
-                  <h3 className="text-sm font-black uppercase tracking-tight text-white">Simulate Secondary Resale</h3>
-                </div>
-                <button 
-                  onClick={() => setShowSimulateModal(false)}
-                  className="text-white/60 hover:text-white text-xs font-bold"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                Test how secondary market NFT sales automatically calculate and accrue creator royalties into your pending payout balance.
-              </p>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-wider text-white/50">Resell Price (TON)</label>
-                <div className="relative">
-                  <input 
-                    type="number"
-                    value={simulatedResellPrice}
-                    onChange={(e) => setSimulatedResellPrice(e.target.value)}
-                    className="w-full h-11 bg-black/50 border border-white/10 rounded-xl px-4 text-purple-300 font-mono font-bold text-sm focus:outline-none focus:border-purple-500"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-white/40">TON</span>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 text-xs font-mono flex justify-between items-center text-purple-300">
-                <span>Calculated Royalty (7.5%):</span>
-                <span className="font-bold">+{(parseFloat(simulatedResellPrice || '0') * 0.075).toFixed(3)} TON</span>
-              </div>
-
-              <Button
-                onClick={handleSimulateResale}
-                className="w-full py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white font-black uppercase text-xs tracking-wider rounded-xl shadow-lg active:scale-95 transition-all"
-              >
-                Trigger Simulated Resale
-              </Button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

@@ -65,17 +65,17 @@ export const DownloadedTracks: React.FC = () => {
       songId: t.id,
       title: t.title,
       artist: t.artist,
-      artistId: t.artistId || 'artist-1',
+      artistId: t.artistId || '',
       coverUrl: t.coverUrl,
-      audioUrl: '/tonjam-offline-audio.mp3',
-      duration: t.duration || 210,
+      audioUrl: (t as any).audioUrl || '',
+      duration: t.duration || 0,
       streams: t.plays || 0,
       playCount: t.plays || 0,
-      album: t.album || 'Downloaded Compilation',
+      album: t.album || 'Single',
       genre: 'Music',
       isNFT: false,
       isDownloaded: true,
-      fileSize: t.downloadSize || '5.4 MB',
+      fileSize: t.downloadSize || '',
       createdAt: new Date().toISOString()
     } as Track));
   }, [downloadedTracks]);
@@ -306,7 +306,7 @@ export const DownloadedTracks: React.FC = () => {
                 key={track.id}
                 track={track}
                 index={idx}
-                subtitleExtra={track.fileSize || '5.4 MB'}
+                subtitleExtra={track.fileSize || 'Cached offline'}
                 onRemove={() => handleRemoveDownload(track.id)}
               />
             ))}

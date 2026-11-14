@@ -6,8 +6,6 @@ import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage, cn } from '@/lib/utils';
 import { cardTokens } from '@/design';
 
-import { MOCK_ARTISTS } from '@/constants';
-
 interface UserCardProps {
   user: Artist | UserProfile;
   variant?: 'portrait' | 'compact' | 'row';
@@ -16,10 +14,14 @@ interface UserCardProps {
 
 const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait', className = '' }) => {
   const navigate = useNavigate();
-  const { followedUserIds, toggleFollowUser, userProfile } = useAudio();
+  const { followedUserIds, toggleFollowUser, userProfile, artists } = useAudio();
 
   const isFollowing = followedUserIds.includes(user.uid);
   const isOwnProfile = user.uid === userProfile.uid;
+
+  const avatarUrl = 'avatarUrl' in user ? user.avatarUrl : user.avatar;
+  const verified = 'verified' in user ? user.verified : user.isVerifiedArtist;
+  const genre = 'genre' in user ? user.genre : ('username' in user ? user.username.replace('@', '') : 'Artist');
 
   const handleClick = (e: React.MouseEvent) => {
     // Prevent navigation if clicking the follow button
@@ -27,7 +29,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait', classNa
     
     if (isOwnProfile) {
       navigate('/profile');
-    } else if (verified || MOCK_ARTISTS.some(a => a.uid === user.uid)) {
+    } else if (verified || (artists || []).some(a => a.uid === user.uid)) {
       navigate(`/artist/${user.uid}`);
     } else {
       navigate(`/user/${user.uid}`);
@@ -38,10 +40,6 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait', classNa
     e.stopPropagation();
     toggleFollowUser(user.uid);
   };
-
-  const avatarUrl = 'avatarUrl' in user ? user.avatarUrl : user.avatar;
-  const verified = 'verified' in user ? user.verified : user.isVerifiedArtist;
-  const genre = 'genre' in user ? user.genre : ('username' in user ? user.username.replace('@', '') : 'Artist');
 
   if (variant === 'compact') {
     return (

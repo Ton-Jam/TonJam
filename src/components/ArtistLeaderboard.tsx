@@ -11,17 +11,15 @@ import {
   Search, 
   UserCheck, 
   Plus, 
-  TrendingUp, 
   RefreshCw, 
   Users, 
-  BarChart3,
-  CheckCircle2,
-  ArrowUpRight
+  CheckCircle2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Artist } from '@/types';
-import { MOCK_ARTISTS, TON_LOGO } from '@/constants';
+import { TON_LOGO } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 import { useAudio } from '@/contexts/AudioContext';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -65,28 +63,23 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
   const [activeMetric, setActiveMetric] = useState<MetricCategory>('all');
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('all_time');
 
-  // Fetch performance data from Firestore
   const fetchFirestorePerformanceData = async () => {
     try {
       setIsRefreshing(true);
 
-      // 1. Fetch artist users from Firestore
-      const usersPath = 'users';
       let firestoreUsers: any[] = [];
       try {
-        const usersQuery = query(collection(db, usersPath), where('role', '==', 'artist'));
+        const usersQuery = query(collection(db, 'users'), where('role', '==', 'artist'));
         const usersSnap = await getDocs(usersQuery);
         firestoreUsers = usersSnap.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
       } catch (err) {
-        handleFirestoreError(err, OperationType.GET, usersPath);
+        handleFirestoreError(err, OperationType.LIST, 'users');
       }
 
-      // 2. Fetch track streams from Firestore
-      const tracksPath = 'tracks';
       const streamsMap: Record<string, number> = {};
       const trackCountMap: Record<string, number> = {};
       try {
-        const tracksSnap = await getDocs(collection(db, tracksPath));
+        const tracksSnap = await getDocs(collection(db, 'tracks'));
         tracksSnap.docs.forEach(doc => {
           const data = doc.data();
           const artistId = data.artistId || data.creator;
@@ -97,62 +90,51 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
           }
         });
       } catch (err) {
-        handleFirestoreError(err, OperationType.GET, tracksPath);
+        handleFirestoreError(err, OperationType.LIST, 'tracks');
       }
 
-      // 3. Fetch NFT sales activity from Firestore
-      const transactionsPath = 'transactions';
       const salesMap: Record<string, number> = {};
       const nftCountMap: Record<string, number> = {};
       try {
-        const txSnap = await getDocs(collection(db, transactionsPath));
-        txSnap.docs.forEach(doc => {
+        const salesSnap = await getDocs(collection(db, 'nftSales'));
+        salesSnap.docs.forEach(doc => {
           const data = doc.data();
-          if (data.type === 'nft_sale' || data.type === 'jam_purchase') {
-            const artistId = data.artistId || data.recipientAddress || (data.participants && data.participants[0]);
-            const amount = Number(data.amount || data.price || 0);
-            if (artistId) {
-              salesMap[artistId] = (salesMap[artistId] || 0) + amount;
-              nftCountMap[artistId] = (nftCountMap[artistId] || 0) + 1;
-            }
+          const artistId = data.artistId || data.creatorId || data.sellerId;
+          const amount = Number(data.salePrice ?? data.amount ?? data.price ?? 0);
+          if (artistId) {
+            salesMap[artistId] = (salesMap[artistId] || 0) + amount;
+            nftCountMap[artistId] = (nftCountMap[artistId] || 0) + 1;
           }
         });
       } catch (err) {
-        handleFirestoreError(err, OperationType.GET, transactionsPath);
+        handleFirestoreError(err, OperationType.LIST, 'nftSales');
       }
 
-      // 4. Base list of artists: prop override > firestore users > default MOCK_ARTISTS
-      const baseArtists: Artist[] = propArtists && propArtists.length > 0 
-        ? propArtists 
-        : firestoreUsers.length > 0 
-          ? firestoreUsers.map(u => ({
-              uid: u.uid,
-              name: u.name || 'Artist',
-              avatarUrl: u.avatar || u.avatarUrl || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150`,
-              followers: u.followers || Math.floor(Math.random() * 15000 + 1200),
-              verified: Boolean(u.isVerifiedArtist || u.verified),
-              genre: u.genre || 'Web3 Sonic',
-              bio: u.bio || '',
-            }))
-          : MOCK_ARTISTS;
+      const baseArtists: Artist[] = propArtists && propArtists.length > 0
+        ? propArtists
+        : firestoreUsers.map(u => ({
+            uid: u.uid,
+            name: u.name || 'Artist',
+            avatarUrl: u.avatar || u.avatarUrl || getPlaceholderImage(`artist-${u.uid}`),
+            followers: u.followers || 0,
+            verified: Boolean(u.isVerifiedArtist || u.verified),
+            genre: u.genre || 'Web3 Sonic',
+            bio: u.bio || '',
+          }));
 
-      // 5. Merge Firestore stats and compute combined metrics
       const compiledList: LeaderboardArtist[] = baseArtists.map(artist => {
         const firestoreSales = salesMap[artist.uid] || 0;
         const firestoreStreams = streamsMap[artist.uid] || 0;
-        
-        // Fallback baseline values if Firestore metrics are fresh or unpopulated
-        const totalSalesTon = firestoreSales > 0 
-          ? firestoreSales 
-          : (artist.earnings?.nftSales || Math.floor(Math.random() * 950 + 250));
 
-        const totalStreams = firestoreStreams > 0 
-          ? firestoreStreams 
-          : (artist.playCount || artist.monthlyListeners || Math.floor(Math.random() * 650000 + 45000));
+        const totalSalesTon = firestoreSales > 0
+          ? firestoreSales
+          : (typeof artist.earnings === 'number' ? artist.earnings : (artist.earnings?.nftSales || 0));
 
-        const followers = artist.followers || Math.floor(Math.random() * 18000 + 1500);
+        const totalStreams = firestoreStreams > 0
+          ? firestoreStreams
+          : (artist.playCount || artist.monthlyListeners || 0);
 
-        // Combined Score algorithm: (NFT Sales * 100) + (Streams / 10) + (Followers * 0.2)
+        const followers = artist.followers || 0;
         const combinedScore = Math.round((totalSalesTon * 100) + (totalStreams * 0.05) + (followers * 0.2));
 
         return {
@@ -161,24 +143,15 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
           totalSalesTon,
           totalStreams,
           combinedScore,
-          nftCount: nftCountMap[artist.uid] || Math.floor(Math.random() * 12 + 2),
-          trackCount: trackCountMap[artist.uid] || Math.floor(Math.random() * 8 + 1),
+          nftCount: nftCountMap[artist.uid] || 0,
+          trackCount: trackCountMap[artist.uid] || 0,
         };
       });
 
       setLeaderboardArtists(compiledList);
     } catch (error) {
-      console.warn("Leaderboard data compilation fallback:", error);
-      // Fallback baseline using MOCK_ARTISTS
-      const fallbackList: LeaderboardArtist[] = MOCK_ARTISTS.map(a => ({
-        ...a,
-        totalSalesTon: a.earnings?.nftSales || Math.floor(Math.random() * 900 + 200),
-        totalStreams: a.playCount || Math.floor(Math.random() * 500000 + 50000),
-        combinedScore: Math.round(((a.earnings?.nftSales || 500) * 100) + ((a.playCount || 200000) * 0.05) + (a.followers * 0.2)),
-        nftCount: 8,
-        trackCount: 5,
-      }));
-      setLeaderboardArtists(fallbackList);
+      handleFirestoreError(error, OperationType.LIST, 'leaderboard');
+      setLeaderboardArtists([]);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -186,28 +159,22 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
   };
 
   useEffect(() => {
-    fetchLeaderboardData();
-  }, [propArtists]);
-
-  const fetchLeaderboardData = () => {
     fetchFirestorePerformanceData();
-  };
+  }, [propArtists]);
 
   const handleFollow = async (e: React.MouseEvent, artistUid: string) => {
     e.stopPropagation();
     try {
       await toggleFollowUser(artistUid);
       toast.success(followedUserIds.includes(artistUid) ? "Unfollowed artist" : "Following artist");
-    } catch (error) {
+    } catch {
       toast.error("Failed to update follow status");
     }
   };
 
-  // Filter & Sort Logic
   const processedArtists = useMemo(() => {
     let result = [...leaderboardArtists];
 
-    // Search query filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(a => 
@@ -217,22 +184,11 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
       );
     }
 
-    // Time period multiplier logic (visual adjustment factor)
-    const multiplier = timePeriod === 'this_week' ? 0.25 : timePeriod === 'this_month' ? 0.65 : 1.0;
-
-    // Metric sorting
     result.sort((a, b) => {
-      if (activeMetric === 'sales') {
-        return (b.totalSalesTon * multiplier) - (a.totalSalesTon * multiplier);
-      }
-      if (activeMetric === 'streams') {
-        return (b.totalStreams * multiplier) - (a.totalStreams * multiplier);
-      }
-      if (activeMetric === 'followers') {
-        return b.followers - a.followers;
-      }
-      // 'all' combined score default
-      return (b.combinedScore * multiplier) - (a.combinedScore * multiplier);
+      if (activeMetric === 'sales') return b.totalSalesTon - a.totalSalesTon;
+      if (activeMetric === 'streams') return b.totalStreams - a.totalStreams;
+      if (activeMetric === 'followers') return b.followers - a.followers;
+      return b.combinedScore - a.combinedScore;
     });
 
     if (limit && limit > 0) {
@@ -240,9 +196,8 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
     }
 
     return result;
-  }, [leaderboardArtists, searchQuery, activeMetric, timePeriod, limit]);
+  }, [leaderboardArtists, searchQuery, activeMetric, limit]);
 
-  // Format large numbers
   const formatNumber = (num: number) => {
     if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
     if (num >= 1_000) return (num / 1_000).toFixed(1) + 'K';
@@ -251,7 +206,6 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
 
   return (
     <div className={`space-y-5 text-left ${className}`}>
-      {/* Header & Controls */}
       {!compact && (
         <div className="space-y-4 bg-white/[0.02] p-4 sm:p-5 rounded-2xl backdrop-blur-md">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -266,9 +220,8 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Refresh button */}
               <button
-                onClick={fetchLeaderboardData}
+                onClick={fetchFirestorePerformanceData}
                 disabled={isRefreshing}
                 className="p-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white transition-all cursor-pointer outline-none"
                 title="Refresh Analytics Data"
@@ -276,7 +229,6 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
                 <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-primary' : ''}`} />
               </button>
 
-              {/* Time Period Selector */}
               <div className="flex bg-white/[0.04] p-1 rounded-xl gap-1">
                 {(['all_time', 'this_month', 'this_week'] as TimePeriod[]).map((period) => (
                   <button
@@ -296,7 +248,6 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
             </div>
           </div>
 
-          {/* Metric Selector Tabs & Search */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
             <div className="flex bg-white/[0.03] p-1 rounded-xl overflow-x-auto gap-1">
               {[
@@ -325,7 +276,6 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
               })}
             </div>
 
-            {/* Search Input */}
             <div className="relative min-w-[180px] sm:w-64">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
               <input
@@ -340,19 +290,16 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
         </div>
       )}
 
-      {/* Top 3 Podium Highlights (Non-compact mode only) */}
       {!compact && processedArtists.length >= 3 && !searchQuery && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {processedArtists.slice(0, 3).map((artist, idx) => {
             const rank = idx + 1;
             const isFollowed = followedUserIds.includes(artist.uid);
-            
             const badgeStyle = rank === 1 
               ? 'bg-amber-500/15 text-amber-400' 
               : rank === 2 
                 ? 'bg-zinc-300/15 text-zinc-300' 
                 : 'bg-amber-700/15 text-amber-500';
-
             const rankLabel = rank === 1 ? '1ST PLACE' : rank === 2 ? '2ND PLACE' : '3RD PLACE';
 
             return (
@@ -389,7 +336,6 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
                   </span>
                 </div>
 
-                {/* Metrics Breakdown */}
                 <div className="grid grid-cols-2 gap-2 bg-black/20 p-2.5 rounded-xl">
                   <div>
                     <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold block">NFT Volume</span>
@@ -427,7 +373,6 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
         </div>
       )}
 
-      {/* Main Ranked List Table / Cards */}
       <div className="space-y-2">
         {isLoading ? (
           <div className="p-8 text-center text-zinc-500 space-y-2 bg-white/[0.02] rounded-2xl">
@@ -438,7 +383,7 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
           <div className="p-8 text-center text-zinc-500 bg-white/[0.02] rounded-2xl space-y-2">
             <Trophy className="w-8 h-8 mx-auto text-zinc-600" />
             <p className="text-sm font-bold text-white">No artists found matching your criteria</p>
-            <p className="text-xs text-zinc-500">Try clearing your search query or selecting another metric.</p>
+            <p className="text-xs text-zinc-500">Artists will appear here once registered on TonJam.</p>
           </div>
         ) : (
           <AnimatePresence mode="popLayout">
@@ -456,7 +401,6 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
                   onClick={() => navigate(`/artist/${artist.uid}`)}
                   className="flex items-center justify-between p-3.5 bg-white/[0.02] hover:bg-white/[0.06] rounded-xl cursor-pointer transition-all group"
                 >
-                  {/* Left: Rank & Info */}
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div className="w-7 text-center shrink-0">
                       {rank === 1 ? (
@@ -490,7 +434,6 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
                     </div>
                   </div>
 
-                  {/* Middle/Right: Performance Metrics */}
                   <div className="flex items-center gap-4 sm:gap-6 shrink-0">
                     <div className="text-right hidden sm:block">
                       <div className="text-xs font-black text-emerald-400 flex items-center justify-end gap-1">
@@ -518,7 +461,6 @@ export const ArtistLeaderboard: React.FC<ArtistLeaderboardProps> = ({
                       </div>
                     )}
 
-                    {/* Action Button */}
                     <Button
                       variant={isFollowed ? "outline" : "default"}
                       size="sm"

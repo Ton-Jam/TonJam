@@ -2,7 +2,7 @@ import React from 'react';
 import { Artist, Track, NFTItem } from '@/types';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
-import { MOCK_NFTS } from '@/constants';
+import { useAudio } from '@/contexts/AudioContext';
 
 interface ArtistPortfolioProps {
   artist: Artist;
@@ -10,8 +10,9 @@ interface ArtistPortfolioProps {
 }
 
 export const ArtistPortfolio: React.FC<ArtistPortfolioProps> = ({ artist, tracks }) => {
+  const { allNFTs } = useAudio();
   const pinnedNFTs = artist.pinnedNftIds 
-    ? MOCK_NFTS.filter(nft => artist.pinnedNftIds?.includes(nft.id))
+    ? (allNFTs || []).filter(nft => artist.pinnedNftIds?.includes(nft.id))
     : [];
 
   return (

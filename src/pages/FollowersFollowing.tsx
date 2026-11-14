@@ -7,8 +7,12 @@ import {
   BadgeCheck, Radio, Loader2, Volume2
 } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/layout/ToastProvider';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { collection, getDocs, limit, query } from 'firebase/firestore';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface ProfileUser {
   id: string;
@@ -25,135 +29,93 @@ interface ProfileUser {
   followsYou: boolean;
 }
 
-// Generate extended mock user database (60+ items for infinite scrolling demo)
-const GENERATED_USERS: ProfileUser[] = [
-  {
-    id: 'art-1',
-    name: 'DJ Krupy',
-    username: '@djkrupy',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300',
-    role: 'Artist',
-    genre: 'Afrobeats & EDM',
-    bio: 'Pioneer of TonJam Sonic Synth. Lossless audio creator & Web3 music innovator.',
-    followersCount: 14200,
-    followingCount: 385,
-    tracksCount: 24,
-    isVerified: true,
-    followsYou: true,
-  },
-  {
-    id: 'art-2',
-    name: 'ElectroX Lab',
-    username: '@electrox',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300',
-    role: 'Producer',
-    genre: 'Glitch Hop',
-    bio: 'Crafting heavy bass matrixes and modular analog synthesizers on-chain.',
-    followersCount: 8900,
-    followingCount: 120,
-    tracksCount: 18,
-    isVerified: true,
-    followsYou: true,
-  },
-  {
-    id: 'art-3',
-    name: 'Luna Vibes',
-    username: '@lunavibes',
-    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300',
-    role: 'Artist',
-    genre: 'Ambient & Chill',
-    bio: 'Binaural 432Hz soundscapes & spatial audio sound designer.',
-    followersCount: 19500,
-    followingCount: 410,
-    tracksCount: 32,
-    isVerified: true,
-    followsYou: false,
-  },
-  {
-    id: 'art-4',
-    name: 'Burna Boy',
-    username: '@burnaboy',
-    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300',
-    role: 'Artist',
-    genre: 'Afrobeats',
-    bio: 'The African Giant. Blending Afrobeats, dancehall & global soul.',
-    followersCount: 1250000,
-    followingCount: 95,
-    tracksCount: 88,
-    isVerified: true,
-    followsYou: false,
-  },
-  {
-    id: 'art-5',
-    name: 'Cyber Wave',
-    username: '@cyberwave',
-    avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300',
-    role: 'DJ',
-    genre: 'Synthwave',
-    bio: 'Retro futuristic neon electronic audio producer & live performer.',
-    followersCount: 6400,
-    followingCount: 210,
-    tracksCount: 14,
-    isVerified: false,
-    followsYou: true,
-  },
-  {
-    id: 'art-6',
-    name: 'Aria Rhythm',
-    username: '@ariarhythm',
-    avatarUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300',
-    role: 'Artist',
-    genre: 'Neo Soul',
-    bio: 'Vocalist, songwriter & acoustic stem artist.',
-    followersCount: 11200,
-    followingCount: 340,
-    tracksCount: 21,
-    isVerified: true,
-    followsYou: true,
-  },
-  ...Array.from({ length: 54 }).map((_, index) => {
-    const idx = index + 7;
-    const roles: ('Artist' | 'Producer' | 'DJ' | 'Sound Engineer' | 'Listener')[] = [
-      'Artist', 'Producer', 'DJ', 'Sound Engineer', 'Listener'
-    ];
-    const genres = ['Deep House', 'Lo-Fi Beats', 'Techno', 'Hyperpop', 'Jazz Fusion', 'Afro-House', 'Drum & Bass'];
-    const names = [
-      'Echo Phoenix', 'Quantum Bass', 'Solar Eclipse', 'Velvet Groove',
-      'Krypton Pulse', 'Frequency Shift', 'Cosmic Modular', 'Starlight Vocal',
-      'Neon Spectrum', 'Aura Waves', 'Subwoofer King', 'Hyper Drive',
-      'Orion Beats', 'Chroma Sound', 'Zenith Resonance', 'Sonic Titan'
-    ];
-    
-    const role = roles[idx % roles.length];
-    const genre = genres[idx % genres.length];
-    const name = `${names[idx % names.length]} #${idx}`;
-    const username = `@${name.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
-    
-    return {
-      id: `usr-${idx}`,
-      name,
-      username,
-      avatarUrl: `https://images.unsplash.com/photo-${1500000000000 + (idx * 12345) % 10000000}?w=300&auto=format&fit=crop&q=80`,
-      role,
-      genre,
-      bio: `Official ${role.toLowerCase()} on TonJam ecosystem producing high-fidelity ${genre} music NFTs.`,
-      followersCount: Math.floor((idx * 739) % 25000) + 120,
-      followingCount: Math.floor((idx * 43) % 900) + 15,
-      tracksCount: Math.floor((idx * 3) % 40),
-      isVerified: idx % 3 === 0,
-      followsYou: idx % 2 === 0,
-    };
-  })
-];
-
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 20;
 
 export const FollowersFollowing: React.FC = () => {
   const { type: paramType } = useParams<{ type?: 'followers' | 'following', userId?: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
-  const { followedUserIds = [], toggleFollowUser } = useAudio();
+  const { user: authUser, userProfile } = useAuth();
+  const { followedUserIds = [], toggleFollowUser, artists = [] } = useAudio();
+
+  const [firestoreUsers, setFirestoreUsers] = useState<ProfileUser[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadUsers = async () => {
+      try {
+        setIsLoadingUsers(true);
+        const snap = await getDocs(query(collection(db, 'users'), limit(100)));
+        if (!isMounted) return;
+        const loaded: ProfileUser[] = snap.docs
+          .filter((d) => d.id !== authUser?.uid)
+          .map((d) => {
+            const data = d.data() as any;
+            const roleRaw = String(data.role || '').toLowerCase();
+            const role: ProfileUser['role'] =
+              roleRaw === 'producer'
+                ? 'Producer'
+                : roleRaw === 'dj'
+                ? 'DJ'
+                : roleRaw === 'sound engineer'
+                ? 'Sound Engineer'
+                : data.isVerifiedArtist || data.isArtist || roleRaw === 'artist'
+                ? 'Artist'
+                : 'Listener';
+            return {
+              id: d.id,
+              name: data.name || data.displayName || 'TonJam Member',
+              username: data.username ? (String(data.username).startsWith('@') ? data.username : `@${data.username}`) : '@member',
+              avatarUrl: data.avatar || data.photoURL || getPlaceholderImage('artist'),
+              role,
+              genre: data.genre || undefined,
+              bio: data.bio || '',
+              followersCount: Array.isArray(data.followers) ? data.followers.length : (typeof data.followers === 'number' ? data.followers : 0),
+              followingCount: Array.isArray(data.following) ? data.following.length : (typeof data.following === 'number' ? data.following : 0),
+              tracksCount: typeof data.tracksCount === 'number' ? data.tracksCount : 0,
+              isVerified: Boolean(data.isVerified || data.isVerifiedArtist),
+              followsYou: Array.isArray(data.following) && authUser?.uid ? data.following.includes(authUser.uid) : false,
+            };
+          });
+        setFirestoreUsers(loaded);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.LIST, 'users');
+      } finally {
+        if (isMounted) setIsLoadingUsers(false);
+      }
+    };
+    loadUsers();
+    return () => {
+      isMounted = false;
+    };
+  }, [authUser?.uid]);
+
+  // Combine Firestore user directory with loaded real artists
+  const directoryUsers: ProfileUser[] = useMemo(() => {
+    const map = new Map<string, ProfileUser>();
+    firestoreUsers.forEach((u) => map.set(u.id, u));
+    artists.forEach((a) => {
+      if (!map.has(a.uid) && a.uid !== authUser?.uid) {
+        map.set(a.uid, {
+          id: a.uid,
+          name: a.name,
+          username: a.username ? (a.username.startsWith('@') ? a.username : `@${a.username}`) : `@${a.name.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+          avatarUrl: a.avatarUrl || getPlaceholderImage('artist'),
+          role: 'Artist',
+          genre: a.genre,
+          bio: a.bio || '',
+          followersCount: a.followers || 0,
+          followingCount: 0,
+          tracksCount: 0,
+          isVerified: Boolean(a.verified),
+          followsYou: false,
+        });
+      }
+    });
+    return Array.from(map.values());
+  }, [firestoreUsers, artists, authUser?.uid]);
 
   // Determine active tab based on params or path
   const initialTab = useMemo(() => {
@@ -181,15 +143,21 @@ export const FollowersFollowing: React.FC = () => {
     }
   }, [paramType, location.pathname]);
 
+  const followersList = useMemo(() => {
+    return directoryUsers.filter((u) => u.followsYou);
+  }, [directoryUsers]);
+
+  const followingList = useMemo(() => {
+    return directoryUsers.filter((u) => followedUserIds.includes(u.id));
+  }, [directoryUsers, followedUserIds]);
+
   // Filter raw data list
   const baseList = useMemo(() => {
     if (activeTab === 'following') {
-      // Show users that match followedUserIds + sample subset of generated users
-      return GENERATED_USERS.filter(u => followedUserIds.includes(u.id) || u.id === 'art-1' || u.id === 'art-2');
+      return followingList;
     }
-    // Followers tab shows all followers
-    return GENERATED_USERS;
-  }, [activeTab, followedUserIds]);
+    return followersList;
+  }, [activeTab, followingList, followersList]);
 
   // Filter by search & role
   const filteredList = useMemo(() => {
@@ -207,14 +175,18 @@ export const FollowersFollowing: React.FC = () => {
 
     if (roleFilter !== 'All') {
       if (roleFilter === 'Mutuals') {
-        result = result.filter(u => u.followsYou);
+        result = result.filter(u => u.followsYou && followedUserIds.includes(u.id));
+      } else if (roleFilter === 'Artists') {
+        result = result.filter(u => u.role === 'Artist');
+      } else if (roleFilter === 'Producers') {
+        result = result.filter(u => u.role === 'Producer');
       } else {
         result = result.filter(u => u.role === roleFilter);
       }
     }
 
     return result;
-  }, [baseList, searchQuery, roleFilter]);
+  }, [baseList, searchQuery, roleFilter, followedUserIds]);
 
   // Paginated visible list for Infinite Scroll
   const visibleUsers = useMemo(() => {
@@ -232,10 +204,8 @@ export const FollowersFollowing: React.FC = () => {
   const loadNextPage = useCallback(() => {
     if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
-    setTimeout(() => {
-      setPage(prev => prev + 1);
-      setIsLoadingMore(false);
-    }, 400);
+    setPage(prev => prev + 1);
+    setIsLoadingMore(false);
   }, [isLoadingMore, hasMore]);
 
   // IntersectionObserver for Infinite Scroll
@@ -275,6 +245,11 @@ export const FollowersFollowing: React.FC = () => {
     setPage(1);
   };
 
+  const totalFollowersCount = Math.max(
+    followersList.length,
+    typeof (userProfile as any)?.followers === 'number' ? (userProfile as any).followers : 0
+  );
+
   return (
     <div className="min-h-screen bg-[#050a24] text-white pb-12">
       <PageHeader title={activeTab === 'followers' ? 'Followers' : 'Following'} showBack={true} />
@@ -293,7 +268,7 @@ export const FollowersFollowing: React.FC = () => {
           <Users className="w-4 h-4" />
           <span>Followers</span>
           <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-black/30">
-            1,420
+            {totalFollowersCount}
           </span>
         </button>
 
@@ -309,7 +284,7 @@ export const FollowersFollowing: React.FC = () => {
           <UserCheck className="w-4 h-4" />
           <span>Following</span>
           <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-black/30">
-            {followedUserIds.length || 385}
+            {followedUserIds.length}
           </span>
         </button>
       </div>
@@ -350,7 +325,12 @@ export const FollowersFollowing: React.FC = () => {
 
       {/* Infinite Scroll List */}
       <div className="space-y-3">
-        {visibleUsers.map((user, idx) => {
+        {isLoadingUsers && visibleUsers.length === 0 ? (
+          <div className="py-12 flex items-center justify-center gap-2 text-xs text-slate-400">
+            <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+            <span>Loading community profiles...</span>
+          </div>
+        ) : visibleUsers.map((user, idx) => {
           const isFollowing = followedUserIds.includes(user.id);
 
           return (
@@ -370,7 +350,7 @@ export const FollowersFollowing: React.FC = () => {
                     alt={user.name}
                     className="w-12 h-12 rounded-full object-cover border border-white/10 group-hover:scale-105 transition-transform"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300';
+                      (e.target as HTMLImageElement).src = getPlaceholderImage('artist');
                     }}
                   />
                   {user.isVerified && (

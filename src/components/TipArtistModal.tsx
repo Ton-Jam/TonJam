@@ -34,11 +34,11 @@ export const TipArtistModal: React.FC<TipArtistModalProps> = ({ artist, track, o
   const userAddress = useTonAddress();
 
   const artistName = track?.artist || artist?.name || "Artist";
-  const artistUid = track?.artistId || artist?.uid || "artist-1";
+  const artistUid = track?.artistId || artist?.uid || "";
   const avatarUrl = track?.artistAvatar || artist?.avatarUrl || getPlaceholderImage("avatar");
   const trackTitle = track?.title;
   const coverUrl = track?.coverUrl;
-  const walletAddress = artist?.walletAddress || "UQCc_DJ_Krupy_Vibez_x9y1_8888";
+  const walletAddress = artist?.walletAddress || "";
 
   // Presets based on currency
   const tonPresets = ["0.5", "1", "2.5", "5", "10", "25"];
@@ -53,6 +53,7 @@ export const TipArtistModal: React.FC<TipArtistModalProps> = ({ artist, track, o
 
   // Generate TON transfer deep-link / URI
   const qrTransferUri = React.useMemo(() => {
+    if (!walletAddress) return "";
     if (numericAmount <= 0) return walletAddress;
     const nanoValue = Math.floor(numericAmount * 1e9);
     const comment = encodeURIComponent(`Tip for ${artistName} (${amount} ${currency}) on TonJam`);
@@ -68,6 +69,7 @@ export const TipArtistModal: React.FC<TipArtistModalProps> = ({ artist, track, o
   };
 
   const handleCopyWallet = async () => {
+    if (!walletAddress) return;
     try {
       await navigator.clipboard.writeText(walletAddress);
       setCopied(true);
@@ -79,6 +81,10 @@ export const TipArtistModal: React.FC<TipArtistModalProps> = ({ artist, track, o
   };
 
   const handleSendDirectTip = async () => {
+    if (!walletAddress) {
+      toast.error("Artist payout wallet address is not configured.");
+      return;
+    }
     if (numericAmount <= 0) {
       toast.error(`Please enter a valid ${currency} amount`);
       return;
@@ -295,13 +301,21 @@ export const TipArtistModal: React.FC<TipArtistModalProps> = ({ artist, track, o
                 </p>
               ) : (
                 <p className="text-[11px] font-mono text-neutral-400 truncate">
-                  {walletAddress.slice(0, 8)}...{walletAddress.slice(-6)}
+                  {walletAddress ? `${walletAddress.slice(0, 8)}...${walletAddress.slice(-6)}` : "Wallet not configured"}
                 </p>
               )}
             </div>
           </div>
 
-          {isSuccess ? (
+          {!walletAddress ? (
+            <div className="py-8 text-center space-y-2">
+              <Wallet className="w-8 h-8 text-neutral-500 mx-auto" />
+              <p className="text-sm font-bold text-white">Wallet Not Connected</p>
+              <p className="text-xs text-neutral-400">
+                {artistName} has not configured a TON receiving address yet.
+              </p>
+            </div>
+          ) : isSuccess ? (
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -440,7 +454,7 @@ export const TipArtistModal: React.FC<TipArtistModalProps> = ({ artist, track, o
                       level="H"
                       className="rounded-lg"
                       imageSettings={{
-                        src: avatarUrl || "https://ton.org/download/ton_symbol.png",
+                        src: avatarUrl,
                         x: undefined,
                         y: undefined,
                         height: 32,

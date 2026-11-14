@@ -26,6 +26,7 @@ export interface Collection {
   nftIds: string[]; // List of NFT IDs in this collection
   createdAt: string;
   updatedAt?: string;
+  floorPrice?: string;
 }
 
 export interface CollabMessage {
@@ -190,8 +191,11 @@ export interface NFTItem {
   owner: string;
   ownerId?: string;
   creator: string;
+  creatorId?: string;
   artist?: string;
   artistId?: string;
+  nftCollection?: string;
+  likes?: number;
   price: string;
   imageUrl: string;
   coverUrl?: string; // Alias for imageUrl
@@ -202,6 +206,8 @@ export interface NFTItem {
   minted?: number;
   isAuction?: boolean;
   contractAddress?: string;
+  nftContractAddress?: string;
+  tokenId?: string;
   royaltySplits?: RoyaltySplit[];
   stems_available?: boolean;
   artistVerified?: boolean;
@@ -408,6 +414,7 @@ export interface Playlist {
   coverUrl: string;
   trackCount: number;
   creator: string;
+  creatorId?: string;
   description?: string;
   trackIds?: string[];
   isPrivate?: boolean;

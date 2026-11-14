@@ -14,6 +14,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudio } from '@/contexts/AudioContext';
 import { uploadFile } from '@/services/storageService';
+import { getPlaceholderImage } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface CreateJamSpaceModalProps {
@@ -347,7 +348,7 @@ export const CreateJamSpaceModal: React.FC<CreateJamSpaceModalProps> = ({
           {/* Host Info Box */}
           <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 border border-[#c0c0c0]/10 text-left">
             <img
-              src={userProfile?.avatar || user?.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
+              src={userProfile?.avatar || user?.photoURL || getPlaceholderImage(`host-${user?.uid || 'user'}`)}
               alt={userProfile?.name || user?.displayName || 'Host'}
               className="w-9 h-9 rounded-full object-cover border border-white/10"
             />

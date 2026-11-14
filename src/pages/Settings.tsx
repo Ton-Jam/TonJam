@@ -46,7 +46,7 @@ import { useCacheManagement } from '@/hooks/useCacheManagement';
 import { useI18n } from '@/contexts/I18nContext';
 import { useGramPrice } from '@/contexts/GramPriceContext';
 import StorageManagementModal from '@/components/StorageManagementModal';
-import { cn, validateFile } from '@/lib/utils';
+import { cn, validateFile, getPlaceholderImage } from '@/lib/utils';
 import { NotificationPreferences, RoyaltySplit, Collaborator } from '@/types';
 import VerificationTracker from '@/components/VerificationTracker';
 import VerifyArtistModal from '@/components/VerifyArtistModal';
@@ -333,7 +333,7 @@ const Settings: React.FC = () => {
         {userProfile && (
           <div className="flex items-center gap-3 bg-white/[0.03] border border-white/5 p-2 rounded-2xl backdrop-blur-md self-start sm:self-auto">
             <img 
-              src={profile.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.name || 'user'}`}
+              src={profile.avatar || getPlaceholderImage(profile.name || 'user')}
               alt="Profile"
               className="w-8 h-8 rounded-xl object-cover"
             />
@@ -436,7 +436,7 @@ const Settings: React.FC = () => {
                   <Card className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 text-center flex flex-col items-center">
                     <div className="w-28 h-28 rounded-2xl relative group overflow-hidden mb-4 border border-white/10">
                       <img 
-                        src={profile.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.name || 'user'}`} 
+                        src={profile.avatar || getPlaceholderImage(profile.name || 'user')} 
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                         alt="Avatar"
                       />

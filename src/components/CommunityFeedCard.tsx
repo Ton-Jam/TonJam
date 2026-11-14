@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MOCK_ARTISTS, MOCK_USERS } from "@/constants";
+import { useAudio } from "@/contexts/AudioContext";
 
 interface CommunityFeedCardProps {
   username: string;
@@ -21,6 +21,7 @@ const CommunityFeedCard: React.FC<CommunityFeedCardProps> = ({
   accentColor,
 }) => {
   const navigate = useNavigate();
+  const { artists, firestoreUsers } = useAudio();
   const initials = username
     ? username.split(/\s+/).map(n => n[0]).join("").substring(0, 2).toUpperCase()
     : "U";
@@ -29,22 +30,21 @@ const CommunityFeedCard: React.FC<CommunityFeedCardProps> = ({
     e.stopPropagation();
     if (!username) return;
 
-    // Search in MOCK_ARTISTS first
-    const artist = MOCK_ARTISTS.find(a => 
-      a.name.toLowerCase() === username.toLowerCase() || 
-      (a.username && a.username.toLowerCase() === username.toLowerCase()) ||
-      (a.username && a.username.toLowerCase() === `@${username.toLowerCase()}`)
+    const normalized = username.toLowerCase();
+    const artist = (artists || []).find(a => 
+      a.name.toLowerCase() === normalized || 
+      (a.username && a.username.toLowerCase() === normalized) ||
+      (a.username && a.username.toLowerCase() === `@${normalized}`)
     );
     if (artist) {
       navigate(`/artist/${artist.uid}`);
       return;
     }
 
-    // Search in MOCK_USERS
-    const user = MOCK_USERS.find(u => 
-      u.name.toLowerCase() === username.toLowerCase() || 
-      u.username.toLowerCase() === username.toLowerCase() ||
-      u.username.toLowerCase() === `@${username.toLowerCase()}`
+    const user = (firestoreUsers || []).find(u => 
+      (u.name && u.name.toLowerCase() === normalized) || 
+      (u.username && u.username.toLowerCase() === normalized) ||
+      (u.username && u.username.toLowerCase() === `@${normalized}`)
     );
     if (user) {
       navigate(`/user/${user.uid}`);

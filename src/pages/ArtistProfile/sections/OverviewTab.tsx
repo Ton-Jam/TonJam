@@ -7,8 +7,8 @@ import {
   Wallet, Zap, CheckCircle2, Sliders, Globe
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { MOCK_ARTISTS } from "@/constants";
 import { useAudio } from "@/contexts/AudioContext";
+import { getPlaceholderImage } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface OverviewTabProps {
@@ -35,7 +35,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   onNavigateToTab
 }) => {
   const navigate = useNavigate();
-  const { currentTrack, isPlaying, togglePlay } = useAudio();
+  const { currentTrack, isPlaying, artists = [] } = useAudio();
   const [showAllPopular, setShowAllPopular] = React.useState(false);
   const [discographyFilter, setDiscographyFilter] = React.useState<"popular" | "albums" | "singles">("popular");
   const [likedTracks, setLikedTracks] = React.useState<Record<string, boolean>>({});
@@ -50,15 +50,14 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   };
 
   const popularTracks = showAllPopular ? tracks.slice(0, 10) : tracks.slice(0, 5);
-  const latestRelease = tracks[0] || albums[0];
   const upcomingEvent = events[0];
 
   // Similar artists for "Fans Also Like"
   const similarArtists = React.useMemo(() => {
-    return MOCK_ARTISTS.filter(a => a.uid !== artist?.uid).slice(0, 5);
-  }, [artist?.uid]);
+    return artists.filter(a => a.uid !== artist?.uid).slice(0, 5);
+  }, [artists, artist?.uid]);
 
-  const activeWallet = artist?.walletAddress || "UQCc_DJ_Krupy_Vibez_x9y1_8888";
+  const activeWallet = artist?.walletAddress || "";
 
   return (
     <div className="space-y-10 animate-in fade-in" id="tonjam-overview-tab">
@@ -82,7 +81,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               </span>
             </div>
             <p className="text-xs text-neutral-400 truncate">
-              Payout Recipient: <span className="font-mono text-neutral-300">{activeWallet}</span> • Auto-settles per stream & NFT sale
+              {activeWallet ? (
+                <>Payout Recipient: <span className="font-mono text-neutral-300">{activeWallet}</span> • Auto-settles per stream & NFT sale</>
+              ) : (
+                "No TON payout wallet linked yet • Connect wallet to receive automatic royalties"
+              )}
             </p>
           </div>
         </div>
@@ -90,7 +93,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         <div className="flex items-center gap-3 self-end md:self-center shrink-0">
           <div className="text-right hidden sm:block">
             <span className="text-xs font-bold text-white font-mono block">
-              {(artist?.earnings?.total || 1764.5).toFixed(1)} TON Paid
+              {(artist?.earnings?.total || 0).toFixed(1)} TON Paid
             </span>
             <span className="text-[10px] text-neutral-400">View Royalty Splits & Ledger</span>
           </div>
@@ -144,7 +147,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                     </div>
 
                     <img
-                      src={track.coverUrl || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop"}
+                      src={track.coverUrl || getPlaceholderImage(track.title || 'track')}
                       className="w-11 h-11 object-cover rounded-xl shrink-0 shadow-md"
                       alt={track.title}
                     />
@@ -162,14 +165,14 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-neutral-400 truncate">{track.genre || "Electronic Master"}</p>
+                      <p className="text-[11px] text-neutral-400 truncate">{track.genre || "Audio"}</p>
                     </div>
                   </div>
 
                   {/* Middle: Stream count */}
                   <div className="hidden sm:block text-right px-4">
                     <span className="text-xs font-mono text-neutral-400">
-                      {(track.playCount || track.streams || 124500 + index * 34200).toLocaleString()} streams
+                      {(track.playCount || track.streams || 0).toLocaleString()} streams
                     </span>
                   </div>
 
@@ -213,7 +216,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           <div className="bg-neutral-900/60 hover:bg-neutral-900/80 backdrop-blur-md transition-all rounded-3xl p-5 space-y-4 cursor-pointer group shadow-xl">
             <div className="flex items-center gap-2.5">
               <img
-                src={artist?.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop"}
+                src={artist?.avatarUrl || getPlaceholderImage(artist?.name || 'artist')}
                 alt=""
                 className="w-7 h-7 rounded-full object-cover"
               />
@@ -224,7 +227,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
             <div className="flex items-center gap-4 pt-1">
               <img
-                src={tracks[0]?.coverUrl || albums[0]?.coverUrl || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop"}
+                src={tracks[0]?.coverUrl || albums[0]?.coverUrl || getPlaceholderImage(tracks[0]?.title || 'track')}
                 className="w-20 h-20 rounded-2xl object-cover shadow-md group-hover:scale-105 transition-transform"
                 alt="Artist Pick"
               />
@@ -233,9 +236,9 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                   Latest Master
                 </span>
                 <h4 className="text-sm font-bold text-white truncate group-hover:text-[#1DB954] transition-colors">
-                  {tracks[0]?.title || "Solar Pulse Genesis"}
+                  {tracks[0]?.title || albums[0]?.title || "No Releases Yet"}
                 </h4>
-                <p className="text-xs text-neutral-400">Single • 2026</p>
+                <p className="text-xs text-neutral-400">{tracks[0] ? "Single" : albums[0] ? "Album" : "Release"}</p>
               </div>
             </div>
 
@@ -488,7 +491,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           <div
             className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 opacity-60"
             style={{
-              backgroundImage: `url(${artist?.bannerUrl || artist?.bannerImageUrl || artist?.coverPhoto || artist?.avatarUrl || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&h=600&fit=crop"})`
+              backgroundImage: `url(${artist?.bannerUrl || artist?.bannerImageUrl || artist?.coverPhoto || artist?.avatarUrl || getPlaceholderImage('banner')})`
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
@@ -496,10 +499,10 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           <div className="relative z-10 space-y-3 max-w-2xl">
             <div className="space-y-1">
               <span className="text-xs sm:text-sm font-bold text-white block">
-                {(artist?.monthlyListeners || 184500).toLocaleString()} monthly on-chain listeners
+                {(artist?.monthlyListeners || 0).toLocaleString()} monthly on-chain listeners
               </span>
               <p className="text-xs sm:text-sm text-neutral-200 line-clamp-3 leading-relaxed">
-                {artist?.bio || "Shaping the frontier of decentralized Web3 audio, generative rhythm synthesis, and real-time community royalty streaming pools."}
+                {artist?.bio || "No artist biography provided yet."}
               </p>
             </div>
 

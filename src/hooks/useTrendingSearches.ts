@@ -19,19 +19,8 @@ export interface TrendingSearchItem {
   updatedAt?: string;
 }
 
-const DEFAULT_TRENDING: TrendingSearchItem[] = [
-  { id: 'burna_boy', term: 'Burna Boy', count: 184 },
-  { id: 'asake', term: 'Asake', count: 142 },
-  { id: 'ton_nft', term: 'TON NFT', count: 119 },
-  { id: 'afrobeats_2026', term: 'Afrobeats 2026', count: 96 },
-  { id: 'phonk_drift', term: 'Phonk Drift', count: 83 },
-  { id: 'amapiano', term: 'Amapiano', count: 68 },
-  { id: 'synthwave', term: 'Synthwave', count: 54 },
-  { id: 'wizkid', term: 'Wizkid', count: 47 }
-];
-
 export function useTrendingSearches() {
-  const [trendingSearches, setTrendingSearches] = useState<TrendingSearchItem[]>(DEFAULT_TRENDING);
+  const [trendingSearches, setTrendingSearches] = useState<TrendingSearchItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Initialize and listen to real-time updates from Firestore
@@ -39,44 +28,22 @@ export function useTrendingSearches() {
     const colRef = collection(db, 'trendingSearches');
     const q = query(colRef, orderBy('count', 'desc'), limit(10));
 
-    // Seed defaults if empty
-    const seedInitialIfEmpty = async () => {
-      try {
-        const snap = await getDocs(q);
-        if (snap.empty) {
-          for (const item of DEFAULT_TRENDING) {
-            await setDoc(doc(db, 'trendingSearches', item.id), {
-              ...item,
-              updatedAt: new Date().toISOString()
-            });
-          }
-        }
-      } catch (err) {
-        // Silently continue to listener
-      }
-    };
-    seedInitialIfEmpty();
-
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        if (!snapshot.empty) {
-          const items: TrendingSearchItem[] = [];
-          snapshot.forEach((d) => {
-            const data = d.data();
-            if (data && data.term) {
-              items.push({
-                id: d.id,
-                term: data.term,
-                count: typeof data.count === 'number' ? data.count : 1,
-                updatedAt: data.updatedAt
-              });
-            }
-          });
-          if (items.length > 0) {
-            setTrendingSearches(items);
+        const items: TrendingSearchItem[] = [];
+        snapshot.forEach((d) => {
+          const data = d.data();
+          if (data && data.term) {
+            items.push({
+              id: d.id,
+              term: data.term,
+              count: typeof data.count === 'number' ? data.count : 1,
+              updatedAt: data.updatedAt
+            });
           }
-        }
+        });
+        setTrendingSearches(items);
         setIsLoading(false);
       },
       (error) => {

@@ -1,6 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { 
   Flame, 
   Sparkles, 
@@ -18,7 +20,7 @@ import { ArtistCard } from '@/components/cards/ArtistCard';
 import { NFTCard } from '@/components/cards/NFTCard';
 import { CollectionCard } from '@/components/cards/CollectionCard';
 import { Hero, PageTitle, SectionTitle, Label } from '@/components/ui/typography/Typography';
-import AutoCarousel from '@/components/AutoCarousel';
+import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
 import { useAudio } from '@/contexts/AudioContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -37,119 +39,15 @@ import { Moon, Target, Smile, Frown } from 'lucide-react';
 import { Track } from '@/types';
 import RecentlyMintedNFTs from '@/components/RecentlyMintedNFTs';
 
-// --- Premium Mock Data Providers ---
-
-const SPONSORED_ITEMS = [
-  {
-    id: 's1',
-    title: 'Cyber Pulse Live',
-    subtitle: 'Stream the ultimate neon synth-pop performance by DarkStar',
-    imageUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=1200&h=450',
-    link: '#/jamspace',
-    cta: 'Tune In Now'
-  },
-  {
-    id: 's2',
-    title: 'Neon Dreams Album',
-    subtitle: 'The brand new soundscape by SynthWave is out now',
-    imageUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=1200&h=450',
-    link: '#/marketplace',
-    cta: 'Collect Album'
-  },
-  {
-    id: 's3',
-    title: 'Genesis Mint #04',
-    subtitle: 'Exclusive limited edition audio collectible is now open',
-    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=1200&h=450',
-    link: '#/genesis-forge',
-    cta: 'Mint Genesis'
-  }
-];
-
-const MOCK_SPACES = [
-  {
-    id: 'sp1',
-    title: 'Cyber Lounge Room',
-    host: 'DJ Krupy',
-    listeners: '1.4K',
-    nowPlaying: 'Future Funk (Vibe Mix)',
-    imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=600&h=400',
-    status: 'Live'
-  },
-  {
-    id: 'sp2',
-    title: 'Synth Arena Club',
-    host: 'SynthWave',
-    listeners: '940',
-    nowPlaying: 'Retro Horizon (Extended)',
-    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=600&h=400',
-    status: 'Live'
-  },
-  {
-    id: 'sp3',
-    title: 'Chill Hop Oasis',
-    host: 'Lofi Beats',
-    listeners: '2.1K',
-    nowPlaying: 'Sunset Breeze (Smooth)',
-    imageUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&q=80&w=600&h=400',
-    status: 'Live'
-  }
-];
-
-const MOCK_NEW_DROPS = [
-  { id: 'nd1', title: 'Solar Flare', artist: 'Hyperion', coverUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'nd2', title: 'Cosmic Drift', artist: 'Nebula', coverUrl: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'nd3', title: 'Acid Rain', artist: 'Tokyo Drift', coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'nd4', title: 'Velocity', artist: 'Turbo Charge', coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'nd5', title: 'Ethereal Echo', artist: 'Luna Key', coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=300&h=300' }
-];
-
-const MOCK_TRENDING_SONGS = [
-  { id: 'ts1', title: 'Future Funk', artist: 'Cybernetic', coverUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'ts2', title: 'Neon Nights', artist: 'SynthWave', coverUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'ts3', title: 'Void Walker', artist: 'DarkStar', coverUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'ts4', title: 'Binary Star', artist: 'Cybernetic', coverUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'ts5', title: 'Gravity Well', artist: 'Astro Beats', coverUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=300&h=300' }
-];
-
-const MOCK_TRENDING_ARTISTS = [
-  { id: 'ta1', name: 'Cybernetic', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200&h=200', followers: '1.2M' },
-  { id: 'ta2', name: 'SynthWave', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200&h=200', followers: '850K' },
-  { id: 'ta3', name: 'DarkStar', avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=200&h=200', followers: '620K' },
-  { id: 'ta4', name: 'Nebula', avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200', followers: '450K' }
-];
-
-const MOCK_FAVORITE_ARTISTS = [
-  { id: 'fa1', name: 'Hyperion', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200&h=200', followers: '310K' },
-  { id: 'fa2', name: 'Luna Key', avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200&h=200', followers: '180K' },
-  { id: 'fa3', name: 'Turbo Charge', avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200&h=200', followers: '95K' }
-];
-
-const MOCK_TRENDING_COLLECTIONS = [
-  { id: 'tc1', name: 'Cyber Vibes', itemCount: '50', coverUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'tc2', name: 'Synth Dreams', itemCount: '32', coverUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'tc3', name: 'Quantum Beats', itemCount: '18', coverUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'tc4', name: 'Retro Sunset', itemCount: '24', coverUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=300&h=300' }
-];
-
-const MOCK_TRENDING_NFTS = [
-  { id: 'tn1', title: 'Cyber Orb', creator: 'DarkStar', imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=300&h=300', price: '12' },
-  { id: 'tn2', title: 'Neon Pulse', creator: 'SynthWave', imageUrl: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=300&h=300', price: '8' },
-  { id: 'tn3', title: 'Vortex Eye', creator: 'Cybernetic', imageUrl: 'https://images.unsplash.com/photo-1618005198143-e5283b519a7f?auto=format&fit=crop&q=80&w=300&h=300', price: '15' }
-];
-
-const MOCK_RECENTLY_MINTED = [
-  { id: 'rm1', title: 'Digital Relic', creator: 'Astro Beats', imageUrl: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&q=80&w=300&h=300', price: '4.5' },
-  { id: 'rm2', title: 'Pixel Wave', creator: 'Luna Key', imageUrl: 'https://images.unsplash.com/photo-1618005198143-e5283b519a7f?auto=format&fit=crop&q=80&w=300&h=300', price: '6.2' },
-  { id: 'rm3', title: 'Audio Prism', creator: 'Hyperion', imageUrl: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=300&h=300', price: '9.0' }
-];
-
-const MOCK_RECOMMENDED = [
-  { id: 'rec1', title: 'Starlight', artist: 'Nebula', coverUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'rec2', title: 'Horizon', artist: 'Lofi Beats', coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'rec3', title: 'Subzero', artist: 'Turbo Charge', coverUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=300&h=300' },
-  { id: 'rec4', title: 'Nebula Wave', artist: 'Astro Beats', coverUrl: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&q=80&w=300&h=300' }
-];
+interface LiveSpaceItem {
+  id: string;
+  title: string;
+  host: string;
+  listeners: string;
+  nowPlaying: string;
+  imageUrl: string;
+  status: string;
+}
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -160,7 +58,7 @@ const FILTERS = [
 
 // --- Sub-components for customized UI items ---
 
-const FeedCard = ({ space }: { space: typeof MOCK_SPACES[0] }) => {
+const FeedCard = ({ space }: { space: LiveSpaceItem }) => {
   const navigate = useNavigate();
   return (
     <motion.div
@@ -169,7 +67,7 @@ const FeedCard = ({ space }: { space: typeof MOCK_SPACES[0] }) => {
       className="relative w-[calc(100vw-32px)] sm:w-[380px] aspect-[16/10] rounded-[32px] overflow-hidden cursor-pointer flex-shrink-0 snap-start bg-slate-900 shadow-xl border border-white/5 hover:border-blue-500/30 transition-all duration-300"
       onClick={() => navigate('/jamspace')}
     >
-      <img src={space.imageUrl} alt={space.title} className="w-full h-full object-cover" />
+      {space.imageUrl && <img src={space.imageUrl} alt={space.title} className="w-full h-full object-cover" />}
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-between p-4" />
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
         <span className="bg-red-600 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1">
@@ -208,6 +106,52 @@ export default function JamUp() {
   const { user, userProfile } = useAuth();
   const [activeFilter, setActiveFilter] = useState<'all' | 'music' | 'nfts' | 'spaces'>('all');
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [sponsoredItems, setSponsoredItems] = useState<CarouselItem[]>([]);
+  const [liveSpaces, setLiveSpaces] = useState<LiveSpaceItem[]>([]);
+
+  useEffect(() => {
+    const qSponsored = query(collection(db, 'sponsoredContent'), where('status', '==', 'active'));
+    const unsubSponsored = onSnapshot(qSponsored, (snap) => {
+      const items = snap.docs.map((d) => {
+        const data = d.data() as any;
+        return {
+          id: d.id,
+          title: data.title || 'Sponsored',
+          subtitle: data.description || data.subtitle || '',
+          imageUrl: data.imageUrl || data.bannerUrl || '',
+          link: data.targetUrl || data.link || '/marketplace',
+          cta: data.cta || 'Explore',
+        } as CarouselItem;
+      }).filter((item) => item.imageUrl);
+      setSponsoredItems(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'sponsoredContent');
+    });
+
+    const qStreams = query(collection(db, 'liveStreams'), where('status', '==', 'live'));
+    const unsubStreams = onSnapshot(qStreams, (snap) => {
+      const items = snap.docs.map((d) => {
+        const data = d.data() as any;
+        return {
+          id: d.id,
+          title: data.title || 'Live Jam Session',
+          host: data.artistName || data.hostName || 'Artist',
+          listeners: String(data.viewersCount || 0),
+          nowPlaying: data.currentTrackTitle || data.genre || 'Live Stream',
+          imageUrl: data.thumbnailUrl || data.coverUrl || '',
+          status: 'Live',
+        } as LiveSpaceItem;
+      });
+      setLiveSpaces(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'liveStreams');
+    });
+
+    return () => {
+      unsubSponsored();
+      unsubStreams();
+    };
+  }, []);
 
   const MOOD_GENRES_MAP = useMemo<Record<string, string[]>>(() => ({
     chill: ['lofi', 'ambient', 'jazz', 'r&b', 'classical', 'synthwave'],
@@ -415,10 +359,12 @@ export default function JamUp() {
         {showSponsored && (
           <SectionWrapper>
             <div className="px-4 grid grid-cols-1 md:grid-cols-12 gap-4">
-              <div className="md:col-span-8">
-                <AutoCarousel items={SPONSORED_ITEMS} interval={5500} />
-              </div>
-              <div className="md:col-span-4 hidden md:flex flex-col gap-4">
+              {sponsoredItems.length > 0 && (
+                <div className="md:col-span-8">
+                  <AutoCarousel items={sponsoredItems} interval={5500} />
+                </div>
+              )}
+              <div className={sponsoredItems.length > 0 ? "md:col-span-4 hidden md:flex flex-col gap-4" : "md:col-span-12 grid grid-cols-1 sm:grid-cols-2 gap-4"}>
                 <div className="flex-1 rounded-[32px] bg-gradient-to-br from-indigo-600 to-blue-700 p-6 flex flex-col justify-between relative overflow-hidden group cursor-pointer" onClick={() => navigate('/tasks')}>
                   <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
                     <Zap className="w-32 h-32" />
@@ -473,10 +419,10 @@ export default function JamUp() {
         )}
 
         {/* Live Spaces */}
-        {showSpaces && (
+        {showSpaces && liveSpaces.length > 0 && (
           <SectionWrapper>
             <HorizontalSection title="Live Now">
-              {MOCK_SPACES.map((space) => (
+              {liveSpaces.map((space) => (
                 <FeedCard key={space.id} space={space} />
               ))}
             </HorizontalSection>

@@ -37,27 +37,30 @@ export const MusicNftCard: React.FC<MusicNftCardProps> = ({
   const animFrameRef = useRef<number | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
 
-  // Resolve audio source: attached audioUrl or match from trackId or default preview audio
+  // Resolve audio source: attached audioUrl or match from trackId
   const audioSource = useMemo(() => {
     if (nft.audioUrl) return nft.audioUrl;
     const matchedTrack = allTracks.find(
       (t) => t.id === nft.trackId || t.songId === nft.trackId || t.title.toLowerCase() === nft.title.toLowerCase()
     );
-    if (matchedTrack?.audioUrl) return matchedTrack.audioUrl;
-    return '/tonjam-offline-audio.mp3';
+    return matchedTrack?.audioUrl || '';
   }, [nft, allTracks]);
 
   // Audio setup
   useEffect(() => {
+    if (!audioSource) {
+      audioRef.current = null;
+      return;
+    }
     const audio = new Audio();
-    audio.preload = 'none'; // Don't preload immediately to avoid unneeded network and decoding errors
+    audio.preload = 'none';
     audio.src = audioSource;
     audio.volume = 0;
     audioRef.current = audio;
 
     const handleLoadedMetadata = () => {
       if (audio.duration && !isNaN(audio.duration)) {
-        setDuration(Math.min(audio.duration, 45)); // Preview up to 45s
+        setDuration(Math.min(audio.duration, 45));
       }
     };
 
@@ -74,10 +77,7 @@ export const MusicNftCard: React.FC<MusicNftCardProps> = ({
     };
 
     const handleError = () => {
-      // Auto-fallback if the external audio file fails to decode
-      if (audio.src && !audio.src.includes('tonjam-offline-audio')) {
-        audio.src = '/tonjam-offline-audio.mp3';
-      }
+      setIsPlayingPreview(false);
     };
 
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -190,16 +190,16 @@ export const MusicNftCard: React.FC<MusicNftCardProps> = ({
       id: nft.id,
       songId: nft.trackId || nft.id,
       title: nft.title,
-      artist: nft.artist || nft.creator || 'TonJam Artist',
+      artist: nft.artist || nft.creator || 'Artist',
       artistId: nft.artistId || '',
-      audioUrl: audioSource,
+      audioUrl: audioSource || matchedTrack?.audioUrl || '',
       coverUrl: nft.imageUrl || nft.coverUrl || getPlaceholderImage(`nft-${nft.id}`),
-      duration: duration || 210,
+      duration: matchedTrack?.duration || duration || 0,
       isNFT: true,
       nftId: nft.id,
-      price: nft.price || '2.5',
+      price: nft.price || '0',
       genre: (nft.traits?.find((t) => t.trait_type.toLowerCase() === 'genre')?.value as string) || 'Electronic',
-      rarity: nft.rarity || 'Rare',
+      rarity: nft.rarity || 'Common',
     } as Track);
   };
 
@@ -424,7 +424,6 @@ export const MusicNftCard: React.FC<MusicNftCardProps> = ({
     return false;
   }, [nft]);
 
-  // Determine if this NFT is held by a Verified Owner (on-chain ownership proof or collection authenticity)
   const isVerifiedOwner = useMemo(() => {
     if ((nft as any).isVerifiedOwner === false || (nft as any).verifiedOwner === false) {
       return false;
@@ -433,8 +432,7 @@ export const MusicNftCard: React.FC<MusicNftCardProps> = ({
       nft.owner ||
       (nft as any).ownerAddress ||
       (nft as any).ownerId ||
-      nft.contractAddress ||
-      true
+      nft.contractAddress
     );
   }, [nft]);
 
@@ -466,7 +464,7 @@ export const MusicNftCard: React.FC<MusicNftCardProps> = ({
 
           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono font-bold text-white shadow-sm">
             <img src={TON_LOGO} alt="TON" className="w-3 h-3 object-contain" />
-            <span>{nft.price ? `${nft.price} TON` : '3.5 TON'}</span>
+            <span>{nft.price ? `${nft.price} TON` : 'Unlisted'}</span>
           </div>
         </div>
 

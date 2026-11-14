@@ -1,11 +1,15 @@
 import './polyfills';
 import './lib/logger';
+import { resetStaleMockStateOnce } from './lib/resetMockCache';
 import './index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { runFirebaseDiagnostics } from './lib/firebase-debug';
 import { registerServiceWorker } from './registerServiceWorker';
+
+// Clear any legacy local mock data caches once so Firestore is the source of truth
+resetStaleMockStateOnce();
 
 // Run non-blocking Firebase startup diagnostics
 runFirebaseDiagnostics().catch(() => {});

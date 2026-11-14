@@ -23,13 +23,35 @@ export const DownloadsManager: React.FC<DownloadsManagerProps> = ({
   const downloadedTracks = tracks.filter(t => t.isDownloaded);
   const downloadedAlbums = albums.filter(a => a.isDownloaded);
 
-  // Hardcoded device storage mock values
-  const totalDeviceGb = 128;
-  const usedDeviceGb = 42.6;
-  const systemTonJamGb = parseFloat(totalDownloadedSize) || 0.45;
+  const [storageEstimate, setStorageEstimate] = React.useState<{ quotaGb: number; usageGb: number }>({
+    quotaGb: 0,
+    usageGb: 0,
+  });
 
-  const tonjamPercentage = (systemTonJamGb / totalDeviceGb) * 100;
-  const otherPercentage = (usedDeviceGb / totalDeviceGb) * 100;
+  React.useEffect(() => {
+    let active = true;
+    if (typeof navigator !== 'undefined' && navigator.storage && typeof navigator.storage.estimate === 'function') {
+      navigator.storage
+        .estimate()
+        .then((est) => {
+          if (!active) return;
+          const quotaGb = est.quota ? est.quota / (1024 * 1024 * 1024) : 0;
+          const usageGb = est.usage ? est.usage / (1024 * 1024 * 1024) : 0;
+          setStorageEstimate({ quotaGb, usageGb });
+        })
+        .catch(() => {});
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const totalDeviceGb = storageEstimate.quotaGb > 0 ? storageEstimate.quotaGb : 1;
+  const usedDeviceGb = storageEstimate.usageGb;
+  const systemTonJamGb = parseFloat(totalDownloadedSize) || 0;
+
+  const tonjamPercentage = storageEstimate.quotaGb > 0 ? (systemTonJamGb / totalDeviceGb) * 100 : 0;
+  const otherPercentage = storageEstimate.quotaGb > 0 ? (usedDeviceGb / totalDeviceGb) * 100 : 0;
 
   return (
     <div className="space-y-4">

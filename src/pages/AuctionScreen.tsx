@@ -28,7 +28,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { MOCK_NFTS, MOCK_ARTISTS, TON_LOGO, APP_LOGO } from '@/constants';
+import { TON_LOGO, APP_LOGO } from '@/constants';
 import NFTCard from '@/components/NFTCard';
 import SectionHeader from '@/components/SectionHeader';
 import { AuctionAnalyticsSection } from '@/components/AuctionAnalyticsSection';
@@ -36,7 +36,7 @@ import { BidDashboard } from '@/components/BidDashboard';
 import FeaturedAuctionCard from '@/components/FeaturedAuctionCard';
 import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn, getPlaceholderImage } from '@/lib/utils';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 
@@ -81,26 +81,6 @@ const ActiveAuctionLeaderboard: React.FC<{ auctions: NFTItem[] }> = ({ auctions 
     });
 
     const sorted = Object.values(bidderMap).sort((a, b) => b.price - a.price);
-
-    // If less than 3 bidders, fill with competitive mock high-tier placeholders to foster healthy competition
-    if (sorted.length < 3 && selectedAuction) {
-      const basePrice = parseFloat(selectedAuction.startingBid || selectedAuction.price) || 10;
-      const mockBidders = [
-        { offerer: 'EQA4g2K9J6fsNeuralFreq', price: basePrice * 0.95, timestamp: '1 hour ago' },
-        { offerer: 'EQBp3m8X92xLSonicVoyager', price: basePrice * 0.90, timestamp: '3 hours ago' },
-        { offerer: 'EQDl9Wq112mBasstonian', price: basePrice * 0.85, timestamp: '5 hours ago' }
-      ];
-
-      mockBidders.forEach(mb => {
-        if (sorted.length < 3 && !sorted.some(s => s.offerer.toLowerCase() === mb.offerer.toLowerCase())) {
-          sorted.push({
-            offerer: mb.offerer,
-            price: parseFloat(mb.price.toFixed(2)),
-            timestamp: mb.timestamp
-          });
-        }
-      });
-    }
 
     return sorted.slice(0, 3);
   }, [selectedAuction]);
@@ -266,24 +246,11 @@ const AuctionScreen: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState(12);
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Filter only auction listings and add synthetic items for infinite feel
+  // Filter only live auction listings from Firestore NFTs
   const auctionNFTs = useMemo(() => {
-    let baseItems = allNFTs.filter(nft => nft.listingType === 'auction');
-    
-    // Generate synthetic items if we have few auctions for better UX demo
-    if (baseItems.length < 12 && MOCK_NFTS.some(n => n.listingType === 'auction')) {
-      const mockAuctions = MOCK_NFTS.filter(n => n.listingType === 'auction');
-      const extraItems: NFTItem[] = Array.from({ length: 48 }).map((_, i) => ({
-        ...mockAuctions[i % mockAuctions.length],
-        id: `synthetic-${i}`,
-        title: `${mockAuctions[i % mockAuctions.length].title} (Resale #${i + 100})`,
-        price: (parseFloat(mockAuctions[i % mockAuctions.length].price) * (0.8 + Math.random() * 0.5)).toFixed(2),
-        auctionEndTime: new Date(Date.now() + Math.random() * 1000 * 60 * 60 * 72).toISOString()
-      }));
-      baseItems = [...baseItems, ...extraItems];
-    }
+    const baseItems = allNFTs.filter(nft => nft.listingType === 'auction');
 
-    let filtered = baseItems;
+    let filtered = [...baseItems];
     
     if (activeTab === 'premium') {
       filtered = filtered.filter(nft => parseFloat(nft.price) > 20);
@@ -325,11 +292,23 @@ const AuctionScreen: React.FC = () => {
     }
 
     return filtered;
-  }, [searchQuery, activeTab, sortOrder]);
+  }, [allNFTs, searchQuery, activeTab, sortOrder]);
 
   const recommendations = useMemo(() => {
-    return MOCK_NFTS.filter(nft => nft.listingType !== 'auction').slice(0, 4);
-  }, []);
+    return allNFTs.filter(nft => nft.listingType !== 'auction').slice(0, 4);
+  }, [allNFTs]);
+
+  const auctionStats = useMemo(() => {
+    const auctions = allNFTs.filter(nft => nft.listingType === 'auction');
+    const totalBids = auctions.reduce((sum, n) => sum + (n.offers?.length || 0), 0);
+    const totalVolume = auctions.reduce((sum, n) => sum + (parseFloat(String(n.price)) || 0), 0);
+    return {
+      totalVolume: `${totalVolume.toLocaleString(undefined, { maximumFractionDigits: 1 })} GRAM`,
+      totalBids: totalBids.toLocaleString(),
+      liveAuctions: auctions.length.toLocaleString(),
+      totalNFTs: allNFTs.length.toLocaleString(),
+    };
+  }, [allNFTs]);
 
   // Infinite Scroll Logic
   useEffect(() => {
@@ -358,7 +337,7 @@ const AuctionScreen: React.FC = () => {
       <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src={featuredAuction?.imageUrl || 'https://image.pollinations.ai/prompt/abstract%20cyberpunk%20blue%20neon%20background?width=1920&height=1080&nologo=true'} 
+            src={featuredAuction?.imageUrl || getPlaceholderImage('auction-hero', 1920, 1080)} 
             className="w-full h-full object-cover opacity-30 scale-105 blur-sm"
             alt="Hero Background"
           />
@@ -532,10 +511,10 @@ const AuctionScreen: React.FC = () => {
         {/* Statistics Bar */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Total Volume', value: '1.2M GRAM', icon: ArrowUpRight, color: 'text-blue-500' },
-            { label: 'Active Bidders', value: '4.2k', icon: Users, color: 'text-purple-500' },
-            { label: 'Royalties Paid', value: '85.4k GRAM', icon: Gem, color: 'text-amber-500' },
-            { label: 'NFTs Minted', value: '12.8k', icon: Sparkles, color: 'text-emerald-500' },
+            { label: 'Auction Volume', value: auctionStats.totalVolume, icon: ArrowUpRight, color: 'text-blue-500' },
+            { label: 'Active Bids', value: auctionStats.totalBids, icon: Users, color: 'text-purple-500' },
+            { label: 'Live Auctions', value: auctionStats.liveAuctions, icon: Gem, color: 'text-amber-500' },
+            { label: 'NFTs Minted', value: auctionStats.totalNFTs, icon: Sparkles, color: 'text-emerald-500' },
           ].map((stat, i) => (
             <motion.div 
               key={i}

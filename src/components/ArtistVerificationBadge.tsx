@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { db, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 
 interface ArtistVerificationBadgeProps {
   isVerified?: boolean;
@@ -27,6 +28,8 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
 }) => {
   const { userProfile, setUserProfile, addNotification } = useAudio();
   const { user } = useAuth();
+  const tonAddress = useTonAddress();
+  const [tonConnectUI] = useTonConnectUI();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(1);
 
@@ -42,6 +45,8 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
 
   const isVerified = propsIsVerified ?? (userProfile?.isVerifiedArtist || userProfile?.verified);
   const isOwnProfile = !artistUid || artistUid === user?.uid || artistUid === userProfile?.uid;
+  const connectedWallet = tonAddress || userProfile?.walletAddress || '';
+  const payloadHash = user?.uid && connectedWallet ? `tonjam:${user.uid.slice(0, 6)}:${connectedWallet.slice(0, 6)}` : 'Pending wallet connection';
 
   // Listen for OAuth postMessage callbacks from Spotify, Twitter, and Instagram popups
   useEffect(() => {
@@ -88,90 +93,71 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
         const top = window.innerHeight / 2 - height / 2;
         window.open(url, `${provider}_oauth`, `width=${width},height=${height},left=${left},top=${top}`);
       } else {
-        // Fallback for demo when OAuth credentials are mock/simulated
-        setTimeout(() => {
-          if (provider === 'spotify') setSpotifyConnected(true);
-          if (provider === 'twitter') setTwitterConnected(true);
-          if (provider === 'instagram') setInstagramConnected(true);
-          setIsConnecting(null);
-          addNotification(`${provider.toUpperCase()} verification verified successfully!`, "success");
-        }, 1200);
+        setIsConnecting(null);
+        addNotification(`${provider.toUpperCase()} OAuth integration is not configured yet.`, "error");
       }
     } catch (err) {
-      setTimeout(() => {
-        if (provider === 'spotify') setSpotifyConnected(true);
-        if (provider === 'twitter') setTwitterConnected(true);
-        if (provider === 'instagram') setInstagramConnected(true);
-        setIsConnecting(null);
-        addNotification(`${provider.toUpperCase()} authenticated!`, "success");
-      }, 1000);
+      setIsConnecting(null);
+      addNotification(`Failed to connect ${provider.toUpperCase()} OAuth.`, "error");
     }
   };
 
   const handleSignWallet = () => {
-    setIsConnecting('wallet');
-    setTimeout(() => {
-      setWalletSigned(true);
-      setIsConnecting(null);
-      addNotification("Cryptographic wallet signature verified!", "success");
-    }, 1200);
+    if (!connectedWallet) {
+      tonConnectUI.openModal();
+      return;
+    }
+    setWalletSigned(true);
+    addNotification("Connected TON wallet confirmed for verification.", "success");
   };
 
-  const runOracleVerification = () => {
+  const runOracleVerification = async () => {
+    if (!user?.uid) {
+      addNotification("Please sign in to submit verification.", "error");
+      return;
+    }
     setIsOracleRunning(true);
     setCurrentStep(4);
-    setOracleProgress(0);
-    setOracleLogs(['[ORACLE] Initializing Multi-Step Verification Protocol...']);
+    setOracleProgress(25);
+    setOracleLogs([
+      '[ORACLE] Initializing Multi-Step Verification Protocol...',
+      '[TON] Confirming connected wallet & OAuth credentials...'
+    ]);
 
-    const pipeline = [
-      { delay: 400, log: '[SPOTIFY] Verifying Spotify discography token payload...' },
-      { delay: 900, log: '[TWITTER] Matching X profile social graph...' },
-      { delay: 1400, log: '[INSTAGRAM] Validating creator media authenticity...' },
-      { delay: 1900, log: '[TON] Validating cryptographic wallet signature...' },
-      { delay: 2400, log: '[SANITY] Zero identity conflicts detected. Issuing badge...' }
-    ];
-
-    pipeline.forEach((item, index) => {
-      setTimeout(() => {
-        setOracleLogs(prev => [...prev, item.log]);
-        setOracleProgress(Math.floor(((index + 1) / pipeline.length) * 100));
-      }, item.delay);
-    });
-
-    setTimeout(async () => {
-      setIsOracleRunning(false);
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, cleanUpdateData({
+        isVerifiedArtist: true,
+        verified: true,
+        isSpotifyVerified: spotifyConnected,
+        isTwitterVerified: twitterConnected,
+        isInstagramVerified: instagramConnected,
+        verificationStatus: 'verified',
+        role: 'artist'
+      }));
+      setUserProfile({
+        ...userProfile,
+        isVerifiedArtist: true,
+        verified: true,
+        isSpotifyVerified: spotifyConnected,
+        isTwitterVerified: twitterConnected,
+        isInstagramVerified: instagramConnected,
+        verificationStatus: 'verified',
+        role: 'artist'
+      } as any);
+      setOracleProgress(100);
+      setOracleLogs(prev => [...prev, '[ORACLE] Verification status recorded in Firestore.']);
       setCurrentStep(5);
-      
-      if (user?.uid) {
-        try {
-          const userRef = doc(db, 'users', user.uid);
-          await updateDoc(userRef, cleanUpdateData({
-            isVerifiedArtist: true,
-            verified: true,
-            isSpotifyVerified: true,
-            isTwitterVerified: true,
-            isInstagramVerified: true,
-            verificationStatus: 'verified',
-            role: 'artist'
-          }));
-          setUserProfile({
-            ...userProfile,
-            isVerifiedArtist: true,
-            verified: true,
-            isSpotifyVerified: true,
-            isTwitterVerified: true,
-            isInstagramVerified: true,
-            verificationStatus: 'verified',
-            role: 'artist'
-          } as any);
-        } catch (err) {
-          console.error('Error persisting verification:', err);
-        }
-      }
-
       addNotification("Artist identity verified! Verified Badge active.", "success");
       if (onVerificationComplete) onVerificationComplete();
-    }, 3000);
+    } catch (err) {
+      console.error('Error persisting verification:', err);
+      setOracleLogs(prev => [...prev, '[ORACLE] Verification update requires admin approval or elevated permissions.']);
+      addNotification("Verification requires admin review or updated permissions.", "error");
+      setCurrentStep(3);
+    } finally {
+      setIsOracleRunning(false);
+    }
   };
 
   const sizeClasses = {
@@ -432,12 +418,14 @@ export const ArtistVerificationBadge: React.FC<ArtistVerificationBadgeProps> = (
 
                     <div className="p-5 bg-slate-950/60 rounded-2xl space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase text-slate-300">Payload Hash</span>
-                        <span className="text-[10px] font-mono text-blue-400">0x8a7f...91c4</span>
+                        <span className="text-xs font-bold uppercase text-slate-300">Payload Reference</span>
+                        <span className="text-[10px] font-mono text-blue-400">{payloadHash}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold uppercase text-slate-300">Connected Wallet</span>
-                        <span className="text-[10px] font-mono text-slate-400">UQAs9...7K_p</span>
+                        <span className="text-[10px] font-mono text-slate-400">
+                          {connectedWallet ? `${connectedWallet.slice(0, 5)}...${connectedWallet.slice(-4)}` : 'Not connected'}
+                        </span>
                       </div>
                       <button
                         onClick={handleSignWallet}

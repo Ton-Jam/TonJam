@@ -3,13 +3,12 @@ import { useAudio } from '@/contexts/AudioContext';
 import { Heart, Play, Shuffle, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { MOCK_TRACKS } from '@/constants';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { BackButton } from '@/components/BackButton';
 import { SpotifyTrackRow } from './Library/components/SpotifyTrackRow';
 
 const FavoriteTracks: React.FC = () => {
-  const { likedTrackIds, playTrack, setHeaderTitle, toggleLikeTrack } = useAudio();
+  const { likedTrackIds, allTracks, playTrack, setHeaderTitle, toggleLikeTrack } = useAudio();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -19,8 +18,8 @@ const FavoriteTracks: React.FC = () => {
   }, [setHeaderTitle]);
 
   const likedTracks = useMemo(() => {
-    return MOCK_TRACKS.filter(t => likedTrackIds.includes(t.id));
-  }, [likedTrackIds]);
+    return allTracks.filter(t => likedTrackIds.includes(t.id));
+  }, [allTracks, likedTrackIds]);
 
   const filteredLikedTracks = useMemo(() => {
     const safeQuery = typeof searchQuery === 'string' ? searchQuery.toLowerCase().trim() : '';

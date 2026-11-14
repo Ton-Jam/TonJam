@@ -69,8 +69,8 @@ export const LiveTipModal: React.FC<LiveTipModalProps> = ({
       });
 
       const senderName = userProfile?.name || userProfile?.username || user?.displayName || 'TonJam Fan';
-      const senderAvatar = userProfile?.avatar || user?.photoURL || 'https://api.dicebear.com/7.x/bottts/svg?seed=Fan';
-      const senderAddress = address || userProfile?.walletAddress || 'EQ...viewer';
+      const senderAvatar = userProfile?.avatar || user?.photoURL || '';
+      const senderAddress = address || userProfile?.walletAddress || '';
 
       await sendCryptoTipToStreamer(stream.id, {
         senderId: user?.uid || 'guest_fan',
@@ -258,10 +258,14 @@ export const LiveTipModal: React.FC<LiveTipModalProps> = ({
           </button>
 
           {!isConnected && (
-            <p className="text-[10px] text-center text-zinc-400 flex items-center justify-center gap-1">
-              <Wallet className="w-3 h-3 text-amber-400" />
-              <span>Simulated demo mode enabled for instant testing</span>
-            </p>
+            <button
+              type="button"
+              onClick={connectWallet}
+              className="w-full py-2 text-[10px] text-center text-amber-400 hover:text-amber-300 flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Wallet className="w-3 h-3" />
+              <span>Connect TON wallet to send on-chain tips</span>
+            </button>
           )}
         </div>
       </motion.div>

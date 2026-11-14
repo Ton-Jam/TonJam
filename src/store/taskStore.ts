@@ -2,13 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Task } from '@/types';
 
-// Default tasks for the initial state
-const DEFAULT_TASKS: Task[] = [
-  { id: '1', title: 'Daily Sync', description: 'Stream 5 tracks today', reward: '5 TJ', points: 50, completed: false, claimed: false, type: 'daily', progress: 0, total: 5 },
-  { id: '2', title: 'Network Supporter', description: 'Follow 3 new artists', reward: '10 TJ', points: 100, completed: false, claimed: false, type: 'daily', progress: 0, total: 3 },
-  { id: '3', title: 'Collector Genesis', description: 'Purchase your first NFT', reward: '50 TJ', points: 500, completed: false, claimed: false, type: 'achievement', progress: 0, total: 1 },
-  { id: '4', title: 'Signal Broadcaster', description: 'Share a track to JamSpace', reward: '5 TJ', points: 25, completed: false, claimed: false, type: 'daily', progress: 0, total: 1 },
-];
+const DEFAULT_TASKS: Task[] = [];
 
 interface TaskState {
   tasks: Task[];

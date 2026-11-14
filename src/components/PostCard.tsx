@@ -26,7 +26,6 @@ import { Post, PostComment } from '@/types';
 import { Button } from '@/components/ui/button';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
-import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_USER } from '@/constants';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn, getPlaceholderImage, shareContent } from '@/lib/utils';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -67,7 +66,8 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     updatePost, 
     addCommentToPost, 
     toggleLikePost,
-    artists 
+    artists,
+    allTracks 
   } = useAudio();
   
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
@@ -169,9 +169,9 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
 
   const track = useMemo(() => {
     if (post.track) return post.track;
-    if (post.trackId) return MOCK_TRACKS.find(t => t.id === post.trackId);
+    if (post.trackId) return (allTracks || []).find(t => t.id === post.trackId);
     return undefined;
-  }, [post.track, post.trackId]);
+  }, [post.track, post.trackId, allTracks]);
 
   const nft = useMemo(() => {
     if (post.nft) return post.nft;
@@ -221,10 +221,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     if (post.userId === userProfile.uid) {
       navigate('/profile');
     } else {
-      const matchedArtist = MOCK_ARTISTS.find(a => 
-        a.uid === post.userId || 
-        a.name.toLowerCase() === post.userName?.toLowerCase()
-      ) || artists?.find(a => 
+      const matchedArtist = artists?.find(a => 
         a.uid === post.userId || 
         a.name.toLowerCase() === post.userName?.toLowerCase()
       );
@@ -534,8 +531,8 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
               
               <form onSubmit={handleAddComment} className="flex gap-4 mb-6">
                 <Avatar className="h-9 w-9 border border-white/5 ring-2 ring-blue-500/10 shrink-0">
-                  <AvatarImage src={MOCK_USER.avatar} />
-                  <AvatarFallback className="bg-zinc-800 font-bold">{MOCK_USER.name[0]}</AvatarFallback>
+                  <AvatarImage src={userProfile.avatar || getPlaceholderImage(`user-${userProfile.uid || 'guest'}`)} />
+                  <AvatarFallback className="bg-zinc-800 font-bold">{(userProfile.name || 'U').charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 relative">
                   <input
@@ -567,7 +564,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                     onProfileClick={(e, uid) => {
                       e.stopPropagation();
                       if (uid === userProfile.uid) navigate('/profile');
-                      else if (artists.some(a => a.uid === uid) || MOCK_ARTISTS.some(a => a.uid === uid)) navigate(`/artist/${uid}`);
+                      else if (artists.some(a => a.uid === uid)) navigate(`/artist/${uid}`);
                       else navigate(`/user/${uid}`);
                     }}
                     activeReactionId={activeReactionCommentId}

@@ -27,6 +27,7 @@ import { UserProfile as UserProfileType } from '@/types';
 import { ProfileQRCodeModal } from './ProfileQRCodeModal';
 import { ArtistVerificationBadge } from '@/components/ArtistVerificationBadge';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { getPlaceholderImage } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,8 +72,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   // Unify data from either user or profile
   const displayName = user?.name || profile?.name || 'TonJam Explorer';
   const username = user?.username || profile?.username || (displayName || 'user').toLowerCase().replace(/\s+/g, '');
-  const avatarUrl = user?.avatar || profile?.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=500&h=500&q=80';
-  const bannerUrl = user?.bannerUrl || profile?.bannerUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1400&h=500&q=80';
+  const avatarUrl = user?.avatar || profile?.avatar || getPlaceholderImage('artist');
+  const bannerUrl = user?.bannerUrl || profile?.bannerUrl || getPlaceholderImage('banner');
   const bio = user?.bio || profile?.bio || '';
   const walletAddress = user?.walletAddress || profile?.walletAddress || '';
   const isVerifiedArtist = Boolean(

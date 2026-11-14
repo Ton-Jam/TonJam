@@ -4,7 +4,7 @@ import { db } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import { NFTItem, NFTOffer } from "@/types";
 import { motion, AnimatePresence } from "motion/react";
-import { cn } from "@/lib/utils";
+import { cn, getPlaceholderImage } from "@/lib/utils";
 
 interface NFTBidTrackerProps {
   nft: NFTItem;
@@ -267,7 +267,7 @@ export const NFTBidTracker: React.FC<NFTBidTrackerProps> = ({ nft, className }) 
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="h-7 w-7 rounded-full bg-neutral-900 flex-shrink-0 overflow-hidden flex items-center justify-center">
                           <img
-                            src={`https://picsum.photos/50/50?seed=${offer.offerer}`}
+                            src={getPlaceholderImage(`offerer-${offer.offerer}`)}
                             className="h-full w-full object-cover opacity-80"
                             alt=""
                           />

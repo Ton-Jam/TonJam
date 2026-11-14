@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { useAudio } from '@/contexts/AudioContext';
 
 const {
   AreaChart, 
@@ -41,34 +42,35 @@ interface DashboardData {
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
 const ArtistRevenueDashboard: React.FC = () => {
-  const [data, setData] = useState<DashboardData[]>([]);
+  const { allTracks = [], allNFTs = [], userProfile } = useAudio();
   const [activeMetric, setActiveMetric] = useState<'earnings' | 'streams' | 'royalties'>('earnings');
 
-  // Initialize and update real-time data
-  useEffect(() => {
-    const initialData = Array.from({ length: 20 }, (_, i) => ({
-      time: `${i}:00`,
-      earnings: 50 + Math.random() * 100,
-      streams: 1000 + Math.random() * 5000,
-      royalties: 20 + Math.random() * 50,
-    }));
-    setData(initialData);
+  const artistTracks = useMemo(() => {
+    if (!userProfile?.uid) return allTracks;
+    const own = allTracks.filter(t => t.artistId === userProfile.uid || t.artist === userProfile.name);
+    return own.length > 0 ? own : allTracks;
+  }, [allTracks, userProfile]);
 
-    const interval = setInterval(() => {
-      setData(prev => {
-        const nextTime = (parseInt(prev[prev.length - 1].time.split(':')[0]) + 1) % 24;
-        const newDataPoint = {
-          time: `${nextTime}:00`,
-          earnings: 50 + Math.random() * 100,
-          streams: 1000 + Math.random() * 5000,
-          royalties: 20 + Math.random() * 50,
-        };
-        return [...prev.slice(1), newDataPoint];
-      });
-    }, 5000);
+  const artistNFTs = useMemo(() => {
+    if (!userProfile?.uid) return allNFTs;
+    const own = allNFTs.filter(n => n.creator === userProfile.name || n.owner === userProfile.walletAddress || n.owner === userProfile.uid);
+    return own.length > 0 ? own : allNFTs;
+  }, [allNFTs, userProfile]);
 
-    return () => clearInterval(interval);
-  }, []);
+  const data = useMemo<DashboardData[]>(() => {
+    if (artistTracks.length === 0) return [];
+    return artistTracks.slice(0, 20).map((t, i) => {
+      const streams = t.streams || t.playCount || 0;
+      const streamingRev = parseFloat(t.streamingPrice || '0.01') * streams;
+      const royaltyPct = (t.royaltySplits || []).reduce((sum, s) => sum + (s.percentage || 0), 0) / 100 || 0.1;
+      return {
+        time: t.title ? t.title.slice(0, 10) : `Track ${i + 1}`,
+        earnings: Number((streamingRev + (t.isNFT ? parseFloat(t.nftPrice || t.price || '0') : 0)).toFixed(2)),
+        streams,
+        royalties: Number((streamingRev * royaltyPct).toFixed(2)),
+      };
+    });
+  }, [artistTracks]);
 
   const stats = useMemo(() => {
     const totalStreams = data.reduce((acc, curr) => acc + curr.streams, 0);
@@ -79,16 +81,28 @@ const ArtistRevenueDashboard: React.FC = () => {
       totalStreams,
       totalEarnings,
       totalRoyalties,
-      avgEarnings: totalEarnings / data.length,
+      avgEarnings: data.length > 0 ? totalEarnings / data.length : 0,
     };
   }, [data]);
 
-  const royaltyDistribution = [
-    { name: 'Direct Sales', value: 45 },
-    { name: 'Secondary Royalties', value: 25 },
-    { name: 'Streaming Payouts', value: 20 },
-    { name: 'License Fees', value: 10 },
-  ];
+  const royaltyDistribution = useMemo(() => {
+    const directSales = artistNFTs.reduce((sum, n) => sum + (parseFloat(n.price || '0') || 0), 0);
+    const secondary = stats.totalRoyalties;
+    const streaming = Math.max(0, stats.totalEarnings - directSales);
+    const total = directSales + secondary + streaming;
+    if (total <= 0) {
+      return [
+        { name: 'Direct Sales', value: 0 },
+        { name: 'Secondary Royalties', value: 0 },
+        { name: 'Streaming Payouts', value: 0 },
+      ];
+    }
+    return [
+      { name: 'Direct Sales', value: Math.round((directSales / total) * 100) },
+      { name: 'Secondary Royalties', value: Math.round((secondary / total) * 100) },
+      { name: 'Streaming Payouts', value: Math.round((streaming / total) * 100) },
+    ];
+  }, [artistNFTs, stats]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -187,9 +201,6 @@ const ArtistRevenueDashboard: React.FC = () => {
               <h3 className="text-3xl font-black text-white font-mono">
                 {stats.totalStreams.toLocaleString()}
               </h3>
-              <span className="text-[10px] font-bold text-emerald-500 mb-1 flex items-center gap-0.5">
-                <TrendingUp className="w-3 h-3" /> 12%
-              </span>
             </div>
           </div>
         </motion.div>
@@ -206,11 +217,8 @@ const ArtistRevenueDashboard: React.FC = () => {
             <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">NFT Revenue</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl font-black text-white font-mono">
-                ${stats.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {stats.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TON
               </h3>
-              <span className="text-[10px] font-bold text-emerald-500 mb-1 flex items-center gap-0.5">
-                <TrendingUp className="w-3 h-3" /> 8.4%
-              </span>
             </div>
           </div>
         </motion.div>
@@ -227,11 +235,8 @@ const ArtistRevenueDashboard: React.FC = () => {
             <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Active Royalty Pool</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl font-black text-white font-mono">
-                ${stats.totalRoyalties.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {stats.totalRoyalties.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TON
               </h3>
-              <span className="text-[10px] font-bold text-blue-500 mb-1 flex items-center gap-0.5">
-                <ArrowUpRight className="w-3 h-3" /> 4.2%
-              </span>
             </div>
           </div>
         </motion.div>

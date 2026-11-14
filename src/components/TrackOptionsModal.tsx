@@ -21,7 +21,6 @@ import { Track } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { cn, getPlaceholderImage } from '@/lib/utils';
-import { MOCK_ARTISTS } from '@/constants';
 import AddToPlaylistModal from './AddToPlaylistModal';
 import TrackMonetizationModal from './TrackMonetizationModal';
 import TipArtistModal from './TipArtistModal';
@@ -44,7 +43,8 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
     currentTrack,
     isPlaying,
     playTrack,
-    togglePlay
+    togglePlay,
+    artists = []
   } = useAudio();
 
   const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
@@ -66,8 +66,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
   const isArtist = userProfile?.uid === track.artistId;
   const isCurrentPlaying = currentTrack?.id === track.id && isPlaying;
   
-  // Check artist verification
-  const artistData = MOCK_ARTISTS.find(a => a.uid === track.artistId || a.name === track.artist);
+  const artistData = artists.find(a => a.uid === track.artistId || a.name === track.artist);
   const isVerified = Boolean(track.artistVerified || artistData?.verified || artistData?.isVerifiedArtist);
 
   const handleAction = async (action: string) => {

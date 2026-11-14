@@ -34,7 +34,7 @@ import {
   Copy,
   Send
 } from 'lucide-react';
-import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, TJ_COIN_ICON } from '@/constants';
+import { TJ_COIN_ICON } from '@/constants';
 import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
 import confetti from 'canvas-confetti';
@@ -53,7 +53,7 @@ const TrackDetail: React.FC = () => {
   const navigate = useNavigate();
   const { 
     playTrack, currentTrack, isPlaying, jamTrack, purchaseTrack, mintNFT, 
-    allTracks, allNFTs, likedTrackIds, toggleLikeTrack, addNotification, 
+    allTracks, allNFTs, artists, likedTrackIds, toggleLikeTrack, addNotification, 
     setTrackToAddToPlaylist, setOptionsTrack, setFullPlayerOpen, userProfile, setUserProfile,
     isTrackCached, downloadTrackForOffline, deleteCachedTrack,
     toggleFollowUser, followedUserIds
@@ -64,7 +64,7 @@ const TrackDetail: React.FC = () => {
   const userAddress = useTonAddress();
   
   const track = useMemo(() => allTracks.find(t => t.id === id), [id, allTracks]);
-  const artist = useMemo(() => MOCK_ARTISTS.find(a => a.uid === track?.artistId), [track]);
+  const artist = useMemo(() => artists.find(a => a.uid === track?.artistId), [artists, track]);
   const associatedNFTs = useMemo(() => allNFTs.filter(n => n.trackId === id), [id, allNFTs]);
   
   const isOwner = useMemo(() => {
@@ -184,12 +184,20 @@ const TrackDetail: React.FC = () => {
     const twitterLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
     const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
 
+    const openExternalLink = (href: string) => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.click();
+    };
+
     if (platform === 'telegram') {
-      window.open(telegramLink, '_blank', 'width=600,height=400,noopener,noreferrer');
+      openExternalLink(telegramLink);
     } else if (platform === 'twitter') {
-      window.open(twitterLink, '_blank', 'width=600,height=400,noopener,noreferrer');
+      openExternalLink(twitterLink);
     } else if (platform === 'facebook') {
-      window.open(facebookLink, '_blank', 'width=600,height=400,noopener,noreferrer');
+      openExternalLink(facebookLink);
     } else if (platform === 'copylink') {
       try {
         await navigator.clipboard.writeText(shareUrl);
@@ -198,9 +206,6 @@ const TrackDetail: React.FC = () => {
         console.error("Clipboard copy failed:", err);
       }
     }
-
-    // Interactive countdown latency simulation for a neat transition feel
-    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     const rewardAmount = platform === 'copylink' ? 2 : 5;
 
@@ -225,8 +230,8 @@ const TrackDetail: React.FC = () => {
         trackId: track.id,
         trackTitle: `Share to Earn: shared "${track.title}" to ${platform.toUpperCase()}`,
         timestamp: new Date().toISOString(),
-        status: "completed" as const,
-        txHash: `0x${Math.random().toString(16).substr(2, 40)}`,
+        status: "pending" as const,
+        txHash: txId,
         participants: [userProfile.uid].filter(Boolean),
       };
 
@@ -290,12 +295,17 @@ const TrackDetail: React.FC = () => {
       return;
     }
 
+    if (!artist?.walletAddress) {
+      addNotification("Artist has not configured a TON wallet address.", "warning");
+      return;
+    }
+
     try {
       const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
         messages: [
           {
-            address: artist?.walletAddress || "EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c",
+            address: artist.walletAddress,
             amount: (amount * 1000000000).toString(), // Convert GRAM to nanogram
           }
         ]
@@ -892,27 +902,7 @@ const TrackDetail: React.FC = () => {
                     {associatedNFTs.some(n => n.exclusiveContent && n.exclusiveContent.length > 0) || track.isExclusive ? (
                       (() => {
                         // Gather items
-                        let allExclusives: any[] = associatedNFTs.flatMap(n => n.exclusiveContent || []);
-                        
-                        // Fallback if none defined but track shows isExclusive
-                        if (allExclusives.length === 0 && track.isExclusive) {
-                          allExclusives = [
-                            {
-                              id: 'default-bts-1',
-                              title: 'Behind-The-Scenes Studio Vlog',
-                              type: 'video',
-                              url: 'https://www.youtube.com',
-                              description: 'Studio creation diary of the sonic frequencies.'
-                            },
-                            {
-                              id: 'default-stems-2',
-                              title: 'Lossless Master Audio Stems',
-                              type: 'track',
-                              url: track.audioUrl,
-                              description: 'Individual channels: Drums, Bass, Melodies, Vocals.'
-                            }
-                          ];
-                        }
+                        const allExclusives: any[] = associatedNFTs.flatMap(n => n.exclusiveContent || []);
                         
                         if (hasAccess || isOwner) {
                           return (
@@ -1043,11 +1033,11 @@ const TrackDetail: React.FC = () => {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-4 text-muted-foreground">
                         <Users className="h-3 w-3" />
-                        <span className="text-[9px] font-bold uppercase tracking-widest">{artist?.followers.toLocaleString() || '12.4K'} Followers</span>
+                        <span className="text-[9px] font-bold uppercase tracking-widest">{(artist?.followers || 0).toLocaleString()} Followers</span>
                       </div>
                       <div className="flex items-center gap-4 text-muted-foreground">
                         <Activity className="h-3 w-3" />
-                        <span className="text-[9px] font-bold uppercase tracking-widest">{artist?.monthlyListeners?.toLocaleString() || '84.2K'} Monthly</span>
+                        <span className="text-[9px] font-bold uppercase tracking-widest">{(artist?.monthlyListeners || 0).toLocaleString()} Monthly</span>
                       </div>
                     </div>
                   </div>
@@ -1064,7 +1054,7 @@ const TrackDetail: React.FC = () => {
                 </button>
               </div>
               <p className="text-sm text-foreground/50 leading-relaxed max-w-2xl mb-4">
-                {artist?.bio || "Neon Voyager is a pioneer in the decentralized electronic scene, blending high-fidelity soundscapes with blockchain-native experiences. Based in the digital ether, they continue to push the boundaries of what's possible in the TonJam ecosystem."}
+                {artist?.bio || "Verified artist on TonJam."}
               </p>
               <button 
                 onClick={() => navigate(`/artist/${track.artistId}`)}

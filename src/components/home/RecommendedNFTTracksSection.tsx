@@ -74,7 +74,7 @@ export const RecommendedNFTTracksSection: React.FC = () => {
         style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
       >
         {recommendedNFTs.map((nft) => {
-          const priceDisplay = nft.price ? `${nft.price} TON` : '5.5 TON';
+          const priceDisplay = nft.price ? `${nft.price} TON` : 'Not Listed';
           const artworkUrl = nft.imageUrl || nft.coverUrl || getPlaceholderImage(`nft-${nft.id}`);
 
           return (

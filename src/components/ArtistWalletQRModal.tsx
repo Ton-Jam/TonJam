@@ -11,6 +11,7 @@ import { Artist } from "@/types";
 import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
 import { toNano } from "@ton/ton";
 import { distributeRoyalties } from "@/services/royaltyService";
+import { getPlaceholderImage } from "@/lib/utils";
 
 interface ArtistWalletQRModalProps {
   isOpen: boolean;
@@ -33,7 +34,7 @@ export const ArtistWalletQRModal: React.FC<ArtistWalletQRModalProps> = ({
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
 
-  const walletAddress = artist.walletAddress || "UQCc_DJ_Krupy_Vibez_x9y1_8888";
+  const walletAddress = artist.walletAddress || "";
   const activeAmount = customAmount || tipAmount;
   const numericAmount = parseFloat(activeAmount) || 0;
 
@@ -47,6 +48,7 @@ export const ArtistWalletQRModal: React.FC<ArtistWalletQRModalProps> = ({
 
   // Generate TON URI or raw address
   const qrValue = React.useMemo(() => {
+    if (!walletAddress) return "";
     if (numericAmount <= 0) {
       return walletAddress;
     }
@@ -56,6 +58,7 @@ export const ArtistWalletQRModal: React.FC<ArtistWalletQRModalProps> = ({
   }, [walletAddress, numericAmount, activeAmount, currency, artist.name]);
 
   const handleCopyWallet = async () => {
+    if (!walletAddress) return;
     try {
       await navigator.clipboard.writeText(walletAddress);
       setCopied(true);
@@ -67,6 +70,10 @@ export const ArtistWalletQRModal: React.FC<ArtistWalletQRModalProps> = ({
   };
 
   const handleSendDirectTip = async () => {
+    if (!walletAddress) {
+      toast.error("Artist wallet address is not configured.");
+      return;
+    }
     if (numericAmount <= 0) {
       toast.error(`Please enter a valid ${currency} amount`);
       return;
@@ -258,7 +265,15 @@ export const ArtistWalletQRModal: React.FC<ArtistWalletQRModalProps> = ({
           </button>
         </div>
 
-        {isSuccess ? (
+        {!walletAddress ? (
+          <div className="py-10 text-center space-y-2">
+            <Wallet className="w-10 h-10 text-neutral-500 mx-auto" />
+            <p className="text-sm font-bold text-white">Wallet Not Connected</p>
+            <p className="text-xs text-neutral-400">
+              {artist.name} has not linked a TON payout wallet address yet.
+            </p>
+          </div>
+        ) : isSuccess ? (
           <div className="py-8 flex flex-col items-center text-center space-y-3">
             <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shadow-xl animate-bounce">
               <Sparkles className="w-8 h-8" />
@@ -315,7 +330,7 @@ export const ArtistWalletQRModal: React.FC<ArtistWalletQRModalProps> = ({
                   includeMargin={false}
                   className="rounded-lg"
                   imageSettings={{
-                    src: artist.avatarUrl || "https://ton.org/download/ton_symbol.png",
+                    src: artist.avatarUrl || getPlaceholderImage('artist'),
                     x: undefined,
                     y: undefined,
                     height: 34,

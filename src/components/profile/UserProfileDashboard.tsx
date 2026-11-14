@@ -50,13 +50,14 @@ export const UserProfileDashboard: React.FC = () => {
   const [nftSearch, setNftSearch] = useState('');
 
   // Clean TON Address
-  const walletAddress = userProfile?.walletAddress || 'EQBvW3Fi_ZcrT9S6Jv5N3m9T7y9H5n7P5w9N7K5w9N7K5w9';
+  const walletAddress = userProfile?.walletAddress || '';
   const truncatedAddress = useMemo(() => {
-    if (!walletAddress) return '';
+    if (!walletAddress) return 'Not connected';
     return `${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 6)}`;
   }, [walletAddress]);
 
   const handleCopyAddress = () => {
+    if (!walletAddress) return;
     navigator.clipboard.writeText(walletAddress);
     setCopied(true);
     addNotification("Wallet address copied to clipboard!", "success");
@@ -88,68 +89,51 @@ export const UserProfileDashboard: React.FC = () => {
     });
   }, [userNFTs, nftSearch]);
 
-  // Generate mock chart data based on transaction timestamps or fallback to nice activity data
   const activityChartData = useMemo(() => {
-    if (transactions.length > 0) {
-      // Group by last 7 days
-      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      const counts: { [key: string]: { txs: number; gas: number; points: number } } = {};
-      
-      // Seed last 7 days
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dayName = days[d.getDay()];
-        counts[dayName] = { txs: 0, gas: 0, points: 10 + (i * 5) };
-      }
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const counts: { [key: string]: { txs: number; gas: number; points: number } } = {};
 
-      transactions.forEach(tx => {
-        const date = new Date(tx.timestamp);
-        const dayName = days[date.getDay()];
-        if (counts[dayName]) {
-          counts[dayName].txs += 1;
-          counts[dayName].gas += 0.012; // average simulated gas per transaction
-          counts[dayName].points += 15;
-        }
-      });
-
-      return Object.keys(counts).map(day => ({
-        day,
-        "Transactions": counts[day].txs || Math.floor(Math.random() * 3) + 1,
-        "Gas Saved (mTON)": Math.round((counts[day].gas || (Math.random() * 0.05 + 0.01)) * 1000),
-        "Ecosystem Points": counts[day].points
-      }));
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayName = days[d.getDay()];
+      counts[dayName] = { txs: 0, gas: 0, points: 0 };
     }
 
-    // Default mock data if no transactions yet
-    return [
-      { day: 'Mon', "Transactions": 2, "Gas Saved (mTON)": 24, "Ecosystem Points": 45 },
-      { day: 'Tue', "Transactions": 5, "Gas Saved (mTON)": 60, "Ecosystem Points": 110 },
-      { day: 'Wed', "Transactions": 3, "Gas Saved (mTON)": 36, "Ecosystem Points": 80 },
-      { day: 'Thu', "Transactions": 8, "Gas Saved (mTON)": 96, "Ecosystem Points": 220 },
-      { day: 'Fri', "Transactions": 6, "Gas Saved (mTON)": 72, "Ecosystem Points": 160 },
-      { day: 'Sat', "Transactions": 12, "Gas Saved (mTON)": 144, "Ecosystem Points": 340 },
-      { day: 'Sun', "Transactions": 9, "Gas Saved (mTON)": 108, "Ecosystem Points": 290 },
-    ];
+    transactions.forEach((tx) => {
+      if (!tx.timestamp) return;
+      const date = new Date(tx.timestamp);
+      const dayName = days[date.getDay()];
+      if (counts[dayName]) {
+        counts[dayName].txs += 1;
+        counts[dayName].gas += 0.012;
+        counts[dayName].points += 15;
+      }
+    });
+
+    return Object.keys(counts).map((day) => ({
+      day,
+      "Transactions": counts[day].txs,
+      "Gas Saved (mTON)": Math.round(counts[day].gas * 1000),
+      "Ecosystem Points": counts[day].points,
+    }));
   }, [transactions]);
 
   const handlePlayNFT = (nft: any) => {
-    // Try to find matching track in allTracks
     const matchingTrack = allTracks.find(t => t.id === nft.trackId || t.title?.toLowerCase() === nft.title?.toLowerCase());
     if (matchingTrack) {
       playTrack(matchingTrack);
     } else {
-      // Play mock track created from NFT
       playTrack({
-        id: nft.id || nft.trackId || 'mock-nft-track',
+        id: nft.id || nft.trackId || '',
         title: nft.title || 'NFT Collectible',
         artist: nft.artist || nft.creator || 'Creator',
         coverUrl: nft.imageUrl || nft.coverUrl || '',
         audioUrl: nft.audioUrl || '',
         genre: 'Web3 Single',
-        duration: 180,
-        playCount: 1,
-        likes: 1
+        duration: 0,
+        playCount: 0,
+        likes: 0
       } as any);
     }
   };
@@ -207,11 +191,11 @@ export const UserProfileDashboard: React.FC = () => {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-slate-300">TON Balance</span>
-                <span className="text-sm font-mono font-black text-white">{(userProfile?.tonBalance || 12.5).toFixed(2)} TON</span>
+                <span className="text-sm font-mono font-black text-white">{(userProfile?.tonBalance ?? 0).toFixed(2)} TON</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-slate-300">JAM Fuel</span>
-                <span className="text-sm font-mono font-black text-blue-400">{(userProfile?.jamBalance || 450).toFixed(0)} JAM</span>
+                <span className="text-sm font-mono font-black text-blue-400">{(userProfile?.tjBalance ?? userProfile?.jamBalance ?? 0).toFixed(0)} JAM</span>
               </div>
             </div>
           </div>
@@ -247,7 +231,7 @@ export const UserProfileDashboard: React.FC = () => {
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-300">Transactions Count</span>
-                <span className="font-mono font-bold">{transactions.length || 8}</span>
+                <span className="font-mono font-bold">{transactions.length}</span>
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-300">Gas Optimizer</span>
@@ -367,7 +351,7 @@ export const UserProfileDashboard: React.FC = () => {
                     {/* Cover Photo */}
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">
                       <img 
-                        src={nft.imageUrl || nft.coverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150'} 
+                        src={nft.imageUrl || nft.coverUrl || '/placeholders/nft-placeholder.webp'} 
                         className="w-full h-full object-cover" 
                         alt={nft.title} 
                       />

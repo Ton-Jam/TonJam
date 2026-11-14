@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAudio } from "@/contexts/AudioContext";
+import { getPlaceholderImage } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const WelcomeHero: React.FC = () => {
@@ -35,7 +36,8 @@ export const WelcomeHero: React.FC = () => {
     togglePlay,
     followedUserIds, 
     toggleFollowUser,
-    userProfile 
+    userProfile,
+    collections = []
   } = useAudio();
 
   const [activeTab, setActiveTab] = useState<'artists' | 'collections' | 'habits'>('artists');
@@ -138,61 +140,32 @@ export const WelcomeHero: React.FC = () => {
         genre: artist.genre || listeningHabits.topGenre,
         listeners: artist.monthlyListeners 
           ? `${(artist.monthlyListeners / 1000).toFixed(1)}K` 
-          : '18.5K',
-        matchScore: listeningHabits.hasHistory ? `${98 - idx * 3}% Affinity` : '89% Affinity',
+          : `${artist.followers || 0}`,
+        matchScore: listeningHabits.hasHistory ? `${98 - idx * 3}% Affinity` : 'Matching Profile',
         reason: listeningHabits.hasHistory 
           ? `Matches your ${listeningHabits.topGenre} frequency` 
-          : 'Trending TON Web3 Creator'
+          : 'Web3 Creator'
       };
     });
   }, [artists, allTracks, listeningHabits, followedUserIds]);
 
-  // Recommended Collections based on listening habits
+  // Recommended Collections sourced from live Firestore collections
   const recommendedCollections = useMemo(() => {
     const topG = listeningHabits.topGenre;
-
-    return [
-      {
-        id: 'col-rec-1',
-        title: `${topG} Sovereign Master Stems`,
-        creator: 'TON Audio Protocol',
-        coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=800',
-        genre: topG,
-        floorPrice: '2.8 TON',
-        totalVolume: '520 TON',
-        itemsCount: 150,
-        description: `Exclusive limited-edition master audio stems optimized for ${topG} producers and collectors.`,
-        matchScore: '98% Synergy',
-        badge: `Top ${topG} Pick`
-      },
-      {
-        id: 'col-rec-2',
-        title: 'Vibe Alchemist Genesis Vault',
-        creator: 'Alchemist Wave',
-        coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=800',
-        genre: 'Electronic',
-        floorPrice: '1.5 TON',
-        totalVolume: '380 TON',
-        itemsCount: 88,
-        description: 'Generative sonic frequencies minted directly on the TON blockchain with royalty split contracts.',
-        matchScore: '91% Synergy',
-        badge: 'Genesis Drop'
-      },
-      {
-        id: 'col-rec-3',
-        title: 'TON Cyber Resonance Gold',
-        creator: 'DJ Krupy',
-        coverUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=800',
-        genre: 'Phonk & Synth',
-        floorPrice: '4.2 TON',
-        totalVolume: '1.2K TON',
-        itemsCount: 50,
-        description: 'High-fidelity audio NFTs unlocking exclusive backstage live spaces and studio stems.',
-        matchScore: '89% Synergy',
-        badge: 'VIP Collectible'
-      }
-    ];
-  }, [listeningHabits]);
+    return collections.slice(0, 4).map((col: any) => ({
+      id: String(col.id),
+      title: col.name || col.title || 'Collection',
+      creator: col.creator || col.artistName || 'Creator',
+      coverUrl: col.coverUrl || getPlaceholderImage(`col-${col.id}`),
+      genre: col.genre || topG,
+      floorPrice: col.floorPrice ? `${col.floorPrice} TON` : '0 TON',
+      totalVolume: col.totalVolume ? `${col.totalVolume} TON` : '0 TON',
+      itemsCount: col.nftIds?.length || col.totalSupply || 0,
+      description: col.description || 'Verified Web3 music NFT collection on TON.',
+      matchScore: 'Collection Match',
+      badge: col.genre || topG
+    }));
+  }, [collections, listeningHabits.topGenre]);
 
   // Current item in slide
   const currentArtistItem = recommendedArtists[currentSlideIndex % Math.max(1, recommendedArtists.length)];
@@ -321,7 +294,7 @@ export const WelcomeHero: React.FC = () => {
               <div className="flex items-center gap-4 md:w-1/2">
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 bg-slate-900 shadow-md">
                   <img
-                    src={currentArtistItem.artist.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300'}
+                    src={currentArtistItem.artist.avatarUrl || getPlaceholderImage(`artist-${currentArtistItem.artistId}`)}
                     alt={currentArtistItem.artist.name}
                     className="w-full h-full object-cover"
                   />
@@ -597,7 +570,7 @@ export const WelcomeHero: React.FC = () => {
         </AnimatePresence>
 
         {/* Carousel Slide Indicators & Controls (For Artists and Collections) */}
-        {activeTab !== 'habits' && (
+        {activeTab !== 'habits' && (activeTab === 'artists' ? recommendedArtists.length : recommendedCollections.length) > 1 && (
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-1.5">
               {(activeTab === 'artists' ? recommendedArtists : recommendedCollections).map((_, idx) => (

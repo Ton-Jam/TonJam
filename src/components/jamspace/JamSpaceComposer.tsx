@@ -83,7 +83,7 @@ export const JamSpaceComposer: React.FC<JamSpaceComposerProps> = ({
           id: selectedTrack.id,
           title: selectedTrack.title,
           artist: selectedTrack.artist,
-          url: selectedTrack.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+          url: selectedTrack.audioUrl || ''
         });
       }
       if (mediaUrl) {
@@ -99,7 +99,7 @@ export const JamSpaceComposer: React.FC<JamSpaceComposerProps> = ({
         id: postId,
         userId: userProfile?.uid || 'anonymous',
         userName: userProfile?.name || 'Anonymous Jammer',
-        userAvatar: userProfile?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+        userAvatar: userProfile?.avatar || '',
         username: userProfile?.username || '@jammer',
         content: content.trim(),
         likes: 0,
@@ -150,11 +150,17 @@ export const JamSpaceComposer: React.FC<JamSpaceComposerProps> = ({
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#0052FF]/40 to-transparent"></div>
 
       <div className="flex items-start gap-3">
-        <img 
-          src={userProfile?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'} 
-          alt={userProfile?.name || 'User'} 
-          className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0" 
-        />
+        {userProfile?.avatar ? (
+          <img 
+            src={userProfile.avatar} 
+            alt={userProfile?.name || 'User'} 
+            className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0" 
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-300 shrink-0">
+            {(userProfile?.name || 'J').slice(0, 2).toUpperCase()}
+          </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <form onSubmit={handlePostSubmit} className="space-y-3">

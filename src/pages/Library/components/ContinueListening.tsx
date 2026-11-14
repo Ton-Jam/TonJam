@@ -11,11 +11,6 @@ interface ContinueListeningProps {
 
 export const ContinueListening: React.FC<ContinueListeningProps> = ({ tracks, onPlay }) => {
   const navigate = useNavigate();
-  // Generate mock progresses for continue listening demo
-  const getMockProgress = (id: string) => {
-    const hashes = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return 20 + (hashes % 60); // range 20% to 80%
-  };
 
   return (
     <div className="space-y-3">
@@ -34,7 +29,7 @@ export const ContinueListening: React.FC<ContinueListeningProps> = ({ tracks, on
 
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x">
         {tracks.slice(0, 4).map((track) => {
-          const progress = getMockProgress(track.id);
+          const progress = Math.min(100, Math.max(0, Number((track as any).progress) || 0));
           return (
             <motion.div
               key={track.id}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Sparkles, ChevronRight, User } from 'lucide-react';
+import { ShieldCheck, ChevronRight, User } from 'lucide-react';
 import { ProfileData } from './types';
 
 interface ProfileSummaryCardProps {
@@ -45,19 +45,23 @@ export const ProfileSummaryCard: React.FC<ProfileSummaryCardProps> = ({
       onClick={onEditProfile}
       className="group relative w-full rounded-2xl bg-gradient-to-r from-[#111C30] via-[#132038] to-[#171b38] p-4 flex items-center justify-between gap-3 shadow-md select-none cursor-pointer hover:bg-white/[0.02] transition-all overflow-hidden"
     >
-      {/* Subtle blue-purple gradient ambient glow */}
       <div className="absolute -top-8 -left-8 w-32 h-32 bg-[#2E8CEB]/15 rounded-full blur-2xl pointer-events-none" />
       <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-[#9B7CFF]/15 rounded-full blur-2xl pointer-events-none" />
 
       <div className="flex items-center gap-3.5 z-10 min-w-0">
-        {/* Avatar with restrained blue-purple gradient glow ring */}
         <div className="relative shrink-0">
           <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-tr from-[#2E8CEB] to-[#9B7CFF] opacity-75 blur-[1px]" />
-          <img
-            src={profile.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.name}`}
-            alt={profile.name}
-            className="relative w-12 h-12 rounded-2xl object-cover bg-[#091326]"
-          />
+          {profile.avatar ? (
+            <img
+              src={profile.avatar}
+              alt={profile.name}
+              className="relative w-12 h-12 rounded-2xl object-cover bg-[#091326]"
+            />
+          ) : (
+            <div className="relative w-12 h-12 rounded-2xl bg-[#091326] flex items-center justify-center text-slate-400">
+              <User className="w-6 h-6" />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col min-w-0">

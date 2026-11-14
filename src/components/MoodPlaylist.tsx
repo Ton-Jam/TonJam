@@ -3,6 +3,7 @@ import { Play, Headphones, Moon, Zap, Target, Smile, Frown } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react";
 import { Track } from "@/types";
 import LazyArtworkImage from "@/components/common/LazyArtworkImage";
+import { getPlaceholderImage } from "@/lib/utils";
 
 interface MoodPlaylistProps {
   selectedMood: string | null;
@@ -101,7 +102,7 @@ const MoodPlaylist: React.FC<MoodPlaylistProps> = ({
                     </span>
                     <LazyArtworkImage 
                       src={track.coverUrl} 
-                      fallbackSrc="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80"
+                      fallbackSrc={getPlaceholderImage('track')}
                       alt={track.title} 
                       className="w-9 h-9 rounded-lg object-cover shrink-0" 
                     />

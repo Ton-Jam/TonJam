@@ -7,11 +7,11 @@ import {
   TrendingUp, Users, MessageSquare, BarChart3, HelpCircle, Smartphone 
 } from 'lucide-react';
 
-// --- MOCK DATA IMPORTS ---
-import { 
-  artists, tracks, nftTracks, albums, playlists, users, 
-  collections, wallets, feedPosts, missions 
-} from '../data/mockData';
+// --- CONTEXT IMPORTS ---
+import { useAudio } from '../contexts/AudioContext';
+import { useNFT } from '../contexts/NFTContext';
+import { useTask } from '../contexts/TaskContext';
+import { getPlaceholderImage } from '../lib/utils';
 
 // --- CARDS IMPORTS ---
 import { 
@@ -63,29 +63,121 @@ import {
   DiscoverCard, QuickActionCard, ContinueListeningCard 
 } from '../components/cards/home/HomeCards';
 
-const randomRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+const FALLBACK_TRACK: any = {
+  id: 'preview-track',
+  title: 'No Active Track',
+  artist: 'TonJam Creator',
+  coverUrl: getPlaceholderImage('track'),
+  audioUrl: '',
+  duration: 0,
+  playCount: 0,
+  isNFT: false,
+  isVerified: true,
+};
 
-const mapTrackToNFT = (track: any): any => ({
-  id: track.id,
-  title: track.title,
-  creator: track.artist,
-  imageUrl: track.coverUrl,
-  price: '1.5',
-  highestBid: '2.4',
-  supplyTotal: 1000,
-  supplyMinted: 450,
+const FALLBACK_ARTIST: any = {
+  id: 'preview-artist',
+  name: 'TonJam Artist',
+  handle: '@tonjam',
+  avatarUrl: getPlaceholderImage('artist'),
+  genre: 'Electronic',
+  followers: 0,
+  monthlyListeners: 0,
+  verified: true,
+};
+
+const FALLBACK_COLLECTION: any = {
+  id: 'preview-col',
+  title: 'Collection',
+  creator: 'TonJam',
+  coverUrl: getPlaceholderImage('nft'),
+  itemCount: 0,
+  floorPrice: '0',
+};
+
+const FALLBACK_ALBUM: any = {
+  id: 'preview-album',
+  title: 'Album',
+  artist: 'TonJam Artist',
+  coverUrl: getPlaceholderImage('album'),
+  trackCount: 0,
+};
+
+const FALLBACK_PLAYLIST: any = {
+  id: 'preview-playlist',
+  title: 'Playlist',
+  creator: 'TonJam',
+  coverUrl: getPlaceholderImage('playlist'),
+  trackCount: 0,
+};
+
+const FALLBACK_POST: any = {
+  id: 'preview-post',
+  authorName: 'TonJam Creator',
+  authorAvatar: getPlaceholderImage('artist'),
+  content: 'No posts available yet.',
+  createdAt: new Date().toISOString(),
+  likes: 0,
+  comments: 0,
+};
+
+const FALLBACK_MISSION: any = {
+  id: 'preview-mission',
+  title: 'Complete Profile',
+  description: 'Connect your TON wallet and explore live music.',
+  reward: 50,
+  isCompleted: false,
+};
+
+const mapTrackToNFT = (track?: any): any => ({
+  id: track?.id || 'preview-nft',
+  title: track?.title || 'Untitled NFT',
+  creator: track?.artist || 'TonJam Creator',
+  imageUrl: track?.coverUrl || getPlaceholderImage('nft'),
+  price: track?.price || '0',
+  highestBid: '0',
+  supplyTotal: 1,
+  supplyMinted: 0,
   mintStatus: 'open',
-  isVerified: track.isVerified,
+  isVerified: Boolean(track?.isVerified),
 });
 
 export const UIKitShowcase: React.FC = () => {
   const navigate = useNavigate();
+  const {
+    allTracks: liveTracks = [],
+    artists: liveArtists = [],
+    playlists: livePlaylists = [],
+    posts: livePosts = [],
+  } = useAudio();
+  const { nfts: liveNfts = [] } = useNFT();
+  const { tasks: liveTasks = [] } = useTask();
+
+  const tracks = liveTracks.length > 0 ? liveTracks : [FALLBACK_TRACK];
+  const nftTracks = liveNfts.length > 0 ? liveNfts : liveTracks.filter((t) => t.isNFT);
+  const artists = liveArtists.length > 0 ? liveArtists : [FALLBACK_ARTIST];
+  const albums = [FALLBACK_ALBUM];
+  const playlists = livePlaylists.length > 0 ? livePlaylists : [FALLBACK_PLAYLIST];
+  const collections = [FALLBACK_COLLECTION];
+  const feedPosts = livePosts.length > 0 ? livePosts : [FALLBACK_POST];
+  const missions = liveTasks.length > 0 ? liveTasks : [FALLBACK_MISSION];
+
+  const getTrack = (i: number) => tracks[i] || tracks[0] || FALLBACK_TRACK;
+  const getArtist = (i: number) => artists[i] || artists[0] || FALLBACK_ARTIST;
+  const getAlbum = (i: number) => albums[i] || FALLBACK_ALBUM;
+  const getPlaylist = (i: number) => playlists[i] || playlists[0] || FALLBACK_PLAYLIST;
+  const getCollection = (i: number) => collections[i] || FALLBACK_COLLECTION;
+  const getNftTrack = (i: number) => nftTracks[i] || nftTracks[0] || FALLBACK_TRACK;
+  const getPost = (i: number) => feedPosts[i] || feedPosts[0] || FALLBACK_POST;
+  const getMission = (i: number) => missions[i] || missions[0] || FALLBACK_MISSION;
+
   const [activeTab, setActiveTab] = useState<'music' | 'nft' | 'artists' | 'social' | 'tasks' | 'wallet' | 'analytics' | 'home'>('music');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [nowPlayingTrack, setNowPlayingTrack] = useState(tracks[0]);
+  const [nowPlayingTrack, setNowPlayingTrack] = useState<any>(getTrack(0));
 
   // Handle playing music
   const handlePlayTrack = (track: any) => {
+    if (!track) return;
     setNowPlayingTrack(track);
     setIsPlaying(true);
   };
@@ -174,13 +266,13 @@ export const UIKitShowcase: React.FC = () => {
                       track={nowPlayingTrack} 
                       isPlaying={isPlaying} 
                       onTogglePlay={() => setIsPlaying(!isPlaying)}
-                      onNext={() => handlePlayTrack(tracks[randomRange(0, 499)])}
-                      onPrev={() => handlePlayTrack(tracks[randomRange(0, 499)])}
+                      onNext={() => handlePlayTrack(getTrack(Math.floor(Math.random() * tracks.length)))}
+                      onPrev={() => handlePlayTrack(getTrack(Math.floor(Math.random() * tracks.length)))}
                     />
                     <div className="space-y-4 flex-1 w-full">
                       <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Active Playing Queue</h4>
                       <div className="space-y-2">
-                        {tracks.slice(1, 4).map((t, idx) => (
+                        {tracks.slice(0, 3).map((t, idx) => (
                           <QueueCard 
                             key={t.id} 
                             track={t} 
@@ -210,8 +302,8 @@ export const UIKitShowcase: React.FC = () => {
                   <h3 className="text-lg font-black tracking-widest text-blue-400 uppercase mb-4">Track Cards & Skeletons</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <TrackCard 
-                      track={tracks[0]} 
-                      isPlaying={isPlaying && nowPlayingTrack.id === tracks[0].id} 
+                      track={getTrack(0)} 
+                      isPlaying={isPlaying && nowPlayingTrack.id === getTrack(0).id} 
                       onPlay={handlePlayTrack} 
                     />
                     <TrackCard isLoading />
@@ -223,13 +315,13 @@ export const UIKitShowcase: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
                       <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Trending Track</h4>
-                      <TrendingTrackCard track={tracks[5]} onPlay={() => handlePlayTrack(tracks[5])} />
-                      <TrendingTrackCard track={tracks[6]} onPlay={() => handlePlayTrack(tracks[6])} />
+                      <TrendingTrackCard track={getTrack(1)} onPlay={() => handlePlayTrack(getTrack(1))} />
+                      <TrendingTrackCard track={getTrack(2)} onPlay={() => handlePlayTrack(getTrack(2))} />
                     </div>
                     <div className="space-y-3">
                       <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Recently Played Log</h4>
-                      <RecentlyPlayedCard track={tracks[12]} onPlay={() => handlePlayTrack(tracks[12])} />
-                      <MusicHistoryCard track={tracks[15]} onPlay={() => handlePlayTrack(tracks[15])} />
+                      <RecentlyPlayedCard track={getTrack(3)} onPlay={() => handlePlayTrack(getTrack(3))} />
+                      <MusicHistoryCard track={getTrack(4)} onPlay={() => handlePlayTrack(getTrack(4))} />
                     </div>
                   </div>
                 </div>
@@ -237,13 +329,13 @@ export const UIKitShowcase: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-black tracking-widest text-blue-400 uppercase mb-4">Albums & Playlists</h3>
                   <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none">
-                    <AlbumCard album={albums[0]} onPlay={() => handlePlayTrack(tracks[20])} />
-                    <AlbumCard album={albums[1]} onPlay={() => handlePlayTrack(tracks[21])} />
-                    <PlaylistCard playlist={playlists[0]} onPlay={() => handlePlayTrack(tracks[22])} />
-                    <PlaylistCard playlist={playlists[1]} onPlay={() => handlePlayTrack(tracks[23])} />
+                    <AlbumCard album={getAlbum(0)} onPlay={() => handlePlayTrack(getTrack(0))} />
+                    <AlbumCard album={getAlbum(1)} onPlay={() => handlePlayTrack(getTrack(1))} />
+                    <PlaylistCard playlist={getPlaylist(0)} onPlay={() => handlePlayTrack(getTrack(2))} />
+                    <PlaylistCard playlist={getPlaylist(1)} onPlay={() => handlePlayTrack(getTrack(3))} />
                   </div>
                   <div className="mt-4">
-                    <FavoritePlaylistCard playlist={playlists[2]} onPlay={() => handlePlayTrack(tracks[24])} />
+                    <FavoritePlaylistCard playlist={getPlaylist(2)} onPlay={() => handlePlayTrack(getTrack(4))} />
                   </div>
                 </div>
               </div>
@@ -254,7 +346,7 @@ export const UIKitShowcase: React.FC = () => {
               <div className="space-y-10">
                 <div>
                   <h3 className="text-lg font-black tracking-widest text-purple-400 uppercase mb-4">Featured Launchpad</h3>
-                  <FeaturedNFTCard nft={mapTrackToNFT(nftTracks[0])} onMint={() => {}} />
+                  <FeaturedNFTCard nft={mapTrackToNFT(getNftTrack(0))} onMint={() => {}} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -262,27 +354,27 @@ export const UIKitShowcase: React.FC = () => {
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest mb-3">Live Auction (Featured Audio NFT)</h4>
                     <FeaturedAuctionCard 
                       nft={{
-                        id: nftTracks[1]?.id || 'nft-2',
-                        title: nftTracks[1]?.title || 'Neon Genesis Synth #08',
-                        creator: nftTracks[1]?.artist || 'Satoshi Beats',
-                        imageUrl: nftTracks[1]?.coverUrl || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&q=80',
-                        currentBid: '42 Grams',
-                        floorPrice: '35 Grams',
+                        id: getNftTrack(1).id,
+                        title: getNftTrack(1).title,
+                        creator: getNftTrack(1).artist || 'TonJam Artist',
+                        imageUrl: getNftTrack(1).coverUrl || getPlaceholderImage('nft'),
+                        currentBid: '0 TON',
+                        floorPrice: '0 TON',
                       }} 
                     />
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest mb-3">Bids Feed</h4>
                     <div className="space-y-2.5">
-                      <BidCard nft={{ ...mapTrackToNFT(nftTracks[2]), highestBid: '32.5', bidderName: '@Satoshi', bidTime: '2m ago' }} />
-                      <BidCard nft={{ ...mapTrackToNFT(nftTracks[3]), highestBid: '28.0', bidderName: '@Luna_Web3', bidTime: '15m ago' }} />
+                      <BidCard nft={{ ...mapTrackToNFT(getNftTrack(2)), highestBid: '32.5', bidderName: '@collector', bidTime: '2m ago' }} />
+                      <BidCard nft={{ ...mapTrackToNFT(getNftTrack(3)), highestBid: '28.0', bidderName: '@listener', bidTime: '15m ago' }} />
                     </div>
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest mb-3">Floor Analytics</h4>
                     <div className="space-y-2.5">
-                      <FloorPriceCard title="Genesis Synth Floor" floorPrice="12.5" change24h={14.2} volume24h="4,500" />
-                      <MarketplaceAnalyticsCard totalVolume="120K" totalSales={4500} activeListings={230} ownersRatio="82%" />
+                      <FloorPriceCard title="Collection Floor" floorPrice="0" change24h={0} volume24h="0" />
+                      <MarketplaceAnalyticsCard totalVolume="0" totalSales={0} activeListings={0} ownersRatio="0%" />
                     </div>
                   </div>
                 </div>
@@ -290,13 +382,13 @@ export const UIKitShowcase: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-black tracking-widest text-purple-400 uppercase mb-4">NFT Collections & Launch</h3>
                   <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none">
-                    <NFTCard nft={mapTrackToNFT(nftTracks[4])} />
-                    <NFTCard nft={mapTrackToNFT(nftTracks[5])} />
-                    <CollectionCard collection={collections[0]} />
-                    <CollectionCard collection={collections[1]} />
+                    <NFTCard nft={mapTrackToNFT(getNftTrack(4))} />
+                    <NFTCard nft={mapTrackToNFT(getNftTrack(5))} />
+                    <CollectionCard collection={getCollection(0)} />
+                    <CollectionCard collection={getCollection(1)} />
                   </div>
                   <div className="mt-4">
-                    <MintCard nft={{ ...mapTrackToNFT(nftTracks[8]), supplyMinted: 742, supplyTotal: 1000 }} />
+                    <MintCard nft={{ ...mapTrackToNFT(getNftTrack(6)), supplyMinted: 0, supplyTotal: 1 }} />
                   </div>
                 </div>
               </div>
@@ -307,30 +399,30 @@ export const UIKitShowcase: React.FC = () => {
               <div className="space-y-10">
                 <div>
                   <h3 className="text-lg font-black tracking-widest text-blue-400 uppercase mb-4">Artist of the Week</h3>
-                  <FeaturedArtistCard artist={artists[0]} />
+                  <FeaturedArtistCard artist={getArtist(0)} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Artist Metrics</h4>
-                    <ArtistStatsCard artist={artists[0]} />
-                    <VerifiedArtistCard artist={artists[1]} />
+                    <ArtistStatsCard artist={getArtist(0)} />
+                    <VerifiedArtistCard artist={getArtist(1)} />
                   </div>
                   <div className="space-y-3">
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Leaderboard Rankings</h4>
-                    <TopArtistCard artist={artists[2]} rank={1} />
-                    <TopArtistCard artist={artists[3]} rank={2} />
-                    <TopArtistCard artist={artists[4]} rank={3} />
+                    <TopArtistCard artist={getArtist(2)} rank={1} />
+                    <TopArtistCard artist={getArtist(3)} rank={2} />
+                    <TopArtistCard artist={getArtist(4)} rank={3} />
                   </div>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-black tracking-widest text-blue-400 uppercase mb-4">Creators Roster</h3>
                   <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none">
-                    <ArtistCard artist={artists[5]} />
-                    <ArtistCard artist={artists[6]} />
-                    <SuggestedArtistCard artist={artists[7]} reason="Similar to DJ Krupy" />
-                    <SuggestedArtistCard artist={artists[8]} reason="Trending in Phonk" />
+                    <ArtistCard artist={getArtist(5)} />
+                    <ArtistCard artist={getArtist(6)} />
+                    <SuggestedArtistCard artist={getArtist(7)} reason="TonJam Creator" />
+                    <SuggestedArtistCard artist={getArtist(8)} reason="Electronic" />
                   </div>
                 </div>
               </div>
@@ -345,46 +437,46 @@ export const UIKitShowcase: React.FC = () => {
                     <LiveSpaceCard 
                       space={{
                         id: 's1',
-                        title: 'Future Funk Web3 Drops Live Discussion',
-                        hostName: 'DJ Krupy',
-                        hostAvatar: artists[0].avatarUrl,
-                        listenersCount: 1420
+                        title: 'TonJam Live Audio Space',
+                        hostName: getArtist(0).name,
+                        hostAvatar: getArtist(0).avatarUrl,
+                        listenersCount: 0
                       }} 
                     />
                     <SpaceCard 
                       space={{
                         id: 's2',
-                        title: 'Phonk Community Jam & AMA Session',
-                        hostName: 'Aero beats',
-                        hostAvatar: artists[1].avatarUrl,
-                        scheduledTime: 'Tomorrow 19:00',
+                        title: 'Community Jam & Listening Session',
+                        hostName: getArtist(1).name,
+                        hostAvatar: getArtist(1).avatarUrl,
+                        scheduledTime: 'Upcoming',
                         listenersCount: 0,
-                        avatars: [artists[2].avatarUrl, artists[3].avatarUrl, artists[4].avatarUrl]
+                        avatars: [getArtist(2).avatarUrl, getArtist(3).avatarUrl, getArtist(4).avatarUrl]
                       }} 
                     />
-                    <CommunityCard name="Satoshi Radio Hub" membersCount={12500} category="Web3 FM" onlineCount={412} avatarUrl={artists[5].avatarUrl} />
+                    <CommunityCard name="TonJam Radio Hub" membersCount={0} category="Web3 FM" onlineCount={0} avatarUrl={getArtist(5).avatarUrl} />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                   <div className="space-y-4">
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Social Status Feed</h4>
-                    <FeedCard post={feedPosts[0]} />
-                    <FeedCard post={feedPosts[1]} />
+                    <FeedCard post={getPost(0)} />
+                    <FeedCard post={getPost(1)} />
                   </div>
                   <div className="space-y-4">
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Announcements & Event Tickets</h4>
                     <AnnouncementCard 
-                      title="Gas-Back Royalties are officially Active!" 
-                      description="All NFT creators now earn 0.5% gas-back refunds directly into their GRAM connected balance on every secondary market transaction." 
+                      title="Creator Royalties Active" 
+                      description="Verified NFT creators earn automated royalties on marketplace sales." 
                     />
                     <EventCard 
                       event={{
                         id: 'e1',
-                        title: 'TonJam Global Virtual Meetup',
-                        organizer: 'TonJam Official',
-                        date: 'JULY 22',
-                        location: 'TonJam Telegram Live Hub',
+                        title: 'TonJam Listening Session',
+                        organizer: 'TonJam',
+                        date: 'UPCOMING',
+                        location: 'Live Hub',
                         price: 'Free'
                       }} 
                     />
@@ -392,12 +484,12 @@ export const UIKitShowcase: React.FC = () => {
                     <CommentCard 
                       comment={{
                         id: 'c1',
-                        authorName: 'Satoshi_Listener',
-                        authorAvatar: artists[6].avatarUrl,
+                        authorName: getArtist(0).name,
+                        authorAvatar: getArtist(0).avatarUrl,
                         isVerified: true,
-                        content: 'This launchpad drop looks insane! Can’t wait to mint this and hold the exclusive audio files in my wallet.',
-                        timeString: '3m ago',
-                        likesCount: 12
+                        content: 'Track comment preview.',
+                        timeString: 'now',
+                        likesCount: 0
                       }} 
                     />
                   </div>
@@ -411,13 +503,13 @@ export const UIKitShowcase: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">Streak & Daily Calendar</h4>
-                    <StreakCard streakDays={7} multiplier="1.5x" />
-                    <DailyRewardCard currentDay={3} />
+                    <StreakCard streakDays={0} multiplier="1.0x" />
+                    <DailyRewardCard currentDay={1} />
                   </div>
                   <div className="space-y-4">
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest">XP Level Progress & Sharing</h4>
-                    <XPCard currentXP={4500} nextLevelXP={10000} level={12} />
-                    <ReferralCard referralCode="TONJAM_KRUPY_312" rewardDetails="Share this referral code with friends. Receive 10% direct royalties on their primary NFT track mints!" />
+                    <XPCard currentXP={0} nextLevelXP={1000} level={1} />
+                    <ReferralCard referralCode="TONJAM" rewardDetails="Share your referral link with friends." />
                   </div>
                 </div>
 
@@ -425,8 +517,8 @@ export const UIKitShowcase: React.FC = () => {
                   <div>
                     <h4 className="text-xs font-black text-[#9AA0AE] uppercase tracking-widest mb-3">Roster Missions</h4>
                     <div className="space-y-3">
-                      <MissionCard mission={missions[0]} />
-                      <MissionCard mission={{ ...missions[1], isCompleted: true, title: 'Mint 1 Dolby Atmos track' }} />
+                      <MissionCard mission={getMission(0)} />
+                      <MissionCard mission={{ ...getMission(1), isCompleted: true, title: 'Connect Wallet' }} />
                     </div>
                   </div>
                   <div>

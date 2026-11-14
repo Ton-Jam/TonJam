@@ -4,7 +4,6 @@ import {
   User, Check, ExternalLink, Share2, Activity, 
   Music as MusicIcon, Zap, Award 
 } from "lucide-react";
-import { MOCK_ARTISTS } from "@/constants";
 import { useAudio } from "@/contexts/AudioContext";
 import { NFTItem, Track } from "@/types";
 import { getPlaceholderImage } from "@/lib/utils";
@@ -33,7 +32,7 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
   isOwner,
 }) => {
   const navigate = useNavigate();
-  const { allNFTs, collections, transactions, userProfile, currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
+  const { allNFTs, artists, collections, transactions, userProfile, currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
 
   const isCurrentTrack = associatedTrack && currentTrack?.id === associatedTrack.id;
   const isTrackPlaying = isCurrentTrack && isPlaying;
@@ -47,13 +46,20 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
     }
   };
 
-  const matchedCreator = MOCK_ARTISTS.find(
-    (a) => a.name.toLowerCase() === nft.creator?.toLowerCase() || a.uid === nft.creator
+  const matchedCreator = artists.find(
+    (a) => a.name.toLowerCase() === nft.creator?.toLowerCase() || a.uid === nft.creator || a.uid === nft.creatorId
   );
 
-  const matchedOwner = MOCK_ARTISTS.find(
+  const matchedOwner = artists.find(
     (a) => a.walletAddress === nft.owner || a.name === nft.owner || a.uid === nft.ownerId
   );
+
+  const computedRank = React.useMemo(() => {
+    if (!allNFTs || allNFTs.length === 0) return "—";
+    const sorted = [...allNFTs].sort((a, b) => (b.views || 0) - (a.views || 0));
+    const idx = sorted.findIndex((item) => item.id === nft.id);
+    return idx >= 0 ? `#${idx + 1}` : "—";
+  }, [allNFTs, nft.id]);
 
   const handleCreatorClick = () => {
     const targetId = matchedCreator?.uid || nft.creator?.toLowerCase().replace(/\s+/g, '-');
@@ -94,25 +100,25 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
             {[
               {
                 label: "BPM",
-                val: associatedTrack?.bpm || "128",
+                val: associatedTrack?.bpm || "—",
                 icon: Activity,
                 color: "text-blue-400",
               },
               {
                 label: "KEY",
-                val: associatedTrack?.key || "C#m",
+                val: associatedTrack?.key || "—",
                 icon: MusicIcon,
                 color: "text-purple-400",
               },
               {
                 label: "BIT",
-                val: associatedTrack?.bitrate || "FLAC",
+                val: associatedTrack?.bitrate || "—",
                 icon: Zap,
                 color: "text-emerald-400",
               },
               {
                 label: "RANK",
-                val: "#12",
+                val: computedRank,
                 icon: Award,
                 color: "text-amber-400",
               },
@@ -151,7 +157,7 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
                   className="w-full h-full object-cover"
                   alt={nft.creator}
                 />
-                {(matchedCreator?.verified || true) && (
+                {(matchedCreator?.verified || matchedCreator?.isVerifiedArtist || nft.artistVerified) && (
                   <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#0052FF] rounded-full flex items-center justify-center">
                     <Check className="h-2 w-2 text-white" />
                   </div>

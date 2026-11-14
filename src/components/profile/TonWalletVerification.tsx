@@ -12,7 +12,7 @@ interface TonWalletVerificationProps {
 type StepStatus = 'idle' | 'rpc_connect' | 'state_fetch' | 'dns_check' | 'completed';
 
 export const TonWalletVerification: React.FC<TonWalletVerificationProps> = ({
-  walletAddress = 'EQBvW3Fi_ZcrT9S6Jv5N3m9T7y9H5n7P5w9N7K5w9N7K5w9',
+  walletAddress = '',
   isVerified = false,
   onVerifiedSuccess,
 }) => {
@@ -21,31 +21,19 @@ export const TonWalletVerification: React.FC<TonWalletVerificationProps> = ({
   const [progress, setProgress] = useState(0);
 
   const startVerificationProcess = () => {
+    if (!walletAddress) {
+      toast.error('No Wallet Connected', 'Connect your TON wallet first to verify ownership.');
+      return;
+    }
     if (isVerified) {
       toast.info('Already Verified', 'Your TON wallet address is already validated on the network.');
       return;
     }
 
-    setStatus('rpc_connect');
-    setProgress(15);
-
-    // Simulated steps to make it look highly authentic and rich
-    setTimeout(() => {
-      setStatus('state_fetch');
-      setProgress(50);
-    }, 1200);
-
-    setTimeout(() => {
-      setStatus('dns_check');
-      setProgress(80);
-    }, 2400);
-
-    setTimeout(() => {
-      setStatus('completed');
-      setProgress(100);
-      onVerifiedSuccess();
-      toast.success('TON Wallet Verified', 'Your address has been successfully verified on the TON network.');
-    }, 3600);
+    setStatus('completed');
+    setProgress(100);
+    onVerifiedSuccess();
+    toast.success('TON Wallet Connected', 'Your connected TON wallet address has been recorded.');
   };
 
   const truncateAddress = (addr: string) => {

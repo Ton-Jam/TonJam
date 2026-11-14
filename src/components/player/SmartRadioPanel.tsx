@@ -2,6 +2,7 @@ import React from "react";
 import { Radio, Sparkles, Play, Plus, Zap } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import { Track } from "@/types";
+import { getPlaceholderImage } from "@/lib/utils";
 
 interface SmartRadioPanelProps {
   onClose?: () => void;
@@ -80,7 +81,7 @@ export const SmartRadioPanel: React.FC<SmartRadioPanelProps> = () => {
         <div className="bg-[#050B28] border border-[#16244F] rounded-xl p-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <img
-              src={seedTrack.coverUrl || "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=120&q=80"}
+              src={seedTrack.coverUrl || getPlaceholderImage("track")}
               alt={seedTrack.title}
               className="w-11 h-11 rounded-lg object-cover border border-[#16244F] shrink-0"
             />
@@ -157,7 +158,7 @@ export const SmartRadioPanel: React.FC<SmartRadioPanelProps> = () => {
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <img
-                    src={track.coverUrl || "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=120&q=80"}
+                    src={track.coverUrl || getPlaceholderImage("track")}
                     alt={track.title}
                     className="w-9 h-9 rounded-md object-cover border border-[#16244F] shrink-0"
                   />

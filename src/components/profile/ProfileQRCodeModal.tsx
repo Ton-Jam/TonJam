@@ -16,6 +16,7 @@ import {
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import QRScanner from '../QRScanner';
+import { getPlaceholderImage } from '@/lib/utils';
 
 export interface ProfileShareData {
   name: string;
@@ -217,7 +218,7 @@ export const ProfileQRCodeModal: React.FC<ProfileQRCodeModalProps> = ({
               <div className="relative mb-3">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-slate-900 ring-2 ring-blue-500/30 shadow-md">
                   <img 
-                    src={profile.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=300&h=300&q=80'} 
+                    src={profile.avatar || getPlaceholderImage('artist')} 
                     alt={profile.name} 
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"

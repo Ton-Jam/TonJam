@@ -21,7 +21,6 @@ import { Track } from "@/types";
 import { getPlaceholderImage } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAudio } from "@/contexts/AudioContext";
-import { MOCK_TRACKS } from "@/constants";
 
 interface QueueSheetProps {
   queue: Track[];
@@ -206,13 +205,11 @@ export const QueueSheet: React.FC<QueueSheetProps> = ({
   };
 
   const favoriteTracks = useMemo(() => {
-    const pool = [...(allTracks || []), ...MOCK_TRACKS];
     const uniqueMap = new Map<string, Track>();
-    pool.forEach((t) => {
+    (allTracks || []).forEach((t) => {
       if (t && t.id) uniqueMap.set(t.id, t);
     });
-    const allAvailable = Array.from(uniqueMap.values());
-    return allAvailable.filter((t) => likedTrackIds.includes(t.id));
+    return Array.from(uniqueMap.values()).filter((t) => likedTrackIds.includes(t.id));
   }, [allTracks, likedTrackIds]);
 
   const handleReorder = (newQueue: Track[]) => {

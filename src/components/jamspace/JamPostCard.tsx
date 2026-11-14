@@ -18,6 +18,7 @@ import { SocialPost } from '@/types/social';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudio } from '@/contexts/AudioContext';
 import VerifiedBadge from '@/components/VerifiedBadge';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface JamPostCardProps {
   post: SocialPost;
@@ -108,8 +109,8 @@ export const JamPostCard: React.FC<JamPostCardProps> = ({
         artist: attachedTrack.artist || post.author.name,
         artistId: attachedTrack.artistId || post.authorId,
         audioUrl: attachedTrack.url,
-        coverUrl: attachedTrack.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=300&h=300&q=80',
-        duration: attachedTrack.duration || 180,
+        coverUrl: attachedTrack.coverUrl || getPlaceholderImage('track'),
+        duration: attachedTrack.duration || 0,
         streams: 0,
         playCount: 0,
         createdAt: new Date().toISOString()
@@ -148,7 +149,7 @@ export const JamPostCard: React.FC<JamPostCardProps> = ({
             alt={post.author.name}
             className="w-full h-full object-cover"
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+              (e.currentTarget as HTMLImageElement).src = getPlaceholderImage('artist');
             }}
           />
         </div>
@@ -274,7 +275,7 @@ export const JamPostCard: React.FC<JamPostCardProps> = ({
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-12 h-12 rounded-lg bg-slate-800 overflow-hidden shrink-0 relative">
                           <img
-                            src={att.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=300&h=300&q=80'}
+                            src={att.coverUrl || getPlaceholderImage('track')}
                             alt={att.title || 'Track'}
                             className="w-full h-full object-cover"
                           />
@@ -308,7 +309,7 @@ export const JamPostCard: React.FC<JamPostCardProps> = ({
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-12 h-12 rounded-lg bg-slate-800 overflow-hidden shrink-0">
                           <img
-                            src={att.coverUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&h=300&q=80'}
+                            src={att.coverUrl || getPlaceholderImage('nft')}
                             alt={att.title || 'NFT'}
                             className="w-full h-full object-cover"
                           />

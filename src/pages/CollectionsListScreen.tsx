@@ -2,62 +2,69 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Layers, Disc } from 'lucide-react';
 import { CollectionCard } from '@/components/marketplace/CollectionCard';
-import { PRIMARY_COLLECTIONS, DetailedCollection } from '@/data/collectionsData';
-import { getFeaturedCollections } from '@/services/collectionService';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { collection, onSnapshot, query, limit } from 'firebase/firestore';
+
+interface RemoteCollectionItem {
+  id: string;
+  name: string;
+  creatorName: string;
+  floorPrice: string;
+  volume: string;
+  coverUrl: string;
+  itemCount: number;
+  verified: boolean;
+}
 
 export const CollectionsListScreen: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [remoteCollections, setRemoteCollections] = useState<DetailedCollection[]>([]);
+  const [remoteCollections, setRemoteCollections] = useState<RemoteCollectionItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
-    const loadRemote = async () => {
-      try {
-        const fetched = await getFeaturedCollections();
-        if (fetched && fetched.length > 0 && isMounted) {
-          const mapped: DetailedCollection[] = fetched
-            .filter(f => !PRIMARY_COLLECTIONS.some(p => p.id === f.id))
-            .map(f => ({
-              ...f,
-              volume: '12,500',
-              floorPrice: '10.0',
-              ownersCount: 50,
-              totalSupply: 100,
-              creatorName: f.artistId || 'Artist',
-              verified: true,
-              contractAddress: `EQ_${f.id}_TON`,
-              royaltyFee: '5.0%',
-              bannerUrl: f.coverUrl,
-              items: []
-            }));
-          setRemoteCollections(mapped);
-        }
-      } catch (e) {
-        // Built-in PRIMARY_COLLECTIONS are always ready
+    const q = query(collection(db, 'collections'), limit(50));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const mapped: RemoteCollectionItem[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          const itemCount =
+            Number(data.totalNFTs || data.itemsCount || data.itemCount || 0) ||
+            (Array.isArray(data.nftIds) ? data.nftIds.length : 0);
+          return {
+            id: docSnap.id,
+            name: data.name || 'Untitled Collection',
+            creatorName: data.creatorName || data.creator || data.artistName || 'Artist',
+            floorPrice: String(data.floorPrice || '0'),
+            volume: String(data.volume || '0'),
+            coverUrl: data.coverUrl || data.imageUrl || '',
+            itemCount,
+            verified: Boolean(data.verified ?? data.creatorVerified ?? false),
+          };
+        });
+        setRemoteCollections(mapped);
+        setIsLoading(false);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'collections');
+        setIsLoading(false);
       }
-    };
+    );
 
-    loadRemote();
-    return () => { isMounted = false; };
+    return () => unsubscribe();
   }, []);
 
-  const allCollections = useMemo(() => {
-    return [...PRIMARY_COLLECTIONS, ...remoteCollections];
-  }, [remoteCollections]);
-
   const filteredCollections = useMemo(() => {
-    if (!searchQuery.trim()) return allCollections;
+    if (!searchQuery.trim()) return remoteCollections;
     const q = searchQuery.toLowerCase();
-    return allCollections.filter(
-      c => c.name.toLowerCase().includes(q) || c.creatorName.toLowerCase().includes(q)
+    return remoteCollections.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.creatorName.toLowerCase().includes(q)
     );
-  }, [allCollections, searchQuery]);
+  }, [remoteCollections, searchQuery]);
 
   return (
     <div className="min-h-screen bg-[#070B18] text-white pb-32 overflow-x-hidden selection:bg-blue-600/30">
-      
-      {/* Top Clean Header: [Back] Screen Title */}
       <div className="sticky top-0 z-30 bg-[#070B18]/80 backdrop-blur-md px-4 sm:px-6 py-3 flex items-center justify-between gap-3 border-none">
         <button
           onClick={() => navigate(-1)}
@@ -78,8 +85,6 @@ export const CollectionsListScreen: React.FC = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 space-y-6">
-        
-        {/* Screen Title & Search Container */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
@@ -92,11 +97,10 @@ export const CollectionsListScreen: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Explore curated and verified on-chain digital music collections on the TON Blockchain.
+              Explore verified on-chain digital music collections on the TON Blockchain.
             </p>
           </div>
 
-          {/* Quick Search */}
           <div className="relative w-full sm:w-72">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -109,8 +113,13 @@ export const CollectionsListScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* Collections Grid using refined 10px Collection Cards */}
-        {filteredCollections.length > 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-72 rounded-2xl bg-[#0B112C] animate-pulse" />
+            ))}
+          </div>
+        ) : filteredCollections.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredCollections.map((col) => (
               <CollectionCard
@@ -119,10 +128,10 @@ export const CollectionsListScreen: React.FC = () => {
                   id: col.id,
                   name: col.name,
                   creator: col.creatorName,
-                  floorPrice: col.floorPrice,
+                  floorPrice: `${col.floorPrice} TON`,
                   volume: col.volume,
                   imageUrl: col.coverUrl,
-                  itemCount: col.items?.length || col.totalSupply,
+                  itemCount: col.itemCount,
                   verified: col.verified,
                 }}
                 onClick={() => navigate(`/collections/${col.id}`)}
@@ -136,7 +145,9 @@ export const CollectionsListScreen: React.FC = () => {
               No Collections Found
             </h3>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              No music NFT collections matched your search term "{searchQuery}".
+              {searchQuery.trim()
+                ? `No music NFT collections matched your search term "${searchQuery}".`
+                : 'No music NFT collections are available in Firestore yet.'}
             </p>
           </div>
         )}

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
-import { Track, NFTItem } from '@/types';
+import { Track, NFTItem, Transaction } from '@/types';
+import { useAudio } from '@/contexts/AudioContext';
 
 export type TimeRange = '30d' | '90d' | 'all';
 export type AnalyticsMetricTab = 'overview' | 'streams' | 'followers' | 'nfts';
@@ -81,126 +82,112 @@ export interface ArtistAnalyticsContextType {
   refreshAnalytics: () => void;
 }
 
-const defaultSummary: AnalyticsSummary = {
-  totalStreams: 148520,
-  streamGrowthPercent: 18.4,
-  totalFollowers: 12400,
-  followerGrowthPercent: 9.2,
-  nftVolumeTON: 462.8,
-  nftVolumeGrowthPercent: 24.6,
-  totalRoyaltiesTON: 46.28,
-  royaltiesGrowthPercent: 24.6,
-  totalListeners: 28940,
-  listenersGrowthPercent: 14.1,
-  topTrackTitle: "Midnight Echoes",
+const ZERO_SUMMARY: AnalyticsSummary = {
+  totalStreams: 0,
+  streamGrowthPercent: 0,
+  totalFollowers: 0,
+  followerGrowthPercent: 0,
+  nftVolumeTON: 0,
+  nftVolumeGrowthPercent: 0,
+  totalRoyaltiesTON: 0,
+  royaltiesGrowthPercent: 0,
+  totalListeners: 0,
+  listenersGrowthPercent: 0,
+  topTrackTitle: 'No tracks yet',
 };
 
 const ArtistAnalyticsContext = createContext<ArtistAnalyticsContextType | null>(null);
 
-function seededRandom(seedStr: string) {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < seedStr.length; i++) {
-    h ^= seedStr.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return () => {
-    h = Math.imul(h ^ (h >>> 16), 2246822507);
-    h = Math.imul(h ^ (h >>> 13), 3266489909);
-    return ((h ^= h >>> 16) >>> 0) / 4294967296;
-  };
-}
-
-function generateSeriesForRange(
-  artistId: string,
+function buildRealSeriesForRange(
   rangeKey: TimeRange,
   tracks: Track[],
-  nfts: NFTItem[]
+  nfts: NFTItem[],
+  transactions: Transaction[],
+  artistFollowers: number
 ) {
-  const seed = `${artistId || 'default'}-${rangeKey}`;
-  const rng = seededRandom(seed);
-
-  let pointCount = 30;
-  if (rangeKey === '90d') pointCount = 12; // 12 weeks
-  else if (rangeKey === 'all') pointCount = 12; // 12 months (All-time)
-
-  const realTrackStreamsTotal = tracks.reduce((acc, t) => acc + (t.playCount || 0), 0);
-  const baselineStreams = realTrackStreamsTotal > 1000 ? realTrackStreamsTotal : 150000;
-  const realNftVolume = nfts.reduce((acc, n) => acc + (parseFloat(n.price || '0') || 0), 0);
-  const baselineNftVolume = realNftVolume > 10 ? realNftVolume * 5 : 500;
+  const now = new Date();
+  let bucketCount = 30;
+  let bucketMs = 24 * 60 * 60 * 1000;
+  if (rangeKey === '90d') {
+    bucketCount = 12;
+    bucketMs = 7 * 24 * 60 * 60 * 1000;
+  } else if (rangeKey === 'all') {
+    bucketCount = 12;
+    bucketMs = 30 * 24 * 60 * 60 * 1000;
+  }
 
   const streamData: StreamMetricPoint[] = [];
   const nftSalesData: NFTSalesMetricPoint[] = [];
   const followerData: FollowerMetricPoint[] = [];
 
-  let runningFollowers = 9800;
-  let cumulativeStreams = 0;
-  let cumulativeNftVolume = 0;
+  const trackIds = new Set(tracks.map((t) => t.id));
+  const nftIds = new Set(nfts.map((n) => n.id));
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  for (let i = 0; i < pointCount; i++) {
+  const totalPlayCount = tracks.reduce((acc, t) => acc + Number(t.playCount || t.streams || 0), 0);
+  const floorPrices = nfts
+    .map((n) => parseFloat(String(n.price || '0')) || 0)
+    .filter((p) => p > 0);
+  const minFloor = floorPrices.length > 0 ? Math.min(...floorPrices) : 0;
+
+  for (let i = 0; i < bucketCount; i++) {
+    const bucketEnd = now.getTime() - (bucketCount - 1 - i) * bucketMs;
+    const bucketStart = bucketEnd - bucketMs;
+
     let label = `Day ${i + 1}`;
     if (rangeKey === '90d') label = `W${i + 1}`;
     else if (rangeKey === 'all') {
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      label = months[i % months.length];
+      const d = new Date(bucketEnd);
+      label = months[d.getMonth()];
     }
 
-    const variance = 0.8 + rng() * 0.4 + (i > pointCount * 0.6 ? 0.25 : 0);
-    const dayStreams = Math.floor((baselineStreams / pointCount) * variance);
-    cumulativeStreams += dayStreams;
+    const bucketTxs = transactions.filter((tx) => {
+      const ts = tx.timestamp ? new Date(tx.timestamp).getTime() : 0;
+      return ts >= bucketStart && ts <= bucketEnd;
+    });
 
-    const dayListeners = Math.floor(dayStreams * (0.6 + rng() * 0.15));
-    const completionRate = Math.min(96, Math.max(68, Math.floor(78 + (rng() - 0.5) * 12)));
+    const streamTxs = bucketTxs.filter(
+      (tx) => tx.type === 'stream' && (!tx.trackId || trackIds.has(tx.trackId))
+    );
+    const nftTxs = bucketTxs.filter(
+      (tx) =>
+        (tx.type === 'nft_sale' || tx.type === 'nft_purchase') &&
+        (!tx.nftId || nftIds.has(tx.nftId))
+    );
 
-    // Milestone check for streams (e.g., reaching 10k or 50k streams)
-    let hasStreamMilestone = false;
-    let streamMilestoneLabel = '';
-    if (!rangeKey && cumulativeStreams >= 10000 && cumulativeStreams - dayStreams < 10000) {
-      hasStreamMilestone = true;
-      streamMilestoneLabel = '10k Streams Milestone!';
-    } else if (cumulativeStreams >= 50000 && cumulativeStreams - dayStreams < 50000) {
-      hasStreamMilestone = true;
-      streamMilestoneLabel = '50k Streams Milestone!';
-    }
+    const bucketStreams =
+      streamTxs.length > 0
+        ? streamTxs.length
+        : i === bucketCount - 1 && totalPlayCount > 0 && transactions.length === 0
+          ? totalPlayCount
+          : 0;
+
+    const vol = parseFloat(
+      nftTxs.reduce((acc, tx) => acc + Number(tx.amount || 0), 0).toFixed(2)
+    );
+    const royalties = parseFloat(
+      nftTxs.reduce((acc, tx) => acc + Number(tx.artistShare || 0), 0).toFixed(2)
+    );
 
     streamData.push({
       date: label,
-      streams: dayStreams,
-      listeners: dayListeners,
-      completionRate,
-      hasMilestone: hasStreamMilestone,
-      milestoneLabel: streamMilestoneLabel,
+      streams: bucketStreams,
+      listeners: bucketStreams,
+      completionRate: bucketStreams > 0 ? 100 : 0,
     });
-
-    const baseVol = (baselineNftVolume / pointCount) * (0.7 + rng() * 0.8);
-    const vol = parseFloat(baseVol.toFixed(2));
-    cumulativeNftVolume += vol;
-    const sales = Math.max(1, Math.floor(vol / 15));
-    const royalties = parseFloat((vol * 0.08).toFixed(2));
-    const floor = parseFloat((9.0 + rng() * 6.0).toFixed(1));
-
-    let hasNftMilestone = false;
-    let nftMilestoneLabel = '';
-    if (cumulativeNftVolume >= 100 && cumulativeNftVolume - vol < 100) {
-      hasNftMilestone = true;
-      nftMilestoneLabel = '100 TON NFT Volume Milestone!';
-    }
 
     nftSalesData.push({
       date: label,
       volumeTON: vol,
-      salesCount: sales,
+      salesCount: nftTxs.length,
       royaltiesTON: royalties,
-      floorPrice: floor,
-      hasMilestone: hasNftMilestone,
-      milestoneLabel: nftMilestoneLabel,
+      floorPrice: minFloor,
     });
 
-    const netGain = Math.floor(40 + rng() * 80);
-    runningFollowers += netGain;
     followerData.push({
       date: label,
-      followers: runningFollowers,
-      netGain,
+      followers: artistFollowers,
+      netGain: 0,
     });
   }
 
@@ -222,39 +209,77 @@ export const ArtistAnalyticsProvider: React.FC<ArtistAnalyticsProviderProps> = (
   initialTracks,
   initialNfts,
 }) => {
-  const [artistId, setArtistId] = useState<string | null>(initialArtistId || 'dj-krupy');
-  const [artistName, setArtistName] = useState<string | null>(initialArtistName || 'DJ Krupy');
-  const [tracks, setTracks] = useState<Track[]>(initialTracks || []);
-  const [nfts, setNfts] = useState<NFTItem[]>(initialNfts || []);
+  const { allTracks, allNFTs, transactions, artists, userProfile } = useAudio();
+  const [artistId, setArtistId] = useState<string | null>(initialArtistId || null);
+  const [artistName, setArtistName] = useState<string | null>(initialArtistName || null);
+  const [explicitTracks, setExplicitTracks] = useState<Track[] | null>(initialTracks || null);
+  const [explicitNfts, setExplicitNfts] = useState<NFTItem[] | null>(initialNfts || null);
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
   const [activeTab, setActiveTab] = useState<AnalyticsMetricTab>('overview');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [version, setVersion] = useState<number>(0);
 
-  const setArtistContextData = useCallback((data: {
-    artistId?: string;
-    artistName?: string;
-    tracks?: Track[];
-    nfts?: NFTItem[];
-  }) => {
-    if (data.artistId) setArtistId(data.artistId);
-    if (data.artistName) setArtistName(data.artistName);
-    if (data.tracks) setTracks(data.tracks);
-    if (data.nfts) setNfts(data.nfts);
-  }, []);
+  const effectiveArtistId = artistId || userProfile?.uid || null;
+  const effectiveArtistName = artistName || userProfile?.name || null;
+
+  const tracks = useMemo(() => {
+    if (explicitTracks) return explicitTracks;
+    if (!effectiveArtistId) return [];
+    return allTracks.filter(
+      (t) =>
+        t.artistId === effectiveArtistId ||
+        (effectiveArtistName && t.artist?.toLowerCase() === effectiveArtistName.toLowerCase())
+    );
+  }, [explicitTracks, allTracks, effectiveArtistId, effectiveArtistName]);
+
+  const nfts = useMemo(() => {
+    if (explicitNfts) return explicitNfts;
+    if (!effectiveArtistId) return [];
+    return allNFTs.filter(
+      (n) =>
+        n.artistId === effectiveArtistId ||
+        (effectiveArtistName &&
+          (n.artist?.toLowerCase() === effectiveArtistName.toLowerCase() ||
+            n.creator?.toLowerCase() === effectiveArtistName.toLowerCase()))
+    );
+  }, [explicitNfts, allNFTs, effectiveArtistId, effectiveArtistName]);
+
+  const artistFollowers = useMemo(() => {
+    const matched = artists.find((a) => a.uid === effectiveArtistId);
+    return Number(matched?.followers ?? userProfile?.followers ?? 0);
+  }, [artists, effectiveArtistId, userProfile?.followers]);
+
+  const setArtistContextData = useCallback(
+    (data: {
+      artistId?: string;
+      artistName?: string;
+      tracks?: Track[];
+      nfts?: NFTItem[];
+    }) => {
+      if (data.artistId !== undefined) setArtistId(data.artistId);
+      if (data.artistName !== undefined) setArtistName(data.artistName);
+      if (data.tracks !== undefined) setExplicitTracks(data.tracks);
+      if (data.nfts !== undefined) setExplicitNfts(data.nfts);
+    },
+    []
+  );
 
   const refreshAnalytics = useCallback(() => {
     setIsLoading(true);
-    setTimeout(() => {
-      setVersion((v) => v + 1);
-      setIsLoading(false);
-    }, 250);
+    setTimeout(() => setIsLoading(false), 150);
   }, []);
 
-  // Generate all time range series
-  const series30d = useMemo(() => generateSeriesForRange(artistId || 'dj-krupy', '30d', tracks, nfts), [artistId, tracks, nfts, version]);
-  const series90d = useMemo(() => generateSeriesForRange(artistId || 'dj-krupy', '90d', tracks, nfts), [artistId, tracks, nfts, version]);
-  const seriesAll = useMemo(() => generateSeriesForRange(artistId || 'dj-krupy', 'all', tracks, nfts), [artistId, tracks, nfts, version]);
+  const series30d = useMemo(
+    () => buildRealSeriesForRange('30d', tracks, nfts, transactions, artistFollowers),
+    [tracks, nfts, transactions, artistFollowers]
+  );
+  const series90d = useMemo(
+    () => buildRealSeriesForRange('90d', tracks, nfts, transactions, artistFollowers),
+    [tracks, nfts, transactions, artistFollowers]
+  );
+  const seriesAll = useMemo(
+    () => buildRealSeriesForRange('all', tracks, nfts, transactions, artistFollowers),
+    [tracks, nfts, transactions, artistFollowers]
+  );
 
   const activeStreamData = useMemo(() => {
     if (timeRange === '90d') return series90d.streamData;
@@ -268,47 +293,54 @@ export const ArtistAnalyticsProvider: React.FC<ArtistAnalyticsProviderProps> = (
     return series30d.nftSalesData;
   }, [timeRange, series30d, series90d, seriesAll]);
 
-  const topTracks = useMemo(() => {
-    if (tracks.length > 0) {
-      return tracks.slice(0, 5).map((t, i) => ({
-        id: t.id,
-        title: t.title,
-        streams: t.playCount || 12000 - i * 1500,
-        uniqueListeners: Math.floor((t.playCount || 12000) * 0.65),
-        completionRate: 82 - i * 3,
-        trend: parseFloat((14.2 - i * 2.1).toFixed(1)),
-        coverUrl: t.coverUrl,
-      }));
-    }
-    return [
-      { id: '1', title: 'Midnight In TON', streams: 48500, uniqueListeners: 31000, completionRate: 88, trend: 15.4 },
-      { id: '2', title: 'Symphony of Blocks', streams: 36200, uniqueListeners: 23500, completionRate: 82, trend: 12.1 },
-      { id: '3', title: 'Telegram Wave', streams: 29400, uniqueListeners: 19000, completionRate: 79, trend: 9.8 },
-      { id: '4', title: 'Decentralized Soul', streams: 18200, uniqueListeners: 11800, completionRate: 75, trend: 8.4 },
-    ];
+  const topTracks = useMemo<TopTrackAnalytics[]>(() => {
+    return [...tracks]
+      .sort((a, b) => Number(b.playCount || b.streams || 0) - Number(a.playCount || a.streams || 0))
+      .slice(0, 5)
+      .map((t) => {
+        const plays = Number(t.playCount || t.streams || 0);
+        return {
+          id: t.id,
+          title: t.title,
+          streams: plays,
+          uniqueListeners: plays,
+          completionRate: plays > 0 ? 100 : 0,
+          trend: 0,
+          coverUrl: t.coverUrl,
+        };
+      });
   }, [tracks]);
 
-  const summary = useMemo(() => {
-    const totalStreams = activeStreamData.reduce((acc, curr) => acc + curr.streams, 0);
-    const nftVolumeTON = parseFloat(activeNftData.reduce((acc, curr) => acc + curr.volumeTON, 0).toFixed(2));
+  const summary = useMemo<AnalyticsSummary>(() => {
+    const trackStreams = tracks.reduce((acc, t) => acc + Number(t.playCount || t.streams || 0), 0);
+    const nftSalesTxs = transactions.filter(
+      (tx) => tx.type === 'nft_sale' || tx.type === 'nft_purchase'
+    );
+    const nftVolumeTON = parseFloat(
+      nftSalesTxs.reduce((acc, tx) => acc + Number(tx.amount || 0), 0).toFixed(2)
+    );
+    const totalRoyaltiesTON = parseFloat(
+      nftSalesTxs.reduce((acc, tx) => acc + Number(tx.artistShare || 0), 0).toFixed(2)
+    );
+
     return {
-      totalStreams,
-      streamGrowthPercent: 18.4,
-      totalFollowers: 12400,
-      followerGrowthPercent: 9.2,
+      totalStreams: trackStreams,
+      streamGrowthPercent: 0,
+      totalFollowers: artistFollowers,
+      followerGrowthPercent: 0,
       nftVolumeTON,
-      nftVolumeGrowthPercent: 24.6,
-      totalRoyaltiesTON: parseFloat((nftVolumeTON * 0.08).toFixed(2)),
-      royaltiesGrowthPercent: 24.6,
-      totalListeners: Math.floor(totalStreams * 0.65),
-      listenersGrowthPercent: 14.1,
-      topTrackTitle: topTracks[0]?.title || "Midnight In TON",
+      nftVolumeGrowthPercent: 0,
+      totalRoyaltiesTON,
+      royaltiesGrowthPercent: 0,
+      totalListeners: trackStreams,
+      listenersGrowthPercent: 0,
+      topTrackTitle: topTracks[0]?.title || 'No tracks yet',
     };
-  }, [activeStreamData, activeNftData, topTracks]);
+  }, [tracks, transactions, artistFollowers, topTracks]);
 
   const value: ArtistAnalyticsContextType = {
-    artistId,
-    artistName,
+    artistId: effectiveArtistId,
+    artistName: effectiveArtistName,
     timeRange,
     setTimeRange,
     activeTab,
@@ -339,41 +371,24 @@ export const ArtistAnalyticsProvider: React.FC<ArtistAnalyticsProviderProps> = (
 export const useArtistAnalytics = (): ArtistAnalyticsContextType => {
   const context = useContext(ArtistAnalyticsContext);
   if (!context) {
-    const fallbackSeries = Array.from({ length: 30 }, (_, i) => ({
-      date: `Day ${i + 1}`,
-      streams: Math.floor(1200 + Math.sin(i * 0.5) * 400 + (i * 25)),
-      listeners: Math.floor(750 + Math.sin(i * 0.5) * 200),
-      completionRate: 78,
-      hasMilestone: i === 15,
-      milestoneLabel: i === 15 ? '10k Streams Milestone!' : undefined,
-    }));
-    const fallbackNft = Array.from({ length: 30 }, (_, i) => ({
-      date: `Day ${i + 1}`,
-      volumeTON: parseFloat((15 + Math.sin(i * 0.4) * 8).toFixed(2)),
-      salesCount: Math.floor(2 + Math.random() * 4),
-      royaltiesTON: 1.5,
-      floorPrice: 12.0,
-      hasMilestone: i === 20,
-      milestoneLabel: i === 20 ? '50 TON Volume Milestone!' : undefined,
-    }));
     return {
-      artistId: 'dj-krupy',
-      artistName: 'DJ Krupy',
+      artistId: null,
+      artistName: null,
       timeRange: '30d',
       setTimeRange: () => {},
       activeTab: 'overview',
       setActiveTab: () => {},
-      streamData: fallbackSeries,
-      dailyStreams30d: fallbackSeries,
-      dailyStreams90d: fallbackSeries,
-      dailyStreamsAll: fallbackSeries,
-      nftSalesData: fallbackNft,
-      nftSales30d: fallbackNft,
-      nftSales90d: fallbackNft,
-      nftSalesAll: fallbackNft,
+      streamData: [],
+      dailyStreams30d: [],
+      dailyStreams90d: [],
+      dailyStreamsAll: [],
+      nftSalesData: [],
+      nftSales30d: [],
+      nftSales90d: [],
+      nftSalesAll: [],
       followerData: [],
       topTracks: [],
-      summary: defaultSummary,
+      summary: ZERO_SUMMARY,
       isLoading: false,
       setArtistContextData: () => {},
       refreshAnalytics: () => {},

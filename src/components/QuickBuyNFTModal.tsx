@@ -168,6 +168,11 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
       return;
     }
 
+    if (!nft.owner) {
+      toast.error("Seller wallet address is unavailable for this NFT.");
+      return;
+    }
+
     const toastId = toast.loading(`Authorizing purchase of "${nft.title}"...`, {
       description: "Please confirm the transaction in your TON wallet..."
     });
@@ -177,7 +182,7 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
       setErrorMessage(null);
       addNotification(`Authorizing purchase of ${nft.title}...`, 'info');
 
-      const ownerTarget = nft.owner || 'EQA...marketplace-custody';
+      const ownerTarget = nft.owner;
       const formattedPriceStr = `${numericPrice} TON`;
 
       await buyNFT(
@@ -213,18 +218,20 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
     const matched = allTracks?.find((t) => t.id === nft.id);
     if (matched) {
       playTrack(matched);
-    } else {
+    } else if (nft.audioUrl) {
       playTrack({
         id: nft.id,
         title: nft.title,
         artist: nft.artist,
         artwork: nft.imageUrl,
         coverUrl: nft.imageUrl,
-        audioUrl: nft.audioUrl || '/tonjam-offline-audio.mp3',
-        duration: 180,
+        audioUrl: nft.audioUrl,
+        duration: 0,
         isNFT: true,
         price: `${numericPrice} TON`,
       } as any);
+    } else {
+      addNotification("No audio stream attached to this NFT.", "info");
     }
     onClose();
   };

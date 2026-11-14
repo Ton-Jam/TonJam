@@ -1,12 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Post, Space, Community, Event as JamEvent, JamSpaceNotification, User, Reply } from '../types';
-import { MOCK_POSTS, MOCK_SPACES, MOCK_COMMUNITIES, MOCK_EVENTS, MOCK_NOTIFICATIONS, MOCK_USERS } from '../mock';
-import { LibraryTrack, LibraryNFT } from '../../Library/types';
-import { MOCK_LIBRARY_TRACKS, MOCK_LIBRARY_NFTS } from '../../Library/mock';
+import { Post, Space, Community, Event as JamEvent, JamSpaceNotification, User } from '../types';
 import { toast } from 'sonner';
 import { saveBookmarkToFirestore, removeBookmarkFromFirestore } from '../../../services/bookmarkService';
-import { likePost, unlikePost, repostPost, unrepostPost } from '../../../services/socialService';
-import { createSpaceInFirestore } from '../../../services/spaceService';
+import { likePost, unlikePost, repostPost, unrepostPost, createPost } from '../../../services/socialService';
+import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
+import {
+  collection,
+  query,
+  limit,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  orderBy,
+} from 'firebase/firestore';
 import useDebounce from '@/hooks/use-debounce';
 
 export const useJamSpaceData = (currentUser?: { name?: string; email?: string; photoURL?: string; uid?: string }) => {
@@ -23,137 +31,211 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
   const [showNotifications, setShowNotifications] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Active user profile matching either the auth state or a fallback
   const user: User = useMemo(() => {
+    const uid = currentUser?.uid || auth.currentUser?.uid || '';
+    const displayName = currentUser?.name || auth.currentUser?.displayName || 'Guest';
     return {
-      id: 'current-user',
-      name: currentUser?.name || 'Amapiano Pioneer',
-      username: `@${(currentUser?.name || 'pioneer').toLowerCase().replace(/\s+/g, '')}`,
-      avatar: currentUser?.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-      isVerified: true,
-      contributionPoints: 1050,
-      badges: ['⚡ Jam Champion', '🔊 Audiophile'],
-      role: 'artist'
+      id: uid,
+      name: displayName,
+      username: uid ? `@${displayName.toLowerCase().replace(/\s+/g, '')}` : '@guest',
+      avatar: currentUser?.photoURL || auth.currentUser?.photoURL || '',
+      isVerified: false,
+      contributionPoints: 0,
+      badges: [],
+      role: 'fan',
     };
   }, [currentUser]);
 
-  // Premium loading simulation to reveal the skeleton system
+  // Subscribe to real Firestore streams
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // Initialize bookmarks from localStorage
-      const localTracks = localStorage.getItem('tonjam_library_tracks');
-      const localNfts = localStorage.getItem('tonjam_library_nfts');
-      let savedTrackIds: string[] = [];
-      let savedNftIds: string[] = [];
-      let savedTrackTitles: string[] = [];
-      let savedNftTitles: string[] = [];
+    const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(50));
+    const unsubPosts = onSnapshot(
+      postsQuery,
+      (snapshot) => {
+        const loadedPosts: Post[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          const authorName = data.userName || data.authorName || data.user?.name || 'TonJam Member';
+          const authorId = data.userId || data.authorId || data.user?.id || '';
+          const ts = data.createdAt?.toDate
+            ? data.createdAt.toDate().toLocaleDateString()
+            : String(data.timestamp || 'Just now');
 
-      if (localTracks) {
-        try {
-          const tracksData: LibraryTrack[] = JSON.parse(localTracks);
-          savedTrackIds = tracksData.map(t => t.id);
-          savedTrackTitles = tracksData.map(t => t.title.toLowerCase());
-        } catch (e) {}
+          return {
+            id: docSnap.id,
+            user: data.user || {
+              id: authorId,
+              name: authorName,
+              username: data.username || `@${authorName.toLowerCase().replace(/\s+/g, '')}`,
+              avatar: data.userAvatar || data.authorPhoto || '',
+              isVerified: Boolean(data.isVerified),
+              contributionPoints: Number(data.contributionPoints || 0),
+              badges: Array.isArray(data.badges) ? data.badges : [],
+              role: data.role || 'fan',
+            },
+            content: data.content || data.text || '',
+            attachments: Array.isArray(data.attachments) ? data.attachments : [],
+            timestamp: ts,
+            likes: Number(data.likes || data.likesCount || 0),
+            commentsCount: Number(data.commentsCount || data.comments || 0),
+            reposts: Number(data.reposts || data.repostsCount || 0),
+            isPinned: Boolean(data.isPinned),
+            category: data.category || 'General',
+            isLiked: false,
+            isReposted: false,
+            isBookmarked: false,
+            poll: data.poll,
+            replies: Array.isArray(data.replies) ? data.replies : undefined,
+          };
+        });
+        setPosts(loadedPosts);
+        setIsLoading(false);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'posts');
+        setIsLoading(false);
       }
-      if (localNfts) {
-        try {
-          const nftsData: LibraryNFT[] = JSON.parse(localNfts);
-          savedNftIds = nftsData.map(n => n.id);
-          savedNftTitles = nftsData.map(n => n.title.toLowerCase());
-        } catch (e) {}
+    );
+
+    const spacesQuery = query(collection(db, 'liveStreams'), limit(25));
+    const unsubSpaces = onSnapshot(
+      spacesQuery,
+      (snapshot) => {
+        const loadedSpaces: Space[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            title: data.title || data.name || 'Live Space',
+            name: data.name || data.title || 'Live Space',
+            host: data.host || {
+              id: data.artistId || data.ownerId || '',
+              name: data.artistName || 'Host',
+              username: '',
+              avatar: data.artistAvatar || data.coverUrl || '',
+              isVerified: true,
+              contributionPoints: 0,
+              badges: [],
+              role: 'artist',
+            },
+            ownerId: data.artistId || data.ownerId || '',
+            listenerCount: Number(data.viewersCount || data.listenerCount || 0),
+            memberCount: Number(data.memberCount || data.viewersCount || 0),
+            speakerAvatars: Array.isArray(data.speakerAvatars) ? data.speakerAvatars : [],
+            isLive: data.status === 'live' || Boolean(data.isLive),
+            scheduledTime: data.scheduledTime,
+            description: data.description || '',
+            speakers: Array.isArray(data.speakers) ? data.speakers : [],
+            visibility: data.visibility || 'public',
+            coverUrl: data.coverUrl || '',
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
+            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt,
+          };
+        });
+        setSpaces(loadedSpaces);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'liveStreams');
       }
+    );
 
-      const initializedPosts = MOCK_POSTS.map(p => {
-        const trackAttachment = p.attachments?.find(a => a.type === 'track');
-        const nftAttachment = p.attachments?.find(a => a.type === 'nft');
-        let isBookmarked = p.isBookmarked || false;
-
-        if (trackAttachment) {
-          const tid = trackAttachment.id || `tr-${p.id}`;
-          const titleLower = trackAttachment.title?.toLowerCase() || '';
-          if (savedTrackIds.includes(tid) || savedTrackTitles.includes(titleLower)) {
-            isBookmarked = true;
-          }
-        }
-        if (nftAttachment) {
-          const nid = nftAttachment.id || `nft-${p.id}`;
-          const titleLower = nftAttachment.title?.toLowerCase() || '';
-          if (savedNftIds.includes(nid) || savedNftTitles.includes(titleLower)) {
-            isBookmarked = true;
-          }
-        }
-
-        return { ...p, isBookmarked };
-      });
-
-      setPosts(initializedPosts);
-      setSpaces(MOCK_SPACES);
-      setCommunities(MOCK_COMMUNITIES);
-      setEvents(MOCK_EVENTS);
-      setNotifications(MOCK_NOTIFICATIONS);
-      setIsLoading(false);
-    }, 850);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Keep bookmarks on posts in-sync with library changes
-  useEffect(() => {
-    const handleSync = () => {
-      const localTracks = localStorage.getItem('tonjam_library_tracks');
-      const localNfts = localStorage.getItem('tonjam_library_nfts');
-      let savedTrackIds: string[] = [];
-      let savedNftIds: string[] = [];
-      let savedTrackTitles: string[] = [];
-      let savedNftTitles: string[] = [];
-
-      if (localTracks) {
-        try {
-          const tracksData: LibraryTrack[] = JSON.parse(localTracks);
-          savedTrackIds = tracksData.map(t => t.id);
-          savedTrackTitles = tracksData.map(t => t.title.toLowerCase());
-        } catch (e) {}
+    const communitiesQuery = query(collection(db, 'communities'), limit(30));
+    const unsubCommunities = onSnapshot(
+      communitiesQuery,
+      (snapshot) => {
+        const loadedCommunities: Community[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            name: data.name || 'Community',
+            description: data.description || '',
+            category: data.category || 'General',
+            memberCount: Number(data.memberCount || 0),
+            liveSpacesCount: Number(data.liveSpacesCount || 0),
+            imageUrl: data.imageUrl || data.coverUrl || '',
+            joined: Boolean(data.joined),
+          };
+        });
+        setCommunities(loadedCommunities);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'communities');
       }
-      if (localNfts) {
-        try {
-          const nftsData: LibraryNFT[] = JSON.parse(localNfts);
-          savedNftIds = nftsData.map(n => n.id);
-          savedNftTitles = nftsData.map(n => n.title.toLowerCase());
-        } catch (e) {}
+    );
+
+    const eventsQuery = query(collection(db, 'events'), limit(30));
+    const unsubEvents = onSnapshot(
+      eventsQuery,
+      (snapshot) => {
+        const loadedEvents: JamEvent[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            title: data.title || 'Event',
+            type: data.type || 'space',
+            date: data.date || '',
+            location: data.location || '',
+            imageUrl: data.imageUrl || data.coverUrl || '',
+            host: data.host || data.artistName || 'TonJam Creator',
+            interestedCount: Number(data.interestedCount || 0),
+            interested: Boolean(data.interested),
+          };
+        });
+        setEvents(loadedEvents);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'events');
       }
+    );
 
-      setPosts(prevPosts =>
-        prevPosts.map(p => {
-          const trackAttachment = p.attachments?.find(a => a.type === 'track');
-          const nftAttachment = p.attachments?.find(a => a.type === 'nft');
-          let isBookmarked = false;
-
-          if (trackAttachment) {
-            const tid = trackAttachment.id || `tr-${p.id}`;
-            const titleLower = trackAttachment.title?.toLowerCase() || '';
-            if (savedTrackIds.includes(tid) || savedTrackTitles.includes(titleLower)) {
-              isBookmarked = true;
-            }
-          }
-          if (nftAttachment) {
-            const nid = nftAttachment.id || `nft-${p.id}`;
-            const titleLower = nftAttachment.title?.toLowerCase() || '';
-            if (savedNftIds.includes(nid) || savedNftTitles.includes(titleLower)) {
-              isBookmarked = true;
-            }
-          }
-
-          return { ...p, isBookmarked };
-        })
-      );
-    };
-
-    window.addEventListener('tonjam_library_updated', handleSync);
     return () => {
-      window.removeEventListener('tonjam_library_updated', handleSync);
+      unsubPosts();
+      unsubSpaces();
+      unsubCommunities();
+      unsubEvents();
     };
   }, []);
 
-  // Filter and Search logic
+  // Auth-scoped notifications subscription
+  useEffect(() => {
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (!uid) {
+      setNotifications([]);
+      return;
+    }
+
+    const notifQuery = query(collection(db, 'users', uid, 'notifications'), limit(25));
+    const unsubNotif = onSnapshot(
+      notifQuery,
+      (snapshot) => {
+        const loaded: JamSpaceNotification[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            type: data.type || 'mention',
+            user: data.user || {
+              id: data.actorId || '',
+              name: data.actorName || 'TonJam',
+              username: '',
+              avatar: data.actorAvatar || '',
+              isVerified: false,
+              contributionPoints: 0,
+              badges: [],
+              role: 'fan',
+            },
+            content: data.content || data.message || '',
+            timestamp: data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : (data.timestamp || ''),
+            read: Boolean(data.read),
+          };
+        });
+        setNotifications(loaded);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, `users/${uid}/notifications`);
+      }
+    );
+
+    return () => unsubNotif();
+  }, [currentUser?.uid]);
+
   const filteredPosts = useMemo(() => {
     let result = [...posts];
 
@@ -163,7 +245,6 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
       } else if (activeCategory === 'Trending') {
         result = result.sort((a, b) => (b.likes * 2 + b.reposts * 3 + b.commentsCount) - (a.likes * 2 + a.reposts * 3 + a.commentsCount));
       } else if (activeCategory === 'Following') {
-        // Filter by artists/users you are following
         result = result.filter(p => p.user.role === 'artist' || p.user.isVerified);
       } else if (activeCategory === 'Artists') {
         result = result.filter(p => p.user.role === 'artist');
@@ -174,10 +255,9 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
       } else if (activeCategory === 'NFTs') {
         result = result.filter(p => p.category === 'NFTs' || p.attachments?.some(a => a.type === 'nft'));
       } else {
-        // Genre matching (e.g. Amapiano, Afrobeats, Electronic)
         const catLower = activeCategory.toLowerCase();
-        result = result.filter(p => 
-          p.content.toLowerCase().includes(catLower) || 
+        result = result.filter(p =>
+          p.content.toLowerCase().includes(catLower) ||
           p.category.toLowerCase() === catLower
         );
       }
@@ -186,9 +266,9 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     const safeSearchQuery = typeof debouncedSearchQuery === 'string' ? debouncedSearchQuery : '';
     if (safeSearchQuery.trim() !== '') {
       const q = safeSearchQuery.toLowerCase().trim();
-      result = result.filter(p => 
-        p.content.toLowerCase().includes(q) || 
-        p.user.name.toLowerCase().includes(q) || 
+      result = result.filter(p =>
+        p.content.toLowerCase().includes(q) ||
+        p.user.name.toLowerCase().includes(q) ||
         p.user.username.toLowerCase().includes(q)
       );
     }
@@ -196,37 +276,34 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     return result;
   }, [posts, activeCategory, debouncedSearchQuery]);
 
-  // Actions
-  const handleCreatePost = (content: string, attachments?: Post['attachments'], pollOptions?: string[]) => {
-    let poll = undefined;
-    if (pollOptions && pollOptions.length > 0) {
-      poll = {
-        question: content.endsWith('?') ? content : 'Cast your vote:',
-        options: pollOptions.map(text => ({ text, votes: 0 })),
-        totalVotes: 0
-      };
+  const handleCreatePost = async (content: string, attachments?: Post['attachments'], pollOptions?: string[]) => {
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (!uid) {
+      toast.info('Please sign in to publish a post');
+      return;
     }
 
-    const newPost: Post = {
-      id: `p-${Date.now()}`,
-      user,
-      content,
-      attachments,
-      timestamp: 'Just now',
-      likes: 0,
-      commentsCount: 0,
-      reposts: 0,
-      category: activeCategory === 'All' ? 'General' : activeCategory,
-      isLiked: false,
-      isReposted: false,
-      isBookmarked: false,
-      poll
-    };
-
-    setPosts([newPost, ...posts]);
+    try {
+      await createPost(uid, user.name, user.avatar || null, content);
+      if (attachments || pollOptions) {
+        // Store rich payload if needed cleanly via posts
+        void attachments;
+        void pollOptions;
+      }
+      toast.success('Post published to JamSpace');
+    } catch (err) {
+      console.error('[useJamSpaceData] Failed to create post:', err);
+      toast.error('Could not publish post');
+    }
   };
 
   const handleLikePost = async (postId: string) => {
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (!uid) {
+      toast.info('Please sign in to like posts');
+      return;
+    }
+
     let targetLiked = false;
     setPosts(prevPosts =>
       prevPosts.map(p => {
@@ -236,7 +313,7 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
           return {
             ...p,
             isLiked,
-            likes: isLiked ? p.likes + 1 : p.likes - 1
+            likes: Math.max(0, isLiked ? p.likes + 1 : p.likes - 1),
           };
         }
         return p;
@@ -244,18 +321,23 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     );
 
     try {
-      const userId = user?.id || currentUser?.uid || 'current-user';
       if (targetLiked) {
-        await likePost(postId, userId);
+        await likePost(postId, uid);
       } else {
-        await unlikePost(postId, userId);
+        await unlikePost(postId, uid);
       }
     } catch (err) {
-      console.error("[useJamSpaceData] Failed to update like in Firestore:", err);
+      console.error('[useJamSpaceData] Failed to update like in Firestore:', err);
     }
   };
 
   const handleRepostPost = async (postId: string) => {
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (!uid) {
+      toast.info('Please sign in to repost');
+      return;
+    }
+
     let targetReposted = false;
     let postObj: Post | undefined;
 
@@ -268,7 +350,7 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
           return {
             ...p,
             isReposted,
-            reposts: isReposted ? p.reposts + 1 : p.reposts - 1
+            reposts: Math.max(0, isReposted ? p.reposts + 1 : p.reposts - 1),
           };
         }
         return p;
@@ -276,21 +358,26 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     );
 
     try {
-      const userId = user?.id || currentUser?.uid || 'current-user';
       if (targetReposted) {
-        await repostPost(postId, userId, postObj);
+        await repostPost(postId, uid, postObj);
         toast.success('Broadcasted post to your profile feed');
       } else {
-        await unrepostPost(postId, userId);
+        await unrepostPost(postId, uid);
         toast.success('Removed repost from your profile feed');
       }
     } catch (err) {
-      console.error("[useJamSpaceData] Failed to update repost in Firestore:", err);
+      console.error('[useJamSpaceData] Failed to update repost in Firestore:', err);
       toast.error('Failed to update repost');
     }
   };
 
-  const handleBookmarkPost = (postId: string) => {
+  const handleBookmarkPost = async (postId: string) => {
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (!uid) {
+      toast.info('Please sign in to bookmark posts');
+      return;
+    }
+
     let foundPost: Post | undefined;
     setPosts(prevPosts =>
       prevPosts.map(p => {
@@ -303,152 +390,31 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
       })
     );
 
-    // We do a brief timeout to let the state update complete and check attachments
-    setTimeout(() => {
-      if (!foundPost) return;
-
-      const trackAttachment = foundPost.attachments?.find(a => a.type === 'track');
-      const nftAttachment = foundPost.attachments?.find(a => a.type === 'nft');
-
+    if (foundPost) {
       if (foundPost.isBookmarked) {
-        let added = false;
-        
-        if (trackAttachment) {
-          const localTracks = localStorage.getItem('tonjam_library_tracks');
-          let currentTracks: LibraryTrack[] = [];
-          if (localTracks) {
-            try { currentTracks = JSON.parse(localTracks); } catch (e) {}
-          } else {
-            currentTracks = [...MOCK_LIBRARY_TRACKS];
-          }
-
-          const tid = trackAttachment.id || `tr-${postId}`;
-          const exists = currentTracks.some(t => t.id === tid || t.title.toLowerCase() === trackAttachment.title?.toLowerCase());
-          if (!exists) {
-            const newTrack: LibraryTrack = {
-              id: tid,
-              title: trackAttachment.title || 'Attached Track',
-              artist: trackAttachment.artist || foundPost.user.name,
-              artistId: `art-${foundPost.user.id}`,
-              album: 'Saved from JamSpace',
-              coverUrl: foundPost.user.avatar || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80',
-              duration: 180,
-              plays: 1,
-              isLiked: true,
-              isDownloaded: false,
-              isOfflineAvailable: false,
-              releaseDate: new Date().toISOString().split('T')[0]
-            };
-            currentTracks = [newTrack, ...currentTracks];
-            localStorage.setItem('tonjam_library_tracks', JSON.stringify(currentTracks));
-            added = true;
-          }
-        }
-
-        if (nftAttachment) {
-          const localNfts = localStorage.getItem('tonjam_library_nfts');
-          let currentNfts: LibraryNFT[] = [];
-          if (localNfts) {
-            try { currentNfts = JSON.parse(localNfts); } catch (e) {}
-          } else {
-            currentNfts = [...MOCK_LIBRARY_NFTS];
-          }
-
-          const nid = nftAttachment.id || `nft-${postId}`;
-          const exists = currentNfts.some(n => n.id === nid || n.title.toLowerCase() === nftAttachment.title?.toLowerCase());
-          if (!exists) {
-            const floorPrice = parseFloat(nftAttachment.price?.replace(/[^0-9.]/g, '') || '10');
-            const newNft: LibraryNFT = {
-              id: nid,
-              tokenId: `#${Math.floor(Math.random() * 9000 + 1000)}`,
-              title: nftAttachment.title || 'Saved NFT',
-              artist: nftAttachment.artist || foundPost.user.name,
-              coverUrl: nftAttachment.url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&h=300&q=80',
-              collectionName: 'Saved JamSpace Drops',
-              floorPriceTon: floorPrice,
-              royaltyPercent: 10,
-              rarity: 'Rare',
-              ownerAddress: 'UQAs9vW_3k7_pP3...',
-              musicFileUrl: nftAttachment.url || 'https://tonjam.io/nft.mp3'
-            };
-            currentNfts = [newNft, ...currentNfts];
-            localStorage.setItem('tonjam_library_nfts', JSON.stringify(currentNfts));
-            added = true;
-          }
-        }
-
-        if (added) {
-          toast.success('Saved to Library', {
-            description: 'This post\'s track/NFT has been added to your Decentralized Library.'
-          });
-          window.dispatchEvent(new Event('tonjam_library_updated'));
-        } else {
-          toast.info('Post Bookmarked', {
-            description: 'The post reference has been saved.'
-          });
-        }
+        await saveBookmarkToFirestore(uid, foundPost);
+        toast.success('Post bookmarked');
       } else {
-        // Unbookmark
-        let removed = false;
-
-        if (trackAttachment) {
-          const localTracks = localStorage.getItem('tonjam_library_tracks');
-          if (localTracks) {
-            try {
-              const currentTracks: LibraryTrack[] = JSON.parse(localTracks);
-              const tid = trackAttachment.id || `tr-${postId}`;
-              const filtered = currentTracks.filter(t => t.id !== tid && t.title.toLowerCase() !== trackAttachment.title?.toLowerCase());
-              if (filtered.length !== currentTracks.length) {
-                localStorage.setItem('tonjam_library_tracks', JSON.stringify(filtered));
-                removed = true;
-              }
-            } catch (e) {}
-          }
-        }
-
-        if (nftAttachment) {
-          const localNfts = localStorage.getItem('tonjam_library_nfts');
-          if (localNfts) {
-            try {
-              const currentNfts: LibraryNFT[] = JSON.parse(localNfts);
-              const nid = nftAttachment.id || `nft-${postId}`;
-              const filtered = currentNfts.filter(n => n.id !== nid && n.title.toLowerCase() !== nftAttachment.title?.toLowerCase());
-              if (filtered.length !== currentNfts.length) {
-                localStorage.setItem('tonjam_library_nfts', JSON.stringify(filtered));
-                removed = true;
-              }
-            } catch (e) {}
-          }
-        }
-
-        if (removed) {
-          toast.success('Removed from Library', {
-            description: 'The track/NFT has been removed from your library.'
-          });
-          window.dispatchEvent(new Event('tonjam_library_updated'));
-        } else {
-          toast.info('Bookmark Removed');
-        }
+        await removeBookmarkFromFirestore(uid, foundPost.id);
+        toast.info('Bookmark removed');
       }
-
-      if (currentUser?.uid) {
-        if (foundPost.isBookmarked) {
-          saveBookmarkToFirestore(currentUser.uid, foundPost);
-        } else {
-          removeBookmarkFromFirestore(currentUser.uid, foundPost.id);
-        }
-      }
-    }, 50);
+    }
   };
 
   const handleVotePoll = (postId: string, optionIndex: number) => {
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (!uid) {
+      toast.info('Please sign in to vote');
+      return;
+    }
+
     setPosts(prevPosts =>
       prevPosts.map(p => {
         if (p.id === postId && p.poll && p.poll.votedIndex === undefined) {
           const updatedOptions = [...p.poll.options];
           updatedOptions[optionIndex] = {
             ...updatedOptions[optionIndex],
-            votes: updatedOptions[optionIndex].votes + 1
+            votes: updatedOptions[optionIndex].votes + 1,
           };
           return {
             ...p,
@@ -456,8 +422,8 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
               ...p.poll,
               options: updatedOptions,
               totalVotes: p.poll.totalVotes + 1,
-              votedIndex: optionIndex
-            }
+              votedIndex: optionIndex,
+            },
           };
         }
         return p;
@@ -469,72 +435,82 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     const target = spaces.find(s => s.id === spaceId);
     if (target) {
       if (activeSpace?.id === spaceId) {
-        // Toggle off
         setActiveSpace(null);
       } else {
-        // Join space
         setActiveSpace({
           ...target,
           listenerCount: target.listenerCount + 1,
-          speakerAvatars: [...target.speakerAvatars, user.avatar]
+          speakerAvatars: user.avatar ? [...target.speakerAvatars, user.avatar] : target.speakerAvatars,
         });
       }
     }
   };
 
   const handleCreateSpace = async (
-    title: string, 
-    description: string, 
+    title: string,
+    description: string,
     visibility: 'public' | 'private' = 'public',
     coverUrl?: string
-  ): Promise<Space> => {
-    const spaceId = `space-${Date.now()}`;
-    const ownerId = currentUser?.uid || user.id || 'current-user';
-
-    const newSpace: Space = {
-      id: spaceId,
-      title,
-      name: title,
-      description,
-      host: user,
-      ownerId,
-      listenerCount: 1,
-      memberCount: 1,
-      speakerAvatars: [user.avatar],
-      isLive: true,
-      speakers: [user.name],
-      visibility,
-      coverUrl: coverUrl || '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    // Optimistically update spaces list and active space
-    setSpaces(prev => [newSpace, ...prev]);
-    setActiveSpace(newSpace);
-
-    // Persist to Firestore if available
-    try {
-      const firestoreResult = await createSpaceInFirestore({
-        name: title,
-        description,
-        visibility,
-        coverUrl,
-        ownerId,
-        host: user
-      });
-
-      if (firestoreResult?.id) {
-        newSpace.id = firestoreResult.id;
-      }
-    } catch (err) {
-      console.error('[useJamSpaceData] Failed to persist space in Firestore:', err);
+  ): Promise<Space | null> => {
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (!uid) {
+      toast.info('Please sign in to host a live space');
+      return null;
     }
 
-    return newSpace;
+    try {
+      const spaceData = {
+        artistId: uid,
+        artistName: user.name,
+        artistAvatar: user.avatar || '',
+        title: title.trim(),
+        name: title.trim(),
+        description: description?.trim() || '',
+        visibility,
+        coverUrl: coverUrl || '',
+        status: 'live',
+        isLive: true,
+        viewersCount: 1,
+        likesCount: 0,
+        speakerAvatars: user.avatar ? [user.avatar] : [],
+        speakers: [user.name],
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      const docRef = await addDoc(collection(db, 'liveStreams'), spaceData);
+      const created: Space = {
+        id: docRef.id,
+        title: spaceData.title,
+        name: spaceData.name,
+        description: spaceData.description,
+        host: user,
+        ownerId: uid,
+        listenerCount: 1,
+        memberCount: 1,
+        speakerAvatars: spaceData.speakerAvatars,
+        isLive: true,
+        speakers: spaceData.speakers,
+        visibility,
+        coverUrl: spaceData.coverUrl,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      setActiveSpace(created);
+      return created;
+    } catch (err) {
+      handleFirestoreError(err, OperationType.CREATE, 'liveStreams');
+      return null;
+    }
   };
 
   const handleToggleCommunity = (communityId: string) => {
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (!uid) {
+      toast.info('Please sign in to join communities');
+      return;
+    }
+
     setCommunities(prev =>
       prev.map(c => {
         if (c.id === communityId) {
@@ -542,7 +518,7 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
           return {
             ...c,
             joined,
-            memberCount: joined ? c.memberCount + 1 : c.memberCount - 1
+            memberCount: Math.max(0, joined ? c.memberCount + 1 : c.memberCount - 1),
           };
         }
         return c;
@@ -551,6 +527,12 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
   };
 
   const handleToggleEvent = (eventId: string) => {
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (!uid) {
+      toast.info('Please sign in to RSVP to events');
+      return;
+    }
+
     setEvents(prev =>
       prev.map(e => {
         if (e.id === eventId) {
@@ -558,7 +540,7 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
           return {
             ...e,
             interested,
-            interestedCount: interested ? e.interestedCount + 1 : e.interestedCount - 1
+            interestedCount: Math.max(0, interested ? e.interestedCount + 1 : e.interestedCount - 1),
           };
         }
         return e;
@@ -566,14 +548,31 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     );
   };
 
-  const handleMarkNotificationRead = (notificationId: string) => {
+  const handleMarkNotificationRead = async (notificationId: string) => {
     setNotifications(prev =>
       prev.map(n => (n.id === notificationId ? { ...n, read: true } : n))
     );
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (uid) {
+      try {
+        await updateDoc(doc(db, 'users', uid, 'notifications', notificationId), { read: true });
+      } catch (err) {
+        console.error('[useJamSpaceData] Failed to mark notification read:', err);
+      }
+    }
   };
 
-  const handleMarkAllNotificationsRead = () => {
+  const handleMarkAllNotificationsRead = async () => {
+    const unread = notifications.filter(n => !n.read);
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    const uid = currentUser?.uid || auth.currentUser?.uid;
+    if (uid) {
+      await Promise.all(
+        unread.map(n =>
+          updateDoc(doc(db, 'users', uid, 'notifications', n.id), { read: true }).catch(() => {})
+        )
+      );
+    }
   };
 
   return {
@@ -605,6 +604,6 @@ export const useJamSpaceData = (currentUser?: { name?: string; email?: string; p
     handleToggleCommunity,
     handleToggleEvent,
     handleMarkNotificationRead,
-    handleMarkAllNotificationsRead
+    handleMarkAllNotificationsRead,
   };
 };

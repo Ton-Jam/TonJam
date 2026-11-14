@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { UserPlus, UserCheck } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getPlaceholderImage } from '@/lib/utils';
 import { ArtistVerificationBadge } from '@/components/ArtistVerificationBadge';
 
 interface ArtistHeaderProps {
@@ -39,7 +39,7 @@ export const ArtistHeader: React.FC<ArtistHeaderProps> = ({
       <div className="flex items-center gap-3.5 min-w-0">
         <div className="relative shrink-0">
           <img
-            src={avatarUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200'}
+            src={avatarUrl || getPlaceholderImage('artist')}
             alt={name}
             className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover ring-2 ring-blue-500/40 shadow-md bg-slate-900"
             referrerPolicy="no-referrer"

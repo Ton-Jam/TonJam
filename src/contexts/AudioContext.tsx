@@ -28,15 +28,9 @@ import {
   NFTFolder,
 } from "@/types";
 import {
-  MOCK_PLAYLISTS,
-  MOCK_USER,
-  MOCK_TRACKS,
-  MOCK_NFTS,
-  MOCK_ARTISTS,
-  MOCK_POSTS,
-  CURATED_PLAYLISTS,
   JAM_JETTON_MASTER,
 } from "@/constants";
+import { GUEST_USER_PROFILE } from "@/lib/resetMockCache";
 import * as tonService from "@/services/tonService";
 import * as royaltyService from "@/services/royaltyService";
 import { audioCacheService } from "@/services/audioCacheService";
@@ -797,25 +791,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     PlaylistFolder[]
   >([]);
 
-  const [playlists, setPlaylists] = useState<Playlist[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PLAYLISTS);
-    return saved ? JSON.parse(saved) : MOCK_PLAYLISTS;
-  });
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
   const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.RECENTLY_PLAYED);
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.RECENTLY_PLAYED);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
-  const [transactions, setTransactions] = useState<Transaction[]>(() => {
-    const saved = localStorage.getItem("tonjam_transactions");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const [posts, setPosts] = useState<Post[]>(() => {
-    const saved = localStorage.getItem("tonjam_posts");
-    return saved ? JSON.parse(saved) : MOCK_POSTS;
-  });
+  const [posts, setPosts] = useState<Post[]>([]);
   const [sponsoredPosts, setSponsoredPosts] = useState<SponsoredContent[]>([]);
 
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -1239,16 +1228,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     let unsubs: (() => void)[] = [];
     let isMounted = true;
 
-    // Add a mapping for user bids from MOCK data or local storage
     const savedBids = localStorage.getItem("tonjam_user_bids");
     if (savedBids) {
-      setUserBids(JSON.parse(savedBids));
+      try {
+        setUserBids(JSON.parse(savedBids));
+      } catch {
+        setUserBids([]);
+      }
     } else {
-      // Mock some initial bids for demonstration
-      const initialBids = MOCK_NFTS.filter(
-        (n) => n.listingType === "auction",
-      ).slice(0, 2);
-      setUserBids(initialBids);
+      setUserBids([]);
     }
 
     // Load initial track metadata from IndexedDB to ensure robust offline startup
@@ -1331,11 +1319,35 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           handleFirestoreError(error, OperationType.LIST, "sponsoredContent"),
       );
 
+      const usersUnsubscribe = onSnapshot(
+        query(collection(db, "users"), where("isVerifiedArtist", "==", true)),
+        (snapshot) => {
+          const users = snapshot.docs.map(
+            (docSnap) => ({ uid: docSnap.id, ...docSnap.data() }) as UserProfile,
+          );
+          setFirestoreUsers(users);
+        },
+        (error) => handleFirestoreError(error, OperationType.LIST, "users"),
+      );
+
+      const collectionsUnsubscribe = onSnapshot(
+        collection(db, "collections"),
+        (snapshot) => {
+          const cols = snapshot.docs.map(
+            (docSnap) => ({ id: docSnap.id, ...docSnap.data() }) as Collection,
+          );
+          setCollections(cols);
+        },
+        (error) => handleFirestoreError(error, OperationType.LIST, "collections"),
+      );
+
       unsubs = [
         tracksUnsubscribe,
         nftsUnsubscribe,
         postsUnsubscribe,
         sponsoredUnsubscribe,
+        usersUnsubscribe,
+        collectionsUnsubscribe,
       ];
     }, 150);
 
@@ -1364,16 +1376,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (user) {
         // 1. Start protected collection listeners
-        usersUnsubscribe = onSnapshot(
-          query(collection(db, "users"), where("isVerifiedArtist", "==", true)),
-          (snapshot) => {
-            const users = snapshot.docs.map(
-              (doc) => ({ uid: doc.id, ...doc.data() }) as UserProfile,
-            );
-            setFirestoreUsers(users);
-          },
-          (error) => handleFirestoreError(error, OperationType.LIST, "users"),
-        );
 
         playlistFoldersUnsubscribe = onSnapshot(
           query(
@@ -1437,9 +1439,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
             if (!userSnap.exists()) {
               // Profile doesn't exist, create it
               const newProfile: UserProfile = {
-                ...MOCK_USER,
+                ...GUEST_USER_PROFILE,
                 uid: user.uid,
-                name: user.displayName || "Anonymous",
+                name: user.displayName || "Listener",
                 avatar:
                   user.photoURL ||
                   getPlaceholderImage(`user-${user.uid}`, 200, 200),
@@ -1451,7 +1453,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
                 earnings: 0,
                 streamingEarnings: 0,
                 nftEarnings: 0,
-                jamBalance: 100, // Welcome bonus
+                jamBalance: 0,
+                tjBalance: 0,
+                tonBalance: 0,
                 stakedJam: 0,
                 pendingJamRewards: 0,
                 likedTrackIds: [],
@@ -1497,9 +1501,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         };
         await fetchUserProfile();
       } else {
-        setFirestoreUsers([]);
         setFirestoreTransactions([]);
-        setUserProfile(MOCK_USER);
+        setUserProfile(GUEST_USER_PROFILE);
         if (usersUnsubscribe) usersUnsubscribe();
         if (transactionsUnsubscribe) transactionsUnsubscribe();
         if (userDocUnsubscribe) userDocUnsubscribe();
@@ -1534,85 +1537,59 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
-  // Update local state when firestore data changes
+  // Update local state directly from live Firestore data
   useEffect(() => {
-    if (firestorePlaylists.length > 0) {
-      setPlaylists(firestorePlaylists);
-    }
+    setPlaylists(firestorePlaylists);
   }, [firestorePlaylists]);
 
   useEffect(() => {
-    if (firestorePlaylistFolders.length > 0) {
-      setPlaylistFolders(firestorePlaylistFolders);
-    }
+    setPlaylistFolders(firestorePlaylistFolders);
   }, [firestorePlaylistFolders]);
 
   useEffect(() => {
-    if (firestoreTransactions.length > 0) {
-      setTransactions(firestoreTransactions);
-    }
+    setTransactions(firestoreTransactions);
   }, [firestoreTransactions]);
 
   useEffect(() => {
-    if (firestorePosts.length > 0) {
-      setPosts((prevPosts) => {
-        const mergedPosts = [...firestorePosts];
-        prevPosts.forEach((post) => {
-          // Keep posts that were added locally but are not yet in firestorePosts
-          if (!mergedPosts.find((p) => p.id === post.id)) {
-            mergedPosts.unshift(post);
-          }
-        });
-        return mergedPosts.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
-      });
-    }
+    const sorted = [...firestorePosts].sort(
+      (a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()
+    );
+    setPosts(sorted);
   }, [firestorePosts]);
 
   useEffect(() => {
-    if (firestoreUsers.length > 0) {
-      // Sync artists with firestoreUsers who are verified artists
-      const firestoreArtists = firestoreUsers
-        .filter((u) => u.isVerifiedArtist)
-        .map(
-          (u) =>
-            ({
-              uid: u.uid,
-              name: u.name,
-              walletAddress: u.walletAddress,
-              avatarUrl: u.avatar,
-              followers: u.followers || 0,
-              verified: u.isVerifiedArtist || u.isVerified || false,
-              isVerifiedArtist: u.isVerifiedArtist || false,
-              verificationStatus:
-                u.verificationStatus ||
-                (u.isVerifiedArtist || u.isVerified
-                  ? "verified"
-                  : "unverified"),
-              bio: u.bio,
-              bannerUrl: u.bannerUrl,
-              socials: u.socials,
-              royaltyConfig: (u as any).royaltyConfig,
-              earnings: {
-                streaming: Number((u as any).streamingEarnings || 0),
-                nftSales: Number((u as any).nftEarnings || 0),
-                total: Number((u as any).earnings || 0),
-              },
-            }) as Artist,
-        );
+    const firestoreArtists = firestoreUsers
+      .filter((u) => u.isVerifiedArtist)
+      .map(
+        (u) =>
+          ({
+            uid: u.uid,
+            name: u.name,
+            walletAddress: u.walletAddress,
+            avatarUrl: u.avatar,
+            followers: u.followers || 0,
+            verified: u.isVerifiedArtist || u.isVerified || false,
+            isVerifiedArtist: u.isVerifiedArtist || false,
+            verificationStatus:
+              u.verificationStatus ||
+              (u.isVerifiedArtist || u.isVerified ? "verified" : "unverified"),
+            bio: u.bio,
+            bannerUrl: u.bannerUrl,
+            socials: u.socials,
+            royaltyConfig: (u as any).royaltyConfig,
+            earnings: {
+              streaming: Number((u as any).streamingEarnings || 0),
+              nftSales: Number((u as any).nftEarnings || 0),
+              total: Number((u as any).earnings || 0),
+            },
+          }) as Artist,
+      );
 
-      if (firestoreArtists.length > 0) {
-        setArtists(firestoreArtists);
-      }
-    }
+    setArtists(firestoreArtists);
   }, [firestoreUsers]);
 
   const allTracks = React.useMemo(() => {
-    const combined = [...MOCK_TRACKS, ...firestoreTracks];
-    // De-duplicate by ID, later entries (Firestore) overwrite earlier ones (Mock)
-    const unique = Array.from(new Map(combined.map((t) => [t.id, t])).values());
-    return unique;
+    return firestoreTracks;
   }, [firestoreTracks]);
 
   const featuredPlaylist = useMemo(() => {
@@ -1628,7 +1605,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       )
       .slice(0, 6);
 
-    // Combine and de-duplicate, ensuring variety of artists
     const combined = [...popular, ...newest];
     const uniqueTrackIds = new Set<string>();
     const artistCount = new Map<string, number>();
@@ -1639,7 +1615,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!uniqueTrackIds.has(track.id)) {
         const count = artistCount.get(track.artist) || 0;
         if (count < 2) {
-          // Max 2 tracks per artist in featured
           featuredTracks.push(track.id);
           uniqueTrackIds.add(track.id);
           artistCount.set(track.artist, count + 1);
@@ -1650,18 +1625,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     return {
       id: "featured-tracks",
       title: "Featured Tracks",
-      coverUrl:
-        "https://image.pollinations.ai/prompt/playlist%20cover%20Featured%20Tracks%20dynamic%20music%20vibrant?width=600&height=600&nologo=true",
+      coverUrl: "/placeholders/playlist-placeholder.webp",
       trackCount: featuredTracks.length,
-      creator: "TonJam AI",
+      creator: "TonJam",
       description:
-        "Dynamically updated with popular hits and fresh releases from across the TON ecosystem.",
+        "Dynamically updated with popular tracks and fresh releases on TonJam.",
       trackIds: featuredTracks,
     };
   }, [allTracks]);
 
   const allPlaylists = useMemo(() => {
-    return [featuredPlaylist, ...CURATED_PLAYLISTS, ...playlists];
+    return featuredPlaylist.trackIds.length > 0
+      ? [featuredPlaylist, ...playlists]
+      : [...playlists];
   }, [playlists, featuredPlaylist]);
 
   const discoverWeekly = useMemo(
@@ -1673,10 +1649,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const allNFTs = React.useMemo(() => {
-    const combined = [...MOCK_NFTS, ...firestoreNFTs];
-    // De-duplicate by ID, later entries (Firestore) overwrite earlier ones (Mock)
-    const unique = Array.from(new Map(combined.map((n) => [n.id, n])).values());
-    return unique;
+    return firestoreNFTs;
   }, [firestoreNFTs]);
 
   const getTrendingTracks = useCallback(() => {
@@ -2531,19 +2504,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const handleStreamError = (e: any) => {
       console.warn("Audio connection blocked or failed:", e);
-      // Auto-recover if the audio failed to load because source was invalid, empty, or 403
-      if (audio && (!audio.src || audio.src.includes("codeskulptor") || !audio.src.includes("tonjam-offline-audio"))) {
-        console.info("[Audio] Attempting auto-recovery with local offline audio source...");
-        try {
-          audio.removeAttribute("crossorigin");
-          audio.src = "/tonjam-offline-audio.mp3";
-          audio.load();
-          audio.play().catch(() => {});
-          return;
-        } catch (recoverErr) {
-          console.warn("[Audio] Recovery attempt failed:", recoverErr);
-        }
-      }
       setAudioConnectionState("error");
       setIsLoading(false);
     };
@@ -2640,14 +2600,17 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       userId: auth.currentUser?.uid,
       participants,
       timestamp: new Date().toISOString(),
-      status: "completed",
-      txHash: `0x${Math.random().toString(16).substr(2, 40)}`,
+      status: "pending",
     };
 
     try {
       const cleanTx = cleanObject(newTx);
       if (auth.currentUser) {
-        await setDoc(doc(db, "transactions", txId), cleanTx);
+        try {
+          await setDoc(doc(db, "transactions", txId), cleanTx);
+        } catch (err) {
+          handleFirestoreError(err, OperationType.CREATE, `transactions/${txId}`);
+        }
       }
       setTransactions((prev) => [newTx, ...prev]);
 
@@ -2715,8 +2678,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      // Simulate a deposit transaction
-      // In a real app, this would call a smart contract to deposit TON
       const success = await tonService.depositTON(tonConnectUI, amount);
 
       if (success) {
@@ -2727,7 +2688,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           artistShare: 0,
           recipientAddress: "PLATFORM_WALLET",
           senderAddress: userProfile.walletAddress,
-          txHash: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         });
 
         setUserProfile((prev) => ({
@@ -2759,30 +2719,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      // Simulate a withdrawal transaction
-      // In a real app, this would call a backend service to send TON from the platform wallet to the user
-      // We'll simulate success here
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const success = true;
-
-      if (success) {
-        recordTransaction({
-          type: "withdrawal",
-          amount: Number(amount),
-          platformFee: 0,
-          artistShare: 0,
-          recipientAddress: address,
-          senderAddress: "PLATFORM_WALLET",
-          txHash: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        });
-
-        setUserProfile((prev) => ({
-          ...prev,
-          tonBalance: Math.max(0, (prev.tonBalance || 0) - Number(amount)),
-        }));
-
-        addNotification(`Successfully withdrew ${amount} TON`, "success");
-      }
+      addNotification("On-chain TON withdrawal requires backend treasury settlement", "error");
     } catch (error) {
       console.error("Withdrawal error:", error);
       addNotification("Failed to withdraw TON", "error");
@@ -3296,9 +3233,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         platformFee: 0,
         artistShare: 0.9, // 90% goes to artist
         recipientAddress:
-          MOCK_TRACKS.find((t) => t.id === trackId)?.artistId || "ARTIST",
+          allTracks.find((t) => t.id === trackId)?.artistId || "ARTIST",
         senderAddress: userProfile.walletAddress,
-        trackTitle: `Jammed Track: ${MOCK_TRACKS.find((t) => t.id === trackId)?.title}`,
+        trackTitle: `Jammed Track: ${allTracks.find((t) => t.id === trackId)?.title || trackId}`,
       });
     } finally {
       setIsLoading(false);
@@ -3393,9 +3330,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const joinJamRoom = (roomId: string) => {
     const room = {
       id: roomId,
-      name: roomId === "genesis" ? "Genesis Node" : "Cyber Drift Room",
-      listeners: Math.floor(Math.random() * 50) + 10,
-      currentTrack: MOCK_TRACKS[Math.floor(Math.random() * MOCK_TRACKS.length)],
+      name: roomId === "genesis" ? "Genesis Node" : "Jam Room",
+      listeners: 1,
+      currentTrack: currentTrack || allTracks[0] || null,
     };
     setActiveJamRoom(room);
     addNotification(`Joined Jam Room: ${room.name}`, "success");
@@ -3494,11 +3431,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         playCount: increment(1),
       }).catch(console.warn);
 
-      let sourceUrl = track.audioUrl || "/tonjam-offline-audio.mp3";
-
-      if (sourceUrl.includes("tonjam.io") || sourceUrl.includes("codeskulptor") || sourceUrl.includes("bgm_gui.mp3")) {
-        sourceUrl = "/tonjam-offline-audio.mp3";
-      }
+      let sourceUrl = track.audioUrl || "";
 
       // 1. Direct handling for Local device tracks and Blob/Data URLs
       if (track.isLocal || sourceUrl.startsWith("blob:") || sourceUrl.startsWith("data:")) {
@@ -3519,11 +3452,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
             sourceUrl = URL.createObjectURL(localBlob);
             addNotification("Playing local device audio", "info");
           } else {
-            sourceUrl = "/tonjam-offline-audio.mp3";
-            addNotification("Offline: Playing offline audio", "info");
+            setAudioConnectionState("error");
+            setIsPlaying(false);
+            addNotification("Audio unavailable offline", "error");
+            return;
           }
         }
-      } else {
+      } else if (sourceUrl) {
         // Cache if not already cached
         const isCached = await audioCacheService.isTrackCached(track.id);
         if (!isCached) {
@@ -3555,16 +3490,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsHighFidelity(highFidelity);
       setExclusiveContent(exclusive);
 
+      if (!sourceUrl) {
+        setAudioConnectionState("error");
+        setIsPlaying(false);
+        addNotification("Track audio URL is unavailable", "error");
+        return;
+      }
+
       try {
         const fallbacks = [
-          // Fallback 1: Source URL without crossOrigin
           { url: sourceUrl, crossOrigin: false },
-          // Fallback 2: Guaranteed local offline MP3 (packaged in public)
-          { url: "/tonjam-offline-audio.mp3", crossOrigin: false },
-          // Fallback 3: Guaranteed local offline WAV
-          { url: "/tonjam-offline-audio.wav", crossOrigin: false },
-          // Fallback 4: Silent data URI failsafe backup
-          { url: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=", crossOrigin: false }
         ];
 
         let fallbackIndex = 0;
@@ -3700,17 +3635,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         const currentSrc = audioRef.current.src;
-        if (!currentSrc || currentSrc === "" || currentSrc === window.location.href || currentSrc === window.location.origin || currentSrc.endsWith("/") || currentSrc.includes("tonjam.io") || currentSrc.includes("codeskulptor") || currentSrc.includes("bgm_gui.mp3")) {
-          let trackSourceUrl = currentTrack.audioUrl || "/tonjam-offline-audio.mp3";
-          if (!trackSourceUrl || trackSourceUrl.includes("tonjam.io") || trackSourceUrl.includes("codeskulptor") || trackSourceUrl.includes("bgm_gui.mp3")) {
-            trackSourceUrl = "/tonjam-offline-audio.mp3";
-          }
+        if (!currentSrc || currentSrc === "" || currentSrc === window.location.href || currentSrc === window.location.origin || currentSrc.endsWith("/")) {
+          let trackSourceUrl = currentTrack.audioUrl || "";
           
           if (isOffline) {
             const cachedUrl = await audioCacheService.getCachedTrack(currentTrack.id);
             if (cachedUrl) {
               trackSourceUrl = cachedUrl;
             }
+          }
+
+          if (!trackSourceUrl) {
+            setAudioConnectionState("error");
+            addNotification("Track audio source is unavailable", "error");
+            return;
           }
           
           // Always try playing without crossOrigin first for stable and seamless playback of external audio assets
@@ -3726,24 +3664,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
               error.name !== "AbortError" &&
               !error.message?.includes("interrupted")
             ) {
-              console.warn("[Audio] Playback issue during toggle play, recovering:", error);
-              /* If it failed because of source issues, try to reload with fallbacks */
-              if (currentTrack) {
-                console.warn("[Audio] Attempting recovery during toggle...");
-                
-                let trackSourceUrl = currentTrack.audioUrl || "/tonjam-offline-audio.mp3";
-                if (!trackSourceUrl || trackSourceUrl.includes("tonjam.io") || trackSourceUrl.includes("codeskulptor") || trackSourceUrl.includes("bgm_gui.mp3")) {
-                  trackSourceUrl = "/tonjam-offline-audio.mp3";
-                }
-
+              console.warn("[Audio] Playback issue during toggle play:", error);
+              if (currentTrack && currentTrack.audioUrl) {
                 const toggleFallbacks = [
-                  { url: trackSourceUrl, crossOrigin: false },
-                  { url: "/tonjam-offline-audio.mp3", crossOrigin: false },
-                  { url: "/tonjam-offline-audio.wav", crossOrigin: false },
-                  { url: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=", crossOrigin: false }
+                  { url: currentTrack.audioUrl, crossOrigin: false },
                 ];
 
-                // Since we start by trying trackSourceUrl, if that fails, the next try should be index 1
                 let tFallbackIndex = 1;
 
                 const playToggleFallback = (url: string, useCrossOrigin: boolean) => {
@@ -3783,7 +3709,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
                   }
                 };
 
-                playToggleFallback(trackSourceUrl, false);
+                playToggleFallback(currentTrack.audioUrl, false);
               }
             }
           });
@@ -4086,7 +4012,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const [artists, setArtists] = useState<Artist[]>(MOCK_ARTISTS);
+  const [artists, setArtists] = useState<Artist[]>([]);
 
   const toggleFollowUser = async (userId: string) => {
     if (!userId) {
@@ -5235,17 +5161,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-const FALLBACK_USER_PROFILE = {
-  uid: "anonymous",
-  name: "TONJam Explorer",
-  username: "explorer",
-  role: "collector",
-  avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=explorer",
-  followers: 0,
-  following: 0,
-  bio: "Creating the future of sound.",
-  createdAt: "2026-01-01T00:00:00.000Z"
-};
+const FALLBACK_USER_PROFILE = GUEST_USER_PROFILE;
 const FALLBACK_ARRAY: any[] = [];
 const FALLBACK_NOOP = () => {};
 

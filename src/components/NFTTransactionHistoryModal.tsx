@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { NFTItem, NFTHistory } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import { TON_LOGO } from '@/constants';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 
 interface NFTTransactionHistoryModalProps {
   nft: NFTItem;
@@ -13,59 +15,57 @@ interface NFTTransactionHistoryModalProps {
 
 export const NFTTransactionHistoryModal: React.FC<NFTTransactionHistoryModalProps> = ({ nft, isOpen, onClose }) => {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
-  const [simulatedHistory, setSimulatedHistory] = useState<NFTHistory[]>([]);
+  const [historyItems, setHistoryItems] = useState<NFTHistory[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+    let isMounted = true;
+
+    const loadHistory = async () => {
       if (nft.history && nft.history.length > 0) {
-        setSimulatedHistory(nft.history);
-      } else {
-        // Generate robust mock transaction history specifically for TON blockchain
-        const artistName = nft.artist || nft.creator || 'Creator';
-        const mintDate = new Date(nft.createdAt || Date.now() - 45 * 24 * 60 * 60 * 1000);
-        const listDate = new Date(mintDate.getTime() + 5 * 24 * 60 * 60 * 1000);
-        const saleDate = new Date(listDate.getTime() + 12 * 24 * 60 * 60 * 1000);
-        const transferDate = new Date(saleDate.getTime() + 18 * 24 * 60 * 60 * 1000);
-
-        const mockEvents: NFTHistory[] = [
-          {
-            event: 'Minted',
-            from: 'Vault',
-            to: nft.artistId || 'EQB-artist-addr-tonjam-verifier-node',
-            date: mintDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            price: undefined
-          },
-          {
-            event: 'Listed',
-            from: nft.artistId || 'EQB-artist-addr-tonjam-verifier-node',
-            to: 'TonJam Marketplace Contract',
-            date: listDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            price: nft.price || '5.5'
-          },
-          {
-            event: 'Sold',
-            from: 'TonJam Marketplace Contract',
-            to: nft.owner || 'EQA-buyer-collector-addr-secondary-sales',
-            date: saleDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            price: nft.price || '5.5'
-          }
-        ];
-
-        // Add a recent transfer if owner is not the marketplace or creator
-        if (nft.owner && nft.owner !== nft.artistId) {
-          mockEvents.push({
-            event: 'Transfer',
-            from: 'EQA-buyer-collector-addr-secondary-sales',
-            to: nft.owner,
-            date: transferDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            price: undefined
-          });
-        }
-
-        // Sort descending by date
-        setSimulatedHistory(mockEvents.reverse());
+        if (isMounted) setHistoryItems(nft.history);
+        return;
       }
-    }
+
+      setLoading(true);
+      try {
+        const salesQuery = query(collection(db, 'nftSales'), where('nftId', '==', nft.id));
+        const snap = await getDocs(salesQuery);
+        if (!isMounted) return;
+
+        const mapped: NFTHistory[] = snap.docs
+          .map((d) => {
+            const data = d.data() as Record<string, any>;
+            const ts = data.timestamp || data.createdAt || Date.now();
+            return {
+              event: data.type || 'Sold',
+              from: data.seller || data.from || 'Creator',
+              to: data.buyer || data.to || nft.owner || 'Collector',
+              date: new Date(typeof ts === 'number' ? ts : Date.now()).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              }),
+              price: data.price ? String(data.price) : undefined,
+              _ts: typeof ts === 'number' ? ts : 0
+            };
+          })
+          .sort((a, b) => b._ts - a._ts)
+          .map(({ _ts, ...rest }) => rest);
+
+        setHistoryItems(mapped);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.LIST, 'nftSales');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadHistory();
+    return () => {
+      isMounted = false;
+    };
   }, [isOpen, nft]);
 
   const handleCopy = (text: string, id: string) => {
@@ -135,78 +135,90 @@ export const NFTTransactionHistoryModal: React.FC<NFTTransactionHistoryModalProp
 
           {/* Ledger History List Section */}
           <div className="flex-1 overflow-y-auto pr-1 space-y-4 max-h-[40vh] no-scrollbar">
-            {simulatedHistory.map((item, index) => {
-              const eventId = `event-${index}`;
-              const isMint = item.event.toLowerCase() === 'minted';
-              const isTransfer = item.event.toLowerCase() === 'transfer';
-              const isSold = item.event.toLowerCase() === 'sold';
-              const isListed = item.event.toLowerCase() === 'listed';
+            {loading ? (
+              <div className="py-10 text-center text-xs text-zinc-400">
+                Loading on-chain ledger history...
+              </div>
+            ) : historyItems.length === 0 ? (
+              <div className="py-10 text-center space-y-1">
+                <p className="text-xs font-bold text-zinc-300">No recorded ledger events yet</p>
+                <p className="text-[11px] text-zinc-500">Sales and transfers for this NFT will appear here once recorded.</p>
+              </div>
+            ) : (
+              historyItems.map((item, index) => {
+                const eventId = `event-${index}`;
+                const isMint = item.event.toLowerCase() === 'minted';
+                const isTransfer = item.event.toLowerCase() === 'transfer';
+                const isSold = item.event.toLowerCase() === 'sold';
 
-              return (
-                <div key={index} className="bg-white/[0.015] p-4 rounded-2xl flex items-start gap-4 transition-all hover:bg-white/[0.03]">
-                  {/* Event Indicator Icon */}
-                  <div className={`p-2 rounded-xl flex-shrink-0 mt-0.5 ${
-                    isMint ? 'bg-blue-500/10 text-blue-400' :
-                    isTransfer ? 'bg-purple-500/10 text-purple-400' :
-                    isSold ? 'bg-emerald-500/10 text-emerald-400' :
-                    'bg-amber-500/10 text-amber-400'
-                  }`}>
-                    {isMint ? <Wand2 className="h-4.5 w-4.5" /> :
-                     isTransfer ? <ArrowRightLeft className="h-4.5 w-4.5" /> :
-                     isSold ? <Handshake className="h-4.5 w-4.5" /> :
-                     <Wallet className="h-4.5 w-4.5" />}
-                  </div>
-
-                  {/* Transaction info block */}
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-200">{item.event}</span>
-                      <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">{item.date}</span>
+                return (
+                  <div key={index} className="bg-white/[0.015] p-4 rounded-2xl flex items-start gap-4 transition-all hover:bg-white/[0.03]">
+                    {/* Event Indicator Icon */}
+                    <div className={`p-2 rounded-xl flex-shrink-0 mt-0.5 ${
+                      isMint ? 'bg-blue-500/10 text-blue-400' :
+                      isTransfer ? 'bg-purple-500/10 text-purple-400' :
+                      isSold ? 'bg-emerald-500/10 text-emerald-400' :
+                      'bg-amber-500/10 text-amber-400'
+                    }`}>
+                      {isMint ? <Wand2 className="h-4.5 w-4.5" /> :
+                       isTransfer ? <ArrowRightLeft className="h-4.5 w-4.5" /> :
+                       isSold ? <Handshake className="h-4.5 w-4.5" /> :
+                       <Wallet className="h-4.5 w-4.5" />}
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-[8.5px] font-mono text-zinc-500">
-                      <span>From:</span>
-                      <button 
-                        onClick={() => handleCopy(item.from, `${eventId}-from`)}
-                        className="text-zinc-400 hover:text-blue-400 font-medium cursor-pointer flex items-center gap-1"
-                      >
-                        {item.from === 'Vault' ? 'GENESIS' : `${item.from.slice(0, 6)}...${item.from.slice(-4)}`}
-                        {copiedAddress === `${eventId}-from` ? <Check className="h-2 w-2 text-emerald-400" /> : <Copy className="h-2 w-2 opacity-50" />}
-                      </button>
-                      <span className="opacity-50">→</span>
-                      <span>To:</span>
-                      <button 
-                        onClick={() => handleCopy(item.to, `${eventId}-to`)}
-                        className="text-zinc-400 hover:text-blue-400 font-medium cursor-pointer flex items-center gap-1"
-                      >
-                        {item.to.length > 15 ? `${item.to.slice(0, 6)}...${item.to.slice(-4)}` : item.to}
-                        {copiedAddress === `${eventId}-to` ? <Check className="h-2 w-2 text-emerald-400" /> : <Copy className="h-2 w-2 opacity-50" />}
-                      </button>
-                    </div>
-
-                    {item.price && (
-                      <div className="flex items-center gap-1">
-                        <img src={TON_LOGO} className="w-2.5 h-2.5" alt="TON" />
-                        <span className="text-[10px] font-black text-zinc-300">{item.price} TON</span>
+                    {/* Transaction info block */}
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-200">{item.event}</span>
+                        <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">{item.date}</span>
                       </div>
-                    )}
+
+                      <div className="flex items-center gap-1.5 text-[8.5px] font-mono text-zinc-500">
+                        <span>From:</span>
+                        <button 
+                          onClick={() => handleCopy(item.from, `${eventId}-from`)}
+                          className="text-zinc-400 hover:text-blue-400 font-medium cursor-pointer flex items-center gap-1"
+                        >
+                          {item.from === 'Vault' ? 'GENESIS' : (item.from.length > 15 ? `${item.from.slice(0, 6)}...${item.from.slice(-4)}` : item.from)}
+                          {copiedAddress === `${eventId}-from` ? <Check className="h-2 w-2 text-emerald-400" /> : <Copy className="h-2 w-2 opacity-50" />}
+                        </button>
+                        <span className="opacity-50">→</span>
+                        <span>To:</span>
+                        <button 
+                          onClick={() => handleCopy(item.to, `${eventId}-to`)}
+                          className="text-zinc-400 hover:text-blue-400 font-medium cursor-pointer flex items-center gap-1"
+                        >
+                          {item.to.length > 15 ? `${item.to.slice(0, 6)}...${item.to.slice(-4)}` : item.to}
+                          {copiedAddress === `${eventId}-to` ? <Check className="h-2 w-2 text-emerald-400" /> : <Copy className="h-2 w-2 opacity-50" />}
+                        </button>
+                      </div>
+
+                      {item.price && (
+                        <div className="flex items-center gap-1">
+                          <img src={TON_LOGO} className="w-2.5 h-2.5" alt="TON" />
+                          <span className="text-[10px] font-black text-zinc-300">{item.price} TON</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
 
           {/* Dynamic Blockchain explorer reference link */}
-          <div className="mt-6 pt-4 text-center">
-            <a
-              href={`https://tonviewer.com/${nft.contractAddress || 'EQ-placeholder-address'}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-blue-400 hover:text-blue-300 transition-all cursor-pointer"
-            >
-              Verify Ledger on TON Viewer <ExternalLink className="h-3 w-3" />
-            </a>
-          </div>
+          {nft.contractAddress && (
+            <div className="mt-6 pt-4 text-center">
+              <a
+                href={`https://tonviewer.com/${nft.contractAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-blue-400 hover:text-blue-300 transition-all cursor-pointer"
+              >
+                Verify Ledger on TON Viewer <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          )}
         </motion.div>
       </div>
     </AnimatePresence>

@@ -11,11 +11,15 @@ interface ArtistSummaryCardProps {
 
 export const ArtistSummaryCard: React.FC<ArtistSummaryCardProps> = ({ artist }) => {
   const data = useMemo(() => {
-    return Array.from({ length: 30 }, (_, i) => ({
-      name: `Day ${i + 1}`,
-      followers: Math.floor((artist.followers || 100) * 0.9 + Math.random() * ((artist.followers || 100) * 0.1)),
-    }));
-  }, [artist.followers]);
+    if (Array.isArray(artist.followerHistory) && artist.followerHistory.length > 0) {
+      return artist.followerHistory;
+    }
+    const count = artist.followers || 0;
+    return [
+      { name: 'Start', followers: count },
+      { name: 'Current', followers: count },
+    ];
+  }, [artist.followers, artist.followerHistory]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -26,7 +30,7 @@ export const ArtistSummaryCard: React.FC<ArtistSummaryCardProps> = ({ artist }) 
           </div>
           <div>
             <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Total Sales</p>
-            <p className="text-2xl font-black text-white">{artist.totalSales || '84.5'} TON</p>
+            <p className="text-2xl font-black text-white">{artist.totalSales || '0'} TON</p>
           </div>
         </CardContent>
       </Card>
@@ -38,7 +42,7 @@ export const ArtistSummaryCard: React.FC<ArtistSummaryCardProps> = ({ artist }) 
           </div>
           <div>
             <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Active Auctions</p>
-            <p className="text-2xl font-black text-white">{artist.activeAuctions || '3'}</p>
+            <p className="text-2xl font-black text-white">{artist.activeAuctions ?? 0}</p>
           </div>
         </CardContent>
       </Card>

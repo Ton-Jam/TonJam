@@ -6,6 +6,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { Play, Shuffle } from 'lucide-react';
 import { Track } from '@/types';
 import { SpotifyTrackRow } from './components/SpotifyTrackRow';
+import { getPlaceholderImage } from '@/lib/utils';
 
 export const RecentlyPlayedTracks: React.FC = () => {
   const { 
@@ -25,7 +26,7 @@ export const RecentlyPlayedTracks: React.FC = () => {
       return recentlyPlayed;
     }
 
-    // Fallback to library data history
+    // Fallback to library data history matching real tracks in store
     if (data.history && data.history.length > 0) {
       return data.history.map((h) => {
         const found = allTracks?.find((t) => t.id === h.trackId);
@@ -35,12 +36,12 @@ export const RecentlyPlayedTracks: React.FC = () => {
           songId: h.trackId,
           title: h.title,
           artist: h.artist,
-          artistId: 'artist-1',
-          coverUrl: h.coverUrl,
-          audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-          duration: h.duration || 180,
-          streams: 12000,
-          playCount: 12000,
+          artistId: '',
+          coverUrl: h.coverUrl || getPlaceholderImage('track'),
+          audioUrl: '',
+          duration: h.duration || 0,
+          streams: 0,
+          playCount: 0,
           album: 'Single',
           genre: 'Music',
           isNFT: false,

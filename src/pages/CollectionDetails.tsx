@@ -1,18 +1,47 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { 
-  Disc, Music, Play, Pause, Share2, Check, Copy, 
-  BadgeCheck, ArrowLeft, Search, AlertCircle
+import {
+  Disc,
+  Music,
+  Play,
+  Pause,
+  Share2,
+  Check,
+  Copy,
+  BadgeCheck,
+  ArrowLeft,
+  Search,
+  AlertCircle,
 } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNFT } from '@/contexts/NFTContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/layout/ToastProvider';
 import { NFTItem, Track } from '@/types';
-import { getCollectionDetails } from '@/services/collectionService';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { TON_LOGO } from '@/constants';
-import { PRIMARY_COLLECTIONS, DetailedCollection } from '@/data/collectionsData';
+
+export interface DetailedCollection {
+  id: string;
+  artistId?: string;
+  name: string;
+  description?: string;
+  coverUrl: string;
+  bannerUrl?: string;
+  nftIds?: string[];
+  createdAt?: string;
+  volume: string;
+  floorPrice: string;
+  ownersCount: number;
+  totalSupply: number;
+  creatorName: string;
+  verified: boolean;
+  contractAddress: string;
+  royaltyFee: string;
+  items: NFTItem[];
+}
 
 export const CollectionDetails: React.FC = () => {
   const { collectionId, id } = useParams<{ collectionId?: string; id?: string }>();
@@ -22,99 +51,113 @@ export const CollectionDetails: React.FC = () => {
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const { nfts: contextNFTs } = useNFT();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [firestoreCollection, setFirestoreCollection] = useState<DetailedCollection | null>(null);
+  const [remoteItems, setRemoteItems] = useState<NFTItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const activeId = collectionId || id || 'genesis-pass';
+  const activeId = collectionId || id || '';
 
-  // Load from Firestore if available, otherwise use built-in collection dataset
   useEffect(() => {
     let isMounted = true;
     const loadCollection = async () => {
-      const targetId = collectionId || id;
-      if (!targetId) return;
+      if (!activeId) {
+        if (isMounted) setIsLoading(false);
+        return;
+      }
 
-      const foundPreset = PRIMARY_COLLECTIONS.find(c => c.id === targetId);
-      if (!foundPreset) {
-        setIsLoading(true);
-        try {
-          const remoteDoc = await getCollectionDetails(targetId);
-          if (remoteDoc && isMounted) {
-            const formatted: DetailedCollection = {
-              ...remoteDoc,
-              volume: '10,000',
-              floorPrice: '10.0',
-              ownersCount: 45,
-              totalSupply: 100,
-              creatorName: remoteDoc.artistId || 'Artist',
-              verified: true,
-              contractAddress: `EQ_${remoteDoc.id}_TON`,
-              royaltyFee: '5.0%',
-              bannerUrl: remoteDoc.coverUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1600',
-              items: []
-            };
-            setFirestoreCollection(formatted);
+      setIsLoading(true);
+      try {
+        const collRef = doc(db, 'collections', activeId);
+        const collSnap = await getDoc(collRef);
+        if (!collSnap.exists()) {
+          if (isMounted) {
+            setFirestoreCollection(null);
+            setRemoteItems([]);
           }
-        } catch (e) {
-          console.warn("Could not fetch remote collection:", e);
-        } finally {
-          if (isMounted) setIsLoading(false);
+          return;
         }
+
+        const data = collSnap.data();
+        const formatted: DetailedCollection = {
+          id: collSnap.id,
+          artistId: data.artistId || data.creatorId || '',
+          name: data.name || 'Untitled Collection',
+          description: data.description || '',
+          coverUrl: data.coverUrl || data.imageUrl || '',
+          bannerUrl: data.bannerUrl || data.coverUrl || data.imageUrl || '',
+          nftIds: Array.isArray(data.nftIds) ? data.nftIds : [],
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : (data.createdAt || ''),
+          volume: String(data.volume || '0'),
+          floorPrice: String(data.floorPrice || '0'),
+          ownersCount: Number(data.ownersCount || data.owners || 0),
+          totalSupply: Number(data.totalSupply || data.totalNFTs || data.itemCount || 0),
+          creatorName: data.creatorName || data.creator || data.artistName || 'Artist',
+          verified: Boolean(data.verified ?? data.creatorVerified ?? false),
+          contractAddress: data.contractAddress || '',
+          royaltyFee: data.royaltyFee ? String(data.royaltyFee) : '5.0%',
+          items: [],
+        };
+
+        // Load NFTs referencing this collectionId from Firestore
+        const nftsSnap = await getDocs(
+          query(collection(db, 'nfts'), where('collectionId', '==', activeId))
+        );
+        const loadedItems: NFTItem[] = nftsSnap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as any),
+        }));
+
+        if (isMounted) {
+          setFirestoreCollection(formatted);
+          setRemoteItems(loadedItems);
+        }
+      } catch (error) {
+        handleFirestoreError(error, OperationType.GET, `collections/${activeId}`);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
 
     loadCollection();
-    return () => { isMounted = false; };
-  }, [collectionId, id]);
+    return () => {
+      isMounted = false;
+    };
+  }, [activeId]);
 
-  // Find active collection
-  const activeCollection: DetailedCollection | null = useMemo(() => {
-    if (firestoreCollection && firestoreCollection.id === activeId) {
-      return firestoreCollection;
-    }
-    const match = PRIMARY_COLLECTIONS.find(c => c.id === activeId);
-    if (match) return match;
+  const activeCollection = firestoreCollection;
 
-    // Fallback: match by partial name
-    const fallbackMatch = PRIMARY_COLLECTIONS.find(c => c.name.toLowerCase().includes(activeId.toLowerCase()));
-    if (fallbackMatch) return fallbackMatch;
-
-    return null;
-  }, [activeId, firestoreCollection]);
-
-  // Collect all NFT tracks belonging to this collection
   const collectionTracks = useMemo(() => {
     if (!activeCollection) return [];
 
-    let items = [...(activeCollection.items || [])];
+    let items = [...remoteItems];
 
-    // Include any NFTs in NFTContext or user collection that match
-    const matchingContextNFTs = contextNFTs.filter(nft => 
-      (nft as any).collectionId === activeCollection.id || 
-      (nft as any).nftCollection?.toLowerCase() === activeCollection.name.toLowerCase() ||
-      activeCollection.nftIds?.includes(nft.id)
+    const matchingContextNFTs = contextNFTs.filter(
+      (nft) =>
+        (nft as any).collectionId === activeCollection.id ||
+        (nft as any).nftCollection?.toLowerCase() === activeCollection.name.toLowerCase() ||
+        activeCollection.nftIds?.includes(nft.id)
     );
 
-    matchingContextNFTs.forEach(cnft => {
-      if (!items.some(it => it.id === cnft.id)) {
+    matchingContextNFTs.forEach((cnft) => {
+      if (!items.some((it) => it.id === cnft.id)) {
         items.push(cnft);
       }
     });
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      items = items.filter(it => 
-        it.title.toLowerCase().includes(q) || 
-        (it.artist && it.artist.toLowerCase().includes(q))
+      items = items.filter(
+        (it) =>
+          it.title.toLowerCase().includes(q) ||
+          (it.artist && it.artist.toLowerCase().includes(q))
       );
     }
 
     return items;
-  }, [activeCollection, contextNFTs, searchQuery]);
+  }, [activeCollection, remoteItems, contextNFTs, searchQuery]);
 
-  // Copy smart contract address
   const handleCopyAddress = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!activeCollection?.contractAddress) return;
@@ -124,25 +167,30 @@ export const CollectionDetails: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Share Collection
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!activeCollection) return;
     if (navigator.share) {
-      navigator.share({
-        title: activeCollection.name,
-        text: activeCollection.description,
-        url: window.location.href,
-      }).catch(() => {});
+      navigator
+        .share({
+          title: activeCollection.name,
+          text: activeCollection.description,
+          url: window.location.href,
+        })
+        .catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
       toast.success('Collection link copied to clipboard');
     }
   };
 
-  // Play NFT Track
   const handlePlayTrack = (item: NFTItem, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!item.audioUrl) {
+      toast.info('Audio preview unavailable for this NFT');
+      return;
+    }
+
     const trackObj: Track = {
       id: item.id,
       songId: item.trackId || item.id,
@@ -150,12 +198,12 @@ export const CollectionDetails: React.FC = () => {
       artist: item.artist || item.creator || activeCollection?.creatorName || 'Artist',
       artistId: activeCollection?.artistId || 'artist',
       coverUrl: item.imageUrl || item.coverUrl || activeCollection?.coverUrl || '',
-      audioUrl: item.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+      audioUrl: item.audioUrl,
       duration: 210,
       genre: 'Music NFT',
       isNFT: true,
       nftPrice: item.price,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
 
     if (currentTrack?.id === item.id) {
@@ -166,12 +214,10 @@ export const CollectionDetails: React.FC = () => {
     }
   };
 
-  // Navigate to NFT Details screen
   const handleNavigateToNFT = (nftId: string) => {
     navigate(`/nft/${nftId}`);
   };
 
-  // Loading State
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#070B18] text-white p-4 sm:p-6 space-y-6 animate-pulse pb-32">
@@ -179,7 +225,7 @@ export const CollectionDetails: React.FC = () => {
         <div className="h-48 sm:h-64 rounded-[10px] bg-slate-900/60" />
         <div className="h-8 w-48 rounded-[8px] bg-slate-900/60" />
         <div className="space-y-2.5">
-          {[1, 2, 3, 4].map(i => (
+          {[1, 2, 3, 4].map((i) => (
             <div key={i} className="h-16 rounded-[10px] bg-slate-900/40" />
           ))}
         </div>
@@ -187,11 +233,9 @@ export const CollectionDetails: React.FC = () => {
     );
   }
 
-  // Not Found State
   if (!activeCollection) {
     return (
       <div className="min-h-screen bg-[#070B18] text-white pb-32 flex flex-col">
-        {/* Clean Screen Header */}
         <div className="sticky top-0 z-30 bg-[#070B18]/90 backdrop-blur-md px-4 sm:px-6 py-3 flex items-center justify-between border-none">
           <button
             onClick={() => navigate('/collections')}
@@ -222,8 +266,6 @@ export const CollectionDetails: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#070B18] text-white pb-32 overflow-x-hidden selection:bg-blue-600/30">
-      
-      {/* Clean Screen Header: [Back] Collection Name [Share] */}
       <div className="sticky top-0 z-30 bg-[#070B18]/90 backdrop-blur-md px-4 sm:px-6 py-3 flex items-center justify-between gap-3 border-none">
         <button
           onClick={() => navigate(-1)}
@@ -251,32 +293,34 @@ export const CollectionDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* Collection Hero Section */}
       <div className="relative w-full overflow-hidden bg-[#0A113A]">
-        {/* Banner Artwork */}
         <div className="h-44 sm:h-60 md:h-72 w-full relative">
-          <img
-            src={activeCollection.bannerUrl || activeCollection.coverUrl}
-            alt={activeCollection.name}
-            className="w-full h-full object-cover"
-          />
+          {activeCollection.bannerUrl || activeCollection.coverUrl ? (
+            <img
+              src={activeCollection.bannerUrl || activeCollection.coverUrl}
+              alt={activeCollection.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-[#0B112C] to-[#070B18]" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#070B18] via-[#070B18]/70 to-transparent" />
         </div>
 
-        {/* Collection Identity Header Info */}
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pb-6 -mt-16 sm:-mt-20 flex flex-col md:flex-row md:items-end justify-between gap-5">
           <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-            
-            {/* Collection Cover Artwork (Sharp 10px Radius) */}
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-[10px] overflow-hidden bg-slate-900 shadow-2xl shrink-0">
-              <img
-                src={activeCollection.coverUrl}
-                alt={activeCollection.name}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-[10px] overflow-hidden bg-slate-900 shadow-2xl shrink-0 flex items-center justify-center">
+              {activeCollection.coverUrl ? (
+                <img
+                  src={activeCollection.coverUrl}
+                  alt={activeCollection.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Disc className="w-10 h-10 text-slate-600" />
+              )}
             </div>
 
-            {/* Collection Titles & Creator */}
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-mono font-black uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-[4px]">
@@ -295,14 +339,17 @@ export const CollectionDetails: React.FC = () => {
               </h1>
 
               <div className="flex items-center gap-2 text-xs text-slate-300 font-medium">
-                <span>By <strong className="text-white">{activeCollection.creatorName}</strong></span>
+                <span>
+                  By <strong className="text-white">{activeCollection.creatorName}</strong>
+                </span>
                 <span>•</span>
-                <span className="text-slate-400 font-mono">{activeCollection.items?.length || activeCollection.totalSupply} Tracks</span>
+                <span className="text-slate-400 font-mono">
+                  {collectionTracks.length} Tracks
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Smart Contract Quick Copy Button */}
           {activeCollection.contractAddress && (
             <button
               onClick={handleCopyAddress}
@@ -310,12 +357,14 @@ export const CollectionDetails: React.FC = () => {
               title="Copy Contract Address"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{activeCollection.contractAddress.slice(0, 8)}...{activeCollection.contractAddress.slice(-4)}</span>
+              <span>
+                {activeCollection.contractAddress.slice(0, 8)}...
+                {activeCollection.contractAddress.slice(-4)}
+              </span>
             </button>
           )}
         </div>
 
-        {/* Collection Description */}
         {activeCollection.description && (
           <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-6">
             <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
@@ -324,33 +373,45 @@ export const CollectionDetails: React.FC = () => {
           </div>
         )}
 
-        {/* Collection Metadata Stats Row */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-6 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
           <div className="bg-[#0B112C] p-3 rounded-[10px] shadow-lg shadow-black/20">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Floor Price</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+              Floor Price
+            </span>
             <p className="text-base sm:text-lg font-black font-mono text-cyan-400 flex items-center gap-1">
               <img src={TON_LOGO} className="w-3.5 h-3.5 inline" alt="TON" />
-              {activeCollection.floorPrice} <span className="text-[10px] font-sans text-slate-400">TON</span>
+              {activeCollection.floorPrice}{' '}
+              <span className="text-[10px] font-sans text-slate-400">TON</span>
             </p>
           </div>
 
           <div className="bg-[#0B112C] p-3 rounded-[10px] shadow-lg shadow-black/20">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Total Volume</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+              Total Volume
+            </span>
             <p className="text-base sm:text-lg font-black font-mono text-white flex items-center gap-1">
               <img src={TON_LOGO} className="w-3.5 h-3.5 inline" alt="TON" />
-              {activeCollection.volume} <span className="text-[10px] font-sans text-slate-400">TON</span>
+              {activeCollection.volume}{' '}
+              <span className="text-[10px] font-sans text-slate-400">TON</span>
             </p>
           </div>
 
           <div className="bg-[#0B112C] p-3 rounded-[10px] shadow-lg shadow-black/20">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">NFT Tracks</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+              NFT Tracks
+            </span>
             <p className="text-base sm:text-lg font-black font-mono text-white">
-              {collectionTracks.length} <span className="text-[10px] font-normal text-slate-400">/ {activeCollection.totalSupply}</span>
+              {collectionTracks.length}{' '}
+              <span className="text-[10px] font-normal text-slate-400">
+                / {activeCollection.totalSupply || collectionTracks.length}
+              </span>
             </p>
           </div>
 
           <div className="bg-[#0B112C] p-3 rounded-[10px] shadow-lg shadow-black/20">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Owners</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+              Owners
+            </span>
             <p className="text-base sm:text-lg font-black font-mono text-purple-400">
               {activeCollection.ownersCount}
             </p>
@@ -358,10 +419,7 @@ export const CollectionDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Track / NFT Collection List Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-4">
-        
-        {/* Track List Header & Search */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-black uppercase tracking-wider text-white flex items-center gap-2">
@@ -373,7 +431,6 @@ export const CollectionDetails: React.FC = () => {
             </p>
           </div>
 
-          {/* Quick Search */}
           <div className="relative w-full sm:w-64">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -386,12 +443,13 @@ export const CollectionDetails: React.FC = () => {
           </div>
         </div>
 
-        {/* Compact NFT Track Rows */}
         <div className="space-y-2">
           {collectionTracks.map((item, idx) => {
             const isCurrentPlaying = currentTrack?.id === item.id && isPlaying;
-            const isUserOwner = item.owner === userProfile?.walletAddress || item.owner === userProfile?.email;
-            const formattedPrice = item.price || activeCollection.floorPrice || '10.0';
+            const isUserOwner =
+              (userProfile?.walletAddress && item.owner === userProfile.walletAddress) ||
+              (userProfile?.email && item.owner === userProfile.email);
+            const formattedPrice = item.price || activeCollection.floorPrice || '0';
 
             return (
               <motion.div
@@ -400,13 +458,11 @@ export const CollectionDetails: React.FC = () => {
                 onClick={() => handleNavigateToNFT(item.id)}
                 className="group p-3 bg-[#0B112C] hover:bg-[#0E1638] rounded-[10px] flex items-center justify-between gap-3 cursor-pointer shadow-md shadow-black/20 transition-all border-none"
               >
-                {/* Left Side: Number, Artwork Thumbnail & Metadata */}
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-xs font-mono font-bold text-slate-500 w-5 text-center shrink-0">
                     {String(idx + 1).padStart(2, '0')}
                   </span>
 
-                  {/* Artwork with Interactive Play Button */}
                   <div className="relative w-12 h-12 rounded-[8px] overflow-hidden shrink-0 bg-slate-900">
                     <img
                       src={item.imageUrl || item.coverUrl || activeCollection.coverUrl}
@@ -429,7 +485,6 @@ export const CollectionDetails: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Track Title & Artist */}
                   <div className="min-w-0">
                     <h3 className="text-xs sm:text-sm font-black text-white truncate group-hover:text-blue-400 transition-colors">
                       {item.title}
@@ -442,23 +497,21 @@ export const CollectionDetails: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Right Side: Price & Action Button (Buy / Owned / Bid) */}
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="text-right hidden sm:block">
                     <span className="text-xs font-mono font-black text-cyan-400 flex items-center gap-1">
                       <img src={TON_LOGO} className="w-3 h-3 object-contain inline" alt="TON" />
-                      {formattedPrice} TON
+                      {formattedPrice}
                     </span>
                   </div>
 
-                  {/* Buy / Availability Action Button */}
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleNavigateToNFT(item.id);
                     }}
-                    aria-label={`Buy ${item.title} for ${formattedPrice} TON`}
+                    aria-label={`Inspect ${item.title}`}
                     className={`min-h-[38px] px-4 py-1.5 rounded-[8px] text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none flex items-center justify-center select-none ${
                       isUserOwner
                         ? 'bg-white/[0.08] hover:bg-white/[0.12] text-slate-300'
@@ -475,7 +528,6 @@ export const CollectionDetails: React.FC = () => {
           })}
         </div>
 
-        {/* Empty Collection State */}
         {collectionTracks.length === 0 && (
           <div className="py-16 text-center bg-[#0B112C] rounded-[10px] space-y-3">
             <Disc className="w-10 h-10 text-slate-500 mx-auto" />

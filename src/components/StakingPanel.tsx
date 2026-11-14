@@ -119,55 +119,7 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
     return () => unsub();
   }, []);
 
-  const fallbackValidators = [
-    { 
-      id: 'validator-a',
-      name: 'TonJam Node A', 
-      apr: 15,
-      uptime: 99.92,
-      blocksValidated: '1,424,192',
-      currentCommission: '5%',
-      commissionHistory: [
-        { date: 'Jan 26', fee: '8%' },
-        { date: 'Mar 26', fee: '6%' },
-        { date: 'May 26', fee: '5%' }
-      ],
-      selfStake: '250,000 TON',
-      status: 'Active'
-    },
-    { 
-      id: 'validator-b',
-      name: 'TonJam Node B', 
-      apr: 14,
-      uptime: 99.45,
-      blocksValidated: '984,204',
-      currentCommission: '6%',
-      commissionHistory: [
-        { date: 'Jan 26', fee: '8%' },
-        { date: 'Feb 26', fee: '7%' },
-        { date: 'Apr 26', fee: '6%' }
-      ],
-      selfStake: '180,000 TON',
-      status: 'Active'
-    },
-    { 
-      id: 'validator-c',
-      name: 'TonJam Node C', 
-      apr: 13,
-      uptime: 98.78,
-      blocksValidated: '542,110',
-      currentCommission: '8%',
-      commissionHistory: [
-        { date: 'Jan 26', fee: '9%' },
-        { date: 'Mar 26', fee: '8.5%' },
-        { date: 'May 26', fee: '8%' }
-      ],
-      selfStake: '120,000 TON',
-      status: 'Active'
-    }
-  ];
-
-  const activeValidators = validators.length > 0 ? validators : fallbackValidators;
+  const activeValidators = validators;
 
   useEffect(() => {
     if (autoValidatorSwitching && activeValidators.length > 0) {
@@ -184,7 +136,7 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
   }, [autoValidatorSwitching, activeValidators, selectedValidatorId]);
 
   const selectedValidator = activeValidators.find(v => v.id === selectedValidatorId || v.name === selectedValidatorId) || activeValidators[0];
-  const showWarning = selectedValidator && selectedValidator.uptime < 99;
+  const showWarning = Boolean(selectedValidator && typeof selectedValidator.uptime === 'number' && selectedValidator.uptime < 99);
   
   const stakedBalance = userProfile.stakedJam || 0;
   const rewards = userProfile.pendingJamRewards || 0;
@@ -338,10 +290,20 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
             </div>
           </div>
           <div className="bg-foreground/[0.02] rounded-2xl p-4">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">APR Breakdown (15%)</h3>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">
+              APR Breakdown ({selectedValidator?.apr || 0}%)
+            </h3>
             <div className="h-24">
                <ResponsiveContainerRC width="100%" height="100%">
-                 <BarChartRC data={[{ name: 'APR', baseYield: 10, communityBonus: 5 }]} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                 <BarChartRC
+                   data={[{
+                     name: 'APR',
+                     baseYield: selectedValidator?.apr ? Math.min(10, selectedValidator.apr) : 0,
+                     communityBonus: selectedValidator?.apr && selectedValidator.apr > 10 ? selectedValidator.apr - 10 : 0
+                   }]}
+                   layout="vertical"
+                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                 >
                     <CartesianGridRC strokeDasharray="3 3" />
                     <XAxisRC type="number" hide />
                     <YAxisRC dataKey="name" type="category" hide />
@@ -362,8 +324,8 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
             autoValidatorSwitching={autoValidatorSwitching}
           />
           <CompoundingSimulator 
-            currentValidatorApr={selectedValidator?.apr || 15}
-            validatorName={selectedValidator?.name || 'Standard Node'}
+            currentValidatorApr={selectedValidator?.apr || 0}
+            validatorName={selectedValidator?.name || 'No Validator Selected'}
           />
           {/* Staking History */}
           <div className="bg-foreground/[0.02] rounded-2xl p-4">

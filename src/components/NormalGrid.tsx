@@ -9,34 +9,9 @@ interface ProjectsTypes {
   des: string;
 }
 
-const projects: ProjectsTypes[] = [
-  {
-    id: '01',
-    img: 'https://images.unsplash.com/photo-1615451210353-cbcf249f392a?q=80&w=1200&auto=format&fit=crop',
-    title: 'Distrokings',
-    des: 'We make your logo communicate with your customers more than words ever could',
-  },
-  {
-    id: '02',
-    img: 'https://images.unsplash.com/photo-1704677982215-a2248af6009b?q=80&w=1200&auto=format&fit=crop',
-    title: 'Profitables',
-    des: 'We are dedicated to unlocking your business potential through precision development',
-  },
-  {
-    id: '03',
-    img: 'https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=800&auto=format&fit=crop',
-    title: 'Topserve-copiers',
-    des: 'We are dedicated to unlocking your business potential through precision development',
-  },
-  {
-    id: '04',
-    img: 'https://images.unsplash.com/photo-1605733160314-4fc7dac4bb16?q=80&w=800&auto=format&fit=crop',
-    title: 'Labramart.',
-    des: 'We specialize in crafting marketing solutions that propel your brand to new heights',
-  },
-];
+export default function NormalGrid({ projects = [] }: { projects?: ProjectsTypes[] }) {
+  if (projects.length === 0) return null;
 
-export default function NormalGrid() {
   return (
     <>
       <div className='lg:columns-2 columns-1 overflow-hidden px-5 pb-5'>
@@ -48,7 +23,7 @@ export default function NormalGrid() {
                 whileInView={{ y: 0, opacity: 1 }}
                 transition={{ ease: 'easeOut' }}
                 viewport={{ once: false }}
-                className={` relative pb-4 `}
+                className="relative pb-4"
               >
                 <div className='w-auto h-full'>
                   <img

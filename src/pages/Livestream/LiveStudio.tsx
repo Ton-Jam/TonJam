@@ -47,6 +47,9 @@ import { StreamChatPanel } from '@/components/livestream/StreamChatPanel';
 import { LiveSoundboard } from '@/components/livestream/LiveSoundboard';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { getPlaceholderImage } from '@/lib/utils';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 export const LiveStudio: React.FC = () => {
   const navigate = useNavigate();
@@ -76,23 +79,7 @@ export const LiveStudio: React.FC = () => {
   const [messages, setMessages] = useState<LiveStreamChatMessage[]>([]);
   const [latestTip, setLatestTip] = useState<LiveStreamTip | null>(null);
   const [activeTab, setActiveTab] = useState<'chat' | 'controls' | 'requests'>('chat');
-  const [songRequests, setSongRequests] = useState<LiveStreamSongRequest[]>([
-    {
-      id: 'req_demo_1',
-      streamId: 'demo',
-      requesterId: 'u_1',
-      requesterName: 'SatoshiTon',
-      requesterAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=SatoshiTon',
-      requesterTier: 'Genesis VIP',
-      songTitle: 'Neon Genesis (VIP Remix)',
-      artistName: userProfile?.name || 'Artist',
-      tipAmount: 5,
-      currency: 'TON',
-      status: 'pending',
-      isVipPriority: true,
-      createdAt: '2m ago'
-    }
-  ]);
+  const [songRequests, setSongRequests] = useState<LiveStreamSongRequest[]>([]);
   const [showEndModal, setShowEndModal] = useState(false);
 
   // Privileges calculation
@@ -179,6 +166,26 @@ export const LiveStudio: React.FC = () => {
     }
   }, [streamSession?.id]);
 
+  // Subscribe to real-time song requests when live
+  useEffect(() => {
+    if (!streamSession?.id) return;
+    const reqQuery = query(
+      collection(db, `liveStreams/${streamSession.id}/songRequests`),
+      orderBy('createdAt', 'desc')
+    );
+    const unsubReqs = onSnapshot(
+      reqQuery,
+      (snap) => {
+        const reqs = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as LiveStreamSongRequest))
+          .filter((r) => r.status === 'pending');
+        setSongRequests(reqs);
+      },
+      (err) => handleFirestoreError(err, OperationType.LIST, `liveStreams/${streamSession.id}/songRequests`)
+    );
+    return () => unsubReqs();
+  }, [streamSession?.id]);
+
   // Start Broadcast Action
   const handleStartBroadcast = async () => {
     if (!title.trim()) {
@@ -187,9 +194,9 @@ export const LiveStudio: React.FC = () => {
     }
 
     const artistName = userProfile?.name || userProfile?.username || user?.displayName || 'TonJam Artist';
-    const artistAvatar = userProfile?.avatar || user?.photoURL || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=400';
+    const artistAvatar = userProfile?.avatar || user?.photoURL || getPlaceholderImage('artist');
     const artistHandle = `@${userProfile?.username || 'artist'}`;
-    const artistAddress = address || userProfile?.walletAddress || 'EQ...artist';
+    const artistAddress = address || userProfile?.walletAddress || '';
 
     try {
       const newSession = await createLiveStreamSession({
@@ -204,7 +211,7 @@ export const LiveStudio: React.FC = () => {
         category,
         status: 'live',
         tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean),
-        thumbnailUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1200',
+        thumbnailUrl: getPlaceholderImage('live-stream'),
         videoSourceType: videoSource,
         nftGated,
         pinnedAnnouncement: pinnedText.trim() ? {
@@ -331,10 +338,10 @@ export const LiveStudio: React.FC = () => {
                 description: '',
                 artistId: user?.uid || 'host',
                 artistName: userProfile?.name || 'Artist Host',
-                artistAvatar: userProfile?.avatar || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=400',
-                artistHandle: '@host',
-                artistAddress: address || 'EQ...host',
-                artistVerified: true,
+                artistAvatar: userProfile?.avatar || getPlaceholderImage('artist'),
+                artistHandle: `@${userProfile?.username || 'host'}`,
+                artistAddress: address || userProfile?.walletAddress || '',
+                artistVerified: Boolean(userProfile?.isVerifiedArtist),
                 status: isLive ? 'live' : 'scheduled',
                 category,
                 tags: ['Live'],
@@ -631,19 +638,19 @@ export const LiveStudio: React.FC = () => {
               <div className="grid grid-cols-3 gap-3 mb-6">
                 <div className="p-3 rounded-xl bg-white/[0.03]">
                   <p className="text-lg font-black text-[#00B4D8]">
-                    {streamSession?.totalTipsTon || 15.5}
+                    {streamSession?.totalTipsTon || 0}
                   </p>
                   <p className="text-[10px] font-bold text-zinc-400 uppercase">TON Tips</p>
                 </div>
                 <div className="p-3 rounded-xl bg-white/[0.03]">
                   <p className="text-lg font-black text-purple-400">
-                    {messages.length || 48}
+                    {messages.length}
                   </p>
                   <p className="text-[10px] font-bold text-zinc-400 uppercase">Messages</p>
                 </div>
                 <div className="p-3 rounded-xl bg-white/[0.03]">
                   <p className="text-lg font-black text-emerald-400">
-                    {formatTime(streamDurationSec || 180)}
+                    {formatTime(streamDurationSec)}
                   </p>
                   <p className="text-[10px] font-bold text-zinc-400 uppercase">Duration</p>
                 </div>

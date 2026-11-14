@@ -15,8 +15,7 @@ export const CORE_UI_ASSETS: readonly string[] = [
   '/pwa-192x192.png',
   '/pwa-512x512.png',
   '/pwa-maskable-512x512.png',
-  '/default_tonjam_banner.jpg',
-  '/tonjam-offline-audio.mp3'
+  '/default_tonjam_banner.jpg'
 ] as const;
 
 export function registerServiceWorker(): void {

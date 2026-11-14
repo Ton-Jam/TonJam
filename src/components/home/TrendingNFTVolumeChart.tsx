@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -6,12 +6,9 @@ import {
   BarChart3, 
   Flame, 
   ArrowUpRight, 
-  ArrowDownRight, 
-  Coins, 
   Play, 
   ChevronRight,
   Disc,
-  Sparkles,
   Bell,
   BellRing,
   X
@@ -22,11 +19,11 @@ import {
   Area, 
   XAxis, 
   YAxis, 
-  Tooltip, 
-  Bar
+  Tooltip
 } from 'recharts';
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { useAudio } from '@/contexts/AudioContext';
-import { NFTItem } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import LazyArtworkImage from '@/components/common/LazyArtworkImage';
 import { TON_LOGO } from '@/constants';
@@ -40,13 +37,31 @@ interface ChartDataPoint {
   sales: number;
 }
 
+interface NFTSaleRecord {
+  id: string;
+  nftId?: string;
+  title?: string;
+  price?: number | string;
+  salePrice?: number | string;
+  timestamp?: any;
+}
+
+const parseSaleTimeMs = (ts: any): number => {
+  if (!ts) return 0;
+  if (typeof ts?.toMillis === 'function') return ts.toMillis();
+  if (typeof ts?.seconds === 'number') return ts.seconds * 1000;
+  if (typeof ts === 'number') return ts;
+  const parsed = Date.parse(String(ts));
+  return isNaN(parsed) ? 0 : parsed;
+};
+
 export const TrendingNFTVolumeChart: React.FC = () => {
   const navigate = useNavigate();
   const { allNFTs, playTrack, allTracks } = useAudio();
   const [timeframe, setTimeframe] = useState<Timeframe>('24h');
   const [selectedNFTId, setSelectedNFTId] = useState<string | null>(null);
+  const [salesRecords, setSalesRecords] = useState<NFTSaleRecord[]>([]);
 
-  // Volume Alert State
   const [volumeAlerts, setVolumeAlerts] = useState<Record<string, number>>(() => {
     try {
       const saved = localStorage.getItem('tonjam_nft_volume_alerts');
@@ -57,6 +72,24 @@ export const TrendingNFTVolumeChart: React.FC = () => {
   });
   const [alertModalNFT, setAlertModalNFT] = useState<any | null>(null);
   const [customThreshold, setCustomThreshold] = useState<string>('');
+
+  useEffect(() => {
+    const q = query(collection(db, 'nftSales'), orderBy('timestamp', 'desc'), limit(200));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const rows: NFTSaleRecord[] = [];
+        snapshot.forEach((docSnap) => {
+          rows.push({ id: docSnap.id, ...(docSnap.data() as any) });
+        });
+        setSalesRecords(rows);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'nftSales');
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
   const handleSaveAlert = () => {
     if (!alertModalNFT) return;
@@ -87,74 +120,104 @@ export const TrendingNFTVolumeChart: React.FC = () => {
     toast.info("Volume threshold alert removed");
   };
 
-  // Timeframe chart datasets
-  const chartData = useMemo<Record<Timeframe, ChartDataPoint[]>>(() => ({
-    '24h': [
-      { label: '00:00', volume: 140, sales: 8 },
-      { label: '04:00', volume: 220, sales: 12 },
-      { label: '08:00', volume: 180, sales: 9 },
-      { label: '12:00', volume: 390, sales: 24 },
-      { label: '16:00', volume: 510, sales: 31 },
-      { label: '20:00', volume: 430, sales: 22 },
-      { label: 'Now', volume: 680, sales: 38 },
-    ],
-    '7d': [
-      { label: 'Mon', volume: 1250, sales: 85 },
-      { label: 'Tue', volume: 1820, sales: 110 },
-      { label: 'Wed', volume: 1450, sales: 92 },
-      { label: 'Thu', volume: 2400, sales: 154 },
-      { label: 'Fri', volume: 3100, sales: 198 },
-      { label: 'Sat', volume: 4200, sales: 260 },
-      { label: 'Sun', volume: 3890, sales: 245 },
-    ],
-    '30d': [
-      { label: 'Week 1', volume: 8400, sales: 520 },
-      { label: 'Week 2', volume: 11200, sales: 710 },
-      { label: 'Week 3', volume: 15800, sales: 980 },
-      { label: 'Week 4', volume: 19400, sales: 1240 },
-    ]
-  }), []);
+  const chartData = useMemo<Record<Timeframe, ChartDataPoint[]>>(() => {
+    const now = Date.now();
 
-  // Summary statistics calculated for selected timeframe
+    // 24h buckets: 6 4-hour intervals + Now
+    const h24Labels = ['-24h', '-20h', '-16h', '-12h', '-8h', '-4h', 'Now'];
+    const h24Buckets: ChartDataPoint[] = h24Labels.map((label) => ({ label, volume: 0, sales: 0 }));
+
+    // 7d buckets: 7 daily buckets
+    const d7Buckets: ChartDataPoint[] = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(now - (6 - i) * 86400000);
+      return {
+        label: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        volume: 0,
+        sales: 0,
+      };
+    });
+
+    // 30d buckets: 4 weekly buckets
+    const d30Buckets: ChartDataPoint[] = ['Week 1', 'Week 2', 'Week 3', 'Week 4'].map((label) => ({
+      label,
+      volume: 0,
+      sales: 0,
+    }));
+
+    salesRecords.forEach((sale) => {
+      const tMs = parseSaleTimeMs(sale.timestamp);
+      const price = parseFloat(String(sale.salePrice ?? sale.price ?? 0)) || 0;
+      if (!tMs) return;
+      const ageMs = Math.max(0, now - tMs);
+
+      if (ageMs <= 24 * 3600000) {
+        const hoursAgo = ageMs / 3600000;
+        const bucketIdx = Math.min(6, Math.max(0, Math.floor((24 - hoursAgo) / 4)));
+        h24Buckets[bucketIdx].volume = Number((h24Buckets[bucketIdx].volume + price).toFixed(2));
+        h24Buckets[bucketIdx].sales += 1;
+      }
+
+      if (ageMs <= 7 * 86400000) {
+        const daysAgo = Math.floor(ageMs / 86400000);
+        const bucketIdx = Math.min(6, Math.max(0, 6 - daysAgo));
+        d7Buckets[bucketIdx].volume = Number((d7Buckets[bucketIdx].volume + price).toFixed(2));
+        d7Buckets[bucketIdx].sales += 1;
+      }
+
+      if (ageMs <= 30 * 86400000) {
+        const daysAgo = ageMs / 86400000;
+        const bucketIdx = Math.min(3, Math.max(0, Math.floor((30 - daysAgo) / 7.5)));
+        d30Buckets[bucketIdx].volume = Number((d30Buckets[bucketIdx].volume + price).toFixed(2));
+        d30Buckets[bucketIdx].sales += 1;
+      }
+    });
+
+    return {
+      '24h': h24Buckets,
+      '7d': d7Buckets,
+      '30d': d30Buckets,
+    };
+  }, [salesRecords]);
+
   const currentMetrics = useMemo(() => {
     const data = chartData[timeframe];
-    const totalVol = data.reduce((acc, curr) => acc + curr.volume, 0);
+    const totalVol = Number(data.reduce((acc, curr) => acc + curr.volume, 0).toFixed(2));
     const totalSales = data.reduce((acc, curr) => acc + curr.sales, 0);
-    const growth = timeframe === '24h' ? '+18.4%' : timeframe === '7d' ? '+34.2%' : '+62.8%';
     return {
       totalVol,
       totalSales,
-      growth,
-      avgPrice: (totalVol / (totalSales || 1)).toFixed(2)
+      avgPrice: totalSales > 0 ? (totalVol / totalSales).toFixed(2) : '0.00'
     };
   }, [chartData, timeframe]);
 
-  // Derived trending NFTs with volume ranking
   const topNFTs = useMemo(() => {
+    const volumeByNftId: Record<string, number> = {};
+    salesRecords.forEach((sale) => {
+      if (sale.nftId) {
+        const price = parseFloat(String(sale.salePrice ?? sale.price ?? 0)) || 0;
+        volumeByNftId[sale.nftId] = (volumeByNftId[sale.nftId] || 0) + price;
+      }
+    });
+
     if (allNFTs && allNFTs.length > 0) {
-      return allNFTs.slice(0, 5).map((nft, index) => {
-        const volumeMultiplier = 5 - index * 0.7;
-        const volume = Math.round((parseFloat(nft.price || '5') * 12 + 15) * volumeMultiplier);
-        return {
-          ...nft,
-          volume,
-          change: index % 2 === 0 ? `+${(12 + index * 4.2).toFixed(1)}%` : `+${(5 + index * 3.1).toFixed(1)}%`,
-        };
-      }).sort((a, b) => b.volume - a.volume);
+      return allNFTs
+        .map((nft) => {
+          const volume = Number((volumeByNftId[nft.id] || 0).toFixed(2));
+          return {
+            ...nft,
+            volume,
+            change: `${nft.views || 0} views`,
+          };
+        })
+        .sort((a, b) => b.volume - a.volume || (b.views || 0) - (a.views || 0))
+        .slice(0, 5);
     }
 
-    // Default mock trending items if allNFTs is empty
-    return [
-      { id: 'tn1', title: 'Cyber Pulse Live', creator: 'DarkStar', imageUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=300&h=300', price: '12', volume: 480, change: '+24.5%' },
-      { id: 'tn2', title: 'Neon Horizon', creator: 'SynthWave', imageUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=300&h=300', price: '8.5', volume: 340, change: '+18.2%' },
-      { id: 'tn3', title: 'Vortex Audio Prism', creator: 'Cybernetic', imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=300&h=300', price: '15', volume: 290, change: '+12.8%' },
-      { id: 'tn4', title: 'Starlight Symphony', creator: 'Nebula', imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=300&h=300', price: '6', volume: 210, change: '+8.4%' },
-      { id: 'tn5', title: 'Void Echoes', creator: 'Astro Beats', imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=300&h=300', price: '9', volume: 175, change: '+5.1%' },
-    ];
-  }, [allNFTs]);
+    return [];
+  }, [allNFTs, salesRecords]);
 
   const activeNFT = useMemo(() => {
-    return topNFTs.find(n => n.id === selectedNFTId) || topNFTs[0];
+    return topNFTs.find(n => n.id === selectedNFTId) || topNFTs[0] || null;
   }, [topNFTs, selectedNFTId]);
 
   const CustomChartTooltip = ({ active, payload, label }: any) => {
@@ -180,7 +243,6 @@ export const TrendingNFTVolumeChart: React.FC = () => {
 
   return (
     <div className="px-4 my-8 space-y-6">
-      {/* Header with Title & Timeframe Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -195,7 +257,6 @@ export const TrendingNFTVolumeChart: React.FC = () => {
           <p className="text-xs text-slate-400">Real-time volume metrics & trading activity across music collectibles</p>
         </div>
 
-        {/* Timeframe Controls - No border lines */}
         <div className="flex items-center p-1 bg-slate-900/80 rounded-2xl self-start sm:self-auto">
           {(['24h', '7d', '30d'] as Timeframe[]).map((tf) => {
             const isActive = timeframe === tf;
@@ -221,10 +282,7 @@ export const TrendingNFTVolumeChart: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Container - No border lines */}
       <div className="bg-slate-900/60 backdrop-blur-xl rounded-[32px] p-5 sm:p-7 shadow-2xl space-y-6">
-        
-        {/* Top Summary Cards Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-white/5 rounded-2xl p-4">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Volume ({timeframe.toUpperCase()})</span>
@@ -234,7 +292,7 @@ export const TrendingNFTVolumeChart: React.FC = () => {
             </div>
             <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-400 mt-1">
               <ArrowUpRight className="w-3 h-3" />
-              {currentMetrics.growth}
+              On-Chain Sales
             </span>
           </div>
 
@@ -246,7 +304,7 @@ export const TrendingNFTVolumeChart: React.FC = () => {
             </div>
             <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-blue-400 mt-1">
               <Flame className="w-3 h-3" />
-              Active
+              {currentMetrics.totalSales > 0 ? 'Active' : 'No trades'}
             </span>
           </div>
 
@@ -261,12 +319,13 @@ export const TrendingNFTVolumeChart: React.FC = () => {
 
           <div className="bg-white/5 rounded-2xl p-4">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Top Leader</span>
-            <div className="truncate font-black text-white text-sm mt-1">{activeNFT?.title || 'Cyber Pulse'}</div>
-            <span className="text-[10px] font-bold text-blue-400 mt-1 block truncate">by {activeNFT?.creator || 'DarkStar'}</span>
+            <div className="truncate font-black text-white text-sm mt-1">{activeNFT?.title || 'No NFTs yet'}</div>
+            <span className="text-[10px] font-bold text-blue-400 mt-1 block truncate">
+              {activeNFT ? `by ${activeNFT.creator || 'Artist'}` : 'Awaiting first drop'}
+            </span>
           </div>
         </div>
 
-        {/* Visual Chart Area using Recharts */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-slate-400 px-1">
             <span className="flex items-center gap-1.5 text-white">
@@ -311,7 +370,6 @@ export const TrendingNFTVolumeChart: React.FC = () => {
           </div>
         </div>
 
-        {/* Top Music NFTs Volume Leaderboard */}
         <div className="pt-2 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
@@ -328,105 +386,106 @@ export const TrendingNFTVolumeChart: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            {topNFTs.map((nft, rank) => {
-              const maxVol = topNFTs[0]?.volume || 500;
-              const percent = Math.round((nft.volume / maxVol) * 100);
-              const track = allTracks.find(t => t.id === (nft as any).trackId);
+            {topNFTs.length === 0 ? (
+              <div className="bg-white/5 rounded-2xl p-6 text-center text-xs text-slate-400">
+                No music NFT volume data recorded yet.
+              </div>
+            ) : (
+              topNFTs.map((nft, rank) => {
+                const maxVol = Math.max(topNFTs[0]?.volume || 0, 1);
+                const percent = nft.volume > 0 ? Math.round((nft.volume / maxVol) * 100) : 0;
+                const track = allTracks.find(t => t.id === (nft as any).trackId);
 
-              return (
-                <div 
-                  key={nft.id}
-                  onClick={() => {
-                    setSelectedNFTId(nft.id);
-                    navigate(`/nft/${nft.id}`);
-                  }}
-                  className="group bg-white/5 hover:bg-white/10 transition-all rounded-2xl p-3 flex items-center justify-between gap-3 cursor-pointer"
-                >
-                  {/* Rank & Image */}
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className={`w-6 text-center text-xs font-black font-mono ${
-                      rank === 0 ? 'text-amber-400' : rank === 1 ? 'text-slate-300' : rank === 2 ? 'text-amber-600' : 'text-slate-500'
-                    }`}>
-                      #{rank + 1}
-                    </span>
+                return (
+                  <div 
+                    key={nft.id}
+                    onClick={() => {
+                      setSelectedNFTId(nft.id);
+                      navigate(`/nft/${nft.id}`);
+                    }}
+                    className="group bg-white/5 hover:bg-white/10 transition-all rounded-2xl p-3 flex items-center justify-between gap-3 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className={`w-6 text-center text-xs font-black font-mono ${
+                        rank === 0 ? 'text-amber-400' : rank === 1 ? 'text-slate-300' : rank === 2 ? 'text-amber-600' : 'text-slate-500'
+                      }`}>
+                        #{rank + 1}
+                      </span>
 
-                    <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-950">
-                      <LazyArtworkImage 
-                        src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
-                        fallbackSrc={getPlaceholderImage(`nft-${nft.id}`)}
-                        alt={nft.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                      />
-                      {track && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            playTrack(track);
-                          }}
-                          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                        >
-                          <Play className="w-5 h-5 text-white fill-white" />
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="min-w-0">
-                      <h4 className="text-xs font-black text-white truncate uppercase tracking-tight group-hover:text-blue-400 transition-colors">
-                        {nft.title}
-                      </h4>
-                      <p className="text-[10px] text-slate-400 truncate">
-                        by {nft.creator || 'Artist'}
-                      </p>
-                      
-                      {/* Mini Volume Bar */}
-                      <div className="w-28 sm:w-40 h-1.5 bg-slate-800 rounded-full mt-1.5 overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full"
-                          style={{ width: `${percent}%` }}
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-950">
+                        <LazyArtworkImage 
+                          src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
+                          fallbackSrc={getPlaceholderImage(`nft-${nft.id}`)}
+                          alt={nft.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                         />
+                        {track && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              playTrack(track);
+                            }}
+                            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                          >
+                            <Play className="w-5 h-5 text-white fill-white" />
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-black text-white truncate uppercase tracking-tight group-hover:text-blue-400 transition-colors">
+                          {nft.title}
+                        </h4>
+                        <p className="text-[10px] text-slate-400 truncate">
+                          by {nft.creator || 'Artist'}
+                        </p>
+                        
+                        <div className="w-28 sm:w-40 h-1.5 bg-slate-800 rounded-full mt-1.5 overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full"
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Volume & Price Metrics & Alert Button */}
-                  <div className="flex items-center gap-3 shrink-0">
-                    <div className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <span className="text-xs font-black font-mono text-white">{nft.volume} TON</span>
-                        <span className="text-[9px] font-bold text-emerald-400">{nft.change}</span>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <span className="text-xs font-black font-mono text-white">{nft.volume} TON</span>
+                          <span className="text-[9px] font-bold text-emerald-400">{nft.change}</span>
+                        </div>
+                        <div className="flex items-center justify-end gap-1 mt-0.5 text-[10px] text-slate-400 font-medium">
+                          <span>Floor: {nft.price || '—'}</span>
+                          <img src={TON_LOGO} alt="TON" className="w-2.5 h-2.5" />
+                        </div>
                       </div>
-                      <div className="flex items-center justify-end gap-1 mt-0.5 text-[10px] text-slate-400 font-medium">
-                        <span>Floor: {nft.price}</span>
-                        <img src={TON_LOGO} alt="TON" className="w-2.5 h-2.5" />
-                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAlertModalNFT(nft);
+                          setCustomThreshold(String(volumeAlerts[nft.id] || Math.max(10, Math.round(nft.volume * 1.2))));
+                        }}
+                        className={`p-2 rounded-xl transition-all cursor-pointer ${
+                          volumeAlerts[nft.id] 
+                            ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50' 
+                            : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white'
+                        }`}
+                        title={volumeAlerts[nft.id] ? `Alert set at ${volumeAlerts[nft.id]} TON` : 'Set volume threshold alert'}
+                      >
+                        {volumeAlerts[nft.id] ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                      </button>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setAlertModalNFT(nft);
-                        setCustomThreshold(String(volumeAlerts[nft.id] || Math.round(nft.volume * 1.2)));
-                      }}
-                      className={`p-2 rounded-xl transition-all cursor-pointer ${
-                        volumeAlerts[nft.id] 
-                          ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50' 
-                          : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white'
-                      }`}
-                      title={volumeAlerts[nft.id] ? `Alert set at ${volumeAlerts[nft.id]} TON` : 'Set volume threshold alert'}
-                    >
-                      {volumeAlerts[nft.id] ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
-                    </button>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
-
       </div>
 
-      {/* Volume Alert Configuration Modal */}
       <AnimatePresence>
         {alertModalNFT && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none">

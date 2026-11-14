@@ -7,6 +7,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { Play, Shuffle } from 'lucide-react';
 import { NFTItem, Track } from '@/types';
 import { SpotifyTrackRow } from './components/SpotifyTrackRow';
+import { getPlaceholderImage } from '@/lib/utils';
 
 export const MyNFTTracks: React.FC = () => {
   const { setHeaderTitle, userNFTs, playAll, isShuffle, toggleShuffle } = useAudio();
@@ -35,16 +36,16 @@ export const MyNFTTracks: React.FC = () => {
         trackId: n.id,
         title: n.title,
         artist: n.artist,
-        artistId: 'artist-1',
-        owner: 'You',
+        artistId: '',
+        owner: '',
         creator: n.artist,
-        price: `${n.floorPriceTon || 5} TON`,
-        imageUrl: n.coverUrl,
-        coverUrl: n.coverUrl,
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-        edition: '1 of 50',
-        rarity: 'Rare',
-        contractAddress: 'EQBvW_NFT_Music_Master_TonJam'
+        price: n.floorPriceTon ? `${n.floorPriceTon} TON` : '0 TON',
+        imageUrl: n.coverUrl || getPlaceholderImage('nft'),
+        coverUrl: n.coverUrl || getPlaceholderImage('nft'),
+        audioUrl: '',
+        edition: '',
+        rarity: '',
+        contractAddress: ''
       }));
     }
 
@@ -60,12 +61,12 @@ export const MyNFTTracks: React.FC = () => {
         songId: n.trackId || n.id,
         title: n.title,
         artist: n.artist || n.creator || 'TonJam Artist',
-        artistId: n.artistId || 'artist-1',
-        coverUrl: n.coverUrl || n.imageUrl,
-        audioUrl: n.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-        duration: 210,
-        streams: 15000,
-        playCount: 15000,
+        artistId: n.artistId || '',
+        coverUrl: n.coverUrl || n.imageUrl || getPlaceholderImage('nft'),
+        audioUrl: n.audioUrl || '',
+        duration: (n as any).duration || 0,
+        streams: (n as any).streams || 0,
+        playCount: (n as any).playCount || 0,
         album: 'NFT Master',
         genre: 'NFT Music',
         isNFT: true,

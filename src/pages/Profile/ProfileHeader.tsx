@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ProfileData } from '../../components/profile/ProfileTypes';
 import { ArtistVerificationBadge } from '../../components/ArtistVerificationBadge';
 import { ProfileQRCodeModal } from '../../components/profile/ProfileQRCodeModal';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface ProfileHeaderProps {
   profile: ProfileData;
@@ -28,7 +29,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       {/* Cover Image Container */}
       <div className="relative w-full h-32 sm:h-40 md:h-48 overflow-hidden bg-black">
         <img 
-          src={profile.coverPhoto || profile.bannerUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&h=400&q=80'} 
+          src={profile.coverPhoto || profile.bannerUrl || getPlaceholderImage('banner')} 
           alt="Profile cover" 
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
@@ -99,7 +100,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <div className="relative group">
             <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-[3px] border-black bg-neutral-900 shadow-none">
               <img 
-                src={profile.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=500&h=500&q=80'} 
+                src={profile.avatar || getPlaceholderImage('artist')} 
                 alt={profile.name} 
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"

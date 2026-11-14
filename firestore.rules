@@ -258,23 +258,25 @@ service cloud.firestore {
         incoming().creatorId == request.auth.uid || 
         isAdmin()
       );
-      allow update: if isSignedIn() && isValidNFT(incoming()) && (
-        isAdmin() ||
+      allow update: if (
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes']) ||
-        (
-          !incoming().diff(existing()).affectedKeys().hasAny([
-            'creatorId',
-            'creator',
-            'creatorAddress',
-            'royaltyFee',
-            'contractAddress',
-            'id'
-          ]) && (
-            ('creatorId' in existing() && isOwner(existing().creatorId)) ||
-            ('ownerId' in existing() && isOwner(existing().ownerId)) ||
-            ('owner' in existing() && isOwner(existing().owner))
+        (isSignedIn() && isValidNFT(incoming()) && (
+          isAdmin() ||
+          (
+            !incoming().diff(existing()).affectedKeys().hasAny([
+              'creatorId',
+              'creator',
+              'creatorAddress',
+              'royaltyFee',
+              'contractAddress',
+              'id'
+            ]) && (
+              ('creatorId' in existing() && isOwner(existing().creatorId)) ||
+              ('ownerId' in existing() && isOwner(existing().ownerId)) ||
+              ('owner' in existing() && isOwner(existing().owner))
+            )
           )
-        )
+        ))
       );
       allow delete: if isAdmin();
     }
@@ -610,15 +612,23 @@ service cloud.firestore {
       allow read, write: if isOwner(userId) || isAdmin();
     }
 
-    // 🚀 SPONSORED CONTENT & TASKS
+    // 🚀 SPONSORED CONTENT & CAMPAIGNS
     match /sponsoredContent/{id} {
       allow read: if true;
-      allow create, update: if isSignedIn() && (
-        !incoming().keys().contains('userId') || 
-        incoming().userId == request.auth.uid || 
-        isAdmin()
+      allow create: if isSignedIn() && (
+        isAdmin() || (
+          (!incoming().keys().contains('userId') || incoming().userId == request.auth.uid) &&
+          (!incoming().keys().contains('artistId') || incoming().artistId == request.auth.uid) &&
+          (!incoming().keys().contains('status') || incoming().status == 'pending' || incoming().status == 'submitted')
+        )
       );
+      allow update: if isAdmin();
       allow delete: if isAdmin();
+    }
+
+    match /sponsoredCampaigns/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /tasks/{id} {

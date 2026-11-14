@@ -53,7 +53,10 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNFT } from '@/contexts/NFTContext';
 import { useAudio } from '@/contexts/AudioContext';
-import { TON_LOGO, MOCK_TRACKS } from '@/constants';
+import { TON_LOGO } from '@/constants';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { getPlaceholderImage } from '@/lib/utils';
 import { toast } from 'sonner';
 
 import FanLeaderboardWidget from './FanLeaderboardWidget';
@@ -74,48 +77,17 @@ export interface TrackMilestone {
   isNew?: boolean;
 }
 
-const INITIAL_MILESTONES: TrackMilestone[] = [
-  {
-    id: 'm1',
-    trackTitle: 'Solar Pulse Genesis',
-    type: 'plays',
-    title: '50,000 Streams Milestone Hit!',
-    description: 'Solar Pulse Genesis crossed 52,400 plays on TonJam decentralized node network.',
-    metric: '52,400 Total Streams',
-    timeAgo: '2m ago',
-    isNew: true,
-  },
-  {
-    id: 'm2',
-    trackTitle: 'Metropolis Midnight',
-    type: 'revenue',
-    title: 'New All-Time High Royalty Revenue!',
-    description: 'Secondary trading generated 342.85 TON in automated smart contract splits.',
-    metric: '342.85 TON (~$2,330)',
-    timeAgo: '15m ago',
-    isNew: true,
-  },
-  {
-    id: 'm3',
-    trackTitle: 'Neon Drift Horizon',
-    type: 'rank',
-    title: 'Top #1 Trending Electronic Track!',
-    description: 'Reached #1 on TonJam Weekly Chart with 18,900 plays this week.',
-    metric: '#1 Chart Rank',
-    timeAgo: '1h ago',
-    isNew: true,
-  },
-  {
-    id: 'm4',
-    trackTitle: 'Cyber Groove Master',
-    type: 'plays',
-    title: '1,000 Streams Milestone Hit!',
-    description: 'Cyber Groove Master surpassed 1,000 streams on the GRAM network.',
-    metric: '1,250 Streams',
-    timeAgo: '3h ago',
-    isNew: false,
-  },
-];
+interface CreatorSaleRecord {
+  id: string;
+  price?: number | string;
+  amount?: number | string;
+  royaltyAmount?: number | string;
+  buyerId?: string;
+  nftId?: string;
+  timestamp?: any;
+  createdAt?: any;
+  isPrimary?: boolean;
+}
 
 export const CreatorDashboard: React.FC = () => {
   const { userProfile } = useAuth();
@@ -123,239 +95,310 @@ export const CreatorDashboard: React.FC = () => {
   const { allTracks, currentTrack, isPlaying, playTrack } = useAudio();
 
   const [dateRange, setDateRange] = useState<DateRangeState>({ preset: '7d' });
-  const [liveStreamCounter, setLiveStreamCounter] = useState(148290);
-  const [liveRoyaltyPool, setLiveRoyaltyPool] = useState(342.85);
   const [activeTab, setActiveTab] = useState<'overview' | 'nfts' | 'royalties' | 'fans'>('overview');
-
-  const [milestones, setMilestones] = useState<TrackMilestone[]>(INITIAL_MILESTONES);
+  const [sales, setSales] = useState<CreatorSaleRecord[]>([]);
+  const [readMilestoneIds, setReadMilestoneIds] = useState<Record<string, boolean>>({});
   const [isMilestoneMenuOpen, setIsMilestoneMenuOpen] = useState(false);
 
+  // Subscribe to creator's live NFT sales in Firestore
+  useEffect(() => {
+    const uid = userProfile?.uid;
+    if (!uid) {
+      setSales([]);
+      return;
+    }
+
+    const q = query(collection(db, 'nftSales'), where('creatorId', '==', uid));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const list = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as Omit<CreatorSaleRecord, 'id'>),
+        }));
+        setSales(list);
+      },
+      (err) => {
+        handleFirestoreError(err, OperationType.LIST, 'nftSales');
+      }
+    );
+    return () => unsub();
+  }, [userProfile?.uid]);
+
+  const creatorTracks = useMemo(() => {
+    if (!userProfile?.uid && !userProfile?.name) return allTracks || [];
+    const matched = (allTracks || []).filter(
+      (t) =>
+        (userProfile?.uid && t.artistId === userProfile.uid) ||
+        (userProfile?.name && t.artist?.toLowerCase() === userProfile.name.toLowerCase())
+    );
+    return matched;
+  }, [allTracks, userProfile?.uid, userProfile?.name]);
+
+  const creatorNfts = useMemo(() => {
+    if (!userProfile?.uid && !userProfile?.name) return [];
+    return (nfts || []).filter(
+      (n) =>
+        (userProfile?.uid && n.creatorId === userProfile.uid) ||
+        (userProfile?.name && n.creator?.toLowerCase() === userProfile.name.toLowerCase())
+    );
+  }, [nfts, userProfile?.uid, userProfile?.name]);
+
+  // Filter sales by active date range
+  const filteredSales = useMemo(() => {
+    const now = Date.now();
+    let cutoff = 0;
+    if (dateRange.preset === '24h') cutoff = now - 24 * 60 * 60 * 1000;
+    else if (dateRange.preset === '7d') cutoff = now - 7 * 24 * 60 * 60 * 1000;
+    else if (dateRange.preset === '30d') cutoff = now - 30 * 24 * 60 * 60 * 1000;
+    else if (dateRange.preset === '90d') cutoff = now - 90 * 24 * 60 * 60 * 1000;
+    else if (dateRange.preset === 'ytd') cutoff = new Date(new Date().getFullYear(), 0, 1).getTime();
+    else if (dateRange.preset === 'custom' && dateRange.startDate) {
+      cutoff = new Date(dateRange.startDate).getTime();
+    }
+
+    const endCutoff =
+      dateRange.preset === 'custom' && dateRange.endDate
+        ? new Date(dateRange.endDate).getTime() + 86400000
+        : now + 86400000;
+
+    return sales.filter((s) => {
+      const rawTs = s.timestamp || s.createdAt;
+      const ms = rawTs?.toMillis ? rawTs.toMillis() : rawTs ? new Date(rawTs).getTime() : 0;
+      if (!ms) return dateRange.preset === 'all';
+      return ms >= cutoff && ms <= endCutoff;
+    });
+  }, [sales, dateRange]);
+
+  const milestones: TrackMilestone[] = useMemo(() => {
+    const derived: TrackMilestone[] = [];
+    creatorTracks.forEach((track) => {
+      const plays = track.playCount ?? (track as any).plays ?? 0;
+      if (plays >= 100) {
+        derived.push({
+          id: `m-plays-${track.id}`,
+          trackTitle: track.title,
+          type: 'plays',
+          title: `${plays.toLocaleString()} Streams Reached`,
+          description: `"${track.title}" reached ${plays.toLocaleString()} real streams on TonJam.`,
+          metric: `${plays.toLocaleString()} Plays`,
+          timeAgo: 'Live',
+          isNew: !readMilestoneIds[`m-plays-${track.id}`],
+        });
+      }
+    });
+    if (sales.length > 0) {
+      const totalSaleVol = sales.reduce((acc, s) => acc + (Number(s.price ?? s.amount) || 0), 0);
+      derived.push({
+        id: 'm-sales-total',
+        trackTitle: 'NFT Catalog',
+        type: 'sales',
+        title: `${sales.length} Verified NFT Sale${sales.length > 1 ? 's' : ''}`,
+        description: `Total recorded marketplace volume of ${totalSaleVol.toFixed(2)} TON across your releases.`,
+        metric: `${totalSaleVol.toFixed(2)} TON Volume`,
+        timeAgo: 'Live',
+        isNew: !readMilestoneIds['m-sales-total'],
+      });
+    }
+    return derived;
+  }, [creatorTracks, sales, readMilestoneIds]);
+
   const unreadMilestonesCount = useMemo(() => {
-    return milestones.filter(m => m.isNew).length;
+    return milestones.filter((m) => m.isNew).length;
   }, [milestones]);
 
   const triggerMilestoneToast = (milestone: TrackMilestone) => {
-    toast.custom((id) => (
-      <div className="flex items-start gap-3 w-full max-w-md bg-[#0D1527] border border-amber-500/40 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl">
-        <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-          <Trophy className="w-5 h-5 text-amber-400 animate-bounce" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-black uppercase text-amber-400 tracking-wider flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> Milestone Unlocked
-            </span>
-            <span className="text-[9px] font-mono text-zinc-400">{milestone.timeAgo}</span>
+    toast.custom(
+      (id) => (
+        <div className="flex items-start gap-3 w-full max-w-md bg-[#0D1527] border border-amber-500/40 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+            <Trophy className="w-5 h-5 text-amber-400 animate-bounce" />
           </div>
-          <h4 className="text-xs font-black text-white mt-1 truncate">{milestone.title}</h4>
-          <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">{milestone.description}</p>
-          <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-white/10">
-            <span className="text-[10px] font-mono font-bold text-cyan-400">{milestone.metric}</span>
-            <button 
-              onClick={() => toast.dismiss(id)}
-              className="text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer border-none bg-transparent"
-            >
-              Dismiss
-            </button>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono font-black uppercase text-amber-400 tracking-wider flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> Milestone Unlocked
+              </span>
+              <span className="text-[9px] font-mono text-zinc-400">{milestone.timeAgo}</span>
+            </div>
+            <h4 className="text-xs font-black text-white mt-1 truncate">{milestone.title}</h4>
+            <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">{milestone.description}</p>
+            <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-white/10">
+              <span className="text-[10px] font-mono font-bold text-cyan-400">{milestone.metric}</span>
+              <button
+                onClick={() => toast.dismiss(id)}
+                className="text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer border-none bg-transparent"
+              >
+                Dismiss
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    ), {
-      duration: 6000,
-    });
-  };
-
-  const handleSimulateMilestone = () => {
-    const sampleTrack = topPerformingTracks[0] || { title: 'Solar Pulse Genesis' };
-    const milestonesList = [
-      {
-        title: '1,000 Streams Milestone Hit!',
-        type: 'plays' as const,
-        description: `"${sampleTrack.title}" just crossed 1,000 streams on TonJam!`,
-        metric: '1,000 Streams',
-      },
-      {
-        title: 'New All-Time High Royalty Revenue!',
-        type: 'revenue' as const,
-        description: `Secondary sales on "${sampleTrack.title}" reached a record 250 TON in royalties!`,
-        metric: '250 TON Royalty ATH',
-      },
-      {
-        title: '10,000 Streams Hit!',
-        type: 'plays' as const,
-        description: `"${sampleTrack.title}" reached 10,000 streams milestone!`,
-        metric: '10,000 Streams',
-      },
-      {
-        title: 'Top 3 Trending Track!',
-        type: 'rank' as const,
-        description: `"${sampleTrack.title}" entered the Top 3 Trending Tracks on TonJam!`,
-        metric: '#3 Chart Rank',
-      }
-    ];
-
-    const chosen = milestonesList[Math.floor(Math.random() * milestonesList.length)];
-    const newMilestone: TrackMilestone = {
-      id: `m-${Date.now()}`,
-      trackTitle: sampleTrack.title,
-      type: chosen.type,
-      title: chosen.title,
-      description: chosen.description,
-      metric: chosen.metric,
-      timeAgo: 'Just now',
-      isNew: true,
-    };
-
-    setMilestones(prev => [newMilestone, ...prev]);
-    triggerMilestoneToast(newMilestone);
+      ),
+      { duration: 6000 }
+    );
   };
 
   const handleMarkAllRead = () => {
-    setMilestones(prev => prev.map(m => ({ ...m, isNew: false })));
+    const next: Record<string, boolean> = {};
+    milestones.forEach((m) => {
+      next[m.id] = true;
+    });
+    setReadMilestoneIds((prev) => ({ ...prev, ...next }));
   };
 
-  // Real-time live play tick simulation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLiveStreamCounter((prev) => prev + Math.floor(Math.random() * 3) + 1);
-      if (Math.random() > 0.6) {
-        const royaltyGain = parseFloat((Math.random() * 0.15 + 0.05).toFixed(2));
-        setLiveRoyaltyPool((prev) => parseFloat((prev + royaltyGain).toFixed(2)));
-      }
-    }, 3500);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Calculate days for custom date range
-  const customDays = useMemo(() => {
-    if (dateRange.preset === 'custom' && dateRange.startDate && dateRange.endDate) {
-      const start = new Date(dateRange.startDate).getTime();
-      const end = new Date(dateRange.endDate).getTime();
-      const diff = Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
-      return diff;
-    }
-    return 7;
-  }, [dateRange]);
-
-  // Multiplier calculation for time-filtered metrics
-  const rangeMultiplier = useMemo(() => {
-    switch (dateRange.preset) {
-      case '24h': return 0.2;
-      case '7d': return 1;
-      case '30d': return 3.8;
-      case '90d': return 10.5;
-      case 'ytd': return 18.2;
-      case 'all': return 28.4;
-      case 'custom': return parseFloat((customDays / 7).toFixed(2));
-      default: return 1;
-    }
-  }, [dateRange.preset, customDays]);
-
-  // Main metrics computation
+  // Real metrics computation from Firestore data
   const metrics = useMemo(() => {
-    const totalPlays = Math.floor(liveStreamCounter * (rangeMultiplier / 1));
-    const royaltyEarnings = parseFloat((liveRoyaltyPool * rangeMultiplier).toFixed(2));
-    const primarySales = parseFloat((840.50 * rangeMultiplier).toFixed(2));
-    const totalEarnings = parseFloat((primarySales + royaltyEarnings).toFixed(2));
-    const recentTradeVolume = parseFloat((1840.20 * rangeMultiplier).toFixed(2));
-    const nftSalesCount = Math.floor(156 * rangeMultiplier);
-    const collectorsCount = Math.floor(482 * Math.min(rangeMultiplier, 5));
-    const avgRoyaltyRate = 7.5; // 7.5% average secondary royalty
+    const totalPlays = creatorTracks.reduce(
+      (sum, t) => sum + (Number(t.playCount ?? (t as any).plays ?? 0) || 0),
+      0
+    );
+
+    const avgRoyaltyRate =
+      creatorNfts.length > 0
+        ? parseFloat(
+            (
+              creatorNfts.reduce((sum, n) => sum + (Number(n.royalty) || 0), 0) /
+              creatorNfts.length
+            ).toFixed(1)
+          )
+        : 0;
+
+    let primarySales = 0;
+    let royaltyEarnings = 0;
+    let recentTradeVolume = 0;
+    const uniqueBuyers = new Set<string>();
+
+    filteredSales.forEach((s) => {
+      const val = Number(s.price ?? s.amount ?? 0) || 0;
+      recentTradeVolume += val;
+      if (s.isPrimary) {
+        primarySales += val;
+      } else {
+        const royalty =
+          s.royaltyAmount !== undefined
+            ? Number(s.royaltyAmount) || 0
+            : val * (avgRoyaltyRate / 100);
+        royaltyEarnings += royalty;
+      }
+      if (s.buyerId) uniqueBuyers.add(s.buyerId);
+    });
+
+    creatorNfts.forEach((n) => {
+      if (n.ownerId && n.ownerId !== userProfile?.uid) uniqueBuyers.add(n.ownerId);
+    });
 
     return {
       totalPlays,
-      royaltyEarnings,
-      primarySales,
-      totalEarnings,
-      recentTradeVolume,
-      nftSalesCount,
-      collectorsCount,
-      avgRoyaltyRate
+      royaltyEarnings: parseFloat(royaltyEarnings.toFixed(2)),
+      primarySales: parseFloat(primarySales.toFixed(2)),
+      totalEarnings: parseFloat((primarySales + royaltyEarnings).toFixed(2)),
+      recentTradeVolume: parseFloat(recentTradeVolume.toFixed(2)),
+      nftSalesCount: filteredSales.length,
+      collectorsCount: uniqueBuyers.size,
+      avgRoyaltyRate,
     };
-  }, [rangeMultiplier, liveStreamCounter, liveRoyaltyPool]);
+  }, [creatorTracks, creatorNfts, filteredSales, userProfile?.uid]);
 
-  // Chart data for Plays vs Trade Volume
+  // Real time-bucketed chart data
   const chartData = useMemo(() => {
-    if (dateRange.preset === '24h') {
-      return [
-        { label: '00:00', plays: 1200, volume: 45, royalties: 3.2 },
-        { label: '04:00', plays: 1800, volume: 80, royalties: 6.0 },
-        { label: '08:00', plays: 3200, volume: 150, royalties: 11.2 },
-        { label: '12:00', plays: 5400, volume: 290, royalties: 21.7 },
-        { label: '16:00', plays: 4800, volume: 240, royalties: 18.0 },
-        { label: '20:00', plays: 6100, volume: 340, royalties: 25.5 },
-      ];
-    }
-    if (dateRange.preset === '7d') {
-      return [
-        { label: 'Mon', plays: 14200, volume: 180, royalties: 13.5 },
-        { label: 'Tue', plays: 18900, volume: 240, royalties: 18.0 },
-        { label: 'Wed', plays: 16500, volume: 210, royalties: 15.7 },
-        { label: 'Thu', plays: 22400, volume: 310, royalties: 23.2 },
-        { label: 'Fri', plays: 31000, volume: 480, royalties: 36.0 },
-        { label: 'Sat', plays: 28500, volume: 420, royalties: 31.5 },
-        { label: 'Sun', plays: 24800, volume: 360, royalties: 27.0 },
-      ];
-    }
-    if (dateRange.preset === 'custom') {
-      const basePlays = Math.floor(12000 * rangeMultiplier / 4);
-      const baseVol = Math.floor(150 * rangeMultiplier / 4);
-      return [
-        { label: 'P1', plays: basePlays, volume: baseVol, royalties: parseFloat((baseVol * 0.075).toFixed(1)) },
-        { label: 'P2', plays: Math.floor(basePlays * 1.3), volume: Math.floor(baseVol * 1.4), royalties: parseFloat((baseVol * 1.4 * 0.075).toFixed(1)) },
-        { label: 'P3', plays: Math.floor(basePlays * 1.1), volume: Math.floor(baseVol * 1.2), royalties: parseFloat((baseVol * 1.2 * 0.075).toFixed(1)) },
-        { label: 'P4', plays: Math.floor(basePlays * 1.5), volume: Math.floor(baseVol * 1.6), royalties: parseFloat((baseVol * 1.6 * 0.075).toFixed(1)) },
-      ];
-    }
-    return [
-      { label: 'Wk 1', plays: 84000, volume: 1200, royalties: 90 },
-      { label: 'Wk 2', plays: 102000, volume: 1540, royalties: 115.5 },
-      { label: 'Wk 3', plays: 135000, volume: 1890, royalties: 141.7 },
-      { label: 'Wk 4', plays: 168000, volume: 2400, royalties: 180 },
-    ];
-  }, [dateRange.preset, rangeMultiplier]);
+    const bucketLabels =
+      dateRange.preset === '24h'
+        ? ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00']
+        : dateRange.preset === '7d'
+        ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        : ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4'];
 
-  // Specific Music NFT list with real-time stats
+    const buckets = bucketLabels.map((label) => ({
+      label,
+      plays: 0,
+      volume: 0,
+      royalties: 0,
+    }));
+
+    filteredSales.forEach((s) => {
+      const rawTs = s.timestamp || s.createdAt;
+      const date = rawTs?.toDate ? rawTs.toDate() : rawTs ? new Date(rawTs) : null;
+      if (!date || isNaN(date.getTime())) return;
+
+      let idx = 0;
+      if (dateRange.preset === '24h') {
+        idx = Math.min(buckets.length - 1, Math.floor(date.getHours() / 4));
+      } else if (dateRange.preset === '7d') {
+        idx = (date.getDay() + 6) % 7;
+      } else {
+        idx = Math.min(buckets.length - 1, Math.floor((date.getDate() - 1) / 8));
+      }
+
+      const val = Number(s.price ?? s.amount ?? 0) || 0;
+      buckets[idx].volume = parseFloat((buckets[idx].volume + val).toFixed(2));
+      const royalty =
+        s.royaltyAmount !== undefined
+          ? Number(s.royaltyAmount) || 0
+          : val * (metrics.avgRoyaltyRate / 100);
+      buckets[idx].royalties = parseFloat((buckets[idx].royalties + royalty).toFixed(2));
+    });
+
+    if (buckets.length > 0 && metrics.totalPlays > 0) {
+      buckets[buckets.length - 1].plays = metrics.totalPlays;
+    }
+
+    return buckets;
+  }, [dateRange.preset, filteredSales, metrics.avgRoyaltyRate, metrics.totalPlays]);
+
+  // Specific Music NFT list with real Firestore metrics
   const musicNFTsList = useMemo(() => {
-    const tracks = allTracks && allTracks.length > 0 ? allTracks.slice(0, 5) : MOCK_TRACKS.slice(0, 5);
-    return tracks.map((track, idx) => {
-      const plays = 24500 + (idx * 8400);
-      const floorPrice = (2.5 + (idx * 1.2)).toFixed(1);
-      const tradeVolume = (145.0 + (idx * 62.5)).toFixed(1);
-      const royaltyEarned = (parseFloat(tradeVolume) * 0.075).toFixed(2);
-      const mintedCount = 100 - (idx * 15);
-      const totalSupply = 100;
+    return creatorNfts.map((nftItem) => {
+      const trackMatch = creatorTracks.find((t) => t.id === nftItem.trackId || t.id === nftItem.id);
+      const itemSales = sales.filter((s) => s.nftId === nftItem.id);
+      const tradeVolume = itemSales.reduce((acc, s) => acc + (Number(s.price ?? s.amount) || 0), 0);
+      const royaltyRate = Number(nftItem.royalty) || 0;
+      const royaltyEarned = itemSales.reduce(
+        (acc, s) =>
+          acc +
+          (s.royaltyAmount !== undefined
+            ? Number(s.royaltyAmount) || 0
+            : s.isPrimary
+            ? 0
+            : (Number(s.price ?? s.amount) || 0) * (royaltyRate / 100)),
+        0
+      );
 
       return {
-        id: track.id,
-        title: track.title,
-        artist: track.artist || userProfile?.name || 'Artist',
-        coverUrl: track.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
-        plays,
-        floorPrice: `${floorPrice} TON`,
-        tradeVolume: `${tradeVolume} TON`,
-        royaltyEarned: `${royaltyEarned} TON`,
-        mintedCount,
-        totalSupply,
-        trackObj: track
+        id: nftItem.id,
+        title: nftItem.title,
+        artist: nftItem.creator || userProfile?.name || 'Artist',
+        coverUrl: nftItem.imageUrl || trackMatch?.coverUrl || getPlaceholderImage(`nft-${nftItem.id}`),
+        plays: Number(trackMatch?.playCount ?? (trackMatch as any)?.plays ?? 0) || 0,
+        floorPrice: nftItem.price ? `${nftItem.price} TON` : '—',
+        tradeVolume: `${tradeVolume.toFixed(2)} TON`,
+        royaltyEarned: `${royaltyEarned.toFixed(2)} TON`,
+        mintedCount: nftItem.minted ?? 0,
+        totalSupply: nftItem.supply ?? 1,
+        trackObj: trackMatch || ({
+          id: nftItem.trackId || nftItem.id,
+          title: nftItem.title,
+          artist: nftItem.creator,
+          artistId: nftItem.creatorId || '',
+          coverUrl: nftItem.imageUrl,
+          audioUrl: (nftItem as any).audioUrl || '',
+          duration: 0,
+          genre: (nftItem as any).genre || '',
+        } as any),
       };
     });
-  }, [allTracks, userProfile]);
+  }, [creatorNfts, creatorTracks, sales, userProfile?.name]);
 
-  // Top performing tracks list calculated for the selected date range
+  // Top performing tracks list calculated from real play counts
   const topPerformingTracks = useMemo(() => {
-    const tracks = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
-    
-    const processed = tracks.map((track, idx) => {
-      const trackPlays = (track as any).plays;
-      const basePlays = (typeof trackPlays === 'number' && trackPlays > 0) ? trackPlays : (52400 - (idx * 8200) + (idx % 2 === 0 ? 3200 : -1500));
-      const rangePlays = Math.max(12, Math.round(basePlays * rangeMultiplier));
+    const processed = creatorTracks.map((track, idx) => {
+      const plays = Number(track.playCount ?? (track as any).plays ?? 0) || 0;
       return {
         id: track.id || `top-track-${idx}`,
         title: track.title,
         artist: track.artist || userProfile?.name || 'Artist',
-        coverUrl: track.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
-        plays: rangePlays,
+        coverUrl: track.coverUrl || getPlaceholderImage(`track-${track.id}`),
+        plays,
         trackObj: track,
       };
     });
@@ -367,17 +410,38 @@ export const CreatorDashboard: React.FC = () => {
     return top5.map((item, index) => ({
       ...item,
       rank: index + 1,
-      percentage: totalPlays > 0 ? Math.round((item.plays / totalPlays) * 100) : 20,
+      percentage: totalPlays > 0 ? Math.round((item.plays / totalPlays) * 100) : 0,
     }));
-  }, [allTracks, userProfile, rangeMultiplier]);
+  }, [creatorTracks, userProfile?.name]);
 
   const handleExportData = () => {
-    const rangeName = dateRange.preset === 'custom' && dateRange.startDate && dateRange.endDate
-      ? `${dateRange.startDate}_to_${dateRange.endDate}`
-      : dateRange.preset;
+    const rangeName =
+      dateRange.preset === 'custom' && dateRange.startDate && dateRange.endDate
+        ? `${dateRange.startDate}_to_${dateRange.endDate}`
+        : dateRange.preset;
 
-    toast.success('Exporting Creator Royalty & Analytics Report', {
-      description: `Downloaded TonJam_Creator_Analytics_${rangeName}.csv`
+    const rows = [
+      ['Title', 'Artist', 'Plays', 'Floor Price', 'Trade Volume', 'Royalty Earned'],
+      ...musicNFTsList.map((n) => [
+        n.title,
+        n.artist,
+        String(n.plays),
+        n.floorPrice,
+        n.tradeVolume,
+        n.royaltyEarned,
+      ]),
+    ];
+    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `TonJam_Creator_Analytics_${rangeName}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    toast.success('Exported Creator Royalty & Analytics Report', {
+      description: `Downloaded TonJam_Creator_Analytics_${rangeName}.csv`,
     });
   };
 
@@ -467,46 +531,36 @@ export const CreatorDashboard: React.FC = () => {
 
                   {/* Milestones List */}
                   <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                    {milestones.map((m) => (
-                      <div
-                        key={m.id}
-                        className={cn(
-                          "p-2.5 rounded-2xl transition-all border border-white/5 space-y-1 relative group",
-                          m.isNew ? "bg-amber-500/10 border-amber-500/30" : "bg-white/5 hover:bg-white/10"
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
-                            <Sparkles className="w-3 h-3" /> {m.title}
-                          </span>
-                          <span className="text-[9px] font-mono text-zinc-400">{m.timeAgo}</span>
+                    {milestones.length === 0 ? (
+                      <p className="text-xs text-zinc-400 text-center py-6">No milestones unlocked yet.</p>
+                    ) : (
+                      milestones.map((m) => (
+                        <div
+                          key={m.id}
+                          className={cn(
+                            "p-2.5 rounded-2xl transition-all border border-white/5 space-y-1 relative group",
+                            m.isNew ? "bg-amber-500/10 border-amber-500/30" : "bg-white/5 hover:bg-white/10"
+                          )}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                              <Sparkles className="w-3 h-3" /> {m.title}
+                            </span>
+                            <span className="text-[9px] font-mono text-zinc-400">{m.timeAgo}</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-200 font-medium leading-snug">{m.description}</p>
+                          <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                            <span className="text-[10px] font-mono font-bold text-cyan-400">{m.metric}</span>
+                            <button
+                              onClick={() => triggerMilestoneToast(m)}
+                              className="text-[9px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-0.5 bg-amber-500/10 hover:bg-amber-500/20 px-2 py-0.5 rounded-lg transition-all cursor-pointer border-none outline-none"
+                            >
+                              Show Alert
+                            </button>
+                          </div>
                         </div>
-                        <p className="text-[11px] text-zinc-200 font-medium leading-snug">{m.description}</p>
-                        <div className="flex items-center justify-between pt-1 border-t border-white/5">
-                          <span className="text-[10px] font-mono font-bold text-cyan-400">{m.metric}</span>
-                          <button
-                            onClick={() => triggerMilestoneToast(m)}
-                            className="text-[9px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-0.5 bg-amber-500/10 hover:bg-amber-500/20 px-2 py-0.5 rounded-lg transition-all cursor-pointer border-none outline-none"
-                          >
-                            Trigger Toast Alert
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Action to simulate fresh milestone alert */}
-                  <div className="pt-3 mt-3 border-t border-white/10">
-                    <button
-                      onClick={() => {
-                        handleSimulateMilestone();
-                        setIsMilestoneMenuOpen(false);
-                      }}
-                      className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border-none outline-none shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5"
-                    >
-                      <Zap className="w-3.5 h-3.5 fill-black" />
-                      Simulate Milestone Alert Toast
-                    </button>
+                      ))
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -563,14 +617,14 @@ export const CreatorDashboard: React.FC = () => {
             <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
               <Headphones className="w-5 h-5 text-blue-400" />
             </div>
-            <span className="flex items-center gap-1 text-[10px] font-mono font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-              <TrendingUp className="w-3 h-3" /> +18.4%
+            <span className="flex items-center gap-1 text-[10px] font-mono font-black text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
+              <Music className="w-3 h-3" /> {creatorTracks.length} Tracks
             </span>
           </div>
 
           <div>
             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">
-              Total Music NFT Plays
+              Total Track Plays
             </span>
             <div className="flex items-baseline gap-2 mt-1">
               <h3 className="text-2xl font-black font-mono text-white tracking-tight">
@@ -581,8 +635,8 @@ export const CreatorDashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1 border-t border-white/5">
-            <span>Avg. Daily Listeners</span>
-            <span className="font-mono font-bold text-white">14,280 / day</span>
+            <span>Catalog Releases</span>
+            <span className="font-mono font-bold text-white">{creatorTracks.length} Published</span>
           </div>
         </div>
 
@@ -762,7 +816,7 @@ export const CreatorDashboard: React.FC = () => {
                         alt={item.title} 
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80';
+                          e.currentTarget.src = getPlaceholderImage(`track-${item.id}`);
                         }}
                       />
                       <button
@@ -902,7 +956,7 @@ export const CreatorDashboard: React.FC = () => {
                             alt={item.title} 
                             className="w-full h-full object-cover" 
                             onError={(e) => {
-                              e.currentTarget.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80';
+                              e.currentTarget.src = getPlaceholderImage(`nft-${item.id}`);
                             }}
                           />
                           <button

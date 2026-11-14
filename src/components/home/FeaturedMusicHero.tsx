@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Play, Pause, Sparkles, Plus, Check, Music, Headphones } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import { Track } from "@/types";
-import { MOCK_TRACKS } from "@/constants";
 import LazyArtworkImage from "@/components/common/LazyArtworkImage";
 import { getPlaceholderImage } from "@/lib/utils";
 import { toast } from "sonner";
@@ -20,12 +19,9 @@ export const FeaturedMusicHero: React.FC = () => {
   const { allTracks, currentTrack, isPlaying, playTrack, togglePlay, addToQueue } = useAudio();
   const [queued, setQueued] = useState(false);
 
-  // Pick top featured track from real catalog, or fallback to constants
   const featuredTrack: Track | null = useMemo(() => {
-    const list = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
-    if (!list || list.length === 0) return null;
-    // Prefer track marked as NFT or with highest plays
-    const sorted = [...list].sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
+    if (!allTracks || allTracks.length === 0) return null;
+    const sorted = [...allTracks].sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
     return sorted[0] || null;
   }, [allTracks]);
 
@@ -81,12 +77,10 @@ export const FeaturedMusicHero: React.FC = () => {
         role="region"
         aria-label="Featured music release"
       >
-        {/* Ambient TonJam Blue Glow in the background (no border lines) */}
         <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-[#0088CC]/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 sm:gap-8">
-          {/* Cover Artwork */}
           <div className="relative w-full md:w-56 lg:w-64 aspect-square rounded-2xl overflow-hidden shrink-0 bg-neutral-900 shadow-xl shadow-black/60 group-hover:scale-[1.02] transition-transform duration-300">
             <LazyArtworkImage
               src={featuredTrack.coverUrl || getPlaceholderImage(`track-${featuredTrack.id}`)}
@@ -94,7 +88,6 @@ export const FeaturedMusicHero: React.FC = () => {
               alt={featuredTrack.title}
               className="w-full h-full object-cover"
             />
-            {/* Quick Play overlay for desktop */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-end p-3 md:hidden">
               <button
                 type="button"
@@ -111,10 +104,8 @@ export const FeaturedMusicHero: React.FC = () => {
             </div>
           </div>
 
-          {/* Details & Action Controls */}
           <div className="flex-1 min-w-0 w-full flex flex-col justify-between py-1 space-y-4">
             <div className="space-y-2">
-              {/* Badge Row */}
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0088CC]/20 text-[#0088CC] text-[11px] font-bold uppercase tracking-wider">
                   <Sparkles className="w-3 h-3 text-[#0088CC]" />
@@ -132,7 +123,6 @@ export const FeaturedMusicHero: React.FC = () => {
                 )}
               </div>
 
-              {/* Title & Artist */}
               <div className="pt-1">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight group-hover:text-cyan-200 transition-colors line-clamp-2">
                   {featuredTrack.title}
@@ -146,7 +136,6 @@ export const FeaturedMusicHero: React.FC = () => {
                 </button>
               </div>
 
-              {/* Metadata strip */}
               <div className="flex items-center gap-4 text-xs text-zinc-400 pt-1">
                 {featuredTrack.duration ? (
                   <span>{formatTrackDuration(featuredTrack.duration)}</span>
@@ -160,7 +149,6 @@ export const FeaturedMusicHero: React.FC = () => {
               </div>
             </div>
 
-            {/* CTAs */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
                 type="button"

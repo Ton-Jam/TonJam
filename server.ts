@@ -2223,24 +2223,24 @@ async function startServer() {
             </html>
         `);
     });
-    app.post('/api/pinata/upload', uploadRateLimiter, upload.single('file'), async (req, res) => {
+    // Secure Genuine Pinata/IPFS Upload Endpoint
+    app.post('/api/pinata/upload', uploadRateLimiter, optionalAuth, upload.single('file'), async (req, res) => {
         if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
+            return res.status(400).json({ error: 'No media file provided for IPFS upload' });
         }
 
         const PINATA_API_KEY = process.env.PINATA_API_KEY;
         const PINATA_API_SECRET = process.env.PINATA_API_SECRET;
         const PINATA_JWT = process.env.PINATA_JWT;
 
+        // If Pinata credentials are not configured, return explicit configuration error
         if (!PINATA_JWT && (!PINATA_API_KEY || !PINATA_API_SECRET)) {
-            const mockHash = 'Qm' + Array.from({length: 44}, () => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 62)]).join('');
-            const localFileUrl = `/uploads/${path.basename(req.file.path)}`;
-            return res.json({ 
-                success: true, 
-                ipfsHash: mockHash, 
-                ipfsUrl: localFileUrl,
-                simulated: true,
-                message: "Pinata credentials missing - generated IPFS hash with local file endpoint" 
+            if (fs.existsSync(req.file.path)) {
+                try { fs.unlinkSync(req.file.path); } catch {}
+            }
+            return res.status(503).json({ 
+                error: 'Pinata IPFS credentials are not configured on the server. Please set PINATA_JWT or PINATA_API_KEY in environment variables.',
+                code: 'PINATA_UNCONFIGURED'
             });
         }
 
@@ -2267,51 +2267,49 @@ async function startServer() {
                 maxContentLength: Infinity,
             });
 
-            if (fs.existsSync(req.file.path)) {
-                fs.unlinkSync(req.file.path);
+            const ipfsHash = pinataResponse.data?.IpfsHash;
+            if (!ipfsHash || typeof ipfsHash !== 'string') {
+                throw new Error('Pinata response missing valid IpfsHash');
             }
 
-            const ipfsHash = pinataResponse.data.IpfsHash;
-            if (!ipfsHash) {
-                throw new Error('Pinata response missing IpfsHash');
+            // Validate CID format (CIDv0 Qm... 46 chars, or CIDv1 bafy...)
+            const isValidCid = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|bafy[a-z0-9]{55,65})$/.test(ipfsHash);
+            if (!isValidCid) {
+                throw new Error(`Invalid IPFS CID format received from gateway: ${ipfsHash}`);
             }
+
             const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
-
-            res.json({ success: true, ipfsHash, ipfsUrl });
+            return res.json({ success: true, ipfsHash, ipfsUrl });
         } catch (error: any) {
-            const errorData = error.response?.data;
-            console.error('Pinata Upload Error Detail:', JSON.stringify(errorData || error.message, null, 2));
-            
-            const mockHash = 'Qm' + Array.from({length: 44}, () => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 62)]).join('');
-            const localFileUrl = req.file ? `/uploads/${path.basename(req.file.path)}` : `https://gateway.pinata.cloud/ipfs/${mockHash}`;
-
-            res.json({ 
-                success: true, 
-                ipfsHash: mockHash, 
-                ipfsUrl: localFileUrl, 
-                fallback: true,
-                errorDetails: error.message 
+            const errorMsg = error.response?.data?.error?.details || error.response?.data?.error || error.message || 'Pinata upload failed';
+            console.error('[Pinata Upload Error]:', errorMsg);
+            return res.status(502).json({ 
+                error: `Failed to pin media to IPFS: ${errorMsg}`,
+                code: 'IPFS_PIN_FAILED'
             });
+        } finally {
+            if (req.file && fs.existsSync(req.file.path)) {
+                try { fs.unlinkSync(req.file.path); } catch {}
+            }
         }
     });
 
-    app.post('/api/pinata/upload-json', uploadRateLimiter, async (req, res) => {
+    // Secure Genuine Pinata/IPFS Metadata JSON Endpoint
+    app.post('/api/pinata/upload-json', uploadRateLimiter, optionalAuth, async (req, res) => {
         const metadata = req.body;
-        if (!metadata) {
-            return res.status(400).json({ error: 'No metadata JSON provided' });
+        if (!metadata || typeof metadata !== 'object') {
+            return res.status(400).json({ error: 'Valid metadata JSON object required' });
         }
 
         const PINATA_API_KEY = process.env.PINATA_API_KEY;
         const PINATA_API_SECRET = process.env.PINATA_API_SECRET;
         const PINATA_JWT = process.env.PINATA_JWT;
 
+        // If Pinata credentials are not configured, return explicit configuration error
         if (!PINATA_JWT && (!PINATA_API_KEY || !PINATA_API_SECRET)) {
-            const mockHash = 'Qm' + Array.from({length: 44}, () => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 62)]).join('');
-            return res.json({
-                success: true,
-                ipfsHash: mockHash,
-                ipfsUrl: `https://gateway.pinata.cloud/ipfs/${mockHash}`,
-                simulated: true
+            return res.status(503).json({ 
+                error: 'Pinata IPFS credentials are not configured on the server. Please set PINATA_JWT or PINATA_API_KEY in environment variables.',
+                code: 'PINATA_UNCONFIGURED'
             });
         }
 
@@ -2330,22 +2328,29 @@ async function startServer() {
             const pinataResponse = await axios.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
                 pinataContent: metadata,
                 pinataMetadata: {
-                    name: metadata.name ? `${metadata.name}-metadata.json` : 'tonjam-music-nft.json'
+                    name: metadata.name ? `${metadata.name.slice(0, 50)}-metadata.json` : 'tonjam-music-nft.json'
                 }
             }, { headers });
 
-            const ipfsHash = pinataResponse.data.IpfsHash;
-            const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+            const ipfsHash = pinataResponse.data?.IpfsHash;
+            if (!ipfsHash || typeof ipfsHash !== 'string') {
+                throw new Error('Pinata response missing valid IpfsHash');
+            }
 
-            res.json({ success: true, ipfsHash, ipfsUrl });
+            // Validate CID format
+            const isValidCid = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|bafy[a-z0-9]{55,65})$/.test(ipfsHash);
+            if (!isValidCid) {
+                throw new Error(`Invalid IPFS CID format received from gateway: ${ipfsHash}`);
+            }
+
+            const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+            return res.json({ success: true, ipfsHash, ipfsUrl });
         } catch (error: any) {
-            console.error('Pinata JSON Upload Error:', error.message);
-            const mockHash = 'Qm' + Array.from({length: 44}, () => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 62)]).join('');
-            res.json({
-                success: true,
-                ipfsHash: mockHash,
-                ipfsUrl: `https://gateway.pinata.cloud/ipfs/${mockHash}`,
-                fallback: true
+            const errorMsg = error.response?.data?.error?.details || error.response?.data?.error || error.message || 'Pinata metadata upload failed';
+            console.error('[Pinata JSON Upload Error]:', errorMsg);
+            return res.status(502).json({ 
+                error: `Failed to pin metadata JSON to IPFS: ${errorMsg}`,
+                code: 'IPFS_JSON_PIN_FAILED'
             });
         }
     });

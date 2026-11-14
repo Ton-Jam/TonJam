@@ -9,7 +9,6 @@ import { useProactivePreloader } from '@/hooks/useProactivePreloader';
 import { motion, AnimatePresence } from 'motion/react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, limit, query } from 'firebase/firestore';
-import { seedDatabase } from '@/services/seedService';
 import { resolveEndedAuctions } from '@/services/auctionService';
 import HomePage from '@/pages/HomePage';
 import NotificationsPage from '@/pages/Notifications';
@@ -199,19 +198,6 @@ const AppRouterContent: React.FC = () => {
     };
     initBackend();
   }, []);
-
-  useEffect(() => {
-    const checkAndSeed = async () => {
-      if (user && (userProfile?.role === 'admin' || userProfile?.isAdmin === true)) {
-        try {
-          await seedDatabase();
-        } catch (error) {
-          console.warn("Seeding failed:", error);
-        }
-      }
-    };
-    checkAndSeed();
-  }, [user, userProfile]);
 
   useEffect(() => {
     resolveEndedAuctions();

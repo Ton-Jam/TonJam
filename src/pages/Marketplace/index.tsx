@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAudio } from "@/contexts/AudioContext";
 import { useTonConnectUI } from "@tonconnect/ui-react";
+import { Disc3, Gavel, Layers } from "lucide-react";
 import {
   MarketplaceHeader,
   FilterPill,
@@ -17,90 +18,6 @@ import {
 } from "@/components/marketplace";
 import { QuickBuyNFTModal, QuickBuyNFTData } from "@/components/marketplace/QuickBuyNFTModal";
 import { useMarketplace } from "./hooks/useMarketplace";
-import { MOCK_COLLECTIONS, MOCK_AUCTIONS } from "./mock";
-import { PRIMARY_COLLECTIONS } from "@/data/collectionsData";
-
-// Curated example cards explicitly requested in specification
-const CURATED_TRENDING_NFTS: MusicNFTData[] = [
-  {
-    id: "curated-1",
-    title: "Midnight Frequency",
-    artist: "Krupy Vibez",
-    artistVerified: true,
-    price: "3.5 TON",
-    edition: "12 of 50",
-    genre: "Afrobeats",
-    badge: "EXCLUSIVE",
-    imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80",
-    audioUrl: "/tonjam-offline-audio.mp3",
-    status: "Instant Collect",
-  },
-  {
-    id: "curated-2",
-    title: "Lagos After Dark",
-    artist: "Dangana Elias",
-    artistVerified: true,
-    price: "2.8 TON",
-    edition: "4 of 25",
-    genre: "Amapiano",
-    badge: "LIMITED",
-    imageUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&auto=format&fit=crop&q=80",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg",
-    status: "Instant Collect",
-  },
-  {
-    id: "curated-3",
-    title: "Blue Horizon",
-    artist: "Featured Artist",
-    artistVerified: true,
-    price: "4.2 TON",
-    edition: "1 of 10",
-    genre: "Electronic",
-    badge: "1 OF 10",
-    imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/soundtrack.mp3",
-    status: "Instant Collect",
-  },
-  {
-    id: "curated-4",
-    title: "Rhythm of Tomorrow",
-    artist: "Exclusive Collection",
-    artistVerified: true,
-    price: "5.0 TON",
-    edition: "7 of 50",
-    genre: "Soul & Jazz",
-    badge: "EXCLUSIVE",
-    imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80",
-    audioUrl: "/tonjam-offline-audio.mp3",
-    status: "Instant Collect",
-  },
-  {
-    id: "curated-5",
-    title: "Subtle Echoes",
-    artist: "Astro Beats",
-    artistVerified: true,
-    price: "3.2 TON",
-    edition: "18 of 100",
-    genre: "Ambient",
-    badge: "LIMITED",
-    imageUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&auto=format&fit=crop&q=80",
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/soundtrack.mp3",
-    status: "Instant Collect",
-  },
-  {
-    id: "curated-6",
-    title: "Golden Hour Symphony",
-    artist: "Lara Moon",
-    artistVerified: true,
-    price: "6.0 TON",
-    edition: "2 of 20",
-    genre: "R&B",
-    badge: "EXCLUSIVE",
-    imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80",
-    audioUrl: "/tonjam-offline-audio.mp3",
-    status: "Instant Collect",
-  },
-];
 
 const CATEGORIES = [
   "All",
@@ -121,7 +38,8 @@ export default function MarketplacePage() {
     searchTerm,
     setSearchTerm,
     filteredNFTs,
-    allNFTs,
+    liveAuctions: rawLiveAuctions,
+    trendingCollections: rawCollections,
     isLoading,
     isWalletConnected,
     collectionNFTCounts,
@@ -129,83 +47,39 @@ export default function MarketplacePage() {
 
   const [quickBuyNFT, setQuickBuyNFT] = useState<QuickBuyNFTData | null>(null);
 
-  // Combine curated and dynamic NFTs
   const trendingNFTs: MusicNFTData[] = useMemo(() => {
-    // If search term is present, filter across both
-    const baseList = [...CURATED_TRENDING_NFTS];
-    
-    // Add dynamic items from firestore/mock
-    const dynamicConverted: MusicNFTData[] = (allNFTs || []).slice(0, 16).map((item: any) => ({
+    return (filteredNFTs || []).map((item: any) => ({
       id: item.id,
-      title: item.title,
+      title: item.title || "Untitled NFT",
       artist: item.artist || item.creator || "TonJam Artist",
       artistVerified: Boolean(item.artistVerified),
-      price: item.price ? (String(item.price).includes("TON") ? item.price : `${item.price} TON`) : "2.5 TON",
-      edition: item.edition || "1 of 50",
+      price: item.price ? (String(item.price).includes("TON") ? item.price : `${item.price} TON`) : "0 TON",
+      edition: item.edition || "1/1",
       genre: item.genre || "Music NFT",
-      badge: item.rarity === "Legendary" ? "EXCLUSIVE" : "LIMITED",
-      imageUrl: item.imageUrl || item.coverUrl || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80",
-      audioUrl: item.audioUrl || "/tonjam-offline-audio.mp3",
-      status: "Instant Collect",
+      badge: item.rarity === "Legendary" ? "EXCLUSIVE" : item.rarity === "Rare" ? "LIMITED" : undefined,
+      imageUrl: item.imageUrl || item.coverUrl || "",
+      audioUrl: item.audioUrl || "",
+      status: item.listingType === "auction" ? "On Auction" : "Instant Collect",
     }));
+  }, [filteredNFTs]);
 
-    const combined = [...baseList, ...dynamicConverted];
-
-    if (!searchTerm.trim()) {
-      if (activeCategory === "Limited Editions") {
-        return combined.filter((n) => n.badge === "LIMITED" || n.edition?.includes("of 10") || n.edition?.includes("of 25"));
-      }
-      if (activeCategory === "New Drops") {
-        return [...combined].reverse();
-      }
-      return combined;
-    }
-
-    const query = searchTerm.toLowerCase();
-    return combined.filter(
-      (n) =>
-        n.title.toLowerCase().includes(query) ||
-        n.artist.toLowerCase().includes(query) ||
-        (n.genre && n.genre.toLowerCase().includes(query))
-    );
-  }, [allNFTs, searchTerm, activeCategory]);
-
-  // Transform mock auctions into formatted AuctionData
   const liveAuctions: AuctionData[] = useMemo(() => {
-    return MOCK_AUCTIONS.slice(0, 8).map((auc) => ({
+    return rawLiveAuctions.map((auc) => ({
       id: auc.id,
       title: auc.nft.title,
-      artist: auc.nft.artist,
-      artistVerified: auc.nft.artistVerified,
+      artist: auc.nft.artist || auc.nft.creator || "TonJam Artist",
+      artistVerified: Boolean(auc.nft.artistVerified),
       highestBid: auc.currentBid,
       bidsCount: auc.bidsCount,
       endTime: auc.endsAt,
-      imageUrl: auc.nft.coverUrl,
+      imageUrl: auc.nft.imageUrl || auc.nft.coverUrl || "",
       genre: (auc.nft as any).genre,
     }));
-  }, []);
+  }, [rawLiveAuctions]);
 
-  // Transform collections into formatted CollectionData with dynamic Total NFTs from Firestore NFT collection indices
   const exclusiveCollections: CollectionData[] = useMemo(() => {
-    // 1. Primary curated drops on TON with dynamic NFT index counts
-    const primaryFormatted: CollectionData[] = PRIMARY_COLLECTIONS.map((col, idx) => {
-      const dynamicTotal = collectionNFTCounts[col.id] || col.totalSupply || col.items?.length || col.nftIds?.length || 12;
-      return {
-        id: col.id,
-        name: col.name,
-        creator: col.creatorName,
-        creatorVerified: col.verified,
-        itemCount: dynamicTotal,
-        totalNFTs: dynamicTotal,
-        imageUrl: col.coverUrl,
-        badge: idx === 0 ? "GENESIS DROP" : idx === 1 ? "ALBUM DROP" : "CURATED",
-        floorPrice: `${col.floorPrice} TON`,
-      };
-    });
-
-    // 2. Additional collections from marketplace catalog with dynamic NFT index counts
-    const mockFormatted: CollectionData[] = MOCK_COLLECTIONS.slice(0, 6).map((col) => {
-      const dynamicTotal = collectionNFTCounts[col.id] || col.itemCount || 10;
+    return rawCollections.map((col) => {
+      const dynamicTotal = collectionNFTCounts[col.id] ?? col.itemCount ?? 0;
       return {
         id: col.id,
         name: col.name,
@@ -214,35 +88,23 @@ export default function MarketplacePage() {
         itemCount: dynamicTotal,
         totalNFTs: dynamicTotal,
         imageUrl: col.imageUrl,
-        badge: "EXCLUSIVE",
-        floorPrice: `${col.floorPrice} TON`,
+        badge: "COLLECTION",
+        floorPrice: col.floorPrice ? `${col.floorPrice} TON` : undefined,
       };
     });
+  }, [rawCollections, collectionNFTCounts]);
 
-    // Deduplicate by ID
-    const seenIds = new Set<string>();
-    const merged: CollectionData[] = [];
-    for (const item of [...primaryFormatted, ...mockFormatted]) {
-      if (!seenIds.has(item.id)) {
-        seenIds.add(item.id);
-        merged.push(item);
-      }
-    }
-    return merged.slice(0, 8);
-  }, [collectionNFTCounts]);
-
-  // Audio preview playback handler
   const handlePlayPreview = (nft: MusicNFTData) => {
     if (currentTrack?.id === nft.id) {
       togglePlay();
-    } else {
+    } else if (nft.audioUrl) {
       playTrack({
         id: nft.id,
         title: nft.title,
         artist: nft.artist,
         artwork: nft.imageUrl,
         coverUrl: nft.imageUrl,
-        audioUrl: nft.audioUrl || "/tonjam-offline-audio.mp3",
+        audioUrl: nft.audioUrl,
         duration: 180,
         isNFT: true,
         price: typeof nft.price === "number" ? `${nft.price} TON` : nft.price,
@@ -262,13 +124,11 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-transparent text-[#F5F8FF] pb-36 pt-2 px-0 sm:px-4 md:px-8 max-w-7xl mx-auto space-y-7">
-      {/* 2. SCREEN HEADER */}
       <MarketplaceHeader
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
       />
 
-      {/* 3. MARKETPLACE CATEGORY FILTERS */}
       <div className="px-4 sm:px-0">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 -mx-1 px-1">
           {CATEGORIES.map((cat) => (
@@ -282,7 +142,6 @@ export default function MarketplacePage() {
         </div>
       </div>
 
-      {/* 5. TRENDING MUSIC NFTs — HORIZONTAL CAROUSEL */}
       {activeCategory !== "Auctions" && (
         <section aria-labelledby="trending-nfts-heading">
           <MarketplaceSectionHeader
@@ -292,9 +151,16 @@ export default function MarketplacePage() {
             onAction={() => navigate("/trending-nfts")}
           />
 
-          {/* CRITICAL: Horizontal scrolling carousel with next card peek */}
           {isLoading ? (
             <CarouselSkeletonList type="nft" count={4} />
+          ) : trendingNFTs.length === 0 ? (
+            <div className="mx-4 sm:mx-0 py-10 px-6 rounded-2xl bg-white/[0.02] text-center space-y-2">
+              <Disc3 className="w-8 h-8 text-slate-500 mx-auto" />
+              <p className="text-sm font-bold text-white">No Music NFTs Listed Yet</p>
+              <p className="text-xs text-slate-400">
+                Minted audio NFTs on the TON network will appear here once published.
+              </p>
+            </div>
           ) : (
             <div className="overflow-x-auto scrollbar-none snap-x snap-mandatory flex gap-4 px-4 sm:px-0 pb-3">
               {trendingNFTs.map((nft) => (
@@ -313,7 +179,6 @@ export default function MarketplacePage() {
         </section>
       )}
 
-      {/* 6. LIVE AUCTIONS — HORIZONTAL CAROUSEL */}
       {activeCategory !== "Limited Editions" && activeCategory !== "New Drops" && (
         <section aria-labelledby="live-auctions-heading">
           <MarketplaceSectionHeader
@@ -323,21 +188,31 @@ export default function MarketplacePage() {
             onAction={() => navigate("/auctions")}
           />
 
-          {/* CRITICAL: Horizontal scrolling carousel with next card peek */}
-          <div className="overflow-x-auto scrollbar-none snap-x snap-mandatory flex gap-4 px-4 sm:px-0 pb-3">
-            {liveAuctions.map((auction) => (
-              <AuctionCard
-                key={auction.id}
-                auction={auction}
-                onPlaceBid={(auc) => navigate(`/nft/${auc.id}`)}
-                onView={(auc) => navigate(`/nft/${auc.id}`)}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <CarouselSkeletonList type="nft" count={4} />
+          ) : liveAuctions.length === 0 ? (
+            <div className="mx-4 sm:mx-0 py-10 px-6 rounded-2xl bg-white/[0.02] text-center space-y-2">
+              <Gavel className="w-8 h-8 text-slate-500 mx-auto" />
+              <p className="text-sm font-bold text-white">No Active Auctions</p>
+              <p className="text-xs text-slate-400">
+                Live NFT auctions from verified creators will appear here when scheduled.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto scrollbar-none snap-x snap-mandatory flex gap-4 px-4 sm:px-0 pb-3">
+              {liveAuctions.map((auction) => (
+                <AuctionCard
+                  key={auction.id}
+                  auction={auction}
+                  onPlaceBid={(auc) => navigate(`/nft/${auc.id}`)}
+                  onView={(auc) => navigate(`/nft/${auc.id}`)}
+                />
+              ))}
+            </div>
+          )}
         </section>
       )}
 
-      {/* 7. EXCLUSIVE COLLECTIONS — HORIZONTAL CAROUSEL */}
       {activeCategory === "All" && (
         <section aria-labelledby="exclusive-collections-heading">
           <MarketplaceSectionHeader
@@ -347,9 +222,16 @@ export default function MarketplacePage() {
             onAction={() => navigate("/collections")}
           />
 
-          {/* CRITICAL: Horizontal scrolling carousel with next card peek */}
           {isLoading ? (
             <CarouselSkeletonList type="collection" count={4} />
+          ) : exclusiveCollections.length === 0 ? (
+            <div className="mx-4 sm:mx-0 py-10 px-6 rounded-2xl bg-white/[0.02] text-center space-y-2">
+              <Layers className="w-8 h-8 text-slate-500 mx-auto" />
+              <p className="text-sm font-bold text-white">No Collections Yet</p>
+              <p className="text-xs text-slate-400">
+                Verified music NFT collections published in Firestore will appear here.
+              </p>
+            </div>
           ) : (
             <div className="overflow-x-auto scrollbar-none snap-x snap-mandatory flex gap-4 px-4 sm:px-0 pb-3">
               {exclusiveCollections.map((collection) => (
@@ -364,7 +246,6 @@ export default function MarketplacePage() {
         </section>
       )}
 
-      {/* 8. MARKETPLACE TRANSPARENCY */}
       <div className="px-4 sm:px-0 pt-2">
         <MarketplaceTransparency
           onConnectWallet={handleConnectWallet}
@@ -372,7 +253,6 @@ export default function MarketplacePage() {
         />
       </div>
 
-      {/* Compact Centered Quick Buy Modal without navigating away from the marketplace */}
       <QuickBuyNFTModal
         isOpen={Boolean(quickBuyNFT)}
         onClose={() => setQuickBuyNFT(null)}

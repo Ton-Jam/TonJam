@@ -7,7 +7,6 @@ import {
   MessageSquare, 
   Coins, 
   Sparkles, 
-  UserPlus,
   Send,
   Zap,
   Check,
@@ -16,6 +15,9 @@ import {
   Volume2
 } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query, where, orderBy, limit } from 'firebase/firestore';
 import { Track } from '@/types';
 
 interface ListenerActivityFeedProps {
@@ -30,7 +32,7 @@ interface Interaction {
   trackTitle: string;
   trackId?: string;
   detail?: string;
-  timestamp: string; // "Just now", "2m ago", "12m ago", etc.
+  timestamp: string;
   rawTime: Date;
   repliedMessage?: string;
   avatarBg: string;
@@ -45,23 +47,14 @@ const AVATAR_BGS = [
   'bg-emerald-500/15 text-emerald-400',
 ];
 
-const USERNAME_POOL = [
-  'ton_wizard', 'soundwave_01', 'cryptosonic', 'krupy_grooves', 
-  'sol_rebel', 'jammin_ton', 'beats_by_ton', 'dubstep_ninja',
-  'cyber_bard', '0x_vibe', 'harmonic_whale', 'neon_dancer',
-  'bass_lord', 'melodic_phoenix', 'lofi_duck', 'synth_cat'
-];
-
-const COMMENT_POOL = [
-  'These drums hit hard! 🔥',
-  'This is going playing on repeat all weekend.',
-  'Insane production quality here.',
-  'Can we get a VIP remix of this??',
-  'Absolute masterpiece. TONJAM is the future!',
-  'Brings back retro gaming vibes 🎮',
-  'Who wrote this chord progression? Super slick.',
-  'Beautiful atmospheric arrangement.'
-];
+const formatRelativeTime = (date: Date): string => {
+  const diffMins = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${Math.floor(diffHours / 24)}d ago`;
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -78,157 +71,125 @@ const itemVariants = {
 };
 
 export default function ListenerActivityFeed({ tracks }: ListenerActivityFeedProps) {
-  const { playTrack, currentTrack, isPlaying, addNotification } = useAudio();
+  const { playTrack } = useAudio();
+  const { userProfile } = useAuth();
   const [activeFilter, setActiveFilter] = useState<'all' | 'streams' | 'likes' | 'engagements'>('all');
   const [isLiveEnabled, setIsLiveEnabled] = useState<boolean>(true);
-  const [activities, setActivities] = useState<Interaction[]>(() => {
-    // Initial dummy data matching artist activities
-    const now = new Date();
-    return [
-      {
-        id: 'act-1',
-        type: 'tip',
-        username: 'ton_wizard',
-        userAvatarSeed: 'TW',
-        trackTitle: tracks[0]?.title || 'Cosmic Journey',
-        trackId: tracks[0]?.id,
-        detail: 'Tipped 10 TON to support the release! 💎',
-        timestamp: '3m ago',
-        rawTime: new Date(now.getTime() - 3 * 60 * 1000),
-        avatarBg: AVATAR_BGS[0],
-      },
-      {
-        id: 'act-2',
-        type: 'comment',
-        username: 'neon_dancer',
-        userAvatarSeed: 'ND',
-        trackTitle: tracks[1]?.title || 'Sunset Boulevard',
-        trackId: tracks[1]?.id,
-        detail: 'Commented: "These drums hit hard! 🔥"',
-        timestamp: '7m ago',
-        rawTime: new Date(now.getTime() - 7 * 60 * 1000),
-        avatarBg: AVATAR_BGS[1],
-      },
-      {
-        id: 'act-3',
-        type: 'stream',
-        username: 'lofi_duck',
-        userAvatarSeed: 'LD',
-        trackTitle: tracks[0]?.title || 'Cosmic Journey',
-        trackId: tracks[0]?.id,
-        timestamp: '12m ago',
-        rawTime: new Date(now.getTime() - 12 * 60 * 1000),
-        avatarBg: AVATAR_BGS[4],
-      },
-      {
-        id: 'act-4',
-        type: 'like',
-        username: 'synth_cat',
-        userAvatarSeed: 'SC',
-        trackTitle: tracks[2]?.title || 'Analog Dreams',
-        trackId: tracks[2]?.id,
-        timestamp: '22m ago',
-        rawTime: new Date(now.getTime() - 22 * 60 * 1000),
-        avatarBg: AVATAR_BGS[3],
-      },
-      {
-        id: 'act-5',
-        type: 'collect',
-        username: '0x_vibe',
-        userAvatarSeed: 'XV',
-        trackTitle: tracks[0]?.title || 'Cosmic Journey',
-        trackId: tracks[0]?.id,
-        detail: 'Collected Edition #12/100 NFT!',
-        timestamp: '1h ago',
-        rawTime: new Date(now.getTime() - 60 * 60 * 1000),
-        avatarBg: AVATAR_BGS[2],
-      }
-    ];
-  });
+  const [salesActivities, setSalesActivities] = useState<Interaction[]>([]);
+  const [commentActivities, setCommentActivities] = useState<Interaction[]>([]);
+  const [txActivities, setTxActivities] = useState<Interaction[]>([]);
+  const [repliedMap, setRepliedMap] = useState<Record<string, string>>({});
 
   const [replyInputId, setReplyInputId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState<string>('');
 
-  // Periodically generate simulated activity if Live Feed is active
+  const trackIdSet = useMemo(() => new Set(tracks.map(t => t.id)), [tracks]);
+  const trackMap = useMemo(() => new Map(tracks.map(t => [t.id, t])), [tracks]);
+
   useEffect(() => {
     if (!isLiveEnabled) return;
 
-    const interval = setInterval(() => {
-      // Pick a random track or default
-      const trackObj = tracks.length > 0
-        ? tracks[Math.floor(Math.random() * tracks.length)]
-        : { id: 'default', title: 'Sonic Dimension' };
-
-      // Probability of event type: 40% stream, 30% like, 15% comment, 10% tip, 5% collect
-      const rand = Math.random();
-      let type: 'stream' | 'like' | 'comment' | 'tip' | 'collect' = 'stream';
-      let detail = '';
-
-      if (rand < 0.4) {
-        type = 'stream';
-      } else if (rand < 0.7) {
-        type = 'like';
-      } else if (rand < 0.85) {
-        type = 'comment';
-        detail = `Commented: "${COMMENT_POOL[Math.floor(Math.random() * COMMENT_POOL.length)]}"`;
-      } else if (rand < 0.95) {
-        type = 'tip';
-        const amount = Math.floor(Math.random() * 8) + 3;
-        detail = `Tipped ${amount} TON to support the release! 💎`;
-      } else {
-        type = 'collect';
-        const ed = Math.floor(Math.random() * 50) + 1;
-        detail = `Collected Edition #${ed}/100 NFT!`;
-      }
-
-      const rawUsername = USERNAME_POOL[Math.floor(Math.random() * USERNAME_POOL.length)];
-      const userInitials = rawUsername.split('_').map(n => n[0].toUpperCase()).join('').substring(0, 2);
-
-      const newActivity: Interaction = {
-        id: `act-${Date.now()}`,
-        type,
-        username: rawUsername,
-        userAvatarSeed: userInitials,
-        trackTitle: trackObj.title,
-        trackId: trackObj.id,
-        detail: detail || undefined,
-        timestamp: 'Just now',
-        rawTime: new Date(),
-        avatarBg: AVATAR_BGS[Math.floor(Math.random() * AVATAR_BGS.length)]
-      };
-
-      // Add fresh activity to state and shift lists
-      setActivities(prev => [newActivity, ...prev].slice(0, 15));
-
-      // Notification hook
-      if (type === 'tip' || type === 'collect' || type === 'comment') {
-        if (addNotification) {
-          addNotification(`${rawUsername} ${type === 'tip' ? 'tipped TON!' : type === 'collect' ? 'collected an NFT!' : 'commented on your track'}`, 'success');
+    const salesQuery = query(collection(db, 'nftSales'), limit(25));
+    const unsubSales = onSnapshot(salesQuery, (snapshot) => {
+      const items: Interaction[] = [];
+      snapshot.docs.forEach((docSnap, idx) => {
+        const d = docSnap.data() as any;
+        if (userProfile?.uid && d.sellerId && d.sellerId !== userProfile.uid && d.creatorId !== userProfile.uid) {
+          return;
         }
-      }
-    }, 12000); // add new state item every 12s
+        const rawTime = d.timestamp ? new Date(d.timestamp) : new Date();
+        const username = d.buyerName || d.buyerAddress?.slice(0, 10) || 'Collector';
+        items.push({
+          id: `sale-${docSnap.id}`,
+          type: 'collect',
+          username,
+          userAvatarSeed: username.slice(0, 2).toUpperCase(),
+          trackTitle: d.nftTitle || d.title || 'Music NFT',
+          trackId: d.trackId,
+          detail: `Collected NFT for ${d.price || d.amount || 0} TON`,
+          timestamp: formatRelativeTime(rawTime),
+          rawTime,
+          avatarBg: AVATAR_BGS[idx % AVATAR_BGS.length],
+        });
+      });
+      setSalesActivities(items);
+    }, () => setSalesActivities([]));
 
-    return () => clearInterval(interval);
-  }, [isLiveEnabled, tracks, addNotification]);
-
-  // Handle active relative time computation
-  useEffect(() => {
-    const timeInterval = setInterval(() => {
-      setActivities(prev => prev.map(act => {
-        const diffMs = Date.now() - act.rawTime.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        if (diffMins < 1) {
-          return { ...act, timestamp: 'Just now' };
-        } else if (diffMins < 60) {
-          return { ...act, timestamp: `${diffMins}m ago` };
-        } else {
-          return { ...act, timestamp: `${Math.floor(diffMins / 60)}h ago` };
+    const commentsQuery = query(collection(db, 'comments'), limit(25));
+    const unsubComments = onSnapshot(commentsQuery, (snapshot) => {
+      const items: Interaction[] = [];
+      snapshot.docs.forEach((docSnap, idx) => {
+        const d = docSnap.data() as any;
+        if (trackIdSet.size > 0 && d.trackId && !trackIdSet.has(d.trackId)) {
+          return;
         }
-      }));
-    }, 10000);
+        const rawTime = d.timestamp ? new Date(d.timestamp) : new Date();
+        const username = d.userName || d.username || 'Listener';
+        const matchedTrack = d.trackId ? trackMap.get(d.trackId) : undefined;
+        items.push({
+          id: `cmt-${docSnap.id}`,
+          type: 'comment',
+          username,
+          userAvatarSeed: username.slice(0, 2).toUpperCase(),
+          trackTitle: matchedTrack?.title || d.trackTitle || 'Track',
+          trackId: d.trackId,
+          detail: d.content ? `Commented: "${d.content}"` : undefined,
+          timestamp: formatRelativeTime(rawTime),
+          rawTime,
+          avatarBg: AVATAR_BGS[(idx + 1) % AVATAR_BGS.length],
+        });
+      });
+      setCommentActivities(items);
+    }, () => setCommentActivities([]));
 
-    return () => clearInterval(timeInterval);
-  }, []);
+    let unsubTx = () => {};
+    if (userProfile?.uid) {
+      const txQuery = query(
+        collection(db, 'transactions'),
+        where('sellerId', '==', userProfile.uid),
+        limit(25)
+      );
+      unsubTx = onSnapshot(txQuery, (snapshot) => {
+        const items: Interaction[] = snapshot.docs.map((docSnap, idx) => {
+          const d = docSnap.data() as any;
+          const rawTime = d.timestamp ? new Date(d.timestamp) : new Date();
+          const username = d.senderName || d.buyerName || d.senderAddress?.slice(0, 10) || 'Listener';
+          const matchedTrack = d.trackId ? trackMap.get(d.trackId) : undefined;
+          const isTip = d.type === 'tip' || d.type === 'stream_tip';
+          const isStream = d.type === 'stream';
+          return {
+            id: `tx-${docSnap.id}`,
+            type: isTip ? 'tip' : isStream ? 'stream' : 'collect',
+            username,
+            userAvatarSeed: username.slice(0, 2).toUpperCase(),
+            trackTitle: matchedTrack?.title || d.title || 'Release',
+            trackId: d.trackId,
+            detail: isTip ? `Tipped ${d.amount || 0} TON` : isStream ? undefined : `Completed ${d.type || 'purchase'} (${d.amount || 0} TON)`,
+            timestamp: formatRelativeTime(rawTime),
+            rawTime,
+            avatarBg: AVATAR_BGS[(idx + 2) % AVATAR_BGS.length],
+          };
+        });
+        setTxActivities(items);
+      }, () => setTxActivities([]));
+    }
+
+    return () => {
+      unsubSales();
+      unsubComments();
+      unsubTx();
+    };
+  }, [isLiveEnabled, userProfile?.uid, trackIdSet, trackMap]);
+
+  const activities = useMemo(() => {
+    return [...txActivities, ...salesActivities, ...commentActivities]
+      .sort((a, b) => b.rawTime.getTime() - a.rawTime.getTime())
+      .map(act => ({
+        ...act,
+        repliedMessage: repliedMap[act.id] || act.repliedMessage,
+      }))
+      .slice(0, 20);
+  }, [txActivities, salesActivities, commentActivities, repliedMap]);
 
   const filteredActivities = useMemo(() => {
     if (activeFilter === 'all') return activities;
@@ -242,14 +203,9 @@ export default function ListenerActivityFeed({ tracks }: ListenerActivityFeedPro
 
   const handleSendReply = (actId: string) => {
     if (!replyText.trim()) return;
-    setActivities(prev => prev.map(act => {
-      if (act.id === actId) {
-        return {
-          ...act,
-          repliedMessage: replyText
-        };
-      }
-      return act;
+    setRepliedMap(prev => ({
+      ...prev,
+      [actId]: replyText.trim(),
     }));
     setReplyText('');
     setReplyInputId(null);

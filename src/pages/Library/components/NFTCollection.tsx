@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Zap, Tag, Coins, Award, ArrowUpRight, ShieldCheck, Play, Pause, Send, Check, Loader2, History, ArrowRight, ExternalLink, Calendar, Copy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, LayoutGroup } from 'motion/react';
@@ -6,6 +6,9 @@ import { LibraryNFT } from '../types';
 import { useAudio } from '@/contexts/AudioContext';
 import { useToast } from '@/components/layout/ToastProvider';
 import { useNFT } from '@/contexts/NFTContext';
+import { db, OperationType, handleFirestoreError } from '@/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface NFTCollectionProps {
   nfts: LibraryNFT[];
@@ -25,12 +28,12 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
     tokenId: item.edition || '#001',
     title: item.title,
     artist: item.artist || item.creator || 'Unknown Artist',
-    coverUrl: item.coverUrl || item.imageUrl || '',
-    collectionName: (item as any).collectionName || 'TonJam Genesis',
-    floorPriceTon: parseFloat(item.price || '12.5'),
-    royaltyPercent: item.royaltySplits?.[0]?.percentage || 10,
-    rarity: (item.rarity as any) || 'Rare',
-    ownerAddress: item.owner || userProfile?.walletAddress || 'UQAs9vW_3k7_pP3...',
+    coverUrl: item.coverUrl || item.imageUrl || getPlaceholderImage(`nft-${item.id}`),
+    collectionName: (item as any).collectionName || 'TON Music NFT',
+    floorPriceTon: parseFloat(String(item.price || '0')) || 0,
+    royaltyPercent: item.royaltySplits?.[0]?.percentage || 0,
+    rarity: (item.rarity as any) || 'Common',
+    ownerAddress: item.owner || userProfile?.walletAddress || '',
     musicFileUrl: item.audioUrl || ''
   }));
 
@@ -48,8 +51,47 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
 
   // State for Transaction History Modal
   const [historyNft, setHistoryNft] = useState<LibraryNFT | null>(null);
+  const [historyTxs, setHistoryTxs] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
-  const CURRENT_USER_WALLET = userProfile?.walletAddress || 'UQAs9vW_3k7_pP3...';
+  const CURRENT_USER_WALLET = userProfile?.walletAddress || '';
+
+  useEffect(() => {
+    if (!historyNft) {
+      setHistoryTxs([]);
+      return;
+    }
+    let cancelled = false;
+    setLoadingHistory(true);
+    const loadHistory = async () => {
+      try {
+        const snap = await getDocs(query(collection(db, 'transactions'), where('nftId', '==', historyNft.id)));
+        if (!cancelled) {
+          const rows = snap.docs.map((d) => {
+            const data = d.data();
+            const created = data.createdAt?.toDate ? data.createdAt.toDate() : null;
+            return {
+              id: d.id,
+              type: data.type || 'transfer',
+              from: data.fromAddress || data.sellerAddress || data.userId || '',
+              to: data.toAddress || data.buyerAddress || '',
+              price: data.amount ? String(data.amount) : null,
+              date: created ? created.toLocaleDateString() : '',
+              time: created ? created.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+              hash: data.txHash || data.hash || d.id,
+            };
+          });
+          setHistoryTxs(rows);
+        }
+      } catch (err) {
+        handleFirestoreError(err, OperationType.LIST, 'transactions');
+      } finally {
+        if (!cancelled) setLoadingHistory(false);
+      }
+    };
+    loadHistory();
+    return () => { cancelled = true; };
+  }, [historyNft]);
 
   const getRarityColor = (rarity: LibraryNFT['rarity']) => {
     switch (rarity) {
@@ -62,17 +104,20 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
 
   const handlePlayNFT = (nft: LibraryNFT, e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // Map NFT fields to standard audio context Track layout
+    if (!nft.musicFileUrl) {
+      toast.error('Audio Unavailable', 'This NFT does not have a playable audio stream attached.');
+      return;
+    }
+
     const contextTrack = {
       id: nft.id,
       title: nft.title,
       artist: nft.artist,
-      coverUrl: nft.coverUrl,
-      audioUrl: nft.musicFileUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-      duration: 180,
-      streams: 1450,
-      playCount: 1450,
+      coverUrl: nft.coverUrl || getPlaceholderImage(`nft-${nft.id}`),
+      audioUrl: nft.musicFileUrl,
+      duration: 0,
+      streams: 0,
+      playCount: 0,
       album: nft.collectionName
     };
 
@@ -80,52 +125,15 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
       togglePlay();
     } else {
       playTrack(contextTrack as any);
-      toast.success(
-        'Streaming NFT Track',
-        `Playing "${nft.title}" directly from TON blockchain node.`
-      );
     }
   };
 
   const handleTransferConfirm = () => {
     if (!transferringNft || !destinationAddress.trim()) return;
-    
-    setTransferStep('preparing');
-    
-    // Simulate steps of TON blockchain transaction with visual progress states
-    setTimeout(() => {
-      setTransferStep('signing');
-      setTimeout(() => {
-        setTransferStep('broadcasting');
-        setTimeout(() => {
-          setTransferStep('confirming');
-          setTimeout(() => {
-            // Update ownership locally in localStorage to persist across updates
-            const localNftsStr = localStorage.getItem('tonjam_library_nfts');
-            if (localNftsStr) {
-              try {
-                const currentNfts: LibraryNFT[] = JSON.parse(localNftsStr);
-                const updatedNfts = currentNfts.map(n => 
-                  n.id === transferringNft.id ? { ...n, ownerAddress: destinationAddress } : n
-                );
-                localStorage.setItem('tonjam_library_nfts', JSON.stringify(updatedNfts));
-                
-                // Dispatch event so hooks synchronize automatically
-                window.dispatchEvent(new Event('tonjam_library_updated'));
-              } catch (e) {
-                console.error("Failed to update NFT ownership in local storage", e);
-              }
-            }
-            
-            setTransferStep('success');
-            toast.success(
-              'NFT Transferred Successfully',
-              `"${transferringNft.title}" has been transferred on-chain to ${destinationAddress.substring(0, 8)}...`
-            );
-          }, 1500);
-        }, 1200);
-      }, 1200);
-    }, 1000);
+    toast.error(
+      'On-Chain Transfer Required',
+      'Direct NFT transfers must be signed through a deployed NFT item contract on the NFT detail page.'
+    );
   };
 
   return (
@@ -168,7 +176,7 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
         >
           {displayNfts.map((nft) => {
             const isCurrentPlaying = currentTrack?.id === nft.id && isPlaying;
-            const isOwner = nft.ownerAddress === CURRENT_USER_WALLET;
+            const isOwner = Boolean(CURRENT_USER_WALLET && nft.ownerAddress === CURRENT_USER_WALLET);
 
             return (
               <motion.div
@@ -507,7 +515,7 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
                   <input
                     type="text"
                     required
-                    placeholder="EQ... or UQ... (e.g. UQCc_DJ_Krupy_Vibez_x9y1_8888)"
+                    placeholder="EQ... or UQ..."
                     value={destinationAddress}
                     onChange={(e) => setDestinationAddress(e.target.value)}
                     className="w-full bg-slate-950 text-white text-xs px-3 py-2.5 rounded-lg font-mono outline-none focus:ring-1 focus:ring-purple-500"
@@ -581,73 +589,35 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
 
             {/* List of Transactions */}
             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-              {[
-                {
-                  id: `mint-${historyNft.id}`,
-                  type: 'mint',
-                  from: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
-                  to: 'UQCc_DJ_Krupy_Vibez_x9y1_8888',
-                  price: null,
-                  date: 'Jan 12, 2026',
-                  time: '14:32 UTC',
-                  hash: 'df8a13ef7b5a1c9e8d32b4f6e10a52c3df8a13ef7b5a1c9e8d32b4f6e10a52c3',
-                },
-                {
-                  id: `sale-${historyNft.id}`,
-                  type: 'sale',
-                  from: 'UQCc_DJ_Krupy_Vibez_x9y1_8888',
-                  to: 'UQCc_Prev_Collector_x1y2_8888',
-                  price: (historyNft.floorPriceTon * 0.8).toFixed(1),
-                  date: 'Mar 24, 2026',
-                  time: '09:15 UTC',
-                  hash: '8b42f10ec5d3e391cb0961a2df8a13ef8b42f10ec5d3e391cb0961a2df8a13ef',
-                },
-                {
-                  id: `transfer-${historyNft.id}`,
-                  type: 'transfer',
-                  from: 'UQCc_Prev_Collector_x1y2_8888',
-                  to: CURRENT_USER_WALLET,
-                  price: null,
-                  date: 'May 08, 2026',
-                  time: '18:44 UTC',
-                  hash: 'e391cb0961a2df8a13ef8b42f10ec5d3e391cb0961a2dfe391cb0961a2df8a13',
-                },
-                ...(historyNft.ownerAddress !== CURRENT_USER_WALLET ? [{
-                  id: `session-transfer-${historyNft.id}`,
-                  type: 'transfer',
-                  from: CURRENT_USER_WALLET,
-                  to: historyNft.ownerAddress,
-                  price: null,
-                  date: 'Today',
-                  time: 'Just now',
-                  hash: 'a71b2d9f4f2ece391cb0961a2df8a13efa71b2d9f4f2ece391cb0961a2df8a1',
-                }] : [])
-              ].reverse().map((tx) => (
+              {loadingHistory ? (
+                <div className="py-8 text-center text-xs text-slate-400">Loading transaction history...</div>
+              ) : historyTxs.length === 0 ? (
+                <div className="py-8 text-center text-xs text-slate-500">No on-chain transactions recorded for this NFT yet.</div>
+              ) : (
+                historyTxs.map((tx) => (
                 <div key={tx.id} className="bg-slate-950/40 rounded-xl p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg shrink-0 ${
                       tx.type === 'mint' ? 'bg-amber-500/10 text-amber-400' :
-                      tx.type === 'sale' ? 'bg-emerald-500/10 text-emerald-400' :
+                      tx.type === 'sale' || tx.type === 'purchase' ? 'bg-emerald-500/10 text-emerald-400' :
                       'bg-blue-500/10 text-blue-400'
                     }`}>
                       {tx.type === 'mint' && <Coins className="w-4 h-4" />}
-                      {tx.type === 'sale' && <Tag className="w-4 h-4" />}
-                      {tx.type === 'transfer' && <Send className="w-4 h-4" />}
+                      {(tx.type === 'sale' || tx.type === 'purchase') && <Tag className="w-4 h-4" />}
+                      {tx.type !== 'mint' && tx.type !== 'sale' && tx.type !== 'purchase' && <Send className="w-4 h-4" />}
                     </div>
 
                     <div className="min-w-0">
                       <p className="text-xs font-black text-white uppercase tracking-wider">
-                        {tx.type === 'mint' && 'On-Chain Mint'}
-                        {tx.type === 'sale' && 'Marketplace Sale'}
-                        {tx.type === 'transfer' && 'Ownership Transfer'}
+                        {tx.type === 'mint' ? 'On-Chain Mint' : tx.type === 'sale' || tx.type === 'purchase' ? 'Marketplace Sale' : 'Ownership Transfer'}
                       </p>
                       
                       <p className="text-[9px] text-slate-400 font-mono mt-1 flex items-center gap-1">
                         <span className="text-slate-500">From:</span>
-                        <span className="text-slate-300 font-semibold">{tx.from.substring(0, 8)}...</span>
+                        <span className="text-slate-300 font-semibold">{tx.from ? `${tx.from.substring(0, 8)}...` : '—'}</span>
                         <ArrowRight className="w-2.5 h-2.5 text-slate-600 shrink-0" />
                         <span className="text-slate-500">To:</span>
-                        <span className="text-slate-300 font-semibold">{tx.to.substring(0, 8)}...</span>
+                        <span className="text-slate-300 font-semibold">{tx.to ? `${tx.to.substring(0, 8)}...` : '—'}</span>
                       </p>
 
                       <p className="text-[8px] text-slate-500 font-mono mt-0.5 flex items-center gap-1">
@@ -675,7 +645,8 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
                     <p className="text-[8px] text-slate-500 font-mono">{tx.time}</p>
                   </div>
                 </div>
-              ))}
+                ))
+              )}
             </div>
 
             {/* Footer blockchain verification */}

@@ -20,13 +20,13 @@ import { useAudio } from '@/contexts/AudioContext';
 import { NFTItem, Track } from '@/types';
 import { motion, AnimatePresence } from 'motion/react';
 import { getPlaceholderImage } from '@/lib/utils';
-import { MOCK_TRACKS, TON_LOGO } from '@/constants';
+import { TON_LOGO } from '@/constants';
 import { Button } from "@/components/ui/button";
 import { MarqueeTitle } from "@/components/MarqueeTitle";
 
 const TrendingNFTs: React.FC = () => {
   const navigate = useNavigate();
-  const { allNFTs, allTracks, playTrack } = useAudio();
+  const { allNFTs, allTracks, collections, artists, playTrack } = useAudio();
   const [displayCount, setDisplayCount] = useState(15);
   const loaderRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +35,7 @@ const TrendingNFTs: React.FC = () => {
     return [...allNFTs]
       .filter(nft => nft.listingType) // Only listed ones
       .map(nft => {
-        const track = allTracks.find(t => t.id === nft.trackId) || MOCK_TRACKS.find(t => t.id === nft.trackId);
+        const track = allTracks.find(t => t.id === nft.trackId);
         const playCount = track?.playCount || 0;
         const likes = track?.likes || 0;
         const offersCount = nft.offers?.length || 0;
@@ -47,6 +47,17 @@ const TrendingNFTs: React.FC = () => {
       })
       .sort((a, b) => b.trendingScore - a.trendingScore);
   }, [allNFTs, allTracks]);
+
+  const nftStats = useMemo(() => {
+    const uniqueOwners = new Set(allNFTs.map(n => n.owner).filter(Boolean)).size;
+    const totalOffers = trendingNfts.reduce((sum, n) => sum + (n.offers?.length || 0), 0);
+    return {
+      collectors: uniqueOwners.toLocaleString(),
+      listedCount: trendingNfts.length.toLocaleString(),
+      activeOffers: totalOffers.toLocaleString(),
+      totalMinted: allNFTs.length.toLocaleString(),
+    };
+  }, [allNFTs, trendingNfts]);
 
   const displayedNfts = useMemo(() => {
     return trendingNfts.slice(0, displayCount);
@@ -97,10 +108,10 @@ const TrendingNFTs: React.FC = () => {
         {/* Stats Summary - Miniaturized */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-10">
           {[
-            { label: 'Active Collectors', value: '42.8K', icon: Zap, color: 'text-blue-400' },
-            { label: 'Market Velocity', value: '+12.4%', icon: Activity, color: 'text-emerald-400' },
-            { label: 'Neural Heatweight', value: '8.4/10', icon: Flame, color: 'text-blue-400' },
-            { label: 'Total Minted', value: '1.2M', icon: Clock, color: 'text-purple-400' },
+            { label: 'Active Collectors', value: nftStats.collectors, icon: Zap, color: 'text-blue-400' },
+            { label: 'Active Listings', value: nftStats.listedCount, icon: Activity, color: 'text-emerald-400' },
+            { label: 'Active Offers', value: nftStats.activeOffers, icon: Flame, color: 'text-blue-400' },
+            { label: 'Total Minted', value: nftStats.totalMinted, icon: Clock, color: 'text-purple-400' },
           ].map((stat, i) => (
             <div key={i} className="bg-white/5 border border-white/5 rounded-[4px] p-4">
               <div className="flex items-center gap-2 mb-1">
@@ -116,27 +127,40 @@ const TrendingNFTs: React.FC = () => {
         <div className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-black uppercase tracking-tight">Active Collections</h2>
-            <button className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">View All</button>
+            <button onClick={() => navigate('/marketplace')} className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">View All</button>
           </div>
-          <div className="scroll-row">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex-shrink-0 w-32 sm:w-40 group cursor-pointer">
-                <div className="relative aspect-square rounded-[4px] overflow-hidden mb-2">
-                  <img 
-                    src={getPlaceholderImage(`collection-${i}`)} 
-                    alt="Collection"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-2 sm:p-3">
-                    <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-white truncate w-full">Vol. {i}</span>
+          {collections.length === 0 ? (
+            <div className="bg-white/5 rounded-[4px] p-6 text-center text-xs text-white/40 uppercase tracking-widest">
+              No active collections yet
+            </div>
+          ) : (
+            <div className="scroll-row">
+              {collections.slice(0, 12).map((col) => {
+                const colArtist = artists.find((a) => a.uid === col.artistId)?.name || 'Creator';
+                return (
+                <div
+                  key={col.id}
+                  onClick={() => navigate(`/album/${col.id}`)}
+                  className="flex-shrink-0 w-32 sm:w-40 group cursor-pointer"
+                >
+                  <div className="relative aspect-square rounded-[4px] overflow-hidden mb-2">
+                    <img 
+                      src={col.coverUrl || getPlaceholderImage('collection')} 
+                      alt={col.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-2 sm:p-3">
+                      <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-white truncate w-full">{colArtist}</span>
+                    </div>
                   </div>
+                  <h3 className="text-xs sm:text-sm font-black uppercase tracking-tight truncate group-hover:text-blue-400 transition-colors">{col.name}</h3>
+                  <p className="text-[8px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{col.nftIds?.length || 0} Items</p>
                 </div>
-                <h3 className="text-xs sm:text-sm font-black uppercase tracking-tight truncate group-hover:text-blue-400 transition-colors">Sonic Genesis {i}</h3>
-                <p className="text-[8px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{Math.floor(Math.random() * 50) + 10} Items</p>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Infinite List - Flattened Display */}

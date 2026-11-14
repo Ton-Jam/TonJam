@@ -4,7 +4,7 @@ import { NFTItem, NFTOffer } from '@/types';
 import { TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/contexts/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { acceptBid } from '@/services/tonService';
+import { acceptBid, validateTonAddress, TONJAM_MARKETPLACE_ADDRESS, waitForTransactionConfirmation } from '@/services/tonService';
 import ConfirmationModal from './ConfirmationModal';
 import {
   Dialog,
@@ -35,20 +35,81 @@ const BidAcceptanceModal: React.FC<BidAcceptanceModalProps> = ({ nft, offer, onC
   const handleConfirm = async () => {
     setIsConfirmOpen(false);
     setIsProcessing(true);
-    addNotification("Initiating ownership transfer protocol...", "info");
-    
+
+    // 1. Validate Offer and Listing
+    if (!offer || !offer.price || !offer.offerer) {
+      addNotification("Invalid offer details.", "error");
+      setIsProcessing(false);
+      return;
+    }
+
+    const offerPrice = parseFloat(offer.price);
+    if (isNaN(offerPrice) || offerPrice <= 0) {
+      addNotification("Invalid offer amount. Must be greater than 0 TON.", "error");
+      setIsProcessing(false);
+      return;
+    }
+
+    if (!validateTonAddress(offer.offerer)) {
+      addNotification("Offerer address is not a valid TON address format.", "error");
+      setIsProcessing(false);
+      return;
+    }
+
+    // 2. Validate Connected Wallet matches NFT Seller/Owner
+    if (!userAddress) {
+      addNotification("Please connect your TON wallet.", "warning");
+      tonConnectUI.openModal();
+      setIsProcessing(false);
+      return;
+    }
+
+    const currentOwner = nft.owner || nft.ownerId || '';
+    if (currentOwner && currentOwner !== userAddress && !currentOwner.toLowerCase().includes(userAddress.toLowerCase())) {
+      addNotification("Unauthorized: Connected wallet does not match the current verified owner of this NFT.", "error");
+      setIsProcessing(false);
+      return;
+    }
+
+    // 3. Verify Contract Destination / Settlement Support
+    const settlementContract = nft.contractAddress || TONJAM_MARKETPLACE_ADDRESS;
+    if (!settlementContract || !validateTonAddress(settlementContract)) {
+      addNotification(
+        "On-chain escrow contract is not configured on this network. Direct offer acceptance is paused until contract settlement is active.",
+        "warning"
+      );
+      setIsProcessing(false);
+      return;
+    }
+
+    addNotification("Initiating on-chain offer settlement protocol...", "info");
+
     try {
-      await acceptBid(tonConnectUI, offer.offerer);
-      
-      // Update NFT owner in Firestore
-      await updateNFT(nft.id, { owner: offer.offerer });
-      
+      // 4. Submit genuine contract transaction to the settlement contract
+      const result = await acceptBid(tonConnectUI, settlementContract);
+
+      addNotification("Transaction broadcast. Waiting for on-chain settlement confirmation...", "info");
+
+      // 5. Wait for on-chain block confirmation before synchronizing Firestore
+      const isConfirmed = await waitForTransactionConfirmation(settlementContract, 30000, 3000);
+
+      if (!isConfirmed) {
+        addNotification(
+          `Transaction submitted (Hash: ${result.txHash.slice(0, 10)}...), but pending block inclusion. Ownership will update upon confirmation.`,
+          "info"
+        );
+      } else {
+        // 6. Synchronize Firestore ONLY after verified blockchain settlement
+        await updateNFT(nft.id, { owner: offer.offerer, ownerId: offer.offerer });
+        addNotification("Offer successfully accepted and settled on TON blockchain!", "success");
+      }
+
       setIsProcessing(false);
       onAccept();
       onClose();
-    } catch (e) {
-      console.error(e);
-      addNotification("Acceptance protocol aborted.", "error");
+    } catch (e: any) {
+      console.error("[BidAcceptanceModal] Acceptance failed:", e);
+      addNotification(e.message || "Acceptance protocol failed or was rejected by wallet.", "error");
       setIsProcessing(false);
     }
   };

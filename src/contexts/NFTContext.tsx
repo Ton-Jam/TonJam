@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { NFTItem, Track } from '@/types';
-import { MOCK_NFTS } from '@/constants';
+import { NFTItem } from '@/types';
+import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
+import { collection, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 
 export interface MintingStatus {
   trackId: string;
@@ -22,6 +23,7 @@ export interface MintingStatus {
 interface NFTContextType {
   nfts: NFTItem[];
   setNfts: React.Dispatch<React.SetStateAction<NFTItem[]>>;
+  loading: boolean;
   isMinting: boolean;
   setIsMinting: (isMinting: boolean) => void;
   mintingStatus: Record<string, MintingStatus>;
@@ -44,6 +46,7 @@ const NFTContext = createContext<NFTContextType | null>(null);
 const FALLBACK_NFT_CONTEXT: NFTContextType = {
   nfts: [],
   setNfts: () => {},
+  loading: false,
   isMinting: false,
   mintingStatus: {},
   setIsMinting: () => {},
@@ -71,21 +74,33 @@ export const useNFT = () => {
 
 export const NFTProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [nfts, setNfts] = useState<NFTItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isMinting, setIsMinting] = useState(false);
   const [mintingStatus, setMintingStatus] = useState<Record<string, MintingStatus>>({});
 
-  // Initialize with mock NFTs or from localStorage if available
+  // Subscribe to real-time NFTs collection in Firestore
   useEffect(() => {
-    const cached = localStorage.getItem('tonjam_nfts');
-    if (cached) {
-      try {
-        setNfts(JSON.parse(cached));
-      } catch (e) {
-        setNfts(MOCK_NFTS);
+    let mounted = true;
+    const unsub = onSnapshot(
+      collection(db, 'nfts'),
+      (snapshot) => {
+        if (!mounted) return;
+        const list = snapshot.docs.map(
+          (docSnap) => ({ id: docSnap.id, ...docSnap.data() }) as NFTItem
+        );
+        setNfts(list);
+        setLoading(false);
+      },
+      (error) => {
+        if (mounted) setLoading(false);
+        handleFirestoreError(error, OperationType.LIST, 'nfts');
       }
-    } else {
-      setNfts(MOCK_NFTS);
-    }
+    );
+
+    return () => {
+      mounted = false;
+      unsub();
+    };
   }, []);
 
   const updateMintingStatus = (trackId: string, status: Partial<MintingStatus>) => {
@@ -128,33 +143,36 @@ export const NFTProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addNFT = (nft: NFTItem) => {
     setNfts((prev) => {
-      const updated = [nft, ...prev];
-      localStorage.setItem('tonjam_nfts', JSON.stringify(updated));
-      return updated;
+      if (prev.some((item) => item.id === nft.id)) return prev;
+      return [nft, ...prev];
     });
+    if (auth.currentUser && nft.id) {
+      setDoc(doc(db, 'nfts', nft.id), cleanUpdateData(nft as any), { merge: true }).catch((err) => {
+        handleFirestoreError(err, OperationType.CREATE, `nfts/${nft.id}`);
+      });
+    }
   };
 
   const updateNFT = (nftId: string, updates: Partial<NFTItem>) => {
-    setNfts((prev) => {
-      const updated = prev.map((item) => (item.id === nftId ? { ...item, ...updates } : item));
-      localStorage.setItem('tonjam_nfts', JSON.stringify(updated));
-      return updated;
-    });
+    setNfts((prev) => prev.map((item) => (item.id === nftId ? { ...item, ...updates } : item)));
+    if (auth.currentUser && nftId) {
+      updateDoc(doc(db, 'nfts', nftId), cleanUpdateData(updates as any)).catch((err) => {
+        handleFirestoreError(err, OperationType.UPDATE, `nfts/${nftId}`);
+      });
+    }
   };
 
   const stakeNFT = async (nftId: string, lockPeriodDays: number, ownerAddress?: string): Promise<boolean> => {
     const target = nfts.find((n) => n.id === nftId);
-    if (!target) return false;
+    if (!target || !auth.currentUser) return false;
 
-    // Determine APY based on lock period
     let apy = 12;
     if (lockPeriodDays >= 365) apy = 80;
     else if (lockPeriodDays >= 180) apy = 45;
     else if (lockPeriodDays >= 90) apy = 25;
 
     const now = new Date().toISOString();
-
-    updateNFT(nftId, {
+    const updates: Partial<NFTItem> = {
       isStaked: true,
       stakedAt: now,
       stakedLockPeriodDays: lockPeriodDays,
@@ -171,18 +189,24 @@ export const NFTProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         },
         ...(target.history || []),
       ],
-    });
+    };
 
-    return true;
+    try {
+      await updateDoc(doc(db, 'nfts', nftId), cleanUpdateData(updates as any));
+      setNfts((prev) => prev.map((item) => (item.id === nftId ? { ...item, ...updates } : item)));
+      return true;
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `nfts/${nftId}`);
+      return false;
+    }
   };
 
   const unstakeNFT = async (nftId: string): Promise<boolean> => {
     const target = nfts.find((n) => n.id === nftId);
-    if (!target || !target.isStaked) return false;
+    if (!target || !target.isStaked || !auth.currentUser) return false;
 
     const now = new Date().toISOString();
-
-    updateNFT(nftId, {
+    const updates: Partial<NFTItem> = {
       isStaked: false,
       stakedAt: undefined,
       stakedLockPeriodDays: undefined,
@@ -197,27 +221,45 @@ export const NFTProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         },
         ...(target.history || []),
       ],
-    });
+    };
 
-    return true;
+    try {
+      await updateDoc(doc(db, 'nfts', nftId), cleanUpdateData(updates as any));
+      setNfts((prev) => prev.map((item) => (item.id === nftId ? { ...item, ...updates } : item)));
+      return true;
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `nfts/${nftId}`);
+      return false;
+    }
   };
 
   const claimNFTGovernanceRewards = async (nftId: string): Promise<number> => {
     const target = nfts.find((n) => n.id === nftId);
-    if (!target || !target.isStaked) return 0;
+    if (!target || !target.isStaked || !auth.currentUser) return 0;
 
-    // Calculate accrued rewards
     const stakedTime = target.stakedAt ? new Date(target.stakedAt).getTime() : Date.now();
-    const daysElapsed = Math.max(0.1, (Date.now() - stakedTime) / (1000 * 60 * 60 * 24));
-    const baseDailyReward = parseFloat(target.price) * 1.5; // Governance tokens daily
-    const earned = Math.round((daysElapsed * baseDailyReward * ((target.stakedApy || 12) / 100)) * 100) / 100;
+    const daysElapsed = Math.max(0, (Date.now() - stakedTime) / (1000 * 60 * 60 * 24));
+    const baseDailyReward = (parseFloat(target.price) || 0) * 1.5;
+    const earned = Math.round(daysElapsed * baseDailyReward * ((target.stakedApy || 12) / 100) * 100) / 100;
 
-    updateNFT(nftId, {
-      stakedRewardsEarned: 0, // Reset counter after claiming
-      stakedAt: new Date().toISOString(), // Reset baseline
-    });
+    if (earned <= 0) return 0;
 
-    return earned || 25.5;
+    const now = new Date().toISOString();
+    try {
+      await updateDoc(doc(db, 'nfts', nftId), {
+        stakedRewardsEarned: 0,
+        stakedAt: now,
+      });
+      setNfts((prev) =>
+        prev.map((item) =>
+          item.id === nftId ? { ...item, stakedRewardsEarned: 0, stakedAt: now } : item
+        )
+      );
+      return earned;
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `nfts/${nftId}`);
+      return 0;
+    }
   };
 
   const getNFTByTrackId = (trackId: string) => {
@@ -229,7 +271,7 @@ export const NFTProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const normalized = ownerAddressOrId.toLowerCase();
     return nfts.filter(
       (n) =>
-        n.owner.toLowerCase() === normalized ||
+        (n.owner || '').toLowerCase() === normalized ||
         (n.ownerId && n.ownerId.toLowerCase() === normalized) ||
         (n.stakedOwnerAddress && n.stakedOwnerAddress.toLowerCase() === normalized)
     );
@@ -241,7 +283,7 @@ export const NFTProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return nfts.filter(
       (n) =>
         n.isStaked &&
-        (n.owner.toLowerCase() === normalized ||
+        ((n.owner || '').toLowerCase() === normalized ||
           (n.stakedOwnerAddress && n.stakedOwnerAddress.toLowerCase() === normalized) ||
           (n.ownerId && n.ownerId.toLowerCase() === normalized))
     );
@@ -257,6 +299,7 @@ export const NFTProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         nfts,
         setNfts,
+        loading,
         isMinting,
         setIsMinting,
         mintingStatus,

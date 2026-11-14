@@ -22,7 +22,7 @@ import {
   Bookmark
 } from 'lucide-react';
 import { Post, PostComment } from '@/types';
-import { MOCK_USER, MOCK_ARTISTS, APP_LOGO } from '@/constants';
+import { APP_LOGO } from '@/constants';
 import { useAudio } from '@/contexts/AudioContext';
 import TrackCard from '@/components/TrackCard';
 import { motion, AnimatePresence } from 'motion/react'; 
@@ -127,7 +127,7 @@ const PostDetail: React.FC = () => {
   const isMe = post.userId === userProfile.uid;
   const track = post.trackId ? allTracks.find(t => t.id === post.trackId) : post.track;
   const nft = post.nftId ? allNFTs.find(n => n.id === post.nftId) : post.nft;
-  const artist = MOCK_ARTISTS.find(a => a.name === post.userName || a.uid === post.userId);
+  const artist = artists.find(a => a.name === post.userName || a.uid === post.userId);
 
   const handleLike = async () => {
     triggerHaptic('light');
@@ -234,7 +234,7 @@ const PostDetail: React.FC = () => {
               <div className="flex items-center gap-4">
                 <Avatar 
                   className="h-12 w-12 border border-white/5 cursor-pointer ring-offset-background hover:ring-2 ring-blue-500/20 transition-all"
-                  onClick={() => navigate(isMe ? '/profile' : (post.isVerified || MOCK_ARTISTS.some(a => a.uid === post.userId) ? `/artist/${post.userId}` : `/user/${post.userId}`))}
+                  onClick={() => navigate(isMe ? '/profile' : (post.isVerified || artists.some(a => a.uid === post.userId) ? `/artist/${post.userId}` : `/user/${post.userId}`))}
                 >
                   <AvatarImage src={post.userAvatar || getPlaceholderImage(`user-${post.userId}`)} className="object-cover" />
                   <AvatarFallback className="bg-zinc-800 font-bold text-lg">{post.userName[0]}</AvatarFallback>
@@ -243,7 +243,7 @@ const PostDetail: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <h3 
                       className="text-sm font-black uppercase tracking-tighter text-foreground hover:text-blue-500 transition-colors cursor-pointer"
-                      onClick={() => navigate(isMe ? '/profile' : (post.isVerified || MOCK_ARTISTS.some(a => a.uid === post.userId) ? `/artist/${post.userId}` : `/user/${post.userId}`))}
+                      onClick={() => navigate(isMe ? '/profile' : (post.isVerified || artists.some(a => a.uid === post.userId) ? `/artist/${post.userId}` : `/user/${post.userId}`))}
                     >
                       {post.userName}
                     </h3>
@@ -319,7 +319,7 @@ const PostDetail: React.FC = () => {
               </div>
               <div className="flex items-center gap-1.5 ml-auto">
                 <Eye className="h-3 w-3" />
-                <span className="text-foreground">{(Math.random() * 10000).toFixed(0)}</span>
+                <span className="text-foreground">{(post as any).views || 0}</span>
                 <span className="opacity-60">Scans</span>
               </div>
             </div>
@@ -492,7 +492,7 @@ const PostDetail: React.FC = () => {
                       onProfileClick={(e, uid) => {
                         e.stopPropagation();
                         if (uid === userProfile.uid) navigate('/profile');
-                        else if (artists.some(a => a.uid === uid) || MOCK_ARTISTS.some(a => a.uid === uid)) navigate(`/artist/${uid}`);
+                        else if (artists.some(a => a.uid === uid)) navigate(`/artist/${uid}`);
                         else navigate(`/user/${uid}`);
                       }}
                       activeReactionId={activeReactionCommentId}

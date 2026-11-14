@@ -1,8 +1,8 @@
 import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
 import { Twitter, Instagram, Music, CheckCircle2, Download, MessageSquare, Wallet, RefreshCw, Check, Loader2, Coins, Lock, ShieldCheck, History, User, ExternalLink, FileText, Clock } from 'lucide-react';
-import { db } from "@/lib/firebase";
-import { doc, getDoc, writeBatch, serverTimestamp, increment, collection } from "firebase/firestore";
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
+import { doc, getDoc, getDocs, query, limit, writeBatch, serverTimestamp, increment, collection } from "firebase/firestore";
 
 const { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } = RechartsPrimitive as any;
 
@@ -22,6 +22,7 @@ const CartesianGridRC = CartesianGrid as any;
 import { Button } from "@/components/ui/button";
 import { useNotification } from "@/contexts/NotificationContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAudio } from "@/contexts/AudioContext";
 import { motion } from "motion/react";
 import { exportAuditLogToPDF } from "@/lib/pdfExport";
 import TrackUploadModal from "@/components/TrackUploadModal";
@@ -34,12 +35,30 @@ const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
 export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalEarnings }) => {
   const navigate = useNavigate();
-  const genreData = [
-    { name: 'Electronic', value: 400 },
-    { name: 'Lo-fi', value: 300 },
-    { name: 'Ambient', value: 300 },
-    { name: 'Hip-Hop', value: 200 },
-  ];
+  const { allTracks = [], allNFTs = [], userProfile: audioProfile } = useAudio();
+  const { user, userProfile } = useAuth();
+  const effectiveProfile = userProfile || audioProfile;
+
+  const artistTracks = React.useMemo(() => {
+    const uid = user?.uid || effectiveProfile?.uid;
+    const name = effectiveProfile?.name;
+    return allTracks.filter(t => (uid && t.artistId === uid) || (name && t.artist === name));
+  }, [allTracks, user?.uid, effectiveProfile?.uid, effectiveProfile?.name]);
+
+  const artistNFTs = React.useMemo(() => {
+    const uid = user?.uid || effectiveProfile?.uid;
+    const name = effectiveProfile?.name;
+    return allNFTs.filter(n => (uid && (n.artistId === uid || n.creatorId === uid)) || (name && n.creator === name));
+  }, [allNFTs, user?.uid, effectiveProfile?.uid, effectiveProfile?.name]);
+
+  const genreData = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    artistTracks.forEach(t => {
+      const g = t.genre || 'Other';
+      counts[g] = (counts[g] || 0) + (t.streams || t.playCount || 1);
+    });
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }, [artistTracks]);
 
   // Timeframe states for all charts
   const [revenueTimeFrame, setRevenueTimeFrame] = React.useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
@@ -76,72 +95,34 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
     </div>
   );
 
-  // Last 30 days revenue trend data
+  // Revenue trend data derived from real track & audit records
   const revenueTrendData = React.useMemo(() => {
-    const rawData = Array.from({ length: 90 }, (_, i) => ({
-        day: i + 1,
-        revenue: Math.floor(Math.random() * 500) + 100,
+    if (artistTracks.length === 0) return [];
+    return artistTracks.slice(0, 12).map((t, i) => ({
+      day: revenueTimeFrame === 'Daily' ? (i + 1) : (t.title?.slice(0, 10) || `#${i + 1}`),
+      revenue: Number(((parseFloat(t.streamingPrice || '0.01') * (t.streams || t.playCount || 0)) + (t.isNFT ? parseFloat(t.nftPrice || t.price || '0') : 0)).toFixed(2)),
+      projected: false
     }));
-    
-    if (revenueTimeFrame === 'Daily') {
-        const history = rawData.slice(-30);
-        
-        // Calculate velocity (average daily increase)
-        const diffs = [];
-        for (let i = 1; i < history.length; i++) {
-            diffs.push(history[i].revenue - history[i-1].revenue);
-        }
-        const avgIncrease = diffs.reduce((a, b) => a + b, 0) / diffs.length;
-        
-        // Generate projection
-        const projection = [];
-        let lastRevenue = history[history.length - 1].revenue;
-        for (let i = 1; i <= 30; i++) {
-            lastRevenue += avgIncrease;
-            projection.push({ 
-                day: 30 + i, 
-                revenue: lastRevenue,
-                projected: true 
-            });
-        }
-        
-        return [...history.map(d => ({ ...d, projected: false })), ...projection];
-    }
+  }, [artistTracks, revenueTimeFrame]);
 
-    if (revenueTimeFrame === 'Weekly') {
-      const weekly = [];
-      for(let i=0; i<rawData.length; i+=7) weekly.push({ day: `W${i/7+1}`, revenue: rawData.slice(i, i+7).reduce((acc, cur) => acc + cur.revenue, 0) });
-      return weekly.slice(-12);
-    }
-    const monthly = [{ day: 'Jan', revenue: 5000 }, { day: 'Feb', revenue: 7000 }, { day: 'Mar', revenue: 6000 }];
-    return monthly;
-  }, [revenueTimeFrame]);
-
-  // Hourly streaming activity (24 hours)
-  const streamingActivityData = Array.from({ length: 24 }, (_, i) => ({
-    hour: `${i}:00`,
-    streams: Math.floor(Math.random() * 1000),
-  }));
+  // Streaming distribution across artist tracks
+  const streamingActivityData = React.useMemo(() => {
+    return artistTracks.slice(0, 24).map((t, i) => ({
+      hour: t.title ? t.title.slice(0, 8) : `T${i + 1}`,
+      streams: t.streams || t.playCount || 0,
+    }));
+  }, [artistTracks]);
 
   // Weekly stream performance
   const [weeklyStreamsData, setWeeklyStreamsData] = React.useState<{ day: string; streams: number }[]>([]);
   const [loading, setLoading] = React.useState(true);
 
-  // Fan Engagement Data
-  const engagementData = [
-    { x: 10, y: 30, z: 200, location: 'New York' },
-    { x: 20, y: 50, z: 400, location: 'London' },
-    { x: 30, y: 70, z: 300, location: 'Tokyo' },
-    { x: 40, y: 20, z: 500, location: 'Berlin' },
-    { x: 50, y: 80, z: 250, location: 'LA' },
-  ];
-
   // Royalty Splits State
   const [splits, setSplits] = React.useState([
-      { name: 'Self', value: 50, address: 'EQD3_P_pM_U8Gk7r_aZ7b8C9D0e1F2g3H4i5J6k7_L8m9N0O' },
-      { name: 'Producer', value: 25, address: 'EQC8_W_tF_X4Yk2r_bY8c9D0E1f2G3h4I5j6K7l8_M9n0O1P' },
-      { name: 'Manager', value: 15, address: 'EQA5_K_rP_H3Yg5t_cY7b8D9E0f1G2h3I4j5K6l7_M8n9O0P' },
-      { name: 'Collaborator', value: 10, address: 'EQB1_X_qM_G5Yk8r_dY9c0D1E2f3G4h5I6j7K8l9_M0n1O2P' },
+      { name: 'Self', value: 100, address: effectiveProfile?.walletAddress || '' },
+      { name: 'Producer', value: 0, address: '' },
+      { name: 'Manager', value: 0, address: '' },
+      { name: 'Collaborator', value: 0, address: '' },
   ]);
 
   const updateSplitAddress = (index: number, newAddress: string) => {
@@ -149,10 +130,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
   };
 
   // Royalty Notifications
-  const [notifications, setNotifications] = React.useState([
-      { id: 1, message: 'Producer split processed: 25% (track: Neon Waves)', timestamp: 'Just now' },
-      { id: 2, message: 'Manager split processed: 15% (track: Echoes)', timestamp: '2h ago' },
-  ]);
+  const [notifications, setNotifications] = React.useState<{ id: string | number; message: string; timestamp: string }[]>([]);
 
   // Royalty Audit Table
   interface AuditEntry {
@@ -374,66 +352,69 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
   const [auditFindings, setAuditFindings] = React.useState<string[]>([]);
   const [auditLoading, setAuditLoading] = React.useState(false);
 
-  const { user, userProfile } = useAuth();
   const { preferences, addNotification } = useNotification();
   const hasAlerted = React.useRef(false);
 
-  // Secondary NFT Royalties states
+  // Secondary NFT Royalties states loaded from Firestore nftSales
   const [secondaryFilter, setSecondaryFilter] = React.useState<string>('all');
   const [isScanningRoyalties, setIsScanningRoyalties] = React.useState<boolean>(false);
-  const [secondaryTransactions, setSecondaryTransactions] = React.useState([
-    { id: 'tx-sec-1', nftName: 'Neon Waves #03', salePrice: 45, royalty: 2.25, seller: 'EQD8a...28bN', buyer: 'EQA5k...49gT', date: 'May 20, 2026', txHash: 'e6a8...3b9c' },
-    { id: 'tx-sec-2', nftName: 'Cyberpunk Genesis #01', salePrice: 120, royalty: 6.00, seller: 'EQC1o...99xY', buyer: 'EQK2r...22zL', date: 'May 18, 2026', txHash: 'f49b...281a' },
-    { id: 'tx-sec-3', nftName: 'Sunset Vibe #14', salePrice: 30, royalty: 1.50, seller: 'EQB2w...88vC', buyer: 'EQF7d...11kP', date: 'May 12, 2026', txHash: 'd712...918b' },
-    { id: 'tx-sec-4', nftName: 'Electric Dreams #07', salePrice: 80, royalty: 4.00, seller: 'EQM4p...55sQ', buyer: 'EQN9c...33vA', date: 'May 05, 2026', txHash: 'c90a...471d' },
-    { id: 'tx-sec-5', nftName: 'Neon Waves #09', salePrice: 50, royalty: 2.50, seller: 'EQA2h...12eR', buyer: 'EQT5y...88uI', date: 'Apr 28, 2026', txHash: 'a55d...102f' },
-  ]);
+  const [secondaryTransactions, setSecondaryTransactions] = React.useState<Array<{
+    id: string;
+    nftName: string;
+    salePrice: number;
+    royalty: number;
+    seller: string;
+    buyer: string;
+    date: string;
+    txHash: string;
+  }>>([]);
+
+  const fetchSecondarySales = React.useCallback(async () => {
+    try {
+      const snap = await getDocs(query(collection(db, 'nftSales'), limit(50)));
+      const artistNftIds = new Set(artistNFTs.map(n => n.id));
+      const rows: typeof secondaryTransactions = [];
+      snap.forEach(docSnap => {
+        const d = docSnap.data() as any;
+        const belongsToArtist =
+          artistNftIds.size === 0 ||
+          artistNftIds.has(d.nftId) ||
+          (user?.uid && (d.creatorId === user.uid || d.sellerId === user.uid || d.artistId === user.uid));
+        if (belongsToArtist) {
+          const salePrice = Number(d.price || d.salePrice || 0);
+          const royaltyRate = Number(d.royaltyPercentage || 0.05);
+          rows.push({
+            id: docSnap.id,
+            nftName: d.nftTitle || d.nftName || 'Music NFT',
+            salePrice,
+            royalty: Number(d.royaltyAmount ?? (salePrice * royaltyRate)),
+            seller: d.seller || d.from || 'Collector',
+            buyer: d.buyer || d.to || 'Collector',
+            date: d.createdAt ? new Date(d.createdAt).toLocaleDateString() : (d.date || 'Confirmed'),
+            txHash: d.txHash || ''
+          });
+        }
+      });
+      setSecondaryTransactions(rows);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.LIST, 'nftSales');
+    }
+  }, [artistNFTs, user?.uid]);
+
+  React.useEffect(() => {
+    fetchSecondarySales();
+  }, [fetchSecondarySales]);
 
   const handleScanOnChainRoyalties = async () => {
     if (isScanningRoyalties) return;
     setIsScanningRoyalties(true);
-    addNotification({
-      userId: user?.uid || 'all',
-      type: 'general',
-      title: 'Mainnet Scan Initiated',
-      message: 'Connecting to TON mainnet nodes to scan secondary sales contract...',
-    });
-    
-    // Simulate delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Check if we've already scanned once to avoid infinite insertions
-    const hasAlreadyScanned = secondaryTransactions.some(tx => tx.id === 'tx-sec-scanned');
-    if (hasAlreadyScanned) {
-      setIsScanningRoyalties(false);
-      addNotification({
-        userId: user?.uid || 'all',
-        type: 'general',
-        title: 'Scan Completed',
-        message: 'No new secondary transactions found. All royalties fully settled.',
-      });
-      return;
-    }
-    
-    // Add a new high-value transaction
-    const newTx = {
-      id: 'tx-sec-scanned',
-      nftName: 'Cyberpunk Genesis #02',
-      salePrice: 150,
-      royalty: 7.50,
-      seller: 'EQG2k...44fD',
-      buyer: 'EQW7s...81pQ',
-      date: 'May 24, 2026',
-      txHash: 'c12b...9a8f'
-    };
-    
-    setSecondaryTransactions(prev => [newTx, ...prev]);
+    await fetchSecondarySales();
     setIsScanningRoyalties(false);
     addNotification({
       userId: user?.uid || 'all',
       type: 'general',
-      title: 'Secondary Royalties Settled',
-      message: 'Successfully retrieved and settled 1 new secondary royalty payout: +7.50 TON!',
+      title: 'Ledger Synced',
+      message: `Synchronized secondary sales ledger from Firestore.`,
     });
   };
 
@@ -456,7 +437,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
   }, [filteredSecTransactions, totalSecRoyalties]);
 
   // States for Withdrawals & Payout calculations
-  const [pendingBalance, setPendingBalance] = React.useState<number>(totalEarnings > 0 ? totalEarnings : 12.4);
+  const [pendingBalance, setPendingBalance] = React.useState<number>(Math.max(0, totalEarnings));
   const [isProcessingPayouts, setIsProcessingPayouts] = React.useState(false);
   const [payoutLogs, setPayoutLogs] = React.useState<string[]>([]);
   const [payoutStatus, setPayoutStatus] = React.useState<'idle' | 'simulating' | 'broadcasting' | 'completed' | 'failed'>('idle');
@@ -513,18 +494,17 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
     setPayoutLogs(['[INFO] Initializing payout settlement sequence...', '[INFO] Total pending pool for settlement: ' + pendingBalance.toFixed(2) + ' TON']);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setPayoutLogs(prev => [...prev, '[INFO] Simulating gas fees and network state...']);
-      
-      await new Promise(resolve => setTimeout(resolve, 800));
       setPayoutStatus('broadcasting');
-      setPayoutLogs(prev => [...prev, '[INFO] Allocation verification details:']);
-      
-      const shares = splits.map(s => {
+      const activeSplits = splits.filter(s => s.value > 0 && s.address.trim().length > 0);
+      if (activeSplits.length === 0) {
+        throw new Error('Add at least one valid collaborator TON wallet address before settling.');
+      }
+
+      const shares = activeSplits.map(s => {
         const amt = pendingBalance * (s.value / 100);
         return {
           name: s.name,
-          address: s.address,
+          address: s.address.trim(),
           percentage: s.value,
           amount: amt
         };
@@ -534,14 +514,9 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
         setPayoutLogs(prev => [...prev, `  - ${s.name}: ${s.percentage}% -> allocating ${s.amount.toFixed(4)} TON to ${s.address.slice(0, 8)}...${s.address.slice(-6)}`]);
       });
 
-      setPayoutLogs(prev => [...prev, '[INFO] Compiling TON batch dictionary payload...']);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setPayoutLogs(prev => [...prev, '[INFO] Initiating atomic database batch transaction...']);
+      setPayoutLogs(prev => [...prev, '[INFO] Executing atomic Firestore batch settlement...']);
 
-      // Firestore Atomic batch execution
       const batch = writeBatch(db);
-      
-      // 1. Reset artist pending balance
       if (user) {
         const artistRoyaltyRef = doc(db, 'royalties', user.uid);
         batch.set(artistRoyaltyRef, {
@@ -550,24 +525,20 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
         }, { merge: true });
       }
 
-      // Generate a mock hash representing TON blockchain TX
-      const txHash = '0x' + Array.from({length:64}, () => Math.floor(Math.random()*16).toString(16)).join('');
-      setGeneratedTxHash(txHash);
+      const txRef = doc(collection(db, 'transactions'));
+      const settlementId = txRef.id;
+      setGeneratedTxHash(settlementId);
 
-      // 2. Distribute and update collaborator records
       shares.forEach(s => {
-        const collabId = s.address; 
-        const collabRef = doc(db, 'royalties', collabId);
+        const collabRef = doc(db, 'royalties', s.address);
         batch.set(collabRef, {
-          artistId: collabId,
+          artistId: s.address,
           totalEarned: increment(s.amount),
           pendingWithdrawal: increment(s.amount),
           updatedAt: serverTimestamp()
         }, { merge: true });
       });
 
-      // 3. Record the transaction in history
-      const txRef = doc(collection(db, 'transactions'));
       const participants = [user?.uid].filter(Boolean) as string[];
       const txData = {
         type: 'withdrawal',
@@ -577,27 +548,29 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
         timestamp: new Date().toISOString(),
         serverTimestamp: serverTimestamp(),
         participants,
-        txHash,
-        notes: `Batch Royalty Payout of ${pendingBalance.toFixed(2)} TON distributed to ${splits.length} collaborators.`
+        txHash: settlementId,
+        notes: `Batch Royalty Payout of ${pendingBalance.toFixed(2)} TON distributed to ${shares.length} stakeholders.`
       };
       batch.set(txRef, txData);
 
       await batch.commit();
 
       setPayoutStatus('completed');
-      setPayoutLogs(prev => [...prev, '[SUCCESS] Transaction verified on TON testnet / ledger!', `[SUCCESS] TX hash: ${txHash}`]);
+      setPayoutLogs(prev => [...prev, '[SUCCESS] Settlement recorded!', `[SUCCESS] Reference ID: ${settlementId}`]);
       setPendingBalance(0);
+      setNotifications(prev => [
+        { id: settlementId, message: `Settled ${pendingBalance.toFixed(2)} TON across ${shares.length} stakeholders`, timestamp: 'Just now' },
+        ...prev
+      ]);
 
       addNotification({
         userId: user?.uid || 'all',
         type: 'general',
-        title: '✅ Payout Complete',
-        message: `Successfully structured payout of ${pendingBalance.toFixed(2)} TON to ${splits.length} addresses!`,
+        title: 'Payout Complete',
+        message: `Recorded payout settlement of ${pendingBalance.toFixed(2)} TON.`,
       });
 
-      // Refresh audit logs
       fetchRoyaltyAudit();
-
     } catch (err: any) {
       console.error(err);
       setPayoutStatus('failed');
@@ -661,7 +634,11 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
   const fetchRoyaltyAdvice = async () => {
     setAdviceLoading(true);
     try {
-        const perfData = { streams: 14000, growth: "18.2%", tracks: ["Neon Waves"] }; // Mock current performance
+        const totalTrackStreams = artistTracks.reduce((sum, t) => sum + (t.streams || t.playCount || 0), 0);
+        const perfData = {
+          streams: totalTrackStreams,
+          tracks: artistTracks.slice(0, 5).map(t => t.title)
+        };
         const response = await fetch('/api/royalty-advice', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -708,32 +685,13 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
   };
 
   React.useEffect(() => {
-    // Simulated Firestore fetch for the last 7 days
-    const fetchWeeklyStreams = async () => {
-      try {
-          // In a real implementation, you would query Firestore:
-          // const q = query(collection(db, 'streams'), where('timestamp', '>=', sevenDaysAgo));
-          // const snapshot = await getDocs(q);
-          
-          // Simulating the data for now
-          const data = [
-            { day: 'Mon', streams: 1200 },
-            { day: 'Tue', streams: 1900 },
-            { day: 'Wed', streams: 1500 },
-            { day: 'Thu', streams: 2100 },
-            { day: 'Fri', streams: 3200 },
-            { day: 'Sat', streams: 2800 },
-            { day: 'Sun', streams: 2500 },
-          ];
-          setWeeklyStreamsData(data);
-      } catch (error) {
-        console.error("Error fetching weekly streams:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchWeeklyStreams();
-  }, []);
+    const data = artistTracks.slice(0, 7).map((t, i) => ({
+      day: t.title ? t.title.slice(0, 10) : `Track ${i + 1}`,
+      streams: t.streams || t.playCount || 0,
+    }));
+    setWeeklyStreamsData(data);
+    setLoading(false);
+  }, [artistTracks]);
 
   const MetricCard = ({ title, value, sub, isPulsing = false }: { title: string, value: string, sub: string, isPulsing?: boolean }) => (
       <motion.div 
@@ -757,17 +715,22 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
     try {
         const response = await fetch(`/api/auth/${provider.toLowerCase()}/url`);
         const { url } = await response.json();
-        const authWindow = window.open(url, 'oauth_popup', 'width=600,height=700');
-        
+        if (url) {
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
         const handleMessage = (event: MessageEvent) => {
             if (event.data?.type === 'OAUTH_AUTH_SUCCESS' && event.data?.provider === provider.toLowerCase()) {
                 window.removeEventListener('message', handleMessage);
                 setLinkedSocials(prev => ({ ...prev, [provider.toLowerCase()]: true }));
-                console.log(`Successfully linked ${provider}!`);
             }
         };
         window.addEventListener('message', handleMessage);
-        
     } catch (e) {
         console.error('OAuth initiation error:', e);
     }
@@ -828,9 +791,23 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
         <>
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <MetricCard title="Total Earnings" value={`$${totalEarnings.toLocaleString()}`} sub="+12.5% from last month" isPulsing={isEarningsPulsing} />
-              <MetricCard title="Top Performing Track" value="Neon Waves" sub="14k streams last week" />
-              <MetricCard title="Monthly Growth" value="18.2%" sub="Total platform presence" />
+              <MetricCard title="Total Earnings" value={`${totalEarnings.toLocaleString()} TON`} sub={`${artistNFTs.length} NFTs published`} isPulsing={isEarningsPulsing} />
+              <MetricCard
+                title="Top Performing Track"
+                value={(() => {
+                  const sorted = [...artistTracks].sort((a, b) => (b.streams || b.playCount || 0) - (a.streams || a.playCount || 0));
+                  return sorted[0]?.title || 'No tracks yet';
+                })()}
+                sub={(() => {
+                  const sorted = [...artistTracks].sort((a, b) => (b.streams || b.playCount || 0) - (a.streams || a.playCount || 0));
+                  return `${(sorted[0]?.streams || sorted[0]?.playCount || 0).toLocaleString()} streams`;
+                })()}
+              />
+              <MetricCard
+                title="Total Catalog Streams"
+                value={artistTracks.reduce((sum, t) => sum + (t.streams || t.playCount || 0), 0).toLocaleString()}
+                sub={`Across ${artistTracks.length} tracks`}
+              />
           </div>
 
           {/* Secondary Market Royalties Tracker Widget */}
@@ -905,7 +882,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                   Filter Resales ledger
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {['all', 'neon waves', 'cyberpunk', 'sunset vibe', 'electric dreams'].map(filterId => (
+                  {(['all', ...Array.from(new Set(secondaryTransactions.map(t => t.nftName.toLowerCase())))].slice(0, 5)).map(filterId => (
                     <button
                       key={filterId}
                       onClick={() => setSecondaryFilter(filterId)}
@@ -1036,91 +1013,10 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                     <XAxisRC dataKey="day" stroke="#666" fontSize={10} />
                     <YAxisRC stroke="#666" fontSize={10} />
                     <TooltipRC contentStyle={{ backgroundColor: '#111', border: 'none' }} />
-                    <LineRC type="monotone" dataKey="revenue" data={revenueTrendData.filter(d => !d.projected)} stroke="#3b82f6" strokeWidth={2} dot={false} isAnimationActive={false} />
-                    {revenueTimeFrame === 'Daily' && (
-                      <LineRC type="monotone" dataKey="revenue" data={revenueTrendData.filter(d => d.projected)} stroke="#3b82f6" strokeWidth={2} strokeDasharray="5 5" dot={false} isAnimationActive={false} />
-                    )}
+                    <LineRC type="monotone" dataKey="revenue" data={revenueTrendData} stroke="#3b82f6" strokeWidth={2} dot={false} isAnimationActive={false} />
                   </LineChartRC>
                 </ResponsiveContainerRC>
               </div>
-
-              {/* Month Breakdown Selector */}
-              {revenueTimeFrame === 'Monthly' && (
-                <div className="mt-6 space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#666] mb-3">
-                    Monthly Source Splits
-                  </p>
-                  {[
-                    { 
-                      month: 'Jan', 
-                      revenue: 5000, 
-                      tracks: [
-                        { name: 'Neon Waves', type: 'Track Stream', count: '10,200', amount: 2800 },
-                        { name: 'Echoes of Sky', type: 'Track Stream', count: '4,500', amount: 1200 },
-                        { name: 'Cyberpunk Genesis #01', type: 'NFT Royalty', count: '1 copy', amount: 1000 }
-                      ]
-                    },
-                    { 
-                      month: 'Feb', 
-                      revenue: 7000, 
-                      tracks: [
-                        { name: 'Neon Waves', type: 'Track Stream', count: '15,800', amount: 4100 },
-                        { name: 'Electric Dreams #04', type: 'NFT Sale', count: '1 copy', amount: 2000 },
-                        { name: 'Sunset Vibe', type: 'Track Stream', count: '3,100', amount: 900 }
-                      ]
-                    },
-                    { 
-                      month: 'Mar', 
-                      revenue: 6000, 
-                      tracks: [
-                        { name: 'Neon Waves', type: 'Track Stream', count: '12,400', amount: 3200 },
-                        { name: 'Retro Beats #12', type: 'NFT Royalty', count: '2 copies', amount: 1800 },
-                        { name: 'Echoes of Sky', type: 'Track Stream', count: '3,800', amount: 1000 }
-                      ]
-                    }
-                  ].map((d) => {
-                    const isExpanded = expandedMonth === d.month;
-                    return (
-                      <div key={d.month} className="bg-white/5 rounded-2xl p-4 transition-all duration-250">
-                        <div 
-                          onClick={() => setExpandedMonth(isExpanded ? null : d.month)}
-                          className="flex items-center justify-between cursor-pointer select-none"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center font-bold text-xs text-blue-400">
-                              {d.month[0]}
-                            </div>
-                            <div>
-                              <p className="text-xs font-black uppercase tracking-wider text-white">{d.month} Earnings</p>
-                              <p className="text-[10px] text-[#666] font-bold">{d.tracks.length} Revenue Sources</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <p className="text-xs font-black text-blue-400">${d.revenue.toLocaleString()}</p>
-                            <span className="text-[10px] text-[#666] transition-transform duration-250" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }}>
-                              ▼
-                            </span>
-                          </div>
-                        </div>
-                        
-                        {isExpanded && (
-                          <div className="mt-4 pt-4 border-t border-white/[0.05] space-y-3">
-                            {d.tracks.map((track, i) => (
-                              <div key={i} className="flex items-center justify-between py-1 text-xs">
-                                <div>
-                                  <p className="font-bold text-white uppercase tracking-tight text-[11px]">{track.name}</p>
-                                  <span className="text-[9px] text-[#666] uppercase tracking-widest">{track.type} • {track.count}</span>
-                                </div>
-                                <p className="font-mono font-bold text-emerald-400 text-[11px]">+${track.amount}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </div>
 
@@ -1909,15 +1805,10 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                 </div>
                 {generatedTxHash && (
                   <div className="pt-2 mt-2 flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    <span>Transaction Hash:</span>
-                    <a 
-                      href={`https://tonscan.org/tx/${generatedTxHash}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-blue-400 font-mono font-bold hover:underline flex items-center gap-1 lowercase"
-                    >
-                      {generatedTxHash.slice(0, 16)}...{generatedTxHash.slice(-16)} <ExternalLink className="w-3 h-3 text-blue-400" />
-                    </a>
+                    <span>Settlement ID:</span>
+                    <span className="text-blue-400 font-mono font-bold lowercase">
+                      {generatedTxHash.slice(0, 16)}
+                    </span>
                   </div>
                 )}
               </motion.div>

@@ -2,12 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useAudio } from '@/contexts/AudioContext';
-import { MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { NFTItem } from '@/types';
-import { ShoppingCart, Layers } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import VerifiedArtistBadge from '@/components/common/VerifiedArtistBadge';
-import { MarqueeTitle } from './MarqueeTitle';
-import { cardTokens } from '@/design';
 
 interface TrendingNFTCardProps {
   nft: NFTItem;
@@ -16,34 +13,30 @@ interface TrendingNFTCardProps {
 
 const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
   const navigate = useNavigate();
-  const { allTracks, playTrack, collections } = useAudio();
+  const { allTracks, artists, playTrack } = useAudio();
 
-  const artist = MOCK_ARTISTS.find(a => a.name.toLowerCase() === (nft.creator || nft.artist || '').toLowerCase());
+  const artist = artists.find(a => a.name.toLowerCase() === (nft.creator || nft.artist || '').toLowerCase());
   const isVerified = nft.artistVerified || artist?.verified || artist?.isVerifiedArtist;
 
-  const nftCollection = collections?.find(c => c.nftIds?.includes(nft.id));
-  const traitCollection = nft.traits?.find(t => t.trait_type.toLowerCase() === 'collection' || t.trait_type.toLowerCase() === 'series')?.value as string ||
-                          nft.attributes?.find(t => t.trait_type.toLowerCase() === 'collection' || t.trait_type.toLowerCase() === 'series')?.value as string;
-  const collectionName = nftCollection?.name || traitCollection || (nft.title.includes(':') ? nft.title.split(':')[0] : null);
-
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = () => {
     if (onClick) {
       onClick();
       return;
     }
 
-    const track = allTracks.find(t => t.id === nft.trackId) || MOCK_TRACKS.find(t => t.id === nft.trackId);
-    if (track) {
+    const track = allTracks.find(t => t.id === nft.trackId);
+    if (track && track.audioUrl) {
       playTrack(track);
-    } else {
-      const fallbackTrack = {
+    } else if (nft.audioUrl) {
+      playTrack({
         id: nft.trackId || nft.id,
         title: nft.title,
-        artist: nft.artist || nft.creator,
+        artist: nft.artist || nft.creator || 'Artist',
         coverUrl: nft.imageUrl,
-        audioUrl: nft.audioUrl || (MOCK_TRACKS[0]?.audioUrl ?? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'),
-      };
-      playTrack(fallbackTrack as any);
+        audioUrl: nft.audioUrl,
+      } as any);
+    } else {
+      navigate(`/nft/${nft.id}`);
     }
   };
 
@@ -72,11 +65,17 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
         className="relative aspect-square w-full rounded-[10px] overflow-hidden bg-neutral-900/60"
         style={{ borderRadius: 'var(--card-image-radius, 10px)' }}
       >
-        <img 
-          src={nft.imageUrl || 'https://via.placeholder.com/150'} 
-          alt={nft.title} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-        />
+        {nft.imageUrl ? (
+          <img 
+            src={nft.imageUrl} 
+            alt={nft.title} 
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-white/20 text-xs font-bold">
+            NFT
+          </div>
+        )}
         
         {/* Floating Quick Buy / View Action */}
         <div className="absolute bottom-2 right-2 opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
@@ -121,8 +120,8 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
             lineHeight: 'var(--card-meta-line-height, 15px)',
           }}
         >
-          <span className="text-blue-400 font-bold">{nft.price}</span>
-          <span className="text-white/40">TON</span>
+          <span className="text-blue-400 font-bold">{nft.price || '—'}</span>
+          {nft.price && <span className="text-white/40">TON</span>}
         </div>
       </div>
     </motion.div>

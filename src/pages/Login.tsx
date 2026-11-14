@@ -12,6 +12,7 @@ import { uploadFile } from '@/services/storageService';
 import { toast } from 'sonner';
 import { TonConnectButton, useTonAddress, useTonWallet, useTonConnectUI } from '@tonconnect/ui-react';
 import { APP_LOGO } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -92,13 +93,12 @@ const Login: React.FC = () => {
     }
   }, [tonAddress]);
 
-  // Dynamically compute avatar URL when seed or style updates
+  // Default to local placeholder image until custom photo is uploaded
   useEffect(() => {
-    if (avatarSeed && !customFilePreview) {
-      const generated = `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${encodeURIComponent(avatarSeed)}`;
-      setOnboardAvatarUrl(generated);
+    if (!customFilePreview && !onboardAvatarUrl) {
+      setOnboardAvatarUrl(getPlaceholderImage('artist'));
     }
-  }, [avatarStyle, avatarSeed, customFilePreview]);
+  }, [customFilePreview, onboardAvatarUrl]);
 
   const {
     register: loginRegister,
@@ -231,9 +231,8 @@ const Login: React.FC = () => {
           const { downloadUrl } = await uploadFile(customFile, storagePath);
           finalAvatarUrl = downloadUrl;
         } catch (uploadError) {
-          console.warn("Avatar upload failed, falling back to dynamic SVG generator option", uploadError);
-          // Fallback to generated Dicebear URL
-          finalAvatarUrl = `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${encodeURIComponent(avatarSeed)}`;
+          console.warn("Avatar upload failed, using default avatar", uploadError);
+          finalAvatarUrl = getPlaceholderImage('artist');
         } finally {
           setIsUploadingImage(false);
         }
@@ -571,69 +570,17 @@ const Login: React.FC = () => {
                       <div className="space-y-3">
                         {/* TON CONNECT DEFAULT SDK TRIGGER */}
                         <div className="flex flex-col gap-2">
-                          <Label className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">GRAM Ecosystem</Label>
+                          <Label className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">TON Ecosystem</Label>
                           <button
                             onClick={() => tonConnectUI.openModal()}
                             className="w-full h-11 pointer-events-auto flex items-center justify-between px-4 border border-blue-500/30 hover:bg-blue-500/10 text-blue-400 rounded-[4px] transition-colors font-bold text-[10px] uppercase tracking-wider cursor-pointer"
                           >
                             <span className="flex items-center gap-2">
                               <Wallet className="h-4 w-4" />
-                              GRAM Wallet Connect (Standard)
+                              TON Wallet Connect (Standard)
                             </span>
                             <span className="text-[8px] tracking-normal font-bold lowercase opacity-75">SDK Client</span>
                           </button>
-                        </div>
-
-                        {/* EVM / WALLETCONNECT */}
-                        <div className="flex flex-col gap-2 pt-2">
-                          <Label className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">Multi-Chain standard (WalletConnect / EVM)</Label>
-                          
-                          <button
-                            onClick={() => {
-                              const mockEthAddress = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
-                              setActiveAddress(mockEthAddress);
-                              setActiveWalletType('MetaMask');
-                              setOnboardingActive(true);
-                              setOnboardUsername(`eth_user_${mockEthAddress.substring(2, 8)}`);
-                              setAvatarSeed(mockEthAddress);
-                              toast.success("MetaMask Connected");
-                            }}
-                            className="w-full h-11 flex items-center justify-between px-4 border border-purple-500/30 hover:bg-purple-500/10 text-purple-400 rounded-[4px] transition-colors font-bold text-[10px] uppercase tracking-wider cursor-pointer"
-                          >
-                            <span className="flex items-center gap-2">
-                              <Sparkles className="h-4 w-4" />
-                              Connect with MetaMask / EVM
-                            </span>
-                            <span className="text-[8px] bg-purple-500/20 px-2 py-0.5 rounded-[4px] tracking-widest">Active</span>
-                          </button>
-
-                          {/* Interactive Standard QR Simulator Card to represent premium WalletConnect capabilities */}
-                          <div className="border border-white/10 p-3 rounded-[4px] flex items-center justify-between bg-white/[0.02] backdrop-blur-md mt-1">
-                            <div className="flex items-center gap-2">
-                              <RefreshCw className="h-4 w-4 text-emerald-400 animate-spin" />
-                              <div className="text-left">
-                                <p className="text-[9px] font-bold text-white">Standard WalletConnect Hub</p>
-                                <p className="text-[8px] text-white/60">Ethers, Metamask, Safe standard support</p>
-                              </div>
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => {
-                                // Simulate WalletConnect address callback beautifully for full demo compliance
-                                const mockEthAddress = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
-                                setActiveAddress(mockEthAddress);
-                                setActiveWalletType('WalletConnect');
-                                setOnboardingActive(true);
-                                setOnboardUsername(`wc_user_${mockEthAddress.substring(2, 8)}`);
-                                setAvatarSeed(mockEthAddress);
-                                toast.success("WalletConnected Successfully");
-                              }}
-                              className="text-[8px] h-7 bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-400 uppercase font-black tracking-widest rounded-[4px]"
-                            >
-                              Simulate WC
-                            </Button>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -679,56 +626,7 @@ const Login: React.FC = () => {
                           accept="image/*" 
                         />
 
-                        {/* Identity Selection Style Grid & Seed Trigger */}
-                        <div className="w-full space-y-2 text-center">
-                          <div className="flex justify-center gap-1">
-                            {['identicon', 'bottts', 'retro', 'lorelei'].map((styleName) => (
-                              <button
-                                key={styleName}
-                                type="button"
-                                onClick={() => {
-                                  setCustomFile(null);
-                                  setCustomFilePreview('');
-                                  setAvatarStyle(styleName);
-                                }}
-                                className={`px-2 py-1 text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all border ${
-                                  avatarStyle === styleName && !customFilePreview
-                                    ? 'bg-blue-600 border-blue-600 text-white animate-pulse'
-                                    : 'border-white/10 bg-transparent text-white/60 hover:bg-white/5'
-                                }`}
-                              >
-                                {styleName}
-                              </button>
-                            ))}
-                          </div>
-
-                          <div className="flex items-center gap-1.5 max-w-[200px] mx-auto">
-                            <Input
-                              type="text"
-                              value={avatarSeed}
-                              onChange={(e) => {
-                                setCustomFile(null);
-                                setCustomFilePreview('');
-                                setAvatarSeed(e.target.value);
-                              }}
-                              placeholder="Avatar seed..."
-                              className="h-7 text-[10px] font-semibold text-center bg-white/[0.02] backdrop-blur-md border border-white/10 text-white placeholder-white/30 rounded-[4px]"
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              onClick={() => {
-                                setCustomFile(null);
-                                setCustomFilePreview('');
-                                setAvatarSeed(Math.random().toString(36).substring(7));
-                              }}
-                              className="h-7 w-7 rounded-[4px] border-white/10 text-white/70 hover:text-white hover:bg-white/5"
-                            >
-                              <RefreshCw className="h-3.5 w-3.5 text-white/75" />
-                            </Button>
-                          </div>
-                        </div>
+                        <p className="text-[9px] text-white/50 text-center">Click the avatar above to upload a custom profile photo.</p>
                       </div>
 
                       {/* PROFILE DETAIL FIELDS */}

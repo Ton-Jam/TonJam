@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, MapPin, Clock, ExternalLink, Ticket } from 'lucide-react';
 import { ArtistEvent } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn, getPlaceholderImage } from '@/lib/utils';
 import { motion } from 'motion/react';
 
 interface EventCardProps {
@@ -34,7 +34,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
         {/* Event Image */}
         <div className="relative h-48 sm:h-56 overflow-hidden">
           <img 
-            src={event.imageUrl || `https://picsum.photos/seed/${event.id}/800/400`} 
+            src={event.imageUrl || getPlaceholderImage(`event-${event.id}`)} 
             alt={event.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />

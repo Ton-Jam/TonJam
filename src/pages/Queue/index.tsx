@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Track } from '@/types';
-import { MOCK_TRACKS } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 import emptyQueueIllustration from '@/assets/images/empty_queue_illustration_1791583279786.jpg';
 
 export const QueuePage: React.FC = () => {
@@ -69,7 +69,7 @@ export const QueuePage: React.FC = () => {
 
   // Recommended tracks to quick-add (exclude items currently in queue or playing)
   const recommendedTracks = useMemo(() => {
-    const pool = (allTracks && allTracks.length > 0) ? allTracks : MOCK_TRACKS;
+    const pool = allTracks || [];
     const existingIds = new Set(queue.map(t => t.id));
     if (currentTrack) existingIds.add(currentTrack.id);
     return pool.filter(t => !existingIds.has(t.id)).slice(0, 5);
@@ -165,7 +165,7 @@ export const QueuePage: React.FC = () => {
             <div className="flex items-center gap-3.5 min-w-0">
               <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-slate-800 shrink-0 shadow-lg">
                 <img 
-                  src={currentTrack.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=300&h=300&q=80'} 
+                  src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} 
                   alt={currentTrack.title} 
                   className="w-full h-full object-cover" 
                   referrerPolicy="no-referrer" 
@@ -274,7 +274,7 @@ export const QueuePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const seed = currentTrack || recommendedTracks[0] || MOCK_TRACKS[0];
+                  const seed = currentTrack || recommendedTracks[0] || allTracks[0];
                   if (seed) startSmartRadio(seed);
                 }}
                 className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-purple-600/90 hover:bg-purple-600 text-white text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95 transition-all shadow-lg shadow-purple-600/25"
@@ -322,7 +322,7 @@ export const QueuePage: React.FC = () => {
                       className="w-10 h-10 rounded-lg overflow-hidden bg-slate-800 shrink-0 cursor-pointer"
                     >
                       <img 
-                        src={track.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=300&h=300&q=80'} 
+                        src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
                         alt={track.title} 
                         className="w-full h-full object-cover" 
                         referrerPolicy="no-referrer" 
@@ -389,7 +389,7 @@ export const QueuePage: React.FC = () => {
                 <div className="flex items-center gap-3 min-w-0 flex-1 mr-3">
                   <div className="w-9 h-9 rounded-lg overflow-hidden bg-slate-800 shrink-0">
                     <img 
-                      src={track.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=300&h=300&q=80'} 
+                      src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
                       alt={track.title} 
                       className="w-full h-full object-cover" 
                       referrerPolicy="no-referrer" 

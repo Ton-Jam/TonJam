@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ExternalLink, Disc, Layers, Loader2, Verified } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { NFTItem } from '@/types';
-import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
+import { useAudio } from '@/contexts/AudioContext';
 import NFTAudioPreviewPlayer from '@/components/NFTAudioPreviewPlayer';
 
 interface NFTQuickViewModalProps {
@@ -13,18 +13,8 @@ interface NFTQuickViewModalProps {
 
 const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onClose }) => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (isOpen) {
-      setIsLoading(true);
-      // Simulate data fetching delay
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 600);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, nft.id]);
+  const { artists, userProfile } = useAudio();
+  const [isLoading] = useState(false);
 
   if (!isOpen) return null;
 
@@ -87,11 +77,11 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                       className="text-foreground hover:text-blue-400 hover:underline cursor-pointer inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                        const artist = artists.find(a => a.name === nft.creator);
                         if (artist) {
                           navigate(`/artist/${artist.uid}`);
                           onClose();
-                        } else if (nft.creator === MOCK_USER.name) {
+                        } else if (nft.creator === userProfile?.name) {
                           navigate('/profile');
                           onClose();
                         }
@@ -100,11 +90,11 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
                           e.stopPropagation();
-                          const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                          const artist = artists.find(a => a.name === nft.creator);
                           if (artist) {
                             navigate(`/artist/${artist.uid}`);
                             onClose();
-                          } else if (nft.creator === MOCK_USER.name) {
+                          } else if (nft.creator === userProfile?.name) {
                             navigate('/profile');
                             onClose();
                           }
@@ -116,7 +106,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                     >
                       {nft.creator}
                     </span>
-                    {MOCK_ARTISTS.find(a => a.name === nft.creator)?.verified && (
+                    {artists.find(a => a.name === nft.creator)?.verified && (
                       <Verified className="h-3 w-3 text-blue-500 flex-shrink-0" />
                     )}
                   </span>
@@ -173,7 +163,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                   >
                     View Details <ExternalLink className="h-3 w-3" />
                   </button>
-                  {nft.owner === MOCK_USER.walletAddress && !nft.listingType && (
+                  {userProfile?.walletAddress && nft.owner === userProfile.walletAddress && !nft.listingType && (
                     <button 
                       onClick={() => {
                         onClose();

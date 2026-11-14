@@ -67,7 +67,7 @@ const TRIVIA_QUESTIONS = [
 
 export const FanTokenHub: React.FC<FanTokenHubProps> = ({ artist }) => {
   const { userProfile, refreshProfile } = useAuth();
-  const { playTrack, addNotification } = useAudio();
+  const { playTrack, addNotification, allTracks } = useAudio();
   
   // Wallet States
   const [tokenBalance, setTokenBalance] = useState<number>(0);
@@ -323,41 +323,35 @@ export const FanTokenHub: React.FC<FanTokenHubProps> = ({ artist }) => {
     }
   };
 
-  // Static exclusive content specifications
+  const artistTrack = useMemo(
+    () => (allTracks || []).find((t) => t.artistId === artist.uid || t.artist === artist.name),
+    [allTracks, artist.uid, artist.name]
+  );
+
+  // Exclusive content specifications tied to artist's real tracks when available
   const EXCLUSIVE_ITEMS = [
     {
       id: `exclusive_bts_${artist.uid}`,
-      title: "Behind-the-Scenes: Live Rehearsal VLOG",
+      title: "Behind-the-Scenes: Studio Session",
       type: "video" as const,
       cost: 50,
-      description: "Direct rehearsal studio walkthrough. Hear vocal warm-ups and instrument soundchecks before the final tour.",
-      snippet: "https://www.w3schools.com/html/mov_bbb.mp4"
+      description: "Direct rehearsal studio walkthrough and soundcheck notes shared with token supporters.",
+      snippet: ""
     },
     {
       id: `exclusive_track_${artist.uid}`,
-      title: "Unreleased Master: Synth Retrospective (Demo)",
+      title: artistTrack ? `Exclusive Master: ${artistTrack.title}` : "Unreleased Master: Coming Soon",
       type: "audio" as const,
       cost: 100,
-      description: "Exclusive pre-release demo recording of our pending single, available exclusively to top tier token supporters.",
-      trackObj: {
-        id: `unreleased_demo_${artist.uid}`,
-        title: "Synth Retrospective (Exclusive Demo)",
-        artist: artist.name,
-        artistId: artist.uid,
-        coverUrl: artist.avatarUrl,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-        duration: 215,
-        isNFT: false,
-        genre: artist.genre || "Electronic",
-        isExclusive: true
-      } as Track
+      description: "Exclusive track access reserved for token supporters.",
+      trackObj: artistTrack || null
     },
     {
       id: `exclusive_discount_${artist.uid}`,
       title: "Exclusive Merch Voucher: 20% Vinyl Cut",
       type: "code" as const,
       cost: 150,
-      description: "A secure redeemable voucher to claim 20% off physical album pressings, shirts, and custom stickers.",
+      description: "A redeemable voucher to claim 20% off physical album pressings and merchandise.",
       codeValue: `TONJAM_VINYL_20_${tokenTicker}_${artist.uid.substring(0, 4).toUpperCase()}`
     }
   ];
@@ -573,20 +567,28 @@ export const FanTokenHub: React.FC<FanTokenHubProps> = ({ artist }) => {
                     </button>
                   ) : (
                     <div className="bg-black/35 rounded-xl p-3">
-                      {item.type === 'video' && item.snippet && (
-                        <div className="space-y-2">
-                          <video src={item.snippet} className="w-full rounded-lg aspect-video object-cover" controls playsInline />
-                          <span className="text-[9px] font-mono font-medium text-muted-foreground uppercase text-center block">Playing Live Vault Video</span>
-                        </div>
+                      {item.type === 'video' && (
+                        item.snippet ? (
+                          <div className="space-y-2">
+                            <video src={item.snippet} className="w-full rounded-lg aspect-video object-cover" controls playsInline />
+                            <span className="text-[9px] font-mono font-medium text-muted-foreground uppercase text-center block">Playing Live Vault Video</span>
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-muted-foreground text-center py-2">Artist has not uploaded a studio video yet.</p>
+                        )
                       )}
                       
-                      {item.type === 'audio' && item.trackObj && (
-                        <button
-                          onClick={() => playTrack(item.trackObj as Track)}
-                          className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer"
-                        >
-                          <Play className="w-3.5 h-3.5 fill-current" /> Stream Pre-Release Track
-                        </button>
+                      {item.type === 'audio' && (
+                        item.trackObj ? (
+                          <button
+                            onClick={() => playTrack(item.trackObj as Track)}
+                            className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" /> Stream Pre-Release Track
+                          </button>
+                        ) : (
+                          <p className="text-[11px] text-muted-foreground text-center py-2">No tracks uploaded by this artist yet.</p>
+                        )
                       )}
 
                       {item.type === 'code' && item.codeValue && (

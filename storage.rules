@@ -1,0 +1,120 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Default deny: All paths are locked unless explicitly granted below
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidAudioMime() {
+      return request.resource.contentType.matches('audio/.*') ||
+             request.resource.contentType in [
+               'audio/mpeg',
+               'audio/mp3',
+               'audio/wav',
+               'audio/x-wav',
+               'audio/flac',
+               'audio/ogg',
+               'audio/aac',
+               'audio/x-m4a',
+               'audio/mp4'
+             ];
+    }
+
+    function isValidImageMime() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType in [
+               'image/jpeg',
+               'image/png',
+               'image/webp',
+               'image/gif'
+             ];
+    }
+
+    function isValidAudioSize() {
+      return request.resource.size <= 50 * 1024 * 1024; // Maximum 50 MB
+    }
+
+    function isValidImageSize() {
+      return request.resource.size <= 10 * 1024 * 1024; // Maximum 10 MB
+    }
+
+    function isValidPostMediaSize() {
+      return request.resource.size <= 50 * 1024 * 1024; // Maximum 50 MB for post audio/video/image
+    }
+
+    // 👤 User Avatars
+    match /users/{userId}/avatars/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && isValidImageMime() && isValidImageSize();
+      allow delete: if isOwner(userId);
+    }
+
+    // 👤 User Profile Covers / Banners
+    match /users/{userId}/covers/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && isValidImageMime() && isValidImageSize();
+      allow delete: if isOwner(userId);
+    }
+
+    // 👤 Legacy Avatar path
+    match /avatars/{userId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && isValidImageMime() && isValidImageSize();
+      allow delete: if isOwner(userId);
+    }
+
+    // 🎵 Music Tracks Audio Masters
+    match /audio/{userId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && isValidAudioMime() && isValidAudioSize();
+      allow delete: if isOwner(userId);
+    }
+
+    // 🖼 Track Cover Artworks
+    match /images/{userId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && isValidImageMime() && isValidImageSize();
+      allow delete: if isOwner(userId);
+    }
+
+    // 💎 Music NFT Media & Artwork
+    match /nfts/{userId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && (
+        (isValidImageMime() && isValidImageSize()) || 
+        (isValidAudioMime() && isValidAudioSize())
+      );
+      allow delete: if isOwner(userId);
+    }
+
+    // 💬 JamSpace Community Posts Media (Images, Short Audio/Video clips)
+    match /posts/{userId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && (
+        (isValidImageMime() && isValidImageSize()) ||
+        (request.resource.contentType.matches('video/.*') && isValidPostMediaSize()) ||
+        (isValidAudioMime() && isValidAudioSize())
+      );
+      allow delete: if isOwner(userId);
+    }
+
+    // 📜 NFT JSON metadata
+    match /nft/{userId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && 
+        request.resource.size <= 2 * 1024 * 1024 &&
+        request.resource.contentType == 'application/json';
+      allow delete: if isOwner(userId);
+    }
+  }
+}

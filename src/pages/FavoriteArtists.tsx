@@ -4,12 +4,11 @@ import { Users, Search, MoreHorizontal, UserPlus, CheckCircle2, X } from 'lucide
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'motion/react';
-import { MOCK_ARTISTS } from '@/constants';
 import ArtistOptionsModal from '@/components/ArtistOptionsModal';
 import { Artist } from '@/types';
 
 const FavoriteArtists: React.FC = () => {
-  const { followedUserIds, setHeaderTitle } = useAudio();
+  const { followedUserIds, artists, setHeaderTitle } = useAudio();
   const navigate = useNavigate();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,7 +19,7 @@ const FavoriteArtists: React.FC = () => {
     return () => setHeaderTitle('');
   }, [setHeaderTitle]);
 
-  const followedArtists = MOCK_ARTISTS.filter(a => 
+  const followedArtists = artists.filter(a => 
     followedUserIds.includes(a.uid) && 
     a.name.toLowerCase().includes(searchQuery.toLowerCase())
   );

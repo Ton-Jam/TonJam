@@ -1,5 +1,8 @@
 import { sendTransactionSafe } from "@/services/tonService";
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { collection, onSnapshot, query, where, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { getPlaceholderImage } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/contexts/AudioContext';
 import { useNFT } from '@/contexts/NFTContext';
@@ -60,100 +63,8 @@ export interface NFTDrop {
   whitelistLimit: number;
   status: 'upcoming' | 'live' | 'sold_out';
   isFeatured?: boolean;
+  creatorId?: string;
 }
-
-const INITIAL_DROPS: NFTDrop[] = [
-  {
-    id: "drop-krupy-genesis",
-    title: "Vaporwave Nights: Genesis Edition",
-    artist: "DJKrupy AI",
-    artistId: "artist-krupy",
-    artistWallet: "EQB-z9X_GZ_uRQ93n4X_krupy_master_ton_vault_01",
-    priceTon: 12.5,
-    priceGram: 2500,
-    supply: 150,
-    mintedCount: 68,
-    coverUrl: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=800",
-    audioPreviewUrl: "https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3",
-    releaseDate: new Date(Date.now() + 1000 * 60 * 60 * 14).toISOString(), // 14 hours from now
-    description: "The ultimate neural-synthesized vaporwave collection. Minting unlocks exclusive lossless FLAC downloads, VIP Backstage JamSpace passes, and 12% lifetime on-chain streaming royalty splits.",
-    genre: "Phonk / Vaporwave",
-    perks: ["12% Lifetime Royalties", "Lossless Master FLAC", "VIP JamSpace Lounge Pass", "Exclusive Remix Stems"],
-    whitelist: [
-      "EQB-z9X_GZ_uRQ93n4X_krupy_master_ton_vault_01",
-      "UQAn8_W91x_4mKZ98P1Q009_ton_fan_collector_02",
-      "EQC-99X_123_abc_cyber_ton_audiophile_03"
-    ],
-    whitelistLimit: 50,
-    status: 'upcoming',
-    isFeatured: true,
-  },
-  {
-    id: "drop-aether-cyber",
-    title: "Cybernetic Resonance Vol. 1",
-    artist: "Aether Flux",
-    artistId: "artist-aether",
-    artistWallet: "EQD_aether_flux_sound_lab_ton_address_001",
-    priceTon: 25.0,
-    priceGram: 5000,
-    supply: 75,
-    mintedCount: 75,
-    coverUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=800",
-    audioPreviewUrl: "https://assets.mixkit.co/music/preview/mixkit-cyber-city-synthwave-1084.mp3",
-    releaseDate: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // Live / Started
-    description: "High-octane cyberpunk modular synthesis synced with 3D generative visualizers. A collaborative sonic experiment bridging hardware Eurorack rigs and TON smart contracts.",
-    genre: "Synthwave / Cyberpunk",
-    perks: ["3D Generative Visualizer NFT", "High-Res Modular Stems", "Private Producer Telegram Access"],
-    whitelist: [
-      "EQB-z9X_GZ_uRQ93n4X_krupy_master_ton_vault_01",
-      "UQAn8_W91x_4mKZ98P1Q009_ton_fan_collector_02"
-    ],
-    whitelistLimit: 30,
-    status: 'sold_out',
-  },
-  {
-    id: "drop-satoshi-symphony",
-    title: "Symphony of the Blockchain",
-    artist: "Satoshi Symphony",
-    artistId: "artist-satoshi",
-    artistWallet: "EQA_satoshi_symphony_orchestra_ton_vault_99",
-    priceTon: 40.0,
-    priceGram: 8000,
-    supply: 50,
-    mintedCount: 14,
-    coverUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=800",
-    audioPreviewUrl: "https://assets.mixkit.co/music/preview/mixkit-chill-bro-494.mp3",
-    releaseDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3.5).toISOString(), // 3.5 days from now
-    description: "An orchestral ambient masterpiece mapping real-time TON blockchain telemetry data to 48-piece classical acoustic orchestra stems.",
-    genre: "Ambient / Classical Web3",
-    perks: ["Full Orchestral Score PDF", "Signed Physical Vinyl Shipped", "Governance Voting Token"],
-    whitelist: [
-      "EQB-z9X_GZ_uRQ93n4X_krupy_master_ton_vault_01"
-    ],
-    whitelistLimit: 25,
-    status: 'upcoming',
-  },
-  {
-    id: "drop-ton-groove",
-    title: "Tokyo Midnight Groove",
-    artist: "Neon Shinjuku",
-    artistId: "artist-neon",
-    artistWallet: "EQC_tokyo_groove_sound_syndicate_ton_77",
-    priceTon: 8.0,
-    priceGram: 1600,
-    supply: 200,
-    mintedCount: 42,
-    coverUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=800",
-    audioPreviewUrl: "https://assets.mixkit.co/music/preview/mixkit-deep-urban-623.mp3",
-    releaseDate: new Date(Date.now() + 1000 * 60 * 60 * 48).toISOString(), // 2 days from now
-    description: "Smooth Japanese City Pop grooves blended with futuristic French house basslines. Limited mint on TON with instant staking yield.",
-    genre: "City Pop / Nu-Disco",
-    perks: ["Instant 18% APY Staking Boost", "Uncompressed Audio WAV", "Exclusive Concert Ticket Airdrop"],
-    whitelist: [],
-    whitelistLimit: 80,
-    status: 'upcoming',
-  }
-];
 
 // High Precision Real-Time Countdown Timer Component
 const DropCountdown: React.FC<{ targetDate: string; onExpire?: () => void }> = ({ targetDate, onExpire }) => {
@@ -276,9 +187,9 @@ export default function NFTLaunchpad() {
   const [subscribedDropIds, setSubscribedDropIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('tonjam_launchpad_drop_subscriptions');
-      return saved ? JSON.parse(saved) : ['drop-krupy-genesis'];
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return ['drop-krupy-genesis'];
+      return [];
     }
   });
 
@@ -367,24 +278,31 @@ export default function NFTLaunchpad() {
     return () => clearInterval(interval);
   }, [drops, subscribedDropIds, user, addNotification]);
 
-  // Load and cache drops
+  // Subscribe to launchpad drops stored in Firestore collections
   useEffect(() => {
-    const cached = localStorage.getItem('tonjam_launchpad_drops_v2');
-    if (cached) {
-      try {
-        setDrops(JSON.parse(cached));
-      } catch (e) {
-        setDrops(INITIAL_DROPS);
-      }
-    } else {
-      setDrops(INITIAL_DROPS);
-      localStorage.setItem('tonjam_launchpad_drops_v2', JSON.stringify(INITIAL_DROPS));
-    }
+    const q = query(collection(db, 'collections'), where('isLaunchpadDrop', '==', true));
+    const unsub = onSnapshot(q, (snapshot) => {
+      const loadedDrops: NFTDrop[] = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as any),
+      }));
+      setDrops(loadedDrops);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'collections');
+    });
+
+    return () => unsub();
   }, []);
 
-  const saveDrops = (updatedDrops: NFTDrop[]) => {
-    setDrops(updatedDrops);
-    localStorage.setItem('tonjam_launchpad_drops_v2', JSON.stringify(updatedDrops));
+  const persistDropUpdate = async (dropId: string, updates: Partial<NFTDrop>) => {
+    setDrops(prev => prev.map(d => d.id === dropId ? { ...d, ...updates } : d));
+    if (user?.uid) {
+      try {
+        await updateDoc(doc(db, 'collections', dropId), updates as any);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.UPDATE, `collections/${dropId}`);
+      }
+    }
   };
 
   // Audio preview playback toggle
@@ -456,7 +374,7 @@ export default function NFTLaunchpad() {
   }, [drops, searchQuery, selectedGenre, activeTab]);
 
   // Handle Joining Whitelist
-  const handleJoinWhitelist = (dropId: string) => {
+  const handleJoinWhitelist = async (dropId: string) => {
     const targetWallet = activeWallet || joinCustomWallet.trim();
 
     if (!targetWallet) {
@@ -483,9 +401,7 @@ export default function NFTLaunchpad() {
     }
 
     const updatedWhitelist = [...drop.whitelist, targetWallet];
-    const updatedDrops = [...drops];
-    updatedDrops[dropIndex] = { ...drop, whitelist: updatedWhitelist };
-    saveDrops(updatedDrops);
+    await persistDropUpdate(drop.id, { whitelist: updatedWhitelist });
 
     toast.success(`🎉 Whitelist spot secured! Verified for ${targetWallet.slice(0, 6)}...${targetWallet.slice(-4)}`);
     setJoinCustomWallet('');
@@ -499,11 +415,16 @@ export default function NFTLaunchpad() {
       return;
     }
 
+    if (!drop.artistWallet) {
+      toast.error('Artist has not configured a verified TON wallet for this drop.');
+      return;
+    }
+
     setIsMintingOnChain(true);
     const toastId = toast.loading(`Preparing TON blockchain transaction for ${drop.title}...`);
 
     try {
-      const recipientAddress = drop.artistWallet || "EQB-z9X_GZ_uRQ93n4X_krupy_master_ton_vault_01";
+      const recipientAddress = drop.artistWallet;
       const totalTon = (drop.priceTon * mintQuantity).toFixed(2);
       const nanoTonAmount = (BigInt(Math.round(parseFloat(totalTon) * 1e9))).toString();
 
@@ -518,7 +439,7 @@ export default function NFTLaunchpad() {
         ]
       };
 
-      const result = await sendTransactionSafe(tonConnectUI, transactionPayload);
+      await sendTransactionSafe(tonConnectUI, transactionPayload);
 
       // Successfully minted on TON!
       const mintedNftItem: NFTItem = {
@@ -532,7 +453,7 @@ export default function NFTLaunchpad() {
         ownerId: user?.uid || connectedAddress,
         imageUrl: drop.coverUrl,
         coverUrl: drop.coverUrl,
-        audioUrl: drop.audioPreviewUrl || 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
+        audioUrl: drop.audioPreviewUrl || '',
         price: `${drop.priceTon} TON`,
         rarity: "Launchpad Genesis Master",
         edition: `#${drop.mintedCount + 1} of ${drop.supply}`,
@@ -545,18 +466,11 @@ export default function NFTLaunchpad() {
       addNFT(mintedNftItem);
 
       // Update drop minted count
-      const updatedDrops = drops.map(d => {
-        if (d.id === drop.id) {
-          const newCount = d.mintedCount + mintQuantity;
-          return {
-            ...d,
-            mintedCount: newCount,
-            status: newCount >= d.supply ? 'sold_out' : d.status
-          };
-        }
-        return d;
+      const newCount = drop.mintedCount + mintQuantity;
+      await persistDropUpdate(drop.id, {
+        mintedCount: newCount,
+        status: newCount >= drop.supply ? 'sold_out' : drop.status
       });
-      saveDrops(updatedDrops);
 
       toast.success(
         `🎉 Minted ${mintQuantity}x "${drop.title}" on TON blockchain! Added to your Library.`,
@@ -572,35 +486,38 @@ export default function NFTLaunchpad() {
   };
 
   // Create & Schedule new Drop (Artist Studio)
-  const handleScheduleDrop = (e: React.FormEvent) => {
+  const handleScheduleDrop = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.uid) {
+      toast.error('Please sign in to schedule a drop');
+      return;
+    }
     if (!newTitle || !newPriceTon || !newSupply || !newReleaseDate || !newDescription) {
       toast.error('Please complete all required fields');
       return;
     }
+    const artistWallet = connectedAddress || userProfile?.walletAddress;
+    if (!artistWallet) {
+      toast.error('Please connect a TON wallet before scheduling a drop');
+      return;
+    }
 
+    const dropId = `drop-${Date.now()}`;
     const isoDateTime = new Date(`${newReleaseDate}T${newReleaseTime || '18:00'}`).toISOString();
-    const defaultCovers = [
-      "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=800"
-    ];
-
-    const randomCover = defaultCovers[Math.floor(Math.random() * defaultCovers.length)];
 
     const newDrop: NFTDrop = {
-      id: `drop-${Date.now()}`,
+      id: dropId,
       title: newTitle,
-      artist: userProfile?.name || userProfile?.username || user?.email?.split('@')[0] || "Verified TON Artist",
-      artistId: user?.uid || "artist-verified",
-      artistWallet: connectedAddress || userProfile?.walletAddress || "EQB-z9X_GZ_uRQ93n4X_krupy_master_ton_vault_01",
+      artist: userProfile?.name || userProfile?.username || user?.email?.split('@')[0] || "Artist",
+      artistId: user.uid,
+      creatorId: user.uid,
+      artistWallet,
       priceTon: parseFloat(newPriceTon) || 10,
       priceGram: parseFloat(newPriceGram) || 2000,
       supply: parseInt(newSupply) || 100,
       mintedCount: 0,
-      coverUrl: newCoverUrl || randomCover,
-      audioPreviewUrl: newAudioPreviewUrl || 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
+      coverUrl: newCoverUrl || getPlaceholderImage(dropId),
+      audioPreviewUrl: newAudioPreviewUrl || undefined,
       releaseDate: isoDateTime,
       description: newDescription,
       genre: newGenre,
@@ -610,9 +527,18 @@ export default function NFTLaunchpad() {
       status: 'upcoming'
     };
 
-    const updated = [newDrop, ...drops];
-    saveDrops(updated);
-    toast.success(`🚀 Scheduled drop "${newTitle}" for ${new Date(isoDateTime).toLocaleDateString()}!`);
+    try {
+      await setDoc(doc(db, 'collections', dropId), {
+        ...newDrop,
+        isLaunchpadDrop: true,
+        createdAt: new Date().toISOString()
+      });
+      toast.success(`🚀 Scheduled drop "${newTitle}" for ${new Date(isoDateTime).toLocaleDateString()}!`);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.CREATE, `collections/${dropId}`);
+      toast.error('Failed to schedule drop');
+      return;
+    }
 
     // Reset Form
     setNewTitle('');
@@ -638,17 +564,22 @@ export default function NFTLaunchpad() {
     setNewPerksList(newPerksList.filter((_, i) => i !== index));
   };
 
-  const handleDeleteDrop = (id: string) => {
-    const updated = drops.filter(d => d.id !== id);
-    saveDrops(updated);
-    if (selectedDropForMgmt?.id === id) {
-      setSelectedDropForMgmt(null);
+  const handleDeleteDrop = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'collections', id));
+      setDrops(prev => prev.filter(d => d.id !== id));
+      if (selectedDropForMgmt?.id === id) {
+        setSelectedDropForMgmt(null);
+      }
+      toast.success('Drop canceled successfully');
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, `collections/${id}`);
+      toast.error('Failed to delete drop');
     }
-    toast.success('Drop canceled successfully');
   };
 
   // Whitelist Admin Add
-  const handleAddManualAddress = () => {
+  const handleAddManualAddress = async () => {
     if (!selectedDropForMgmt || !manualAddress.trim()) {
       toast.error('Please specify a TON wallet address');
       return;
@@ -666,20 +597,13 @@ export default function NFTLaunchpad() {
     }
 
     const updatedWhitelist = [...selectedDropForMgmt.whitelist, addr];
-    const updatedDrops = drops.map(d => {
-      if (d.id === selectedDropForMgmt.id) {
-        return { ...d, whitelist: updatedWhitelist };
-      }
-      return d;
-    });
-
     setSelectedDropForMgmt({ ...selectedDropForMgmt, whitelist: updatedWhitelist });
-    saveDrops(updatedDrops);
+    await persistDropUpdate(selectedDropForMgmt.id, { whitelist: updatedWhitelist });
     setManualAddress('');
     toast.success('Wallet address added to whitelist!');
   };
 
-  const handleAddBulkAddresses = () => {
+  const handleAddBulkAddresses = async () => {
     if (!selectedDropForMgmt || !bulkAddresses.trim()) {
       toast.error('No addresses provided');
       return;
@@ -706,30 +630,17 @@ export default function NFTLaunchpad() {
     }
 
     const updatedWhitelist = Array.from(existingSet);
-    const updatedDrops = drops.map(d => {
-      if (d.id === selectedDropForMgmt.id) {
-        return { ...d, whitelist: updatedWhitelist };
-      }
-      return d;
-    });
-
     setSelectedDropForMgmt({ ...selectedDropForMgmt, whitelist: updatedWhitelist });
-    saveDrops(updatedDrops);
+    await persistDropUpdate(selectedDropForMgmt.id, { whitelist: updatedWhitelist });
     setBulkAddresses('');
     toast.success(`Successfully imported ${addedCount} TON wallets into whitelist`);
   };
 
-  const handleRemoveFromWhitelist = (address: string) => {
+  const handleRemoveFromWhitelist = async (address: string) => {
     if (!selectedDropForMgmt) return;
     const updatedWhitelist = selectedDropForMgmt.whitelist.filter(a => a !== address);
-    const updatedDrops = drops.map(d => {
-      if (d.id === selectedDropForMgmt.id) {
-        return { ...d, whitelist: updatedWhitelist };
-      }
-      return d;
-    });
     setSelectedDropForMgmt({ ...selectedDropForMgmt, whitelist: updatedWhitelist });
-    saveDrops(updatedDrops);
+    await persistDropUpdate(selectedDropForMgmt.id, { whitelist: updatedWhitelist });
     toast.success('Wallet removed from whitelist');
   };
 
@@ -1398,7 +1309,7 @@ export default function NFTLaunchpad() {
                   <label className="block text-[10px] font-black uppercase tracking-wider text-neutral-400 mb-1.5">Cover Artwork URL</label>
                   <input
                     type="url"
-                    placeholder="https://images.unsplash.com/..."
+                    placeholder="https://..."
                     className="w-full text-xs bg-black/40 text-white rounded-xl py-3 px-4 focus:outline-none focus:ring-1 focus:ring-[#0098EA] placeholder-neutral-600"
                     value={newCoverUrl}
                     onChange={(e) => setNewCoverUrl(e.target.value)}

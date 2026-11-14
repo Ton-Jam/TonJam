@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PlaylistPreview } from './PlaylistPreview';
+import { getPlaceholderImage } from '@/lib/utils';
 
 export interface SpotifyPreviewTrack {
   id: string;
@@ -109,27 +110,6 @@ function formatDuration(secondsOrMs?: number): string | null {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// Curated demo playlists mapping for instant fallback resolution
-const PLAYLIST_FALLBACK_METADATA: Record<string, { title: string; owner: string; description: string; coverUrl: string; totalCount: number; tracks: { title: string; artist: string; album?: string; duration?: number; coverUrl?: string }[] }> = {
-  default: {
-    title: 'Spotify Synth & Web3 Waves',
-    owner: 'Spotify Curators',
-    description: 'High-energy electronic rhythms, decentralized beats, and chill synthesizer soundscapes.',
-    coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&h=400&q=80',
-    totalCount: 18,
-    tracks: [
-      { title: 'Sovereign Nodes', artist: 'DJ Krupy', album: 'TON Genesis', duration: 198 },
-      { title: 'Neon Horizon', artist: 'Satoshi Sync', album: 'Future Ledger', duration: 225 },
-      { title: 'Consensus Drift', artist: 'Hyperion', album: 'Ethereal Orbit', duration: 182 },
-      { title: 'Gas Price Chill', artist: 'EVM Demigod', album: 'Mempool Melodies', duration: 210 },
-      { title: 'Blockchain Romance', artist: 'Satoshi Sync', album: 'Distributed Hearts', duration: 245 },
-      { title: 'Liquid Royalty', artist: 'DJ Krupy', album: 'TON Genesis', duration: 211 },
-      { title: 'Smart Contract Love', artist: 'Satoshi Sync', album: 'Distributed Hearts', duration: 228 },
-      { title: 'Degen Serenade', artist: 'Durov Collective', album: 'The Telegram Way', duration: 176 }
-    ]
-  }
-};
-
 export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProps> = ({
   isOpen,
   onClose,
@@ -203,76 +183,44 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
       const savedToken = localStorage.getItem('tonjam_spotify_token');
       let previewResult: SpotifyPlaylistPreview | null = null;
 
-      // If a real Spotify token is stored, attempt direct Spotify API proxy
-      if (savedToken && savedToken !== 'demo-token') {
-        try {
-          // Attempt playlist details endpoint first
-          const detailsRes = await fetch(`/api/spotify/playlist-details?token=${encodeURIComponent(savedToken)}&playlistId=${encodeURIComponent(playlistId)}`);
-          if (detailsRes.ok) {
-            const data = await detailsRes.json();
-            const tracksSample: SpotifyPreviewTrack[] = (data.tracks?.items || []).slice(0, 5).map((item: any) => ({
-              id: item.track?.id || Math.random().toString(),
-              name: item.track?.name || 'Untitled Track',
-              artists: (item.track?.artists || []).map((a: any) => a.name) || ['Unknown Artist'],
-              album: item.track?.album?.name || '',
-              durationMs: item.track?.duration_ms || 180000,
-              imageUrl: item.track?.album?.images?.[0]?.url || data.images?.[0]?.url
-            }));
-
-            const allResolvedTracks = (data.tracks?.items || []).map((item: any) => ({
-              title: item.track?.name || 'Untitled Track',
-              artist: (item.track?.artists || []).map((a: any) => a.name).join(', ') || 'Unknown Artist',
-              album: item.track?.album?.name || 'Spotify Album',
-              coverUrl: item.track?.album?.images?.[0]?.url || data.images?.[0]?.url,
-              duration: Math.round((item.track?.duration_ms || 180000) / 1000)
-            }));
-
-            previewResult = {
-              id: playlistId,
-              name: data.name || `Spotify Playlist #${playlistId.slice(0, 6)}`,
-              description: data.description || '',
-              ownerName: data.owner?.display_name || 'Spotify',
-              imageUrl: data.images?.[0]?.url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&h=400&q=80',
-              trackCount: data.tracks?.total || allResolvedTracks.length,
-              tracks: tracksSample,
-              allTracks: allResolvedTracks
-            };
-          }
-        } catch (apiErr) {
-          console.warn('Live Spotify details request fallback:', apiErr);
-        }
+      if (!savedToken || savedToken === 'demo-token') {
+        throw new Error('Connect your Spotify account in Library Sync first to fetch real playlist metadata.');
       }
 
-      // If previewResult could not be fetched from live API, generate high-fidelity preview dataset
-      if (!previewResult) {
-        // Small realistic network delay for smooth UX
-        await new Promise((resolve) => setTimeout(resolve, 350));
-        
-        // Ensure this response matches active request
-        if (requestId !== activeRequestIdRef.current) return;
-
-        const fallback = PLAYLIST_FALLBACK_METADATA.default;
-        const totalCount = fallback.totalCount;
-        const sampleTracks: SpotifyPreviewTrack[] = fallback.tracks.slice(0, 5).map((t, idx) => ({
-          id: `sample-${idx}`,
-          name: t.title,
-          artists: [t.artist],
-          album: t.album,
-          durationMs: (t.duration || 200) * 1000,
-          imageUrl: fallback.coverUrl
-        }));
-
-        previewResult = {
-          id: playlistId,
-          name: `${fallback.title} (${playlistId.slice(0, 4).toUpperCase()})`,
-          description: fallback.description,
-          ownerName: fallback.owner,
-          imageUrl: fallback.coverUrl,
-          trackCount: totalCount,
-          tracks: sampleTracks,
-          allTracks: [...fallback.tracks]
-        };
+      const detailsRes = await fetch(`/api/spotify/playlist-details?token=${encodeURIComponent(savedToken)}&playlistId=${encodeURIComponent(playlistId)}`);
+      if (!detailsRes.ok) {
+        const errPayload = await detailsRes.json().catch(() => ({}));
+        throw new Error(errPayload?.error || 'Could not retrieve playlist from Spotify. Reconnect your Spotify account and try again.');
       }
+
+      const data = await detailsRes.json();
+      const tracksSample: SpotifyPreviewTrack[] = (data.tracks?.items || []).slice(0, 5).map((item: any, idx: number) => ({
+        id: item.track?.id || `spotify-track-${idx}`,
+        name: item.track?.name || 'Untitled Track',
+        artists: (item.track?.artists || []).map((a: any) => a.name) || ['Unknown Artist'],
+        album: item.track?.album?.name || '',
+        durationMs: item.track?.duration_ms || 0,
+        imageUrl: item.track?.album?.images?.[0]?.url || data.images?.[0]?.url
+      }));
+
+      const allResolvedTracks = (data.tracks?.items || []).map((item: any) => ({
+        title: item.track?.name || 'Untitled Track',
+        artist: (item.track?.artists || []).map((a: any) => a.name).join(', ') || 'Unknown Artist',
+        album: item.track?.album?.name || '',
+        coverUrl: item.track?.album?.images?.[0]?.url || data.images?.[0]?.url || getPlaceholderImage(`playlist-${playlistId}`),
+        duration: Math.round((item.track?.duration_ms || 0) / 1000)
+      }));
+
+      previewResult = {
+        id: playlistId,
+        name: data.name || `Spotify Playlist #${playlistId.slice(0, 6)}`,
+        description: data.description || '',
+        ownerName: data.owner?.display_name || 'Spotify',
+        imageUrl: data.images?.[0]?.url || getPlaceholderImage(`playlist-${playlistId}`),
+        trackCount: data.tracks?.total || allResolvedTracks.length,
+        tracks: tracksSample,
+        allTracks: allResolvedTracks
+      };
 
       if (requestId === activeRequestIdRef.current && previewResult) {
         previewCacheRef.current.set(playlistId, previewResult);
@@ -302,26 +250,21 @@ export const ImportSpotifyPlaylistModal: React.FC<ImportSpotifyPlaylistModalProp
 
     try {
       const playlistTitle = previewData.name;
-      const coverUrl = previewData.imageUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&h=400&q=80';
+      const coverUrl = previewData.imageUrl || getPlaceholderImage(`playlist-${previewData.id}`);
       
-      let tracksList = previewData.allTracks && previewData.allTracks.length > 0 
+      const tracksList = previewData.allTracks && previewData.allTracks.length > 0 
         ? [...previewData.allTracks] 
         : previewData.tracks.map((t) => ({
             title: t.name,
             artist: t.artists.join(', '),
-            album: t.album || 'Spotify Album',
+            album: t.album || '',
             coverUrl: t.imageUrl || coverUrl,
-            duration: t.durationMs ? Math.round(t.durationMs / 1000) : 200
+            duration: t.durationMs ? Math.round(t.durationMs / 1000) : 0
           }));
 
       const total = tracksList.length;
       setTotalTracksCount(total);
-
-      // Smooth track progress increments
-      for (let i = 1; i <= total; i++) {
-        await new Promise((resolve) => setTimeout(resolve, Math.max(100, Math.floor(1100 / total))));
-        setProgressCount(i);
-      }
+      setProgressCount(total);
 
       // Commit to Library state via parent callback
       onImportPlaylist(playlistTitle, coverUrl, tracksList);

@@ -1,12 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import {
-  Settings,
-  CheckCheck,
-  Search,
-  Filter,
-  RefreshCw,
-  SlidersHorizontal,
-} from 'lucide-react';
+import { Settings, CheckCheck } from 'lucide-react';
 import {
   TonJamHeader,
   NotificationFilterPills,
@@ -16,6 +9,7 @@ import {
   ErrorState,
 } from '../index';
 import { UnifiedNotification, NotificationFilterType } from '../types';
+import { useTonJamNotifications } from '@/components/notifications/NotificationContext';
 import { toast } from 'sonner';
 
 interface MobileNotificationsScreenProps {
@@ -24,131 +18,43 @@ interface MobileNotificationsScreenProps {
   showBack?: boolean;
 }
 
-const INITIAL_NOTIFICATIONS: UnifiedNotification[] = [
-  {
-    id: 'notif-1',
-    category: 'music',
-    subType: 'new_track',
-    title: 'New Track Drop',
-    description: 'released "TON Odyssey (VIP Club Mix)" — stream the exclusive master stem.',
-    senderName: 'CYBERPUNK TON',
-    senderHandle: 'cyberpunkton',
-    senderAvatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&auto=format&fit=crop&q=80',
-    isVerified: true,
-    timestamp: '5m ago',
-    read: false,
-    previewImageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80',
-    previewTitle: 'TON Odyssey (VIP Club Mix)',
-    previewSubtitle: 'Single · Lossless Master Stems',
-    actionLabel: 'Listen Now',
-  },
-  {
-    id: 'notif-2',
-    category: 'nft',
-    subType: 'bid',
-    title: 'New Bid Received',
-    description: 'placed a new bid of 14.5 TON on your rare collectible "Sonic Horizons #08".',
-    senderName: 'Elena Rostova',
-    senderHandle: 'elena_sound',
-    senderAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    isVerified: false,
-    timestamp: '22m ago',
-    read: false,
-    previewImageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80',
-    previewTitle: 'Sonic Horizons #08 (Rare Tier)',
-    previewSubtitle: 'Highest Bid: 14.5 TON · 2h remaining',
-    actionLabel: 'Review Bid',
-  },
-  {
-    id: 'notif-3',
-    category: 'social',
-    subType: 'like',
-    title: 'Liked your JamSpace comment',
-    description: 'liked your review on "The Genesis Soundscape: Decentralizing Electronic Music".',
-    senderName: 'Krupy Beats',
-    senderHandle: 'krupybeats',
-    senderAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    isVerified: true,
-    timestamp: '1h ago',
-    read: false,
-  },
-  {
-    id: 'notif-4',
-    category: 'social',
-    subType: 'follower',
-    title: 'New Follower',
-    description: 'started following your artist catalog on TonJam.',
-    senderName: 'Marcus Wright',
-    senderHandle: 'mwright_audio',
-    senderAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    isVerified: false,
-    timestamp: '3h ago',
-    read: true,
-    actionLabel: 'Follow Back',
-  },
-  {
-    id: 'notif-5',
-    category: 'nft',
-    subType: 'sale',
-    title: 'Music NFT Sold',
-    description: 'Your 1-of-1 master NFT "Midnight Waves" was sold for 42.0 TON. Royalties credited!',
-    senderName: 'TonJam Marketplace',
-    senderHandle: 'tonjam_market',
-    senderAvatar: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80',
-    isVerified: true,
-    timestamp: '5h ago',
-    read: true,
-    previewImageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80',
-    previewTitle: 'Midnight Waves #01 (1/1 Master)',
-    previewSubtitle: 'Sold for 42.0 TON ($231 USD)',
-    actionLabel: 'View Transaction',
-  },
-  {
-    id: 'notif-6',
-    category: 'account',
-    subType: 'verification',
-    title: 'Artist Badge Verified',
-    description: 'Your application for verified artist status has been approved by TonJam DAO curators.',
-    senderName: 'TonJam DAO',
-    senderHandle: 'tonjam_curators',
-    senderAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-    isVerified: true,
-    timestamp: '1d ago',
-    read: true,
-  },
-  {
-    id: 'notif-7',
-    category: 'nft',
-    subType: 'auction',
-    title: 'Outbid Alert',
-    description: 'You were outbid by @dj_tony on "Genesis Album Key #03". The current top bid is 8.2 TON.',
-    senderName: 'TonJam Auctions',
-    senderHandle: 'tonjam_auctions',
-    senderAvatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80',
-    isVerified: true,
-    timestamp: '2d ago',
-    read: true,
-    actionLabel: 'Place Higher Bid',
-  },
-];
-
 export const MobileNotificationsScreen: React.FC<MobileNotificationsScreenProps> = ({
   onNavigate,
   onBack,
   showBack = false,
 }) => {
-  const [notifications, setNotifications] = useState<UnifiedNotification[]>(INITIAL_NOTIFICATIONS);
+  const { notifications: realNotifications, isLoading, error, retryFetch, markAsRead, markAllAsRead } = useTonJamNotifications();
   const [activeFilter, setActiveFilter] = useState<NotificationFilterType>('all');
-  const [simulatedState, setSimulatedState] = useState<'normal' | 'loading' | 'error' | 'empty'>('normal');
+
+  const notifications = useMemo<UnifiedNotification[]>(() => {
+    return realNotifications.map((n) => ({
+      id: n.id,
+      category: (n.category === 'nft_sale' || n.category === 'nft_purchase' || n.category === 'auction' || n.category === 'marketplace')
+        ? 'nft'
+        : (n.category === 'music' || n.category === 'artist_release')
+        ? 'music'
+        : (n.category === 'system' ? 'account' : 'social'),
+      subType: (n.metadata?.subCategory as any) || 'system',
+      title: n.title,
+      description: n.description,
+      senderName: n.senderName || 'TonJam',
+      senderHandle: n.senderName || 'tonjam',
+      senderAvatar: n.avatarUrl || '',
+      isVerified: Boolean(n.isVerified),
+      timestamp: n.timestamp,
+      read: n.read,
+      previewImageUrl: n.thumbnailUrl,
+      previewTitle: n.musicPreview?.title || n.nftPreview?.title,
+      actionLabel: n.quickAction?.label,
+      actionDestination: n.link,
+    }));
+  }, [realNotifications]);
 
   const unreadCount = useMemo(() => {
     return notifications.filter((n) => !n.read).length;
   }, [notifications]);
 
-  // Filter logic
   const filteredNotifications = useMemo(() => {
-    if (simulatedState === 'empty') return [];
-
     return notifications.filter((n) => {
       if (activeFilter === 'all') return true;
       if (activeFilter === 'verified_artists') return Boolean(n.isVerified);
@@ -156,38 +62,32 @@ export const MobileNotificationsScreen: React.FC<MobileNotificationsScreenProps>
       if (activeFilter === 'music_nfts') return n.category === 'music' || n.category === 'nft';
       return true;
     });
-  }, [notifications, activeFilter, simulatedState]);
+  }, [notifications, activeFilter]);
 
-  const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
     toast.success('All notifications marked as read');
   };
 
-  const handleItemClick = (notification: UnifiedNotification) => {
-    // Mark this notification as read
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
-    );
-
+  const handleItemClick = async (notification: UnifiedNotification) => {
+    await markAsRead(notification.id);
     if (notification.actionDestination && onNavigate) {
       onNavigate(notification.actionDestination);
-    } else {
-      toast.info(`Opened: ${notification.title}`);
     }
   };
 
-  const handleActionClick = (notification: UnifiedNotification) => {
-    handleItemClick(notification);
-    toast.success(`Action taken on ${notification.title}`);
+  const handleActionClick = async (notification: UnifiedNotification) => {
+    await handleItemClick(notification);
   };
 
   const handlePreviewPlay = (notification: UnifiedNotification) => {
-    toast.success(`Now Playing: ${notification.previewTitle || 'Selected track'}`);
+    if (notification.previewTitle) {
+      toast.info(notification.previewTitle);
+    }
   };
 
   return (
     <div className="w-full flex flex-col bg-[#080D1A] text-white select-none pb-24 text-left">
-      {/* SCREEN HEADER */}
       <TonJamHeader
         title="Notifications"
         subtitle={unreadCount > 0 ? `${unreadCount} unread updates` : 'All caught up'}
@@ -220,27 +120,22 @@ export const MobileNotificationsScreen: React.FC<MobileNotificationsScreenProps>
       />
 
       <div className="px-4 space-y-3 pt-1">
-        {/* FILTER PILLS */}
         <NotificationFilterPills
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
           unreadCount={unreadCount}
         />
 
-        {/* NOTIFICATION FEED BODY */}
-        {simulatedState === 'loading' ? (
+        {isLoading ? (
           <div className="pt-2">
             <SkeletonRow count={5} />
           </div>
-        ) : simulatedState === 'error' ? (
+        ) : error ? (
           <div className="pt-4">
             <ErrorState
               title="Failed to sync notifications"
-              message="Network interruption prevented loading recent events."
-              onRetry={() => {
-                setSimulatedState('normal');
-                toast.success('Notifications re-synced successfully');
-              }}
+              message={error}
+              onRetry={retryFetch}
             />
           </div>
         ) : filteredNotifications.length === 0 ? (
@@ -249,10 +144,7 @@ export const MobileNotificationsScreen: React.FC<MobileNotificationsScreenProps>
               heading="You're all caught up."
               supportingText="Updates from artists, listeners, and your music community will appear here."
               buttonText="Explore TonJam"
-              onAction={() => {
-                if (simulatedState === 'empty') setSimulatedState('normal');
-                onNavigate?.('/discover');
-              }}
+              onAction={() => onNavigate?.('/discover')}
             />
           </div>
         ) : (

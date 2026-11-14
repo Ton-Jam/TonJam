@@ -14,18 +14,20 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_NFTS, TON_LOGO } from '@/constants';
+import { TON_LOGO } from '@/constants';
+import { useAudio } from '@/contexts/AudioContext';
 import NFTCard from '@/components/NFTCard';
 import SectionHeader from '@/components/SectionHeader';
 import { cn } from '@/lib/utils';
 
 const LimitedNFTs: React.FC = () => {
   const navigate = useNavigate();
+  const { allNFTs } = useAudio();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | '1/1' | 'under-100'>('all');
 
   const limitedNFTs = useMemo(() => {
-    let filtered = MOCK_NFTS.filter(nft => 
+    let filtered = allNFTs.filter(nft => 
       nft.edition !== 'Open' && nft.edition !== 'Unlimited'
     );
 
@@ -33,7 +35,7 @@ const LimitedNFTs: React.FC = () => {
       filtered = filtered.filter(nft => nft.edition === 'Unique' || nft.edition === '1/1');
     } else if (filterType === 'under-100') {
       filtered = filtered.filter(nft => {
-        const supply = parseInt(nft.edition.split('/')[1] || nft.edition);
+        const supply = parseInt(String(nft.edition || '').split('/')[1] || String(nft.edition || ''));
         return supply <= 100 && supply > 1;
       });
     }
@@ -46,7 +48,7 @@ const LimitedNFTs: React.FC = () => {
     }
 
     return filtered;
-  }, [searchQuery, filterType]);
+  }, [allNFTs, searchQuery, filterType]);
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24">

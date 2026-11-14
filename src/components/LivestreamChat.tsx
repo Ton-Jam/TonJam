@@ -140,61 +140,13 @@ export const LivestreamChat: React.FC<LivestreamChatProps> = ({
   className = ''
 }) => {
   const [activeTab, setActiveTab] = useState<'all' | 'qa' | 'tips'>('all');
-  const [messages, setMessages] = useState<LivestreamChatMessage[]>([
-    {
-      id: 'init-1',
-      userId: hostId || 'host-1',
-      userName: hostName,
-      userAvatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150',
-      text: `Welcome to the live session! Dropping exclusive unreleased stems and taking your live questions during the broadcast.`,
-      timestamp: '10:00 AM',
-      type: 'chat',
-      isArtist: true,
-      isHost: true,
-      reactions: { '🔥': 14, '🎶': 9, '🚀': 6 }
-    },
-    {
-      id: 'init-2',
-      userId: 'user-vip-1',
-      userName: 'Sasha_K',
-      userAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
-      text: 'Bassline is sounding huge! Can you breakdown the synth patch in the chorus?',
-      timestamp: '10:02 AM',
-      type: 'qa',
-      isQuestion: true,
-      questionUpvotes: 14,
-      isVip: true,
-      reactions: { '🎶': 8, '🔥': 5 }
-    },
-    {
-      id: 'init-3',
-      userId: 'tip-user-1',
-      userName: 'Alex_Ton',
-      userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
-      text: 'Support the sound! Keep pushing Web3 music forward 🚀',
-      timestamp: '10:04 AM',
-      type: 'tip',
-      tipAmount: 15,
-      currency: 'TON',
-      isVip: true,
-      reactions: { '🚀': 18, '🔥': 11, '💎': 7 }
-    }
-  ]);
+  const [messages, setMessages] = useState<LivestreamChatMessage[]>([]);
 
   const [inputMessage, setInputMessage] = useState('');
   const [replyTarget, setReplyTarget] = useState<{ userName: string; text: string } | null>(null);
   const [isQuestionMode, setIsQuestionMode] = useState(false);
-  const [pinnedMessage, setPinnedMessage] = useState<LivestreamChatMessage | null>({
-    id: 'pin-1',
-    userId: hostId || 'host-1',
-    userName: hostName,
-    userAvatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150',
-    text: `⚡ Live AMA & Genesis Stem Drop at 45m mark! Type in your questions or send tips to boost priority.`,
-    timestamp: 'Pinned',
-    type: 'pinned',
-    isArtist: true
-  });
-  const [upvotedQuestions, setUpvotedQuestions] = useState<Record<string, boolean>>({ 'init-2': true });
+  const [pinnedMessage, setPinnedMessage] = useState<LivestreamChatMessage | null>(null);
+  const [upvotedQuestions, setUpvotedQuestions] = useState<Record<string, boolean>>({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [floatingReactions, setFloatingReactions] = useState<{ id: string; emoji: string; x: number }[]>([]);
   const [hasNewMessagesBelow, setHasNewMessagesBelow] = useState(false);
@@ -230,7 +182,7 @@ export const LivestreamChat: React.FC<LivestreamChatProps> = ({
           id: data.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
           userId: data.user?.id || 'anon',
           userName: data.user?.name || 'Viewer',
-          userAvatar: data.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Viewer',
+          userAvatar: data.user?.avatar || '',
           text: maskedText,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           type: data.type || (data.isQuestion ? 'qa' : data.tipAmount ? 'tip' : 'chat'),
@@ -427,7 +379,7 @@ export const LivestreamChat: React.FC<LivestreamChatProps> = ({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
       userId: currentUser?.uid || `guest-${Date.now()}`,
       userName: currentUser?.name || currentUser?.username || 'Guest Fan',
-      userAvatar: currentUser?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (currentUser?.name || 'Fan'),
+      userAvatar: currentUser?.avatar || '',
       text: maskedText,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       type: isQuestion ? 'qa' : 'chat',

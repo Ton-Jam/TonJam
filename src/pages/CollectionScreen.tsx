@@ -1,5 +1,4 @@
-import CollectionDetails from "./CollectionDetails";
-export { CollectionDetails } from "./CollectionDetails";
-export { PRIMARY_COLLECTIONS, type DetailedCollection } from "@/data/collectionsData";
+import CollectionDetails, { type DetailedCollection } from "./CollectionDetails";
+export { CollectionDetails, type DetailedCollection } from "./CollectionDetails";
 export const CollectionScreen = CollectionDetails;
 export default CollectionDetails;

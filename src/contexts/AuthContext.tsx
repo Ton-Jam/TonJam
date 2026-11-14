@@ -147,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           uid: userId,
           name: auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'New User',
           username: `user_${userId.substring(0, 5)}`,
-          avatar: auth.currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+          avatar: auth.currentUser?.photoURL || '',
           followers: 0,
           following: 0,
           earnings: 0,
@@ -177,7 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           uid: userId,
           name: auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'User',
           username: `user_${userId.substring(0, 5)}`,
-          avatar: auth.currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+          avatar: auth.currentUser?.photoURL || '',
           followers: 0,
           following: 0,
           earnings: 0,
@@ -314,8 +314,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Let user have a friendly generic nickname or display profile 
         if (result.user) {
           await updateProfile(result.user, {
-            displayName: "TONJam Explorer",
-            photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=explorer"
+            displayName: "TONJam Explorer"
           });
           // Also initialize their profile
           await fetchProfile(result.user.uid);
@@ -370,7 +369,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         uid: newUser.uid,
         name: displayName,
         username: metadata?.username || `user_${newUser.uid.substring(0, 5)}`,
-        avatar: newUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${newUser.uid}`,
+        avatar: newUser.photoURL || '',
         followers: 0,
         following: 0,
         earnings: 0,
@@ -420,7 +419,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: `Wallet User`,
           username: `user_${result.user.uid.substring(0, 5)}`,
           walletAddress,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${result.user.uid}`,
+          avatar: '',
           followers: 0,
           following: 0,
           earnings: 0,

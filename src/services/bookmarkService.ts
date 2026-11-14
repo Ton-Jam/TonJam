@@ -9,7 +9,6 @@ import {
   getDocs
 } from 'firebase/firestore';
 import { LibraryTrack, LibraryNFT } from '@/pages/Library/types';
-import { MOCK_LIBRARY_TRACKS, MOCK_LIBRARY_NFTS } from '@/pages/Library/mock';
 
 export interface FirestoreBookmark {
   id: string; // matches postId
@@ -28,9 +27,8 @@ export const saveBookmarkToFirestore = async (userId: string, post: any) => {
   try {
     const bookmarkRef = doc(db, 'users', userId, 'bookmarks', post.id);
     const cleanedPost = { ...post };
-    // Remove replies or complex fields if present to avoid bulky storage, but preserve core data
     delete cleanedPost.replies;
-    
+
     const bookmarkData: FirestoreBookmark = {
       id: post.id,
       userId,
@@ -39,9 +37,8 @@ export const saveBookmarkToFirestore = async (userId: string, post: any) => {
       postData: cleanedPost,
       createdAt: serverTimestamp()
     };
-    
+
     await setDoc(bookmarkRef, bookmarkData);
-    console.log(`[BookmarkService] Saved bookmark for post ${post.id} to Firestore.`);
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `users/${userId}/bookmarks/${post.id}`);
   }
@@ -55,7 +52,6 @@ export const removeBookmarkFromFirestore = async (userId: string, postId: string
   try {
     const bookmarkRef = doc(db, 'users', userId, 'bookmarks', postId);
     await deleteDoc(bookmarkRef);
-    console.log(`[BookmarkService] Removed bookmark for post ${postId} from Firestore.`);
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, `users/${userId}/bookmarks/${postId}`);
   }
@@ -63,7 +59,6 @@ export const removeBookmarkFromFirestore = async (userId: string, postId: string
 
 /**
  * Syncs bookmarked items from Firestore to local storage and alerts components in real-time.
- * Returns unsubscribe function.
  */
 export const syncBookmarksFromFirestore = (userId: string, callback?: (bookmarks: FirestoreBookmark[]) => void) => {
   if (!userId) {
@@ -71,18 +66,13 @@ export const syncBookmarksFromFirestore = (userId: string, callback?: (bookmarks
   }
 
   const bookmarksCollectionRef = collection(db, 'users', userId, 'bookmarks');
-  
-  console.log(`[BookmarkService] Starting real-time sync for user bookmarks: ${userId}`);
 
   return onSnapshot(bookmarksCollectionRef, (snapshot) => {
     const bookmarks: FirestoreBookmark[] = [];
-    snapshot.forEach((doc) => {
-      bookmarks.push(doc.data() as FirestoreBookmark);
+    snapshot.forEach((docSnap) => {
+      bookmarks.push(docSnap.data() as FirestoreBookmark);
     });
 
-    console.log(`[BookmarkService] Synced ${bookmarks.length} bookmarks from Firestore.`);
-
-    // 1. Extract tracks and NFTs from Firestore bookmarks
     const syncedTracks: LibraryTrack[] = [];
     const syncedNfts: LibraryNFT[] = [];
 
@@ -101,9 +91,9 @@ export const syncBookmarksFromFirestore = (userId: string, callback?: (bookmarks
           artist: trackAttachment.artist || p.user?.name || 'Unknown Artist',
           artistId: p.user?.id ? `art-${p.user.id}` : 'art-unknown',
           album: 'Saved from JamSpace',
-          coverUrl: p.user?.avatar || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&h=300&q=80',
+          coverUrl: p.user?.avatar || '/placeholders/track-placeholder.webp',
           duration: 180,
-          plays: 1,
+          plays: 0,
           isLiked: true,
           isDownloaded: false,
           isOfflineAvailable: false,
@@ -113,38 +103,33 @@ export const syncBookmarksFromFirestore = (userId: string, callback?: (bookmarks
 
       if (nftAttachment) {
         const nid = nftAttachment.id || `nft-${p.id}`;
-        const floorPrice = parseFloat(nftAttachment.price?.replace(/[^0-9.]/g, '') || '10');
+        const floorPrice = parseFloat(nftAttachment.price?.replace(/[^0-9.]/g, '') || '0');
         syncedNfts.push({
           id: nid,
-          tokenId: `#${Math.floor(Math.random() * 9000 + 1000)}`,
+          tokenId: nftAttachment.tokenId || `#${nid.slice(0, 4)}`,
           title: nftAttachment.title || 'Saved NFT',
           artist: nftAttachment.artist || p.user?.name || 'Unknown Artist',
-          coverUrl: nftAttachment.url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&h=300&q=80',
+          coverUrl: nftAttachment.url || '/placeholders/nft-placeholder.webp',
           collectionName: 'Saved JamSpace Drops',
           floorPriceTon: floorPrice,
           royaltyPercent: 10,
           rarity: 'Rare',
-          ownerAddress: 'UQAs9vW_3k7_pP3...',
-          musicFileUrl: nftAttachment.url || 'https://tonjam.io/nft.mp3'
+          ownerAddress: '',
+          musicFileUrl: nftAttachment.url || ''
         });
       }
     });
 
-    // 2. Load existing tracks & nfts from local storage to merge them
     let currentTracks: LibraryTrack[] = [];
     const localTracks = localStorage.getItem('tonjam_library_tracks');
     if (localTracks) {
-      try { currentTracks = JSON.parse(localTracks); } catch (e) {}
-    } else {
-      currentTracks = [...MOCK_LIBRARY_TRACKS];
+      try { currentTracks = JSON.parse(localTracks); } catch {}
     }
 
     let currentNfts: LibraryNFT[] = [];
     const localNfts = localStorage.getItem('tonjam_library_nfts');
     if (localNfts) {
-      try { currentNfts = JSON.parse(localNfts); } catch (e) {}
-    } else {
-      currentNfts = [...MOCK_LIBRARY_NFTS];
+      try { currentNfts = JSON.parse(localNfts); } catch {}
     }
 
     // 3. Remove existing "Saved from JamSpace" tracks/NFTs that are NOT in the synced list

@@ -44,17 +44,8 @@ interface FloorPriceHistoryTrackerProps {
 export const FloorPriceHistoryTracker: React.FC<FloorPriceHistoryTrackerProps> = ({ 
   collections = [] 
 }) => {
-  // Fallback if no collections provided
   const availableCollections = useMemo(() => {
-    if (collections && collections.length > 0) {
-      return collections.slice(0, 6);
-    }
-    // Hardcoded mock collections if empty
-    return [
-      { id: 'col-1', name: 'Neon Soundscapes', creator: 'DJ Tonix', floorPrice: '12.5', imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=150&h=150', volume: '14,230', owners: 450, itemCount: 100, verified: true },
-      { id: 'col-2', name: 'Ethereal Harmonics', creator: 'Luna Wave', floorPrice: '4.8', imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=150&h=150', volume: '3,110', owners: 180, itemCount: 50, verified: true },
-      { id: 'col-3', name: 'Cybernetic Echoes', creator: 'Static Drift', floorPrice: '18.2', imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&h=150', volume: '22,450', owners: 620, itemCount: 120, verified: false },
-    ];
+    return (collections || []).slice(0, 6);
   }, [collections]);
 
   const [selectedId, setSelectedId] = useState<string>(availableCollections[0]?.id || '');
@@ -63,44 +54,12 @@ export const FloorPriceHistoryTracker: React.FC<FloorPriceHistoryTrackerProps> =
     return availableCollections.find(c => c.id === selectedId) || availableCollections[0];
   }, [availableCollections, selectedId]);
 
-  // Deterministic 30-day data generator for selected collection floor price
   const chartData = useMemo(() => {
     if (!activeCollection) return [];
-    
-    const basePrice = parseFloat(activeCollection.floorPrice) || 5.0;
-    const seedId = activeCollection.id;
-    
-    // Create seed hash
-    let seedNum = 0;
-    for (let i = 0; i < seedId.length; i++) {
-      seedNum += seedId.charCodeAt(i);
-    }
-    
-    const data = [];
+    const basePrice = parseFloat(activeCollection.floorPrice) || 0;
     const now = new Date();
-    
-    for (let i = 30; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      
-      // Generate consistent fluctuations using sine & cosine with seed
-      const step = Math.sin(seedNum + i) * (basePrice * 0.04) + Math.cos((seedNum * i) / 2.5) * (basePrice * 0.02);
-      const trend = (i / 30) * (basePrice * 0.18); // General upward historical trend
-      const price = Number((basePrice * 0.82 + trend + step).toFixed(2));
-      
-      data.push({
-        date: dateStr,
-        price: price > 0 ? price : 0.1,
-      });
-    }
-    
-    // Ensure the last element matches the actual current floor price perfectly
-    if (data.length > 0) {
-      data[data.length - 1].price = basePrice;
-    }
-    
-    return data;
+    const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return [{ date: dateStr, price: basePrice }];
   }, [activeCollection]);
 
   // Derive high, low and percentage change from chart data

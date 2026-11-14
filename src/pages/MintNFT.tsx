@@ -427,13 +427,12 @@ export const MintNFT: React.FC = () => {
         id: toastId,
         description: "Please confirm and sign the transaction in your TON wallet..."
       });
-      const mintSuccess = await mintTonJamNFT(tonConnectUI, activeWallet, ipfsMetadataUrl);
-      if (!mintSuccess) {
+      const mintTx = await mintTonJamNFT(tonConnectUI, activeWallet, ipfsMetadataUrl);
+      if (!mintTx) {
         throw new Error('Transaction declined or not completed on TON Blockchain.');
       }
-      const pseudoTxHash = `ton_${Date.now().toString(16)}`;
-      setMintTxHash(pseudoTxHash);
-      updateMilestone('ton_tx', true, false, 90, 'TON Smart Contract transaction confirmed.');
+      setMintTxHash(mintTx);
+      updateMilestone('ton_tx', true, false, 90, 'TON Smart Contract transaction broadcast & confirmed.');
 
       // 5. TonJam Platform Synchronization (Firestore + Context)
       updateMilestone('db_sync', false, true, 92, 'Syncing metadata with TonJam registry & Firestore...');

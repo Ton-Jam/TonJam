@@ -54,66 +54,6 @@ export function formatSecondsToTimestamp(totalSeconds: number): string {
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 }
 
-// Default initial timestamped mock comments per track
-function getInitialMockComments(track: Track | null): TimestampComment[] {
-  if (!track) return [];
-  const duration = track.duration || 180;
-
-  return [
-    {
-      id: "tc-1",
-      trackId: track.id,
-      userId: "u1",
-      userName: "AlexVibes",
-      userAvatar: getPlaceholderImage("avatar"),
-      content: "This drop right here hits so heavy! Pure energy ⚡🔥",
-      timeInSeconds: Math.floor(duration * 0.15),
-      formattedTime: formatSecondsToTimestamp(Math.floor(duration * 0.15)),
-      createdAt: "5 mins ago",
-      likes: 38,
-      isLiked: true,
-      badge: "VIP Collector"
-    },
-    {
-      id: "tc-2",
-      trackId: track.id,
-      userId: "u2",
-      userName: "CryptoBeats",
-      userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
-      content: "Sub-bass mix on this vocal breakdown is top notch. On-chain royalty deserved! 💎",
-      timeInSeconds: Math.floor(duration * 0.38),
-      formattedTime: formatSecondsToTimestamp(Math.floor(duration * 0.38)),
-      createdAt: "18 mins ago",
-      likes: 24,
-      badge: "Hi-Fi Listener"
-    },
-    {
-      id: "tc-3",
-      trackId: track.id,
-      userId: "u3",
-      userName: "Sarah_TON",
-      userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-      content: "Chills at this bridge section. Smooth transitions throughout. 🎧✨",
-      timeInSeconds: Math.floor(duration * 0.65),
-      formattedTime: formatSecondsToTimestamp(Math.floor(duration * 0.65)),
-      createdAt: "1 hour ago",
-      likes: 19
-    },
-    {
-      id: "tc-4",
-      trackId: track.id,
-      userId: "u4",
-      userName: "BeatMaster99",
-      userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop",
-      content: "Outro fade-out is clean! Added this to my daily listening loop. 🔥",
-      timeInSeconds: Math.floor(duration * 0.88),
-      formattedTime: formatSecondsToTimestamp(Math.floor(duration * 0.88)),
-      createdAt: "3 hours ago",
-      likes: 12
-    }
-  ];
-}
-
 export const TrackComments: React.FC<TrackCommentsProps> = ({
   track,
   onClose,
@@ -122,7 +62,7 @@ export const TrackComments: React.FC<TrackCommentsProps> = ({
 }) => {
   const { progress, seek, userProfile, isPlaying, togglePlay } = useAudio();
 
-  const trackDuration = track?.duration || 180;
+  const trackDuration = track?.duration || 0;
   const currentPlaybackSeconds = Math.floor((progress / 100) * trackDuration);
   const formattedCurrentTime = formatSecondsToTimestamp(currentPlaybackSeconds);
 
@@ -135,7 +75,6 @@ export const TrackComments: React.FC<TrackCommentsProps> = ({
 
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Load comments from LocalStorage or fall back to mock
   useEffect(() => {
     if (!track) return;
     const storageKey = `${STORAGE_KEY_PREFIX}${track.id}`;
@@ -144,12 +83,10 @@ export const TrackComments: React.FC<TrackCommentsProps> = ({
       if (raw) {
         setComments(JSON.parse(raw));
       } else {
-        const initial = getInitialMockComments(track);
-        setComments(initial);
-        localStorage.setItem(storageKey, JSON.stringify(initial));
+        setComments([]);
       }
-    } catch (e) {
-      setComments(getInitialMockComments(track));
+    } catch {
+      setComments([]);
     }
   }, [track?.id]);
 

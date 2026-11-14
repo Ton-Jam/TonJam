@@ -26,7 +26,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { useNFT } from '@/contexts/NFTContext';
 import { getPlaceholderImage } from '@/lib/utils';
 import { ArtistVerificationBadge } from '@/components/ArtistVerificationBadge';
-import { ProfileData, MOCK_PROFILE } from '@/components/profile/ProfileTypes';
+import { ProfileData } from '@/components/profile/ProfileTypes';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { BottomSheet } from '@/components/layout/BottomSheet';

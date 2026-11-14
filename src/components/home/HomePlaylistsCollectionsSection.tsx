@@ -5,6 +5,7 @@ import { useAudio } from "@/contexts/AudioContext";
 import PlaylistCard from "@/components/PlaylistCard";
 import { CollectionCard } from "@/components/cards/CollectionCard";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
+import { getPlaceholderImage } from "@/lib/utils";
 
 export const HomePlaylistsSection: React.FC = () => {
   const navigate = useNavigate();
@@ -65,41 +66,16 @@ export const HomeCollectionsSection: React.FC = () => {
   const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const curatedCollections = useMemo(() => {
-    if (collections && collections.length > 0) {
-      return collections.slice(0, 8).map(c => ({
-        id: c.id,
-        name: c.name,
-        itemCount: c.nftIds?.length || (c as any).trackIds?.length || 12,
-        coverUrl: c.coverUrl || 'https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20genesis%20beats%20neon%20orange?width=300&height=300&nologo=true',
-      }));
-    }
-    return [
-      {
-        id: 'genesis-pass',
-        name: 'Genesis Beats',
-        itemCount: 24,
-        coverUrl: 'https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20genesis%20beats%20neon%20orange?width=300&height=300&nologo=true',
-      },
-      {
-        id: 'neon-nights',
-        name: 'Neon Nights',
-        itemCount: 16,
-        coverUrl: 'https://image.pollinations.ai/prompt/dubstep%20music%20album%20cover%20neon%20green%20laser%20retro?width=300&height=300&nologo=true',
-      },
-      {
-        id: 'abyssal-frequencies',
-        name: 'Abyssal Audio',
-        itemCount: 32,
-        coverUrl: 'https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true',
-      },
-      {
-        id: 'dreamweaver',
-        name: 'Dreamweaver',
-        itemCount: 18,
-        coverUrl: 'https://image.pollinations.ai/prompt/dreamy%20pink%20clouds%20golden%20moon%20synthesizer%20art?width=300&height=300&nologo=true',
-      },
-    ];
+    if (!collections || collections.length === 0) return [];
+    return collections.slice(0, 8).map(c => ({
+      id: c.id,
+      name: c.name,
+      itemCount: c.nftIds?.length || (c as any).trackIds?.length || (c as any).itemCount || 0,
+      coverUrl: c.coverUrl || getPlaceholderImage(`collection-${c.id}`),
+    }));
   }, [collections]);
+
+  if (curatedCollections.length === 0) return null;
 
   return (
     <section className="space-y-3 text-left w-full">

@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NFTItem, NFTOffer } from "@/types";
-import { db } from "@/lib/firebase";
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
-import { MOCK_ARTISTS } from "@/constants";
+import { useAudio } from "@/contexts/AudioContext";
 
 interface RecentBidsSidebarProps {
   nft: NFTItem;
@@ -55,6 +55,7 @@ export const RecentBidsSidebar: React.FC<RecentBidsSidebarProps> = ({
   onPlaceBid,
   isAuction = true,
 }) => {
+  const { artists } = useAudio();
   const [liveOffers, setLiveOffers] = useState<NFTOffer[]>(nft.offers || []);
   const [newlyAddedIds, setNewlyAddedIds] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<"latest" | "highest">("latest");
@@ -121,7 +122,7 @@ export const RecentBidsSidebar: React.FC<RecentBidsSidebarProps> = ({
           }
         }
       }, (err) => {
-        console.warn("[RecentBidsSidebar] Firestore listener fallback:", err);
+        handleFirestoreError(err, OperationType.GET, `nfts/${nft.id}`);
       });
 
       return () => unsub();
@@ -318,8 +319,8 @@ export const RecentBidsSidebar: React.FC<RecentBidsSidebarProps> = ({
                   {normalizedBids.map((bid, index) => {
                     const isTopBid = bid.price === highestBidValue;
                     const isPulsing = newlyAddedIds.includes(bid.id);
-                    const matchedArtist = MOCK_ARTISTS.find(
-                      a => a.walletAddress === bid.offerer || a.name === bid.offerer
+                    const matchedArtist = artists.find(
+                      a => a.walletAddress === bid.offerer || a.name === bid.offerer || a.uid === bid.offerer
                     );
 
                     return (
@@ -339,16 +340,19 @@ export const RecentBidsSidebar: React.FC<RecentBidsSidebarProps> = ({
                       >
                         {/* Left: Bidder Info & Avatar */}
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-neutral-800 shrink-0">
-                            <img
-                              src={
-                                matchedArtist?.avatarUrl || 
-                                `https://picsum.photos/80/80?seed=${bid.offerer}`
-                              }
-                              alt=""
-                              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
-                              loading="lazy"
-                            />
+                          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-neutral-800 shrink-0 flex items-center justify-center">
+                            {matchedArtist?.avatarUrl ? (
+                              <img
+                                src={matchedArtist.avatarUrl}
+                                alt=""
+                                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <span className="text-[10px] font-bold text-slate-300 uppercase">
+                                {bid.offerer.slice(0, 2)}
+                              </span>
+                            )}
                             {matchedArtist?.verified && (
                               <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
                                 <Check className="w-1.5 h-1.5 text-white" />

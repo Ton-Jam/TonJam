@@ -23,80 +23,23 @@ interface CalculatorProps {
 }
 
 const getValidatorTrend = (v: any) => {
-  if (v.id === 'validator-a' || (v.name && v.name.includes('Node A'))) {
-    return { value: '+0.12%', isUp: true };
+  if (v?.trend && typeof v.trend === 'string') {
+    return { value: v.trend, isUp: !v.trend.startsWith('-') };
   }
-  if (v.id === 'validator-b' || (v.name && v.name.includes('Node B'))) {
-    return { value: '+0.05%', isUp: true };
-  }
-  if (v.id === 'validator-c' || (v.name && v.name.includes('Node C'))) {
-    return { value: '-0.15%', isUp: false };
-  }
-  const hash = (v.id || v.name || '').split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
-  const up = hash % 2 === 0;
-  const val = ((hash % 15) / 100).toFixed(2);
-  return { value: `${up ? '+' : '-'}${val}%`, isUp: up };
+  return { value: '0.00%', isUp: true };
 };
 
 const StakingRewardsCalculator: React.FC<CalculatorProps> = ({ 
   initialAmount = '', 
   availableBalance = 0,
-  validators,
+  validators = [],
   selectedValidatorId,
   onSelectValidatorId,
   autoValidatorSwitching = false
 }) => {
-  const FALLBACK_VALIDATORS = [
-    { 
-      id: 'validator-a',
-      name: 'TonJam Node A', 
-      apr: 15,
-      uptime: 99.92,
-      blocksValidated: '1,424,192',
-      currentCommission: '5%',
-      commissionHistory: [
-        { date: 'Jan 26', fee: '8%' },
-        { date: 'Mar 26', fee: '6%' },
-        { date: 'May 26', fee: '5%' }
-      ],
-      selfStake: '250,000 TON',
-      status: 'Active'
-    },
-    { 
-      id: 'validator-b',
-      name: 'TonJam Node B', 
-      apr: 14,
-      uptime: 99.45,
-      blocksValidated: '984,204',
-      currentCommission: '6%',
-      commissionHistory: [
-        { date: 'Jan 26', fee: '8%' },
-        { date: 'Feb 26', fee: '7%' },
-        { date: 'Apr 26', fee: '6%' }
-      ],
-      selfStake: '180,000 TON',
-      status: 'Active'
-    },
-    { 
-      id: 'validator-c',
-      name: 'TonJam Node C', 
-      apr: 13,
-      uptime: 98.78,
-      blocksValidated: '542,110',
-      currentCommission: '8%',
-      commissionHistory: [
-        { date: 'Jan 26', fee: '9%' },
-        { date: 'Mar 26', fee: '8.5%' },
-        { date: 'May 26', fee: '8%' }
-      ],
-      selfStake: '120,000 TON',
-      status: 'Active'
-    }
-  ];
+  const VALIDATORS = Array.isArray(validators) ? validators : [];
 
-  const VALIDATORS = validators && validators.length > 0 ? validators : FALLBACK_VALIDATORS;
-
-  const [localSelectedValidatorId, setLocalSelectedValidatorId] = useState('validator-a');
+  const [localSelectedValidatorId, setLocalSelectedValidatorId] = useState('');
   const [amount, setAmount] = useState(initialAmount);
   const [autoCompound, setAutoCompound] = useState(false);
   const [unstakeType, setUnstakeType] = useState<'standard' | 'instant'>('standard');
@@ -105,7 +48,7 @@ const StakingRewardsCalculator: React.FC<CalculatorProps> = ({
   const handleSelectValidatorId = onSelectValidatorId !== undefined ? onSelectValidatorId : setLocalSelectedValidatorId;
 
   const selectedValidator = VALIDATORS.find(v => v.id === activeSelectedValidatorId || v.name === activeSelectedValidatorId) || VALIDATORS[0];
-  const apr = selectedValidator.apr;
+  const apr = selectedValidator?.apr || 0;
 
   const getNextDistributionDetails = () => {
     const now = new Date();
@@ -202,18 +145,24 @@ const StakingRewardsCalculator: React.FC<CalculatorProps> = ({
              </tr>
            </thead>
            <tbody>
-             {VALIDATORS.map(v => (
+             {VALIDATORS.length === 0 ? (
+               <tr>
+                 <td colSpan={4} className="p-3 text-center text-muted-foreground">
+                   No validators available yet.
+                 </td>
+               </tr>
+             ) : VALIDATORS.map(v => (
                <tr 
-                key={v.name} 
+                key={v.id || v.name} 
                 onClick={() => !autoValidatorSwitching && handleSelectValidatorId(v.id || v.name)}
                 className={`${autoValidatorSwitching ? 'cursor-not-allowed opacity-[0.85]' : 'cursor-pointer'} ${v.id === activeSelectedValidatorId || v.name === activeSelectedValidatorId ? 'bg-blue-500/20' : ''} ${!autoValidatorSwitching ? 'hover:bg-white/5' : ''} transition-colors`}
                >
                  <td className="p-2 font-bold text-foreground">{v.name}</td>
                  <td className="p-2 text-blue-400">10%</td>
-                 <td className="p-2 text-amber-500">{v.apr - 10}%</td>
+                 <td className="p-2 text-amber-500">{Math.max(0, (v.apr || 0) - 10)}%</td>
                  <td className="p-2 font-bold text-emerald-400">
                    <div className="flex items-center gap-1.5 select-none">
-                     <span>{v.apr}%</span>
+                     <span>{v.apr || 0}%</span>
                      {(() => {
                        const trend = getValidatorTrend(v);
                        return (
@@ -234,61 +183,65 @@ const StakingRewardsCalculator: React.FC<CalculatorProps> = ({
          </table>
 
          {/* Drill-down details of selected validator (Frameless, compact for mobile) */}
-         <motion.div 
-           initial={{ opacity: 0, height: 0 }}
-           animate={{ opacity: 1, height: 'auto' }}
-           key={(selectedValidator as any).name}
-           className="mt-2.5 bg-foreground/[0.03] rounded-xl p-3 space-y-3"
-         >
-           <div className="flex items-center justify-between text-[9px] text-muted-foreground uppercase font-black">
-             <span>{(selectedValidator as any).name} Metrics</span>
-             <span className="text-emerald-400">● {(selectedValidator as any).status}</span>
-           </div>
+         {selectedValidator && (
+           <motion.div 
+             initial={{ opacity: 0, height: 0 }}
+             animate={{ opacity: 1, height: 'auto' }}
+             key={(selectedValidator as any).name || selectedValidator.id}
+             className="mt-2.5 bg-foreground/[0.03] rounded-xl p-3 space-y-3"
+           >
+             <div className="flex items-center justify-between text-[9px] text-muted-foreground uppercase font-black">
+               <span>{(selectedValidator as any).name} Metrics</span>
+               <span className="text-emerald-400">● {(selectedValidator as any).status || 'Active'}</span>
+             </div>
 
-           <div className="grid grid-cols-2 gap-2">
-             <div className="bg-background/40 p-2 rounded-lg space-y-0.5">
-               <span className="text-[8px] text-muted-foreground uppercase tracking-wider block">Uptime SLA</span>
-               <p className="text-xs font-black text-foreground">{(selectedValidator as any).uptime}%</p>
-               <div className="w-16 h-1 bg-emerald-500/10 rounded-full mt-1 overflow-hidden">
-                 <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${(selectedValidator as any).uptime}%` }} />
+             <div className="grid grid-cols-2 gap-2">
+               <div className="bg-background/40 p-2 rounded-lg space-y-0.5">
+                 <span className="text-[8px] text-muted-foreground uppercase tracking-wider block">Uptime SLA</span>
+                 <p className="text-xs font-black text-foreground">{(selectedValidator as any).uptime ?? 0}%</p>
+                 <div className="w-16 h-1 bg-emerald-500/10 rounded-full mt-1 overflow-hidden">
+                   <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${(selectedValidator as any).uptime ?? 0}%` }} />
+                 </div>
+               </div>
+               
+               <div className="bg-background/40 p-2 rounded-lg space-y-0.5">
+                 <span className="text-[8px] text-muted-foreground uppercase tracking-wider block">Validated Blocks</span>
+                 <p className="text-xs font-black text-foreground">{(selectedValidator as any).blocksValidated || '0'}</p>
+                 <p className="text-[7px] text-muted-foreground uppercase leading-none mt-1">Sustained Output</p>
+               </div>
+
+               <div className="bg-background/40 p-2 rounded-lg space-y-0.5">
+                 <span className="text-[8px] text-muted-foreground uppercase tracking-wider block">Self Bonded</span>
+                 <p className="text-xs font-black text-foreground">{(selectedValidator as any).selfStake || '0 TON'}</p>
+                 <p className="text-[7px] text-blue-400 font-bold uppercase leading-none mt-1">Guaranteed stake</p>
+               </div>
+
+               <div className="bg-background/40 p-2 rounded-lg space-y-0.5">
+                 <span className="text-[8px] text-muted-foreground uppercase tracking-wider block">Current Commission</span>
+                 <p className="text-xs font-black text-foreground">{(selectedValidator as any).currentCommission || '0%'}</p>
+                 <p className="text-[7px] text-amber-400 font-bold uppercase leading-none mt-1">Protocol Minimum</p>
                </div>
              </div>
-             
-             <div className="bg-background/40 p-2 rounded-lg space-y-0.5">
-               <span className="text-[8px] text-muted-foreground uppercase tracking-wider block">Validated Blocks</span>
-               <p className="text-xs font-black text-foreground">{(selectedValidator as any).blocksValidated}</p>
-               <p className="text-[7px] text-muted-foreground uppercase leading-none mt-1">Sustained Output</p>
-             </div>
 
-             <div className="bg-background/40 p-2 rounded-lg space-y-0.5">
-               <span className="text-[8px] text-muted-foreground uppercase tracking-wider block">Self Bonded</span>
-               <p className="text-xs font-black text-foreground">{(selectedValidator as any).selfStake}</p>
-               <p className="text-[7px] text-blue-400 font-bold uppercase leading-none mt-1">Guaranteed stake</p>
-             </div>
-
-             <div className="bg-background/40 p-2 rounded-lg space-y-0.5">
-               <span className="text-[8px] text-muted-foreground uppercase tracking-wider block">Current Commission</span>
-               <p className="text-xs font-black text-foreground">{(selectedValidator as any).currentCommission}</p>
-               <p className="text-[7px] text-amber-400 font-bold uppercase leading-none mt-1">Protocol Minimum</p>
-             </div>
-           </div>
-
-           {/* Historical Commission Changes List (Drill-Down Detail) */}
-           <div className="space-y-1.5 pt-1">
-             <span className="text-[8px] font-black uppercase tracking-wider text-muted-foreground block">Historical Commission Fee Changes</span>
-             <div className="flex items-center justify-between gap-1.5">
-               {((selectedValidator as any).commissionHistory || []).map((history: any, hIdx: number) => (
-                 <div key={hIdx} className="flex-1 bg-background/30 rounded-lg p-1.5 text-center text-[9px] relative">
-                   <span className="text-[8px] text-muted-foreground block font-mono leading-none mb-0.5">{history.date}</span>
-                   <span className="font-extrabold text-foreground">{history.fee}</span>
-                   {hIdx < (selectedValidator as any).commissionHistory.length - 1 && (
-                     <span className="absolute -right-1 top-1/2 -translate-y-1/2 text-muted-foreground/35 text-[9px] font-black pointer-events-none select-none">→</span>
-                   )}
+             {/* Historical Commission Changes List (Drill-Down Detail) */}
+             {((selectedValidator as any).commissionHistory || []).length > 0 && (
+               <div className="space-y-1.5 pt-1">
+                 <span className="text-[8px] font-black uppercase tracking-wider text-muted-foreground block">Historical Commission Fee Changes</span>
+                 <div className="flex items-center justify-between gap-1.5">
+                   {((selectedValidator as any).commissionHistory || []).map((history: any, hIdx: number) => (
+                     <div key={hIdx} className="flex-1 bg-background/30 rounded-lg p-1.5 text-center text-[9px] relative">
+                       <span className="text-[8px] text-muted-foreground block font-mono leading-none mb-0.5">{history.date}</span>
+                       <span className="font-extrabold text-foreground">{history.fee}</span>
+                       {hIdx < (selectedValidator as any).commissionHistory.length - 1 && (
+                         <span className="absolute -right-1 top-1/2 -translate-y-1/2 text-muted-foreground/35 text-[9px] font-black pointer-events-none select-none">→</span>
+                       )}
+                     </div>
+                   ))}
                  </div>
-               ))}
-             </div>
-           </div>
-         </motion.div>
+               </div>
+             )}
+           </motion.div>
+         )}
 
           {/* Next Reward Distribution Timeline (Frameless, borderless, matching typography rules) */}
           <div className="bg-blue-500/[0.02] rounded-xl p-3 space-y-3">
@@ -436,7 +389,7 @@ const StakingRewardsCalculator: React.FC<CalculatorProps> = ({
           </div>
 
           <p className="text-[9px] text-muted-foreground leading-normal">
-            Simulate cooldown periods and penalty profiles when unstaking <strong>{numericAmount > 0 ? numericAmount.toLocaleString() : '0'} JAM</strong> from {selectedValidator.name}.
+            Simulate cooldown periods and penalty profiles when unstaking <strong>{numericAmount > 0 ? numericAmount.toLocaleString() : '0'} JAM</strong> from {selectedValidator?.name || 'validator'}.
           </p>
 
           <div className="flex bg-background/30 rounded-lg p-0.5 select-none gap-0.5">
@@ -498,41 +451,45 @@ const StakingRewardsCalculator: React.FC<CalculatorProps> = ({
             <span className="text-[10px] font-bold uppercase tracking-widest">Validator Comparison</span>
           </div>
           <div className="h-44 w-full bg-background/20 rounded-2xl p-3 flex items-center justify-center">
-            <ResponsiveContainerRC width="100%" height="100%">
-              <BarChartRC
-                data={VALIDATORS.map(v => ({
-                  name: v.name.replace('TonJam ', ''),
-                  APR: v.apr,
-                  Uptime: v.uptime !== undefined ? v.uptime : (v.apr === 15 ? 99.9 : v.apr === 14 ? 99.5 : 98.8)
-                }))}
-                margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
-              >
-                <XAxisRC 
-                  dataKey="name" 
-                  stroke="#888888" 
-                  fontSize={10} 
-                  tickLine={false} 
-                  axisLine={false} 
-                />
-                <YAxisRC 
-                  stroke="#888888" 
-                  fontSize={10} 
-                  tickLine={false} 
-                  axisLine={false} 
-                />
-                <TooltipRC
-                  contentStyle={{
-                    backgroundColor: '#1f1f1f',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '10px',
-                  }}
-                  cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-                />
-                <BarRC dataKey="APR" name="APR %" fill="#3b82f6" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                <BarRC dataKey="Uptime" name="Uptime %" fill="#10b981" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-              </BarChartRC>
-            </ResponsiveContainerRC>
+            {VALIDATORS.length > 0 ? (
+              <ResponsiveContainerRC width="100%" height="100%">
+                <BarChartRC
+                  data={VALIDATORS.map(v => ({
+                    name: (v.name || v.id || 'Node').replace('TonJam ', ''),
+                    APR: v.apr || 0,
+                    Uptime: v.uptime ?? 0
+                  }))}
+                  margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                >
+                  <XAxisRC 
+                    dataKey="name" 
+                    stroke="#888888" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false} 
+                  />
+                  <YAxisRC 
+                    stroke="#888888" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false} 
+                  />
+                  <TooltipRC
+                    contentStyle={{
+                      backgroundColor: '#1f1f1f',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '10px',
+                    }}
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                  />
+                  <BarRC dataKey="APR" name="APR %" fill="#3b82f6" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                  <BarRC dataKey="Uptime" name="Uptime %" fill="#10b981" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                </BarChartRC>
+              </ResponsiveContainerRC>
+            ) : (
+              <p className="text-[10px] text-muted-foreground">No validator telemetry available.</p>
+            )}
           </div>
        </div>
     </div>

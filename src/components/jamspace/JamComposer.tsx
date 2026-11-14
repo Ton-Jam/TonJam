@@ -21,6 +21,7 @@ import {
   QuotePostSnippet 
 } from '@/types/social';
 import { Track } from '@/types';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface JamComposerProps {
   onPostCreated?: (post: SocialPost) => void;
@@ -69,7 +70,7 @@ export const JamComposer: React.FC<JamComposerProps> = ({
     uid: user?.uid || 'guest',
     name: userProfile?.name || user?.displayName || 'TonJam Pioneer',
     username: userProfile?.username || '@pioneer',
-    avatar: userProfile?.avatar || user?.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    avatar: userProfile?.avatar || user?.photoURL || getPlaceholderImage('artist'),
     isVerified: !!userProfile?.verified || !!userProfile?.isVerifiedArtist,
     role: userProfile?.role || 'fan'
   };
@@ -256,7 +257,7 @@ export const JamComposer: React.FC<JamComposerProps> = ({
             alt={author.name}
             className="w-full h-full object-cover"
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+              (e.currentTarget as HTMLImageElement).src = getPlaceholderImage('artist');
             }}
           />
         </div>
@@ -325,7 +326,7 @@ export const JamComposer: React.FC<JamComposerProps> = ({
                     <div className="flex items-center gap-3 p-1">
                       <div className="w-12 h-12 rounded-lg bg-slate-800 overflow-hidden shrink-0">
                         <img 
-                          src={att.coverUrl || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=300&h=300&q=80'} 
+                          src={att.coverUrl || getPlaceholderImage('track')} 
                           alt={att.title || 'Track'} 
                           className="w-full h-full object-cover"
                         />
@@ -344,7 +345,7 @@ export const JamComposer: React.FC<JamComposerProps> = ({
                     <div className="flex items-center gap-3 p-1">
                       <div className="w-12 h-12 rounded-lg bg-slate-800 overflow-hidden shrink-0">
                         <img 
-                          src={att.coverUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&h=300&q=80'} 
+                          src={att.coverUrl || getPlaceholderImage('nft')} 
                           alt={att.title || 'NFT'} 
                           className="w-full h-full object-cover"
                         />

@@ -14,7 +14,6 @@ import {
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 
 const LOCAL_STORAGE_KEY = 'tonjam_search_history';
-const DEFAULT_SEARCHES = ['Burna Boy', 'Asake', 'Afrobeats 2026', 'Phonk', 'TON NFT'];
 
 export interface SearchHistoryItem {
   id: string;
@@ -33,9 +32,9 @@ export function useSearchHistory() {
         }
       }
     } catch {
-      // Fallback to defaults
+      // Ignore storage access errors
     }
-    return DEFAULT_SEARCHES;
+    return [];
   });
 
   const [isLoading, setIsLoading] = useState<boolean>(false);

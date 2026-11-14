@@ -1,9 +1,8 @@
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, ChevronRight, Gem } from "lucide-react";
+import { ChevronRight, Gem } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
 import { useNFT } from "@/contexts/NFTContext";
-import { MOCK_NFTS } from "@/constants";
 import NFTCard from "@/components/NFTCard";
 import { useHorizontalDragScroll } from "@/hooks/useHorizontalDragScroll";
 import { TrendingNFTVolumeChart } from "@/components/home/TrendingNFTVolumeChart";
@@ -15,40 +14,38 @@ export const TrendingNFTMusicSection: React.FC = () => {
   const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
 
   const displayNFTs = useMemo(() => {
-    const list = (allNFTs && allNFTs.length > 0) 
-      ? allNFTs 
-      : (nfts && nfts.length > 0 ? nfts : MOCK_NFTS);
+    const list = (allNFTs && allNFTs.length > 0)
+      ? allNFTs
+      : (nfts && nfts.length > 0 ? nfts : []);
     return list.slice(0, 10);
   }, [allNFTs, nfts]);
 
   return (
     <section className="space-y-6 text-left w-full">
-      {/* Recharts Volume Trends Analytics Widget */}
       <div className="w-full">
         <TrendingNFTVolumeChart />
       </div>
 
-      {/* Horizontal Trending Music NFTs List */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div>
-            <div className="flex items-center gap-2">
-              <Gem className="w-5 h-5 text-cyan-400" />
-              <h2 className="text-section-title font-bold text-white">
-                Trending Music NFTs
-              </h2>
+      {displayNFTs.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            <div>
+              <div className="flex items-center gap-2">
+                <Gem className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-section-title font-bold text-white">
+                  Trending Music NFTs
+                </h2>
+              </div>
+              <p className="text-xs text-zinc-400 font-normal mt-0.5">Verified digital audio collectibles and drops on TON</p>
             </div>
-            <p className="text-xs text-zinc-400 font-normal mt-0.5">Verified digital audio collectibles and drops on TON</p>
+            <button
+              onClick={() => navigate('/marketplace')}
+              className="text-xs font-semibold text-[#0088CC] flex items-center gap-1 outline-none cursor-pointer border-0 bg-transparent hover:text-white transition-colors"
+            >
+              See All <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <button
-            onClick={() => navigate('/marketplace')}
-            className="text-xs font-semibold text-[#0088CC] flex items-center gap-1 outline-none cursor-pointer border-0 bg-transparent hover:text-white transition-colors"
-          >
-            See All <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
 
-        {displayNFTs && displayNFTs.length > 0 && (
           <div
             ref={scrollRef}
             {...handlers}
@@ -69,8 +66,8 @@ export const TrendingNFTMusicSection: React.FC = () => {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   );
 };

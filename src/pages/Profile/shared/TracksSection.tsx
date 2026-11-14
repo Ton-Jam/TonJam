@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Track } from '@/types';
 import { useToast } from '@/components/layout/ToastProvider';
 import { useAudio } from '@/contexts/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface TracksSectionProps {
   tracks: Track[];
@@ -76,7 +77,7 @@ export const TracksSection: React.FC<TracksSectionProps> = ({
                   {/* Track Number / Play Button */}
                   <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-slate-900 shrink-0">
                     <img 
-                      src={track.coverUrl || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=200&h=200&q=80'} 
+                      src={track.coverUrl || getPlaceholderImage('track')} 
                       alt={track.title} 
                       className="w-full h-full object-cover" 
                       referrerPolicy="no-referrer"

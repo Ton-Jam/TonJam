@@ -3,8 +3,6 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid
 } from 'recharts';
 import { useAudio } from '@/contexts/AudioContext';
-import { MOCK_TRACKS } from '@/constants';
-import { motion } from 'motion/react';
 import { TrendingUp, Music, ShoppingBag } from 'lucide-react';
 
 export const TrendingChart: React.FC = () => {
@@ -12,24 +10,21 @@ export const TrendingChart: React.FC = () => {
   const [metric, setMetric] = useState<'plays' | 'purchases'>('plays');
 
   const chartData = useMemo(() => {
-    const sourceTracks = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
-    
-    // Generate deterministic mock stats based on track id for visual consistency
-    return sourceTracks.slice(0, 8).map((track, i) => {
-      // Deterministic pseudo-randomness based on index and track title length
-      const seed = track.title.length * (i + 1);
-      return {
+    if (!allTracks || allTracks.length === 0) return [];
+    return allTracks
+      .slice(0, 8)
+      .map((track, i) => ({
         name: track.title.length > 15 ? track.title.substring(0, 12) + '...' : track.title,
         fullTitle: track.title,
         artist: track.artist,
-        plays: 1000 + (seed * 142) % 5000,
-        purchases: 50 + (seed * 11) % 400,
-        color: i % 2 === 0 ? '#3b82f6' : '#8b5cf6', // Blue and Purple accents
-      };
-    }).sort((a, b) => b[metric] - a[metric]);
+        plays: Number(track.playCount || track.streams || 0),
+        purchases: Number((track as any).purchases || track.likes || 0),
+        color: i % 2 === 0 ? '#3b82f6' : '#8b5cf6',
+      }))
+      .sort((a, b) => b[metric] - a[metric]);
   }, [allTracks, metric]);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -38,7 +33,7 @@ export const TrendingChart: React.FC = () => {
           <p className="text-[10px] text-slate-400 font-medium uppercase tracking-widest mb-2">{data.artist}</p>
           <div className="flex items-center gap-2">
             <span className={`text-xs font-black ${metric === 'plays' ? 'text-blue-400' : 'text-purple-400'}`}>
-              {payload[0].value.toLocaleString()} {metric === 'plays' ? 'Plays' : 'Purchases'}
+              {payload[0].value.toLocaleString()} {metric === 'plays' ? 'Plays' : 'Likes'}
             </span>
           </div>
         </div>
@@ -47,9 +42,12 @@ export const TrendingChart: React.FC = () => {
     return null;
   };
 
+  if (chartData.length === 0) {
+    return null;
+  }
+
   return (
     <div className="bg-card/50 backdrop-blur-md border border-border/50 rounded-3xl p-6 relative overflow-hidden">
-      {/* Decorative gradient */}
       <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 blur-3xl rounded-full pointer-events-none" />
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
@@ -60,7 +58,7 @@ export const TrendingChart: React.FC = () => {
           <div>
             <h2 className="text-xl font-black text-foreground tracking-tight">Trending Sounds</h2>
             <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mt-0.5">
-              Top tracks by {metric}
+              Top tracks by {metric === 'plays' ? 'plays' : 'likes'}
             </p>
           </div>
         </div>
@@ -86,7 +84,7 @@ export const TrendingChart: React.FC = () => {
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            Purchases
+            Likes
           </button>
         </div>
       </div>

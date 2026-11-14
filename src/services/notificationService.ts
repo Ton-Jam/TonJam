@@ -1,6 +1,7 @@
 import { Notification, NotificationPreferences } from '@/types';
 import { db } from '@/lib/firebase';
 import { doc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
+import { getPlaceholderImage } from '@/lib/utils';
 
 const STORAGE_KEY_NOTIFICATIONS = 'notifications';
 const STORAGE_KEY_PREFERENCES = 'notification_preferences';
@@ -118,7 +119,7 @@ export const notificationService = {
       // TonJamNotification schema fields
       category: categoryMapping[notification.type] || 'system',
       description: notification.message,
-      thumbnailUrl: notification.metadata?.thumbnailUrl || notification.metadata?.coverUrl || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&fit=crop&q=80',
+      thumbnailUrl: notification.metadata?.thumbnailUrl || notification.metadata?.coverUrl || getPlaceholderImage('track'),
       avatarUrl: notification.metadata?.avatarUrl,
     };
 

@@ -5,12 +5,12 @@ const OFFLINE_AUDIO_CACHE = 'tonjam-offline-audio-v1';
 
 export const audioCacheService = {
   async cacheTrack(trackId: string, url?: string): Promise<string | null> {
+    if (!url) return null;
     try {
-      let targetUrl = url || `/tonjam-offline-audio.mp3`;
       let blob: Blob | null = null;
 
       try {
-        const response = await fetch(targetUrl);
+        const response = await fetch(url);
         if (response.ok) {
           blob = await response.blob();
           try {
@@ -23,19 +23,7 @@ export const audioCacheService = {
           }
         }
       } catch (fetchErr) {
-        console.warn(`Direct fetch failed for ${targetUrl}, trying local fallback asset:`, fetchErr);
-      }
-
-      // If initial fetch failed, fallback to local offline asset
-      if (!blob) {
-        try {
-          const fallbackRes = await fetch('/tonjam-offline-audio.mp3');
-          if (fallbackRes.ok) {
-            blob = await fallbackRes.blob();
-          }
-        } catch (fbErr) {
-          console.warn('Fallback offline audio fetch error:', fbErr);
-        }
+        console.warn(`Direct fetch failed for ${url}:`, fetchErr);
       }
 
       if (blob) {

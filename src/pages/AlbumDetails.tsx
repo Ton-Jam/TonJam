@@ -5,7 +5,6 @@ import { Play, Pause, Heart, Share2, MoreHorizontal, ArrowLeft, Clock, TrendingU
 import { useAudio } from '@/contexts/AudioContext';
 import { Track } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
-import { MOCK_TRACKS } from '@/constants';
 import { FloorPriceChart } from '@/components/FloorPriceChart';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { fetchFloorPriceHistory } from '@/services/nftService';
@@ -14,13 +13,12 @@ import { CollectionSummaryCards } from '@/components/marketplace/CollectionSumma
 const AlbumDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, togglePlay, setHeaderTitle, allTracks } = useAudio();
+  const { playTrack, currentTrack, isPlaying, togglePlay, setHeaderTitle, allTracks, collections } = useAudio();
   const [albumTracks, setAlbumTracks] = useState<Track[]>([]);
   const [isLiked, setIsLiked] = useState(false);
   const [floorPriceHistory, setFloorPriceHistory] = useState<{ date: string; price: number }[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
-  // Check local storage for user created albums or fallback
   const [album, setAlbum] = useState<{
     id: string;
     title: string;
@@ -32,49 +30,71 @@ const AlbumDetails = () => {
     description: string;
     floorPrice: string;
     volume: string;
-  }>({
-    id: id || '1',
-    title: 'Cyberpunk Nights',
-    artist: 'Neon Prophet',
-    coverUrl: getPlaceholderImage('album-cover'),
-    releaseYear: '2026',
-    trackCount: 8,
-    totalDuration: '32:45',
-    description: 'A journey through the neon-lit streets of Neo-Tokyo. This album blends synthwave with modern trap beats to create a unique sonic landscape.',
-    floorPrice: '12.5',
-    volume: '1,240'
-  });
+    ownersCount: number;
+  } | null>(null);
 
   useEffect(() => {
     try {
       const storedAlbums = JSON.parse(localStorage.getItem('tonjam_user_albums') || '[]');
-      const foundAlbum = storedAlbums.find((a: any) => a.id === id);
-      if (foundAlbum) {
-        // Find matching tracks in allTracks
-        const matchingTracks = allTracks.filter(t => foundAlbum.trackIds?.includes(t.id) || t.albumId === foundAlbum.id || t.album === foundAlbum.title);
-        const resolvedTracks = matchingTracks.length > 0 ? matchingTracks : MOCK_TRACKS.slice(0, 4);
-        setAlbumTracks(resolvedTracks);
-        
+      const foundStored = storedAlbums.find((a: any) => a.id === id);
+      const foundCollection = collections?.find((c: any) => c.id === id);
+      const sourceAlbum = foundStored || foundCollection;
+
+      if (sourceAlbum) {
+        const matchingTracks = allTracks.filter(
+          (t) =>
+            sourceAlbum.trackIds?.includes(t.id) ||
+            t.albumId === sourceAlbum.id ||
+            (sourceAlbum.title && t.album === sourceAlbum.title)
+        );
+        setAlbumTracks(matchingTracks);
+
+        const totalSec = matchingTracks.reduce((sum, t) => sum + (t.duration || 0), 0);
+        const totalDuration = `${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, '0')}`;
+
         setAlbum({
-          id: foundAlbum.id,
-          title: foundAlbum.title,
-          artist: foundAlbum.artist,
-          coverUrl: foundAlbum.coverUrl || getPlaceholderImage('album-cover'),
-          releaseYear: String(foundAlbum.releaseYear || new Date().getFullYear()),
-          trackCount: foundAlbum.trackIds?.length || resolvedTracks.length,
-          totalDuration: '18:40',
-          description: foundAlbum.description || 'Decentralized Album release on TonJam.',
-          floorPrice: '5.0',
-          volume: '350'
+          id: sourceAlbum.id,
+          title: sourceAlbum.title || sourceAlbum.name || 'Untitled Album',
+          artist: sourceAlbum.artist || sourceAlbum.creator || 'Unknown Artist',
+          coverUrl: sourceAlbum.coverUrl || sourceAlbum.imageUrl || getPlaceholderImage(`album-${sourceAlbum.id}`),
+          releaseYear: String(sourceAlbum.releaseYear || new Date().getFullYear()),
+          trackCount: sourceAlbum.trackIds?.length || matchingTracks.length,
+          totalDuration,
+          description: sourceAlbum.description || '',
+          floorPrice: String(sourceAlbum.floorPrice || '0'),
+          volume: String(sourceAlbum.totalVolume || sourceAlbum.volume || '0'),
+          ownersCount: Number(sourceAlbum.ownersCount || 0),
         });
       } else {
-        setAlbumTracks(MOCK_TRACKS.slice(0, 8));
+        const matchingByAlbumId = allTracks.filter((t) => t.albumId === id || t.album === id);
+        if (matchingByAlbumId.length > 0) {
+          const first = matchingByAlbumId[0];
+          const totalSec = matchingByAlbumId.reduce((sum, t) => sum + (t.duration || 0), 0);
+          setAlbumTracks(matchingByAlbumId);
+          setAlbum({
+            id: id || first.albumId || first.id,
+            title: first.album || first.title,
+            artist: first.artist,
+            coverUrl: first.coverUrl || getPlaceholderImage(`album-${first.id}`),
+            releaseYear: first.releaseDate ? String(new Date(first.releaseDate).getFullYear()) : String(new Date().getFullYear()),
+            trackCount: matchingByAlbumId.length,
+            totalDuration: `${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, '0')}`,
+            description: '',
+            floorPrice: '0',
+            volume: '0',
+            ownersCount: 0,
+          });
+        } else {
+          setAlbum(null);
+          setAlbumTracks([]);
+        }
       }
     } catch (e) {
-      console.warn("Error loading stored album:", e);
-      setAlbumTracks(MOCK_TRACKS.slice(0, 8));
+      console.warn("Error loading album:", e);
+      setAlbum(null);
+      setAlbumTracks([]);
     }
-  }, [id, allTracks]);
+  }, [id, allTracks, collections]);
 
   useEffect(() => {
     const loadHistory = async () => {
@@ -91,7 +111,7 @@ const AlbumDetails = () => {
     let currentTitle = '';
     const handleScroll = () => {
       const scrollThreshold = 300;
-      const nextTitle = window.scrollY > scrollThreshold ? album.title : '';
+      const nextTitle = window.scrollY > scrollThreshold && album ? album.title : '';
       if (nextTitle !== currentTitle) {
         currentTitle = nextTitle;
         setHeaderTitle(nextTitle);
@@ -103,15 +123,30 @@ const AlbumDetails = () => {
       window.removeEventListener('scroll', handleScroll);
       setHeaderTitle('');
     };
-  }, [album.title, setHeaderTitle]);
-
-  // album tracks already populated in first useEffect
+  }, [album, setHeaderTitle]);
 
   const handlePlayAlbum = () => {
     if (albumTracks.length > 0) {
       playTrack(albumTracks[0]);
     }
   };
+
+  if (!album) {
+    return (
+      <div className="min-h-screen bg-background text-foreground pb-32">
+        <PageHeader title="Album" showBack={true} />
+        <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
+          <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Album not found</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-bold uppercase tracking-widest cursor-pointer"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
@@ -172,7 +207,7 @@ const AlbumDetails = () => {
           <CollectionSummaryCards
             collectionName={album.title}
             customVolume={album.volume}
-            customOwners={342}
+            customOwners={album.ownersCount}
             customItems={album.trackCount}
           />
         </div>

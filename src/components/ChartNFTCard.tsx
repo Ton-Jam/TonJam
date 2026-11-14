@@ -4,7 +4,8 @@ import { motion } from 'motion/react';
 import { ChevronUp } from 'lucide-react';
 import { MarqueeTitle } from './MarqueeTitle';
 import { NFTItem } from '@/types';
-import { TON_LOGO, MOCK_ARTISTS, MOCK_USER } from '@/constants';
+import { TON_LOGO } from '@/constants';
+import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
 import VerifiedArtistBadge from '@/components/common/VerifiedArtistBadge';
 
@@ -15,7 +16,9 @@ interface ChartNFTCardProps {
 
 const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
   const navigate = useNavigate();
-  const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+  const { artists, userProfile } = useAudio();
+  const artist = artists.find(a => a.name === nft.creator || a.uid === nft.creatorId);
+  const priceChange = (nft as any).priceChange24h;
 
   return (
     <motion.div
@@ -58,7 +61,7 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
               e.stopPropagation();
               if (artist) {
                 navigate(`/artist/${artist.uid}`);
-              } else if (nft.creator === MOCK_USER.name) {
+              } else if (userProfile?.uid && (nft.creatorId === userProfile.uid || nft.creator === userProfile.name)) {
                 navigate('/profile');
               }
             }}
@@ -87,10 +90,16 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
             {nft.price}
           </motion.span>
         </div>
-        <div className="flex items-center justify-end gap-2 text-[8px] font-bold uppercase tracking-widest text-emerald-400 font-mono">
-          <ChevronUp className="h-2 w-2" />
-          <span>+{Math.floor(Math.random() * 20 + 5)}%</span>
-        </div>
+        {typeof priceChange === 'number' ? (
+          <div className="flex items-center justify-end gap-2 text-[8px] font-bold uppercase tracking-widest text-emerald-400 font-mono">
+            <ChevronUp className="h-2 w-2" />
+            <span>{priceChange >= 0 ? `+${priceChange}%` : `${priceChange}%`}</span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-end gap-2 text-[8px] font-bold uppercase tracking-widest text-muted-foreground font-mono">
+            <span>{nft.edition || 'NFT'}</span>
+          </div>
+        )}
       </div>
     </motion.div>
   );

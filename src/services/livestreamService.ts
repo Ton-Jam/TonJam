@@ -27,189 +27,7 @@ import {
   NFTHolderTier 
 } from '@/types/livestream';
 import { NFTItem, UserProfile } from '@/types';
-
-// Default initial active live streams to ensure the app is immediately alive and populated
-export const SEED_LIVESTREAMS: LiveStreamSession[] = [
-  {
-    id: 'stream_dj_krupy_genesis',
-    title: '🎧 DJ Krupy Live: TON Cyberpunk & Future Bass Studio Jam',
-    description: 'Exclusive live synth performance, testing unreleased stems from the Genesis Album, and real-time interactive remixing with holders!',
-    artistId: 'artist_dj_krupy',
-    artistName: 'DJ Krupy',
-    artistAvatar: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=400',
-    artistHandle: '@djkrupy',
-    artistAddress: 'EQBvW8Z5huBkMJYdn3PCDnvdQwg5261DDq',
-    artistVerified: true,
-    status: 'live',
-    category: 'DJ Set',
-    tags: ['FutureBass', 'TONGenesis', 'LiveStems', 'ModularSynth'],
-    thumbnailUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1200',
-    videoSourceType: 'stage_visualizer',
-    streamVideoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    viewerCount: 1420,
-    peakViewers: 1890,
-    totalTipsTon: 142.5,
-    totalTipsGram: 8500,
-    totalTipsTJ: 34000,
-    startedAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-    nftGated: false,
-    quality: '1080p60',
-    pinnedAnnouncement: {
-      text: '💎 Genesis NFT Holders: Type your stem remix requests in chat for instant priority queue!',
-      author: 'DJ Krupy (Host)',
-      timestamp: '10 mins ago',
-      isVip: true
-    },
-    currentSongPlaying: {
-      title: 'Neon Odyssey (VIP Stem Live Mix)',
-      artist: 'DJ Krupy',
-      coverUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=300',
-      genre: 'Future Bass'
-    }
-  },
-  {
-    id: 'stream_aara_vocals_live',
-    title: '✨ Aara: Acoustic Sunset & Live NFT Mint Reveal',
-    description: 'Chill acoustic session featuring live guitar, soulful vocal loops, and exclusive preview of the upcoming "Lumina Horizon" sonic artifact.',
-    artistId: 'artist_aara_vocal',
-    artistName: 'Aara Nova',
-    artistAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
-    artistHandle: '@aaranova',
-    artistAddress: 'EQC7X8z5huBkMJYdn3PCDnvdQwg8891AAp',
-    artistVerified: true,
-    status: 'live',
-    category: 'Acoustic Lounge',
-    tags: ['Acoustic', 'VocalLooper', 'NFTReveal', 'Chill'],
-    thumbnailUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=1200',
-    videoSourceType: 'stage_visualizer',
-    viewerCount: 890,
-    peakViewers: 1120,
-    totalTipsTon: 98.0,
-    totalTipsGram: 4200,
-    totalTipsTJ: 18500,
-    startedAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-    nftGated: false,
-    quality: '1080p60',
-    pinnedAnnouncement: {
-      text: '🌸 Dropping 5 free whitelist passes to the top tippers at the end of the set!',
-      author: 'Aara Nova',
-      timestamp: '5 mins ago',
-      isVip: true
-    },
-    currentSongPlaying: {
-      title: 'Solstice Echoes (Live Acoustic)',
-      artist: 'Aara Nova',
-      coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=300',
-      genre: 'Acoustic Indie'
-    }
-  },
-  {
-    id: 'stream_beatmaster_ton',
-    title: '🔥 Phonk & Drift Beats: 1-Hour Speed Production Challenge',
-    description: 'Making 3 dark phonk tracks in 60 minutes from fan sound samples sent via live tips. Royalty splits distributed to chat participants!',
-    artistId: 'artist_k_drift',
-    artistName: 'K-Drift',
-    artistAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400',
-    artistHandle: '@kdrift_beats',
-    artistAddress: 'EQDf99Z5huBkMJYdn3PCDnvdQwg0011ZKp',
-    artistVerified: true,
-    status: 'live',
-    category: 'Beat Making',
-    tags: ['Phonk', 'Ableton', 'SpeedRun', 'RoyaltySplit'],
-    thumbnailUrl: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=1200',
-    videoSourceType: 'stage_visualizer',
-    viewerCount: 654,
-    peakViewers: 820,
-    totalTipsTon: 54.2,
-    totalTipsGram: 3100,
-    totalTipsTJ: 12000,
-    startedAt: new Date(Date.now() - 32 * 60 * 1000).toISOString(),
-    nftGated: false,
-    quality: '720p',
-    currentSongPlaying: {
-      title: 'Midnight Tokyo 808 Drive',
-      artist: 'K-Drift',
-      coverUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=300',
-      genre: 'Drift Phonk'
-    }
-  }
-];
-
-export const INITIAL_MOCK_MESSAGES: Record<string, LiveStreamChatMessage[]> = {
-  stream_dj_krupy_genesis: [
-    {
-      id: 'msg_1',
-      streamId: 'stream_dj_krupy_genesis',
-      userId: 'user_ton_whale',
-      userName: 'SatoshiTon',
-      userAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=SatoshiTon',
-      userAddress: 'EQB...49a1',
-      text: 'Let’s go Krupy!! The drop on that lead synth is unbelievable 🔥⚡',
-      timestamp: 'Just now',
-      type: 'chat',
-      highestTierBadge: 'Genesis VIP',
-      userNfts: [
-        { id: 'nft_genesis_1', title: 'TonJam Genesis Gold Pass #042', imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=300', rarity: 'Legendary', isGenesis: true }
-      ],
-      privileges: {
-        glowEffect: true,
-        canPriorityPinQA: true,
-        canRequestSongs: true,
-        badgeLabel: 'Genesis VIP',
-        badgeColor: '#F59E0B'
-      }
-    },
-    {
-      id: 'msg_2',
-      streamId: 'stream_dj_krupy_genesis',
-      userId: 'user_tipper_1',
-      userName: 'VaporKnight',
-      userAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=VaporKnight',
-      userAddress: 'EQC...88f2',
-      text: 'Tipped 10 TON for the incredible set! Drop the heavy bassline next!',
-      timestamp: '1m ago',
-      type: 'tip',
-      tipAmount: 10,
-      tipCurrency: 'TON',
-      highestTierBadge: 'Diamond Holder',
-      userNfts: [
-        { id: 'nft_neon_1', title: 'Cyber Dimension NFT', imageUrl: 'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=300', rarity: 'Rare' }
-      ],
-      privileges: {
-        glowEffect: true,
-        badgeLabel: 'Diamond Holder',
-        badgeColor: '#00B4D8'
-      }
-    },
-    {
-      id: 'msg_3',
-      streamId: 'stream_dj_krupy_genesis',
-      userId: 'artist_dj_krupy',
-      userName: 'DJ Krupy',
-      userAvatar: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=400',
-      text: 'Huge thanks to @VaporKnight and all Genesis holders in the chat right now! Loading up the 808 sub bass!',
-      timestamp: '1m ago',
-      type: 'chat',
-      isHost: true,
-      isArtist: true,
-      highestTierBadge: 'Artist VIP'
-    },
-    {
-      id: 'msg_4',
-      streamId: 'stream_dj_krupy_genesis',
-      userId: 'user_collector_99',
-      userName: 'AuraEcho',
-      userAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=AuraEcho',
-      text: 'Can you preview track #4 from the mint catalog? Holding 3 copies of your debut!',
-      timestamp: '2m ago',
-      type: 'qa',
-      highestTierBadge: 'Collector',
-      userNfts: [
-        { id: 'nft_krupy_single', title: 'Neon Odyssey Single NFT', imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=300' }
-      ]
-    }
-  ]
-};
+import { getPlaceholderImage } from '@/lib/utils';
 
 // Calculate viewer's NFT privileges based on held NFTs
 export const calculateViewerPrivileges = (
@@ -221,7 +39,7 @@ export const calculateViewerPrivileges = (
   const heldNFTs: UserHeldNFT[] = userNfts.map(nft => ({
     id: nft.id,
     title: nft.title,
-    imageUrl: nft.imageUrl || nft.coverUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=300',
+    imageUrl: nft.imageUrl || nft.coverUrl || getPlaceholderImage('nft'),
     rarity: nft.rarity || 'Rare',
     edition: nft.edition || '1/100',
     artistId: nft.artistId,
@@ -279,7 +97,7 @@ export const calculateViewerPrivileges = (
 };
 
 /**
- * Fetch all active live streams
+ * Fetch all active live streams strictly from Firestore
  */
 export const getActiveLiveStreams = async (): Promise<LiveStreamSession[]> => {
   try {
@@ -290,57 +108,29 @@ export const getActiveLiveStreams = async (): Promise<LiveStreamSession[]> => {
       limit(20)
     );
     const snapshot = await getDocs(q);
-    
-    if (!snapshot.empty) {
-      const liveList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LiveStreamSession));
-      // Merge with seed streams if less than 3 for vibrant showcase
-      const existingIds = new Set(liveList.map(s => s.id));
-      const combined = [...liveList, ...SEED_LIVESTREAMS.filter(s => !existingIds.has(s.id))];
-      return combined;
-    }
+    return snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() } as LiveStreamSession));
   } catch (error) {
-    console.warn('[LivestreamService] Error loading live streams from firestore, using cached seed:', error);
+    handleFirestoreError(error, OperationType.LIST, 'liveStreams');
+    return [];
   }
-
-  // Return seed streams stored in localStorage or default
-  const local = localStorage.getItem('tonjam_livestreams');
-  if (local) {
-    try {
-      const parsed = JSON.parse(local);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    } catch {}
-  }
-  return SEED_LIVESTREAMS;
 };
 
 /**
- * Fetch a single live stream session by ID
+ * Fetch a single live stream session by ID strictly from Firestore
  */
 export const getLiveStreamById = async (streamId: string): Promise<LiveStreamSession | null> => {
+  if (!streamId) return null;
   try {
     const docRef = doc(db, 'liveStreams', streamId);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
       return { id: snap.id, ...snap.data() } as LiveStreamSession;
     }
+    return null;
   } catch (error) {
-    console.warn('[LivestreamService] Firestore getLiveStreamById fallback:', error);
+    handleFirestoreError(error, OperationType.GET, `liveStreams/${streamId}`);
+    return null;
   }
-
-  // Fallback to seeds or localStorage
-  const foundSeed = SEED_LIVESTREAMS.find(s => s.id === streamId);
-  if (foundSeed) return foundSeed;
-
-  const local = localStorage.getItem('tonjam_livestreams');
-  if (local) {
-    try {
-      const parsed: LiveStreamSession[] = JSON.parse(local);
-      const matched = parsed.find(s => s.id === streamId);
-      if (matched) return matched;
-    } catch {}
-  }
-
-  return null;
 };
 
 /**
@@ -366,13 +156,8 @@ export const createLiveStreamSession = async (
     const docRef = doc(db, 'liveStreams', newId);
     await setDoc(docRef, fullSession);
   } catch (error) {
-    console.warn('[LivestreamService] Firestore createLiveStream error, saving locally:', error);
+    handleFirestoreError(error, OperationType.CREATE, `liveStreams/${newId}`);
   }
-
-  // Update local storage
-  const current = await getActiveLiveStreams();
-  const updated = [fullSession, ...current.filter(s => s.id !== newId)];
-  localStorage.setItem('tonjam_livestreams', JSON.stringify(updated));
 
   return fullSession;
 };
@@ -381,24 +166,14 @@ export const createLiveStreamSession = async (
  * Update an existing live stream session (e.g. current song, viewer count, status)
  */
 export const updateLiveStreamSession = async (
-  streamId: string, 
+  streamId: string,
   updates: Partial<LiveStreamSession>
 ): Promise<void> => {
   try {
     const docRef = doc(db, 'liveStreams', streamId);
     await updateDoc(docRef, updates);
   } catch (error) {
-    console.warn('[LivestreamService] Firestore updateLiveStreamSession fallback:', error);
-  }
-
-  // Update local cache
-  const local = localStorage.getItem('tonjam_livestreams');
-  if (local) {
-    try {
-      const list: LiveStreamSession[] = JSON.parse(local);
-      const next = list.map(s => s.id === streamId ? { ...s, ...updates } : s);
-      localStorage.setItem('tonjam_livestreams', JSON.stringify(next));
-    } catch {}
+    handleFirestoreError(error, OperationType.UPDATE, `liveStreams/${streamId}`);
   }
 };
 
@@ -416,9 +191,13 @@ export const endLiveStreamSession = async (streamId: string): Promise<void> => {
  * Real-time subscription to stream chat messages
  */
 export const subscribeToStreamChat = (
-  streamId: string, 
+  streamId: string,
   callback: (messages: LiveStreamChatMessage[]) => void
 ) => {
+  if (!streamId) {
+    callback([]);
+    return () => {};
+  }
   try {
     const q = query(
       collection(db, `liveStreams/${streamId}/messages`),
@@ -426,24 +205,22 @@ export const subscribeToStreamChat = (
       limit(100)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      if (!snapshot.empty) {
-        const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LiveStreamChatMessage));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const msgs = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() } as LiveStreamChatMessage));
         callback(msgs);
-      } else {
-        // Use initial mock messages if firestore is empty
-        const initial = INITIAL_MOCK_MESSAGES[streamId] || [];
-        callback(initial);
+      },
+      (err) => {
+        handleFirestoreError(err, OperationType.LIST, `liveStreams/${streamId}/messages`);
+        callback([]);
       }
-    }, (err) => {
-      console.warn('[LivestreamService] onSnapshot error, using local/mock chat:', err);
-      callback(INITIAL_MOCK_MESSAGES[streamId] || []);
-    });
+    );
 
     return unsubscribe;
   } catch (error) {
-    console.warn('[LivestreamService] Chat listener fallback:', error);
-    callback(INITIAL_MOCK_MESSAGES[streamId] || []);
+    handleFirestoreError(error, OperationType.LIST, `liveStreams/${streamId}/messages`);
+    callback([]);
     return () => {};
   }
 };
@@ -466,14 +243,8 @@ export const sendStreamChatMessage = async (
     const docRef = doc(db, `liveStreams/${streamId}/messages`, newMsgId);
     await setDoc(docRef, message);
   } catch (error) {
-    console.warn('[LivestreamService] Error posting chat message to firestore:', error);
+    handleFirestoreError(error, OperationType.CREATE, `liveStreams/${streamId}/messages/${newMsgId}`);
   }
-
-  // Update in-memory seed cache for immediate responsive feedback
-  if (!INITIAL_MOCK_MESSAGES[streamId]) {
-    INITIAL_MOCK_MESSAGES[streamId] = [];
-  }
-  INITIAL_MOCK_MESSAGES[streamId].push(message);
 
   return message;
 };
@@ -551,7 +322,7 @@ export const sendCryptoTipToStreamer = async (
     });
 
   } catch (error) {
-    console.warn('[LivestreamService] Error writing tip to firestore, processed locally:', error);
+    handleFirestoreError(error, OperationType.WRITE, `liveStreams/${streamId}/tips`);
   }
 
   return tipRecord;
@@ -576,7 +347,7 @@ export const submitStreamSongRequest = async (
     const docRef = doc(db, `liveStreams/${streamId}/songRequests`, reqId);
     await setDoc(docRef, newRequest);
   } catch (error) {
-    console.warn('[LivestreamService] Song request firestore write:', error);
+    handleFirestoreError(error, OperationType.CREATE, `liveStreams/${streamId}/songRequests/${reqId}`);
   }
 
   return newRequest;

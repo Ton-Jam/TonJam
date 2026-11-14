@@ -32,10 +32,9 @@ import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "@/contexts/AudioContext";
 import { useNFT } from "@/contexts/NFTContext";
 import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
-import { TON_LOGO, TJ_COIN_ICON, MOCK_NFTS } from "@/constants";
+import { TON_LOGO, TJ_COIN_ICON } from "@/constants";
 import { NFTItem } from "@/types";
 import { toast } from "sonner";
-import confetti from "canvas-confetti";
 
 export interface CryptoToken {
   id: string;
@@ -54,8 +53,8 @@ const SUPPORTED_TOKENS: CryptoToken[] = [
     symbol: "TON",
     name: "Toncoin",
     icon: TON_LOGO,
-    balance: 14.85,
-    priceUsd: 5.30,
+    balance: 0,
+    priceUsd: 0,
     decimals: 9,
     color: "#0098EA"
   },
@@ -64,8 +63,8 @@ const SUPPORTED_TOKENS: CryptoToken[] = [
     symbol: "JAM",
     name: "TonJam Token",
     icon: TJ_COIN_ICON,
-    balance: 1250,
-    priceUsd: 0.12,
+    balance: 0,
+    priceUsd: 0,
     decimals: 6,
     color: "#5B6BFF"
   },
@@ -74,8 +73,8 @@ const SUPPORTED_TOKENS: CryptoToken[] = [
     symbol: "NOT",
     name: "Notcoin",
     icon: "https://assets.coingecko.com/coins/images/33566/standard/NOT.png",
-    balance: 45000,
-    priceUsd: 0.0095,
+    balance: 0,
+    priceUsd: 0,
     decimals: 9,
     color: "#E2B714"
   },
@@ -84,8 +83,8 @@ const SUPPORTED_TOKENS: CryptoToken[] = [
     symbol: "DOGS",
     name: "DOGS Token",
     icon: "https://assets.coingecko.com/coins/images/38600/standard/DOGS.png",
-    balance: 120000,
-    priceUsd: 0.00065,
+    balance: 0,
+    priceUsd: 0,
     decimals: 9,
     color: "#000000"
   },
@@ -94,8 +93,8 @@ const SUPPORTED_TOKENS: CryptoToken[] = [
     symbol: "REVT",
     name: "Royalty Share Token",
     icon: TJ_COIN_ICON,
-    balance: 85,
-    priceUsd: 1.45,
+    balance: 0,
+    priceUsd: 0,
     decimals: 6,
     color: "#10B981"
   }
@@ -114,70 +113,30 @@ export interface P2POffer {
   status: "OPEN" | "COMPLETED" | "CANCELLED";
 }
 
-const INITIAL_P2P_OFFERS: P2POffer[] = [
-  {
-    id: "offer-1",
-    offererAddress: "EQB8...f91a",
-    offererName: "Alex.ton",
-    offeredNFT: MOCK_NFTS[0] || {
-      id: "nft-solar-04",
-      trackId: "track-solar-04",
-      title: "Solar Pulse Genesis #04",
-      artist: "Cyber Beats",
-      creator: "Cyber Beats",
-      imageUrl: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse?width=300&height=300&nologo=true",
-      coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse?width=300&height=300&nologo=true",
-      audioUrl: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3",
-      price: "12.5",
-      rarity: "Legendary",
-      owner: "Alex.ton",
-      edition: "1/1"
-    },
-    offeredTokenBonus: { amount: "2.5", symbol: "TON" },
-    requestedNFTTitle: "Aura Beat Legendary #02",
-    createdAt: "10 mins ago",
-    status: "OPEN"
-  },
-  {
-    id: "offer-2",
-    offererAddress: "EQD1...904b",
-    offererName: "VibesCollector",
-    offeredNFT: MOCK_NFTS[1] || {
-      id: "nft-aura-02",
-      trackId: "track-aura-02",
-      title: "Aura Beat Legendary #02",
-      artist: "Aura Sound",
-      creator: "Aura Sound",
-      imageUrl: "https://image.pollinations.ai/prompt/glowing%20aesthetic%20crystal%20sound%20waves?width=300&height=300&nologo=true",
-      coverUrl: "https://image.pollinations.ai/prompt/glowing%20aesthetic%20crystal%20sound%20waves?width=300&height=300&nologo=true",
-      audioUrl: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a815e3.mp3",
-      price: "25.0",
-      rarity: "Rare",
-      owner: "VibesCollector",
-      edition: "1/5"
-    },
-    requestedNFTTitle: "Any Epic Dubstep Track",
-    requestedTokenPrice: { amount: "10.0", symbol: "TON" },
-    createdAt: "35 mins ago",
-    status: "OPEN"
-  }
-];
-
 export const Swap: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialNftId = searchParams.get("nftId");
 
-  const { userNFTs } = useAudio();
-  const { nfts: allNFTs, setNfts } = useNFT();
+  const { userNFTs, userProfile, transactions } = useAudio();
+  const { nfts: allNFTs } = useNFT();
   const userAddress = useTonAddress();
   const [tonConnectUI] = useTonConnectUI();
 
-  // Combine user's owned NFTs with fallback sample NFTs if user has none
+  // Only show real NFTs available in inventory/catalog
   const availableUserNFTs = useMemo(() => {
     if (userNFTs && userNFTs.length > 0) return userNFTs;
-    return allNFTs.slice(0, 4);
+    return allNFTs;
   }, [userNFTs, allNFTs]);
+
+  const tokensWithRealBalances = useMemo(() => {
+    return SUPPORTED_TOKENS.map(t => {
+      if (t.symbol === "JAM") {
+        return { ...t, balance: userProfile.tjBalance || 0 };
+      }
+      return t;
+    });
+  }, [userProfile.tjBalance]);
 
   // Selected Assets State
   const [fromType, setFromType] = useState<"NFT" | "TOKEN">("NFT");
@@ -191,11 +150,11 @@ export const Swap: React.FC = () => {
     return availableUserNFTs[0] || allNFTs[0] || null;
   });
 
-  const [selectedFromToken, setSelectedFromToken] = useState<CryptoToken>(SUPPORTED_TOKENS[0]);
-  const [fromTokenAmount, setFromTokenAmount] = useState<string>("10");
+  const [selectedFromToken, setSelectedFromToken] = useState<CryptoToken>(tokensWithRealBalances[0]);
+  const [fromTokenAmount, setFromTokenAmount] = useState<string>("0");
 
   const [selectedToNFT, setSelectedToNFT] = useState<NFTItem | null>(allNFTs[1] || null);
-  const [selectedToToken, setSelectedToToken] = useState<CryptoToken>(SUPPORTED_TOKENS[1]); // JAM
+  const [selectedToToken, setSelectedToToken] = useState<CryptoToken>(tokensWithRealBalances[1]); // JAM
 
   // DEX Settings
   const [slippage, setSlippage] = useState<number>(0.5);
@@ -210,79 +169,65 @@ export const Swap: React.FC = () => {
   // Swap Processing state
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const [swapStepIndex, setSwapStepIndex] = useState<number>(0);
-  const [txHash, setTxHash] = useState<string | null>(null);
 
-  // P2P Offers Board state
-  const [p2pOffers, setP2POffers] = useState<P2POffer[]>(INITIAL_P2P_OFFERS);
+  // P2P Offers Board state (backed by real marketplace offers when available)
+  const p2pOffers: P2POffer[] = [];
   const [activeTab, setActiveTab] = useState<"DEX_SWAP" | "P2P_BARTER" | "POOL_STATS">("DEX_SWAP");
+
+  const swapTransactions = useMemo(
+    () => transactions.filter((tx: any) => tx.type === "swap" || tx.category === "swap"),
+    [transactions]
+  );
 
   // Calculated Outputs
   const calculatedOutput = useMemo(() => {
     if (fromType === "NFT" && toType === "TOKEN") {
-      const nftValueTon = parseFloat(selectedFromNFT?.price || "12.5");
-      if (selectedToToken.symbol === "TON") {
+      const nftValueTon = parseFloat(selectedFromNFT?.price || "0");
+      if (selectedToToken.symbol === "TON" || selectedToToken.priceUsd <= 0 || tokensWithRealBalances[0].priceUsd <= 0) {
         return {
           amount: nftValueTon.toFixed(2),
-          amountUsd: (nftValueTon * SUPPORTED_TOKENS[0].priceUsd).toFixed(2),
-          rateStr: `1 NFT ≈ ${nftValueTon} TON`
-        };
-      } else if (selectedToToken.symbol === "JAM") {
-        const jamAmount = (nftValueTon * SUPPORTED_TOKENS[0].priceUsd) / selectedToToken.priceUsd;
-        return {
-          amount: Math.round(jamAmount).toString(),
-          amountUsd: (nftValueTon * SUPPORTED_TOKENS[0].priceUsd).toFixed(2),
-          rateStr: `1 NFT ≈ ${Math.round(jamAmount)} JAM`
-        };
-      } else {
-        const amount = (nftValueTon * SUPPORTED_TOKENS[0].priceUsd) / selectedToToken.priceUsd;
-        return {
-          amount: amount.toFixed(1),
-          amountUsd: (nftValueTon * SUPPORTED_TOKENS[0].priceUsd).toFixed(2),
-          rateStr: `1 NFT ≈ ${amount.toFixed(1)} ${selectedToToken.symbol}`
+          amountUsd: (nftValueTon * tokensWithRealBalances[0].priceUsd).toFixed(2),
+          rateStr: selectedFromNFT ? `1 NFT ≈ ${nftValueTon} TON` : "No NFT selected"
         };
       }
+      const amount = (nftValueTon * tokensWithRealBalances[0].priceUsd) / selectedToToken.priceUsd;
+      return {
+        amount: amount.toFixed(2),
+        amountUsd: (nftValueTon * tokensWithRealBalances[0].priceUsd).toFixed(2),
+        rateStr: `1 NFT ≈ ${amount.toFixed(2)} ${selectedToToken.symbol}`
+      };
     }
 
     if (fromType === "TOKEN" && toType === "NFT") {
-      const targetNftValueTon = parseFloat(selectedToNFT?.price || "10.0");
-      const targetNftValueUsd = targetNftValueTon * SUPPORTED_TOKENS[0].priceUsd;
-      const requiredTokens = targetNftValueUsd / selectedFromToken.priceUsd;
-
+      const targetNftValueTon = parseFloat(selectedToNFT?.price || "0");
       return {
-        amount: "1",
-        requiredFromTokens: requiredTokens.toFixed(2),
-        amountUsd: targetNftValueUsd.toFixed(2),
-        rateStr: `1 NFT ≈ ${requiredTokens.toFixed(1)} ${selectedFromToken.symbol}`
+        amount: selectedToNFT ? "1" : "0",
+        amountUsd: (targetNftValueTon * tokensWithRealBalances[0].priceUsd).toFixed(2),
+        rateStr: selectedToNFT ? `1 NFT ≈ ${targetNftValueTon} TON` : "No NFT selected"
       };
     }
 
     if (fromType === "TOKEN" && toType === "TOKEN") {
       const inputVal = parseFloat(fromTokenAmount) || 0;
-      const totalUsd = inputVal * selectedFromToken.priceUsd;
-      const outputVal = totalUsd / selectedToToken.priceUsd;
-
       return {
-        amount: outputVal > 10 ? Math.round(outputVal).toString() : outputVal.toFixed(3),
-        amountUsd: totalUsd.toFixed(2),
-        rateStr: `1 ${selectedFromToken.symbol} ≈ ${(selectedFromToken.priceUsd / selectedToToken.priceUsd).toFixed(4)} ${selectedToToken.symbol}`
+        amount: inputVal > 0 && selectedToToken.priceUsd > 0 && selectedFromToken.priceUsd > 0
+          ? ((inputVal * selectedFromToken.priceUsd) / selectedToToken.priceUsd).toFixed(3)
+          : "0.00",
+        amountUsd: (inputVal * selectedFromToken.priceUsd).toFixed(2),
+        rateStr: "On-chain quote pending live DEX router"
       };
     }
 
     if (fromType === "NFT" && toType === "NFT") {
-      const fromVal = parseFloat(selectedFromNFT?.price || "10.0");
-      const toVal = parseFloat(selectedToNFT?.price || "12.0");
-      const diffTon = (toVal - fromVal).toFixed(2);
-
       return {
-        amount: "1",
-        diffTon: parseFloat(diffTon) > 0 ? diffTon : "0.00",
-        amountUsd: (toVal * SUPPORTED_TOKENS[0].priceUsd).toFixed(2),
+        amount: selectedFromNFT && selectedToNFT ? "1" : "0",
+        amountUsd: "0.00",
         rateStr: `1 : 1 Direct Music NFT Barter`
       };
     }
 
     return { amount: "0.00", amountUsd: "0.00", rateStr: "" };
-  }, [fromType, toType, selectedFromNFT, selectedFromToken, fromTokenAmount, selectedToNFT, selectedToToken]);
+  }, [fromType, toType, selectedFromNFT, selectedFromToken, fromTokenAmount, selectedToNFT, selectedToToken, tokensWithRealBalances]);
 
   // Flip From and To
   const handleFlipAssets = () => {
@@ -307,41 +252,7 @@ export const Swap: React.FC = () => {
       return;
     }
 
-    setIsSwapping(true);
-    setSwapStepIndex(0);
-
-    const steps = [
-      "Securing TON Blockchain Atomic Escrow Router...",
-      "Signing Transaction Payload in TON Wallet...",
-      "Routing Liquidity through STON.fi / DeDust Pools...",
-      "Transferring NFT ownership & dispatching tokens..."
-    ];
-
-    for (let i = 0; i < steps.length; i++) {
-      setSwapStepIndex(i);
-      await new Promise(resolve => setTimeout(resolve, 1100));
-    }
-
-    // Generate simulated tx hash
-    const generatedHash = "0x" + Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-    setTxHash(generatedHash);
-    setIsSwapping(false);
-
-    // Confetti effect
-    confetti({
-      particleCount: 120,
-      spread: 80,
-      origin: { y: 0.6 }
-    });
-
-    toast.success("TON Swap Executed Successfully!", {
-      description: `Tx: ${generatedHash.substring(0, 10)}...`
-    });
-
-    // Update local inventory state if user swapped an NFT
-    if (fromType === "NFT" && selectedFromNFT) {
-      setNfts(prev => prev.map(item => item.id === selectedFromNFT.id ? { ...item, owner: "TON DEX Liquidity Pool" } : item));
-    }
+    toast.error("On-chain DEX swap router contract is not configured for this network yet.");
   };
 
   return (
@@ -657,11 +568,11 @@ export const Swap: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2 text-center">
                   <div className="bg-[#050A24] p-2.5 rounded-xl">
                     <p className="text-[10px] text-[#9AA0AE] font-bold">Total Liquidity</p>
-                    <p className="text-sm font-black text-white mt-0.5">$1.48M USD</p>
+                    <p className="text-sm font-black text-white mt-0.5">$0.00 USD</p>
                   </div>
                   <div className="bg-[#050A24] p-2.5 rounded-xl">
                     <p className="text-[10px] text-[#9AA0AE] font-bold">24h Trading Vol</p>
-                    <p className="text-sm font-black text-emerald-400 mt-0.5">$324,190</p>
+                    <p className="text-sm font-black text-emerald-400 mt-0.5">$0.00</p>
                   </div>
                 </div>
 
@@ -671,10 +582,10 @@ export const Swap: React.FC = () => {
                       <img src={TON_LOGO} alt="" className="w-4 h-4 object-contain" />
                       TON / JAM Pool
                     </span>
-                    <span className="text-emerald-400 font-extrabold">+18.4% APY</span>
+                    <span className="text-[#9AA0AE] font-extrabold">-- APY</span>
                   </div>
                   <p className="text-[10px] text-[#9AA0AE]">
-                    Earn trading fees and reward shares on every DEX swap executed across TON.
+                    Connect your wallet and deploy/link a live DEX pool contract to track real-time pool APR.
                   </p>
                 </div>
               </div>
@@ -689,29 +600,32 @@ export const Swap: React.FC = () => {
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 </div>
 
-                <div className="space-y-2 max-h-[260px] overflow-y-auto no-scrollbar pr-1">
-                  {[
-                    { user: "EQB8...f91a", action: "Swapped 'Solar Pulse #04' for 12.5 TON", time: "2m ago", hash: "0x89...a12" },
-                    { user: "EQD1...904b", action: "Traded 500 JAM for 0.85 TON", time: "5m ago", hash: "0x34...e90" },
-                    { user: "EQC4...2291", action: "Bartered 'Aura Beat' for 'Neon Nights'", time: "9m ago", hash: "0x7a...1b4" },
-                    { user: "EQA2...441e", action: "Swapped 100 TON for 8,500 JAM", time: "14m ago", hash: "0x1d...6e3" }
-                  ].map((swap, idx) => (
-                    <div key={idx} className="p-2.5 rounded-xl bg-[#050A24] text-xs flex items-center justify-between hover:bg-[#070D30] transition-colors">
-                      <div className="min-w-0 pr-2">
-                        <p className="font-bold text-white text-[11px] truncate">{swap.action}</p>
-                        <p className="text-[9px] text-[#9AA0AE] font-mono mt-0.5">{swap.user} • {swap.time}</p>
+                {swapTransactions.length === 0 ? (
+                  <div className="p-4 rounded-xl bg-[#050A24] text-center text-xs text-[#9AA0AE]">
+                    No on-chain swap transactions recorded yet.
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-[260px] overflow-y-auto no-scrollbar pr-1">
+                    {swapTransactions.slice(0, 10).map((swap: any) => (
+                      <div key={swap.id} className="p-2.5 rounded-xl bg-[#050A24] text-xs flex items-center justify-between hover:bg-[#070D30] transition-colors">
+                        <div className="min-w-0 pr-2">
+                          <p className="font-bold text-white text-[11px] truncate">{swap.description || swap.title || 'Swap transaction'}</p>
+                          <p className="text-[9px] text-[#9AA0AE] font-mono mt-0.5">{swap.amount} {swap.currency || 'TON'}</p>
+                        </div>
+                        {swap.txHash && (
+                          <a 
+                            href={`https://tonviewer.com/transaction/${swap.txHash}`} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="p-1.5 rounded-lg bg-white/5 text-[#9AA0AE] hover:text-[#0098EA] shrink-0"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
                       </div>
-                      <a 
-                        href={`https://tonscan.org/tx/${swap.hash}`} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="p-1.5 rounded-lg bg-white/5 text-[#9AA0AE] hover:text-[#0098EA] shrink-0"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
             </div>
@@ -731,58 +645,42 @@ export const Swap: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {p2pOffers.map((offer) => (
-                <div key={offer.id} className="bg-[#0A113A]/70 backdrop-blur-xl rounded-2xl p-4 space-y-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-[#0098EA] flex items-center gap-1">
-                      Offered by {offer.offererName || offer.offererAddress}
-                    </span>
-                    <span className="text-[10px] text-[#9AA0AE]">{offer.createdAt}</span>
-                  </div>
-
-                  {/* Offered Item */}
-                  <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#050A24]">
-                    <img 
-                      src={offer.offeredNFT.coverUrl || offer.offeredNFT.imageUrl} 
-                      alt="" 
-                      className="w-12 h-12 rounded-lg object-cover" 
-                    />
-                    <div className="min-w-0 flex-1">
-                      <span className="text-[9px] font-black text-amber-400 uppercase tracking-wider">Offering</span>
-                      <h4 className="text-xs font-black text-white truncate">{offer.offeredNFT.title}</h4>
-                      <p className="text-[10px] text-[#9AA0AE]">{offer.offeredNFT.artist}</p>
-                    </div>
-                    {offer.offeredTokenBonus && (
-                      <span className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
-                        +{offer.offeredTokenBonus.amount} {offer.offeredTokenBonus.symbol}
+            {p2pOffers.length === 0 ? (
+              <div className="bg-[#0A113A]/70 backdrop-blur-xl rounded-2xl p-8 text-center text-xs text-[#9AA0AE]">
+                No open P2P barter proposals available right now.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {p2pOffers.map((offer) => (
+                  <div key={offer.id} className="bg-[#0A113A]/70 backdrop-blur-xl rounded-2xl p-4 space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-[#0098EA] flex items-center gap-1">
+                        Offered by {offer.offererName || offer.offererAddress}
                       </span>
-                    )}
-                  </div>
+                      <span className="text-[10px] text-[#9AA0AE]">{offer.createdAt}</span>
+                    </div>
 
-                  <div className="flex justify-center -my-1">
-                    <ArrowDownUp className="w-4 h-4 text-[#9AA0AE]" />
-                  </div>
+                    <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#050A24]">
+                      <img 
+                        src={offer.offeredNFT.coverUrl || offer.offeredNFT.imageUrl} 
+                        alt="" 
+                        className="w-12 h-12 rounded-lg object-cover" 
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[9px] font-black text-amber-400 uppercase tracking-wider">Offering</span>
+                        <h4 className="text-xs font-black text-white truncate">{offer.offeredNFT.title}</h4>
+                        <p className="text-[10px] text-[#9AA0AE]">{offer.offeredNFT.artist}</p>
+                      </div>
+                    </div>
 
-                  {/* Requested Item */}
-                  <div className="p-2.5 rounded-xl bg-[#050A24] text-xs space-y-1">
-                    <span className="text-[9px] font-black text-[#0098EA] uppercase tracking-wider">Requesting</span>
-                    <p className="font-bold text-white">{offer.requestedNFTTitle}</p>
+                    <div className="p-2.5 rounded-xl bg-[#050A24] text-xs space-y-1">
+                      <span className="text-[9px] font-black text-[#0098EA] uppercase tracking-wider">Requesting</span>
+                      <p className="font-bold text-white">{offer.requestedNFTTitle}</p>
+                    </div>
                   </div>
-
-                  <button
-                    onClick={() => {
-                      toast.success(`Barter Proposal Accepted for ${offer.offeredNFT.title}!`);
-                      confetti({ particleCount: 80 });
-                    }}
-                    className="w-full py-2.5 rounded-xl bg-[#0098EA] text-white font-black text-xs uppercase tracking-wider hover:bg-[#0098EA]/90 transition-all flex items-center justify-center gap-1.5"
-                  >
-                    <Shuffle className="w-3.5 h-3.5" />
-                    Accept Trade Offer
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -790,23 +688,8 @@ export const Swap: React.FC = () => {
         {activeTab === "POOL_STATS" && (
           <div className="bg-[#0A113A]/70 backdrop-blur-xl rounded-2xl p-6 space-y-4">
             <h2 className="text-lg font-black text-white">TON Music NFT DEX Pools</h2>
-            <div className="space-y-3">
-              {[
-                { pair: "TON / JAM Pool", tvl: "$840,200", apr: "22.4%", vol24: "$145,000" },
-                { pair: "Genesis Music NFT Vault", tvl: "$420,100", apr: "18.1%", vol24: "$98,400" },
-                { pair: "TON / NOT Pool", tvl: "$220,000", apr: "14.5%", vol24: "$45,200" }
-              ].map((p, i) => (
-                <div key={i} className="p-4 rounded-xl bg-[#050A24] flex items-center justify-between text-xs">
-                  <div>
-                    <h4 className="font-black text-white text-sm">{p.pair}</h4>
-                    <p className="text-[10px] text-[#9AA0AE]">TVL: {p.tvl}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-emerald-400 font-black text-sm">{p.apr} APR</span>
-                    <p className="text-[10px] text-[#9AA0AE]">24h Vol: {p.vol24}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="p-6 rounded-xl bg-[#050A24] text-center text-xs text-[#9AA0AE]">
+              No active on-chain liquidity pools indexed for this network yet.
             </div>
           </div>
         )}
@@ -884,7 +767,7 @@ export const Swap: React.FC = () => {
                     </div>
                   ))
                 ) : (
-                  SUPPORTED_TOKENS.map((token) => (
+                  tokensWithRealBalances.map((token) => (
                     <div
                       key={token.id}
                       onClick={() => {

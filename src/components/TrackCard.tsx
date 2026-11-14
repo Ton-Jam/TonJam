@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Play, Pause, MoreVertical, Headphones, Clock, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock, ChevronDown, ChevronUp, Activity, Key, User, Info, Gem, Trash2, ArrowUp, ArrowDown, TrendingUp, TrendingDown, Download, CheckCircle2 } from 'lucide-react';
 import { Track } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
-import { MOCK_ARTISTS, TJ_COIN_ICON, MOCK_NFTS } from '@/constants';
+import { TJ_COIN_ICON } from '@/constants';
 import { cn, getPlaceholderImage, shareContent, formatNumber } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import confetti from 'canvas-confetti';
@@ -105,7 +105,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
   const navigate = useNavigate();
   const { 
     playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, 
-    jamTrack, artists, addToQueue, setTrackToAddToPlaylist, likedTrackIds, 
+    jamTrack, artists, allNFTs, addToQueue, setTrackToAddToPlaylist, likedTrackIds, 
     toggleLikeTrack, isLoading: isAudioLoading, userProfile, 
     downloadTrackForOffline, isTrackCached, deleteCachedTrack 
   } = useAudio();
@@ -140,8 +140,8 @@ export const TrackCard: React.FC<TrackCardProps> = ({
   }, [track.releaseDate]);
 
   const associatedNft = React.useMemo(() => {
-    return MOCK_NFTS.find(n => n.trackId === track.id);
-  }, [track.id]);
+    return (allNFTs || []).find(n => n.trackId === track.id);
+  }, [allNFTs, track.id]);
 
   const handleHypeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -170,7 +170,6 @@ export const TrackCard: React.FC<TrackCardProps> = ({
     e.stopPropagation();
     const targetArtistId = track.artistId || 
       artists.find(a => a.name.toLowerCase() === track.artist?.toLowerCase())?.uid ||
-      MOCK_ARTISTS.find(a => a.name.toLowerCase() === track.artist?.toLowerCase())?.uid ||
       track.artist?.toLowerCase().replace(/\s+/g, '-');
     if (targetArtistId) {
       navigate(`/artist/${targetArtistId}`);
@@ -256,7 +255,6 @@ export const TrackCard: React.FC<TrackCardProps> = ({
     e?.stopPropagation();
     const targetArtistId = track.artistId || 
       artists.find(a => a.name.toLowerCase() === track.artist?.toLowerCase())?.uid ||
-      MOCK_ARTISTS.find(a => a.name.toLowerCase() === track.artist?.toLowerCase())?.uid ||
       track.artist?.toLowerCase().replace(/\s+/g, '-');
     if (targetArtistId) {
       navigate(`/artist/${targetArtistId}`);

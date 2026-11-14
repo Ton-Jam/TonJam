@@ -319,23 +319,39 @@ export const JamSpaceMain: React.FC = () => {
                 <TrendingUp className="w-4 h-4 text-amber-400" />
                 <span>Trending in Music</span>
               </div>
-              <div className="space-y-2">
-                {[
-                  { tag: '#TONGenesis', subtitle: '1.4k broadcasts' },
-                  { tag: '#AmapianoVibes', subtitle: '890 broadcasts' },
-                  { tag: '#SonicNFTs', subtitle: '620 broadcasts' },
-                  { tag: '#Web3Audio', subtitle: '450 broadcasts' }
-                ].map((topic, i) => (
-                  <div
-                    key={i}
-                    onClick={() => setSearchQuery(topic.tag)}
-                    className="p-2 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer text-left"
-                  >
-                    <p className="text-xs font-bold text-white hover:text-[#00B4D8] transition-colors">{topic.tag}</p>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">{topic.subtitle}</p>
+              {(() => {
+                const counts = new Map<string, number>();
+                posts.forEach((p) => {
+                  const matches = String(p.text || '').match(/#[a-zA-Z0-9_]+/g) || [];
+                  matches.forEach((tag) => counts.set(tag, (counts.get(tag) || 0) + 1));
+                });
+                const liveTopics = Array.from(counts.entries())
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 5);
+
+                if (liveTopics.length === 0) {
+                  return (
+                    <p className="text-xs text-zinc-500">
+                      Hashtags shared in community posts will trend here.
+                    </p>
+                  );
+                }
+
+                return (
+                  <div className="space-y-2">
+                    {liveTopics.map(([tag, count]) => (
+                      <div
+                        key={tag}
+                        onClick={() => setSearchQuery(tag)}
+                        className="p-2 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer text-left"
+                      >
+                        <p className="text-xs font-bold text-white hover:text-[#00B4D8] transition-colors">{tag}</p>
+                        <p className="text-[11px] text-zinc-500 mt-0.5">{count} {count === 1 ? 'post' : 'posts'}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
           </aside>
         </div>
