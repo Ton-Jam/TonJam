@@ -2223,6 +2223,54 @@ async function startServer() {
             </html>
         `);
     });
+    // Safe read-only Pinata IPFS configuration status endpoint (never leaks credentials)
+    app.get('/api/pinata/status', optionalAuth, async (req, res) => {
+        const PINATA_API_KEY = process.env.PINATA_API_KEY;
+        const PINATA_API_SECRET = process.env.PINATA_API_SECRET;
+        const PINATA_JWT = process.env.PINATA_JWT;
+
+        const hasJwt = Boolean(PINATA_JWT && PINATA_JWT.trim().length > 0);
+        const hasApiKeyPair = Boolean(
+            PINATA_API_KEY && PINATA_API_KEY.trim().length > 0 &&
+            PINATA_API_SECRET && PINATA_API_SECRET.trim().length > 0
+        );
+        const configured = hasJwt || hasApiKeyPair;
+        const authMode: 'jwt' | 'api_key' | 'none' = hasJwt ? 'jwt' : (hasApiKeyPair ? 'api_key' : 'none');
+
+        let authenticated: boolean | null = null;
+        let verifyError: string | undefined;
+
+        if (configured && req.query.verify === 'true') {
+            try {
+                const headers: Record<string, string> = hasJwt
+                    ? { Authorization: `Bearer ${PINATA_JWT}` }
+                    : {
+                        pinata_api_key: PINATA_API_KEY as string,
+                        pinata_secret_api_key: PINATA_API_SECRET as string,
+                    };
+                await axios.get('https://api.pinata.cloud/data/testAuthentication', {
+                    headers,
+                    timeout: 5000,
+                });
+                authenticated = true;
+            } catch (err: any) {
+                authenticated = false;
+                verifyError = err?.response?.data?.error?.details || err?.response?.data?.error || err?.message || 'Pinata authentication check failed';
+            }
+        }
+
+        return res.json({
+            configured,
+            authMode,
+            hasJwt,
+            hasApiKeyPair,
+            authenticated,
+            verifyError,
+            maxFileSizeBytes: 50 * 1024 * 1024,
+            gatewayBaseUrl: 'https://gateway.pinata.cloud/ipfs',
+        });
+    });
+
     // Secure Genuine Pinata/IPFS Upload Endpoint
     app.post('/api/pinata/upload', uploadRateLimiter, optionalAuth, upload.single('file'), async (req, res) => {
         if (!req.file) {

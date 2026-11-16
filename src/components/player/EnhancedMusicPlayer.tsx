@@ -91,11 +91,11 @@ export const EnhancedMusicPlayer: React.FC<EnhancedMusicPlayerProps> = ({
   };
 
   return (
-    <div className={`w-full max-w-xl mx-auto rounded-3xl bg-[#050A24] border border-[#16244F] p-4 sm:p-6 shadow-2xl text-white select-none ${className}`}>
+    <div className={`w-full max-w-xl mx-auto rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-bg-surface,#0b1332)] border border-[var(--tj-color-border-subtle,#16244F)] p-4 sm:p-6 shadow-2xl text-white select-none ${className}`}>
       {/* Header Bar */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-[#0098EA]/20 text-[#0098EA] border border-[#0098EA]/40">
+          <div className="p-2 rounded-[var(--tj-radius-md,8px)] bg-[#0098EA]/20 text-[#0098EA] border border-[#0098EA]/40">
             <Activity className="w-5 h-5 animate-pulse" />
           </div>
           <div>

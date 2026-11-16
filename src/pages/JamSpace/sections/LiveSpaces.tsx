@@ -99,11 +99,11 @@ export const LiveSpaces: React.FC<LiveSpacesProps> = ({
                       key={index}
                       src={av}
                       alt="Speaker"
-                      className="w-8 h-8 rounded-full object-cover border-2 border-[#0c133a]"
+                      className="w-8 h-8 rounded-full object-cover border border-[#0c133a]"
                     />
                   ))}
                   {sp.speakerAvatars.length > 3 && (
-                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-[9px] text-white font-black border-2 border-[#0c133a]">
+                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-[9px] text-white font-black border border-[#0c133a]">
                       +{sp.speakerAvatars.length - 3}
                     </div>
                   )}

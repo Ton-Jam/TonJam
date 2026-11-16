@@ -602,7 +602,7 @@ const Login: React.FC = () => {
                       <div className="flex flex-col items-center gap-4 py-2">
                         <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/75">Choose Web3 Identity Picture</Label>
                         
-                        <div className="relative w-24 h-24 rounded-full overflow-hidden group bg-muted/20 border-2 border-primary/20 flex items-center justify-center">
+                        <div className="relative w-24 h-24 rounded-full overflow-hidden group bg-muted/20 border border-primary/20 flex items-center justify-center">
                           {customFilePreview ? (
                             <img src={customFilePreview} className="w-full h-full object-cover" alt="Custom Preview" />
                           ) : (

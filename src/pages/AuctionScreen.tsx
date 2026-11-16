@@ -94,7 +94,7 @@ const ActiveAuctionLeaderboard: React.FC<{ auctions: NFTItem[] }> = ({ auctions 
   if (!selectedAuction) return null;
 
   return (
-    <div className="bg-card/40 backdrop-blur-xl rounded-3xl p-6 md:p-8 space-y-6 relative overflow-hidden shadow-2xl">
+    <div className="bg-card/40 backdrop-blur-xl rounded-[var(--tj-radius-lg,10px)] p-6 md:p-8 space-y-6 relative overflow-hidden shadow-2xl">
       {/* Dynamic ambient highlights without border lines */}
       <div className="absolute top-0 left-1/4 w-[350px] h-[350px] bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-purple-600/5 blur-[120px] rounded-full pointer-events-none" />
@@ -630,7 +630,7 @@ const AuctionScreen: React.FC = () => {
         </section>
 
         {/* Recommendations Section */}
-        <section className="bg-muted/10 border border-white/5 rounded-3xl p-8 overflow-hidden relative">
+        <section className="bg-muted/10 border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-8 overflow-hidden relative">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
           
           <SectionHeader 

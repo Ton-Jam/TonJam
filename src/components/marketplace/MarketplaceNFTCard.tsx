@@ -177,14 +177,13 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         whileHover={{ 
-          y: -6, 
-          scale: 1.03,
-          boxShadow: "0 0 25px rgba(91, 107, 255, 0.35), 0 0 12px rgba(0, 180, 216, 0.15)"
+          y: -4, 
+          scale: 1.01
         }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
         onClick={handleCardClick}
         className={cn(
-          "cursor-pointer group relative flex flex-col bg-[#0A113A] rounded-2xl overflow-hidden border border-white/[0.04] hover:border-[#5B6BFF]/50 transition-all duration-300",
+          "cursor-pointer group relative flex flex-col bg-[var(--tj-color-surface-default,#0D1628)] rounded-[var(--tj-radius-md,8px)] overflow-hidden transition-all duration-300",
           className
         )}
       >
@@ -318,7 +317,7 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
           )}
         </button>
 
-        <div className="mt-auto pt-3 flex items-center justify-between border-t border-white/[0.04]">
+        <div className="mt-auto pt-3 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[8px] uppercase tracking-widest text-[#9AA0AE] font-semibold">
               Floor Price
@@ -332,10 +331,10 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
             <button
               onClick={handlePlayClick}
               className={cn(
-                "p-1.5 rounded-lg border transition-all duration-200",
+                "p-1.5 rounded-lg border-0 transition-all duration-200",
                 isCurrentlyPlaying
-                  ? "bg-[#2BE08C]/15 border-[#2BE08C]/30 text-[#2BE08C]"
-                  : "bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.08] text-[#9AA0AE]"
+                  ? "bg-[#2BE08C]/15 text-[#2BE08C]"
+                  : "bg-white/[0.04] hover:bg-white/[0.08] text-[#9AA0AE]"
               )}
             >
               {isCurrentlyPlaying ? (

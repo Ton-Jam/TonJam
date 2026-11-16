@@ -264,6 +264,14 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({ isOpen, onClose }) => {
                     onClick={() => handleNavigate('/library')}
                   />
 
+                  <DrawerNavigationItem
+                    icon={Sparkles}
+                    label="Artist Studio"
+                    badgeLabel="IPFS + TON"
+                    isActive={isCurrent('/artist-studio')}
+                    onClick={() => handleNavigate('/artist-studio')}
+                  />
+
                   {canAccessCreatorFeatures ? (
                     <>
                       <DrawerNavigationItem

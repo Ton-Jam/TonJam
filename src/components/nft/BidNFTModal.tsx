@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { X, Loader2, Gavel, AlertCircle, Check, Clock, Wallet, ArrowUpRight } from "lucide-react";
 import { useAudio } from "@/contexts/AudioContext";
+import { useTonPrice } from "@/contexts/TonPriceContext";
 import { NFTItem } from "@/types";
 import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
-import { placeBid, getTonPrice, getTonBalance } from "@/services/tonService";
+import { placeBid, getTonBalance } from "@/services/tonService";
 import { getPlaceholderImage } from "@/lib/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -22,7 +23,8 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
   nft,
   onBidPlaced,
 }) => {
-  const { addNotification, updateNFT, userProfile } = useAudio();
+  const { addNotification, updateNFT, userProfile, artists } = useAudio();
+  const { price: tonPrice } = useTonPrice();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -31,9 +33,18 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
   const currentBid = parseFloat(nft.price) || 0;
   const minBid = (currentBid * 1.05).toFixed(2);
   const [bidAmount, setBidAmount] = useState(minBid);
-  const [tonPrice, setTonPrice] = useState<number | null>(null);
   const [walletBalance, setWalletBalance] = useState<number>(userProfile?.tonBalance || 0);
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  const matchedCreator = artists.find(
+    (a) =>
+      a.name.toLowerCase() === (nft.creator || nft.artist || "").toLowerCase() ||
+      a.uid === nft.creatorId ||
+      a.uid === nft.artistId
+  );
+  const isCreatorVerified = Boolean(
+    matchedCreator?.verified || matchedCreator?.isVerifiedArtist || nft.artistVerified
+  );
 
   // Auction countdown state
   const [timeRemaining, setTimeRemaining] = useState<string>("");
@@ -75,15 +86,12 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
 
     const fetchData = async () => {
       try {
-        const price = await getTonPrice();
-        setTonPrice(price);
-
         if (userAddress) {
           const balance = await getTonBalance(userAddress);
           setWalletBalance(balance);
         }
       } catch (err) {
-        console.warn("Failed to fetch TON market price", err);
+        console.warn("Failed to fetch TON balance", err);
       }
     };
     fetchData();
@@ -106,7 +114,10 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
     }
   }, [bidAmount, minBid, walletBalance]);
 
-  const bidInUsd = tonPrice ? (parseFloat(bidAmount || "0") * tonPrice).toFixed(2) : (parseFloat(bidAmount || "0") * 5.2).toFixed(2);
+  const bidInUsd =
+    typeof tonPrice === "number" && tonPrice > 0
+      ? (parseFloat(bidAmount || "0") * tonPrice).toFixed(2)
+      : null;
   const totalBidsCount = (nft.offers?.length || 0) + (nft.history?.filter(h => h.event === 'Bid').length || 0);
 
   const handleQuickAdd = (multiplier: number) => {
@@ -194,50 +205,46 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md w-full bg-[#050A24] text-white p-6 rounded-2xl shadow-2xl overflow-hidden sm:max-w-lg">
-        {/* Subtle background ambient blur */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#0052FF]/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
-
+      <DialogContent className="max-w-md w-full bg-[var(--tj-color-surface-default,#0D1628)] text-white p-6 rounded-[var(--tj-radius-lg,10px)] shadow-xl overflow-hidden sm:max-w-lg">
         {/* Modal Header */}
         <div className="relative flex items-center justify-between pb-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#0052FF]/20 flex items-center justify-center text-[#0098EA]">
+            <div className="w-10 h-10 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-brand-primary,#00B4D8)]/15 flex items-center justify-center text-[var(--tj-color-brand-primary,#00B4D8)]">
               <Gavel className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-base font-black uppercase tracking-wider text-white">Place Auction Bid</h2>
-              <p className="text-xs text-slate-400">Compete for on-chain music NFT ownership</p>
+              <p className="text-xs text-[var(--tj-color-text-secondary,#C2C7CD)]">Compete for on-chain music NFT ownership</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-2 text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* NFT Asset Summary */}
-        <div className="relative flex items-center gap-3.5 p-3 rounded-xl bg-white/[0.04] mt-3">
+        <div className="relative flex items-center gap-3.5 p-3 rounded-[var(--tj-radius-md,8px)] bg-white/[0.04] mt-3">
           <img
             src={nft.imageUrl || (nft as any).image || getPlaceholderImage(`nft-${nft.id}`)}
             alt={nft.title}
-            className="w-14 h-14 rounded-xl object-cover bg-slate-900 shrink-0 shadow-md"
+            className="w-14 h-14 rounded-[var(--tj-radius-sm,6px)] object-cover bg-slate-900 shrink-0 shadow-sm"
           />
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-bold text-white truncate">{nft.title}</h3>
             <div className="flex items-center gap-1.5 pt-0.5">
-              <span className="text-xs text-slate-400 truncate">{nft.creator || nft.artist}</span>
+              <span className="text-xs text-[var(--tj-color-text-secondary,#C2C7CD)] truncate">{nft.creator || nft.artist}</span>
               <ArtistVerificationBadge 
-                isVerified={true} 
+                isVerified={isCreatorVerified} 
                 artistName={nft.creator || nft.artist} 
                 size="sm" 
                 showLabel={false} 
               />
             </div>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Highest Bid:</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)]">Highest Bid:</span>
               <span className="text-xs font-mono font-black text-amber-300">{nft.price} TON</span>
             </div>
           </div>
@@ -245,28 +252,28 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
 
         {/* Auction Status Bar */}
         <div className="grid grid-cols-2 gap-2 mt-3">
-          <div className="bg-white/[0.03] p-2.5 rounded-xl flex items-center gap-2">
+          <div className="bg-white/[0.03] p-2.5 rounded-[var(--tj-radius-sm,6px)] flex items-center gap-2">
             <Clock className="w-4 h-4 text-amber-400 shrink-0" />
             <div>
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Remaining</span>
+              <span className="text-[9px] font-bold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider block">Remaining</span>
               <span className="text-xs font-bold text-white font-mono">{timeRemaining}</span>
             </div>
           </div>
-          <div className="bg-white/[0.03] p-2.5 rounded-xl flex items-center gap-2">
-            <Gavel className="w-4 h-4 text-[#0098EA] shrink-0" />
+          <div className="bg-white/[0.03] p-2.5 rounded-[var(--tj-radius-sm,6px)] flex items-center gap-2">
+            <Gavel className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)] shrink-0" />
             <div>
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Total Bids</span>
+              <span className="text-[9px] font-bold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider block">Total Bids</span>
               <span className="text-xs font-bold text-white font-mono">{totalBidsCount} bids</span>
             </div>
           </div>
         </div>
 
         {/* Connected TON Wallet State */}
-        <div className="mt-3 p-3 rounded-xl bg-white/[0.03] flex items-center justify-between">
+        <div className="mt-3 p-3 rounded-[var(--tj-radius-sm,6px)] bg-white/[0.03] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className={`w-2.5 h-2.5 rounded-full ${userAddress ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-amber-400'}`} />
+            <div className={`w-2.5 h-2.5 rounded-full ${userAddress ? 'bg-emerald-400' : 'bg-amber-400'}`} />
             <div className="text-xs">
-              <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-bold">
+              <span className="text-[10px] text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider block font-bold">
                 {userAddress ? "TON Wallet Connected" : "TON Wallet Disconnected"}
               </span>
               <span className="font-mono text-slate-300 text-[11px]">
@@ -278,13 +285,13 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
             <button
               type="button"
               onClick={handleConnectWallet}
-              className="px-3 py-1.5 bg-[#0052FF] hover:bg-[#1a66ff] text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1 shadow-md"
+              className="px-3 py-1.5 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white rounded-[var(--tj-radius-xs,4px)] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1"
             >
               <Wallet className="w-3.5 h-3.5" /> Connect
             </button>
           ) : (
             <div className="text-right">
-              <span className="text-[9px] text-slate-400 uppercase tracking-wider block">Balance</span>
+              <span className="text-[9px] text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider block">Balance</span>
               <span className="text-xs font-mono font-bold text-white">{walletBalance.toFixed(2)} TON</span>
             </div>
           )}
@@ -292,7 +299,7 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
 
         {isSuccess ? (
           <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
-            <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shadow-lg">
+            <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
               <Check className="w-8 h-8 stroke-[3]" />
             </div>
             <h3 className="text-lg font-black uppercase tracking-wider text-white">Bid Confirmed</h3>
@@ -306,7 +313,7 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-300 font-semibold">Your Bid Magnitude</span>
-                <span className="text-slate-400 font-mono text-[11px]">
+                <span className="text-[var(--tj-color-text-secondary,#C2C7CD)] font-mono text-[11px]">
                   Min: <strong className="text-white">{minBid} TON</strong>
                 </span>
               </div>
@@ -319,14 +326,14 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
                   onChange={(e) => setBidAmount(e.target.value)}
                   disabled={isProcessing}
                   placeholder={minBid}
-                  className="w-full px-4 py-3.5 rounded-xl bg-white/[0.05] text-white font-mono text-lg font-bold focus:outline-none focus:bg-white/[0.08] transition-all pr-20"
+                  className="w-full px-4 py-3.5 rounded-[var(--tj-radius-sm,6px)] bg-white/[0.05] text-white font-mono text-lg font-bold focus:outline-none focus:bg-white/[0.08] transition-all pr-20"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black uppercase tracking-wider text-[#0098EA]">
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black uppercase tracking-wider text-[var(--tj-color-brand-primary,#00B4D8)]">
                   TON
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-                <span>≈ ${bidInUsd} USD</span>
+              <div className="flex items-center justify-between text-[11px] text-[var(--tj-color-text-secondary,#C2C7CD)] px-1">
+                <span>{bidInUsd ? `≈ $${bidInUsd} USD` : "Live USD estimate unavailable"}</span>
                 {walletBalance > 0 && (
                   <span>Available: <strong className="text-slate-300 font-mono">{walletBalance.toFixed(2)} TON</strong></span>
                 )}
@@ -345,7 +352,7 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
                   key={preset.label}
                   type="button"
                   onClick={() => handleQuickAdd(preset.mult)}
-                  className="flex-1 py-1.5 px-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[10px] font-bold text-slate-300 uppercase tracking-wider transition-colors cursor-pointer"
+                  className="flex-1 py-1.5 px-2 rounded-[var(--tj-radius-xs,4px)] bg-white/[0.04] hover:bg-white/[0.08] text-[10px] font-bold text-slate-300 uppercase tracking-wider transition-colors cursor-pointer"
                 >
                   {preset.label}
                 </button>
@@ -353,7 +360,7 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
             </div>
 
             {validationError && (
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-rose-500/10 text-rose-400 text-xs">
+              <div className="flex items-center gap-2 p-2.5 rounded-[var(--tj-radius-sm,6px)] bg-rose-500/10 text-rose-400 text-xs">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{validationError}</span>
               </div>
@@ -365,14 +372,14 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
                 type="button"
                 onClick={onClose}
                 disabled={isProcessing}
-                className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                className="flex-1 py-3 rounded-[var(--tj-radius-sm,6px)] bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isProcessing || Boolean(validationError) || isAuctionEnded}
-                className="flex-[2] py-3 rounded-xl bg-[#0052FF] hover:bg-[#1a66ff] disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-[2] py-3 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isProcessing ? (
                   <>

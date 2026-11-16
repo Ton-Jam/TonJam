@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Disc, ArrowUpDown, Filter } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Disc, ArrowUpDown, Filter, Music2 } from 'lucide-react';
 import { motion, LayoutGroup } from 'motion/react';
 import { LibraryAlbum } from '../types';
 
@@ -9,6 +10,7 @@ interface AlbumsProps {
 }
 
 export const Albums: React.FC<AlbumsProps> = ({ albums, layout = 'list' }) => {
+  const navigate = useNavigate();
   const [localSortBy, setLocalSortBy] = useState<'title' | 'year' | 'tracks'>('title');
 
   const sortedAlbums = useMemo(() => {
@@ -47,24 +49,34 @@ export const Albums: React.FC<AlbumsProps> = ({ albums, layout = 'list' }) => {
         </div>
       </div>
 
-      <LayoutGroup id="albums-layout-group">
-        <motion.div
-          layout
-          transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
-          className={layout === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" : "space-y-2"}
-        >
-          {sortedAlbums.map((album) => (
-            <motion.div
-              layout
-              key={album.id}
-              transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
-              whileHover={layout === 'grid' ? { scale: 1.02 } : { x: 4 }}
-              className={
-                layout === 'grid'
-                  ? "bg-white/[0.02] dark:bg-white/[0.02] bg-black/[0.02] border border-black/5 dark:border-white/5 p-3 rounded-[10px] flex flex-col justify-between group"
-                  : "bg-white/[0.02] dark:bg-white/[0.02] bg-black/[0.02] border border-black/5 dark:border-white/5 p-3 rounded-[10px] flex items-center justify-between group gap-4 text-left"
-              }
-            >
+      {sortedAlbums.length === 0 ? (
+        <div className="text-center py-12 rounded-[10px] bg-white/[0.01] border border-dashed border-white/10">
+          <Music2 className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+          <h4 className="text-xs font-bold text-foreground">No Albums Found</h4>
+          <p className="text-[10px] text-muted-foreground max-w-xs mx-auto mt-1">
+            Albums from collections and release catalogs will be organized here.
+          </p>
+        </div>
+      ) : (
+        <LayoutGroup id="albums-layout-group">
+          <motion.div
+            layout
+            transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+            className={layout === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" : "space-y-2"}
+          >
+            {sortedAlbums.map((album) => (
+              <motion.div
+                layout
+                key={album.id}
+                transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+                whileHover={layout === 'grid' ? { scale: 1.02 } : { x: 4 }}
+                onClick={() => navigate(`/album/${album.id}`)}
+                className={
+                  layout === 'grid'
+                    ? "bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 p-3 rounded-[10px] flex flex-col justify-between group cursor-pointer select-none transition-all shadow-sm"
+                    : "bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 p-3 rounded-[10px] flex items-center justify-between group gap-4 text-left cursor-pointer select-none transition-all shadow-sm"
+                }
+              >
               {layout === 'grid' ? (
                 <>
                   <motion.div 
@@ -134,6 +146,7 @@ export const Albums: React.FC<AlbumsProps> = ({ albums, layout = 'list' }) => {
           ))}
         </motion.div>
       </LayoutGroup>
+      )}
     </div>
   );
 };

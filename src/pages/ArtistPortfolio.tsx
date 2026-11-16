@@ -168,10 +168,10 @@ export default function ArtistPortfolio() {
               <img 
                 src={userProfile.avatar || getPlaceholderImage(userProfile.name)} 
                 alt={userProfile.name}
-                className="relative w-20 h-20 md:w-28 md:h-28 rounded-full border-2 border-white/10 object-cover bg-zinc-900"
+                className="relative w-20 h-20 md:w-28 md:h-28 rounded-full border border-white/10 object-cover bg-zinc-900"
               />
               {userProfile.isVerifiedArtist && (
-                <div className="absolute bottom-1 right-1 bg-cyan-500 p-1 rounded-full border-2 border-black">
+                <div className="absolute bottom-1 right-1 bg-cyan-500 p-1 rounded-full border border-black">
                   <Verified className="w-3 h-3 text-white fill-current" />
                 </div>
               )}

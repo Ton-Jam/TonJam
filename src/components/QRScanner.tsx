@@ -104,11 +104,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ onClose, onScan }) => {
                 className="w-full h-full object-cover"
               />
               {/* Scan overlay guide animations */}
-              <div className="absolute inset-0 border-2 border-dashed border-blue-500/40 m-12 rounded-lg pointer-events-none">
-                <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-blue-400"></div>
-                <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-blue-400"></div>
-                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-blue-400"></div>
-                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-blue-400"></div>
+              <div className="absolute inset-0 border border-dashed border-blue-500/40 m-12 rounded-[var(--tj-radius-md,8px)] pointer-events-none">
+                <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-blue-400"></div>
+                <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-blue-400"></div>
+                <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-blue-400"></div>
+                <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-blue-400"></div>
                 <div className="absolute left-0 right-0 h-0.5 bg-blue-500/80 shadow-[0_0_8px_#3b82f6] animate-[bounce_2s_infinite]"></div>
               </div>
             </>

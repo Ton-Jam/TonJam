@@ -409,7 +409,7 @@ export const TopArtistsSection: React.FC<TopArtistsSectionProps> = ({
                 <div className="w-full bg-[#101010] rounded-[3px] p-2 space-y-1 z-10 border border-white/5">
                   <div className="flex items-center justify-between">
                     <span className="text-[8px] font-medium text-white/50 uppercase tracking-wider">Volume Traded</span>
-                    <span className="text-[8px] font-mono text-slate-400 font-semibold px-1 py-0.2 rounded-[2px]">
+                    <span className="text-[8px] font-mono text-slate-400 font-semibold px-1 py-0.2 rounded-[var(--tj-radius-xs,4px)]">
                       {formatNumber(creator.followersCount)} Fans
                     </span>
                   </div>

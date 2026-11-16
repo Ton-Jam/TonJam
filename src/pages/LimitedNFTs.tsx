@@ -141,7 +141,7 @@ const LimitedNFTs: React.FC = () => {
           </div>
 
           {limitedNFTs.length === 0 && (
-            <div className="py-32 flex flex-col items-center text-center space-y-6 glass border-white/5 rounded-3xl">
+            <div className="py-32 flex flex-col items-center text-center space-y-6 glass border-white/5 rounded-[var(--tj-radius-lg,10px)]">
               <div className="w-20 h-20 rounded-full bg-muted/20 flex items-center justify-center">
                  <Zap className="w-10 h-10 text-muted-foreground/30" />
               </div>
@@ -161,7 +161,7 @@ const LimitedNFTs: React.FC = () => {
         </section>
 
         {/* Scarcity Explained */}
-        <section className="bg-gradient-to-br from-blue-600/5 to-purple-600/5 border border-white/5 rounded-3xl p-8 md:p-12">
+        <section className="bg-gradient-to-br from-blue-600/5 to-purple-600/5 border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-8 md:p-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
              <div className="space-y-8">
                 <div className="space-y-2">

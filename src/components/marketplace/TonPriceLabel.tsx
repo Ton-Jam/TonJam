@@ -26,7 +26,7 @@ export const TonPriceLabel: React.FC<TonPriceLabelProps> = ({
   return (
     <div className={cn("inline-flex flex-col", className)}>
       {label && (
-        <span className="text-[10px] uppercase tracking-wider text-[#9BAAC5]/80 font-medium">
+        <span className="text-[10px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)]/80 font-medium">
           {label}
         </span>
       )}
@@ -36,7 +36,7 @@ export const TonPriceLabel: React.FC<TonPriceLabelProps> = ({
           viewBox="0 0 24 24"
           fill="none"
           className={cn(
-            "text-[#65B8FF] shrink-0",
+            "text-[var(--tj-color-brand-primary,#00B4D8)] shrink-0",
             size === "sm" ? "w-3 h-3" : size === "md" ? "w-3.5 h-3.5" : "w-4 h-4"
           )}
           aria-hidden="true"
@@ -59,7 +59,7 @@ export const TonPriceLabel: React.FC<TonPriceLabelProps> = ({
             strokeWidth="1.5"
           />
         </svg>
-        <span className={cn("text-[#F5F8FF] tracking-tight", sizeClasses[size])}>
+        <span className={cn("text-[var(--tj-color-text-primary,#FFFFFF)] tracking-tight", sizeClasses[size])}>
           {formattedPrice}
         </span>
       </div>

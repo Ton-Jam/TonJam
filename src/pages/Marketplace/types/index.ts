@@ -1,13 +1,38 @@
 import { NFTItem } from "@/types";
 
+export type MarketplaceTab = "discover" | "collections" | "auctions" | "my-nfts";
+
+export type AuctionStatus = "active" | "ended" | "pending" | "cancelled";
+
+export interface MarketplaceNFT extends NFTItem {
+  collectionName?: string;
+  creatorUsername?: string;
+  genre?: string;
+  playCount?: number;
+  likes?: number;
+  highestBidder?: string;
+  currentBid?: string;
+  auctionEndTime?: string;
+  auctionStartTime?: string;
+  bidsCount?: number;
+  watchers?: number;
+  collectionId?: string;
+  isFeatured?: boolean;
+  royalty?: number;
+  editionNumber?: number;
+  totalEditions?: number;
+  listingStatus?: string;
+  isNFT?: boolean;
+}
+
 export interface NFTCollection {
   id: string;
   name: string;
   creator: string;
   creatorId: string;
-  volume: string; // in TON
+  volume?: string; // in TON (optional if unavailable)
   owners: number;
-  floorPrice: string; // in TON
+  floorPrice?: string; // in TON (optional if unavailable)
   imageUrl: string;
   itemCount: number;
   verified: boolean;
@@ -16,14 +41,23 @@ export interface NFTCollection {
 
 export interface LiveAuction {
   id: string;
-  nft: NFTItem;
+  nft: MarketplaceNFT;
   currentBid: string; // TON
+  minimumNextBid: string; // TON
   highestBidder: string;
-  endsAt: string; // ISO string
+  startsAt?: string;
+  endsAt: string; // ISO string or empty if unavailable
   minIncrement: string; // TON
   watchers: number;
   bidsCount: number;
+  status: AuctionStatus;
   isLive: boolean;
+  recentBids: Array<{
+    id: string;
+    bidder: string;
+    amount: string;
+    timestamp?: string;
+  }>;
 }
 
 export interface LeaderboardUser {
@@ -67,6 +101,7 @@ export interface GenreCategory {
   id: string;
   name: string;
   count: string;
+  numericCount: number;
   coverUrl: string;
   colorClass: string;
 }

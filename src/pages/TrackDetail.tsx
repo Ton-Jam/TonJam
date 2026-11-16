@@ -1,20 +1,20 @@
+import React, { useMemo, useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { doc, onSnapshot, updateDoc, increment, setDoc } from "firebase/firestore";
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
 import { sendTransactionSafe } from "@/services/tonService";
-import React, { useMemo, useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { doc, onSnapshot, updateDoc, increment, setDoc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
-import { 
-  Play, 
-  Pause, 
-  Zap, 
-  Verified, 
-  Share2, 
-  Heart, 
-  MoreHorizontal, 
-  ShoppingCart, 
-  Music2, 
-  Disc, 
-  Clock, 
+import {
+  Play,
+  Pause,
+  Zap,
+  Verified,
+  Share2,
+  Heart,
+  MoreHorizontal,
+  ShoppingCart,
+  Music2,
+  Disc,
+  Clock,
   Activity,
   ExternalLink,
   Users,
@@ -32,47 +32,97 @@ import {
   Gift,
   Check,
   Copy,
-  Send
-} from 'lucide-react';
-import { TJ_COIN_ICON } from '@/constants';
-import { useAudio } from '@/contexts/AudioContext';
-import { getPlaceholderImage } from '@/lib/utils';
-import confetti from 'canvas-confetti';
-import { motion, AnimatePresence } from 'motion/react';
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import TokenGate from '@/components/TokenGate';
-import { useTokenGating } from '@/hooks/useTokenGating';
-import CommentsSection from '@/components/CommentsSection';
-import ReactionsSection from '@/components/ReactionsSection';
-import AudioVisualizer from '@/components/AudioVisualizer';
-import { PageHeader } from '@/components/layout/PageHeader';
+  Send,
+  ArrowLeft,
+  ChevronRight,
+} from "lucide-react";
+import { TJ_COIN_ICON, TON_LOGO } from "@/constants";
+import { useAudio } from "@/contexts/AudioContext";
+import { useTonPrice } from "@/contexts/TonPriceContext";
+import { getPlaceholderImage, cn } from "@/lib/utils";
+import confetti from "canvas-confetti";
+import { motion, AnimatePresence } from "motion/react";
+import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
+import TokenGate from "@/components/TokenGate";
+import { useTokenGating } from "@/hooks/useTokenGating";
+import CommentsSection from "@/components/CommentsSection";
+import ReactionsSection from "@/components/ReactionsSection";
+import AudioVisualizer from "@/components/AudioVisualizer";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const TrackDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { 
-    playTrack, currentTrack, isPlaying, jamTrack, purchaseTrack, mintNFT, 
-    allTracks, allNFTs, artists, likedTrackIds, toggleLikeTrack, addNotification, 
-    setTrackToAddToPlaylist, setOptionsTrack, setFullPlayerOpen, userProfile, setUserProfile,
-    isTrackCached, downloadTrackForOffline, deleteCachedTrack,
-    toggleFollowUser, followedUserIds
+  const {
+    playTrack,
+    currentTrack,
+    isPlaying,
+    jamTrack,
+    mintNFT,
+    allTracks,
+    allNFTs,
+    artists,
+    likedTrackIds,
+    toggleLikeTrack,
+    addNotification,
+    setTrackToAddToPlaylist,
+    setOptionsTrack,
+    setFullPlayerOpen,
+    userProfile,
+    setUserProfile,
+    isTrackCached,
+    downloadTrackForOffline,
+    deleteCachedTrack,
+    toggleFollowUser,
+    followedUserIds,
   } = useAudio();
-  const [isTipping, setIsTipping] = useState(false);
-  const [isProcessingPurchase, setIsProcessingPurchase] = useState(false);
+  const { price: tonUsdRate } = useTonPrice();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
-  
-  const track = useMemo(() => allTracks.find(t => t.id === id), [id, allTracks]);
-  const artist = useMemo(() => artists.find(a => a.uid === track?.artistId), [artists, track]);
-  const associatedNFTs = useMemo(() => allNFTs.filter(n => n.trackId === id), [id, allNFTs]);
-  
+
+  const [isTipping, setIsTipping] = useState(false);
+  const [activeTab, setActiveTab] = useState<
+    "lyrics" | "details" | "history" | "nfts" | "exclusive"
+  >("lyrics");
+  const [isCached, setIsCached] = useState(false);
+  const [isCaching, setIsCaching] = useState(false);
+  const [livePlayCount, setLivePlayCount] = useState<number | null>(null);
+  const [sharedPlatforms, setSharedPlatforms] = useState<string[]>([]);
+  const [isSharing, setIsSharing] = useState(false);
+  const [sharingPlatform, setSharingPlatform] = useState<string | null>(null);
+
+  const track = useMemo(() => allTracks.find((t) => t.id === id), [id, allTracks]);
+  const artist = useMemo(
+    () =>
+      artists.find(
+        (a) =>
+          a.uid === track?.artistId ||
+          (track?.artist && a.name?.toLowerCase() === track.artist.toLowerCase())
+      ),
+    [artists, track]
+  );
+  const associatedNFTs = useMemo(
+    () => allNFTs.filter((n) => n.trackId === id),
+    [id, allNFTs]
+  );
+
+  const isArtistVerified = Boolean(
+    track?.artistVerified || artist?.verified || artist?.isVerifiedArtist
+  );
+
+  const artistTargetUid = artist?.uid || track?.artistId;
+  const isFollowingArtist = Boolean(
+    artistTargetUid && followedUserIds?.includes(artistTargetUid)
+  );
+
   const isOwner = useMemo(() => {
     if (!track) return false;
     const currentWallet = userAddress || userProfile?.walletAddress;
     return (
       track.artistId === userProfile?.uid ||
-      associatedNFTs.some(n => n.owner === currentWallet || n.owner === userProfile?.uid)
+      associatedNFTs.some(
+        (n) => n.owner === currentWallet || n.owner === userProfile?.uid
+      )
     );
   }, [track, associatedNFTs, userAddress, userProfile]);
 
@@ -87,7 +137,7 @@ const TrackDetail: React.FC = () => {
         tokenAddress: assocNFT.contractAddress || assocNFT.id,
         minAmount: "1",
         tokenSymbol: "NFT",
-        tokenType: "nft" as const
+        tokenType: "nft" as const,
       };
     }
     return undefined;
@@ -95,38 +145,32 @@ const TrackDetail: React.FC = () => {
 
   const { hasAccess } = useTokenGating(gatingConfig);
 
-  const [activeTab, setActiveTab] = useState<'lyrics' | 'details' | 'history' | 'nfts' | 'exclusive'>('lyrics');
-
-  const [isCached, setIsCached] = useState(false);
-  const [isCaching, setIsCaching] = useState(false);
-  const [livePlayCount, setLivePlayCount] = useState<number | null>(null);
-
   useEffect(() => {
     if (!track?.id) return;
-
-    const trackDocRef = doc(db, 'tracks', track.id);
-    const unsubscribe = onSnapshot(trackDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (typeof data.playCount === 'number') {
-          setLivePlayCount(data.playCount);
+    const trackDocRef = doc(db, "tracks", track.id);
+    const unsubscribe = onSnapshot(
+      trackDocRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (typeof data.playCount === "number") {
+            setLivePlayCount(data.playCount);
+          }
         }
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.GET, `tracks/${track.id}`);
       }
-    }, (error) => {
-      handleFirestoreError(error, OperationType.GET, `tracks/${track.id}`);
-    });
-
+    );
     return () => unsubscribe();
   }, [track?.id]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let active = true;
     const checkCache = async () => {
       if (track) {
         const cached = await isTrackCached(track.id);
-        if (active) {
-          setIsCached(cached);
-        }
+        if (active) setIsCached(cached);
       }
     };
     checkCache();
@@ -138,87 +182,91 @@ const TrackDetail: React.FC = () => {
   const handleToggleCache = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (!track) return;
-    
+
     if (isCached) {
       try {
         await deleteCachedTrack(track.id);
         setIsCached(false);
-        addNotification("Removed track from offline cache", "info");
-      } catch (err) {
-        addNotification("Failed to remove track from offline cache", "error");
+        addNotification("Removed track from offline library.", "info");
+      } catch {
+        addNotification("Failed to remove offline copy.", "error");
       }
     } else {
       setIsCaching(true);
       try {
         await downloadTrackForOffline(track);
         setIsCached(true);
-        addNotification("Track successfully cached for offline", "success");
-      } catch (err) {
-        addNotification("Failed to download track for offline", "error");
+        addNotification("Track saved for offline playback.", "success");
+      } catch {
+        addNotification("Failed to download track for offline playback.", "error");
       } finally {
         setIsCaching(false);
       }
     }
   };
-  
-  const [sharedPlatforms, setSharedPlatforms] = useState<string[]>([]);
-  const [isSharing, setIsSharing] = useState(false);
-  const [sharingPlatform, setSharingPlatform] = useState<string | null>(null);
 
   const handleShareEarn = async (platform: string) => {
-    if (!userProfile) {
-      addNotification("Please initialize neural profile to earn rewards.", "warning");
+    if (!track) return;
+    if (!userProfile?.uid) {
+      addNotification("Sign in to earn JAM rewards for sharing.", "warning");
       return;
     }
     if (sharedPlatforms.includes(platform)) {
-      addNotification(`Rewards already claimed for sharing on ${platform.toUpperCase()}`, "info");
+      addNotification(
+        `Reward already claimed for ${platform.toUpperCase()} share.`,
+        "info"
+      );
       return;
     }
 
     setSharingPlatform(platform);
     setIsSharing(true);
 
-    const shareText = `Check out this music NFT "${track.title}" by ${track.artist} on TonJam!`;
+    const shareText = `Listen to "${track.title}" by ${track.artist} on TonJam!`;
     const shareUrl = window.location.href;
-    const telegramLink = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
-    const twitterLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-    const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-
     const openExternalLink = (href: string) => {
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = href;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
       a.click();
     };
 
-    if (platform === 'telegram') {
-      openExternalLink(telegramLink);
-    } else if (platform === 'twitter') {
-      openExternalLink(twitterLink);
-    } else if (platform === 'facebook') {
-      openExternalLink(facebookLink);
-    } else if (platform === 'copylink') {
+    if (platform === "telegram") {
+      openExternalLink(
+        `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
+      );
+    } else if (platform === "twitter") {
+      openExternalLink(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`
+      );
+    } else if (platform === "facebook") {
+      openExternalLink(
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`
+      );
+    } else if (platform === "copylink") {
       try {
         await navigator.clipboard.writeText(shareUrl);
-        addNotification("Exclusive NFT resource link copied to buffer!", "success");
+        addNotification("Track link copied to clipboard.", "success");
       } catch (err) {
-        console.error("Clipboard copy failed:", err);
+        console.warn("Clipboard copy failed:", err);
       }
     }
 
-    const rewardAmount = platform === 'copylink' ? 2 : 5;
+    const rewardAmount = platform === "copylink" ? 2 : 5;
 
     try {
-      if (userProfile.uid) {
-        const userRef = doc(db, "users", userProfile.uid);
+      const userRef = doc(db, "users", userProfile.uid);
+      try {
         await updateDoc(userRef, {
           jamBalance: increment(rewardAmount),
           tjBalance: increment(rewardAmount),
         });
+      } catch (err) {
+        handleFirestoreError(err, OperationType.UPDATE, `users/${userProfile.uid}`);
       }
 
-      const txId = `tx-share-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+      const txId = `tx-share-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
       const newTx = {
         id: txId,
         type: "claim_rewards" as const,
@@ -228,14 +276,18 @@ const TrackDetail: React.FC = () => {
         recipientAddress: userProfile.walletAddress || "USER_WALLET",
         userId: userProfile.uid,
         trackId: track.id,
-        trackTitle: `Share to Earn: shared "${track.title}" to ${platform.toUpperCase()}`,
+        trackTitle: `Shared "${track.title}" on ${platform.toUpperCase()}`,
         timestamp: new Date().toISOString(),
         status: "pending" as const,
         txHash: txId,
         participants: [userProfile.uid].filter(Boolean),
       };
 
-      await setDoc(doc(db, "transactions", txId), newTx);
+      try {
+        await setDoc(doc(db, "transactions", txId), newTx);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `transactions/${txId}`);
+      }
 
       setUserProfile((prev) => {
         if (!prev) return prev;
@@ -249,16 +301,16 @@ const TrackDetail: React.FC = () => {
       setSharedPlatforms((prev) => [...prev, platform]);
 
       confetti({
-        particleCount: 80,
+        particleCount: 70,
         spread: 60,
         origin: { y: 0.8 },
-        colors: ['#00b4d8', '#3b82f6', '#8b5cf6', '#e0f2fe']
+        colors: ["#0088cc", "#38bdf8", "#8b5cf6", "#e0f2fe"],
       });
 
-      addNotification(`Success! Mindset rewarded with +${rewardAmount} JAM Tokens!`, "success");
+      addNotification(`Earned +${rewardAmount} JAM for sharing!`, "success");
     } catch (error) {
       console.error(error);
-      addNotification("A network delay interrupted the reward transaction.", "error");
+      addNotification("Could not record share reward right now.", "error");
     } finally {
       setIsSharing(false);
       setSharingPlatform(null);
@@ -270,17 +322,31 @@ const TrackDetail: React.FC = () => {
 
   if (!track) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-foreground">
-        <Disc className="h-12 w-12 text-muted-foreground/30 mb-4 animate-spin-slow" />
-        <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">Frequency Not Found</p>
-        <button onClick={() => navigate(-1)} className="mt-4 text-blue-500 font-bold text-[10px] uppercase tracking-widest">Return to Network</button>
+      <div className="min-h-screen bg-[var(--tj-color-bg-primary,#091220)] flex flex-col items-center justify-center px-6 text-center">
+        <div className="w-16 h-16 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)] flex items-center justify-center mb-4">
+          <Disc className="h-8 w-8 text-[var(--tj-color-brand-primary,#00B4D8)] opacity-70" />
+        </div>
+        <h2 className="text-lg font-bold text-white mb-1">Track Not Found</h2>
+        <p className="text-sm text-[var(--tj-color-text-secondary,#C2C7CD)] mb-6">
+          This release may have been removed or the link is incorrect.
+        </p>
+        <button
+          onClick={() => navigate(-1)}
+          className="px-5 py-2.5 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-sm font-semibold text-white flex items-center gap-2 transition-colors border-0 cursor-pointer"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Go Back
+        </button>
       </div>
     );
   }
 
   const handlePlay = () => {
     if (track.tokenGating?.enabled && !hasAccess) {
-      addNotification(`This track is exclusive to ${track.tokenGating.tokenSymbol} holders.`, 'warning');
+      addNotification(
+        `This release requires ${track.tokenGating.tokenSymbol} access.`,
+        "warning"
+      );
       return;
     }
     playTrack(track);
@@ -289,47 +355,45 @@ const TrackDetail: React.FC = () => {
 
   const handleTip = async (amount: number) => {
     setIsTipping(false);
-    
+
     if (!tonConnectUI.connected) {
       tonConnectUI.openModal();
       return;
     }
 
     if (!artist?.walletAddress) {
-      addNotification("Artist has not configured a TON wallet address.", "warning");
+      addNotification("Artist has not connected a TON wallet yet.", "warning");
       return;
     }
 
     try {
       const transaction = {
-        validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
+        validUntil: Math.floor(Date.now() / 1000) + 90,
         messages: [
           {
             address: artist.walletAddress,
-            amount: (amount * 1000000000).toString(), // Convert GRAM to nanogram
-          }
-        ]
+            amount: BigInt(Math.round(amount * 1e9)).toString(),
+          },
+        ],
       };
-      
+
       await sendTransactionSafe(tonConnectUI, transaction);
-      
-      addNotification(`Successfully tipped ${amount} GRAMS to ${track.artist}!`, 'success');
+      addNotification(`Tipped ${amount} TON to ${track.artist}!`, "success");
       confetti({
-        particleCount: 150,
-        spread: 100,
+        particleCount: 120,
+        spread: 85,
         origin: { y: 0.8 },
-        colors: ['#0088cc', '#ffffff', '#3b82f6'],
-        ticks: 200,
-        gravity: 1.5,
-        scalar: 0.8,
-        shapes: ['circle']
+        colors: ["#0088cc", "#ffffff", "#38bdf8"],
       });
     } catch (e: any) {
       console.error(e);
-      if (e.message?.includes("User rejected")) {
-        addNotification("Transaction rejected by user.", "warning");
+      if (e?.message?.includes("User rejected")) {
+        addNotification("Tip transaction cancelled.", "warning");
       } else {
-        addNotification("Tipping transaction failed. Ensure you have sufficient GRAMS balance.", "error");
+        addNotification(
+          "Tip failed. Please verify your TON wallet balance.",
+          "error"
+        );
       }
     }
   };
@@ -337,53 +401,50 @@ const TrackDetail: React.FC = () => {
   const handleJam = () => {
     jamTrack(track.id);
     confetti({
-      particleCount: 100,
-      spread: 70,
+      particleCount: 90,
+      spread: 65,
       origin: { y: 0.6 },
-      colors: ['#3b82f6', '#8b5cf6', '#ec4899'],
-      ticks: 200,
-      gravity: 1.2,
-      scalar: 0.7,
-      shapes: ['circle']
+      colors: ["#0088cc", "#38bdf8", "#8b5cf6"],
     });
   };
 
-  const handlePurchase = async () => {
-    setIsProcessingPurchase(true);
-    try {
-      await purchaseTrack(track.id);
-      confetti({
-        particleCount: 200,
-        spread: 120,
-        origin: { y: 0.8 },
-        colors: ['#22c55e', '#ffffff', '#10b981']
-      });
-    } finally {
-      setIsProcessingPurchase(false);
-    }
-  };
+  const nftPriceNum = parseFloat(String(track.price ?? "2.5")) || 2.5;
+  const usdEstimate = (nftPriceNum * (tonUsdRate ?? 7.5)).toFixed(2);
+  const displayStreams = livePlayCount !== null ? livePlayCount : track.playCount || 0;
+  const durationLabel = `${Math.floor((track.duration || 0) / 60)}:${String(
+    (track.duration || 0) % 60
+  ).padStart(2, "0")}`;
+
+  const coverSrc =
+    track.coverUrl || getPlaceholderImage(`track-${track.id}`, 800, 800);
+  const artistAvatarSrc =
+    artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 200, 200);
+
+  const hasExclusivePerks =
+    associatedNFTs.some((n) => n.exclusiveContent && n.exclusiveContent.length > 0) ||
+    track.isExclusive;
 
   return (
-    <div className="relative min-h-screen pb-4 overflow-hidden">
-      {/* Immersive Background */}
+    <div className="relative min-h-screen bg-[var(--tj-color-bg-primary,#091220)] pb-24 overflow-hidden text-white">
+      {/* Subtle Ambient Atmospheric Backdrop */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div 
-          className="absolute inset-0 opacity-20 blur-[100px]"
-          style={{
-            background: `radial-gradient(circle at 20% 30%, #3b82f6 0%, transparent 50%), 
-                         radial-gradient(circle at 80% 70%, #8b5cf6 0%, transparent 50%)`
-          }}
+        <div
+          className="absolute -top-32 left-1/4 w-[680px] h-[520px] rounded-full blur-[150px] opacity-12"
+          style={{ background: "radial-gradient(circle, #00B4D8 0%, transparent 70%)" }}
         />
-        <div className="absolute inset-0 bg-background/40" />
+        <div
+          className="absolute bottom-0 right-1/4 w-[520px] h-[440px] rounded-full blur-[160px] opacity-10"
+          style={{ background: "radial-gradient(circle, #0088CC 0%, transparent 70%)" }}
+        />
       </div>
 
       <PageHeader
         title="Track Details"
         showBack={true}
         rightContent={
-          <button 
+          <button
             onClick={() => setOptionsTrack(track)}
-            className="p-2 rounded-full text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none" 
+            className="p-2 rounded-full text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-0 outline-none"
             aria-label="Track Options"
             title="Track Options"
           >
@@ -392,145 +453,158 @@ const TrackDetail: React.FC = () => {
         }
       />
 
-      <div className="relative z-10 w-full max-w-full px-4 md:px-4 pt-2">
-        {/* Artist Link Area */}
-        <div className="flex items-center justify-between mb-4">
-          <div 
-            className="flex items-center gap-3 cursor-pointer group"
-            onClick={() => navigate(`/artist/${track.artistId}`)}
-          >
-            <div className="relative">
-              <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 100, 100)} className="w-9 h-9 rounded-full object-cover" alt="" />
-              {track.artistVerified && (
-                <div className="absolute -bottom-0.5 -right-0.5 bg-background rounded-full p-0.5 border border-background">
-                  <Verified className="h-3.5 w-3.5 text-blue-500 fill-white" />
-                </div>
-              )}
-            </div>
-            <div>
-              <p className="text-blue-500 font-bold text-xs uppercase tracking-wider group-hover:text-blue-400 transition-colors">{track.artist}</p>
-              <p className="text-[9px] text-foreground/40 uppercase font-medium tracking-widest">Verified Artist</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Left Column: Cover & Primary Actions */}
-          <div className="lg:col-span-5 space-y-4">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 pt-3">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+          {/* Left Column: Artwork, Playback Controls, Visualizer, Mint Card */}
+          <div className="lg:col-span-5 space-y-5">
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl group"
+              className="relative aspect-square rounded-[var(--tj-radius-lg,10px)] overflow-hidden bg-[var(--tj-color-surface-default,#0D1628)] shadow-lg group"
             >
-              <motion.img 
-                src={track.coverUrl} 
-                alt={track.title} 
-                className="w-full h-full object-cover" 
-                whileHover={{ scale: 1.05 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 150,
-                  damping: 25
+              <img
+                src={coverSrc}
+                alt={track.title}
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.currentTarget.src = getPlaceholderImage(`track-${track.id}`, 800, 800);
                 }}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
+              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-70 pointer-events-none" />
+
               {track.isNFT && (
-                <div className="absolute top-4 right-4 px-4 py-4 bg-neutral-800 rounded-full flex items-center gap-4">
-                  <Zap className="h-3 w-3 text-foreground fill-white" />
-                  <span className="text-[9px] font-black uppercase tracking-widest text-foreground">NFT Protocol</span>
+                <div className="absolute top-4 right-4 px-3 py-1.5 bg-[var(--tj-color-bg-primary,#091220)]/80 backdrop-blur-md rounded-full flex items-center gap-1.5">
+                  <Zap className="h-3.5 w-3.5 text-[var(--tj-color-brand-primary,#00B4D8)] fill-[var(--tj-color-brand-primary,#00B4D8)]" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-white">
+                    Music NFT
+                  </span>
                 </div>
               )}
 
               {track.tokenGating?.enabled && !hasAccess && (
-                <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-6 text-center">
-                  <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-600/40">
-                    <Lock className="w-8 h-8 text-foreground" />
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                  <div className="w-14 h-14 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-brand-primary,#00B4D8)] flex items-center justify-center mb-3 shadow-sm">
+                    <Lock className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-xl font-black uppercase tracking-tighter text-foreground mb-2">Exclusive Content</h3>
-                  <p className="text-xs text-foreground/70 uppercase tracking-widest font-bold">
-                    Hold {track.tokenGating.minAmount} {track.tokenGating.tokenSymbol} to unlock
+                  <h3 className="text-lg font-bold text-white mb-1">Holder Exclusive</h3>
+                  <p className="text-xs text-slate-300">
+                    Hold {track.tokenGating.minAmount} {track.tokenGating.tokenSymbol} to unlock full playback
                   </p>
                 </div>
               )}
             </motion.div>
 
-            <div className="flex gap-4">
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handlePlay} 
-                className="p-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center"
-                aria-label={isActive && isPlaying ? 'Pause Frequency' : 'Initialize Playback'}
+            {/* Transport & Quick Action Row */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={handlePlay}
+                className="flex-1 min-w-[140px] h-12 px-5 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white rounded-[var(--tj-radius-md,8px)] font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border-0 cursor-pointer"
+                aria-label={isActive && isPlaying ? "Pause Track" : "Play Track"}
               >
                 {isActive && isPlaying ? (
-                  <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }}><Pause className="h-5 w-5 fill-current" /></motion.div>
+                  <>
+                    <Pause className="h-4 w-4 fill-current" />
+                    <span>Pause</span>
+                  </>
                 ) : (
-                  <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }}><Play className="h-5 w-5 fill-current" /></motion.div>
+                  <>
+                    <Play className="h-4 w-4 fill-current" />
+                    <span>Play Track</span>
+                  </>
                 )}
               </motion.button>
-              <button 
-                onClick={() => setFullPlayerOpen(true)}
-                className="p-4 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground transition-all active:scale-95"
-                aria-label="Open in Player"
-              >
-                <Sparkles className="h-5 w-5" />
-              </button>
-              <button 
+
+              <button
                 onClick={() => toggleLikeTrack(track.id)}
-                className={`p-4 rounded-xl transition-all active:scale-95 ${isLiked ? 'bg-neutral-500/10 text-neutral-500' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}
+                className={cn(
+                  "h-12 w-12 rounded-[var(--tj-radius-md,8px)] flex items-center justify-center transition-all active:scale-95 border-0 cursor-pointer",
+                  isLiked
+                    ? "bg-rose-500/20 text-rose-400"
+                    : "bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-elevated,#111F36)] text-slate-300 hover:text-white"
+                )}
+                aria-label={isLiked ? "Unlike Track" : "Like Track"}
+                title={isLiked ? "Unlike" : "Like"}
               >
-                <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+                <Heart className={cn("h-5 w-5", isLiked && "fill-current")} />
               </button>
-              
-              <button 
+
+              <button
                 onClick={handleToggleCache}
                 disabled={isCaching}
-                className={`p-4 rounded-xl transition-all active:scale-95 flex items-center justify-center ${isCached ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}
-                title={isCached ? "Remove from Offline Cache" : "Download for Offline Listening"}
+                className={cn(
+                  "h-12 w-12 rounded-[var(--tj-radius-md,8px)] flex items-center justify-center transition-all active:scale-95 border-0 cursor-pointer",
+                  isCached
+                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)]/20 text-[var(--tj-color-brand-primary,#00B4D8)]"
+                    : "bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-elevated,#111F36)] text-slate-300 hover:text-white"
+                )}
+                title={
+                  isCached
+                    ? "Remove from Offline Library"
+                    : "Download for Offline Listening"
+                }
+                aria-label="Toggle offline cache"
               >
                 {isCaching ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                  <Loader2 className="h-5 w-5 animate-spin text-[var(--tj-color-brand-primary,#00B4D8)]" />
                 ) : (
-                  <DownloadCloud className={`h-5 w-5 ${isCached ? 'fill-blue-500/20 text-blue-400' : ''}`} />
+                  <DownloadCloud className="h-5 w-5" />
                 )}
               </button>
 
-              <button 
+              <button
                 onClick={() => setTrackToAddToPlaylist(track)}
-                className="p-4 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground transition-all active:scale-95"
+                className="h-12 w-12 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-elevated,#111F36)] text-slate-300 hover:text-white flex items-center justify-center transition-all active:scale-95 border-0 cursor-pointer"
                 aria-label="Add to playlist"
+                title="Add to playlist"
               >
                 <PlusCircle className="h-5 w-5" />
               </button>
+
               <div className="relative">
-                <button 
-                  onClick={() => setIsTipping(!isTipping)}
-                  className={`p-4 rounded-xl transition-all active:scale-95 ${isTipping ? 'bg-neutral-600 text-foreground' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}
+                <button
+                  onClick={() => setIsTipping((prev) => !prev)}
+                  className={cn(
+                    "h-12 w-12 rounded-[var(--tj-radius-md,8px)] flex items-center justify-center transition-all active:scale-95 border-0 cursor-pointer",
+                    isTipping
+                      ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
+                      : "bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-elevated,#111F36)] text-slate-300 hover:text-white"
+                  )}
                   aria-label="Tip artist"
+                  title="Tip Artist in TON"
                 >
                   <Coins className="h-5 w-5" />
                 </button>
                 <AnimatePresence>
                   {isTipping && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 p-4 bg-background rounded-2xl shadow-2xl z-50 flex flex-col gap-4 min-w-[120px]"
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      className="absolute bottom-full right-0 mb-3 p-3 bg-[var(--tj-color-surface-default,#0D1628)] rounded-[var(--tj-radius-md,8px)] shadow-xl z-50 flex flex-col gap-1.5 min-w-[168px]"
                     >
-                      <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-4 py-4 mb-4">Select Tip Amount</p>
+                      <p className="text-[10px] font-bold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider px-2.5 py-1">
+                        Tip Artist (TON)
+                      </p>
                       {[0.1, 0.5, 1, 5].map((amount) => (
                         <button
                           key={`tip-${amount}`}
                           onClick={() => handleTip(amount)}
-                          className="px-4 py-4 hover:bg-muted rounded-xl text-xs font-bold text-foreground transition-all flex items-center justify-between group/tip"
+                          className="px-3 py-2 bg-[var(--tj-color-surface-elevated,#111F36)]/70 hover:bg-[var(--tj-color-surface-elevated,#111F36)] rounded-[var(--tj-radius-sm,6px)] text-xs font-bold text-white transition-all flex items-center justify-between border-0 cursor-pointer"
                         >
-                          <div className="flex items-center gap-4">
-                            <img src={TJ_COIN_ICON} className="w-5 h-5 group-hover/tip:scale-110 transition-transform" alt="" />
+                          <span className="flex items-center gap-2 font-mono tabular-nums">
+                            <img
+                              src={TON_LOGO}
+                              className="w-4 h-4 rounded-full"
+                              alt="TON"
+                            />
                             {amount}
-                          </div>
-                          <span className="text-[8px] text-muted-foreground/50 uppercase tracking-widest">GRAM</span>
+                          </span>
+                          <span className="text-[10px] font-bold text-[var(--tj-color-brand-primary,#00B4D8)] uppercase">
+                            TON
+                          </span>
                         </button>
                       ))}
                     </motion.div>
@@ -539,86 +613,111 @@ const TrackDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Real-time Audio Visualizer Component */}
-            <AudioVisualizer className="w-full h-[220px]" />
+            {/* Live Audio Spectrum */}
+            <AudioVisualizer className="w-full h-[200px]" />
 
-            {/* Purchase / Mint Card */}
-            {track.isNFT ? (
-              <div className="p-4 rounded-2xl bg-muted/50 space-y-4">
-                <div className="flex items-center justify-between">
+            {/* NFT Collector Card */}
+            {track.isNFT && (
+              <div className="p-5 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)] space-y-4">
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Current Protocol Price</p>
-                    <div className="flex items-baseline gap-4">
-                      <span className="text-[20px] font-black tracking-tighter text-foreground">{track.price || '2.5'} GRAM</span>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">≈ $12.50</span>
+                    <p className="text-[11px] font-semibold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider mb-1">
+                      Collector Edition Price
+                    </p>
+                    <div className="flex items-baseline gap-2.5">
+                      <span className="text-2xl font-black font-mono tabular-nums text-white">
+                        {nftPriceNum} TON
+                      </span>
+                      <span className="text-xs font-mono tabular-nums text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                        ≈ ${usdEstimate}
+                      </span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Available Supply</p>
-                    <p className="text-sm font-bold text-blue-500 tracking-tighter">{track.minted || 0} / {track.editions || '∞'}</p>
+                    <p className="text-[11px] font-semibold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider mb-1">
+                      Minted Supply
+                    </p>
+                    <p className="text-sm font-bold font-mono tabular-nums text-[var(--tj-color-brand-primary,#00B4D8)]">
+                      {track.minted || 0} / {track.editions || "∞"}
+                    </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <button 
+                <div className="grid grid-cols-2 gap-3">
+                  <button
                     onClick={() => mintNFT(track.id, tonConnectUI)}
-                    className="py-4 bg-foreground text-background rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-all flex items-center justify-center gap-4"
+                    className="py-3 px-4 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border-0 cursor-pointer"
                   >
                     <ShoppingCart className="h-4 w-4" />
-                    Buy NFT
+                    Collect NFT
                   </button>
-                  <button onClick={handleJam} className="py-4 bg-neutral-600/10 text-neutral-500 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-neutral-600/20 transition-all flex items-center justify-center gap-4">
-                    <Zap className="h-4 w-4 fill-current" />
-                    Jam Signal
+                  <button
+                    onClick={handleJam}
+                    className="py-3 px-4 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border-0 cursor-pointer"
+                  >
+                    <Zap className="h-4 w-4 text-[var(--tj-color-brand-primary,#00B4D8)] fill-[var(--tj-color-brand-primary,#00B4D8)]" />
+                    Jam Track
                   </button>
                 </div>
-                
-                <p className="text-[8px] text-center text-muted-foreground/50 uppercase tracking-[0.2em] font-medium">
-                  Secured by GRAM Blockchain • Instant Settlement
+
+                <p className="text-[10px] text-center text-slate-500 font-medium tracking-wide">
+                  Verified on TON Blockchain · Instant creator royalty settlement
                 </p>
               </div>
-            ) : (
-              <></>
             )}
 
-            {/* Share to Earn Section */}
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-900/10 via-blue-900/10 to-background space-y-4 relative overflow-hidden">
-              {/* Pulsing glow behind reward */}
-              <div className="absolute -top-12 -right-12 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
-              
-              <div className="flex items-start justify-between">
+            {/* Share to Earn */}
+            <div className="p-5 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)] space-y-4">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="flex h-2 w-2 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    <span className="text-[9px] font-black tracking-[0.2em] text-emerald-400 uppercase">Share Protocol Active</span>
-                  </div>
-                  <h3 className="text-base font-black uppercase tracking-tight text-foreground">Share to Earn</h3>
-                  <p className="text-[10px] text-muted-foreground/80 uppercase tracking-widest font-bold leading-normal mt-1">
-                    Help amplify {track.isNFT ? 'this Music NFT' : 'this Frequency'} on social networks & claim JAM instant streams!
+                  <span className="text-[11px] font-bold tracking-wider text-emerald-400 uppercase">
+                    Rewards Active
+                  </span>
+                  <h3 className="text-base font-bold text-white mt-0.5">
+                    Share to Earn
+                  </h3>
+                  <p className="text-xs text-[var(--tj-color-text-secondary,#C2C7CD)] mt-1 leading-relaxed">
+                    Share {track.isNFT ? "this music NFT" : "this track"} with your audience to earn JAM tokens.
                   </p>
                 </div>
-
-                {/* Pulsing Reward Indicator */}
-                <div className="flex flex-col items-center bg-amber-500/10 px-3.5 py-2.5 rounded-xl shadow-lg relative shrink-0">
-                  <div className="absolute inset-0 bg-amber-500/5 rounded-xl animate-pulse" />
-                  <div className="flex items-center gap-1 text-amber-400 mb-0.5">
-                    <img src={TJ_COIN_ICON} className="w-5 h-5" alt="JAM" />
-                    <span className="text-sm font-black tracking-tight">+5 JAM</span>
-                  </div>
-                  <span className="text-[7px] text-amber-500/80 font-extrabold uppercase tracking-widest">per share</span>
+                <div className="flex items-center gap-1.5 bg-[var(--tj-color-surface-elevated,#111F36)] px-3 py-2 rounded-[var(--tj-radius-sm,6px)] shrink-0">
+                  <img src={TJ_COIN_ICON} className="w-4 h-4" alt="JAM" />
+                  <span className="text-xs font-black font-mono text-amber-400">
+                    +5 JAM
+                  </span>
                 </div>
               </div>
 
-              {/* Social Platforms Action Area */}
               <div className="grid grid-cols-2 gap-2.5">
                 {[
-                  { id: 'telegram', name: 'Telegram', color: 'bg-[#229ED9]/10 hover:bg-[#229ED9]/20 text-[#229ED9]', icon: Send, reward: 5 },
-                  { id: 'twitter', name: 'X / Twitter', color: 'bg-black/40 hover:bg-black/60 text-foreground', icon: Share2, reward: 5 },
-                  { id: 'facebook', name: 'Facebook', color: 'bg-blue-600/10 hover:bg-blue-600/20 text-blue-400', icon: Share2, reward: 5 },
-                  { id: 'copylink', name: 'Copy Link', color: 'bg-muted/45 hover:bg-muted/70 text-muted-foreground', icon: Copy, reward: 2 }
+                  {
+                    id: "telegram",
+                    name: "Telegram",
+                    icon: Send,
+                    reward: 5,
+                    tint: "text-[#38BDF8]",
+                  },
+                  {
+                    id: "twitter",
+                    name: "X / Twitter",
+                    icon: Share2,
+                    reward: 5,
+                    tint: "text-white",
+                  },
+                  {
+                    id: "facebook",
+                    name: "Facebook",
+                    icon: Share2,
+                    reward: 5,
+                    tint: "text-blue-400",
+                  },
+                  {
+                    id: "copylink",
+                    name: "Copy Link",
+                    icon: Copy,
+                    reward: 2,
+                    tint: "text-slate-300",
+                  },
                 ].map((plat) => {
                   const Icon = plat.icon;
                   const isClaimed = sharedPlatforms.includes(plat.id);
@@ -629,27 +728,34 @@ const TrackDetail: React.FC = () => {
                       key={plat.id}
                       onClick={() => handleShareEarn(plat.id)}
                       disabled={isSharing || isClaimed}
-                      className={`flex flex-col p-3 rounded-xl transition-all relative overflow-hidden group text-left ${plat.color} ${isClaimed ? 'opacity-40 cursor-not-allowed' : 'active:scale-95'}`}
+                      className={cn(
+                        "flex flex-col p-3 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] transition-all text-left border-0 cursor-pointer",
+                        isClaimed && "opacity-45 cursor-not-allowed"
+                      )}
                     >
-                      {/* Hover subtle glow effect */}
-                      <span className="absolute inset-0 bg-white/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      
-                      <div className="flex items-center justify-between w-full mb-1 relative z-10">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between w-full mb-1">
+                        <div className={cn("flex items-center gap-2", plat.tint)}>
                           <Icon className="w-3.5 h-3.5" />
-                          <span className="text-[10px] font-black uppercase tracking-wider">{plat.name}</span>
+                          <span className="text-xs font-semibold text-white">
+                            {plat.name}
+                          </span>
                         </div>
-                        {isClaimed && <Check className="w-3.5 h-3.5 text-emerald-500" />}
+                        {isClaimed && <Check className="w-3.5 h-3.5 text-emerald-400" />}
                       </div>
-
-                      <div className="flex items-center justify-between w-full mt-1.5 relative z-10">
-                        <span className="text-[8px] uppercase tracking-widest opacity-60">Reward Pool</span>
+                      <div className="flex items-center justify-between w-full mt-1">
+                        <span className="text-[10px] text-[var(--tj-color-text-secondary,#C2C7CD)]">Reward</span>
                         {isCurrent ? (
-                          <span className="text-[8px] font-black uppercase text-amber-400 animate-pulse">Claiming...</span>
+                          <span className="text-[10px] font-bold text-amber-400">
+                            Claiming...
+                          </span>
                         ) : isClaimed ? (
-                          <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest">Received</span>
+                          <span className="text-[10px] font-bold text-emerald-400">
+                            Claimed
+                          </span>
                         ) : (
-                          <span className="text-[9px] font-black text-amber-400">+{plat.reward} JAM</span>
+                          <span className="text-[11px] font-bold font-mono text-amber-400">
+                            +{plat.reward} JAM
+                          </span>
                         )}
                       </div>
                     </button>
@@ -657,356 +763,469 @@ const TrackDetail: React.FC = () => {
                 })}
               </div>
 
-              {/* Progress/Summary Board */}
-              <div className="p-3 rounded-xl bg-muted/20 flex items-center justify-between">
+              <div className="p-3 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-elevated,#111F36)]/70 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Gift className="w-3.5 h-3.5 text-purple-400" />
-                  <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Distributed Today for this Track
+                  <Gift className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)]" />
+                  <span className="text-xs text-slate-300 font-medium">
+                    Earned on this track
                   </span>
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] font-black text-foreground uppercase tracking-wider">
-                    {sharedPlatforms.reduce((sum, current) => sum + (current === 'copylink' ? 2 : 5), 0)} JAM
-                  </span>
-                  <span className="text-[8px] text-muted-foreground/60 block uppercase tracking-widest leading-none mt-0.5">
-                    Limit resets in 24h
-                  </span>
-                </div>
+                <span className="text-xs font-bold font-mono text-white">
+                  {sharedPlatforms.reduce(
+                    (sum, current) => sum + (current === "copylink" ? 2 : 5),
+                    0
+                  )}{" "}
+                  JAM
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Right Column: Metadata & Content */}
-          <div className="lg:col-span-7 space-y-4">
-            <header>
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-[32px] md:text-[56px] font-black tracking-tighter uppercase text-foreground leading-[0.9]">
+          {/* Right Column: Title, Artist Header, Metadata Strip, Tabs, Comments */}
+          <div className="lg:col-span-7 space-y-6">
+            <header className="space-y-4">
+              {/* Compact Artist Bar */}
+              <div className="flex items-center justify-between gap-3 bg-[var(--tj-color-surface-default,#0D1628)] p-3.5 rounded-[var(--tj-radius-md,8px)]">
+                <div
+                  className="flex items-center gap-3 cursor-pointer group min-w-0"
+                  onClick={() => navigate(`/artist/${track.artistId}`)}
+                >
+                  <div className="relative shrink-0">
+                    <img
+                      src={artistAvatarSrc}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.src = getPlaceholderImage(
+                          `artist-${track.artistId}`,
+                          200,
+                          200
+                        );
+                      }}
+                      className="w-11 h-11 rounded-full object-cover"
+                      alt={track.artist}
+                    />
+                    {isArtistVerified && (
+                      <div className="absolute -bottom-0.5 -right-0.5 bg-[var(--tj-color-bg-primary,#091220)] rounded-full p-0.5">
+                        <Verified className="h-3.5 w-3.5 text-[var(--tj-color-brand-primary,#00B4D8)] fill-current" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-white truncate group-hover:text-[var(--tj-color-brand-primary,#00B4D8)] transition-colors">
+                      {track.artist}
+                    </p>
+                    <p className="text-[11px] text-[var(--tj-color-text-secondary,#C2C7CD)] font-medium">
+                      {isArtistVerified ? "Verified Artist" : "Independent Artist"}
+                    </p>
+                  </div>
+                </div>
+
+                {artistTargetUid && artistTargetUid !== userProfile?.uid && (
+                  <button
+                    onClick={() => toggleFollowUser(artistTargetUid)}
+                    className={cn(
+                      "px-4 py-2 rounded-[var(--tj-radius-sm,6px)] text-xs font-bold transition-all border-0 cursor-pointer shrink-0",
+                      isFollowingArtist
+                        ? "bg-[var(--tj-color-surface-elevated,#111F36)] text-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-surface-hover,#132B49)]"
+                        : "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white hover:bg-[var(--tj-color-brand-hover,#21C2E8)]"
+                    )}
+                  >
+                    {isFollowingArtist ? "Following" : "Follow"}
+                  </button>
+                )}
+              </div>
+
+              {/* Track Title & Status */}
+              <div>
+                <div className="flex flex-wrap items-center gap-2.5 mb-2">
+                  {track.isExplicit && (
+                    <span className="bg-rose-500/15 text-rose-400 px-2.5 py-0.5 rounded-[var(--tj-radius-xs,4px)] text-[10px] font-bold uppercase tracking-wider">
+                      Explicit
+                    </span>
+                  )}
+                  {isCached && (
+                    <span className="bg-[var(--tj-color-brand-primary,#00B4D8)]/15 text-[var(--tj-color-brand-primary,#00B4D8)] px-2.5 py-0.5 rounded-[var(--tj-radius-xs,4px)] text-[10px] font-bold uppercase tracking-wider">
+                      Offline Ready
+                    </span>
+                  )}
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
                   {track.title}
                 </h1>
-                {track.isExplicit && (
-                  <span className="inline-block bg-red-500/15 text-red-500 border border-red-500/30 px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-[0.2em] select-none shadow-lg shadow-red-500/5">
-                    EXPLICIT
-                  </span>
-                )}
-                {isCached && (
-                  <span className="inline-flex bg-blue-500/15 text-blue-400 border border-blue-500/30 px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-[0.2em] select-none items-center gap-1.5 shadow-lg shadow-blue-500/5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                    OFFLINE READY
-                  </span>
-                )}
-              </div>
-              
-              <ReactionsSection targetId={track.id} targetType="track" />
 
-              <div className="flex flex-wrap gap-2 md:gap-3 mt-4">
-                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500"></span>
+                {/* Clean Unified Typographic Metadata Line */}
+                <p className="text-xs sm:text-sm text-[var(--tj-color-text-secondary,#C2C7CD)] font-medium mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono tabular-nums">
+                  <span className="text-[var(--tj-color-brand-primary,#00B4D8)] font-semibold">
+                    {displayStreams.toLocaleString()} streams
                   </span>
-                  <span className="text-[9px] font-extrabold text-[#00b4d8] uppercase tracking-widest">Live</span>
-                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">{(livePlayCount !== null ? livePlayCount : (track.playCount || 0)).toLocaleString()} Streams</span>
-                </div>
-                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
-                  <Clock className="h-3 w-3 text-purple-500" />
-                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
-                </div>
-                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
-                  <Music2 className="h-3 w-3 text-pink-500" />
-                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">{track.genre}</span>
-                </div>
-                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
-                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">BPM: <span className="text-cyan-400 font-extrabold">{track.bpm || '120'}</span></span>
-                </div>
-                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
-                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">Key: <span className="text-purple-400 font-extrabold">{track.key || 'C# min'}</span></span>
-                </div>
-                <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
-                  <span className="text-[9px] font-extrabold uppercase tracking-widest text-emerald-400">Bitrate: {track.bitrate || 'FLAC'}</span>
-                </div>
-                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
-                  <span className="text-[9px] font-extrabold uppercase tracking-widest text-foreground/90">
-                    Rating: <span className={track.isExplicit ? 'text-red-500 font-extrabold' : 'text-green-500 font-extrabold'}>{track.isExplicit ? 'EXPLICIT (18+)' : 'CLEAN'}</span>
-                  </span>
-                </div>
-                {track.mood && (
-                  <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
-                    <Sparkles className="h-3 w-3 text-amber-500" />
-                    <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">{track.mood}</span>
-                  </div>
-                )}
+                  <span>·</span>
+                  <span>{durationLabel}</span>
+                  {track.genre && (
+                    <>
+                      <span>·</span>
+                      <span className="text-slate-200 font-sans">{track.genre}</span>
+                    </>
+                  )}
+                  <span>·</span>
+                  <span>{track.bpm || 120} BPM</span>
+                  <span>·</span>
+                  <span>{track.key || "C# min"}</span>
+                  <span>·</span>
+                  <span className="text-emerald-400">{track.bitrate || "FLAC"}</span>
+                  {track.mood && (
+                    <>
+                      <span>·</span>
+                      <span className="font-sans text-slate-300">{track.mood}</span>
+                    </>
+                  )}
+                </p>
               </div>
+
+              <ReactionsSection targetId={track.id} targetType="track" />
             </header>
 
-            {/* Content Tabs */}
+            {/* Tonal Tab Navigation */}
             <div className="space-y-4">
-              <div className="scroll-row">
-                {(['lyrics', 'details', 'history', 'nfts', 'exclusive'] as const).map((tab) => {
-                  const hasPerks = associatedNFTs.some(n => n.exclusiveContent && n.exclusiveContent.length > 0) || track.isExclusive;
-                  if (tab === 'exclusive' && !hasPerks) return null;
-                  
-                  return (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`text-[11px] font-bold uppercase tracking-[0.22em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-white' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
-                    >
-                      {tab === 'exclusive' ? 'exclusive perks' : tab}
-                      {activeTab === tab && (
-                        <motion.div layoutId="activeTab" className="absolute -bottom-[17px] left-0 right-0 h-0.5 bg-blue-500" />
-                      )}
-                    </button>
-                  );
-                })}
+              <div className="flex items-center gap-2 p-1.5 bg-[var(--tj-color-surface-default,#0D1628)] rounded-[var(--tj-radius-md,8px)] overflow-x-auto no-scrollbar">
+                {(["lyrics", "details", "history", "nfts", "exclusive"] as const).map(
+                  (tab) => {
+                    if (tab === "exclusive" && !hasExclusivePerks) return null;
+                    const label =
+                      tab === "exclusive"
+                        ? "Holder Perks"
+                        : tab === "nfts"
+                        ? `Editions (${associatedNFTs.length})`
+                        : tab.charAt(0).toUpperCase() + tab.slice(1);
+
+                    return (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={cn(
+                          "px-4 py-2 rounded-[var(--tj-radius-sm,6px)] text-xs font-bold whitespace-nowrap transition-all border-0 cursor-pointer",
+                          activeTab === tab
+                            ? "bg-[var(--tj-color-surface-elevated,#111F36)] text-white shadow-sm"
+                            : "bg-transparent text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white"
+                        )}
+                      >
+                        {label}
+                      </button>
+                    );
+                  }
+                )}
               </div>
 
-              <div className="min-h-[300px]">
+              <div className="min-h-[260px]">
                 <TokenGate gating={track.tokenGating}>
-                  {activeTab === 'lyrics' && (
-                    <motion.div 
+                  {activeTab === "lyrics" && (
+                    <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="space-y-4"
+                      className="p-6 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)]"
                     >
                       {track.lyrics ? (
-                        <div className="whitespace-pre-line text-lg md:text-xl font-medium text-muted-foreground/80 leading-relaxed font-serif">
+                        <div className="whitespace-pre-line text-base sm:text-lg font-medium text-slate-200 leading-relaxed">
                           {track.lyrics}
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-4 text-muted-foreground/50">
-                          <Music2 className="h-10 w-10 mb-4 opacity-20" />
-                          <p className="text-[10px] font-bold uppercase tracking-widest">Lyrics not available for this frequency</p>
+                        <div className="flex flex-col items-center justify-center py-10 text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                          <Music2 className="h-9 w-9 mb-3 opacity-30" />
+                          <p className="text-xs font-semibold uppercase tracking-wider">
+                            No lyrics uploaded for this track
+                          </p>
                         </div>
                       )}
                     </motion.div>
                   )}
 
-                  {activeTab === 'details' && (
-                    <motion.div 
+                  {activeTab === "details" && (
+                    <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className="space-y-4"
                     >
-                      <Accordion type="single" collapsible className="w-full">
-                        <AccordionItem value="technical">
-                          <AccordionTrigger className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Technical Specs</AccordionTrigger>
-                          <AccordionContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <DetailItem label="BPM" value={track.bpm?.toString() || '128'} />
-                            <DetailItem label="Key" value={track.key || 'C# Minor'} />
-                            <DetailItem label="Bitrate" value={track.bitrate || 'FLAC'} />
-                            <DetailItem label="Mood" value={track.mood || 'Not Specified'} />
-                            <DetailItem label="Content Rating" value={track.isExplicit ? 'Explicit (18+)' : 'Clean Version'} />
-                          </AccordionContent>
-                        </AccordionItem>
-                        <AccordionItem value="metadata">
-                          <AccordionTrigger className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Metadata</AccordionTrigger>
-                          <AccordionContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <DetailItem label="Release Date" value={track.releaseDate || '2023-10-15'} />
-                            <DetailItem label="CID" value={track.cid || 'Not Available'} isMono />
-                            <DetailItem label="Genre" value={track.genre} />
-                            {track.isDrmProtected && (
-                              <>
-                                <DetailItem label="Content Protection" value="Active (Acoustic Watermark Secured)" />
-                                <DetailItem label="Acoustic Signature" value={track.watermarkText || 'GRAM Signature'} />
-                              </>
-                            )}
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
+                      <div className="p-5 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)] space-y-3">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                          Audio Specifications
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          <DetailItem label="BPM" value={track.bpm?.toString() || "120"} />
+                          <DetailItem label="Musical Key" value={track.key || "C# Minor"} />
+                          <DetailItem label="Format" value={track.bitrate || "FLAC"} />
+                          <DetailItem
+                            label="Mood"
+                            value={track.mood || "Not specified"}
+                          />
+                          <DetailItem
+                            label="Rating"
+                            value={track.isExplicit ? "Explicit (18+)" : "Clean"}
+                          />
+                          <DetailItem label="Genre" value={track.genre || "Electronic"} />
+                        </div>
+                      </div>
+
+                      <div className="p-5 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)] space-y-3">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                          Release & Verification
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <DetailItem
+                            label="Release Date"
+                            value={track.releaseDate || "—"}
+                          />
+                          <DetailItem
+                            label="IPFS Content ID"
+                            value={track.cid || "Not pinned"}
+                            isMono
+                          />
+                          {track.isDrmProtected && (
+                            <>
+                              <DetailItem
+                                label="Watermark Protection"
+                                value="Acoustic Watermark Enabled"
+                              />
+                              <DetailItem
+                                label="Signature"
+                                value={track.watermarkText || "TONJAM-SIG"}
+                                isMono
+                              />
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </motion.div>
                   )}
                 </TokenGate>
 
-                {activeTab === 'history' && (
-                  <motion.div 
+                {activeTab === "history" && (
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="space-y-4"
+                    className="space-y-3"
                   >
-                    {associatedNFTs.some(n => n.history && n.history.length > 0) ? (
-                      associatedNFTs.flatMap(n => n.history || []).map((event, idx) => (
-                        <div key={`history-${idx}`} className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
-                          <div className="flex items-center gap-4">
-                            <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
-                              <Activity className="h-4 w-4 text-muted-foreground" />
+                    {associatedNFTs.some((n) => n.history && n.history.length > 0) ? (
+                      associatedNFTs
+                        .flatMap((n) => n.history || [])
+                        .map((event, idx) => (
+                          <div
+                            key={`history-${idx}`}
+                            className="flex items-center justify-between p-4 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)]"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-9 h-9 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-surface-elevated,#111F36)] flex items-center justify-center shrink-0">
+                                <Activity className="h-4 w-4 text-[var(--tj-color-brand-primary,#00B4D8)]" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold text-white uppercase tracking-wider">
+                                  {event.event}
+                                </p>
+                                <p className="text-[11px] text-[var(--tj-color-text-secondary,#C2C7CD)] font-mono truncate">
+                                  {event.from} → {event.to}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">{event.event}</p>
-                              <p className="text-[9px] text-muted-foreground uppercase tracking-widest">From {event.from} to {event.to}</p>
+                            <div className="text-right shrink-0 ml-3">
+                              <p className="text-xs font-bold font-mono text-[var(--tj-color-brand-primary,#00B4D8)]">
+                                {event.price ? `${event.price} TON` : "—"}
+                              </p>
+                              <p className="text-[11px] text-slate-500 font-mono">
+                                {event.date}
+                              </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{event.price ? `${event.price} GRAM` : '--'}</p>
-                            <p className="text-[9px] text-muted-foreground/50 uppercase tracking-widest">{event.date}</p>
-                          </div>
-                        </div>
-                      ))
+                        ))
                     ) : (
-                      <div className="flex flex-col items-center justify-center py-4 text-muted-foreground/50">
-                        <Activity className="h-10 w-10 mb-4 opacity-20" />
-                        <p className="text-[10px] font-bold uppercase tracking-widest">No protocol history recorded</p>
+                      <div className="flex flex-col items-center justify-center py-12 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)] text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                        <Activity className="h-9 w-9 mb-3 opacity-30" />
+                        <p className="text-xs font-semibold uppercase tracking-wider">
+                          No on-chain activity recorded yet
+                        </p>
                       </div>
                     )}
                   </motion.div>
                 )}
 
-                {activeTab === 'nfts' && (
-                  <motion.div 
+                {activeTab === "nfts" && (
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="grid grid-cols-1 md:grid-cols-2 gap-4"
                   >
                     {associatedNFTs.length > 0 ? (
                       associatedNFTs.map((nft) => (
-                        <motion.div 
-                          key={nft.id} 
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="p-4 rounded-xl bg-muted/50 border border-border/50 hover:border-blue-500/50 transition-all cursor-pointer group/nft"
+                        <motion.div
+                          key={nft.id}
+                          whileHover={{ y: -2 }}
+                          whileTap={{ scale: 0.99 }}
+                          className="p-4 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-elevated,#111F36)] transition-colors cursor-pointer group/nft"
                           onClick={() => navigate(`/nft/${nft.id}`)}
                         >
-                          <div className="flex items-center gap-4 mb-4">
-                            <img src={nft.imageUrl} className="w-12 h-12 rounded-lg object-cover" alt="" />
+                          <div className="flex items-center gap-3.5 mb-4">
+                            <img
+                              src={
+                                nft.imageUrl ||
+                                getPlaceholderImage(`nft-${nft.id}`, 200, 200)
+                              }
+                              referrerPolicy="no-referrer"
+                              onError={(e) => {
+                                e.currentTarget.src = getPlaceholderImage(
+                                  `nft-${nft.id}`,
+                                  200,
+                                  200
+                                );
+                              }}
+                              className="w-14 h-14 rounded-[var(--tj-radius-sm,6px)] object-cover shrink-0"
+                              alt={nft.title}
+                            />
                             <div className="flex-1 min-w-0">
-                              <p className="text-[10px] font-bold text-foreground uppercase tracking-tight truncate">{nft.title}</p>
-                              <p className="text-[8px] text-muted-foreground uppercase tracking-widest">{nft.edition}</p>
+                              <p className="text-sm font-bold text-white truncate">
+                                {nft.title}
+                              </p>
+                              <p className="text-xs text-[var(--tj-color-text-secondary,#C2C7CD)] font-mono">
+                                Edition #{nft.edition || 1}
+                              </p>
                             </div>
                           </div>
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <img src={TJ_COIN_ICON} className="w-4 h-4" alt="" />
-                              <span className="text-xs font-bold text-foreground">{nft.price} GRAM</span>
+                            <div className="flex items-center gap-2">
+                              <img src={TON_LOGO} className="w-4 h-4" alt="TON" />
+                              <span className="text-sm font-bold font-mono text-white">
+                                {nft.price} TON
+                              </span>
                             </div>
-                            <button className="px-4 py-4 bg-blue-600 text-foreground rounded-lg text-[8px] font-bold uppercase tracking-widest opacity-0 group-hover/nft:opacity-100 transition-opacity">
-                              View NFT
-                            </button>
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-[var(--tj-color-brand-primary,#00B4D8)] group-hover/nft:translate-x-0.5 transition-transform">
+                              View NFT <ChevronRight className="w-3.5 h-3.5" />
+                            </span>
                           </div>
                         </motion.div>
                       ))
                     ) : (
-                      <div className="col-span-full flex flex-col items-center justify-center py-4 text-muted-foreground/50">
-                        <Zap className="h-10 w-10 mb-4 opacity-20" />
-                        <p className="text-[10px] font-bold uppercase tracking-widest">No associated artifacts found</p>
+                      <div className="col-span-full flex flex-col items-center justify-center py-12 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)] text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                        <Zap className="h-9 w-9 mb-3 opacity-30" />
+                        <p className="text-xs font-semibold uppercase tracking-wider">
+                          No NFT editions minted for this track yet
+                        </p>
                       </div>
                     )}
                   </motion.div>
                 )}
 
-                {activeTab === 'exclusive' && (
-                  <motion.div 
+                {activeTab === "exclusive" && (
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="space-y-6"
+                    className="space-y-4"
                   >
-                    {associatedNFTs.some(n => n.exclusiveContent && n.exclusiveContent.length > 0) || track.isExclusive ? (
+                    {hasExclusivePerks ? (
                       (() => {
-                        // Gather items
-                        const allExclusives: any[] = associatedNFTs.flatMap(n => n.exclusiveContent || []);
-                        
+                        const allExclusives: any[] = associatedNFTs.flatMap(
+                          (n) => n.exclusiveContent || []
+                        );
+
                         if (hasAccess || isOwner) {
                           return (
-                            <div className="space-y-4">
-                              <div className="flex items-center gap-3 p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 mb-2">
-                                <Unlock className="w-5 h-5 text-emerald-400" />
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-3 p-4 bg-emerald-500/10 rounded-[var(--tj-radius-md,8px)]">
+                                <Unlock className="w-5 h-5 text-emerald-400 shrink-0" />
                                 <div>
-                                  <p className="text-xs font-black uppercase tracking-wider text-emerald-400">Holder Perks Unlocked</p>
-                                  <p className="text-[10px] text-muted-foreground/80 font-bold uppercase tracking-widest mt-0.5">Verified Access Granted to Digital Perks</p>
+                                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                                    Holder Perks Unlocked
+                                  </p>
+                                  <p className="text-xs text-slate-300 mt-0.5">
+                                    You have verified collector access to these files.
+                                  </p>
                                 </div>
                               </div>
-                              
-                              <div className="grid grid-cols-1 gap-4">
-                                {allExclusives.map((item) => {
-                                  let IconComponent = FileText;
-                                  if (item.type === 'video') IconComponent = Video;
-                                  if (item.type === 'track') IconComponent = Volume2;
-                                  if (item.type === 'image') IconComponent = ImageIcon;
-                                  
-                                  return (
-                                    <div key={item.id} className="p-5 rounded-2xl bg-muted/60 border border-border/40 hover:border-blue-500/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                      <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                                          <IconComponent className="w-6 h-6 text-blue-400" />
-                                        </div>
-                                        <div className="space-y-1">
-                                          <span className="text-[8px] font-black uppercase tracking-[0.25em] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">
-                                            {item.type}
-                                          </span>
-                                          <h4 className="text-sm font-black uppercase tracking-tight text-foreground pt-1">{item.title}</h4>
-                                          {item.description && (
-                                            <p className="text-xs text-muted-foreground font-bold">{item.description}</p>
-                                          )}
-                                        </div>
+
+                              {allExclusives.map((item) => {
+                                let IconComponent = FileText;
+                                if (item.type === "video") IconComponent = Video;
+                                if (item.type === "track") IconComponent = Volume2;
+                                if (item.type === "image") IconComponent = ImageIcon;
+
+                                return (
+                                  <div
+                                    key={item.id}
+                                    className="p-4 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                                  >
+                                    <div className="flex items-start gap-3.5">
+                                      <div className="w-11 h-11 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-surface-elevated,#111F36)] flex items-center justify-center shrink-0">
+                                        <IconComponent className="w-5 h-5 text-[var(--tj-color-brand-primary,#00B4D8)]" />
                                       </div>
-                                      <a 
-                                        href={item.url} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="px-5 py-3 h-10 bg-blue-600 hover:bg-blue-500 text-foreground font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 flex-shrink-0"
-                                      >
-                                        <DownloadCloud className="w-3.5 h-3.5" />
-                                        Access Perk
-                                      </a>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        } else {
-                          // Locked view
-                          return (
-                            <div className="space-y-6">
-                              <div className="flex flex-col items-center justify-center p-8 border border-dashed border-border/50 rounded-2xl bg-muted/30 text-center">
-                                <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
-                                  <Lock className="w-6 h-6 text-red-100" />
-                                </div>
-                                <h3 className="text-sm font-black uppercase tracking-wider text-foreground mb-1">Gated Holder Perks</h3>
-                                <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-6 max-w-sm leading-relaxed">
-                                  This frequency features exclusive content. Connect your wallet and verify NFT ownership to unlock:
-                                </p>
-                                <div className="grid grid-cols-1 gap-2.5 w-full max-w-sm text-left mb-6">
-                                  {allExclusives.map((item, idx) => {
-                                    let IconComponent = FileText;
-                                    if (item.type === 'video') IconComponent = Video;
-                                    if (item.type === 'track') IconComponent = Volume2;
-                                    if (item.type === 'image') IconComponent = ImageIcon;
-                                    
-                                    return (
-                                      <div key={`locked-${idx}`} className="flex items-center gap-3 px-4 py-3 bg-background/40 rounded-xl border border-border/20 opacity-60">
-                                        <IconComponent className="w-4 h-4 text-muted-foreground" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground filter blur-[2px]">
-                                          {item.title}
+                                      <div className="space-y-1">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--tj-color-brand-primary,#00B4D8)] bg-[var(--tj-color-surface-elevated,#111F36)] px-2 py-0.5 rounded-[var(--tj-radius-xs,4px)]">
+                                          {item.type}
                                         </span>
-                                        <span className="ml-auto text-[8px] text-red-400 font-bold uppercase tracking-widest">LOCKED</span>
+                                        <h4 className="text-sm font-bold text-white">
+                                          {item.title}
+                                        </h4>
+                                        {item.description && (
+                                          <p className="text-xs text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                                            {item.description}
+                                          </p>
+                                        )}
                                       </div>
-                                    );
-                                  })}
-                                </div>
-                                <div className="flex flex-wrap gap-3 justify-center">
-                                  <button 
-                                    onClick={() => navigate('/limited-editions')} 
-                                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-foreground text-[10px] font-extrabold uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-blue-500/20"
-                                  >
-                                    Acquire NFT
-                                  </button>
-                                  <button 
-                                    onClick={() => window.location.reload()} 
-                                    className="px-6 py-3 bg-white/5 hover:bg-white/10 text-muted-foreground text-[10px] font-extrabold uppercase tracking-widest rounded-xl transition-all"
-                                  >
-                                    Retry Verification
-                                  </button>
-                                </div>
-                              </div>
+                                    </div>
+                                    <a
+                                      href={item.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="px-4 py-2.5 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white font-bold text-xs uppercase tracking-wider rounded-[var(--tj-radius-sm,6px)] transition-all flex items-center justify-center gap-2 shrink-0"
+                                    >
+                                      <DownloadCloud className="w-4 h-4" />
+                                      Download
+                                    </a>
+                                  </div>
+                                );
+                              })}
                             </div>
                           );
                         }
+
+                        return (
+                          <div className="flex flex-col items-center justify-center p-8 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)] text-center">
+                            <div className="w-14 h-14 bg-[var(--tj-color-surface-elevated,#111F36)] rounded-[var(--tj-radius-md,8px)] flex items-center justify-center mb-4">
+                              <Lock className="w-6 h-6 text-rose-400" />
+                            </div>
+                            <h3 className="text-base font-bold text-white mb-1">
+                              Locked Holder Perks
+                            </h3>
+                            <p className="text-xs text-[var(--tj-color-text-secondary,#C2C7CD)] mb-6 max-w-sm leading-relaxed">
+                              Collect an NFT edition for this release to unlock stems, lossless downloads, and bonus files.
+                            </p>
+                            {allExclusives.length > 0 && (
+                              <div className="grid grid-cols-1 gap-2 w-full max-w-sm text-left mb-6">
+                                {allExclusives.map((item, idx) => (
+                                  <div
+                                    key={`locked-${idx}`}
+                                    className="flex items-center justify-between px-4 py-2.5 bg-[var(--tj-color-surface-elevated,#111F36)] rounded-[var(--tj-radius-sm,6px)] opacity-75"
+                                  >
+                                    <span className="text-xs font-medium text-slate-300">
+                                      {item.title}
+                                    </span>
+                                    <span className="text-[10px] text-rose-400 font-bold uppercase">
+                                      Locked
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <button
+                              onClick={() => navigate("/marketplace")}
+                              className="px-5 py-2.5 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white text-xs font-bold uppercase tracking-wider rounded-[var(--tj-radius-sm,6px)] transition-colors border-0 cursor-pointer"
+                            >
+                              Browse NFT Editions
+                            </button>
+                          </div>
+                        );
                       })()
                     ) : (
-                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/50 border border-dashed border-border/20 rounded-2xl bg-muted/10">
-                        <Sparkles className="h-10 w-10 mb-4 opacity-20" />
-                        <p className="text-[10px] font-bold uppercase tracking-widest">No exclusive perks defined for this frequency</p>
-                        <p className="text-[9px] text-muted-foreground/40 uppercase tracking-widest mt-1">Collectors will receive standard access</p>
+                      <div className="flex flex-col items-center justify-center py-12 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)] text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                        <Sparkles className="h-9 w-9 mb-3 opacity-30" />
+                        <p className="text-xs font-semibold uppercase tracking-wider">
+                          No bonus files attached to this release
+                        </p>
                       </div>
                     )}
                   </motion.div>
@@ -1014,66 +1233,85 @@ const TrackDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Artist Mini Bio */}
-            <div className="pt-4 border-t border-border/50">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="relative group/artist" onClick={() => navigate(`/artist/${track.artistId}`)}>
-                    <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 200, 200)} className="w-16 h-16 rounded-full object-cover cursor-pointer transition-transform group-hover/artist:scale-105" alt="" />
-                    {track.artistVerified && (
-                      <div className="absolute -bottom-0.5 -right-0.5 bg-background rounded-full p-0.5 border border-background shadow-lg">
-                        <Verified className="h-4.5 w-4.5 text-blue-500 fill-white" />
+            {/* About the Artist Card (Zero Top Border Line) */}
+            <div className="p-5 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)] space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div
+                  className="flex items-center gap-3.5 cursor-pointer group/artist min-w-0"
+                  onClick={() => navigate(`/artist/${track.artistId}`)}
+                >
+                  <div className="relative shrink-0">
+                    <img
+                      src={artistAvatarSrc}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.src = getPlaceholderImage(
+                          `artist-${track.artistId}`,
+                          200,
+                          200
+                        );
+                      }}
+                      className="w-14 h-14 rounded-full object-cover transition-transform group-hover/artist:scale-105"
+                      alt={track.artist}
+                    />
+                    {isArtistVerified && (
+                      <div className="absolute -bottom-0.5 -right-0.5 bg-[var(--tj-color-surface-default,#0D1628)] rounded-full p-0.5">
+                        <Verified className="h-4 w-4 text-[var(--tj-color-brand-primary,#00B4D8)] fill-current" />
                       </div>
                     )}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-xl font-bold text-foreground tracking-tight cursor-pointer hover:text-blue-500 transition-colors" onClick={() => navigate(`/artist/${track.artistId}`)}>{track.artist}</h3>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-4 text-muted-foreground">
-                        <Users className="h-3 w-3" />
-                        <span className="text-[9px] font-bold uppercase tracking-widest">{(artist?.followers || 0).toLocaleString()} Followers</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-muted-foreground">
-                        <Activity className="h-3 w-3" />
-                        <span className="text-[9px] font-bold uppercase tracking-widest">{(artist?.monthlyListeners || 0).toLocaleString()} Monthly</span>
-                      </div>
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-bold text-white truncate group-hover/artist:text-[var(--tj-color-brand-primary,#00B4D8)] transition-colors">
+                      {track.artist}
+                    </h3>
+                    <div className="flex items-center gap-4 text-xs text-[var(--tj-color-text-secondary,#C2C7CD)] font-mono tabular-nums mt-0.5">
+                      <span className="flex items-center gap-1.5">
+                        <Users className="h-3.5 w-3.5" />
+                        {(artist?.followers || 0).toLocaleString()} followers
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Activity className="h-3.5 w-3.5" />
+                        {(artist?.monthlyListeners || 0).toLocaleString()} monthly
+                      </span>
                     </div>
                   </div>
                 </div>
-                <button 
-                  onClick={() => {
-                    if (artist?.uid) {
-                      toggleFollowUser(artist.uid);
-                    }
-                  }}
-                  className="p-4 rounded-lg bg-muted/50 text-muted-foreground hover:bg-foreground hover:text-background transition-all"
-                >
-                  <Users className="h-4 w-4" />
-                </button>
+
+                {artistTargetUid && artistTargetUid !== userProfile?.uid && (
+                  <button
+                    onClick={() => toggleFollowUser(artistTargetUid)}
+                    className={cn(
+                      "px-4 py-2 rounded-[var(--tj-radius-sm,6px)] text-xs font-bold transition-colors border-0 cursor-pointer shrink-0",
+                      isFollowingArtist
+                        ? "bg-[var(--tj-color-surface-elevated,#111F36)] text-[var(--tj-color-brand-primary,#00B4D8)]"
+                        : "bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
+                    )}
+                  >
+                    {isFollowingArtist ? "Following" : "Follow"}
+                  </button>
+                )}
               </div>
-              <p className="text-sm text-foreground/50 leading-relaxed max-w-2xl mb-4">
-                {artist?.bio || "Verified artist on TonJam."}
+
+              <p className="text-sm text-[var(--tj-color-text-secondary,#C2C7CD)] leading-relaxed">
+                {artist?.bio ||
+                  `${track.artist} publishes tracks and collectible music editions on TonJam.`}
               </p>
-              <button 
+
+              <button
                 onClick={() => navigate(`/artist/${track.artistId}`)}
-                className="flex items-center gap-4 text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em] hover:gap-4 transition-all"
+                className="inline-flex items-center gap-2 text-xs font-bold text-[var(--tj-color-brand-primary,#00B4D8)] hover:text-white transition-colors bg-transparent border-0 p-0 cursor-pointer"
               >
-                View Full Artist Profile <ExternalLink className="h-3 w-3" />
+                View Full Artist Profile <ExternalLink className="h-3.5 w-3.5" />
               </button>
             </div>
 
             {/* Comments Section */}
-            <div className="pt-4">
-              <CommentsSection 
-                targetId={track.id} 
-                targetType="track" 
-                itemOwnerAddress={track.artist}
-                creatorAddress={track.artistId}
-              />
-            </div>
-
+            <CommentsSection
+              targetId={track.id}
+              targetType="track"
+              itemOwnerAddress={track.artist}
+              creatorAddress={track.artistId}
+            />
           </div>
         </div>
       </div>
@@ -1081,10 +1319,27 @@ const TrackDetail: React.FC = () => {
   );
 };
 
-const DetailItem = ({ label, value, isMono }: { label: string; value: string; isMono?: boolean }) => (
-  <div className="p-4 rounded-xl bg-muted/50">
-    <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">{label}</p>
-    <p className={`text-sm font-bold text-foreground tracking-tight ${isMono ? 'font-mono text-xs break-all opacity-60' : ''}`}>{value}</p>
+const DetailItem = ({
+  label,
+  value,
+  isMono,
+}: {
+  label: string;
+  value: string;
+  isMono?: boolean;
+}) => (
+  <div className="p-3.5 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-elevated,#111F36)]/80">
+    <p className="text-[10px] font-bold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider mb-1">
+      {label}
+    </p>
+    <p
+      className={cn(
+        "text-sm font-bold text-white",
+        isMono && "font-mono text-xs break-all text-slate-300"
+      )}
+    >
+      {value}
+    </p>
   </div>
 );
 

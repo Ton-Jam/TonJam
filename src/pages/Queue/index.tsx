@@ -237,15 +237,15 @@ export const QueuePage: React.FC = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="p-6 sm:p-10 rounded-3xl bg-white/[0.02] text-center space-y-6 shadow-inner"
+            className="p-6 sm:p-10 rounded-[var(--tj-radius-lg,10px)] bg-white/[0.02] text-center space-y-6 shadow-inner"
           >
             {/* Visual 3D Holographic Illustration */}
             <div className="relative mx-auto w-52 h-52 sm:w-60 sm:h-60 group">
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-[#0088CC]/20 via-purple-500/10 to-cyan-400/20 blur-xl opacity-75 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 rounded-[var(--tj-radius-lg,10px)] bg-gradient-to-tr from-[#0088CC]/15 via-purple-500/10 to-cyan-400/15 blur-xl opacity-60 group-hover:opacity-85 transition-opacity" />
               <img 
                 src={emptyQueueIllustration} 
                 alt="Empty Music Queue Illustration" 
-                className="relative w-full h-full object-cover rounded-3xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
+                className="relative w-full h-full object-cover rounded-[var(--tj-radius-lg,10px)] shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
                 referrerPolicy="no-referrer" 
               />
             </div>

@@ -427,6 +427,29 @@ export const uploadToPinata = async (
   }
 };
 
+export interface PinataStatus {
+  configured: boolean;
+  authMode: 'jwt' | 'api_key' | 'none';
+  hasJwt: boolean;
+  hasApiKeyPair: boolean;
+  authenticated: boolean | null;
+  verifyError?: string;
+  maxFileSizeBytes: number;
+  gatewayBaseUrl: string;
+}
+
+/**
+ * Checks Pinata IPFS backend configuration status without exposing credentials.
+ */
+export const getPinataStatus = async (verify: boolean = false): Promise<PinataStatus> => {
+  const authHeaders = await getAuthTokenHeader();
+  const response = await axios.get<PinataStatus>('/api/pinata/status', {
+    params: verify ? { verify: 'true' } : undefined,
+    headers: authHeaders,
+  });
+  return response.data;
+};
+
 /**
  * Uploads JSON metadata to Pinata IPFS via secure authenticated server proxy.
  * Rejects with a clear error if Pinata is unconfigured or returns an error.

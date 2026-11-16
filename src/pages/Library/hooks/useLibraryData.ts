@@ -312,6 +312,20 @@ export const useLibraryData = () => {
     });
   }, [tracks, activeChip, searchQuery, isOfflineOnly, cachedTrackIds]);
 
+  const likedTracks = useMemo(() => {
+    return tracks.filter((track) => {
+      if (!track.isLiked) return false;
+      const matchesSearch =
+        !searchQuery ||
+        track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        track.artist.toLowerCase().includes(searchQuery.toLowerCase());
+      if (isOfflineOnly) {
+        return cachedTrackIds.has(track.id) || track.isDownloaded || track.isOfflineAvailable;
+      }
+      return matchesSearch;
+    });
+  }, [tracks, searchQuery, isOfflineOnly, cachedTrackIds]);
+
   const filteredPlaylists = useMemo(() => {
     return playlists.filter((playlist) => {
       const matchesSearch = playlist.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -487,6 +501,7 @@ export const useLibraryData = () => {
       (t) => cachedTrackIds.has(t.id) || t.isDownloaded || t.isOfflineAvailable
     ).length,
     tracks: filteredTracks,
+    likedTracks,
     rawTracks: tracks,
     artists: filteredArtists,
     rawArtists: artists,

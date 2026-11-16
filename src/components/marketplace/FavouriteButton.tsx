@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
-import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface FavouriteButtonProps {
@@ -20,6 +19,10 @@ export const FavouriteButton: React.FC<FavouriteButtonProps> = ({
 }) => {
   const [favourited, setFavourited] = useState(initialFavourited);
 
+  useEffect(() => {
+    setFavourited(initialFavourited);
+  }, [initialFavourited]);
+
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -29,18 +32,18 @@ export const FavouriteButton: React.FC<FavouriteButtonProps> = ({
   };
 
   return (
-    <motion.button
+    <button
       type="button"
-      whileTap={{ scale: 0.85 }}
       onClick={handleClick}
       aria-label={favourited ? "Remove from favourites" : "Add to favourites"}
+      aria-pressed={favourited}
       className={cn(
-        "rounded-full flex items-center justify-center transition-colors cursor-pointer outline-none border-none",
-        "bg-[#070D20]/75 backdrop-blur-md shadow-sm",
+        "rounded-[var(--tj-radius-xs,4px)] flex items-center justify-center transition-colors cursor-pointer outline-none border border-[var(--tj-color-border-subtle)]",
+        "bg-[var(--tj-color-surface-overlay,#07182BCC)] backdrop-blur-md",
         size === "sm" ? "w-7 h-7" : "w-8 h-8",
         favourited
-          ? "text-[#FF4A6B] hover:text-[#FF6685]"
-          : "text-[#9BAAC5] hover:text-[#F5F8FF]",
+          ? "text-[#FF4A6B] border-[#FF4A6B]/50 hover:text-[#FF6685]"
+          : "text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white",
         className
       )}
     >
@@ -54,7 +57,7 @@ export const FavouriteButton: React.FC<FavouriteButtonProps> = ({
       {typeof count === "number" && (
         <span className="text-[10px] ml-1 font-semibold">{count}</span>
       )}
-    </motion.button>
+    </button>
   );
 };
 

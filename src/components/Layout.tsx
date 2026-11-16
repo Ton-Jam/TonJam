@@ -811,6 +811,10 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate, onOpenTestnetM
         )}
       </div>
 
+      <div className="pt-2 pb-1">
+        <NavItem to="/artist-studio" icon={SparklesIcon} label="Artist Studio" onClick={onNavigate} />
+      </div>
+
       {(isArtist || isAdmin || userProfile?.isVerifiedArtist || userProfile?.role === 'artist') ? (
         <div className="pt-2 space-y-2">
           <Link 

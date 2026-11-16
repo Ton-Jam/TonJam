@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Coins, Users, Layers, TrendingUp } from 'lucide-react';
+import { Coins, Users, Layers } from 'lucide-react';
 import { Collection, NFTItem, Transaction } from '@/types';
 
 interface CollectionSummaryCardsProps {
@@ -10,7 +10,6 @@ interface CollectionSummaryCardsProps {
   allNFTs?: NFTItem[];
   collections?: Collection[];
   transactions?: Transaction[];
-  // Direct prop fallbacks
   customVolume?: string | number;
   customOwners?: number;
   customItems?: number;
@@ -27,127 +26,142 @@ export const CollectionSummaryCards: React.FC<CollectionSummaryCardsProps> = ({
   customOwners,
   customItems
 }) => {
-  
-  // Resolve stats with fallback options
   const stats = useMemo(() => {
-    // 1. If direct prop values are passed, prioritize them
     if (customVolume !== undefined || customOwners !== undefined || customItems !== undefined) {
       return {
         volume: customVolume?.toString() || '0',
         owners: customOwners ?? 0,
         items: customItems ?? 0,
-        name: collectionName || 'This Collection'
+        name: collectionName || 'Collection',
+        isStandalone: false,
       };
     }
 
-    // 2. If NFT is provided, find its collection
     let activeCollection: Collection | undefined;
     if (collectionId) {
-      activeCollection = collections.find(c => c.id === collectionId);
+      activeCollection = collections.find((c) => c.id === collectionId);
     } else if (nft) {
-      activeCollection = collections.find(c => c.nftIds.includes(nft.id));
+      activeCollection = collections.find(
+        (c) => (Array.isArray(c.nftIds) && c.nftIds.includes(nft.id)) || c.id === (nft as any).collectionId
+      );
     }
 
     if (activeCollection) {
-      const nftsInCollection = allNFTs.filter(n => activeCollection!.nftIds.includes(n.id));
-      
-      // Calculate Total Volume from transaction records of this collection
-      const collectionTx = transactions.filter(t => 
-        t.type === 'nft_sale' && activeCollection!.nftIds.includes(t.nftId || '')
+      const nftIdList = Array.isArray(activeCollection.nftIds) ? activeCollection.nftIds : [];
+      const nftsInCollection = allNFTs.filter(
+        (n) => nftIdList.includes(n.id) || (n as any).collectionId === activeCollection!.id
       );
-      const volumeNum = collectionTx.reduce((sum, t) => sum + (t.amount || 0), 0);
-      const volumeStr = volumeNum > 0 ? volumeNum.toLocaleString() : '1,240'; // Fallback to a solid stat if no transaction yet
 
-      // Calculate Unique Holders/Owners
-      const ownersSet = new Set(nftsInCollection.map(n => n.owner || n.ownerId).filter(Boolean));
-      const ownersCount = ownersSet.size > 0 ? ownersSet.size : 342; // Fallback to beautiful mock if newly initialized
+      const collectionTx = transactions.filter(
+        (t) =>
+          t.type === 'nft_sale' &&
+          (nftIdList.includes(t.nftId || '') || nftsInCollection.some((n) => n.id === t.nftId))
+      );
+      const txVol = collectionTx.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+      const docVol = parseFloat(String((activeCollection as any).volume || '0')) || 0;
+      const volumeNum = txVol > 0 ? txVol : docVol;
 
-      // Total Items in collection
-      const itemsCount = activeCollection.nftIds.length || nftsInCollection.length || 8;
+      const ownersSet = new Set(nftsInCollection.map((n) => n.owner || n.ownerId).filter(Boolean));
+      const ownersCount = ownersSet.size || Number((activeCollection as any).ownersCount || 0);
+      const itemsCount = nftIdList.length || nftsInCollection.length || Number((activeCollection as any).itemCount || 0);
 
       return {
-        volume: volumeStr,
+        volume: volumeNum.toLocaleString(undefined, { maximumFractionDigits: 2 }),
         owners: ownersCount,
         items: itemsCount,
-        name: activeCollection.name
+        name: activeCollection.name,
+        isStandalone: false,
       };
     }
 
-    // 3. Global fallback for general album/collection view
+    // Standalone NFT summary strictly computed from the NFT document itself (no fake hardcoded numbers)
+    if (nft) {
+      const salesVol = (nft.history || [])
+        .filter((h) => h.event === 'Sold' && h.price)
+        .reduce((sum, h) => sum + (parseFloat(String(h.price).replace(/[^\d.]/g, '')) || 0), 0);
+      const supplyNum = Number(nft.supply || 1);
+
+      return {
+        volume: salesVol > 0 ? salesVol.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0',
+        owners: nft.owner ? 1 : 0,
+        items: supplyNum,
+        name: nft.title || 'Single Release',
+        isStandalone: true,
+      };
+    }
+
     return {
-      volume: '1,240',
-      owners: 342,
-      items: 8,
-      name: collectionName || 'Cyberpunk Nights'
+      volume: '0',
+      owners: 0,
+      items: 0,
+      name: collectionName || 'Collection',
+      isStandalone: false,
     };
   }, [collectionId, collectionName, nft, allNFTs, collections, transactions, customVolume, customOwners, customItems]);
 
   const cardsData = [
     {
       id: 'stat-volume',
-      label: 'Total Volume',
+      label: 'Traded Volume',
       value: `${stats.volume} TON`,
       icon: Coins,
       iconColor: 'text-amber-400',
-      bgColor: 'bg-amber-500/5',
-      trend: '+12.4% this week',
+      bgColor: 'bg-amber-500/10',
+      note: 'On-chain sales',
     },
     {
       id: 'stat-owners',
-      label: 'Unique Owners',
+      label: stats.isStandalone ? 'Holders' : 'Unique Owners',
       value: stats.owners.toLocaleString(),
       icon: Users,
-      iconColor: 'text-blue-400',
-      bgColor: 'bg-blue-500/5',
-      trend: 'Active Collectors',
+      iconColor: 'text-[#38BDF8]',
+      bgColor: 'bg-[#0088CC]/15',
+      note: 'Verified wallets',
     },
     {
       id: 'stat-items',
-      label: 'Collection Items',
-      value: `${stats.items} Tracks`,
+      label: stats.isStandalone ? 'Total Supply' : 'Collection Items',
+      value: `${stats.items} ${stats.items === 1 ? 'Edition' : 'Editions'}`,
       icon: Layers,
       iconColor: 'text-purple-400',
-      bgColor: 'bg-purple-500/5',
-      trend: 'Fully Verified',
+      bgColor: 'bg-purple-500/10',
+      note: stats.isStandalone ? 'Single release' : 'Catalog count',
     }
   ];
 
   return (
     <div className="space-y-3" id="collection-summary-stats-block">
       <div className="flex items-center justify-between px-1">
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-          {stats.name} Ledger Details
-        </span>
-        <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
-          <TrendingUp className="w-3 h-3" /> Live Sync
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 truncate">
+          {stats.name} Summary
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         {cardsData.map((card, idx) => {
           const Icon = card.icon;
           return (
             <motion.div
               key={card.id}
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1, ease: 'easeOut' }}
-              className="bg-[#101A3B]/40 backdrop-blur-md p-5 rounded-2xl flex items-center justify-between transition-all duration-300 hover:bg-[#101A3B]/60 group cursor-default"
+              transition={{ delay: idx * 0.06, ease: 'easeOut' }}
+              className="bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border-0 p-3.5 rounded-[var(--tj-radius-md,8px)] flex items-center justify-between transition-colors duration-200 cursor-default"
             >
-              <div className="space-y-1.5">
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block">
+              <div className="space-y-1 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                   {card.label}
                 </span>
-                <h4 className="text-xl font-black text-white tracking-tight">
+                <h4 className="text-base sm:text-lg font-black text-white font-mono tabular-nums tracking-tight truncate">
                   {card.value}
                 </h4>
-                <p className="text-[9px] font-bold text-slate-400">
-                  {card.trend}
+                <p className="text-[11px] text-slate-400 truncate">
+                  {card.note}
                 </p>
               </div>
 
-              <div className={`${card.bgColor} p-3.5 rounded-2xl transition-transform duration-300 group-hover:scale-110`}>
-                <Icon className={`w-5 h-5 ${card.iconColor}`} />
+              <div className={`${card.bgColor} p-2.5 rounded-[var(--tj-radius-sm,6px)] border-0 shrink-0`}>
+                <Icon className={`w-4 h-4 ${card.iconColor}`} />
               </div>
             </motion.div>
           );

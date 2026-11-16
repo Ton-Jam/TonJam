@@ -230,7 +230,7 @@ const PlaylistFolderCard: React.FC<PlaylistFolderCardProps> = ({ folder, playlis
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden bg-white/[0.01] border-l-2 border-blue-600/30 ml-10 pl-2 pr-4 py-2 space-y-1"
+            className="overflow-hidden bg-white/[0.01] border-l border-blue-600/30 ml-10 pl-2 pr-4 py-2 space-y-1"
           >
             {folderPlaylists.length > 0 ? (
               folderPlaylists.map(playlist => (

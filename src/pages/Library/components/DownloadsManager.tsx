@@ -10,6 +10,7 @@ interface DownloadsManagerProps {
   downloadQuality: 'High' | 'Lossless' | 'Dolby Atmos';
   onChangeQuality: (quality: 'High' | 'Lossless' | 'Dolby Atmos') => void;
   onRemoveDownload: (id: string) => void;
+  onPlay?: (track: LibraryTrack) => void;
 }
 
 export const DownloadsManager: React.FC<DownloadsManagerProps> = ({
@@ -18,7 +19,8 @@ export const DownloadsManager: React.FC<DownloadsManagerProps> = ({
   totalDownloadedSize,
   downloadQuality,
   onChangeQuality,
-  onRemoveDownload
+  onRemoveDownload,
+  onPlay
 }) => {
   const downloadedTracks = tracks.filter(t => t.isDownloaded);
   const downloadedAlbums = albums.filter(a => a.isDownloaded);
@@ -155,7 +157,8 @@ export const DownloadsManager: React.FC<DownloadsManagerProps> = ({
             {downloadedTracks.map((track) => (
               <div 
                 key={track.id}
-                className="flex items-center gap-3 p-2 bg-white/[0.01] hover:bg-white/[0.03] rounded-[10px] border border-black/5 dark:border-white/5 group"
+                onClick={() => onPlay && onPlay(track)}
+                className="flex items-center gap-3 p-2 bg-white/[0.01] hover:bg-white/[0.03] rounded-[10px] border border-black/5 dark:border-white/5 group cursor-pointer select-none transition-all"
               >
                 <div className="relative w-10 h-10 rounded-[10px] overflow-hidden shrink-0 bg-slate-800">
                   <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />

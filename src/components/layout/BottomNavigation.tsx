@@ -127,7 +127,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   return (
     <nav 
       id="tonjam-bottom-navigation"
-      className={`fixed bottom-0 left-0 right-0 z-50 bg-[var(--tj-color-navigation-background,#07172A)]/95 backdrop-blur-[18px] border-t-2 border-slate-300/20 shadow-[0_-1px_0_rgba(226,232,240,0.08),0_-8px_24px_rgba(0,0,0,0.45)] pb-[env(safe-area-inset-bottom,0px)] select-none transition-all duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 z-50 bg-[var(--tj-color-navigation-background,#07172A)]/95 backdrop-blur-[18px] border-t border-[rgba(192,199,212,0.28)] pb-[env(safe-area-inset-bottom,0px)] select-none transition-all duration-300 ${
         isHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
       }`}
       aria-label="Bottom Navigation"
@@ -181,7 +181,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                 >
                   <Icon 
                     className="w-5 h-5 shrink-0 [vector-effect:non-scaling-stroke] [shape-rendering:geometricPrecision]" 
-                    strokeWidth={isActive ? 2.5 : 2} 
+                    strokeWidth={isActive ? 1.75 : 1.25} 
                   />
                 </motion.div>
 

@@ -269,9 +269,7 @@ export const Playlists: React.FC<PlaylistsProps> = ({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (window.confirm(`Delete playlist "${playlist.title}"?`)) {
-                            onDeletePlaylist(playlist.id);
-                          }
+                          onDeletePlaylist(playlist.id);
                         }}
                         className="p-1.5 rounded-lg hover:bg-rose-500/20 text-[#94A3B8] hover:text-rose-400 transition-colors cursor-pointer border-none bg-transparent"
                         title="Delete Playlist"
@@ -311,11 +309,11 @@ export const Playlists: React.FC<PlaylistsProps> = ({
                     <div className="min-w-0 flex-1 text-left">
                       <motion.h4 
                         layoutId={`playlist-title-${playlist.id}`}
-                        className="text-[10px] font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors"
+                        className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-[#00B4D8] transition-colors"
                       >
                         {playlist.title}
                       </motion.h4>
-                      <p className="text-[8px] text-[#94A3B8] font-medium truncate mt-0.5">
+                      <p className="text-[11px] text-[#94A3B8] font-medium truncate mt-0.5">
                         {playlist.tracksCount} track{playlist.tracksCount === 1 ? '' : 's'} • {playlist.creator}
                       </p>
                     </div>
@@ -340,9 +338,7 @@ export const Playlists: React.FC<PlaylistsProps> = ({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (window.confirm(`Delete playlist "${playlist.title}"?`)) {
-                            onDeletePlaylist(playlist.id);
-                          }
+                          onDeletePlaylist(playlist.id);
                         }}
                         className="p-2 rounded-xl hover:bg-rose-500/20 text-[#94A3B8] hover:text-rose-400 transition-colors cursor-pointer border-none bg-transparent"
                         title="Delete Playlist"

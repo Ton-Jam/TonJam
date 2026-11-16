@@ -39,7 +39,7 @@ export const ArtistPreviewCard: React.FC<ArtistPreviewCardProps> = ({
         <img
           src={avatarUrl}
           alt={artistName}
-          className="w-14 h-14 rounded-full object-cover border-2 border-[#16244F] shadow-md flex-shrink-0"
+          className="w-14 h-14 rounded-full object-cover border border-[#16244F] shadow-md flex-shrink-0"
           onError={(e) => {
             (e.target as HTMLImageElement).src = getPlaceholderImage("avatar");
           }}

@@ -569,14 +569,14 @@ export const LiveTourManager: React.FC<LiveTourManagerProps> = ({
               >
                 {/* Glowing Timeline Node */}
                 <div
-                  className={`absolute -left-6 sm:-left-8 top-5 w-4 h-4 rounded-full border-2 transition-all group-hover:scale-125 ${
+                  className={`absolute -left-6 sm:-left-8 top-5 w-4 h-4 rounded-full border transition-all group-hover:scale-125 ${
                     evt.status === 'upcoming'
-                      ? 'bg-blue-500 border-cyan-300 shadow-[0_0_12px_rgba(59,130,246,0.8)]'
+                      ? 'bg-blue-500 border-cyan-300 shadow-[0_0_8px_rgba(59,130,246,0.45)]'
                       : 'bg-zinc-700 border-zinc-500'
                   }`}
                 />
 
-                <div className="p-5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-all shadow-xl backdrop-blur-md relative overflow-hidden">
+                <div className="p-5 rounded-[var(--tj-radius-lg,10px)] bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-all shadow-xl backdrop-blur-md relative overflow-hidden">
                   {/* Background Banner Image preview */}
                   {evt.bannerImageUrl && (
                     <div className="absolute inset-0 z-0 opacity-10 group-hover:opacity-15 transition-opacity">

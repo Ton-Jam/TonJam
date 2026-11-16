@@ -69,7 +69,7 @@ export const NetworkStatus: React.FC<{ className?: string }> = ({ className }) =
         <div className="pt-4 flex items-center justify-between">
           <div className="flex -space-x-2">
              {[1, 2, 3, 4].map(i => (
-               <div key={i} className="w-5 h-5 rounded-full border-2 border-zinc-950 bg-zinc-800 flex items-center justify-center">
+               <div key={i} className="w-5 h-5 rounded-full border border-zinc-950 bg-zinc-800 flex items-center justify-center">
                  <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
                </div>
              ))}

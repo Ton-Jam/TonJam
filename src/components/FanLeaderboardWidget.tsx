@@ -122,8 +122,8 @@ const FanLeaderboardWidget: React.FC<FanLeaderboardWidgetProps> = ({ artistId })
                 
                 <div className="flex items-center justify-between mb-4 relative z-10">
                   <div className="relative">
-                    <img src={fan.avatar} className="w-16 h-16 rounded-2xl bg-background border border-divider p-1 object-cover" alt="" />
-                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center border-2 border-background shadow-xl bg-background">
+                    <img src={fan.avatar} className="w-16 h-16 rounded-[var(--tj-radius-md,8px)] bg-background border border-divider p-1 object-cover" alt="" />
+                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center border border-background shadow-xl bg-background">
                       {fan.rank === 1 && <Crown className="w-4 h-4 text-primary" />}
                       {fan.rank === 2 && <Medal className="w-4 h-4 text-verified" />}
                       {fan.rank === 3 && <Trophy className="w-4 h-4 text-success" />}

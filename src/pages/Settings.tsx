@@ -381,7 +381,7 @@ const Settings: React.FC = () => {
             {/* ACCOUNT TAB */}
             <TabsContent value="account" className="mt-0 space-y-6">
               {/* Cover Photo Customizer */}
-              <Card className="bg-white/[0.03] border border-white/5 rounded-3xl overflow-hidden relative group">
+              <Card className="bg-white/[0.03] border border-white/5 rounded-[var(--tj-radius-lg,10px)] overflow-hidden relative group">
                 <div className="aspect-[21/9] sm:aspect-[24/8] w-full bg-zinc-900/80 overflow-hidden relative">
                   {profile.coverPhoto ? (
                     <img 
@@ -390,7 +390,7 @@ const Settings: React.FC = () => {
                       alt="Cover" 
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-white/5 text-zinc-500">
+                    <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 text-zinc-500">
                       <LayoutGrid className="w-8 h-8 mb-2 opacity-50" />
                       <span className="text-xs font-semibold">Upload artist cover banner</span>
                     </div>
@@ -433,7 +433,7 @@ const Settings: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Profile Avatar Card */}
                 <div className="lg:col-span-1 space-y-6">
-                  <Card className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 text-center flex flex-col items-center">
+                  <Card className="bg-white/[0.03] border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-6 text-center flex flex-col items-center">
                     <div className="w-28 h-28 rounded-2xl relative group overflow-hidden mb-4 border border-white/10">
                       <img 
                         src={profile.avatar || getPlaceholderImage(profile.name || 'user')} 
@@ -477,7 +477,7 @@ const Settings: React.FC = () => {
                   </Card>
 
                   {/* Verification Banner */}
-                  <Card className="bg-blue-600/10 border border-blue-500/20 rounded-3xl p-5 space-y-3">
+                  <Card className="bg-blue-600/10 border border-blue-500/20 rounded-[var(--tj-radius-lg,10px)] p-5 space-y-3">
                     <div className="flex items-center gap-2.5">
                       <ShieldCheck className="w-5 h-5 text-blue-400" />
                       <h4 className="text-xs font-bold text-white">Artist Verification</h4>
@@ -497,7 +497,7 @@ const Settings: React.FC = () => {
 
                 {/* Right Form Inputs */}
                 <div className="lg:col-span-2 space-y-6">
-                  <Card className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6">
+                  <Card className="bg-white/[0.03] border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-6 sm:p-8 space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                       <div className="space-y-2">
                         <label htmlFor="settings-name" className="text-xs font-bold text-zinc-400 ml-1">Display Name</label>
@@ -642,7 +642,7 @@ const Settings: React.FC = () => {
 
             {/* PREFERENCES TAB */}
             <TabsContent value="interface" className="mt-0 space-y-6">
-              <Card className="bg-white/[0.03] border border-white/5 rounded-3xl p-4 sm:p-6 space-y-2">
+              <Card className="bg-white/[0.03] border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-4 sm:p-6 space-y-2">
                 <div className="flex items-center gap-3 mb-4 px-2 pt-2">
                   <Palette className="w-5 h-5 text-blue-500" />
                   <h3 className="text-base font-bold text-foreground">Display & Interface</h3>
@@ -790,7 +790,7 @@ const Settings: React.FC = () => {
 
             {/* NOTIFICATIONS TAB */}
             <TabsContent value="notifications" className="mt-0 space-y-6">
-              <Card className="bg-white/[0.03] border border-white/5 rounded-3xl p-4 sm:p-6 space-y-2">
+              <Card className="bg-white/[0.03] border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-4 sm:p-6 space-y-2">
                 <div className="flex items-center gap-3 mb-4 px-2 pt-2">
                   <Bell className="w-5 h-5 text-blue-500" />
                   <h3 className="text-base font-bold text-foreground">Notification Preferences</h3>
@@ -875,7 +875,7 @@ const Settings: React.FC = () => {
             <TabsContent value="web3" className="mt-0 space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Mainnet Bridge Card */}
-                <Card className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 space-y-6">
+                <Card className="bg-white/[0.03] border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-6 space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Wallet className="w-5 h-5 text-blue-500" />
@@ -924,7 +924,7 @@ const Settings: React.FC = () => {
                 </Card>
 
                 {/* Royalty Engine Card */}
-                <Card className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 space-y-6">
+                <Card className="bg-white/[0.03] border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-6 space-y-6">
                   <div className="flex items-center gap-3">
                     <Sparkles className="w-5 h-5 text-cyan-400" />
                     <h3 className="text-base font-bold text-foreground">Royalty Engine</h3>
@@ -964,7 +964,7 @@ const Settings: React.FC = () => {
               </div>
 
               {/* Artist Verification Card */}
-              <Card className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 sm:p-8">
+              <Card className="bg-white/[0.03] border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-6 sm:p-8">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                   <div className="flex items-center gap-5">
                     <div className="w-14 h-14 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 border border-blue-500/20 shrink-0">
@@ -1008,7 +1008,7 @@ const Settings: React.FC = () => {
             <TabsContent value="system" className="mt-0 space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Storage Card */}
-                <Card className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 space-y-6">
+                <Card className="bg-white/[0.03] border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-6 space-y-6">
                   <div className="flex items-center gap-3">
                     <Database className="w-5 h-5 text-blue-500" />
                     <h3 className="text-base font-bold text-foreground">Local Storage & Cache</h3>
@@ -1047,7 +1047,7 @@ const Settings: React.FC = () => {
                 </Card>
 
                 {/* Privacy & Account Security */}
-                <Card className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 space-y-6">
+                <Card className="bg-white/[0.03] border border-white/5 rounded-[var(--tj-radius-lg,10px)] p-6 space-y-6">
                   <div className="flex items-center gap-3">
                     <Key className="w-5 h-5 text-amber-500" />
                     <h3 className="text-base font-bold text-foreground">Privacy & Security</h3>

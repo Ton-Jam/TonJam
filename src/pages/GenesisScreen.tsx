@@ -164,10 +164,10 @@ const GenesisScreen: React.FC = () => {
               >
                 <div className="relative">
                   <div className="absolute inset-0 bg-primary blur-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
-                  <div className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden border-2 border-border group-hover:border-primary transition-all duration-500 p-1 bg-background shadow-2xl">
+                  <div className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden border border-border group-hover:border-primary transition-all duration-500 p-1 bg-background shadow-2xl">
                     <img src={artist.avatarUrl} className="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt={artist.name} />
                   </div>
-                  <div className="absolute -bottom-2 right-4 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-4 border-background opacity-0 group-hover:opacity-100 transition-opacity scale-0 group-hover:scale-100 duration-300">
+                  <div className="absolute -bottom-2 right-4 w-6 h-6 bg-primary rounded-full flex items-center justify-center border border-background opacity-0 group-hover:opacity-100 transition-opacity scale-0 group-hover:scale-100 duration-300">
                     <ShieldCheck className="w-3 h-3 text-white" />
                   </div>
                 </div>
@@ -204,8 +204,8 @@ const GenesisScreen: React.FC = () => {
               color: "text-purple-500"
             },
           ].map((item, i) => (
-            <div key={i} className="bg-white/[0.03] border border-border/60 rounded-3xl p-10 space-y-6 hover:border-blue-500/40 transition-all">
-              <div className={cn("inline-flex p-4 rounded-2xl bg-white/[0.05]", item.color)}>
+            <div key={i} className="bg-white/[0.03] border border-border/60 rounded-[var(--tj-radius-lg,10px)] p-10 space-y-6 hover:border-blue-500/40 transition-all">
+              <div className={cn("inline-flex p-4 rounded-[var(--tj-radius-md,8px)] bg-white/[0.05]", item.color)}>
                 <item.icon className="w-8 h-8" />
               </div>
               <h4 className="text-2xl font-black uppercase tracking-tight">{item.title}</h4>

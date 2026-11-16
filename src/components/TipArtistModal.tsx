@@ -245,7 +245,7 @@ export const TipArtistModal: React.FC<TipArtistModalProps> = ({ artist, track, o
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
-        className="bg-neutral-900/95 backdrop-blur-2xl rounded-3xl w-full max-w-md overflow-hidden shadow-2xl text-white"
+        className="bg-neutral-900/95 backdrop-blur-2xl rounded-[var(--tj-radius-lg,10px)] w-full max-w-md overflow-hidden shadow-2xl text-white"
       >
         <div className="p-5 sm:p-6 space-y-5">
           

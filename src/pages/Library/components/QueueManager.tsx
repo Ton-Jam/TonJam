@@ -7,12 +7,14 @@ interface QueueManagerProps {
   queue: QueueItem[];
   onRemoveFromQueue: (id: string) => void;
   onClearQueue: () => void;
+  onPlay?: (item: QueueItem) => void;
 }
 
 export const QueueManager: React.FC<QueueManagerProps> = ({
   queue,
   onRemoveFromQueue,
-  onClearQueue
+  onClearQueue,
+  onPlay
 }) => {
   return (
     <div className="space-y-4">
@@ -73,7 +75,8 @@ export const QueueManager: React.FC<QueueManagerProps> = ({
                     initial={{ opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="flex items-center gap-3 p-2 hover:bg-white/[0.03] dark:hover:bg-white/[0.03] hover:bg-black/[0.01] border border-transparent hover:border-black/5 dark:hover:border-white/5 rounded-[10px] group transition-all"
+                    className="flex items-center gap-3 p-2 hover:bg-white/[0.03] dark:hover:bg-white/[0.03] hover:bg-black/[0.01] border border-transparent hover:border-black/5 dark:hover:border-white/5 rounded-[10px] group transition-all cursor-pointer select-none"
+                    onClick={() => onPlay && onPlay(item)}
                   >
                     {/* Index */}
                     <span className="text-[10px] font-mono font-bold text-muted-foreground w-4 text-center shrink-0">

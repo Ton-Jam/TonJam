@@ -254,7 +254,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       >
         <div 
           onClick={() => setIsDroppedDown(false)}
-          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border-2 border-[rgba(192,202,214,0.22)] shadow-[0_8px_30px_rgba(0,0,0,0.8)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden bg-[var(--tj-color-player-background,#061426)]"
+          className="group relative flex items-center gap-2.5 p-1.5 pr-3 text-white rounded-full border border-[rgba(192,202,214,0.22)] shadow-[0_8px_30px_rgba(0,0,0,0.8)] cursor-pointer transition-all hover:scale-105 active:scale-95 select-none overflow-hidden bg-[var(--tj-color-player-background,#061426)]"
           style={{
             backgroundColor: "var(--tj-color-player-background, #061426)",
             opacity: 1,
@@ -452,7 +452,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             <img
               src={coverUrl}
               alt={currentTrack.title}
-              className="w-10 h-10 sm:w-11 sm:h-11 object-cover rounded-[2px] shrink-0 shadow-md bg-[#0A1628]"
+              className="w-10 h-10 sm:w-11 sm:h-11 object-cover rounded-[var(--tj-radius-xs,4px)] shrink-0 shadow-md bg-[#0A1628]"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
               }}

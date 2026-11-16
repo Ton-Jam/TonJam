@@ -337,7 +337,7 @@ export const PlaylistDetail: React.FC = () => {
         <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-end mb-8 pt-2">
           
           {/* Cover Artwork Container */}
-          <div className="relative group w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 shrink-0 rounded-3xl overflow-hidden bg-black/40 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+          <div className="relative group w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 shrink-0 rounded-[var(--tj-radius-lg,10px)] overflow-hidden bg-black/40 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             {playlist.coverUrl ? (
               <img 
                 src={playlist.coverUrl} 
@@ -708,7 +708,7 @@ export const PlaylistDetail: React.FC = () => {
           })}
 
           {filteredPlaylistTracks.length === 0 && (
-            <div className="py-14 px-6 text-center bg-white/[0.03] rounded-3xl mt-4 space-y-3">
+            <div className="py-14 px-6 text-center bg-white/[0.03] rounded-[var(--tj-radius-lg,10px)] mt-4 space-y-3">
               <Music2 className="w-10 h-10 text-[#00B4D8] mx-auto opacity-70" />
               <p className="text-sm font-bold text-white">
                 {playlistSearchQuery ? `No tracks matching "${playlistSearchQuery}"` : 'No tracks in this playlist yet'}
@@ -733,7 +733,7 @@ export const PlaylistDetail: React.FC = () => {
       {isAddTracksOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={() => setIsAddTracksOpen(false)} />
-          <div className="relative w-full max-w-lg bg-[#0B1528] text-white rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] border-none">
+          <div className="relative w-full max-w-lg bg-[#0B1528] text-white rounded-[var(--tj-radius-lg,10px)] overflow-hidden shadow-2xl flex flex-col max-h-[85vh] border-none">
             
             {/* Modal Header */}
             <div className="p-5 flex items-center justify-between pb-3">

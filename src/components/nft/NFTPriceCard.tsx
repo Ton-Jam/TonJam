@@ -1,12 +1,26 @@
 import React from "react";
-import { 
-  Zap, Gavel, Handshake, Lock, Coins, Bell, BellOff, 
-  TrendingDown, Share2, Send, Loader2 
+import {
+  Zap,
+  Gavel,
+  Handshake,
+  Lock,
+  Coins,
+  Bell,
+  BellOff,
+  Send,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { NFTItem, NFTOffer } from "@/types";
 import { PriceSparkline } from "@/components/PriceSparkline";
 import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
+import { useTonPrice } from "@/contexts/TonPriceContext";
+import {
+  TON_NETWORK_MODE,
+  TONJAM_MARKETPLACE_ADDRESS,
+  validateTonAddress,
+} from "@/services/tonService";
 
 interface NFTPriceCardProps {
   nft: NFTItem;
@@ -22,8 +36,8 @@ interface NFTPriceCardProps {
   onCancelBid: () => void;
   onStake: () => void;
   onTip: () => void;
-  onPriceAlert: () => void;
-  onShare: () => void;
+  onPriceAlert?: () => void;
+  onShare?: () => void;
   onManage: () => void;
   onSell: () => void;
   onSend: () => void;
@@ -49,8 +63,6 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
   onCancelBid,
   onStake,
   onTip,
-  onPriceAlert,
-  onShare,
   onManage,
   onSell,
   onSend,
@@ -58,81 +70,100 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
   priceAlertPercent,
   onTogglePriceAlert,
   onPercentChange,
-  onSimulateDrop,
-  showGlow,
 }) => {
+  const { price: liveTonUsd } = useTonPrice();
+  const hasUsdRate = typeof liveTonUsd === "number" && liveTonUsd > 0;
+
   const displayPrice = isAuction
     ? highestOfferPrice > 0
       ? highestOfferPrice
       : nft.startingBid || nft.price
     : nft.price;
 
-  const usdEquivalent = (parseFloat(String(displayPrice || "0")) * 5.2).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const numericTon = parseFloat(String(displayPrice || "0").replace(/[^\d.]/g, "")) || 0;
+  const formattedTon = String(displayPrice || "0").replace(/\s*TON\s*$/i, "").trim() || "0";
+
+  const usdEquivalent = hasUsdRate
+    ? (numericTon * liveTonUsd!).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    : null;
+
+  // Honest contract & seller wallet verification for Buy & Bid actions
+  const hasValidSeller = Boolean(nft.owner && validateTonAddress(nft.owner, TON_NETWORK_MODE));
+  const hasValidContract = Boolean(
+    nft.contractAddress && validateTonAddress(nft.contractAddress, TON_NETWORK_MODE)
+  );
+  const hasMarketplaceContract = Boolean(
+    TONJAM_MARKETPLACE_ADDRESS && validateTonAddress(TONJAM_MARKETPLACE_ADDRESS, TON_NETWORK_MODE)
+  );
+
+  const canBuyVerified =
+    !isOwner &&
+    !isAuction &&
+    numericTon > 0 &&
+    ((hasValidContract && hasMarketplaceContract) || hasValidSeller);
+
+  const canBidVerified =
+    !isOwner &&
+    isAuction &&
+    !isAuctionEnded &&
+    (hasValidContract || hasMarketplaceContract);
+
+  const primaryActionUnavailable = !isOwner && (isAuction ? !isAuctionEnded && !canBidVerified : !canBuyVerified);
+
+  const unavailableReason = isAuction
+    ? "Auction contract is not verified for bidding on this release."
+    : numericTon <= 0
+    ? "This NFT is not currently listed with a price."
+    : "Seller wallet or marketplace contract address is unverified for on-chain settlement.";
 
   return (
-    <div
-      className={`bg-white/[0.03] rounded-2xl p-5 sm:p-7 relative overflow-hidden transition-all duration-300 shadow-xl ${
-        showGlow ? "shadow-[0_0_30px_rgba(0,82,255,0.25)]" : ""
-      }`}
-    >
-      {/* Background ambient lighting */}
-      <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 pointer-events-none">
-        <Zap className="h-60 w-60 text-blue-500" />
-      </div>
+    <div className="bg-[var(--tj-color-surface-default,#0D1628)] border-0 rounded-[var(--tj-radius-md,8px)] p-4 sm:p-6 relative overflow-hidden transition-colors text-left">
+      {/* Main Pricing Header & Sparkline */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 relative z-10">
+        <div className="space-y-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)] block">
+            {isAuction ? "Current Leading Bid" : "Current Listing Price"}
+          </span>
 
-      {/* Main Pricing Header & Stats */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2.5">
-            <div
-              className={`w-2 h-2 rounded-full ${
-                isAuction
-                  ? "bg-amber-400 animate-pulse shadow-[0_0_10px_rgba(251,191,36,0.6)]"
-                  : "bg-[#0052FF] shadow-[0_0_10px_rgba(0,82,255,0.6)]"
-              }`}
-            />
-            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
-              {isAuction ? "Current Leading Bid" : "Instant Valuation"}
-            </span>
-          </div>
-
-          <div className="flex items-baseline gap-3">
+          <div className="flex items-baseline gap-2">
             <motion.span
-              key={displayPrice}
+              key={formattedTon}
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
-              className="text-3xl sm:text-5xl md:text-6xl font-black text-white font-mono tracking-tight leading-none"
+              transition={{ duration: 0.2 }}
+              className="text-3xl sm:text-4xl font-black text-white font-mono tabular-nums tracking-tight leading-none"
             >
-              {displayPrice}
+              {formattedTon}
             </motion.span>
-            <span className="text-base sm:text-xl font-black text-[#0098EA] uppercase tracking-wider">
+            <span className="text-base sm:text-lg font-black text-[var(--tj-color-brand-primary,#00B4D8)] uppercase tracking-wider">
               TON
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-slate-300 font-mono px-3 py-1 bg-white/[0.04] rounded-full">
-              ≈ ${usdEquivalent} USD
-            </span>
-          </div>
+          {usdEquivalent && (
+            <div className="flex items-center gap-2 text-xs text-[var(--tj-color-text-secondary,#C2C7CD)] font-mono tabular-nums">
+              <span>≈ ${usdEquivalent} USD</span>
+              <span className="text-slate-600">·</span>
+              <span>@ ${liveTonUsd!.toFixed(2)} / TON</span>
+            </div>
+          )}
         </div>
 
         {/* Sparkline & Auction Timer */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4 self-stretch md:self-end">
-          <PriceSparkline basePrice={parseFloat(nft.price) || 0} history={nft.history} />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 self-stretch md:self-end">
+          <PriceSparkline basePrice={numericTon} history={nft.history} />
 
           {isAuction && (
-            <div className="bg-white/[0.04] p-3 rounded-xl flex items-center justify-between gap-4 shadow-lg text-xs">
+            <div className="bg-[var(--tj-color-surface-elevated,#111F36)] border-0 p-3 rounded-[var(--tj-radius-sm,6px)] flex items-center justify-between gap-4 text-xs">
               <div className="flex flex-col items-start">
-                <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)]">
                   Highest Bid
                 </span>
-                <span className="text-xs font-black font-mono text-white">
-                  {highestOfferPrice} TON
+                <span className="text-sm font-black font-mono tabular-nums text-white">
+                  {highestOfferPrice > 0 ? `${highestOfferPrice} TON` : `${formattedTon} TON`}
                 </span>
               </div>
               <AuctionCountdownTimer nft={nft} variant="compact" className="items-end" />
@@ -142,42 +173,35 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
       </div>
 
       {/* Main Actions Bar */}
-      <div className="mt-6 flex flex-wrap items-center gap-2.5 relative z-10">
+      <div className="mt-5 flex flex-wrap items-center gap-2 relative z-10">
         {isOwner ? (
           <>
             <button
+              type="button"
               onClick={nft.listingType ? onManage : onSell}
-              className="flex-1 py-3 px-4 bg-[#0052FF] hover:bg-[#1a66ff] text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95"
+              className="flex-1 min-w-[140px] py-3 px-4 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-0 outline-none"
             >
               {nft.listingType ? "Manage Listing" : "List For Sale"}
             </button>
             <button
+              type="button"
               onClick={onManage}
-              className="py-3 px-4 bg-white/[0.05] hover:bg-white/[0.1] text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+              className="py-3 px-3.5 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-0 outline-none"
             >
               Settings
             </button>
             <button
+              type="button"
               onClick={onSend}
-              className="py-3 px-4 bg-white/[0.05] hover:bg-white/[0.1] text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="py-3 px-3.5 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer border-0 outline-none"
             >
               <Send className="h-3.5 w-3.5" /> Send
             </button>
-            <button
-              onClick={onStake}
-              className={`py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
-                nft.isStaked
-                  ? "bg-emerald-500/20 text-emerald-400"
-                  : "bg-purple-600/20 text-purple-300 hover:bg-purple-600/30"
-              }`}
-            >
-              <Lock className="h-3.5 w-3.5 text-amber-300" />
-              {nft.isStaked ? "Staked" : "Stake"}
-            </button>
             {nft.listingType && (
               <button
+                type="button"
                 onClick={onCancelListing}
-                className="py-3 px-4 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                className="py-3 px-3.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-0 outline-none"
               >
                 Cancel Listing
               </button>
@@ -185,15 +209,15 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
           </>
         ) : (
           <>
-            <motion.button
+            <button
+              type="button"
               onClick={onAction}
-              disabled={isPlacingBid || (isAuction && isAuctionEnded)}
-              whileHover={!(isAuction && isAuctionEnded) && !isPlacingBid ? { scale: 1.02 } : undefined}
-              whileTap={!(isAuction && isAuctionEnded) && !isPlacingBid ? { scale: 0.98 } : undefined}
-              className={`flex-[2] py-3.5 px-6 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all ${
-                isAuction && isAuctionEnded
-                  ? "bg-white/10 text-slate-500 cursor-not-allowed"
-                  : "bg-[#0052FF] hover:bg-[#1a66ff] text-white shadow-blue-500/20"
+              disabled={isPlacingBid || (isAuction && isAuctionEnded) || primaryActionUnavailable}
+              title={primaryActionUnavailable ? unavailableReason : undefined}
+              className={`flex-[2] min-w-[160px] py-3 px-5 rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 border-0 outline-none transition-colors ${
+                (isAuction && isAuctionEnded) || primaryActionUnavailable
+                  ? "bg-[var(--tj-color-surface-elevated,#111F36)] text-slate-400 cursor-not-allowed"
+                  : "bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white cursor-pointer"
               }`}
             >
               {isPlacingBid ? (
@@ -202,29 +226,37 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
                   <span>Processing...</span>
                 </>
               ) : isAuction && isAuctionEnded ? (
-                "Auction Expired"
+                "Auction Ended"
+              ) : primaryActionUnavailable ? (
+                isAuction ? (
+                  "Bidding Unavailable"
+                ) : (
+                  "Buy Unavailable"
+                )
               ) : isAuction ? (
                 <>
                   <Gavel className="h-4 w-4" /> Place Bid
                 </>
               ) : (
-                "Acquire Asset"
+                <>
+                  <Zap className="h-4 w-4" /> Buy NFT
+                </>
               )}
-            </motion.button>
+            </button>
 
-            <motion.button
+            <button
+              type="button"
               onClick={onOffer}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex-1 py-3.5 px-4 bg-white/[0.05] hover:bg-white/[0.1] text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 min-w-[125px] py-3 px-4 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer border-0 outline-none"
             >
-              <Handshake className="h-4 w-4" /> Make Offer
-            </motion.button>
+              <Handshake className="h-4 w-4 text-[var(--tj-color-brand-primary,#00B4D8)]" /> Make Offer
+            </button>
 
             {userOffer && (
               <button
+                type="button"
                 onClick={onCancelBid}
-                className="py-3.5 px-4 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                className="py-3 px-3.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-0 outline-none"
               >
                 Retract Offer
               </button>
@@ -232,82 +264,88 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
           </>
         )}
 
+        {/* Shared Utility Actions */}
         <button
+          type="button"
           onClick={onStake}
-          className={`py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`py-3 px-3.5 rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer border-0 outline-none ${
             nft.isStaked
-              ? "bg-emerald-500/15 text-emerald-400"
-              : "bg-purple-600/20 text-purple-300 hover:bg-purple-600/30"
+              ? "bg-emerald-500/20 text-emerald-300"
+              : "bg-[var(--tj-color-surface-elevated,#111F36)] text-purple-300 hover:bg-[var(--tj-color-surface-hover,#132B49)]"
           }`}
         >
           <Lock className="h-3.5 w-3.5 text-amber-300" />
           {nft.isStaked ? "Staked" : "Stake"}
         </button>
 
-        <button
-          onClick={onTip}
-          className="py-3.5 px-4 bg-white/[0.05] hover:bg-white/[0.1] text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <Coins className="h-3.5 w-3.5 text-amber-400" /> Tip
-        </button>
-
-        <button
-          onClick={onShare}
-          className="py-3.5 px-4 bg-white/[0.05] hover:bg-white/[0.1] text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <Share2 className="h-3.5 w-3.5 text-[#0098EA]" /> Share
-        </button>
+        {!isOwner && (
+          <button
+            type="button"
+            onClick={onTip}
+            className="py-3 px-3.5 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer border-0 outline-none"
+          >
+            <Coins className="h-3.5 w-3.5 text-amber-400" /> Tip
+          </button>
+        )}
       </div>
 
-      {/* Price Alert Protocol Controller */}
-      <div className="mt-5 p-4 bg-white/[0.02] rounded-xl space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+      {primaryActionUnavailable && (
+        <div className="mt-3 p-3 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-surface-elevated,#111F36)] border-0 flex items-center gap-2 text-[11px] text-[var(--tj-color-text-secondary,#C2C7CD)]">
+          <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <span>{unavailableReason}</span>
+        </div>
+      )}
+
+      {/* Price Drop Alert Settings */}
+      <div className="mt-4 p-3.5 bg-[var(--tj-color-surface-elevated,#111F36)] border-0 rounded-[var(--tj-radius-sm,6px)] space-y-2.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5">
             <div
-              className={`p-2 rounded-full ${
-                priceAlertEnabled ? "bg-[#0052FF]/20 text-[#0098EA]" : "bg-white/5 text-slate-400"
+              className={`p-2 rounded-[var(--tj-radius-xs,4px)] border-0 ${
+                priceAlertEnabled
+                  ? "bg-[var(--tj-color-brand-primary,#00B4D8)]/20 text-[var(--tj-color-brand-primary,#00B4D8)]"
+                  : "bg-[var(--tj-color-surface-default,#0D1628)] text-[var(--tj-color-text-secondary,#C2C7CD)]"
               }`}
             >
               {priceAlertEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
             </div>
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-                Price Alert Protocol
+                Price Drop Alert
               </h4>
-              <p className="text-[10px] text-slate-400">
-                Receive instant push signals when the floor price drops
+              <p className="text-[11px] text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                Get notified when listing price drops below threshold
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-
-            <button
-              onClick={onTogglePriceAlert}
-              className={`px-4 py-1.5 rounded-lg font-extrabold text-[10px] uppercase tracking-wider transition-all cursor-pointer ${
-                priceAlertEnabled
-                  ? "bg-[#0052FF] text-white shadow-md shadow-blue-500/20 hover:bg-[#1a66ff]"
-                  : "bg-white/10 hover:bg-white/15 text-slate-300"
-              }`}
-            >
-              {priceAlertEnabled ? "Alert Active" : "Enable Alert"}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onTogglePriceAlert}
+            className={`px-3.5 py-2 rounded-[var(--tj-radius-xs,4px)] font-bold text-[11px] uppercase tracking-wider transition-colors cursor-pointer border-0 outline-none shrink-0 ${
+              priceAlertEnabled
+                ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white hover:bg-[var(--tj-color-brand-hover,#21C2E8)]"
+                : "bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-slate-200"
+            }`}
+          >
+            {priceAlertEnabled ? "Alert Active" : "Enable Alert"}
+          </button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-          <span className="text-[11px] text-slate-400">
-            Trigger alert if price dips by <strong className="text-white">{priceAlertPercent}%</strong>:
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+          <span className="text-[11px] text-[var(--tj-color-text-secondary,#C2C7CD)]">
+            Notify if price dips by <strong className="text-white font-mono">{priceAlertPercent}%</strong>
           </span>
           <div className="flex gap-1.5">
             {[5, 10, 15, 25, 40].map((percent) => (
               <button
                 key={percent}
+                type="button"
                 onClick={() => onPercentChange(percent)}
-                className={`px-2.5 py-1 text-xs font-mono font-bold rounded-md transition-colors cursor-pointer ${
+                className={`px-2.5 py-1 text-[11px] font-mono font-bold rounded-[var(--tj-radius-xs,4px)] transition-colors cursor-pointer border-0 outline-none ${
                   priceAlertPercent === percent
-                    ? "bg-[#0052FF] text-white font-black"
-                    : "bg-white/5 text-slate-400 hover:text-white"
+                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
+                    : "bg-[var(--tj-color-surface-default,#0D1628)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white"
                 }`}
               >
                 {percent}%

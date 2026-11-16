@@ -129,7 +129,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = ({
           animate={{ scale: isSeeking ? 1.3 : 1 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
-          <div className="w-3.5 h-3.5 bg-white rounded-full border-2 border-[#00B4D8] shadow-[0_0_8px_rgba(0,180,216,0.8)] group-hover:scale-125 transition-transform" />
+          <div className="w-3.5 h-3.5 bg-white rounded-full border border-[#00B4D8] shadow-sm group-hover:scale-125 transition-transform" />
         </motion.div>
       </div>
 

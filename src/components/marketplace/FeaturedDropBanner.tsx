@@ -1,8 +1,8 @@
 import React from "react";
-import { Sparkles, ArrowRight, Play, Pause } from "lucide-react";
-import { motion } from "motion/react";
+import { ArrowRight, Play, Pause, Sparkles } from "lucide-react";
 import { ProgressiveImage } from "@/components/common/ProgressiveImage";
 import { TonPriceLabel } from "./TonPriceLabel";
+import { VerifiedArtistLabel } from "./VerifiedArtistLabel";
 import { cn, getPlaceholderImage } from "@/lib/utils";
 
 interface FeaturedDropBannerProps {
@@ -11,12 +11,16 @@ interface FeaturedDropBannerProps {
   isPlaying?: boolean;
   className?: string;
   dropInfo?: {
+    id?: string;
     title: string;
     artist: string;
+    artistVerified?: boolean;
     price: string;
-    edition: string;
+    edition?: string;
+    genre?: string;
     imageUrl: string;
-  };
+    hasAudio?: boolean;
+  } | null;
 }
 
 export const FeaturedDropBanner: React.FC<FeaturedDropBannerProps> = ({
@@ -29,96 +33,85 @@ export const FeaturedDropBanner: React.FC<FeaturedDropBannerProps> = ({
   if (!dropInfo) return null;
 
   return (
-    <div
+    <section
+      aria-label="Featured NFT"
       className={cn(
-        "relative rounded-3xl overflow-hidden bg-[#101A32] shadow-xl shadow-black/40",
+        "relative rounded-[var(--tj-radius-md,8px)] overflow-hidden bg-[var(--tj-color-surface-default,#0D1628)] backdrop-blur-md border border-[var(--tj-color-border-subtle)]",
         className
       )}
     >
-      {/* Background Album Art with Dark Blue Overlay & Soft Highlights */}
-      <div className="absolute inset-0 z-0">
-        <ProgressiveImage
-          src={dropInfo.imageUrl || getPlaceholderImage('nft')}
-          alt={dropInfo.title}
-          className="w-full h-full object-cover scale-105 filter blur-xl opacity-30"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#101A32] via-[#101A32]/80 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#101A32] via-[#101A32]/90 to-transparent" />
-        {/* Soft radial blue glow */}
-        <div className="absolute -top-10 -right-10 w-60 h-60 rounded-full bg-[#3390EC]/15 blur-3xl pointer-events-none" />
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="relative z-10 p-5 sm:p-7 flex flex-col md:flex-row items-center gap-6 justify-between">
-        {/* Left Side: Editorial Typography & Actions */}
-        <div className="flex-1 space-y-3.5 text-left w-full">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-[#3390EC]/15 text-[#65B8FF]">
-            <Sparkles className="w-3 h-3" />
-            <span>FEATURED DROP</span>
-          </div>
-
-          <div className="space-y-1">
-            <h2 className="text-2xl sm:text-3xl font-black text-[#F5F8FF] tracking-tight leading-tight">
-              Music worth owning.
-            </h2>
-            <p className="text-xs sm:text-sm text-[#9BAAC5] leading-relaxed max-w-md">
-              Discover exclusive tracks from your favourite artists.
-            </p>
-          </div>
-
-          {/* Collectible Badge / Drop Details */}
-          <div className="flex items-center gap-3 pt-1">
-            <TonPriceLabel price={dropInfo.price} size="md" />
-            <span className="text-[#9BAAC5] text-xs font-medium">·</span>
-            <span className="text-xs text-[#9BAAC5] font-medium">
-              {dropInfo.edition} Exclusive
-            </span>
-          </div>
-
-          {/* Primary Action Button */}
-          <div className="pt-2 flex items-center gap-3">
-            <motion.button
+      <div className="p-3.5 sm:p-5 flex items-center gap-3.5 sm:gap-5">
+        {/* Square 1:1 Artwork */}
+        <div className="relative w-24 h-24 sm:w-32 sm:h-32 shrink-0 rounded-[var(--tj-radius-sm,6px)] overflow-hidden bg-[var(--tj-color-bg-secondary,#0D1628)] border border-[var(--tj-color-border-subtle)]">
+          <ProgressiveImage
+            src={dropInfo.imageUrl || getPlaceholderImage(`featured-${dropInfo.id || dropInfo.title}`)}
+            fallbackSrc={getPlaceholderImage(`featured-${dropInfo.id || dropInfo.title}`)}
+            alt={dropInfo.title}
+            className="w-full h-full object-cover"
+          />
+          {onPlayPreview && dropInfo.hasAudio && (
+            <button
               type="button"
-              whileTap={{ scale: 0.97 }}
-              onClick={onExploreDrop}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#3390EC] hover:bg-[#2879c7] text-[#F5F8FF] font-semibold text-xs tracking-wide shadow-md shadow-[#3390EC]/25 transition-all cursor-pointer border-none outline-none"
+              onClick={onPlayPreview}
+              aria-label={isPlaying ? "Pause featured preview" : "Play featured preview"}
+              className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white flex items-center justify-center border border-white/20 cursor-pointer transition-colors"
             >
-              <span>Explore Drop</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </motion.button>
+              {isPlaying ? (
+                <Pause className="w-3.5 h-3.5 fill-current" />
+              ) : (
+                <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+              )}
+            </button>
+          )}
+        </div>
 
-            {onPlayPreview && (
+        {/* Details & CTA */}
+        <div className="flex-1 min-w-0 space-y-1.5 text-left">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[var(--tj-radius-xs,4px)] text-[10px] font-bold uppercase tracking-wider bg-[var(--tj-color-chip-active-background,#063C55)] text-[var(--tj-color-brand-primary,#00B4D8)] border border-[var(--tj-color-border-interactive,#245078)]">
+              <Sparkles className="w-3 h-3" />
+              Featured NFT
+            </span>
+            {dropInfo.genre && (
+              <span className="text-[10px] font-semibold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider truncate">
+                {dropInfo.genre}
+              </span>
+            )}
+          </div>
+
+          <h2 className="text-sm sm:text-lg font-bold text-white tracking-tight truncate">
+            {dropInfo.title}
+          </h2>
+
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+            <VerifiedArtistLabel
+              artist={dropInfo.artist}
+              verified={Boolean(dropInfo.artistVerified)}
+            />
+            {dropInfo.edition && (
+              <span className="text-[11px] font-mono text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                · Edition {dropInfo.edition}
+              </span>
+            )}
+          </div>
+
+          <div className="pt-1 flex flex-wrap items-center justify-between gap-2.5">
+            <TonPriceLabel price={dropInfo.price} label="" size="sm" />
+
+            {onExploreDrop && (
               <button
                 type="button"
-                onClick={onPlayPreview}
-                className="w-10 h-10 rounded-xl bg-[#152440] hover:bg-[#1f3358] text-[#F5F8FF] flex items-center justify-center transition-colors cursor-pointer border-none outline-none"
-                aria-label={isPlaying ? "Pause preview" : "Play preview"}
+                onClick={onExploreDrop}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white font-bold text-[11px] uppercase tracking-wider transition-colors cursor-pointer border border-[var(--tj-color-brand-primary,#00B4D8)]"
               >
-                {isPlaying ? (
-                  <Pause className="w-4 h-4 fill-current" />
-                ) : (
-                  <Play className="w-4 h-4 fill-current translate-x-0.5" />
-                )}
+                <span>View NFT</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
         </div>
-
-        {/* Right Side: Square Album Cover Display */}
-        <div className="w-36 sm:w-44 md:w-52 aspect-square rounded-2xl overflow-hidden bg-[#070D20] shadow-2xl relative shrink-0">
-          <ProgressiveImage
-            src={dropInfo.imageUrl}
-            alt={dropInfo.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#070D20]/80 via-transparent to-transparent" />
-          <div className="absolute bottom-2.5 left-3 right-3 text-left">
-            <p className="text-xs font-bold text-white truncate">{dropInfo.title}</p>
-            <p className="text-[10px] text-[#65B8FF] truncate">{dropInfo.artist}</p>
-          </div>
-        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -71,11 +71,11 @@ const FavoriteArtists: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
                 key={artist.uid}
-                className="group flex items-center justify-between p-3 rounded-[4px] bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-pointer border-b border-white/5 hover:border-emerald-500/10"
+                className="group flex items-center justify-between p-3 rounded-[var(--tj-radius-sm,6px)] bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-pointer border-b border-white/5 hover:border-emerald-500/10"
                 onClick={() => navigate(`/artist/${artist.uid}`)}
               >
                 <div className="flex items-center gap-4">
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/5 group-hover:border-emerald-500/40 transition-colors bg-muted/20">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-white/5 group-hover:border-emerald-500/40 transition-colors bg-muted/20">
                     <img src={artist.avatarUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
                   </div>
                   <div>

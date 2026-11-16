@@ -114,11 +114,11 @@ const DJKrupy: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="relative group">
               <div className="absolute inset-0 bg-blue-500 rounded-full blur-md opacity-30 group-hover:opacity-60 transition-opacity animate-pulse" />
-              <Avatar className="h-10 w-10 border-2 border-blue-500/50 relative z-10 transition-transform duration-300 group-hover:scale-105">
+              <Avatar className="h-10 w-10 border border-blue-500/50 relative z-10 transition-transform duration-300 group-hover:scale-105">
                 <AvatarImage src={DJ_KRUPY_AVATAR} className="rounded-full" />
                 <AvatarFallback className="bg-blue-900 rounded-full font-black text-blue-400">DK</AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background z-20 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border border-background z-20 animate-pulse" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -391,7 +391,7 @@ const DJKrupy: React.FC = () => {
             >
                 <header className="px-6 py-8 flex items-center justify-between border-b border-white/5 shrink-0">
                     <div className="flex items-center gap-6">
-                        <Avatar className="h-16 w-16 border-2 border-blue-500 shadow-2xl">
+                        <Avatar className="h-16 w-16 border border-blue-500 shadow-2xl">
                             <AvatarImage src={currentTrack.coverUrl} />
                         </Avatar>
                         <div>

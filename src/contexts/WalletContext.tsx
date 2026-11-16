@@ -50,6 +50,10 @@ export const useWallet = () => {
   return context;
 };
 
+export const useOptionalWallet = () => {
+  return useContext(WalletContext);
+};
+
 export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const address = useTonAddress();
   const wallet = useTonWallet();

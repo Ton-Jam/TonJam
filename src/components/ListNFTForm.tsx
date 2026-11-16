@@ -514,7 +514,7 @@ export const ListNFTForm: React.FC<ListNFTFormProps> = ({
               audioInputRef.current?.click();
               markTouched('hasAudio');
             }}
-            className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[140px] ${
+            className={`border border-dashed rounded-[var(--tj-radius-md,8px)] p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[140px] ${
               audioUrl 
                 ? 'border-blue-500/50 bg-blue-950/20' 
                 : (touched.hasAudio || formError) && fieldErrors.hasAudio
@@ -567,7 +567,7 @@ export const ListNFTForm: React.FC<ListNFTFormProps> = ({
               coverInputRef.current?.click();
               markTouched('hasCover');
             }}
-            className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[140px] relative overflow-hidden ${
+            className={`border border-dashed rounded-[var(--tj-radius-md,8px)] p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[140px] relative overflow-hidden ${
               coverUrl 
                 ? 'border-blue-500/50 bg-blue-950/20' 
                 : (touched.hasCover || formError) && fieldErrors.hasCover

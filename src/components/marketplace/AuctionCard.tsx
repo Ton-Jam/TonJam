@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Clock, Radio } from "lucide-react";
-import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
+import { Clock, Gavel } from "lucide-react";
+import { cn, getPlaceholderImage } from "@/lib/utils";
 import { ProgressiveImage } from "@/components/common/ProgressiveImage";
 import { VerifiedArtistLabel } from "./VerifiedArtistLabel";
 import { TonPriceLabel } from "./TonPriceLabel";
+import { AuctionStatus } from "@/pages/Marketplace/types";
 
 export interface AuctionData {
   id: string;
@@ -12,56 +12,106 @@ export interface AuctionData {
   artist: string;
   artistVerified?: boolean;
   highestBid: string | number;
+  minimumNextBid?: string | number;
   bidsCount: number;
-  endTime: string | number | Date;
+  endTime: string;
+  startsAt?: string;
+  status: AuctionStatus;
   imageUrl: string;
   genre?: string;
+  recentBids?: Array<{ id: string; bidder: string; amount: string }>;
 }
 
 interface AuctionCardProps {
   auction: AuctionData;
+  layout?: "grid" | "shelf";
   onPlaceBid?: (auction: AuctionData) => void;
   onView?: (auction: AuctionData) => void;
   className?: string;
 }
 
+const STATUS_BADGE: Record<
+  AuctionStatus,
+  { label: string; dotClass: string; badgeClass: string }
+> = {
+  active: {
+    label: "Active",
+    dotClass: "bg-emerald-400",
+    badgeClass: "bg-emerald-950/90 text-emerald-300 border-emerald-400/40",
+  },
+  ended: {
+    label: "Ended",
+    dotClass: "bg-slate-400",
+    badgeClass: "bg-slate-900/90 text-slate-300 border-slate-500/40",
+  },
+  pending: {
+    label: "Pending",
+    dotClass: "bg-amber-400",
+    badgeClass: "bg-amber-950/90 text-amber-300 border-amber-400/40",
+  },
+  cancelled: {
+    label: "Cancelled",
+    dotClass: "bg-rose-400",
+    badgeClass: "bg-rose-950/90 text-rose-300 border-rose-400/40",
+  },
+};
+
+function computeRealCountdown(endTime?: string): string | null {
+  if (!endTime) return null;
+  const target = new Date(endTime).getTime();
+  if (!Number.isFinite(target)) return null;
+  const diff = target - Date.now();
+  if (diff <= 0) return "Ended";
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  if (hours >= 24) {
+    const days = Math.floor(hours / 24);
+    return `${days}d ${pad(hours % 24)}h ${pad(minutes)}m`;
+  }
+  return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+}
+
 export const AuctionCard: React.FC<AuctionCardProps> = ({
   auction,
+  layout = "grid",
   onPlaceBid,
   onView,
   className,
 }) => {
-  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
-    hours: 4,
-    minutes: 25,
-    seconds: 40,
-  });
+  const [countdown, setCountdown] = useState<string | null>(() =>
+    auction.status === "active" ? computeRealCountdown(auction.endTime) : null
+  );
 
   useEffect(() => {
-    // Dynamic countdown timer
-    const target = typeof auction.endTime === "number"
-      ? auction.endTime
-      : typeof auction.endTime === "string"
-      ? new Date(auction.endTime).getTime()
-      : auction.endTime instanceof Date
-      ? auction.endTime.getTime()
-      : Date.now() + 1000 * 60 * 60 * 4.5;
+    if (auction.status !== "active" || !auction.endTime) {
+      setCountdown(null);
+      return;
+    }
 
     const updateTimer = () => {
-      const now = Date.now();
-      const diff = Math.max(0, target - now);
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      setTimeLeft({ hours, minutes, seconds });
+      setCountdown(computeRealCountdown(auction.endTime));
     };
 
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [auction.endTime]);
+  }, [auction.endTime, auction.status]);
 
-  const pad = (n: number) => n.toString().padStart(2, "0");
+  const statusMeta = STATUS_BADGE[auction.status] || STATUS_BADGE.active;
+
+  const formattedEndDate = React.useMemo(() => {
+    if (!auction.endTime) return "End time unavailable";
+    const parsed = new Date(auction.endTime);
+    if (Number.isNaN(parsed.getTime())) return "End time unavailable";
+    return parsed.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }, [auction.endTime]);
 
   const handlePlaceBid = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -70,84 +120,141 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
   };
 
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onView && onView(auction)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onView?.(auction);
+        }
+      }}
       className={cn(
-        "w-[260px] sm:w-[280px] shrink-0 snap-start flex flex-col justify-between",
-        "bg-[#101A32] hover:bg-[#152440] rounded-2xl p-3 shadow-lg shadow-black/25 cursor-pointer transition-colors duration-200 select-none",
+        "flex flex-col justify-between bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-md",
+        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-md,8px)] p-2.5",
+        "cursor-pointer transition-colors duration-150 select-none text-left",
+        layout === "shelf"
+          ? "w-[220px] sm:w-[248px] shrink-0 snap-start"
+          : "w-full min-w-0",
         className
       )}
     >
       <div>
         {/* Square Artwork */}
-        <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#070D20] group">
+        <div className="relative aspect-square w-full rounded-[var(--tj-radius-sm,6px)] overflow-hidden bg-[var(--tj-color-bg-secondary,#0D1628)] border border-[var(--tj-color-border-subtle)] group">
           <ProgressiveImage
-            src={auction.imageUrl}
+            src={auction.imageUrl || getPlaceholderImage(`auction-${auction.id}`)}
+            fallbackSrc={getPlaceholderImage(`auction-${auction.id}`)}
             alt={auction.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
 
-          {/* LIVE Indicator Badge */}
-          <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#070D20]/80 backdrop-blur-md text-white">
-            <span className="w-2 h-2 rounded-full bg-[#FF4A6B] animate-pulse" />
-            <span>LIVE</span>
+          {/* Auction Status Badge */}
+          <div
+            className={cn(
+              "absolute top-1.5 left-1.5 flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--tj-radius-xs,4px)] text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md",
+              statusMeta.badgeClass
+            )}
+          >
+            <span className={cn("w-1.5 h-1.5 rounded-full", statusMeta.dotClass)} />
+            <span>{statusMeta.label}</span>
           </div>
 
-          {/* Bid Counter Badge */}
-          <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#070D20]/75 backdrop-blur-md text-[#9BAAC5]">
-            {auction.bidsCount} bids
+          {/* Bid Count */}
+          <div className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-[var(--tj-radius-xs,4px)] text-[10px] font-mono font-semibold bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[var(--tj-color-text-secondary,#C2C7CD)]">
+            {auction.bidsCount} {auction.bidsCount === 1 ? "bid" : "bids"}
           </div>
 
-          {/* Countdown Timer Overlay at bottom of artwork */}
-          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#070D20]/85 backdrop-blur-md text-xs">
-            <div className="flex items-center gap-1.5 text-[#9BAAC5]">
-              <Clock className="w-3.5 h-3.5 text-[#65B8FF]" />
-              <span className="text-[10px] font-medium uppercase tracking-wider">Ends in</span>
+          {/* Real Countdown or Explicit End Timestamp */}
+          <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-2 px-2 py-1 rounded-[var(--tj-radius-xs,4px)] bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[10px]">
+            <div className="flex items-center gap-1 text-[var(--tj-color-text-secondary,#C2C7CD)] shrink-0">
+              <Clock className="w-3 h-3 text-[var(--tj-color-brand-primary,#00B4D8)]" />
+              <span className="uppercase tracking-wider">
+                {auction.status === "active" && countdown ? "Ends" : "Closing"}
+              </span>
             </div>
-            <span className="font-mono font-bold text-[#F5F8FF] text-[11px]">
-              {pad(timeLeft.hours)}h {pad(timeLeft.minutes)}m {pad(timeLeft.seconds)}s
+            <span className="font-mono font-bold text-[var(--tj-color-text-primary,#FFFFFF)] truncate">
+              {auction.status === "active" && countdown ? countdown : formattedEndDate}
             </span>
           </div>
         </div>
 
-        {/* Track Title & Artist */}
-        <div className="mt-3 space-y-1">
-          <h3 className="text-sm font-bold text-[#F5F8FF] truncate leading-tight">
+        {/* Title & Artist */}
+        <div className="mt-2.5 space-y-0.5 min-w-0">
+          <h3 className="text-xs sm:text-sm font-bold text-[var(--tj-color-text-primary,#FFFFFF)] truncate leading-tight">
             {auction.title}
           </h3>
-          <div className="flex items-center justify-between text-xs">
-            <VerifiedArtistLabel
-              artist={auction.artist}
-              verified={auction.artistVerified ?? true}
-            />
-            {auction.genre && (
-              <span className="text-[11px] text-[#9BAAC5]/70 shrink-0 ml-2">
-                {auction.genre}
-              </span>
-            )}
+          <VerifiedArtistLabel
+            artist={auction.artist}
+            verified={Boolean(auction.artistVerified)}
+          />
+        </div>
+
+        {/* Bid Metrics */}
+        <div className="mt-2 pt-2 border-t border-[var(--tj-color-border-subtle)] grid grid-cols-2 gap-2 text-[11px]">
+          <div className="min-w-0">
+            <span className="text-[10px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)] block">
+              Highest Bid
+            </span>
+            <TonPriceLabel price={auction.highestBid} label="" size="sm" />
+          </div>
+          <div className="min-w-0 text-right">
+            <span className="text-[10px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)] block">
+              Min Next Bid
+            </span>
+            <span className="text-xs font-mono font-bold text-[var(--tj-color-text-primary,#FFFFFF)] truncate block">
+              {auction.minimumNextBid || auction.highestBid}
+            </span>
           </div>
         </div>
+
+        {/* Recent Bid History Preview (strictly real offers if recorded) */}
+        {auction.recentBids && auction.recentBids.length > 0 && (
+          <div className="mt-2 pt-2 border-t border-[var(--tj-color-border-subtle)] space-y-1">
+            {auction.recentBids.slice(0, 2).map((b) => (
+              <div
+                key={b.id}
+                className="flex items-center justify-between text-[10px] font-mono text-[var(--tj-color-text-secondary,#C2C7CD)]"
+              >
+                <span className="truncate">
+                  {b.bidder.length > 10
+                    ? `${b.bidder.slice(0, 5)}...${b.bidder.slice(-4)}`
+                    : b.bidder}
+                </span>
+                <span className="font-bold text-[var(--tj-color-brand-primary,#00B4D8)] shrink-0">{b.amount}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Highest Bid & Place Bid Button */}
-      <div className="mt-3 pt-3 flex items-end justify-between gap-2">
-        <TonPriceLabel
-          price={auction.highestBid}
-          label="Highest Bid"
-          size="sm"
-        />
-
+      {/* Footer CTA */}
+      <div className="mt-2.5 pt-2 border-t border-[var(--tj-color-border-subtle)] flex items-center justify-between gap-2">
+        <span className="text-[10px] text-[var(--tj-color-text-secondary,#C2C7CD)] truncate">
+          {auction.status === "ended"
+            ? "Bidding closed"
+            : auction.status === "cancelled"
+            ? "Auction cancelled"
+            : auction.status === "pending"
+            ? "Scheduled"
+            : "Live on TON"}
+        </span>
         <button
           type="button"
           onClick={handlePlaceBid}
-          className="px-3.5 py-1.5 rounded-xl bg-[#3390EC] hover:bg-[#2879c7] text-[#F5F8FF] transition-all text-xs font-semibold cursor-pointer border-none outline-none shrink-0 shadow-sm shadow-[#3390EC]/30"
+          className={cn(
+            "px-2.5 py-1 rounded-[var(--tj-radius-sm,6px)] text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1 cursor-pointer border transition-colors shrink-0",
+            auction.status === "active"
+              ? "bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white border-[var(--tj-color-brand-primary,#00B4D8)]"
+              : "bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-primary,#FFFFFF)] border-[var(--tj-color-border-subtle)]"
+          )}
         >
-          Place Bid
+          <Gavel className="w-3 h-3" />
+          <span>{auction.status === "active" ? "Place Bid" : "View"}</span>
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

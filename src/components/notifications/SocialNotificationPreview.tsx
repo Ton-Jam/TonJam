@@ -16,7 +16,7 @@ export const SocialNotificationPreview: React.FC<SocialNotificationPreviewProps>
   return (
     <div
       onClick={onPreviewClick}
-      className="mt-2 w-full p-2.5 rounded-xl bg-[#080D1A]/60 hover:bg-[#080D1A]/90 transition-colors border-l-2 border-[#229ED9] text-left cursor-pointer"
+      className="mt-2 w-full p-2.5 rounded-[var(--tj-radius-md,8px)] bg-[#080D1A]/60 hover:bg-[#080D1A]/90 transition-colors border-l border-[#229ED9] text-left cursor-pointer"
     >
       <div className="flex items-start gap-1.5 text-xs text-[#94A3B8] font-normal leading-relaxed line-clamp-2">
         <MessageSquare className="w-3 h-3 text-[#229ED9] shrink-0 mt-0.5" />

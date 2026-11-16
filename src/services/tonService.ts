@@ -127,12 +127,12 @@ export const getTonEndpoint = (network: TonNetwork = TON_NETWORK_MODE): string =
 export const TON_ENDPOINT = getTonEndpoint();
 
 // Strictly isolated Mainnet configuration
-const MAINNET_COLLECTION = (typeof process !== 'undefined' ? process.env?.VITE_TON_MAINNET_COLLECTION_ADDRESS : '') ||
-                           (typeof import.meta !== 'undefined' ? (import.meta as any).env?.VITE_TON_MAINNET_COLLECTION_ADDRESS : '') ||
+const MAINNET_COLLECTION = (typeof process !== 'undefined' ? (process.env?.VITE_TON_MAINNET_COLLECTION_ADDRESS || process.env?.VITE_TON_MAINNET_COLLECTION) : '') ||
+                           (typeof import.meta !== 'undefined' ? ((import.meta as any).env?.VITE_TON_MAINNET_COLLECTION_ADDRESS || (import.meta as any).env?.VITE_TON_MAINNET_COLLECTION) : '') ||
                            "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt";
 
-const MAINNET_MARKETPLACE = (typeof process !== 'undefined' ? process.env?.VITE_TON_MAINNET_MARKETPLACE_ADDRESS : '') ||
-                            (typeof import.meta !== 'undefined' ? (import.meta as any).env?.VITE_TON_MAINNET_MARKETPLACE_ADDRESS : '') ||
+const MAINNET_MARKETPLACE = (typeof process !== 'undefined' ? (process.env?.VITE_TON_MAINNET_MARKETPLACE_ADDRESS || process.env?.VITE_TON_MAINNET_MARKETPLACE) : '') ||
+                            (typeof import.meta !== 'undefined' ? ((import.meta as any).env?.VITE_TON_MAINNET_MARKETPLACE_ADDRESS || (import.meta as any).env?.VITE_TON_MAINNET_MARKETPLACE) : '') ||
                             "";
 
 export const TON_MAINNET_CONFIG = {
@@ -147,12 +147,12 @@ export const TON_MAINNET_CONFIG = {
 };
 
 // Strictly isolated Testnet configuration (never reuse Mainnet contract address on Testnet)
-const TESTNET_COLLECTION = (typeof process !== 'undefined' ? process.env?.VITE_TON_TESTNET_COLLECTION_ADDRESS : '') ||
-                           (typeof import.meta !== 'undefined' ? (import.meta as any).env?.VITE_TON_TESTNET_COLLECTION_ADDRESS : '') ||
-                           "kQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiU_";
+const TESTNET_COLLECTION = (typeof process !== 'undefined' ? (process.env?.VITE_TON_TESTNET_COLLECTION_ADDRESS || process.env?.VITE_TON_TESTNET_COLLECTION) : '') ||
+                           (typeof import.meta !== 'undefined' ? ((import.meta as any).env?.VITE_TON_TESTNET_COLLECTION_ADDRESS || (import.meta as any).env?.VITE_TON_TESTNET_COLLECTION) : '') ||
+                           "kQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4Tp6n";
 
-const TESTNET_MARKETPLACE = (typeof process !== 'undefined' ? process.env?.VITE_TON_TESTNET_MARKETPLACE_ADDRESS : '') ||
-                            (typeof import.meta !== 'undefined' ? (import.meta as any).env?.VITE_TON_TESTNET_MARKETPLACE_ADDRESS : '') ||
+const TESTNET_MARKETPLACE = (typeof process !== 'undefined' ? (process.env?.VITE_TON_TESTNET_MARKETPLACE_ADDRESS || process.env?.VITE_TON_TESTNET_MARKETPLACE) : '') ||
+                            (typeof import.meta !== 'undefined' ? ((import.meta as any).env?.VITE_TON_TESTNET_MARKETPLACE_ADDRESS || (import.meta as any).env?.VITE_TON_TESTNET_MARKETPLACE) : '') ||
                             "";
 
 export const TON_TESTNET_CONFIG = {
@@ -239,7 +239,10 @@ export const getJettonBalance = async (
  * Converts nanotons to TON. Returns 0 if address is uninitialized or empty.
  * Never falls back to fake/simulated balances.
  */
-export const getTonBalance = async (walletAddress: string): Promise<number> => {
+export const getTonBalance = async (
+  walletAddress: string,
+  network: TonNetwork = TON_NETWORK_MODE
+): Promise<number> => {
   try {
     if (!walletAddress || typeof walletAddress !== 'string') return 0;
     
@@ -251,7 +254,7 @@ export const getTonBalance = async (walletAddress: string): Promise<number> => {
     }
 
     const client = new TonClient({ 
-      endpoint: getTonEndpoint(), 
+      endpoint: getTonEndpoint(network), 
       apiKey: TONCENTER_API_KEY || undefined 
     });
 
@@ -490,24 +493,37 @@ export const cancelNFTListing = async (
   }
 };
 
+export interface MintTonNftOptions {
+  collectionAddress?: string;
+  network?: TonNetwork;
+  gasAmountTon?: string;
+}
+
 /**
- * Mints a new TonJam NFT on the authoritative collection contract
+ * Mints a new TonJam NFT on the configured or custom TON collection contract
  */
 export const mintTonJamNFT = async (
   tonConnectUI: TonConnectUI,
   receiverAddress: string,
-  metadataUrl: string
+  metadataUrl: string,
+  options?: MintTonNftOptions
 ): Promise<string> => {
   try {
     if (!receiverAddress || !metadataUrl) {
       throw new Error("Receiver address and metadata URL are required for NFT minting");
     }
 
-    if (!TONJAM_COLLECTION_ADDRESS || !validateTonAddress(TONJAM_COLLECTION_ADDRESS)) {
-      throw new Error(`TonJam Collection contract address is not configured or deployed on ${TON_NETWORK_MODE}.`);
+    const targetNetwork: TonNetwork = options?.network || TON_NETWORK_MODE;
+    const defaultCollection = targetNetwork === 'mainnet'
+      ? TON_MAINNET_CONFIG.collectionAddress
+      : TON_TESTNET_CONFIG.collectionAddress;
+    const collAddress = (options?.collectionAddress || defaultCollection || '').trim();
+
+    if (!collAddress || !validateTonAddress(collAddress, targetNetwork)) {
+      throw new Error(`TonJam Collection contract address is invalid or not configured for TON ${targetNetwork}.`);
     }
 
-    // Construct the Mint message body
+    // Construct the Mint message body (Tact TonJamCollection Mint opcode)
     const content = beginCell().storeStringTail(metadataUrl).endCell();
 
     let parsedReceiver: Address;
@@ -521,8 +537,6 @@ export const mintTonJamNFT = async (
       }
     }
 
-    const collAddress = TONJAM_COLLECTION_ADDRESS;
-    
     const body = beginCell()
       .storeUint(1048761405, 32) // Opcode for Mint (0x3e7f45bd)
       .storeUint(0, 64) // query_id
@@ -535,13 +549,13 @@ export const mintTonJamNFT = async (
       messages: [
         {
           address: collAddress,
-          amount: toNano("0.1").toString(), // Gas for minting
+          amount: toNano(options?.gasAmountTon || "0.1").toString(), // Gas for minting
           payload: body.toBoc().toString('base64'),
         },
       ],
     };
 
-    const result = await sendTransactionSafe(tonConnectUI, transaction);
+    const result = await sendTransactionSafe(tonConnectUI, transaction, targetNetwork);
     console.log("NFT Minting Transaction sent:", result);
     const txHash = extractTxHashFromBoc(result.boc);
     return txHash;
@@ -687,27 +701,39 @@ export const purchaseJAM = async (
   }
 };
 
+export interface DeployTonCollectionOptions {
+  network?: TonNetwork;
+  royaltyNumerator?: number;
+  gasAmountTon?: string;
+}
+
 /**
- * Deploys the TonJam NFT Collection contract
+ * Deploys a new TonJam NFT Collection contract
  */
 export const deployTonJamCollection = async (
   tonConnectUI: TonConnectUI,
   ownerAddress: string,
-  metadataUrl: string = typeof window !== 'undefined' ? `${window.location.origin}/collection.json` : "https://tonjam.app/collection.json"
+  metadataUrl: string = typeof window !== 'undefined' ? `${window.location.origin}/collection.json` : "https://tonjam.app/collection.json",
+  options?: DeployTonCollectionOptions
 ): Promise<string> => {
   try {
+    const targetNetwork: TonNetwork = options?.network || TON_NETWORK_MODE;
     const owner = Address.parse(ownerAddress);
     const content = beginCell().storeStringTail(metadataUrl).endCell();
+    const royaltyBps = BigInt(Math.max(0, Math.min(1500, Math.round(options?.royaltyNumerator ?? 250))));
     const royaltyParams = {
       $$type: 'RoyaltyParams' as const,
-      numerator: 250n,
+      numerator: royaltyBps,
       denominator: 10000n,
       destination: owner,
     };
 
     const collection = await TonJamCollection.init(owner, content, royaltyParams);
     const stateInit = { ...collection, $$type: 'StateInit' as const };
-    const address = contractAddress(0, stateInit).toString();
+    const address = contractAddress(0, stateInit).toString({
+      testOnly: targetNetwork === 'testnet',
+      bounceable: true,
+    });
 
     // TonConnect transaction format for StateInit
     const deployTransaction = {
@@ -715,7 +741,7 @@ export const deployTonJamCollection = async (
       messages: [
         {
           address: address,
-          amount: toNano("0.1").toString(),
+          amount: toNano(options?.gasAmountTon || "0.1").toString(),
           stateInit: beginCell()
             .store(storeCollectionInit(stateInit))
             .endCell()
@@ -725,10 +751,12 @@ export const deployTonJamCollection = async (
       ],
     };
 
-    await sendTransactionSafe(tonConnectUI, deployTransaction);
+    await sendTransactionSafe(tonConnectUI, deployTransaction, targetNetwork);
     
     // Store in localStorage for persistence in this session
-    localStorage.setItem('tonjam_collection_address', address);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('tonjam_collection_address', address);
+    }
     console.log("NFT Collection Deployed to:", address);
     return address;
   } catch (error) {
@@ -923,6 +951,115 @@ export const waitForTransactionConfirmation = async (
     console.error("[tonService] waitForTransactionConfirmation error:", err);
   }
   return false;
+};
+
+export interface TonTxConfirmationUpdate {
+  phase: 'polling' | 'confirmed' | 'timeout';
+  attempt: number;
+  maxAttempts: number;
+  elapsedMs: number;
+  confirmedTxHash?: string;
+  blockTime?: number;
+}
+
+/**
+ * Polls the selected TON network endpoint in real time after wallet BOC broadcast
+ * and reports live confirmation progress via callback.
+ */
+export const confirmTonTransaction = async (
+  targetAddress: string,
+  expectedTxHash: string,
+  network: TonNetwork = TON_NETWORK_MODE,
+  options?: {
+    maxAttempts?: number;
+    pollIntervalMs?: number;
+    onUpdate?: (update: TonTxConfirmationUpdate) => void;
+    signal?: AbortSignal;
+  }
+): Promise<TonTxConfirmationUpdate> => {
+  const maxAttempts = options?.maxAttempts ?? 6;
+  const pollIntervalMs = options?.pollIntervalMs ?? 2000;
+  const startMs = Date.now();
+  const startEpochSec = Math.floor(startMs / 1000);
+
+  let parsedAddress: Address | null = null;
+  try {
+    if (targetAddress) {
+      parsedAddress = Address.parse(targetAddress);
+    }
+  } catch {
+    parsedAddress = null;
+  }
+
+  if (!parsedAddress) {
+    const immediate: TonTxConfirmationUpdate = {
+      phase: 'timeout',
+      attempt: 1,
+      maxAttempts,
+      elapsedMs: Date.now() - startMs,
+    };
+    options?.onUpdate?.(immediate);
+    return immediate;
+  }
+
+  const client = new TonClient({
+    endpoint: getTonEndpoint(network),
+    apiKey: TONCENTER_API_KEY || undefined,
+  });
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (options?.signal?.aborted) {
+      break;
+    }
+
+    const pollingState: TonTxConfirmationUpdate = {
+      phase: 'polling',
+      attempt,
+      maxAttempts,
+      elapsedMs: Date.now() - startMs,
+    };
+    options?.onUpdate?.(pollingState);
+
+    try {
+      const txs = await client.getTransactions(parsedAddress, { limit: 10 });
+      if (txs && txs.length > 0) {
+        const matched = txs.find((tx) => {
+          const hashHex = tx.hash().toString('hex');
+          if (expectedTxHash && hashHex === expectedTxHash) return true;
+          return tx.now >= startEpochSec - 15;
+        });
+
+        if (matched) {
+          const confirmed: TonTxConfirmationUpdate = {
+            phase: 'confirmed',
+            attempt,
+            maxAttempts,
+            elapsedMs: Date.now() - startMs,
+            confirmedTxHash: matched.hash().toString('hex') || expectedTxHash,
+            blockTime: matched.now,
+          };
+          options?.onUpdate?.(confirmed);
+          return confirmed;
+        }
+      }
+    } catch (err) {
+      console.warn("[tonService] TON confirmation poll warning:", err);
+    }
+
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+    }
+  }
+
+  const timedOut: TonTxConfirmationUpdate = {
+    phase: 'timeout',
+    attempt: maxAttempts,
+    maxAttempts,
+    elapsedMs: Date.now() - startMs,
+    confirmedTxHash: expectedTxHash,
+  };
+  options?.onUpdate?.(timedOut);
+  return timedOut;
 };
 
 /**

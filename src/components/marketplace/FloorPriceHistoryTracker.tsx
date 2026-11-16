@@ -80,18 +80,18 @@ export const FloorPriceHistoryTracker: React.FC<FloorPriceHistoryTrackerProps> =
   }, [chartData]);
 
   return (
-    <div className="bg-[#101A3B]/40 backdrop-blur-md p-6 rounded-3xl shadow-lg space-y-6 text-white font-sans text-left" id="floor-price-tracker-section">
+    <div className="bg-[var(--tj-color-surface-default,#0D1628)]/80 backdrop-blur-md p-6 rounded-[var(--tj-radius-lg,10px)] shadow-md space-y-6 text-white font-sans text-left" id="floor-price-tracker-section">
       
       {/* Header Info Block */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Live Valuation Floor Indexes</span>
+          <span className="text-[10px] font-black uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)]">Live Valuation Floor Indexes</span>
           <h2 className="text-sm font-black text-white uppercase tracking-tight flex items-center gap-1.5">
-            <Activity className="w-4 h-4 text-[#5B6BFF]" />
+            <Activity className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)]" />
             Collection Floor Price Explorer (Past 30 Days)
           </h2>
         </div>
-        <div className="flex items-center gap-1.5 bg-blue-500/10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-blue-400">
+        <div className="flex items-center gap-1.5 bg-[var(--tj-color-brand-primary,#00B4D8)]/10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-[var(--tj-color-brand-primary,#00B4D8)]">
           <Sparkles className="w-3.5 h-3.5" />
           Recharts Secured Signals
         </div>
@@ -112,20 +112,20 @@ export const FloorPriceHistoryTracker: React.FC<FloorPriceHistoryTrackerProps> =
                 <button
                   key={col.id}
                   onClick={() => setSelectedId(col.id)}
-                  className={`w-full text-left p-3 rounded-2xl flex items-center gap-3 transition-all duration-300 relative group overflow-hidden cursor-pointer ${
-                    isSelected ? 'bg-blue-500/15' : 'bg-white/[0.015] hover:bg-white/[0.035]'
+                  className={`w-full text-left p-3 rounded-[var(--tj-radius-md,8px)] flex items-center gap-3 transition-all duration-300 relative group overflow-hidden cursor-pointer ${
+                    isSelected ? 'bg-[var(--tj-color-brand-primary,#00B4D8)]/15' : 'bg-white/[0.015] hover:bg-white/[0.035]'
                   }`}
                 >
                   <img 
                     src={col.imageUrl} 
                     alt={col.name} 
-                    className="w-10 h-10 rounded-xl object-cover shrink-0"
+                    className="w-10 h-10 rounded-[var(--tj-radius-sm,6px)] object-cover shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <h5 className={`text-xs font-black truncate transition-colors ${isSelected ? 'text-blue-400' : 'text-slate-200'}`}>
+                    <h5 className={`text-xs font-black truncate transition-colors ${isSelected ? 'text-[var(--tj-color-brand-primary,#00B4D8)]' : 'text-slate-200'}`}>
                       {col.name}
                     </h5>
-                    <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                    <p className="text-[10px] text-[var(--tj-color-text-secondary,#C2C7CD)] truncate mt-0.5">
                       by {col.creator}
                     </p>
                   </div>
@@ -137,7 +137,7 @@ export const FloorPriceHistoryTracker: React.FC<FloorPriceHistoryTrackerProps> =
                       Floor Price
                     </span>
                   </div>
-                  <ChevronRight className={`w-3.5 h-3.5 text-slate-500 transition-transform ${isSelected ? 'translate-x-0.5 text-blue-400' : 'group-hover:translate-x-0.5'}`} />
+                  <ChevronRight className={`w-3.5 h-3.5 text-slate-500 transition-transform ${isSelected ? 'translate-x-0.5 text-[var(--tj-color-brand-primary,#00B4D8)]' : 'group-hover:translate-x-0.5'}`} />
                 </button>
               );
             })}
@@ -149,7 +149,7 @@ export const FloorPriceHistoryTracker: React.FC<FloorPriceHistoryTrackerProps> =
           
           {/* Active Collection Header Info & Key Stats Block */}
           {activeCollection && (
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-white/[0.02] p-4 rounded-2xl" id="floor-tracker-active-summary">
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-white/[0.02] p-4 rounded-[var(--tj-radius-md,8px)]" id="floor-tracker-active-summary">
               <div className="space-y-1">
                 <h4 className="text-xs font-black text-white uppercase tracking-wide flex items-center gap-1.5">
                   {activeCollection.name}
@@ -246,7 +246,7 @@ export const FloorPriceHistoryTracker: React.FC<FloorPriceHistoryTrackerProps> =
           </div>
 
           {/* Spark details bar */}
-          <div className="flex justify-between items-center bg-white/[0.01] p-3 rounded-2xl" id="floor-tracker-details-footer">
+          <div className="flex justify-between items-center bg-white/[0.01] p-3 rounded-[var(--tj-radius-md,8px)]" id="floor-tracker-details-footer">
             <div className="flex gap-4">
               <div className="text-left">
                 <span className="text-[8px] font-black uppercase tracking-widest text-slate-500">

@@ -134,9 +134,9 @@ const LibraryPage: React.FC = () => {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="relative flex items-center w-full sm:w-72 md:w-80 rounded-[12px] border-none transition-all bg-[#0A1628] shadow-md ring-1 ring-white/10 focus-within:ring-2 focus-within:ring-[#00B4D8]"
+                className="relative flex items-center w-full sm:w-72 md:w-80 rounded-[var(--tj-radius-md,8px)] border-none transition-all bg-[var(--tj-color-input-background,#0B1F36)] shadow-sm ring-1 ring-white/10 focus-within:ring-1 focus-within:ring-[var(--tj-color-brand-primary,#00B4D8)]"
               >
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#00B4D8]" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)]" />
                 <input
                   ref={headerSearchInputRef}
                   type="text"
@@ -160,9 +160,9 @@ const LibraryPage: React.FC = () => {
                 onClick={handleOpenHeaderSearch}
                 aria-label="Open search in library"
                 title="Search Library"
-                className="flex items-center gap-2 px-3.5 py-2 rounded-[12px] bg-[#0A1628] hover:bg-[#0F1C32] text-[#C2C7CD] hover:text-white transition-all cursor-pointer border-none select-none shadow-sm"
+                className="flex items-center gap-2 px-3.5 py-2 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-chip-background,#102943)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white transition-all cursor-pointer border-none select-none shadow-none"
               >
-                <Search className="w-4 h-4 text-[#00B4D8]" />
+                <Search className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)]" />
                 <span className="text-xs font-bold hidden sm:inline">Search</span>
               </button>
             )}
@@ -192,10 +192,10 @@ const LibraryPage: React.FC = () => {
                 onClick={handleOpenHeaderSearch}
                 aria-label="Search filter"
                 title="Search in Library"
-                className={`flex-shrink-0 snap-start px-3 py-2 text-xs font-bold rounded-full cursor-pointer transition-all flex items-center gap-1.5 border-none ${
+                className={`flex-shrink-0 snap-start px-3 py-2 text-xs font-bold rounded-full cursor-pointer transition-all flex items-center gap-1.5 border-none shadow-none ${
                   isHeaderSearchOpen || data.searchQuery
-                    ? 'bg-[#00B4D8] text-white shadow-md shadow-[#00B4D8]/20'
-                    : 'bg-[#0A1628] text-[#C2C7CD] hover:text-white hover:bg-[#0F1C32]'
+                    ? 'bg-[var(--tj-color-brand-primary,#00B4D8)] text-white'
+                    : 'bg-[var(--tj-color-chip-background,#102943)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)]'
                 }`}
               >
                 <Search className="w-3.5 h-3.5" />
@@ -208,10 +208,6 @@ const LibraryPage: React.FC = () => {
                   <button
                     key={chip}
                     onClick={() => {
-                      if (chip === 'Downloads') {
-                        navigate('/library/downloads');
-                        return;
-                      }
                       if (chip === 'Device Music') {
                         navigate('/local-tracks');
                         return;
@@ -224,10 +220,10 @@ const LibraryPage: React.FC = () => {
                       }
                     }}
                     aria-pressed={isActive}
-                    className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full cursor-pointer transition-all border-none ${
+                    className={`flex-shrink-0 snap-start px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full cursor-pointer transition-all border-none shadow-none ${
                       isActive 
-                        ? 'bg-[#00B4D8] text-white shadow-lg shadow-[#00B4D8]/20' 
-                        : 'bg-[#0A1628] text-[#C2C7CD] hover:text-white hover:bg-[#0F1C32]'
+                        ? 'bg-[var(--tj-color-brand-primary,#00B4D8)] text-white' 
+                        : 'bg-[var(--tj-color-chip-background,#102943)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)]'
                     }`}
                   >
                     {chip}
@@ -245,10 +241,10 @@ const LibraryPage: React.FC = () => {
                 onClick={data.toggleOfflineMode}
                 aria-pressed={data.isOfflineOnly}
                 aria-label="Filter to only display tracks cached in service worker storage"
-                className={`min-h-[38px] px-3.5 py-1.5 rounded-[10px] text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all border-none ${
+                className={`min-h-[38px] px-3.5 py-1.5 rounded-[var(--tj-radius-md,8px)] text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all border-none ${
                   data.isOfflineOnly
-                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-950/40 ring-2 ring-emerald-400/30'
-                    : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                    : 'bg-[var(--tj-color-surface-default,#0D1628)] text-slate-400 hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)]'
                 }`}
                 title={data.isOfflineOnly ? "Offline mode active: Showing only tracks cached in service worker" : "Toggle Offline filter (Service Worker storage)"}
               >
@@ -259,14 +255,14 @@ const LibraryPage: React.FC = () => {
                   )}
                 </div>
                 <span>Offline</span>
-                <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md ${
+                <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-[var(--tj-radius-xs,4px)] ${
                   data.isOfflineOnly ? 'bg-emerald-700/60 text-white' : 'bg-slate-800 text-slate-400'
                 }`}>
                   {data.cachedTrackCount}
                 </span>
               </button>
 
-              <div className="bg-slate-900 rounded-[10px] p-1 flex items-center relative">
+              <div className="bg-[var(--tj-color-surface-default,#0D1628)] rounded-[var(--tj-radius-md,8px)] p-1 flex items-center relative">
                 <button
                   type="button"
                   id="library-view-grid-btn"
@@ -310,9 +306,9 @@ const LibraryPage: React.FC = () => {
 
         {/* Offline Service Worker Cache Mode Status Banner */}
         {data.isOfflineOnly && (
-          <div className="bg-gradient-to-r from-emerald-950/60 via-emerald-900/30 to-slate-950 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl shadow-emerald-950/20 border-none">
+          <div className="bg-gradient-to-r from-emerald-950/60 via-emerald-900/30 to-slate-950 p-4 rounded-[var(--tj-radius-lg,10px)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-none">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-[var(--tj-radius-md,8px)] bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
                 <WifiOff className="w-5 h-5" />
               </div>
               <div>
@@ -332,7 +328,7 @@ const LibraryPage: React.FC = () => {
             <button
               type="button"
               onClick={data.toggleOfflineMode}
-              className="min-h-[44px] px-3.5 py-2 text-xs font-bold text-slate-300 hover:text-white hover:bg-white/[0.04] rounded-xl transition-all border-none bg-transparent cursor-pointer self-start sm:self-auto"
+              className="min-h-[44px] px-3.5 py-2 text-xs font-bold text-slate-300 hover:text-white hover:bg-white/[0.04] rounded-[var(--tj-radius-sm,6px)] transition-all border-none bg-transparent cursor-pointer self-start sm:self-auto"
             >
               Disable Offline Mode
             </button>
@@ -341,7 +337,7 @@ const LibraryPage: React.FC = () => {
 
         {/* Empty state when in offline mode and no tracks are cached */}
         {data.isOfflineOnly && data.tracks.length === 0 && !data.isLoading && (
-          <div className="bg-[#0B112C] rounded-2xl p-8 text-center space-y-4 max-w-md mx-auto shadow-xl border-none">
+          <div className="bg-[var(--tj-color-surface-default,#0D1628)] rounded-[var(--tj-radius-lg,10px)] p-8 text-center space-y-4 max-w-md mx-auto border-none">
             <div className="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto">
               <WifiOff className="w-7 h-7" />
             </div>
@@ -355,7 +351,7 @@ const LibraryPage: React.FC = () => {
               <button
                 type="button"
                 onClick={data.toggleOfflineMode}
-                className="min-h-[44px] px-5 py-2.5 bg-[#0052FF] hover:bg-[#1a66ff] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all border-none cursor-pointer"
+                className="min-h-[44px] px-5 py-2.5 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white text-xs font-bold uppercase tracking-wider rounded-[var(--tj-radius-sm,6px)] transition-all border-none cursor-pointer"
               >
                 Show All Tracks
               </button>
@@ -379,7 +375,7 @@ const LibraryPage: React.FC = () => {
               >
                 {/* OPTIONAL: LIBRARY IMPORT SECTION */}
                 {(data.activeChip === 'Import' || showImporter) && (
-                  <div className="border border-white/5 bg-slate-950/40 rounded-2xl p-6 space-y-6">
+                  <div className="border border-white/5 bg-slate-950/40 rounded-[var(--tj-radius-lg,10px)] p-6 space-y-6">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <Database className="w-4.5 h-4.5 text-[#0052FF]" />
@@ -404,7 +400,7 @@ const LibraryPage: React.FC = () => {
 
                 {/* 15. DEVELOPER TESTING PANEL (NO BORDER LINES) */}
                 {data.activeChip === 'Testing' && (
-                  <div className="bg-slate-900/30 rounded-2xl p-6 space-y-6">
+                  <div className="bg-slate-900/30 rounded-[var(--tj-radius-lg,10px)] p-6 space-y-6">
                     <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                       <div>
                         <h3 className="text-base font-extrabold text-white flex items-center gap-2 tracking-wide">
@@ -518,7 +514,7 @@ const LibraryPage: React.FC = () => {
                 {(data.activeChip === 'All' || data.activeChip === 'Tracks' || data.activeChip === 'Favorites') && (
                   <div id="liked-songs-section">
                     <LikedSongs 
-                      tracks={data.tracks}
+                      tracks={data.likedTracks}
                       onPlay={data.handlePlayTrack}
                       onToggleLike={data.toggleLikeTrack}
                       onToggleDownload={data.toggleDownloadTrack}
@@ -573,6 +569,7 @@ const LibraryPage: React.FC = () => {
                         downloadQuality={data.downloadQuality}
                         onChangeQuality={data.setDownloadQuality}
                         onRemoveDownload={data.toggleDownloadTrack}
+                        onPlay={data.handlePlayTrack}
                       />
                     </div>
                   </div>
@@ -600,6 +597,7 @@ const LibraryPage: React.FC = () => {
                       queue={data.queue}
                       onRemoveFromQueue={data.removeFromQueue}
                       onClearQueue={data.clearQueue}
+                      onPlay={(item) => data.handlePlayTrack(item as any)}
                     />
                   </div>
                 )}

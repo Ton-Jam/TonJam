@@ -180,7 +180,7 @@ export const RecentlyPlayedSection: React.FC = () => {
             >
               <div
                 onClick={() => playTrack(track)}
-                className="group relative flex flex-col justify-between p-2 rounded-[2px] bg-white/[0.03] hover:bg-white/[0.07] transition-all cursor-pointer w-full select-none"
+                className="group relative flex flex-col justify-between p-2 rounded-[var(--tj-radius-md,8px)] bg-white/[0.03] hover:bg-white/[0.07] transition-all cursor-pointer w-full select-none"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -191,7 +191,7 @@ export const RecentlyPlayedSection: React.FC = () => {
                 }}
               >
                 {/* Artwork without border lines */}
-                <div className="relative w-full aspect-square rounded-[2px] overflow-hidden bg-neutral-900 mb-2">
+                <div className="relative w-full aspect-square rounded-[var(--tj-radius-sm,6px)] overflow-hidden bg-neutral-900 mb-2">
                   <LazyArtworkImage
                     src={coverArt}
                     fallbackSrc={getPlaceholderImage(`track-${track.id}`)}

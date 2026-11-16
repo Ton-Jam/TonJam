@@ -687,7 +687,7 @@ export default function NFTLaunchpad() {
 
       {/* 2. FEATURED GENESIS IMMINENT DROP HERO BANNER */}
       {featuredDrop && (
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-neutral-900 via-indigo-950/40 to-neutral-900 shadow-2xl p-6 sm:p-8">
+        <div className="relative rounded-[var(--tj-radius-lg,10px)] overflow-hidden bg-gradient-to-r from-neutral-900 via-indigo-950/40 to-neutral-900 shadow-2xl p-6 sm:p-8">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#0098EA]/10 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
@@ -902,7 +902,7 @@ export default function NFTLaunchpad() {
             className="space-y-6"
           >
             {filteredDrops.length === 0 ? (
-              <div className="text-center py-16 bg-neutral-900/30 rounded-3xl p-8 space-y-3">
+              <div className="text-center py-16 bg-neutral-900/30 rounded-[var(--tj-radius-lg,10px)] p-8 space-y-3">
                 <Rocket className="h-12 w-12 text-neutral-600 mx-auto" />
                 <h3 className="text-lg font-bold text-neutral-400 uppercase">No drops match your criteria</h3>
                 <p className="text-xs text-neutral-500 max-w-md mx-auto">Try resetting your search query or switch over to the Artist Studio to schedule the next big release.</p>
@@ -917,7 +917,7 @@ export default function NFTLaunchpad() {
                   return (
                     <div 
                       key={drop.id}
-                      className="group bg-neutral-900/40 hover:bg-neutral-900/70 rounded-3xl p-5 flex flex-col justify-between transition-all duration-300 shadow-xl space-y-4"
+                      className="group bg-neutral-900/40 hover:bg-neutral-900/70 rounded-[var(--tj-radius-lg,10px)] p-5 flex flex-col justify-between transition-all duration-300 shadow-xl space-y-4"
                     >
                       {/* Artwork & Badges */}
                       <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-black/40">
@@ -1085,7 +1085,7 @@ export default function NFTLaunchpad() {
             className="space-y-6"
           >
             {userWhitelistedDrops.length === 0 ? (
-              <div className="text-center py-16 bg-neutral-900/30 rounded-3xl p-8 space-y-4">
+              <div className="text-center py-16 bg-neutral-900/30 rounded-[var(--tj-radius-lg,10px)] p-8 space-y-4">
                 <Users className="h-12 w-12 text-neutral-600 mx-auto" />
                 <h3 className="text-lg font-bold text-neutral-400 uppercase">You haven't joined any drop whitelists</h3>
                 <p className="text-xs text-neutral-500 max-w-md mx-auto">Connect your TON wallet and browse upcoming drops to reserve your priority minting spots.</p>
@@ -1101,7 +1101,7 @@ export default function NFTLaunchpad() {
                 {userWhitelistedDrops.map(drop => {
                   const isLive = new Date(drop.releaseDate).getTime() <= Date.now() || drop.status === 'live';
                   return (
-                    <div key={drop.id} className="bg-neutral-900/40 p-6 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg">
+                    <div key={drop.id} className="bg-neutral-900/40 p-6 rounded-[var(--tj-radius-lg,10px)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg">
                       <div className="flex items-center gap-4">
                         <img 
                           src={drop.coverUrl} 
@@ -1178,7 +1178,7 @@ export default function NFTLaunchpad() {
             className="grid grid-cols-1 lg:grid-cols-12 gap-8"
           >
             {/* Left: Schedule Drop Form */}
-            <div className="lg:col-span-6 bg-neutral-900/40 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+            <div className="lg:col-span-6 bg-neutral-900/40 rounded-[var(--tj-radius-lg,10px)] p-6 sm:p-8 space-y-6 shadow-xl">
               <div className="space-y-1">
                 <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-[#00E5FF]" />
@@ -1373,7 +1373,7 @@ export default function NFTLaunchpad() {
             <div className="lg:col-span-6 space-y-6">
               
               {/* Studio Scheduled Drops List */}
-              <div className="bg-neutral-900/40 rounded-3xl p-6 space-y-4 shadow-xl">
+              <div className="bg-neutral-900/40 rounded-[var(--tj-radius-lg,10px)] p-6 space-y-4 shadow-xl">
                 <h3 className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
                   <Layers className="h-5 w-5 text-[#00E5FF]" />
                   Active Releases Studio
@@ -1430,7 +1430,7 @@ export default function NFTLaunchpad() {
 
               {/* Whitelist Management Detail Panel */}
               {selectedDropForMgmt && (
-                <div className="bg-neutral-900/40 rounded-3xl p-6 space-y-6 shadow-xl">
+                <div className="bg-neutral-900/40 rounded-[var(--tj-radius-lg,10px)] p-6 space-y-6 shadow-xl">
                   <div className="flex justify-between items-start">
                     <div>
                       <span className="text-[9px] font-black uppercase tracking-widest text-[#00E5FF]">Whitelist Console</span>
@@ -1533,7 +1533,7 @@ export default function NFTLaunchpad() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#0c143d] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 relative"
+              className="bg-[#0c143d] rounded-[var(--tj-radius-lg,10px)] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 relative"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[#00E5FF]">

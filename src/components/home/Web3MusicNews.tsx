@@ -147,11 +147,8 @@ export const Web3MusicNews: React.FC<Web3MusicNewsProps> = ({ className = '' }) 
                 <Sparkles className="w-4 h-4 text-blue-400 shrink-0" />
               </h2>
               <div className="flex items-center gap-1.5 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                <span className="flex h-1.5 w-1.5 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                </span>
-                <span className="text-[9px] font-semibold uppercase tracking-widest text-emerald-400">Search Grounded</span>
+                <span className="inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                <span className="text-[9px] font-semibold uppercase tracking-widest text-emerald-400">Live News</span>
               </div>
             </div>
           </div>
@@ -182,7 +179,7 @@ export const Web3MusicNews: React.FC<Web3MusicNewsProps> = ({ className = '' }) 
             onClick={() => fetchNews(true)}
             disabled={refreshing}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-semibold rounded-xl transition-colors cursor-pointer outline-none border-none disabled:opacity-50"
-            title="Refresh news using Google Search Grounding"
+            title="Refresh Web3 music news"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-blue-400 ${refreshing ? 'animate-spin' : ''}`} />
             <span>{refreshing ? 'Scanning...' : 'Live Refresh'}</span>
@@ -199,10 +196,10 @@ export const Web3MusicNews: React.FC<Web3MusicNewsProps> = ({ className = '' }) 
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-1 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer outline-none shrink-0 ${
+                className={`px-3 py-1 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer outline-none border-0 shrink-0 ${
                   isSelected 
-                    ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20 border border-blue-500' 
-                    : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] border border-white/10 hover:border-white/20'
+                    ? 'bg-[#0088CC] text-white shadow-md shadow-[#0088CC]/20' 
+                    : 'bg-[#182032] text-slate-400 hover:text-white hover:bg-[#1f2940]'
                 }`}
               >
                 {cat}

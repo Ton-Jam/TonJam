@@ -442,7 +442,7 @@ export const ListenStreakIndicator: React.FC<ListenStreakIndicatorProps> = ({
 
               <div className="text-center space-y-4">
                 {/* Badge Image Large */}
-                <div className="relative w-48 h-48 mx-auto rounded-2xl overflow-hidden border-2 border-amber-500/40 shadow-2xl shadow-amber-500/20 group">
+                <div className="relative w-48 h-48 mx-auto rounded-[var(--tj-radius-lg,10px)] overflow-hidden border border-amber-500/40 shadow-lg group">
                   <img
                     src={selectedBadge.badgeImageUrl}
                     alt={selectedBadge.name}

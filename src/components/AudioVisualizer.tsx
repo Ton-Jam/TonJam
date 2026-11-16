@@ -400,53 +400,54 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   }, [analyser, activeMode, isPlaying]);
 
   return (
-    <div className={`flex flex-col bg-[#050a24]/60 backdrop-blur-xl rounded-2xl border border-white/5 p-4 overflow-hidden relative group/viz ${className}`} id="audio-visualizer-card">
-      <div className="flex items-center justify-between mb-4 z-10">
+    <div className={`flex flex-col bg-[#121824]/90 backdrop-blur-xl rounded-2xl p-4 overflow-hidden relative group/viz ${className}`} id="audio-visualizer-card">
+      <div className="flex items-center justify-between mb-3 z-10">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-[pulse_1s_infinite] shadow-lg shadow-blue-500/50" />
-          <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-foreground">
-            Neural Audio Spectrum
+          <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-[#0088CC] animate-pulse' : 'bg-slate-600'}`} />
+          <h4 className="text-[11px] font-bold uppercase tracking-wider text-white">
+            Live Audio Spectrum
           </h4>
         </div>
 
-        {/* Dynamic Telemetry Status */}
-        <div className="hidden sm:flex items-center gap-1.5 font-mono text-[8px] tracking-wider text-foreground/45 bg-white/5 px-2 py-1 rounded-[4px] uppercase select-none">
-          <Sliders className="w-2.5 h-2.5" />
+        {/* Dynamic Audio Status */}
+        <div className="hidden sm:flex items-center gap-1.5 font-mono text-[10px] tracking-wider text-slate-400 bg-white/[0.04] px-2.5 py-1 rounded-lg uppercase select-none">
+          <Sliders className="w-3 h-3" />
           <span>
-            {isCorsBlocked ? "Fallback Sync Mode" : isPlaying ? "Live Stream Telemetry" : "Ready"}
+            {isCorsBlocked ? "Visual Sync" : isPlaying ? "Live Audio" : "Ready"}
           </span>
         </div>
       </div>
 
       {/* Main Canvas Stage */}
-      <div ref={containerRef} className="flex-1 w-full min-h-[140px] relative rounded-lg overflow-hidden bg-[#020617]/70 border border-white/5 shadow-inner">
+      <div ref={containerRef} className="flex-1 w-full min-h-[140px] relative rounded-xl overflow-hidden bg-[#0B0F17] shadow-inner">
         <canvas ref={canvasRef} className="absolute inset-0 block w-full h-full" />
-        
+
         {/* Playback instruction overlay if stream isn't playing */}
         {!isPlaying && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 text-center p-4 backdrop-blur-[1px] pointer-events-none select-none">
-            <Music className="w-6 h-6 text-muted-foreground/30 mb-2 animate-bounce" />
-            <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">
-              Initialize track playback to activate audio analysis
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/25 text-center p-4 backdrop-blur-[1px] pointer-events-none select-none">
+            <Music className="w-6 h-6 text-slate-500 mb-2" />
+            <p className="text-[11px] text-slate-400 font-medium tracking-wide">
+              Press play to activate the live visualizer
             </p>
           </div>
         )}
       </div>
 
       {/* Interface Mode Controls */}
-      <div className="flex items-center justify-between mt-4 z-10 pt-2 border-t border-white/5">
-        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
-          Visualization Mode
+      <div className="flex items-center justify-between mt-3 z-10 pt-2">
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+          Mode
         </span>
-        <div className="flex items-center gap-1.5 bg-white/5 rounded-lg p-0.5 border border-white/5">
+        <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1">
           {modes.map((mode) => (
             <button
               key={mode.id}
+              type="button"
               onClick={() => setActiveMode(mode.id)}
-              className={`p-1.5 px-2.5 rounded-md text-[8px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 select-none cursor-pointer ${
+              className={`p-1.5 px-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 select-none cursor-pointer border-0 outline-none ${
                 activeMode === mode.id
-                  ? 'bg-blue-600/20 text-blue-400 border border-blue-500/10 shadow-sm'
-                  : 'text-muted-foreground/80 hover:text-foreground hover:bg-white/5'
+                  ? 'bg-[#0088CC] text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
               }`}
               title={mode.label}
             >

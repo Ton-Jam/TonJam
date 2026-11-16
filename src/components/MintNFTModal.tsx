@@ -619,7 +619,7 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
                           if (file) processCoverFile(file);
                         }}
                         onClick={() => fileInputRef.current?.click()}
-                        className={`relative w-full aspect-square border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden group ${
+                        className={`relative w-full aspect-square border border-dashed rounded-[var(--tj-radius-lg,10px)] flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden group ${
                           isDraggingCover
                             ? 'bg-[#0052FF]/20 border-[#0052FF]'
                             : coverPreview
@@ -729,7 +729,7 @@ export const MintNFTModal: React.FC<MintNFTModalProps> = ({
                           if (file) processAudioFile(file);
                         }}
                         onClick={() => !preselectedTrack && audioInputRef.current?.click()}
-                        className={`w-full p-5 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all ${
+                        className={`w-full p-5 border border-dashed rounded-[var(--tj-radius-lg,10px)] flex flex-col items-center justify-center transition-all ${
                           !preselectedTrack ? 'cursor-pointer' : 'opacity-90'
                         } ${
                           isDraggingAudio

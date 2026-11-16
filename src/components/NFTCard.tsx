@@ -507,7 +507,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
   );
 
   const ContextMenuContentRefined = () => (
-    <ContextMenuContent className="bg-[#0A0A0B] border border-white/12 text-white min-w-[200px] p-1 rounded-[3px]">
+    <ContextMenuContent className="bg-[#121824] border-0 text-white min-w-[200px] p-1 rounded-xl shadow-2xl">
       <ContextMenuLabel className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/50 py-2.5 px-3">NFT Options</ContextMenuLabel>
       <ContextMenuSeparator className="bg-white/10" />
       <ContextMenuItem onClick={handlePlayClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
@@ -577,7 +577,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
     if (supply === 1 || editionLower === 'unique' || nft.edition === 'Unique') {
       return {
         label: '1/1 UNIQUE',
-        className: 'bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 text-white font-extrabold uppercase border border-white/20 animate-pulse',
+        className: 'bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 text-white font-extrabold uppercase',
         icon: 'Star'
       };
     }
@@ -585,7 +585,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
     if (supply <= 10) {
       return {
         label: `LIMIT: ${supply} (ULTRA)`,
-        className: 'bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold uppercase border border-orange-400/20',
+        className: 'bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold uppercase',
         icon: 'Gem'
       };
     }
@@ -593,14 +593,14 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
     if (supply <= 100) {
       return {
         label: `LIMIT: ${supply}`,
-        className: 'bg-slate-900/90 text-amber-500 font-bold uppercase border border-amber-500/20',
+        className: 'bg-[#182032]/90 text-amber-400 font-bold uppercase',
         icon: 'Sparkles'
       };
     }
 
     return {
       label: `QTY: ${supply}`,
-      className: 'bg-black/60 text-zinc-300 font-medium uppercase border border-white/5',
+      className: 'bg-black/60 text-zinc-300 font-medium uppercase',
       icon: 'Layers'
     };
   };
@@ -632,7 +632,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
             aria-label={`View NFT ${nft.title}`}
           >
             <div 
-              className="relative w-12 h-12 rounded-[3px] overflow-hidden flex-shrink-0 bg-[#101010] border border-white/12"
+              className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#121824]"
               onClick={(e) => { e.stopPropagation(); handlePreviewToggle(e); }}
             >
               {!isRowImageLoaded && (
@@ -715,7 +715,15 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
         <MediaCard
           type="nft"
           isActive={isActive}
-          className={cn("snap-start", className)}
+          className={cn(
+            "snap-start border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] bg-[var(--tj-color-surface-default,#0D1628)]",
+            className
+          )}
+          style={{
+            ['--card-radius' as any]: 'var(--tj-radius-md, 8px)',
+            ['--card-image-radius' as any]: 'var(--tj-radius-sm, 6px)',
+            ['--card-action-radius' as any]: 'var(--tj-radius-sm, 6px)',
+          }}
           onClick={handleCardClick}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -761,7 +769,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
               )}>
                 <button 
                   type="button"
-                  className="w-8 h-8 rounded-full bg-[#0088CC] hover:bg-[#0077b3] text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white cursor-pointer"
+                  className="w-8 h-8 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white cursor-pointer border border-white/20"
                   onClick={handlePreviewToggle}
                   aria-label={isPlayingPreview || (isActive && isPlaying) ? `Pause preview for ${nft.title}` : `Play preview for ${nft.title}`}
                 >
@@ -806,15 +814,15 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
               }
               style={{
                 height: 'var(--card-action-height, 34px)',
-                borderRadius: 'var(--card-action-radius, 8px)',
+                borderRadius: 'var(--tj-radius-sm, 6px)',
               }}
               className={cn(
-                "w-full h-[34px] py-1 px-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-150 flex items-center justify-center gap-1.5 text-center cursor-pointer border-none select-none",
+                "w-full h-[34px] py-1 px-3 rounded-[var(--tj-radius-sm,6px)] text-xs font-bold uppercase tracking-wider transition-all duration-150 flex items-center justify-center gap-1.5 text-center cursor-pointer border border-[var(--tj-color-border-subtle)] select-none",
                 isOwner
                   ? "bg-white/[0.08] hover:bg-white/[0.12] text-slate-300"
                   : isAuctionEnded
                   ? "bg-white/[0.04] text-slate-500 cursor-not-allowed"
-                  : "bg-[#0052FF] hover:bg-[#1a66ff] active:scale-[0.98] text-white shadow-md shadow-[#0052FF]/25"
+                  : "bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] active:scale-[0.98] text-white"
               )}
             >
               {isOwner ? (

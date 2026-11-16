@@ -1,29 +1,41 @@
 import React from "react";
-import { Search, X, Wallet } from "lucide-react";
+import { Search, X, Wallet, Sparkles } from "lucide-react";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
+import { useOptionalWallet } from "@/contexts/WalletContext";
+import NotificationBell from "@/components/NotificationBell";
 import { cn } from "@/lib/utils";
 
 interface MarketplaceHeaderProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
+  onMintClick?: () => void;
   className?: string;
 }
 
 export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
   searchTerm,
   onSearchChange,
+  onMintClick,
   className,
 }) => {
-  const rawAddress = useTonAddress();
+  const wallet = useOptionalWallet();
+  const tonAddressFallback = useTonAddress();
   const [tonConnectUI] = useTonConnectUI();
-  const isConnected = Boolean(rawAddress);
 
-  // Shorten TON address for clean mobile display
+  const rawAddress = wallet?.address || tonAddressFallback || "";
+  const isConnected = Boolean(wallet?.isConnected || rawAddress);
+  const tonBalance = wallet?.tonBalance ?? 0;
+  const networkLabel = wallet?.isTestnet ? "Testnet" : "TON";
+
   const shortAddress = rawAddress
     ? `${rawAddress.slice(0, 4)}...${rawAddress.slice(-4)}`
     : "";
 
   const handleWalletClick = () => {
+    if (wallet?.connectWallet) {
+      wallet.connectWallet();
+      return;
+    }
     if (tonConnectUI) {
       try {
         tonConnectUI.openModal();
@@ -34,58 +46,76 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
   };
 
   return (
-    <header className={cn("space-y-4 pt-2 pb-2", className)}>
-      {/* Top Row: Page Title + Wallet */}
-      <div className="flex items-center justify-between gap-3 px-4 sm:px-0">
-        {/* Title */}
+    <header
+      className={cn(
+        "space-y-3 pt-3 pb-4 border-b border-[var(--tj-color-border-subtle)] bg-[var(--tj-color-bg-secondary,#0D1628)]/80 backdrop-blur-md",
+        className
+      )}
+    >
+      <div className="flex items-start sm:items-center justify-between gap-2.5 px-3 sm:px-0">
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-[#F5F8FF] leading-tight">
-            Marketplace
+          <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-white leading-tight truncate">
+            NFT Marketplace
           </h1>
-          <p className="text-xs text-[#9BAAC5] truncate">
-            Own the music you love.
+          <p className="text-[11px] sm:text-xs text-[var(--tj-color-text-secondary,#C2C7CD)] truncate mt-0.5">
+            Discover, collect and trade music NFTs.
           </p>
         </div>
 
-        {/* Right Actions: TON Wallet */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* TON Wallet Connection Pill */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {onMintClick && (
+            <button
+              type="button"
+              onClick={onMintClick}
+              className="h-9 px-2.5 sm:px-3 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] text-[var(--tj-color-brand-primary,#00B4D8)] hover:text-white flex items-center gap-1.5 text-[11px] font-bold transition-colors cursor-pointer outline-none"
+            >
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Mint NFT</span>
+              <span className="sm:hidden">Mint</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handleWalletClick}
             className={cn(
-              "h-9 px-3 rounded-xl flex items-center gap-1.5 text-xs font-semibold transition-all cursor-pointer border-none outline-none",
+              "h-9 px-2.5 sm:px-3 rounded-[var(--tj-radius-sm,6px)] flex items-center gap-1.5 text-[11px] font-semibold transition-colors cursor-pointer border outline-none",
               isConnected
-                ? "bg-[#101A32] hover:bg-[#152440] text-[#65B8FF]"
-                : "bg-[#3390EC] hover:bg-[#2879c7] text-[#F5F8FF] shadow-sm shadow-[#3390EC]/30"
+                ? "bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border-[var(--tj-color-border-subtle)] text-[var(--tj-color-brand-primary,#00B4D8)]"
+                : "bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] border-[var(--tj-color-brand-primary,#00B4D8)] text-white"
             )}
             aria-label="TON Wallet Status"
           >
-            {/* Wallet Icon */}
             <Wallet className="w-3.5 h-3.5 shrink-0" />
-            <span className="font-mono text-[11px]">
-              {isConnected ? shortAddress : "Connect TON"}
+            <span className="font-mono text-[11px] truncate max-w-[130px]">
+              {isConnected
+                ? tonBalance > 0
+                  ? `${tonBalance.toFixed(1)} ${networkLabel}`
+                  : shortAddress
+                : "Connect Wallet"}
             </span>
           </button>
+
+          <NotificationBell />
         </div>
       </div>
 
-      {/* Compact Search Field */}
-      <div className="px-4 sm:px-0">
+      <div className="px-3 sm:px-0">
         <div className="relative flex items-center">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9BAAC5]/60 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--tj-color-text-secondary,#C2C7CD)] pointer-events-none" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search tracks, artists, collections"
-            className="w-full h-11 bg-[#101A32] focus:bg-[#152440] text-sm text-[#F5F8FF] placeholder-[#9BAAC5]/60 rounded-xl pl-10 pr-9 transition-colors outline-none border-none focus:ring-1 focus:ring-[#3390EC]/40"
+            placeholder="Search NFTs, artists, collections, genres, or @creators..."
+            aria-label="Search marketplace"
+            className="w-full h-10 bg-[var(--tj-color-input-background,#0B1F36)] focus:bg-[var(--tj-color-surface-elevated,#111F36)] text-xs sm:text-sm text-white placeholder:text-[var(--tj-color-input-placeholder,#8193A8)] rounded-[var(--tj-radius-md,8px)] pl-9 pr-9 border border-[var(--tj-color-border-subtle)] focus:border-[var(--tj-color-brand-primary,#00B4D8)] transition-colors outline-none"
           />
           {searchTerm && (
             <button
               type="button"
               onClick={() => onSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9BAAC5] hover:text-[#F5F8FF] p-1 rounded-full cursor-pointer border-none bg-transparent"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white p-1 rounded-[var(--tj-radius-xs,4px)] cursor-pointer border-0 bg-transparent"
               aria-label="Clear search"
             >
               <X className="w-3.5 h-3.5" />

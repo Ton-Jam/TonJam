@@ -22,27 +22,9 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
   const { currentTrack, isPlaying, playTrack, togglePlay, userProfile } = useAudio();
   const { nfts: providerNfts } = useNFT();
 
-  // Map provider NFTs into LibraryNFT format
-  const mappedProviderNfts: LibraryNFT[] = providerNfts.map(item => ({
-    id: item.id,
-    tokenId: item.edition || '#001',
-    title: item.title,
-    artist: item.artist || item.creator || 'Unknown Artist',
-    coverUrl: item.coverUrl || item.imageUrl || getPlaceholderImage(`nft-${item.id}`),
-    collectionName: (item as any).collectionName || 'TON Music NFT',
-    floorPriceTon: parseFloat(String(item.price || '0')) || 0,
-    royaltyPercent: item.royaltySplits?.[0]?.percentage || 0,
-    rarity: (item.rarity as any) || 'Common',
-    ownerAddress: item.owner || userProfile?.walletAddress || '',
-    musicFileUrl: item.audioUrl || ''
-  }));
-
-  // Combine prop nfts and provider nfts uniquely by id
-  const displayNfts = Array.from(
-    new Map([...nfts, ...mappedProviderNfts].map(item => [item.id, item])).values()
-  );
-
-  const displayTotalFloorValue = displayNfts.reduce((acc, nft) => acc + nft.floorPriceTon, 0);
+  // Only display verified user-owned NFTs passed in from the library context
+  const displayNfts = nfts;
+  const displayTotalFloorValue = totalFloorValue;
 
   // State for NFT transfer
   const [transferringNft, setTransferringNft] = useState<LibraryNFT | null>(null);
@@ -168,12 +150,32 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
       </div>
 
       {/* Collectibles list or grid */}
-      <LayoutGroup id="nfts-layout-group">
-        <motion.div
-          layout
-          transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
-          className={layout === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-2"}
-        >
+      {displayNfts.length === 0 ? (
+        <div className="bg-[#111C30] rounded-2xl p-8 text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center mx-auto">
+            <Zap className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-sm font-bold text-white">No Music NFTs In Your Vault</h4>
+            <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
+              You don&apos;t own any TON music NFTs yet. Discover, collect, and trade exclusive artist drops on the TonJam NFT Marketplace.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/marketplace')}
+            className="px-5 py-2.5 bg-[#00B4D8] hover:bg-[#0098EA] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-lg shadow-[#00B4D8]/25 border-none"
+          >
+            Explore NFT Marketplace
+          </button>
+        </div>
+      ) : (
+        <LayoutGroup id="nfts-layout-group">
+          <motion.div
+            layout
+            transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+            className={layout === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-2"}
+          >
           {displayNfts.map((nft) => {
             const isCurrentPlaying = currentTrack?.id === nft.id && isPlaying;
             const isOwner = Boolean(CURRENT_USER_WALLET && nft.ownerAddress === CURRENT_USER_WALLET);
@@ -419,6 +421,7 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
           })}
         </motion.div>
       </LayoutGroup>
+      )}
 
       {/* Transfer Modal Overlay */}
       {transferringNft && (

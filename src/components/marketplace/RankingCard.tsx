@@ -38,7 +38,7 @@ export const RankingCard: React.FC<RankingCardProps> = ({
     <motion.div
       whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.04)" }}
       onClick={handleInteract}
-      className="flex items-center gap-3 p-2.5 rounded-xl bg-[#0A113A]/40 hover:bg-[#0A113A] transition-all duration-300 cursor-pointer border border-white/[0.02]"
+      className="flex items-center gap-3 p-2.5 rounded-xl bg-[#121824] hover:bg-[#182032] transition-all duration-300 cursor-pointer"
     >
       {/* Rank Index */}
       <span className="w-5 text-center text-xs font-black text-[#9AA0AE]">

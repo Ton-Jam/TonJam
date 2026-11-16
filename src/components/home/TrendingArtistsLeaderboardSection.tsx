@@ -77,10 +77,10 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
           <button
             onClick={() => setTrendingMetric('sales')}
             aria-pressed={trendingMetric === 'sales'}
-            className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-semibold rounded-lg transition-all cursor-pointer outline-none border ${
+            className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-semibold rounded-lg transition-all cursor-pointer outline-none border-0 ${
               trendingMetric === 'sales'
-                ? "bg-primary text-black border-[#c0c0c0]/40"
-                : "text-zinc-400 hover:text-white bg-transparent border-[#c0c0c0]/25"
+                ? "bg-primary text-black"
+                : "text-zinc-400 hover:text-white bg-transparent"
             }`}
           >
             NFT Sales Volume
@@ -88,10 +88,10 @@ export const TrendingArtistsLeaderboardSection: React.FC = () => {
           <button
             onClick={() => setTrendingMetric('followers')}
             aria-pressed={trendingMetric === 'followers'}
-            className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-semibold rounded-lg transition-all cursor-pointer outline-none border ${
+            className={`flex-1 py-1.5 text-[10px] uppercase tracking-wider font-semibold rounded-lg transition-all cursor-pointer outline-none border-0 ${
               trendingMetric === 'followers'
-                ? "bg-primary text-black border-[#c0c0c0]/40"
-                : "text-zinc-400 hover:text-white bg-transparent border-[#c0c0c0]/25"
+                ? "bg-primary text-black"
+                : "text-zinc-400 hover:text-white bg-transparent"
             }`}
           >
             Followers

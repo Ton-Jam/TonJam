@@ -181,7 +181,7 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({ isOpen, onClos
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       {/* Strict borderless design: no border lines */}
-      <DialogContent className="sm:max-w-[430px] bg-[#0A113A]/95 backdrop-blur-2xl text-white max-h-[95vh] overflow-y-auto rounded-3xl shadow-2xl shadow-cyan-500/10 p-5 sm:p-6 border-none select-none">
+      <DialogContent className="sm:max-w-[430px] bg-[#0A113A]/95 backdrop-blur-2xl text-white max-h-[95vh] overflow-y-auto rounded-[var(--tj-radius-lg,10px)] shadow-2xl shadow-cyan-500/10 p-5 sm:p-6 border-none select-none">
         <DialogHeader>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">

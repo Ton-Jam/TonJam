@@ -1,12 +1,15 @@
-import { useState, useEffect, useMemo } from "react";
-import { NFTItem, Artist, UserProfile } from "@/types";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { Artist, UserProfile } from "@/types";
 import {
+  MarketplaceNFT,
+  MarketplaceTab,
   NFTCollection,
   LiveAuction,
   LeaderboardUser,
   RecentSale,
   GenreCategory,
   MarketplaceStats,
+  AuctionStatus,
 } from "../types";
 import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
 import {
@@ -17,66 +20,111 @@ import {
   onSnapshot,
   orderBy,
 } from "firebase/firestore";
-import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
+import { useOptionalWallet } from "@/contexts/WalletContext";
+import { useAudio } from "@/contexts/AudioContext";
 
-const BASE_GENRES: Array<{ id: string; name: string; colorClass: string }> = [
-  { id: "g1", name: "Afrobeats", colorClass: "from-amber-600 to-yellow-900" },
-  { id: "g2", name: "Hip-Hop", colorClass: "from-blue-600 to-indigo-950" },
-  { id: "g3", name: "Amapiano", colorClass: "from-purple-600 to-pink-950" },
-  { id: "g4", name: "Pop", colorClass: "from-emerald-600 to-teal-950" },
-  { id: "g5", name: "Electronic", colorClass: "from-cyan-600 to-blue-950" },
-  { id: "g6", name: "R&B", colorClass: "from-rose-600 to-red-950" },
-  { id: "g7", name: "Gospel", colorClass: "from-amber-500 to-stone-900" },
-  { id: "g8", name: "Jazz", colorClass: "from-sky-700 to-slate-900" },
-  { id: "g9", name: "Classical", colorClass: "from-zinc-600 to-neutral-900" },
-  { id: "g10", name: "Experimental", colorClass: "from-fuchsia-700 to-purple-950" },
+export const DEFAULT_GENRES: string[] = [
+  "Afrobeats",
+  "Hip-Hop",
+  "Pop",
+  "R&B",
+  "Electronic",
+  "Amapiano",
+  "Gospel",
+  "Dancehall",
 ];
 
+const GENRE_COLOR_CLASSES: Record<string, string> = {
+  Afrobeats: "from-amber-600 to-yellow-900",
+  "Hip-Hop": "from-blue-600 to-indigo-950",
+  Pop: "from-emerald-600 to-teal-950",
+  "R&B": "from-rose-600 to-red-950",
+  Electronic: "from-cyan-600 to-blue-950",
+  Amapiano: "from-purple-600 to-pink-950",
+  Gospel: "from-amber-500 to-stone-900",
+  Dancehall: "from-sky-700 to-slate-900",
+};
+
+const PAGE_STEP = 12;
+
+function parseTonValue(val?: string | number | null): number {
+  if (val === undefined || val === null) return 0;
+  const num = parseFloat(String(val).replace(/[^\d.]/g, ""));
+  return Number.isFinite(num) ? num : 0;
+}
+
+function resolveAuctionStatus(nft: MarketplaceNFT, nowMs: number): AuctionStatus {
+  const rawStatus = String(nft.listingStatus || (nft as any).auctionStatus || "").toLowerCase();
+  if (rawStatus === "cancelled" || rawStatus === "canceled") return "cancelled";
+
+  if (nft.auctionStartTime) {
+    const startMs = new Date(nft.auctionStartTime).getTime();
+    if (Number.isFinite(startMs) && startMs > nowMs) {
+      return "pending";
+    }
+  }
+
+  if (nft.auctionEndTime) {
+    const endMs = new Date(nft.auctionEndTime).getTime();
+    if (Number.isFinite(endMs) && endMs <= nowMs) {
+      return "ended";
+    }
+  }
+
+  if (rawStatus === "ended" || rawStatus === "sold") return "ended";
+  if (rawStatus === "pending" || rawStatus === "scheduled") return "pending";
+  return "active";
+}
+
 export const useMarketplace = () => {
+  const [activeTab, setActiveTab] = useState<MarketplaceTab>("discover");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [activeGenre, setActiveGenre] = useState("All");
   const [sortBy, setSortBy] = useState("default");
+  const [pageSize, setPageSize] = useState(PAGE_STEP);
+  const [reloadNonce, setReloadNonce] = useState(0);
+
   const [isLoading, setIsLoading] = useState(true);
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [firestoreNFTs, setFirestoreNFTs] = useState<NFTItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(
+    typeof navigator !== "undefined" ? !navigator.onLine : false
+  );
+
+  const [firestoreNFTs, setFirestoreNFTs] = useState<MarketplaceNFT[]>([]);
   const [firestoreCollections, setFirestoreCollections] = useState<NFTCollection[]>([]);
   const [verifiedArtists, setVerifiedArtists] = useState<LeaderboardUser[]>([]);
   const [recentSales, setRecentSales] = useState<RecentSale[]>([]);
   const [collectionNFTCounts, setCollectionNFTCounts] = useState<Record<string, number>>({});
 
-  // Real TON Connect wallet hook
-  const walletAddress = useTonAddress();
-  const [tonConnectUI] = useTonConnectUI();
-  const isWalletConnected = Boolean(walletAddress);
+  const wallet = useOptionalWallet();
+  const audio = useAudio();
 
-  const connectWallet = () => {
-    if (tonConnectUI) {
-      try {
-        tonConnectUI.openModal();
-      } catch (err) {
-        console.warn("[useMarketplace] Failed to open TON Connect modal:", err);
-      }
-    }
-  };
-
-  const disconnectWallet = async () => {
-    if (tonConnectUI && tonConnectUI.connected) {
-      try {
-        await tonConnectUI.disconnect();
-      } catch (err) {
-        console.warn("[useMarketplace] Error disconnecting wallet:", err);
-      }
-    }
-  };
+  const walletAddress = wallet?.address || "";
+  const isWalletConnected = Boolean(wallet?.isConnected || walletAddress);
+  const tonBalance = wallet?.tonBalance ?? 0;
+  const walletNetwork = wallet?.network || "mainnet";
+  const connectWallet = useCallback(() => {
+    wallet?.connectWallet?.();
+  }, [wallet]);
+  const disconnectWallet = useCallback(async () => {
+    await wallet?.disconnectWallet?.();
+  }, [wallet]);
 
   // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
-    }, 250);
+      setPageSize(PAGE_STEP);
+    }, 220);
     return () => clearTimeout(handler);
   }, [searchTerm]);
+
+  // Reset visible pagination when category / genre / sort changes
+  useEffect(() => {
+    setPageSize(PAGE_STEP);
+  }, [activeCategory, activeGenre, sortBy, activeTab]);
 
   // Online / Offline tracking
   useEffect(() => {
@@ -92,18 +140,22 @@ export const useMarketplace = () => {
 
   // Subscribe to real Firestore NFTs, collections, verified artists, and sales
   useEffect(() => {
-    const nftsQuery = query(collection(db, "nfts"), limit(100));
+    setIsLoading(true);
+    setError(null);
+
+    const nftsQuery = query(collection(db, "nfts"), limit(120));
     const unsubscribeNFTs = onSnapshot(
       nftsQuery,
       (snapshot) => {
-        const loaded: NFTItem[] = [];
+        const loaded: MarketplaceNFT[] = [];
         const counts: Record<string, number> = {};
 
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
-          const rawPrice = data.price !== undefined && data.price !== null ? String(data.price) : "0 TON";
+          const rawPrice =
+            data.price !== undefined && data.price !== null ? String(data.price) : "0 TON";
           const formattedPrice = rawPrice.includes("TON") ? rawPrice : `${rawPrice} TON`;
-          const colId = data.collectionId || data.albumId;
+          const colId = data.collectionId || data.albumId || "";
           if (colId) {
             counts[colId] = (counts[colId] || 0) + 1;
           }
@@ -112,43 +164,70 @@ export const useMarketplace = () => {
             id: docSnap.id,
             trackId: data.trackId || docSnap.id,
             title: data.title || "Untitled NFT",
-            artist: data.creator || data.artist || "Unknown Artist",
+            artist: data.artist || data.creator || "Unknown Artist",
             artistId: data.artistId || data.creatorId || "",
             owner: data.owner || data.ownerAddress || "",
+            ownerId: data.ownerId || "",
             creator: data.creator || data.artist || "Unknown Artist",
+            creatorId: data.creatorId || data.artistId || "",
+            creatorUsername: data.creatorUsername || data.username || data.handle || "",
             imageUrl: data.imageUrl || data.coverUrl || "",
             coverUrl: data.coverUrl || data.imageUrl || "",
             audioUrl: data.audioUrl || data.mediaUrl || "",
             price: formattedPrice,
-            listingType: data.listingType || "fixed",
+            listingType: data.listingType || (data.price ? "fixed" : undefined),
+            listingStatus: data.listingStatus || data.status || "",
+            contractAddress: data.contractAddress || "",
             isNFT: true,
             artistVerified: Boolean(data.artistVerified),
             edition: data.edition || "1/1",
+            editionNumber: Number(data.editionNumber || 1),
+            totalEditions: Number(data.totalEditions || data.supply || 1),
+            supply: Number(data.supply || data.totalEditions || 1),
             rarity: data.rarity || "Common",
             genre: data.genre || "",
+            description: data.description || "",
+            royalty: Number(data.royalty ?? data.royaltyPercentage ?? 0),
+            royaltySplits: Array.isArray(data.royaltySplits) ? data.royaltySplits : [],
+            isFeatured: Boolean(data.isFeatured || data.featured),
             playCount: Number(data.playCount || 0),
             likes: Number(data.likes || 0),
             highestBidder: data.highestBidder || "",
             currentBid: data.currentBid ? String(data.currentBid) : formattedPrice,
+            auctionStartTime: data.auctionStartTime || data.startsAt || "",
             auctionEndTime: data.auctionEndTime || data.endsAt || "",
-            bidsCount: Number(data.bidsCount || (Array.isArray(data.bids) ? data.bids.length : 0)),
+            bidsCount: Number(
+              data.bidsCount ||
+                (Array.isArray(data.bids)
+                  ? data.bids.length
+                  : Array.isArray(data.offers)
+                  ? data.offers.length
+                  : 0)
+            ),
+            offers: Array.isArray(data.offers) ? data.offers : [],
             watchers: Number(data.watchers || 0),
-            collectionId: colId || "",
-            createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : (data.createdAt || ""),
-          } as any);
+            collectionId: colId,
+            collectionName: data.collectionName || data.albumTitle || "",
+            stakedOwnerAddress: data.stakedOwnerAddress || "",
+            createdAt: data.createdAt?.toDate
+              ? data.createdAt.toDate().toISOString()
+              : data.createdAt || "",
+          });
         });
 
         setFirestoreNFTs(loaded);
         setCollectionNFTCounts((prev) => ({ ...prev, ...counts }));
         setIsLoading(false);
+        setError(null);
       },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, "nfts");
+      (err) => {
+        handleFirestoreError(err, OperationType.LIST, "nfts");
+        setError("Unable to load NFT listings from Firebase right now.");
         setIsLoading(false);
       }
     );
 
-    const colQuery = query(collection(db, "collections"), limit(50));
+    const colQuery = query(collection(db, "collections"), limit(60));
     const unsubscribeCols = onSnapshot(
       colQuery,
       (snapshot) => {
@@ -166,14 +245,23 @@ export const useMarketplace = () => {
             colCounts[docSnap.id] = total;
           }
 
+          const floorRaw = data.floorPrice;
+          const volRaw = data.volume;
+
           cols.push({
             id: docSnap.id,
             name: data.name || "Untitled Collection",
             creator: data.creatorName || data.creator || "TonJam Creator",
             creatorId: data.creatorId || data.artistId || "",
-            volume: String(data.volume || "0"),
+            volume:
+              volRaw !== undefined && volRaw !== null && Number(volRaw) > 0
+                ? String(volRaw)
+                : undefined,
             owners: Number(data.ownersCount || data.owners || 0),
-            floorPrice: String(data.floorPrice || "0"),
+            floorPrice:
+              floorRaw !== undefined && floorRaw !== null && Number(floorRaw) > 0
+                ? String(floorRaw)
+                : undefined,
             imageUrl: data.imageUrl || data.coverUrl || "",
             itemCount: Number(total || 0),
             verified: Boolean(data.verified ?? data.creatorVerified ?? false),
@@ -184,15 +272,15 @@ export const useMarketplace = () => {
         setFirestoreCollections(cols);
         setCollectionNFTCounts((prev) => ({ ...colCounts, ...prev }));
       },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, "collections");
+      (err) => {
+        handleFirestoreError(err, OperationType.LIST, "collections");
       }
     );
 
     const artistsQuery = query(
       collection(db, "users"),
       where("isVerifiedArtist", "==", true),
-      limit(30)
+      limit(40)
     );
     const unsubscribeArtists = onSnapshot(
       artistsQuery,
@@ -212,8 +300,8 @@ export const useMarketplace = () => {
         });
         setVerifiedArtists(loadedArtists);
       },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, "users");
+      (err) => {
+        handleFirestoreError(err, OperationType.LIST, "users");
       }
     );
 
@@ -239,14 +327,18 @@ export const useMarketplace = () => {
             buyerAddress: data.buyerAddress || "",
             sellerName: data.sellerName || data.artistName || "Creator",
             sellerAddress: data.sellerAddress || "",
-            price: data.price ? (String(data.price).includes("TON") ? String(data.price) : `${data.price} TON`) : "0 TON",
+            price: data.price
+              ? String(data.price).includes("TON")
+                ? String(data.price)
+                : `${data.price} TON`
+              : "0 TON",
             timestamp: ts,
           };
         });
         setRecentSales(sales);
       },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, "nftSales");
+      (err) => {
+        handleFirestoreError(err, OperationType.LIST, "nftSales");
       }
     );
 
@@ -256,50 +348,120 @@ export const useMarketplace = () => {
       unsubscribeArtists();
       unsubscribeSales();
     };
+  }, [reloadNonce]);
+
+  const retryLoad = useCallback(() => {
+    setReloadNonce((n) => n + 1);
   }, []);
 
-  const allNFTs = firestoreNFTs;
+  // Join collection names, verified status, track genre, and creator username cleanly
+  const allNFTs = useMemo<MarketplaceNFT[]>(() => {
+    const collectionMap = new Map<string, NFTCollection>();
+    firestoreCollections.forEach((c) => collectionMap.set(c.id, c));
 
-  // Filter based on category & debounced search term
+    const artistMap = new Map<string, LeaderboardUser>();
+    verifiedArtists.forEach((a) => {
+      artistMap.set(a.id, a);
+      if (a.name) artistMap.set(a.name.toLowerCase(), a);
+    });
+
+    const trackMap = new Map<string, (typeof audio.allTracks)[number]>();
+    (audio.allTracks || []).forEach((t) => trackMap.set(t.id, t));
+
+    return firestoreNFTs.map((nft) => {
+      const col = nft.collectionId ? collectionMap.get(nft.collectionId) : undefined;
+      const verifiedArtist =
+        (nft.artistId && artistMap.get(nft.artistId)) ||
+        (nft.creatorId && artistMap.get(nft.creatorId)) ||
+        (nft.artist && artistMap.get(nft.artist.toLowerCase())) ||
+        (nft.creator && artistMap.get(nft.creator.toLowerCase()));
+      const matchedTrack = nft.trackId ? trackMap.get(nft.trackId) : undefined;
+
+      return {
+        ...nft,
+        collectionName: nft.collectionName || col?.name || "",
+        genre: nft.genre || matchedTrack?.genre || "",
+        artistVerified: Boolean(nft.artistVerified || verifiedArtist?.isVerified),
+        creatorUsername: nft.creatorUsername || verifiedArtist?.username || "",
+        playCount: nft.playCount || matchedTrack?.playCount || 0,
+        likes: nft.likes || matchedTrack?.likes || 0,
+      };
+    });
+  }, [firestoreNFTs, firestoreCollections, verifiedArtists, audio.allTracks]);
+
+  // Dynamic globally inclusive genre options from default set + backend genres
+  const availableGenres = useMemo<string[]>(() => {
+    const seen = new Set<string>(DEFAULT_GENRES.map((g) => g.toLowerCase()));
+    const result = [...DEFAULT_GENRES];
+
+    allNFTs.forEach((nft) => {
+      const g = (nft.genre || "").trim();
+      if (g && !seen.has(g.toLowerCase())) {
+        seen.add(g.toLowerCase());
+        result.push(g);
+      }
+    });
+
+    return result;
+  }, [allNFTs]);
+
+  // Filter based on search term (title, artist, collection, genre, creator username), category pills, genre filter, and sort
   const filteredNFTs = useMemo(() => {
     let result = [...allNFTs];
 
     if (debouncedSearch.trim() !== "") {
-      const q = debouncedSearch.toLowerCase();
+      const q = debouncedSearch.trim().toLowerCase();
       result = result.filter(
         (t) =>
-          t.title.toLowerCase().includes(q) ||
+          (t.title || "").toLowerCase().includes(q) ||
           (t.artist || "").toLowerCase().includes(q) ||
-          (Boolean((t as any).albumId) && String((t as any).albumId).toLowerCase().includes(q)) ||
-          (Boolean((t as any).genre) && String((t as any).genre).toLowerCase().includes(q))
+          (t.creator || "").toLowerCase().includes(q) ||
+          (t.collectionName || "").toLowerCase().includes(q) ||
+          (t.genre || "").toLowerCase().includes(q) ||
+          (t.creatorUsername || "").toLowerCase().includes(q)
       );
     }
 
+    if (activeGenre !== "All") {
+      const targetGenre = activeGenre.toLowerCase();
+      result = result.filter((t) => (t.genre || "").toLowerCase() === targetGenre);
+    }
+
     switch (activeCategory) {
-      case "Tracks":
-      case "Singles":
-        result = result.filter((t) => !(t as any).albumId || (t as any).isNFT);
+      case "Trending":
+        if (sortBy === "default") {
+          result.sort(
+            (a, b) =>
+              (b.playCount || 0) + (b.likes || 0) - ((a.playCount || 0) + (a.likes || 0))
+          );
+        }
         break;
-      case "Albums":
-        result = result.filter((t) => Boolean((t as any).albumId));
+      case "New Releases":
+      case "Newly Minted":
+      case "New Drops":
+        result.sort((a, b) => {
+          const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return tb - ta;
+        });
         break;
-      case "Artist Shares":
-        result = result.filter((t) => (t as any).edition?.includes("/") || (t as any).rarity === "Legendary");
+      case "Featured": {
+        const flagged = result.filter((t) => t.isFeatured);
+        result = flagged.length > 0 ? flagged : result.filter((t) => t.artistVerified);
         break;
-      case "Live Auctions":
+      }
+      case "Music":
+        result = result.filter((t) => Boolean(t.audioUrl) || Boolean(t.trackId));
+        break;
+      case "Collections":
+        result = result.filter((t) => Boolean(t.collectionId || t.collectionName));
+        break;
       case "Auctions":
+      case "Live Auctions":
         result = result.filter((t) => t.listingType === "auction");
         break;
-      case "Newly Minted":
-      case "New":
-      case "New Drops":
-        result = [...result].reverse().slice(0, 50);
-        break;
-      case "Verified Artists":
-        result = result.filter((t) => t.artistVerified);
-        break;
-      case "Limited Editions":
-        result = result.filter((t) => t.rarity === "Legendary" || t.rarity === "Rare" || Boolean(t.edition));
+      case "Listed NFTs":
+        result = result.filter((t) => parseTonValue(t.price) > 0 && Boolean(t.listingType));
         break;
       case "All":
       default:
@@ -308,89 +470,184 @@ export const useMarketplace = () => {
 
     switch (sortBy) {
       case "price_asc":
-        result.sort(
-          (a, b) =>
-            parseFloat(String(a.price || "0").replace(/[^\d.]/g, "") || "0") -
-            parseFloat(String(b.price || "0").replace(/[^\d.]/g, "") || "0")
-        );
+        result.sort((a, b) => parseTonValue(a.price) - parseTonValue(b.price));
         break;
       case "price_desc":
-        result.sort(
-          (a, b) =>
-            parseFloat(String(b.price || "0").replace(/[^\d.]/g, "") || "0") -
-            parseFloat(String(a.price || "0").replace(/[^\d.]/g, "") || "0")
-        );
+        result.sort((a, b) => parseTonValue(b.price) - parseTonValue(a.price));
         break;
       case "recent":
-        result.reverse();
+        result.sort((a, b) => {
+          const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return tb - ta;
+        });
         break;
       case "popular":
       case "trending":
-        result.sort((a, b) => ((b as any).playCount || 0) - ((a as any).playCount || 0));
+        result.sort(
+          (a, b) =>
+            (b.playCount || 0) + (b.likes || 0) - ((a.playCount || 0) + (a.likes || 0))
+        );
         break;
       default:
         break;
     }
 
     return result;
-  }, [allNFTs, debouncedSearch, activeCategory, sortBy]);
+  }, [allNFTs, debouncedSearch, activeCategory, activeGenre, sortBy]);
 
-  const featuredNFT = useMemo(() => {
-    return allNFTs.find((t) => t.artistVerified && t.listingType === "auction") || allNFTs[0] || null;
+  const paginatedNFTs = useMemo(() => {
+    return filteredNFTs.slice(0, pageSize);
+  }, [filteredNFTs, pageSize]);
+
+  const hasMoreNFTs = paginatedNFTs.length < filteredNFTs.length;
+
+  const loadMoreNFTs = useCallback(() => {
+    setPageSize((prev) => prev + PAGE_STEP);
+  }, []);
+
+  // Owned NFTs strictly verified from connected wallet or authenticated Firestore UID (never fake)
+  const myNFTs = useMemo<MarketplaceNFT[]>(() => {
+    const uid = audio.userProfile?.uid || "";
+    const ownedIds = new Set(audio.userProfile?.ownedNftIds || []);
+    const activeAddr = (walletAddress || audio.userProfile?.walletAddress || "").trim();
+
+    if (!activeAddr && !uid && ownedIds.size === 0) {
+      return [];
+    }
+
+    let list = allNFTs.filter((nft) => {
+      if (ownedIds.has(nft.id)) return true;
+      if (activeAddr && (nft.owner === activeAddr || nft.stakedOwnerAddress === activeAddr)) {
+        return true;
+      }
+      if (uid && (nft.ownerId === uid || nft.owner === uid)) {
+        return true;
+      }
+      return false;
+    });
+
+    if (debouncedSearch.trim() !== "") {
+      const q = debouncedSearch.trim().toLowerCase();
+      list = list.filter(
+        (t) =>
+          (t.title || "").toLowerCase().includes(q) ||
+          (t.artist || "").toLowerCase().includes(q) ||
+          (t.collectionName || "").toLowerCase().includes(q) ||
+          (t.genre || "").toLowerCase().includes(q)
+      );
+    }
+
+    return list;
+  }, [allNFTs, walletAddress, audio.userProfile, debouncedSearch]);
+
+  // Featured NFT strictly from real Firestore records (hidden when none exist)
+  const featuredNFT = useMemo<MarketplaceNFT | null>(() => {
+    if (allNFTs.length === 0) return null;
+    return (
+      allNFTs.find((t) => t.isFeatured) ||
+      allNFTs.find((t) => t.artistVerified && parseTonValue(t.price) > 0) ||
+      allNFTs.find((t) => parseTonValue(t.price) > 0) ||
+      null
+    );
   }, [allNFTs]);
 
-  // Live auctions strictly derived from Firestore NFTs
+  // Real auctions strictly derived from Firestore NFTs without fake countdowns/bids
   const liveAuctions = useMemo<LiveAuction[]>(() => {
-    let list = allNFTs
+    const nowMs = Date.now();
+    let list: LiveAuction[] = allNFTs
       .filter((t) => t.listingType === "auction")
-      .map((nft: any) => ({
-        id: nft.id,
-        nft,
-        currentBid: nft.currentBid || nft.price || "0 TON",
-        highestBidder: nft.highestBidder || "",
-        endsAt: nft.auctionEndTime || "",
-        minIncrement: "0.5 TON",
-        watchers: Number(nft.watchers || 0),
-        bidsCount: Number(nft.bidsCount || 0),
-        isLive: true,
-      }));
+      .map((nft) => {
+        const status = resolveAuctionStatus(nft, nowMs);
+        const currentNumeric = parseTonValue(nft.currentBid || nft.price);
+        const increment = 0.5;
+        const minNextNumeric = currentNumeric > 0 ? currentNumeric + increment : increment;
+
+        return {
+          id: nft.id,
+          nft,
+          currentBid: nft.currentBid || nft.price || "0 TON",
+          minimumNextBid: `${minNextNumeric.toFixed(2).replace(/\.00$/, "")} TON`,
+          highestBidder: nft.highestBidder || "",
+          startsAt: nft.auctionStartTime || "",
+          endsAt: nft.auctionEndTime || "",
+          minIncrement: `${increment} TON`,
+          watchers: Number(nft.watchers || 0),
+          bidsCount: Number(nft.bidsCount || 0),
+          status,
+          isLive: status === "active",
+          recentBids: (nft.offers || []).slice(0, 3).map((o) => ({
+            id: o.id,
+            bidder: o.offerer,
+            amount: o.price.includes("TON") ? o.price : `${o.price} TON`,
+            timestamp: o.timestamp,
+          })),
+        };
+      });
 
     if (debouncedSearch.trim() !== "") {
-      const q = debouncedSearch.toLowerCase();
+      const q = debouncedSearch.trim().toLowerCase();
       list = list.filter(
         (a) =>
-          a.nft.title.toLowerCase().includes(q) ||
-          (a.nft.artist || "").toLowerCase().includes(q)
+          (a.nft.title || "").toLowerCase().includes(q) ||
+          (a.nft.artist || "").toLowerCase().includes(q) ||
+          (a.nft.collectionName || "").toLowerCase().includes(q) ||
+          (a.nft.genre || "").toLowerCase().includes(q) ||
+          (a.nft.creatorUsername || "").toLowerCase().includes(q)
       );
     }
 
-    return list;
-  }, [allNFTs, debouncedSearch]);
+    if (activeGenre !== "All") {
+      const targetGenre = activeGenre.toLowerCase();
+      list = list.filter((a) => (a.nft.genre || "").toLowerCase() === targetGenre);
+    }
 
-  // Trending collections strictly from Firestore
+    return list;
+  }, [allNFTs, debouncedSearch, activeGenre]);
+
+  // Collections strictly from Firestore with honest floor/volume when available
   const trendingCollections = useMemo<NFTCollection[]>(() => {
-    let list = firestoreCollections.map((c) => ({
-      ...c,
-      itemCount: collectionNFTCounts[c.id] ?? c.itemCount ?? 0,
-    }));
+    let list = firestoreCollections.map((c) => {
+      const colNFTs = allNFTs.filter((n) => n.collectionId === c.id);
+      const prices = colNFTs.map((n) => parseTonValue(n.price)).filter((p) => p > 0);
+      const computedFloor = prices.length > 0 ? `${Math.min(...prices)} TON` : undefined;
+      return {
+        ...c,
+        itemCount: collectionNFTCounts[c.id] ?? (colNFTs.length || c.itemCount || 0),
+        floorPrice: c.floorPrice
+          ? c.floorPrice.includes("TON")
+            ? c.floorPrice
+            : `${c.floorPrice} TON`
+          : computedFloor,
+        volume: c.volume
+          ? c.volume.includes("TON")
+            ? c.volume
+            : `${c.volume} TON`
+          : undefined,
+      };
+    });
 
     if (debouncedSearch.trim() !== "") {
-      const q = debouncedSearch.toLowerCase();
+      const q = debouncedSearch.trim().toLowerCase();
       list = list.filter(
-        (c) => c.name.toLowerCase().includes(q) || c.creator.toLowerCase().includes(q)
+        (c) =>
+          c.name.toLowerCase().includes(q) || c.creator.toLowerCase().includes(q)
       );
     }
 
     return list;
-  }, [firestoreCollections, collectionNFTCounts, debouncedSearch]);
+  }, [firestoreCollections, collectionNFTCounts, allNFTs, debouncedSearch]);
 
   // Top buyers derived from recentSales
   const topBuyers = useMemo<LeaderboardUser[]>(() => {
-    const buyerTotals = new Map<string, { name: string; address: string; spent: number; count: number }>();
+    const buyerTotals = new Map<
+      string,
+      { name: string; address: string; spent: number; count: number }
+    >();
     recentSales.forEach((sale) => {
       const key = sale.buyerAddress || sale.buyerName;
       if (!key) return;
-      const priceVal = parseFloat(String(sale.price).replace(/[^\d.]/g, "")) || 0;
+      const priceVal = parseTonValue(sale.price);
       const existing = buyerTotals.get(key) || {
         name: sale.buyerName || "Collector",
         address: sale.buyerAddress || "",
@@ -420,29 +677,30 @@ export const useMarketplace = () => {
 
   // Dynamic genre counts strictly from live Firestore NFTs
   const genreCategories = useMemo<GenreCategory[]>(() => {
-    return BASE_GENRES.map((genre) => {
+    return availableGenres.map((genreName, idx) => {
       const matchingNFTs = allNFTs.filter(
-        (n: any) => (n.genre || "").toLowerCase() === genre.name.toLowerCase()
+        (n) => (n.genre || "").toLowerCase() === genreName.toLowerCase()
       );
       return {
-        id: genre.id,
-        name: genre.name,
-        count: `${matchingNFTs.length} NFTs`,
+        id: `genre-${idx}-${genreName.toLowerCase().replace(/\s+/g, "-")}`,
+        name: genreName,
+        count: `${matchingNFTs.length} ${matchingNFTs.length === 1 ? "NFT" : "NFTs"}`,
+        numericCount: matchingNFTs.length,
         coverUrl: matchingNFTs[0]?.imageUrl || matchingNFTs[0]?.coverUrl || "",
-        colorClass: genre.colorClass,
+        colorClass: GENRE_COLOR_CLASSES[genreName] || "from-blue-700 to-slate-900",
       };
     });
-  }, [allNFTs]);
+  }, [availableGenres, allNFTs]);
 
-  // Marketplace analytics strictly from Firestore data (zeroed when empty)
+  // Marketplace analytics strictly from Firestore data
   const analyticsStats = useMemo<MarketplaceStats>(() => {
     const numericPrices = allNFTs
-      .map((n) => parseFloat(String(n.price || "0").replace(/[^\d.]/g, "") || "0"))
-      .filter((p) => !isNaN(p) && p > 0);
+      .map((n) => parseTonValue(n.price))
+      .filter((p) => p > 0);
 
     const salesPrices = recentSales
-      .map((s) => parseFloat(String(s.price || "0").replace(/[^\d.]/g, "") || "0"))
-      .filter((p) => !isNaN(p) && p > 0);
+      .map((s) => parseTonValue(s.price))
+      .filter((p) => p > 0);
 
     const minPrice = numericPrices.length > 0 ? Math.min(...numericPrices) : 0;
     const totalSalesVol = salesPrices.reduce((acc, p) => acc + p, 0);
@@ -461,28 +719,43 @@ export const useMarketplace = () => {
     };
   }, [allNFTs, recentSales]);
 
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setSearchTerm("");
     setDebouncedSearch("");
     setActiveCategory("All");
+    setActiveGenre("All");
     setSortBy("default");
-  };
+    setPageSize(PAGE_STEP);
+  }, []);
 
   return {
+    activeTab,
+    setActiveTab,
     searchTerm,
     setSearchTerm,
     debouncedSearch,
     activeCategory,
     setActiveCategory,
+    activeGenre,
+    setActiveGenre,
+    availableGenres,
     sortBy,
     setSortBy,
     isLoading,
+    error,
+    retryLoad,
     isOffline,
     walletAddress,
     isWalletConnected,
+    tonBalance,
+    walletNetwork,
     connectWallet,
     disconnectWallet,
     filteredNFTs,
+    paginatedNFTs,
+    hasMoreNFTs,
+    loadMoreNFTs,
+    myNFTs,
     allNFTs,
     featuredNFT,
     liveAuctions,
@@ -494,6 +767,8 @@ export const useMarketplace = () => {
     analyticsStats,
     genreCategories,
     collectionNFTCounts,
+    likedTrackIds: audio.likedTrackIds || [],
+    toggleLikeTrack: audio.toggleLikeTrack,
     handleResetFilters,
   };
 };

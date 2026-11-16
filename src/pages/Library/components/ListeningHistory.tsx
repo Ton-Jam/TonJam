@@ -19,6 +19,7 @@ export const ListeningHistory: React.FC<ListeningHistoryProps> = ({
     const today: HistoryEvent[] = [];
     const yesterday: HistoryEvent[] = [];
     const thisWeek: HistoryEvent[] = [];
+    const older: HistoryEvent[] = [];
 
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -26,17 +27,21 @@ export const ListeningHistory: React.FC<ListeningHistoryProps> = ({
     const startOfThisWeek = startOfToday - 1000 * 60 * 60 * 24 * 7;
 
     history.forEach((item) => {
-      const playTime = new Date(item.playedAt).getTime();
-      if (playTime >= startOfToday) {
+      const playTime = item.playedAt ? new Date(item.playedAt).getTime() : 0;
+      if (!playTime || isNaN(playTime)) {
+        today.push(item);
+      } else if (playTime >= startOfToday) {
         today.push(item);
       } else if (playTime >= startOfYesterday) {
         yesterday.push(item);
       } else if (playTime >= startOfThisWeek) {
         thisWeek.push(item);
+      } else {
+        older.push(item);
       }
     });
 
-    return { today, yesterday, thisWeek };
+    return { today, yesterday, thisWeek, older };
   }, [history]);
 
   const renderHistoryList = (events: HistoryEvent[]) => {
@@ -131,6 +136,17 @@ export const ListeningHistory: React.FC<ListeningHistoryProps> = ({
                 Earlier This Week
               </span>
               {renderHistoryList(groupedHistory.thisWeek)}
+            </div>
+          )}
+
+          {/* Older History Group */}
+          {groupedHistory.older.length > 0 && (
+            <div className="space-y-2">
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-1 flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                Older
+              </span>
+              {renderHistoryList(groupedHistory.older)}
             </div>
           )}
         </div>

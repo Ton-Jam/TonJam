@@ -520,7 +520,7 @@ export default function UploadTrackScreen() {
               const file = e.dataTransfer.files?.[0];
               if (file) handleCoverSelected(file);
             }}
-            className={`aspect-square sm:aspect-[21/9] w-48 mx-auto sm:w-full rounded-2xl bg-white/5 border-2 border-dashed ${isCoverDragging ? 'border-cyan-400 bg-cyan-500/10 scale-[1.01]' : coverPreview ? 'border-transparent' : 'border-white/10 hover:border-cyan-500/50'} transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center group relative shadow-inner`}
+            className={`aspect-square sm:aspect-[21/9] w-48 mx-auto sm:w-full rounded-[var(--tj-radius-lg,10px)] bg-white/5 border border-dashed ${isCoverDragging ? 'border-cyan-400 bg-cyan-500/10 scale-[1.01]' : coverPreview ? 'border-transparent' : 'border-white/10 hover:border-cyan-500/50'} transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center group relative shadow-inner`}
           >
             {coverPreview ? (
               <img src={coverPreview} className="w-full h-full object-cover" alt="Preview" referrerPolicy="no-referrer" />
@@ -584,7 +584,7 @@ export default function UploadTrackScreen() {
                   const file = e.dataTransfer.files?.[0];
                   if (file) handleAudioSelected(file);
                 }}
-                className={`w-full rounded-2xl ${isAudioDragging ? 'bg-purple-500/20 border-purple-400 scale-[1.01]' : audioFile ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5'} border-2 border-dashed ${!audioFile && !isAudioDragging && 'border-white/10 hover:border-purple-500/50'} transition-all cursor-pointer flex flex-col items-center justify-center p-8 group relative shadow-inner`}
+                className={`w-full rounded-[var(--tj-radius-lg,10px)] ${isAudioDragging ? 'bg-purple-500/20 border-purple-400 scale-[1.01]' : audioFile ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5'} border border-dashed ${!audioFile && !isAudioDragging && 'border-white/10 hover:border-purple-500/50'} transition-all cursor-pointer flex flex-col items-center justify-center p-8 group relative shadow-inner`}
               >
                 {audioFile ? (
                   <div className="text-center">
@@ -847,9 +847,9 @@ export default function UploadTrackScreen() {
                     addNotification(`${validFiles.length} tracks added to batch via drop`, "success");
                   }
                 }}
-                className={`w-full rounded-3xl ${isBatchDragging ? 'bg-purple-500/20 border-purple-400 scale-[1.01]' : 'bg-white/5'} border-2 border-dashed ${!isBatchDragging && 'border-white/10 hover:border-purple-500/50'} transition-all cursor-pointer flex flex-col items-center justify-center p-10 group relative shadow-inner`}
+                className={`w-full rounded-[var(--tj-radius-lg,10px)] ${isBatchDragging ? 'bg-purple-500/20 border-purple-400 scale-[1.01]' : 'bg-white/5'} border border-dashed ${!isBatchDragging && 'border-white/10 hover:border-purple-500/50'} transition-all cursor-pointer flex flex-col items-center justify-center p-10 group relative shadow-inner`}
               >
-                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 rounded-[var(--tj-radius-md,8px)] bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Upload className="w-6 h-6 text-white/20 group-hover:text-purple-400 transition-colors" />
                 </div>
                 <p className="mt-4 text-[10px] font-bold text-white/40 uppercase tracking-widest text-center">

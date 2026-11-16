@@ -105,7 +105,7 @@ const AIAssistant: React.FC = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="mb-4 w-[calc(100vw-48px)] sm:w-[380px] h-[60vh] sm:h-[500px] bg-background/80 backdrop-blur-2xl border border-blue-500/20 rounded-[4px] shadow-2xl flex flex-col overflow-hidden"
+            className="mb-4 w-[calc(100vw-48px)] sm:w-[380px] h-[60vh] sm:h-[500px] bg-background/80 backdrop-blur-2xl border border-blue-500/20 rounded-[var(--tj-radius-md,8px)] shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-b border-white/5 flex items-center justify-between">
@@ -115,7 +115,7 @@ const AIAssistant: React.FC = () => {
                   <motion.div 
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
-                    className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background flex items-center justify-center"
+                    className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border border-background flex items-center justify-center"
                   >
                     <Sparkles className="w-2 h-2 text-white" />
                   </motion.div>
@@ -244,7 +244,7 @@ const AIAssistant: React.FC = () => {
             <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 bg-blue-600 text-white p-1 rounded-full border-2 border-background shadow-lg"
+                className="absolute -top-1 -right-1 bg-blue-600 text-white p-1 rounded-full border border-background shadow-lg"
             >
                 <Mic2 className="w-2.5 h-2.5" />
             </motion.div>

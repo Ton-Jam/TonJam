@@ -316,7 +316,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
   );
 
   const ContextMenuContentRefined = () => (
-    <ContextMenuContent className="bg-[#0A0A0B] border-white/5 text-white shadow-2xl min-w-[200px] p-1 rounded-xl backdrop-blur-3xl">
+    <ContextMenuContent className="bg-[#121824] border-0 text-white shadow-2xl min-w-[200px] p-1 rounded-xl backdrop-blur-3xl">
       <ContextMenuLabel className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Actions</ContextMenuLabel>
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handlePlay} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
@@ -400,7 +400,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
             role="button"
             tabIndex={0}
           >
-            <div className="relative w-11 h-11 rounded-[3px] overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/12">
+            <div className="relative w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-900">
               <LazyArtworkImage 
                 src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
                 fallbackSrc={getPlaceholderImage(`track-${track.id}`)}
@@ -475,7 +475,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
             )}
 
             <div 
-              className="relative w-12 h-12 rounded-[3px] overflow-hidden flex-shrink-0 bg-neutral-900 border border-white/12"
+              className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-900"
               onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
             >
               <LazyArtworkImage 

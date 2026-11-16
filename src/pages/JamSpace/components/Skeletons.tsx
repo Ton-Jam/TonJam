@@ -41,9 +41,9 @@ export const LiveSpaceCardSkeleton: React.FC = () => {
       </div>
       <div className="flex items-center justify-between pt-2">
         <div className="flex -space-x-2">
-          <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-900" />
-          <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-900" />
-          <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-900" />
+          <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-900" />
+          <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-900" />
+          <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-900" />
         </div>
         <div className="h-7 bg-slate-800 rounded w-16" />
       </div>

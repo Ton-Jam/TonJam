@@ -309,7 +309,7 @@ const ProtocolForge: React.FC = () => {
                 <div
                   key={`log-${idx}`}
                   className={cn(
-                    "flex gap-4 border-l-2 pl-3 py-1 transition-all",
+                    "flex gap-4 border-l pl-3 py-1 transition-all",
                     log.includes('ERROR') ? 'text-destructive border-destructive' : 
                     log.includes('SUCCESS') || log.includes('FINAL') ? 'text-emerald-500 border-emerald-500' : 'text-muted-foreground/60 border-primary/20'
                   )}

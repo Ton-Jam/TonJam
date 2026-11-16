@@ -572,7 +572,7 @@ export const ArtistMinting: React.FC = () => {
         )}
 
         {/* MAIN STEP PANELS */}
-        <div className="bg-[#0D1527] border border-white/10 p-6 sm:p-8 rounded-3xl shadow-2xl backdrop-blur-md relative overflow-hidden">
+        <div className="bg-[#0D1527] border border-white/10 p-6 sm:p-8 rounded-[var(--tj-radius-lg,10px)] shadow-2xl backdrop-blur-md relative overflow-hidden">
           <AnimatePresence mode="wait">
             
             {/* STEP 1: MEDIA & AUDIO UPLOAD */}
@@ -611,7 +611,7 @@ export const ArtistMinting: React.FC = () => {
                         if (file) processAudioFile(file);
                       }}
                       onClick={() => !selectedTrack && audioInputRef.current?.click()} 
-                      className={`w-full p-6 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all ${
+                      className={`w-full p-6 border border-dashed rounded-[var(--tj-radius-md,8px)] flex flex-col items-center justify-center cursor-pointer transition-all ${
                         isDraggingAudio
                           ? 'bg-[#0052FF]/20 border-[#0052FF] scale-[1.01]'
                           : trackData.audioPreview || trackData.audioFile
@@ -684,7 +684,7 @@ export const ArtistMinting: React.FC = () => {
                         if (file) processCoverFile(file);
                       }}
                       onClick={() => !isGeneratingAiCover && fileInputRef.current?.click()} 
-                      className={`w-full aspect-square border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden group ${
+                      className={`w-full aspect-square border border-dashed rounded-[var(--tj-radius-md,8px)] flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden group ${
                         isDraggingCover
                           ? 'bg-[#0052FF]/20 border-[#0052FF]'
                           : trackData.coverPreview

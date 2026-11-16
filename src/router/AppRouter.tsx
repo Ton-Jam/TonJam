@@ -18,6 +18,7 @@ import DiscoverPage from '@/pages/Discover';
 import NFTDetailPage from '@/pages/NFTDetail';
 import PartnershipsPage from '@/pages/Partnerships';
 import UserProfilePage from '@/pages/UserProfile';
+import LibraryPage from '@/pages/Library';
 
 const RouteLoadingFallback: React.FC = () => (
   <LoadingScreen />
@@ -92,7 +93,8 @@ const EditProfile = lazyWithRetry(() => import('@/pages/EditProfile'));
 const UserProfile = UserProfilePage;
 const ArtistProfile = lazyWithRetry(() => import('@/pages/ArtistProfile'));
 const ArtistDashboard = lazyWithRetry(() => import('@/pages/ArtistDashboard'));
-const Library = lazyWithRetry(() => import('@/pages/Library'));
+const ArtistStudio = lazyWithRetry(() => import('@/pages/ArtistStudio'));
+const Library = LibraryPage;
 const DownloadedTracks = lazyWithRetry(() => import('@/pages/Library/DownloadedTracks'));
 const LocalTracks = lazyWithRetry(() => import('@/pages/LocalTracks'));
 const RecentlyPlayedTracks = lazyWithRetry(() => import('@/pages/Library/RecentlyPlayedTracks'));
@@ -244,6 +246,7 @@ const AppRouterContent: React.FC = () => {
                   <Route path="/user/:id" element={<PageWrapper><UserProfile /></PageWrapper>} />
                   <Route path="/artist/:id" element={<PageWrapper><ArtistProfile /></PageWrapper>} />
                   <Route path="/artist-dashboard" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistDashboard /></ProtectedRoute></PageWrapper>} />
+                  <Route path="/artist-studio" element={<PageWrapper><ProtectedRoute><ArtistStudio /></ProtectedRoute></PageWrapper>} />
                   <Route path="/artist-analytics" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistAnalytics /></ProtectedRoute></PageWrapper>} />
                   <Route path="/artist-portfolio" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistPortfolio /></ProtectedRoute></PageWrapper>} />
                   <Route path="/artist-onboarding" element={<PageWrapper><ProtectedRoute><ArtistOnboarding /></ProtectedRoute></PageWrapper>} />

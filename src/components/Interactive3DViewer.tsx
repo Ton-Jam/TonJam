@@ -102,14 +102,6 @@ export const Interactive3DViewer: React.FC<Interactive3DViewerProps> = ({
       style={{ perspective: '1200px' }}
       id="interactive-3d-artwork-container"
     >
-      {/* Dynamic ambient background glow matching the artwork colors */}
-      <div 
-        className={cn(
-          "absolute -inset-6 bg-gradient-to-tr from-[#00B4D8]/30 via-indigo-500/20 to-purple-600/30 rounded-full blur-[50px] opacity-70 transition-all duration-700 pointer-events-none",
-          isHovered ? "scale-115 opacity-90" : "scale-100"
-        )}
-      />
-
       {/* 3D Vinyl Record sliding out behind the sleeve */}
       <motion.div
         className="absolute top-[6%] bottom-[6%] right-3 aspect-square rounded-full bg-[#070913] shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex items-center justify-center border-0 overflow-hidden"
@@ -125,13 +117,15 @@ export const Interactive3DViewer: React.FC<Interactive3DViewerProps> = ({
         }}
         style={{ zIndex: 0 }}
       >
-        {/* Vinyl Grooves & Specular Reflection Ring */}
-        <div className="absolute inset-1.5 rounded-full border border-white/[0.04]" />
-        <div className="absolute inset-4 rounded-full border border-white/[0.03]" />
-        <div className="absolute inset-7 rounded-full border border-white/[0.04]" />
-        <div className="absolute inset-10 rounded-full border border-white/[0.03]" />
-        <div className="absolute inset-14 rounded-full border border-white/[0.05]" />
-        <div className="absolute inset-20 rounded-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none opacity-40 animate-pulse" />
+        {/* Vinyl Grooves & Specular Reflection (borderless repeating radial gradient) */}
+        <div
+          className="absolute inset-1.5 rounded-full pointer-events-none opacity-60"
+          style={{
+            background:
+              'repeating-radial-gradient(circle, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 10px)',
+          }}
+        />
+        <div className="absolute inset-20 rounded-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none opacity-40" />
 
         {/* Center label image */}
         <div className="w-[34%] h-[34%] rounded-full bg-[#0d1224] overflow-hidden flex items-center justify-center relative shadow-inner">
@@ -155,7 +149,7 @@ export const Interactive3DViewer: React.FC<Interactive3DViewerProps> = ({
           transformStyle: 'preserve-3d',
           zIndex: 10,
         }}
-        className="relative w-full h-full rounded-3xl overflow-hidden shadow-[0_35px_70px_rgba(0,0,0,0.85)] bg-slate-950/90 backdrop-blur-xl transition-shadow duration-300 flex items-center justify-center group border-0"
+        className="relative w-full h-full rounded-[var(--tj-radius-md,8px)] overflow-hidden shadow-xl bg-[var(--tj-color-surface-default,#0D1628)] transition-shadow duration-300 flex items-center justify-center group border-0"
       >
         {/* High-fidelity artwork image with interactive Framer Motion hover scale-up effect */}
         <motion.img
@@ -203,24 +197,24 @@ export const Interactive3DViewer: React.FC<Interactive3DViewerProps> = ({
           </motion.div>
         </div>
 
-        {/* Edition badges container (styled perfectly without harsh border lines) */}
+        {/* Edition chip overlay (strictly borderless) */}
         <div 
-          className="absolute top-4 left-4 flex flex-col gap-1.5 sm:top-5 sm:left-5 text-left select-none pointer-events-none"
+          className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 sm:top-4 sm:left-4 text-left select-none pointer-events-none"
           style={{ transform: 'translateZ(45px)' }}
         >
           {edition && (
-            <div className="px-3 py-1 bg-black/60 backdrop-blur-xl border border-white/5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-md">
-              {edition} <span className="text-white/50 font-normal ml-1">Edition</span>
+            <div className="px-2.5 py-1 bg-[#091220]/85 backdrop-blur-md rounded-[var(--tj-radius-xs,4px)] text-[10px] font-bold uppercase tracking-wider text-white">
+              {edition} <span className="text-slate-400 font-normal ml-1">Edition</span>
             </div>
           )}
           {minted !== undefined && supply !== undefined && (
-            <div className="px-3 py-1 bg-black/60 backdrop-blur-xl border border-white/5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-md">
-              {minted} <span className="text-white/50 font-normal ml-1">Minted / {supply} Total</span>
+            <div className="px-2.5 py-1 bg-[#091220]/85 backdrop-blur-md rounded-[var(--tj-radius-xs,4px)] text-[10px] font-bold uppercase tracking-wider text-white font-mono tabular-nums">
+              {minted} <span className="text-slate-400 font-normal ml-1">/ {supply} Minted</span>
             </div>
           )}
           {supply !== undefined && minted !== undefined && (
-            <div className="px-3 py-1 bg-black/60 backdrop-blur-xl border border-white/5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-md">
-              {supply - minted} <span className="text-white/50 font-normal ml-1">Remaining</span>
+            <div className="px-2.5 py-1 bg-[#091220]/85 backdrop-blur-md rounded-[var(--tj-radius-xs,4px)] text-[10px] font-bold uppercase tracking-wider text-white font-mono tabular-nums">
+              {Math.max(0, supply - minted)} <span className="text-slate-400 font-normal ml-1">Remaining</span>
             </div>
           )}
         </div>

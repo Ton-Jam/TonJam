@@ -94,7 +94,7 @@ export const NFTTransactionHistoryModal: React.FC<NFTTransactionHistoryModalProp
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-lg bg-zinc-950/95 text-white rounded-3xl p-6 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col scrollbar-none"
+          className="relative w-full max-w-lg bg-zinc-950/95 text-white rounded-[var(--tj-radius-lg,10px)] p-6 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col scrollbar-none"
         >
           {/* Top Header Row */}
           <div className="flex items-center justify-between mb-6">

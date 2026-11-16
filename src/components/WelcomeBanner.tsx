@@ -17,7 +17,7 @@ const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ onDismiss, onGetTokens })
       animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
       exit={{ opacity: 0, height: 0, marginBottom: 0 }}
     >
-      <Card className="relative overflow-hidden border-none bg-transparent dark:bg-black text-foreground rounded-2xl">
+      <Card className="relative overflow-hidden border-none bg-transparent dark:bg-black text-foreground rounded-[var(--tj-radius-lg,10px)]">
         <button 
           onClick={onDismiss}
           className="absolute top-4 right-4 p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors z-20 text-muted-foreground"
@@ -27,7 +27,7 @@ const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ onDismiss, onGetTokens })
         
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
-            <div className="w-20 h-20 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center flex-shrink-0">
+            <div className="w-20 h-20 rounded-[var(--tj-radius-md,8px)] bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center flex-shrink-0">
               <Sparkles className="h-10 w-10 text-primary" />
             </div>
             
@@ -48,7 +48,7 @@ const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ onDismiss, onGetTokens })
                 </button>
                 <button 
                   onClick={onGetTokens}
-                  className="px-6 py-2 bg-secondary text-foreground font-black uppercase tracking-widest rounded-full text-[10px] hover:bg-secondary/80 transition-all border-2 border-[#C0C0C0]/85 shadow-lg active:scale-95 cursor-pointer"
+                  className="px-6 py-2 bg-secondary text-foreground font-black uppercase tracking-widest rounded-full text-[10px] hover:bg-secondary/80 transition-all border border-[#C0C0C0]/55 shadow-lg active:scale-95 cursor-pointer"
                 >
                   Get Free Tokens
                 </button>

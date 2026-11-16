@@ -672,8 +672,8 @@ export const SpaceRoom: React.FC = () => {
   if (!roomData) {
     return (
       <div className="min-h-screen bg-[#0a0e2e] text-white flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-[#090F2E] rounded-3xl p-8 text-center space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mx-auto text-slate-400">
+        <div className="max-w-md w-full bg-[#090F2E] rounded-[var(--tj-radius-lg,10px)] p-8 text-center space-y-4">
+          <div className="w-14 h-14 rounded-[var(--tj-radius-md,8px)] bg-white/5 flex items-center justify-center mx-auto text-slate-400">
             <Radio className="w-7 h-7" />
           </div>
           <h2 className="text-lg font-black uppercase tracking-tight">Space Room Not Found</h2>
@@ -951,13 +951,13 @@ export const SpaceRoom: React.FC = () => {
                         <div className="relative">
                           {/* Animated Audio Frequency Aura when speaking */}
                           {sp.isSpeaking && (
-                            <div className="absolute -inset-2 rounded-full border-2 border-blue-400 animate-ping opacity-75" />
+                            <div className="absolute -inset-2 rounded-full border border-blue-400 animate-ping opacity-75" />
                           )}
 
                           <img
                             src={sp.avatar}
                             alt={sp.name}
-                            className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 relative z-10 shadow-lg ${
+                            className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border relative z-10 shadow-lg ${
                               sp.isSpeaking ? 'border-blue-400' : 'border-white/20'
                             }`}
                           />
@@ -1405,7 +1405,7 @@ export const SpaceRoom: React.FC = () => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 15, scale: 0.95 }}
                 transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                className="absolute bottom-14 left-1/2 -translate-x-1/2 w-80 sm:w-96 bg-[#080d28]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-50 space-y-3"
+                className="absolute bottom-14 left-1/2 -translate-x-1/2 w-80 sm:w-96 bg-[#080d28]/95 backdrop-blur-2xl border border-white/15 rounded-[var(--tj-radius-lg,10px)] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-50 space-y-3"
               >
                 {/* Popover Header */}
                 <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
@@ -1546,7 +1546,7 @@ export const SpaceRoom: React.FC = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-[#090F2E] border border-white/10 rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-6 shadow-2xl relative"
+              className="bg-[#090F2E] border border-white/10 rounded-[var(--tj-radius-lg,10px)] p-6 sm:p-8 max-w-md w-full space-y-6 shadow-2xl relative"
             >
               <div className="text-center space-y-3">
                 <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
@@ -1885,7 +1885,7 @@ export const SpaceRoom: React.FC = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-md bg-[#080d28] border border-white/15 rounded-3xl p-6 shadow-2xl z-10 space-y-5 overflow-hidden"
+              className="relative w-full max-w-md bg-[#080d28] border border-white/15 rounded-[var(--tj-radius-lg,10px)] p-6 shadow-2xl z-10 space-y-5 overflow-hidden"
             >
               {/* Background ambient glow */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -1957,7 +1957,7 @@ export const SpaceRoom: React.FC = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-lg bg-[#080d28] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 space-y-6 overflow-hidden"
+              className="relative w-full max-w-lg bg-[#080d28] border border-white/15 rounded-[var(--tj-radius-lg,10px)] p-6 sm:p-8 shadow-2xl z-10 space-y-6 overflow-hidden"
             >
               {/* Background Glow */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />

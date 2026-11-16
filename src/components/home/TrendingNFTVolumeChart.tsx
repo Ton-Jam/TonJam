@@ -468,9 +468,9 @@ export const TrendingNFTVolumeChart: React.FC = () => {
                           setAlertModalNFT(nft);
                           setCustomThreshold(String(volumeAlerts[nft.id] || Math.max(10, Math.round(nft.volume * 1.2))));
                         }}
-                        className={`p-2 rounded-xl transition-all cursor-pointer ${
+                        className={`p-2 rounded-xl transition-all cursor-pointer border-0 ${
                           volumeAlerts[nft.id] 
-                            ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50' 
+                            ? 'bg-blue-500/20 text-blue-400' 
                             : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white'
                         }`}
                         title={volumeAlerts[nft.id] ? `Alert set at ${volumeAlerts[nft.id]} TON` : 'Set volume threshold alert'}
@@ -493,7 +493,7 @@ export const TrendingNFTVolumeChart: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-5 text-left"
+              className="bg-[#121824] rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-5 text-left"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -538,7 +538,7 @@ export const TrendingNFTVolumeChart: React.FC = () => {
                     value={customThreshold}
                     onChange={(e) => setCustomThreshold(e.target.value)}
                     placeholder="e.g. 500"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full bg-[#182032] border-0 rounded-xl px-4 py-3 text-white font-mono text-sm focus:outline-none transition-colors"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">TON</span>
                 </div>

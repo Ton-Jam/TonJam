@@ -118,9 +118,9 @@ export const TrendingNowWidget: React.FC = () => {
                 <h2 className="text-lg sm:text-xl font-extrabold text-[#F5F7FB] tracking-tight">
                   Trending Now
                 </h2>
-                <div className="flex items-center gap-1 bg-[#229ED9]/15 text-[#229ED9] px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#229ED9] animate-ping" />
-                  Google Search Grounded
+                <div className="flex items-center gap-1.5 bg-[#229ED9]/15 text-[#229ED9] px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#229ED9]" />
+                  Live Drops
                 </div>
               </div>
               <p className="text-xs text-[#94A3B8] mt-0.5">
@@ -133,7 +133,7 @@ export const TrendingNowWidget: React.FC = () => {
             <button
               onClick={() => fetchTrendingData(true)}
               disabled={refreshing}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 transition-all text-[#F5F7FB] text-xs font-semibold cursor-pointer shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 transition-all text-[#F5F7FB] text-xs font-semibold cursor-pointer border-0 shadow-sm"
               title="Refresh trends"
             >
               <RefreshCw className={`w-3.5 h-3.5 text-[#229ED9] ${refreshing ? 'animate-spin' : ''}`} />
@@ -141,7 +141,7 @@ export const TrendingNowWidget: React.FC = () => {
             </button>
             <button
               onClick={() => navigate('/launchpad')}
-              className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-[#229ED9] hover:bg-[#229ED9]/90 active:scale-95 transition-all text-white text-xs font-bold shadow-md shadow-[#229ED9]/30 cursor-pointer"
+              className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-[#229ED9] hover:bg-[#229ED9]/90 active:scale-95 transition-all text-white text-xs font-bold shadow-md shadow-[#229ED9]/30 cursor-pointer border-0"
             >
               <span>Launchpad</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -200,7 +200,7 @@ export const TrendingNowWidget: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-white/[0.06] relative z-10 text-[11px]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 relative z-10 text-[11px]">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[#94A3B8] font-medium">Trending Tags:</span>
             {data?.trendingTags?.map((tag, i) => (

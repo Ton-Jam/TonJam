@@ -47,7 +47,7 @@ export const LibraryHero: React.FC<LibraryHeroProps> = ({
       {/* Main Row */}
       <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
         {/* User avatar with dynamic outline ring */}
-        <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-[#0052FF]/40 p-0.5 shrink-0 bg-slate-900">
+        <div className="relative w-16 h-16 rounded-full overflow-hidden border border-[var(--tj-color-brand-primary,#00B4D8)]/40 p-0.5 shrink-0 bg-slate-900">
           <img src={userAvatar || getPlaceholderImage(`user-${userName || 'collector'}`)} alt={userName} className="w-full h-full object-cover rounded-full" referrerPolicy="no-referrer" />
         </div>
 

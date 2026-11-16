@@ -80,21 +80,22 @@ export default function ReactionsSection({ targetId, targetType }: ReactionsSect
   }));
 
   return (
-    <div className="flex flex-wrap gap-2 py-4">
+    <div className="flex flex-wrap gap-2 py-2">
       {reactionCounts.map(({ emoji, label, count, hasReacted }) => (
         <motion.button
           key={label}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          type="button"
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
           onClick={() => handleReact(label)}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-normal transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[34px] rounded-[var(--tj-radius-sm,6px)] text-xs font-semibold border-0 cursor-pointer transition-colors ${
             hasReacted 
-              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' 
-              : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent'
+              ? 'bg-[var(--tj-color-brand-primary,#00B4D8)]/20 text-[var(--tj-color-brand-primary,#00B4D8)]' 
+              : 'bg-[var(--tj-color-surface-default,#0D1628)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:bg-[var(--tj-color-surface-hover,#132B49)] hover:text-white'
           }`}
         >
           <span>{emoji}</span>
-          {count > 0 && <span>{count}</span>}
+          {count > 0 && <span className="font-mono tabular-nums">{count}</span>}
         </motion.button>
       ))}
     </div>
