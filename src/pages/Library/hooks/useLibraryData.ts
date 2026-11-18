@@ -108,19 +108,24 @@ export const useLibraryData = () => {
   const albums: LibraryAlbum[] = useMemo(() => {
     return (audioCollections || []).map((col) => {
       const artistObj = audioArtists.find((a) => a.uid === col.artistId);
+      const matchingTrackCount = (allTracks || []).filter(
+        (t) =>
+          (t.album && col.name && t.album.toLowerCase() === col.name.toLowerCase()) ||
+          (col.artistId && t.artistId === col.artistId && t.album === col.name)
+      ).length;
       return {
         id: col.id,
         title: col.name,
         artist: artistObj?.name || 'Artist',
         artistId: col.artistId,
         coverUrl: col.coverUrl || '/placeholders/album-placeholder.webp',
-        tracksCount: col.nftIds?.length || 0,
+        tracksCount: col.nftIds?.length || matchingTrackCount || 0,
         releaseYear: col.createdAt ? new Date(col.createdAt).getFullYear() : new Date().getFullYear(),
         isLiked: false,
         isDownloaded: false,
       };
     });
-  }, [audioCollections, audioArtists]);
+  }, [audioCollections, audioArtists, allTracks]);
 
   const nfts: LibraryNFT[] = useMemo(() => {
     const uid = userProfile?.uid;
@@ -178,7 +183,7 @@ export const useLibraryData = () => {
       title: t.title,
       artist: t.artist,
       coverUrl: t.coverUrl || '/placeholders/track-placeholder.webp',
-      playedAt: t.releaseDate || '',
+      playedAt: (t as any).playedAt || t.createdAt || t.releaseDate || '',
       duration: t.duration || 0,
     }));
   }, [recentlyPlayed]);
@@ -292,10 +297,13 @@ export const useLibraryData = () => {
   };
 
   const filteredTracks = useMemo(() => {
-    return tracks.filter((track) => {
+    const q = searchQuery.trim().toLowerCase();
+    const list = tracks.filter((track) => {
       const matchesSearch =
-        track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        track.artist.toLowerCase().includes(searchQuery.toLowerCase());
+        !q ||
+        track.title.toLowerCase().includes(q) ||
+        track.artist.toLowerCase().includes(q) ||
+        track.album.toLowerCase().includes(q);
 
       if (isOfflineOnly) {
         const isCached = cachedTrackIds.has(track.id) || track.isDownloaded || track.isOfflineAvailable;
@@ -310,7 +318,23 @@ export const useLibraryData = () => {
       }
       return false;
     });
-  }, [tracks, activeChip, searchQuery, isOfflineOnly, cachedTrackIds]);
+
+    if (sortBy === 'alphabetical') {
+      return [...list].sort((a, b) => a.title.localeCompare(b.title));
+    }
+    if (sortBy === 'artist') {
+      return [...list].sort((a, b) => a.artist.localeCompare(b.artist));
+    }
+    return list;
+  }, [tracks, activeChip, searchQuery, isOfflineOnly, cachedTrackIds, sortBy]);
+
+  const filteredHistory = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return history;
+    return history.filter(
+      (h) => h.title.toLowerCase().includes(q) || h.artist.toLowerCase().includes(q)
+    );
+  }, [history, searchQuery]);
 
   const likedTracks = useMemo(() => {
     return tracks.filter((track) => {
@@ -465,7 +489,10 @@ export const useLibraryData = () => {
   };
 
   const removeFromQueue = (id: string) => {
-    const trackId = id.startsWith('q-') ? id.split('-')[1] : id;
+    const matchedItem = queue.find((item) => item.id === id);
+    const trackId =
+      matchedItem?.trackId ??
+      (id.startsWith('q-') ? id.replace(/^q-/, '').replace(/-\d+$/, '') : id);
     audioRemoveFromQueue(trackId);
   };
 
@@ -509,7 +536,8 @@ export const useLibraryData = () => {
     rawAlbums: albums,
     nfts: filteredNfts,
     playlists: filteredPlaylists,
-    history,
+    history: filteredHistory,
+    rawHistory: history,
     queue,
     analytics,
     downloadQuality,
@@ -531,17 +559,62 @@ export const useLibraryData = () => {
     addToQueue,
     removeFromQueue,
     clearQueue,
-    importTracks: () => {},
+    importTracks: (
+      tracksList: { title: string; artist: string; album?: string; coverUrl?: string; duration?: number }[]
+    ) => {
+      if (!tracksList || tracksList.length === 0) return;
+      const matchedTracks = tracksList
+        .map((incoming) =>
+          allTracks.find(
+            (t) =>
+              t.title.toLowerCase() === incoming.title.toLowerCase() &&
+              t.artist.toLowerCase() === incoming.artist.toLowerCase()
+          )
+        )
+        .filter((t): t is NonNullable<typeof t> => Boolean(t));
+
+      matchedTracks.forEach((track) => {
+        if (!likedTrackIds.includes(track.id)) {
+          audioToggleLikeTrack(track.id);
+        }
+      });
+
+      const fallbackCover = tracksList.find((t) => t.coverUrl)?.coverUrl;
+      audioCreateNewPlaylist(
+        `Imported Tracks (${tracksList.length})`,
+        `Imported ${tracksList.length} track${tracksList.length === 1 ? '' : 's'} into your Library`,
+        matchedTracks[0],
+        fallbackCover
+      );
+      toast.success(
+        'Tracks Imported',
+        `Imported ${tracksList.length} track${tracksList.length === 1 ? '' : 's'} to your Library.`
+      );
+    },
     importPlaylistWithTracks: (
       playlistTitle: string,
-      _playlistCoverUrl: string,
-      tracksList: { title: string; artist: string }[]
+      playlistCoverUrl: string,
+      tracksList: { title: string; artist: string; album?: string; coverUrl?: string; duration?: number }[]
     ) => {
+      const matchedTracks = (tracksList || [])
+        .map((incoming) =>
+          allTracks.find(
+            (t) =>
+              t.title.toLowerCase() === incoming.title.toLowerCase() &&
+              t.artist.toLowerCase() === incoming.artist.toLowerCase()
+          )
+        )
+        .filter((t): t is NonNullable<typeof t> => Boolean(t));
+
       audioCreateNewPlaylist(
         playlistTitle,
-        `Imported playlist with ${tracksList.length} tracks`,
-        undefined,
-        _playlistCoverUrl
+        `Imported playlist with ${tracksList.length} track${tracksList.length === 1 ? '' : 's'}`,
+        matchedTracks[0],
+        playlistCoverUrl
+      );
+      toast.success(
+        'Playlist Imported',
+        `"${playlistTitle}" (${tracksList.length} tracks) added to Playlists.`
       );
     },
   };

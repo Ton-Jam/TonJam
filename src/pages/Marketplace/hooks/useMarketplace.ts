@@ -80,7 +80,7 @@ export const useMarketplace = () => {
   const [activeTab, setActiveTab] = useState<MarketplaceTab>("discover");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeCategory, setActiveCategory] = useState("All NFTs");
   const [activeGenre, setActiveGenre] = useState("All");
   const [sortBy, setSortBy] = useState("default");
   const [pageSize, setPageSize] = useState(PAGE_STEP);
@@ -405,7 +405,7 @@ export const useMarketplace = () => {
     return result;
   }, [allNFTs]);
 
-  // Filter based on search term (title, artist, collection, genre, creator username), category pills, genre filter, and sort
+  // Filter based on search term (title, artist, collection, genre, creator username, listing status), category pills, genre filter, and sort
   const filteredNFTs = useMemo(() => {
     let result = [...allNFTs];
 
@@ -418,7 +418,9 @@ export const useMarketplace = () => {
           (t.creator || "").toLowerCase().includes(q) ||
           (t.collectionName || "").toLowerCase().includes(q) ||
           (t.genre || "").toLowerCase().includes(q) ||
-          (t.creatorUsername || "").toLowerCase().includes(q)
+          (t.creatorUsername || "").toLowerCase().includes(q) ||
+          (t.listingType || "").toLowerCase().includes(q) ||
+          (t.listingStatus || "").toLowerCase().includes(q)
       );
     }
 
@@ -432,7 +434,10 @@ export const useMarketplace = () => {
         if (sortBy === "default") {
           result.sort(
             (a, b) =>
-              (b.playCount || 0) + (b.likes || 0) - ((a.playCount || 0) + (a.likes || 0))
+              (b.playCount || 0) +
+              (b.likes || 0) +
+              (b.bidsCount || 0) * 5 -
+              ((a.playCount || 0) + (a.likes || 0) + (a.bidsCount || 0) * 5)
           );
         }
         break;
@@ -445,14 +450,32 @@ export const useMarketplace = () => {
           return tb - ta;
         });
         break;
+      case "Exclusive":
       case "Featured": {
-        const flagged = result.filter((t) => t.isFeatured);
+        const flagged = result.filter(
+          (t) =>
+            t.isFeatured ||
+            (t.rarity || "").toLowerCase() === "legendary" ||
+            (t.rarity || "").toLowerCase() === "mythic" ||
+            t.supply === 1 ||
+            Boolean((t as any).stems_available)
+        );
         result = flagged.length > 0 ? flagged : result.filter((t) => t.artistVerified);
         break;
       }
+      case "Limited Editions":
+        result = result.filter(
+          (t) =>
+            (t.supply && t.supply > 1 && t.supply <= 100) ||
+            (t.totalEditions && t.totalEditions > 1 && t.totalEditions <= 100) ||
+            (t.rarity || "").toLowerCase() === "rare" ||
+            (t.rarity || "").toLowerCase() === "epic"
+        );
+        break;
       case "Music":
         result = result.filter((t) => Boolean(t.audioUrl) || Boolean(t.trackId));
         break;
+      case "Music Collections":
       case "Collections":
         result = result.filter((t) => Boolean(t.collectionId || t.collectionName));
         break;
@@ -460,9 +483,17 @@ export const useMarketplace = () => {
       case "Live Auctions":
         result = result.filter((t) => t.listingType === "auction");
         break;
+      case "Recently Listed":
       case "Listed NFTs":
-        result = result.filter((t) => parseTonValue(t.price) > 0 && Boolean(t.listingType));
+        result = result
+          .filter((t) => parseTonValue(t.price) > 0 || Boolean(t.listingType))
+          .sort((a, b) => {
+            const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return tb - ta;
+          });
         break;
+      case "All NFTs":
       case "All":
       default:
         break;
@@ -486,9 +517,30 @@ export const useMarketplace = () => {
       case "trending":
         result.sort(
           (a, b) =>
-            (b.playCount || 0) + (b.likes || 0) - ((a.playCount || 0) + (a.likes || 0))
+            (b.playCount || 0) +
+            (b.likes || 0) +
+            (b.bidsCount || 0) * 5 -
+            ((a.playCount || 0) + (a.likes || 0) + (a.bidsCount || 0) * 5)
         );
         break;
+      case "ending_soon": {
+        const now = Date.now();
+        result.sort((a, b) => {
+          const aEnd =
+            a.listingType === "auction" && a.auctionEndTime
+              ? new Date(a.auctionEndTime).getTime()
+              : Infinity;
+          const bEnd =
+            b.listingType === "auction" && b.auctionEndTime
+              ? new Date(b.auctionEndTime).getTime()
+              : Infinity;
+          const aValid = Number.isFinite(aEnd) && aEnd > now ? aEnd : Infinity;
+          const bValid = Number.isFinite(bEnd) && bEnd > now ? bEnd : Infinity;
+          if (aValid !== bValid) return aValid - bValid;
+          return (b.listingType === "auction" ? 1 : 0) - (a.listingType === "auction" ? 1 : 0);
+        });
+        break;
+      }
       default:
         break;
     }
@@ -719,10 +771,81 @@ export const useMarketplace = () => {
     };
   }, [allNFTs, recentSales]);
 
+  // Real curated horizontal-scroll shelf slices derived from Firestore data
+  const trendingNFTs = useMemo<MarketplaceNFT[]>(() => {
+    return [...allNFTs]
+      .sort(
+        (a, b) =>
+          (b.playCount || 0) +
+          (b.likes || 0) +
+          (b.bidsCount || 0) * 5 -
+          ((a.playCount || 0) + (a.likes || 0) + (a.bidsCount || 0) * 5)
+      )
+      .slice(0, 12);
+  }, [allNFTs]);
+
+  const recentlyListedNFTs = useMemo<MarketplaceNFT[]>(() => {
+    return [...allNFTs]
+      .filter((t) => parseTonValue(t.price) > 0 || Boolean(t.listingType))
+      .sort((a, b) => {
+        const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return tb - ta;
+      })
+      .slice(0, 12);
+  }, [allNFTs]);
+
+  const exclusiveDrops = useMemo<MarketplaceNFT[]>(() => {
+    const exclusive = allNFTs.filter(
+      (t) =>
+        t.isFeatured ||
+        (t.rarity || "").toLowerCase() === "legendary" ||
+        (t.rarity || "").toLowerCase() === "mythic" ||
+        t.supply === 1 ||
+        Boolean((t as any).stems_available)
+    );
+    if (exclusive.length > 0) return exclusive.slice(0, 12);
+    return allNFTs.filter((t) => t.artistVerified).slice(0, 12);
+  }, [allNFTs]);
+
+  const recommendedNFTs = useMemo<MarketplaceNFT[]>(() => {
+    const likedSet = new Set(audio.likedTrackIds || []);
+    const preferredGenres = new Set<string>();
+    (audio.allTracks || []).forEach((track) => {
+      if (likedSet.has(track.id) && track.genre) {
+        preferredGenres.add(track.genre.toLowerCase());
+      }
+    });
+
+    if (preferredGenres.size === 0) {
+      return [...allNFTs]
+        .sort(
+          (a, b) =>
+            (b.artistVerified ? 1 : 0) - (a.artistVerified ? 1 : 0) ||
+            (b.likes || 0) - (a.likes || 0)
+        )
+        .slice(0, 12);
+    }
+
+    return [...allNFTs]
+      .sort((a, b) => {
+        const aMatch = a.genre && preferredGenres.has(a.genre.toLowerCase()) ? 1 : 0;
+        const bMatch = b.genre && preferredGenres.has(b.genre.toLowerCase()) ? 1 : 0;
+        if (bMatch !== aMatch) return bMatch - aMatch;
+        return (b.playCount || 0) - (a.playCount || 0);
+      })
+      .slice(0, 12);
+  }, [allNFTs, audio.likedTrackIds, audio.allTracks]);
+
+  const hasAuctions = useMemo(
+    () => liveAuctions.length > 0 || allNFTs.some((n) => n.listingType === "auction"),
+    [liveAuctions, allNFTs]
+  );
+
   const handleResetFilters = useCallback(() => {
     setSearchTerm("");
     setDebouncedSearch("");
-    setActiveCategory("All");
+    setActiveCategory("All NFTs");
     setActiveGenre("All");
     setSortBy("default");
     setPageSize(PAGE_STEP);
@@ -758,6 +881,11 @@ export const useMarketplace = () => {
     myNFTs,
     allNFTs,
     featuredNFT,
+    trendingNFTs,
+    recentlyListedNFTs,
+    exclusiveDrops,
+    recommendedNFTs,
+    hasAuctions,
     liveAuctions,
     trendingCollections,
     topArtists: verifiedArtists,

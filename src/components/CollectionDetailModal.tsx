@@ -10,6 +10,7 @@ import {
 import { fetchNFTMetadata } from '@/services/nftService';
 import { Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { normalizePlayableAudioUrl } from '@/utils/audioSource';
 
 interface CollectionDetailModalProps {
   collection: Collection | null;
@@ -57,8 +58,9 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
       audio.pause();
       setPlayingTrackId(null);
     } else {
-      if (!nft.audioUrl) return;
-      audio.src = nft.audioUrl;
+      const resolvedUrl = normalizePlayableAudioUrl(nft.audioUrl);
+      if (!resolvedUrl) return;
+      audio.src = resolvedUrl;
       audio.onerror = () => {
         setPlayingTrackId(null);
       };

@@ -79,8 +79,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests or non-http/https protocols
-  if (request.method !== 'GET' || !url.protocol.startsWith('http')) {
+  // Skip non-GET requests, byte-range audio/media requests, or non-http/https protocols
+  if (request.method !== 'GET' || request.headers.has('range') || !url.protocol.startsWith('http')) {
     return;
   }
 
@@ -165,7 +165,7 @@ self.addEventListener('fetch', (event) => {
       }
 
       notifyClients({ type: 'CACHE_STATUS_LOG', url: request.url, status: 'miss', cacheName: CACHE_NAME, assetType });
-      return fetchPromise.then((netRes) => netRes || caches.match('/index.html'));
+      return fetchPromise.then((netRes) => netRes || Response.error());
     })
   );
 });

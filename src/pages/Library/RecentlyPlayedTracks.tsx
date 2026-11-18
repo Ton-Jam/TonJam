@@ -94,7 +94,7 @@ export const RecentlyPlayedTracks: React.FC = () => {
             <button
               type="button"
               onClick={handlePlayAll}
-              className="w-10 h-10 rounded-full bg-[#0052FF] hover:bg-[#0040D9] text-white flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
+              className="w-10 h-10 rounded-full bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white flex items-center justify-center cursor-pointer active:scale-95 transition-all border-0"
               title="Play All"
               aria-label="Play all recently played tracks"
             >

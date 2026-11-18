@@ -36,6 +36,11 @@ import * as royaltyService from "@/services/royaltyService";
 import { audioCacheService } from "@/services/audioCacheService";
 import { indexedDbService } from "@/services/indexedDbService";
 import { localAudioService } from "@/services/localAudioService";
+import {
+  buildAudioFallbackQueue,
+  normalizePlayableAudioUrl,
+  AudioSourceCandidate,
+} from "@/utils/audioSource";
 import { updateEngagementScore } from "@/services/engagementService";
 import { recordListeningActivity } from "@/services/recommendationService";
 import {
@@ -713,6 +718,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
+  const playbackAttemptIdRef = useRef<number>(0);
 
   const [crossfadeEnabled, setCrossfadeEnabled] = useState(true);
   const toggleCrossfade = () => setCrossfadeEnabled(prev => !prev);
@@ -2474,7 +2480,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
               error.name !== "AbortError" &&
               !error.message?.includes("interrupted")
             )
-              console.error("Playback error:", error);
+              console.warn("Repeat playback ended early:", error);
           });
         }
       } else {
@@ -3431,25 +3437,37 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         playCount: increment(1),
       }).catch(console.warn);
 
-      let sourceUrl = track.audioUrl || "";
+      const attemptId = ++playbackAttemptIdRef.current;
+
+      const rawTrackUrl = track.audioUrl || "";
+      let sourceUrl = normalizePlayableAudioUrl(rawTrackUrl);
+      let localBlobUrl: string | null = null;
+      let offlineCachedUrl: string | null = null;
 
       // 1. Direct handling for Local device tracks and Blob/Data URLs
-      if (track.isLocal || sourceUrl.startsWith("blob:") || sourceUrl.startsWith("data:")) {
-        const localBlob = await indexedDbService.getLocalAudioBlob(track.id);
-        if (localBlob) {
-          sourceUrl = URL.createObjectURL(localBlob);
+      if (track.isLocal || rawTrackUrl.startsWith("blob:") || rawTrackUrl.startsWith("data:")) {
+        const localBlob =
+          (await indexedDbService.getLocalAudioBlob(track.id)) ||
+          (await indexedDbService.getAudioBlob(track.id));
+        if (localBlob && localBlob.size > 0) {
+          localBlobUrl = URL.createObjectURL(localBlob);
+          sourceUrl = localBlobUrl;
+        } else if (rawTrackUrl.startsWith("blob:")) {
+          // Dead blob URLs from previous sessions cannot be loaded; clear before fallback checks
+          sourceUrl = "";
         }
       } else if (isOffline || !navigator.onLine) {
         // 2. Offline Mode: retrieve from IndexedDB or Service Worker Cache
         const cachedUrl = await audioCacheService.getCachedTrack(track.id);
         if (cachedUrl) {
+          offlineCachedUrl = cachedUrl;
           sourceUrl = cachedUrl;
           addNotification("Playing from offline cache", "info");
         } else {
-          // Check if local device track exists with this ID
           const localBlob = await indexedDbService.getLocalAudioBlob(track.id);
-          if (localBlob) {
-            sourceUrl = URL.createObjectURL(localBlob);
+          if (localBlob && localBlob.size > 0) {
+            localBlobUrl = URL.createObjectURL(localBlob);
+            sourceUrl = localBlobUrl;
             addNotification("Playing local device audio", "info");
           } else {
             setAudioConnectionState("error");
@@ -3459,17 +3477,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           }
         }
       } else if (sourceUrl) {
-        // Cache if not already cached
+        // Cache normalized remote URL if not already cached
         const isCached = await audioCacheService.isTrackCached(track.id);
-        if (!isCached) {
+        if (!isCached && !sourceUrl.startsWith("blob:") && !sourceUrl.startsWith("data:")) {
           audioCacheService
             .cacheTrack(track.id, sourceUrl)
-            .catch(console.error);
+            .catch(() => {});
         }
       }
 
+      if (attemptId !== playbackAttemptIdRef.current) return;
+
       let highFidelity = false;
       let exclusive = null;
+      const normalizedIpfsUrl = normalizePlayableAudioUrl(track.audioIpfsUrl);
 
       if (track.isNFT) {
         const ownedNFT =
@@ -3481,8 +3502,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         if (ownedNFT) {
           highFidelity = true;
           exclusive = ownedNFT.exclusiveContent || null;
-          if (track.audioIpfsUrl) {
-            sourceUrl = track.audioIpfsUrl;
+          if (normalizedIpfsUrl) {
+            sourceUrl = normalizedIpfsUrl;
           }
         }
       }
@@ -3490,95 +3511,163 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsHighFidelity(highFidelity);
       setExclusiveContent(exclusive);
 
-      if (!sourceUrl) {
+      const candidates = buildAudioFallbackQueue({
+        primaryUrl: sourceUrl,
+        trackAudioUrl: track.audioUrl,
+        audioIpfsUrl: track.audioIpfsUrl,
+        cachedUrl: offlineCachedUrl,
+        localBlobUrl,
+      });
+
+      if (candidates.length === 0) {
+        const recoveredCacheUrl = await audioCacheService.getCachedTrack(track.id);
+        if (recoveredCacheUrl) {
+          candidates.push({ url: recoveredCacheUrl, crossOrigin: false });
+        }
+      }
+
+      if (candidates.length === 0) {
         setAudioConnectionState("error");
         setIsPlaying(false);
-        addNotification("Track audio URL is unavailable", "error");
+        setIsLoading(false);
+        addNotification("Track audio source is unavailable", "info");
         return;
       }
 
       try {
-        const fallbacks = [
-          { url: sourceUrl, crossOrigin: false },
-        ];
+        let triedOfflineCacheFallback = Boolean(offlineCachedUrl);
 
-        let fallbackIndex = 0;
+        const playCandidateAtIndex = async (
+          queueCandidates: AudioSourceCandidate[],
+          candidateIndex: number
+        ) => {
+          if (!audioRef.current || attemptId !== playbackAttemptIdRef.current) return;
+          const candidate = queueCandidates[candidateIndex];
+          if (!candidate) return;
 
-        const playWithCrossfade = async (url: string, useCrossOrigin: boolean) => {
-          if (!audioRef.current) return;
           const audio = audioRef.current;
           const targetVolume = isMuted ? 0 : volume;
 
-          if (isPlaying && !audio.paused && crossfadeEnabled) {
-            const fadeSteps = 12;
-            const fadeInterval = 40; // ms
+          if (candidateIndex === 0 && isPlaying && !audio.paused && crossfadeEnabled) {
+            const fadeSteps = 10;
+            const fadeInterval = 35;
             const stepVol = audio.volume / fadeSteps;
             for (let i = fadeSteps; i >= 0; i--) {
-              if (!audioRef.current) break;
+              if (!audioRef.current || attemptId !== playbackAttemptIdRef.current) return;
               audioRef.current.volume = Math.max(0, i * stepVol);
-              await new Promise(r => setTimeout(r, fadeInterval));
+              await new Promise((r) => setTimeout(r, fadeInterval));
             }
           }
+
+          if (!audioRef.current || attemptId !== playbackAttemptIdRef.current) return;
 
           try {
             setAudioConnectionState("connecting");
             audio.pause();
-            if (useCrossOrigin && url.startsWith("http")) {
+            if (candidate.crossOrigin && candidate.url.startsWith("http")) {
               audio.crossOrigin = "anonymous";
             } else {
               audio.removeAttribute("crossorigin");
             }
-            audio.src = url;
-            console.log("[Audio] Playing source with crossfade:", url);
+            audio.src = candidate.url;
             audio.load();
-            audio.volume = 0;
+            audio.volume = crossfadeEnabled ? 0 : targetVolume;
 
             const promise = audio.play();
             playPromiseRef.current = promise;
 
-            if (crossfadeEnabled) {
-              const fadeSteps = 12;
-              const fadeInterval = 40;
-              const stepVol = targetVolume / fadeSteps;
-              for (let i = 1; i <= fadeSteps; i++) {
-                if (!audioRef.current) break;
-                audioRef.current.volume = Math.min(targetVolume, i * stepVol);
-                await new Promise(r => setTimeout(r, fadeInterval));
-              }
-            } else {
-              audio.volume = targetVolume;
-            }
-
             if (promise !== undefined) {
-              promise.catch((error) => {
-                const isInterrupted =
-                  error.name === "AbortError" ||
-                  error.message?.includes("interrupted");
+              // Attach handlers synchronously before any async work to prevent unhandled rejections
+              promise
+                .then(async () => {
+                  if (!audioRef.current || attemptId !== playbackAttemptIdRef.current) return;
+                  setIsPlaying(true);
+                  setAudioConnectionState("connected");
 
-                if (!isInterrupted) {
-                  console.warn(`[Audio] Playback failed for source ${url}:`, error);
-                  if (fallbackIndex < fallbacks.length) {
-                    const next = fallbacks[fallbackIndex++];
-                    console.log(`[Audio] Switching to fallback index ${fallbackIndex}...`);
-                    playWithCrossfade(next.url, next.crossOrigin);
-                  } else {
-                    console.error("[Audio] All fallbacks failed:", error);
-                    setAudioConnectionState("error");
-                    addNotification("Playback protocol failed. Signal lost.", "error");
-                    setIsPlaying(false);
+                  if (crossfadeEnabled) {
+                    const fadeSteps = 10;
+                    const fadeInterval = 35;
+                    const stepVol = targetVolume / fadeSteps;
+                    for (let i = 1; i <= fadeSteps; i++) {
+                      if (
+                        !audioRef.current ||
+                        audioRef.current.paused ||
+                        attemptId !== playbackAttemptIdRef.current
+                      ) {
+                        break;
+                      }
+                      audioRef.current.volume = Math.min(targetVolume, i * stepVol);
+                      await new Promise((r) => setTimeout(r, fadeInterval));
+                    }
+                  } else if (audioRef.current) {
+                    audioRef.current.volume = targetVolume;
                   }
-                }
-              });
+                })
+                .catch(async (error) => {
+                  if (attemptId !== playbackAttemptIdRef.current) return;
+                  const isInterrupted =
+                    error?.name === "AbortError" ||
+                    error?.message?.includes("interrupted");
+                  if (isInterrupted) return;
+
+                  if (error?.name === "NotAllowedError") {
+                    setAudioConnectionState("idle");
+                    setIsPlaying(false);
+                    setIsLoading(false);
+                    addNotification("Tap Play to resume audio playback", "info");
+                    return;
+                  }
+
+                  console.warn(`[Audio] Source failed (${candidate.url}):`, error?.message || error);
+
+                  const nextIndex = candidateIndex + 1;
+                  if (nextIndex < queueCandidates.length) {
+                    await playCandidateAtIndex(queueCandidates, nextIndex);
+                    return;
+                  }
+
+                  if (!triedOfflineCacheFallback) {
+                    triedOfflineCacheFallback = true;
+                    const cachedFallback = await audioCacheService.getCachedTrack(track.id);
+                    if (
+                      cachedFallback &&
+                      attemptId === playbackAttemptIdRef.current &&
+                      !queueCandidates.some((c) => c.url === cachedFallback)
+                    ) {
+                      const extended = [
+                        ...queueCandidates,
+                        { url: cachedFallback, crossOrigin: false },
+                      ];
+                      await playCandidateAtIndex(extended, extended.length - 1);
+                      return;
+                    }
+                  }
+
+                  console.warn(
+                    "[Audio] No supported audio source available for track:",
+                    track.title,
+                    error?.message || error
+                  );
+                  if (audioRef.current) {
+                    audioRef.current.removeAttribute("src");
+                  }
+                  setAudioConnectionState("error");
+                  setIsLoading(false);
+                  setIsPlaying(false);
+                  addNotification("Unable to stream this track right now.", "error");
+                });
             }
           } catch (err) {
-            console.error("[Audio] Error setting up audio source with crossfade:", err);
+            console.warn("[Audio] Error initializing audio source:", err);
             setAudioConnectionState("error");
+            setIsLoading(false);
+            setIsPlaying(false);
           }
         };
 
-        playWithCrossfade(sourceUrl, false);
+        await playCandidateAtIndex(candidates, 0);
 
-        setIsPlaying(true);
+        if (attemptId !== playbackAttemptIdRef.current) return;
 
         // Record stream transaction
         recordTransaction({
@@ -3599,8 +3688,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           })
         );
       } catch (err) {
-        console.error("Audio initialization error:", err);
-        addNotification("Failed to initialize audio protocol", "error");
+        console.warn("Audio initialization issue:", err);
+        setAudioConnectionState("error");
+        setIsPlaying(false);
+        addNotification("Failed to initialize audio playback", "error");
       }
     }
 
@@ -3618,107 +3709,139 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!audioRef.current || !currentTrack) return;
 
     if (isPlaying) {
+      playbackAttemptIdRef.current += 1;
       /* Wait for any pending play to finish before pausing to avoid interruption error */
       if (playPromiseRef.current) {
         await playPromiseRef.current.catch(() => {});
       }
       audioRef.current.pause();
-    } else {
-      try {
-        // Ensure AudioContext is running
-        if (audioContextRef.current?.state === "suspended") {
-          audioContextRef.current
-            .resume()
-            .catch((err) =>
-              console.warn("Failed to resume AudioContext:", err),
-            );
-        }
+      setIsPlaying(false);
+      return;
+    }
 
-        const currentSrc = audioRef.current.src;
-        if (!currentSrc || currentSrc === "" || currentSrc === window.location.href || currentSrc === window.location.origin || currentSrc.endsWith("/")) {
-          let trackSourceUrl = currentTrack.audioUrl || "";
-          
-          if (isOffline) {
-            const cachedUrl = await audioCacheService.getCachedTrack(currentTrack.id);
-            if (cachedUrl) {
-              trackSourceUrl = cachedUrl;
-            }
-          }
+    const attemptId = ++playbackAttemptIdRef.current;
 
-          if (!trackSourceUrl) {
-            setAudioConnectionState("error");
-            addNotification("Track audio source is unavailable", "error");
-            return;
-          }
-          
-          // Always try playing without crossOrigin first for stable and seamless playback of external audio assets
-          audioRef.current.removeAttribute("crossorigin");
-          audioRef.current.src = trackSourceUrl;
-          audioRef.current.load();
-        }
+    try {
+      // Ensure AudioContext is running
+      if (audioContextRef.current?.state === "suspended") {
+        audioContextRef.current
+          .resume()
+          .catch((err) =>
+            console.warn("Failed to resume AudioContext:", err),
+          );
+      }
 
-        playPromiseRef.current = audioRef.current.play();
-        if (playPromiseRef.current !== undefined) {
-          playPromiseRef.current.catch((error) => {
-            if (
-              error.name !== "AbortError" &&
-              !error.message?.includes("interrupted")
-            ) {
-              console.warn("[Audio] Playback issue during toggle play:", error);
-              if (currentTrack && currentTrack.audioUrl) {
-                const toggleFallbacks = [
-                  { url: currentTrack.audioUrl, crossOrigin: false },
-                ];
+      const currentSrc = audioRef.current.src;
+      const needsSourceInit =
+        !currentSrc ||
+        currentSrc === "" ||
+        currentSrc === window.location.href ||
+        currentSrc === window.location.origin ||
+        currentSrc.endsWith("/");
 
-                let tFallbackIndex = 1;
+      let resolvedCandidates = buildAudioFallbackQueue({
+        primaryUrl: needsSourceInit ? undefined : currentSrc,
+        trackAudioUrl: currentTrack.audioUrl,
+        audioIpfsUrl: currentTrack.audioIpfsUrl,
+      });
 
-                const playToggleFallback = (url: string, useCrossOrigin: boolean) => {
-                  if (!audioRef.current) return;
-                  try {
-                    audioRef.current.pause();
-                    if (useCrossOrigin && url.startsWith("http")) {
-                      audioRef.current.crossOrigin = "anonymous";
-                    } else {
-                      audioRef.current.removeAttribute("crossorigin");
-                    }
-                    audioRef.current.src = url;
-                    audioRef.current.load();
-                    const promise = audioRef.current.play();
-                    playPromiseRef.current = promise;
-                    if (promise !== undefined) {
-                      promise.catch((e) => {
-                        const isAbort = e.name === "AbortError" || e.message?.includes("interrupted");
-                        if (!isAbort) {
-                          if (tFallbackIndex < toggleFallbacks.length) {
-                            const next = toggleFallbacks[tFallbackIndex++];
-                            console.warn(`[Audio] Switch toggle fallback to index ${tFallbackIndex - 1}:`, next.url);
-                            playToggleFallback(next.url, next.crossOrigin);
-                          } else {
-                            console.error("[Audio] Toggle recovery completely failed:", e);
-                            addNotification(
-                              "Audio signal lost. Recovery failed.",
-                              "error",
-                            );
-                            setIsPlaying(false);
-                          }
-                        }
-                      });
-                    }
-                  } catch (subErr) {
-                    console.error("[Audio] Sub-error in toggle recovery:", subErr);
-                  }
-                };
-
-                playToggleFallback(currentTrack.audioUrl, false);
-              }
-            }
+      if (isOffline || resolvedCandidates.length === 0) {
+        const cachedUrl = await audioCacheService.getCachedTrack(currentTrack.id);
+        if (cachedUrl) {
+          resolvedCandidates = buildAudioFallbackQueue({
+            cachedUrl,
+            trackAudioUrl: currentTrack.audioUrl,
+            audioIpfsUrl: currentTrack.audioIpfsUrl,
           });
         }
-      } catch (err) {
-        console.error("Toggle play error:", err);
       }
+
+      if (resolvedCandidates.length === 0) {
+        setAudioConnectionState("error");
+        setIsPlaying(false);
+        addNotification("Track audio source is unavailable", "info");
+        return;
+      }
+
+      if (needsSourceInit) {
+        audioRef.current.removeAttribute("crossorigin");
+        audioRef.current.src = resolvedCandidates[0].url;
+        audioRef.current.load();
+      }
+
+      const tryToggleAtIndex = (idx: number) => {
+        if (!audioRef.current || attemptId !== playbackAttemptIdRef.current) return;
+        const promise = audioRef.current.play();
+        playPromiseRef.current = promise;
+        if (promise === undefined) return;
+
+        promise
+          .then(() => {
+            if (attemptId !== playbackAttemptIdRef.current) return;
+            setIsPlaying(true);
+            setAudioConnectionState("connected");
+          })
+          .catch(async (error) => {
+            if (attemptId !== playbackAttemptIdRef.current) return;
+            if (
+              error?.name === "AbortError" ||
+              error?.message?.includes("interrupted")
+            ) {
+              return;
+            }
+            if (error?.name === "NotAllowedError") {
+              setIsPlaying(false);
+              setAudioConnectionState("idle");
+              addNotification("Tap Play to start audio playback", "info");
+              return;
+            }
+
+            const nextIdx = idx + 1;
+            if (nextIdx < resolvedCandidates.length && audioRef.current) {
+              const nextCandidate = resolvedCandidates[nextIdx];
+              audioRef.current.pause();
+              if (nextCandidate.crossOrigin && nextCandidate.url.startsWith("http")) {
+                audioRef.current.crossOrigin = "anonymous";
+              } else {
+                audioRef.current.removeAttribute("crossorigin");
+              }
+              audioRef.current.src = nextCandidate.url;
+              audioRef.current.load();
+              tryToggleAtIndex(nextIdx);
+              return;
+            }
+
+            const cachedUrl = await audioCacheService.getCachedTrack(currentTrack.id);
+            if (
+              cachedUrl &&
+              attemptId === playbackAttemptIdRef.current &&
+              audioRef.current &&
+              !resolvedCandidates.some((c) => c.url === cachedUrl)
+            ) {
+              resolvedCandidates.push({ url: cachedUrl, crossOrigin: false });
+              audioRef.current.pause();
+              audioRef.current.removeAttribute("crossorigin");
+              audioRef.current.src = cachedUrl;
+              audioRef.current.load();
+              tryToggleAtIndex(resolvedCandidates.length - 1);
+              return;
+            }
+
+            console.warn("[Audio] Playback unavailable on resume:", error?.message || error);
+            if (audioRef.current) {
+              audioRef.current.removeAttribute("src");
+            }
+            setAudioConnectionState("error");
+            setIsPlaying(false);
+            addNotification("Unable to stream this track right now.", "error");
+          });
+      };
+
+      tryToggleAtIndex(0);
+    } catch (err) {
+      console.warn("Toggle play error:", err);
+      setIsPlaying(false);
     }
-    setIsPlaying(!isPlaying);
   };
 
   const getSmartRadioTracks = useCallback(

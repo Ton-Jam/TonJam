@@ -28,17 +28,19 @@ export const Artists: React.FC<ArtistsProps> = ({ artists, layout = 'grid' }) =>
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-[#0052FF]" />
-          <h2 className="section-title">Followed Artists & Creators</h2>
+          <Users className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)]" />
+          <h2 className="section-title text-[var(--tj-color-text-primary,#F8FAFC)]">Followed Artists & Creators</h2>
         </div>
-        <span className="text-[10px] text-muted-foreground font-mono font-medium">
-          {artists.length} creators connected
+        <span className="text-[11px] text-[var(--tj-color-text-muted,#7F91AA)] font-mono font-medium">
+          {artists.length} {artists.length === 1 ? 'creator' : 'creators'}
         </span>
       </div>
 
       {artists.length === 0 ? (
-        <div className="py-12 text-center text-slate-500 text-xs">
-          No followed artists yet. Explore and follow creators in the Discovery feed.
+        <div className="py-10 px-6 text-center rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-elevated,#111C30)]/60 border-0">
+          <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)]">
+            No followed artists yet. Explore and follow creators in the Discovery feed.
+          </p>
         </div>
       ) : layout === 'list' ? (
         <div className="space-y-2.5">

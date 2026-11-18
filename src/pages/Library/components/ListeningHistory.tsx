@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { History, Play, Trash2, Calendar } from 'lucide-react';
-import { motion } from 'motion/react';
 import { HistoryEvent } from '../types';
 
 interface ListeningHistoryProps {
@@ -9,12 +8,28 @@ interface ListeningHistoryProps {
   onClearHistory: () => void;
 }
 
+const formatDuration = (seconds?: number) => {
+  if (!seconds || isNaN(seconds) || seconds <= 0) return 'Recent';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+};
+
+const formatEventTime = (playedAt?: string, duration?: number) => {
+  if (playedAt) {
+    const parsed = new Date(playedAt);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+  }
+  return formatDuration(duration);
+};
+
 export const ListeningHistory: React.FC<ListeningHistoryProps> = ({
   history,
   onPlay,
   onClearHistory
 }) => {
-  // Group history items
   const groupedHistory = useMemo(() => {
     const today: HistoryEvent[] = [];
     const yesterday: HistoryEvent[] = [];
@@ -48,30 +63,32 @@ export const ListeningHistory: React.FC<ListeningHistoryProps> = ({
     return (
       <div className="space-y-1.5">
         {events.map((event) => (
-          <motion.div
+          <button
+            type="button"
             key={event.id}
-            whileHover={{ scale: 1.005 }}
-            className="flex items-center gap-3 p-2 hover:bg-white/[0.03] dark:hover:bg-white/[0.03] hover:bg-black/[0.01] border border-transparent hover:border-black/5 dark:hover:border-white/5 rounded-[10px] group transition-all"
+            onClick={() => onPlay(event)}
+            className="w-full flex items-center gap-3 p-2.5 bg-[var(--tj-color-surface-elevated,#111C30)]/60 hover:bg-[var(--tj-color-surface-hover,#132B49)] rounded-[var(--tj-radius-lg,10px)] group transition-colors cursor-pointer text-left border-0"
           >
-            <div className="relative w-10 h-10 rounded-[10px] overflow-hidden bg-slate-800 shrink-0">
+            <div className="relative w-10 h-10 rounded-[var(--tj-radius-md,8px)] overflow-hidden bg-[var(--tj-color-bg-secondary,#0B1424)] shrink-0">
               <img src={event.coverUrl} alt={event.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              <button
-                onClick={() => onPlay(event)}
-                className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-              >
-                <Play className="w-4.5 h-4.5 text-white fill-current" />
-              </button>
+              <div className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+              </div>
             </div>
 
-            <div className="flex-1 min-w-0" onClick={() => onPlay(event)}>
-              <h5 className="text-xs font-bold text-foreground truncate cursor-pointer">{event.title}</h5>
-              <p className="text-[10px] text-muted-foreground truncate">{event.artist}</p>
+            <div className="flex-1 min-w-0">
+              <h5 className="text-xs sm:text-sm font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate">
+                {event.title}
+              </h5>
+              <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)] truncate">
+                {event.artist}
+              </p>
             </div>
 
-            <span className="text-[9px] font-mono font-bold text-muted-foreground shrink-0 bg-white/5 px-2 py-0.5 rounded-md">
-              {new Date(event.playedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <span className="text-[11px] font-mono font-medium text-[var(--tj-color-text-secondary,#A8B7CC)] shrink-0 bg-white/5 px-2 py-0.5 rounded-[var(--tj-radius-sm,6px)] tabular-nums">
+              {formatEventTime(event.playedAt, event.duration)}
             </span>
-          </motion.div>
+          </button>
         ))}
       </div>
     );
@@ -80,47 +97,48 @@ export const ListeningHistory: React.FC<ListeningHistoryProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
-          <History className="w-5 h-5 text-purple-500" />
-          <h2 className="section-title">Listening History Timeline</h2>
+        <div className="flex items-center gap-2">
+          <History className="w-4 h-4 text-purple-400" />
+          <h2 className="section-title">Listening History</h2>
         </div>
 
         {history.length > 0 && (
           <button
+            type="button"
             onClick={onClearHistory}
-            className="text-[10px] font-bold uppercase tracking-wider text-red-500 hover:underline flex items-center gap-1 cursor-pointer"
+            className="min-h-[36px] px-2.5 text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-[var(--tj-radius-md,8px)] flex items-center gap-1.5 cursor-pointer transition-colors border-0 bg-transparent"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>Wipe History</span>
+            <span>Clear History</span>
           </button>
         )}
       </div>
 
       {history.length === 0 ? (
-        <div className="text-center py-12 border border-dashed border-black/10 dark:border-white/10 rounded-[10px] bg-black/[0.01] dark:bg-white/[0.01]">
-          <History className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-          <h4 className="text-xs font-bold text-foreground">Listening History is Empty</h4>
-          <p className="text-[10px] text-muted-foreground max-w-xs mx-auto mt-1">
-            Wandered soundwaves will map here as you stream and explore TonJam music.
+        <div className="text-center py-10 px-4 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-elevated,#111C30)]/60">
+          <History className="w-7 h-7 text-[var(--tj-color-text-muted,#7F91AA)] mx-auto mb-2 opacity-70" />
+          <h4 className="text-sm font-semibold text-[var(--tj-color-text-primary,#F8FAFC)]">
+            Listening History is Empty
+          </h4>
+          <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)] max-w-xs mx-auto mt-1">
+            Tracks you play on TonJam will appear here automatically.
           </p>
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Today Group */}
           {groupedHistory.today.length > 0 && (
             <div className="space-y-2">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-1 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-[#0052FF]" />
-                Today
+              <span className="text-[11px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider font-mono px-1 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-[var(--tj-color-brand-primary,#00B4D8)]" />
+                Recent
               </span>
               {renderHistoryList(groupedHistory.today)}
             </div>
           )}
 
-          {/* Yesterday Group */}
           {groupedHistory.yesterday.length > 0 && (
             <div className="space-y-2">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-1 flex items-center gap-1">
+              <span className="text-[11px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider font-mono px-1 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-indigo-400" />
                 Yesterday
               </span>
@@ -128,10 +146,9 @@ export const ListeningHistory: React.FC<ListeningHistoryProps> = ({
             </div>
           )}
 
-          {/* This Week Group */}
           {groupedHistory.thisWeek.length > 0 && (
             <div className="space-y-2">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-1 flex items-center gap-1">
+              <span className="text-[11px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider font-mono px-1 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-purple-400" />
                 Earlier This Week
               </span>
@@ -139,11 +156,10 @@ export const ListeningHistory: React.FC<ListeningHistoryProps> = ({
             </div>
           )}
 
-          {/* Older History Group */}
           {groupedHistory.older.length > 0 && (
             <div className="space-y-2">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-1 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-[11px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider font-mono px-1 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-[var(--tj-color-text-muted,#7F91AA)]" />
                 Older
               </span>
               {renderHistoryList(groupedHistory.older)}

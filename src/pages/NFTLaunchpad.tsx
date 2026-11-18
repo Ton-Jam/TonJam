@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { collection, onSnapshot, query, where, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { getPlaceholderImage } from '@/lib/utils';
+import { normalizePlayableAudioUrl } from '@/utils/audioSource';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/contexts/AudioContext';
 import { useNFT } from '@/contexts/NFTContext';
@@ -307,7 +308,8 @@ export default function NFTLaunchpad() {
 
   // Audio preview playback toggle
   const toggleAudioPreview = (drop: NFTDrop) => {
-    if (!drop.audioPreviewUrl) {
+    const resolvedPreviewUrl = normalizePlayableAudioUrl(drop.audioPreviewUrl);
+    if (!resolvedPreviewUrl) {
       toast.info('Audio preview not available for this drop');
       return;
     }
@@ -319,12 +321,17 @@ export default function NFTLaunchpad() {
       if (audioRef.current) {
         audioRef.current.pause();
       }
-      const audio = new Audio(drop.audioPreviewUrl);
+      const audio = new Audio(resolvedPreviewUrl);
       audio.onended = () => setPlayingDropId(null);
+      audio.onerror = () => {
+        setPlayingDropId(null);
+        toast.error('Could not play audio preview');
+      };
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
           if (err?.name !== 'AbortError' && !err?.message?.includes('interrupted')) {
+            setPlayingDropId(null);
             toast.error('Could not play audio preview');
           }
         });

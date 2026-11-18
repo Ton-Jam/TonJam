@@ -44,11 +44,13 @@
   --tj-color-text-muted: var(--tj-text-muted);
 
   /* =========================================================
-     BORDER DISCIPLINE (SUBTLE SILVER 1PX BORDER)
+     BORDER DISCIPLINE (SUBTLE SILVER 1PX / 2PX BORDERS)
      ========================================================= */
   --tj-border: 1px solid rgba(192, 192, 192, 0.22);
   --tj-border-subtle: 1px solid rgba(192, 192, 192, 0.15);
   --tj-border-strong: 1px solid rgba(192, 192, 192, 0.35);
+  --tj-border-silver-2: 2px solid rgba(192, 192, 192, 0.22);
+  --tj-border-silver-2-strong: 2px solid rgba(192, 192, 192, 0.35);
   --tj-color-border-subtle: rgba(192, 192, 192, 0.22);
   --tj-color-border-strong: rgba(192, 192, 192, 0.35);
 
@@ -100,10 +102,11 @@
      RADIUS TOKENS
      Subtle, consistent geometric curves
      ========================================================= */
-  --tj-radius-sm: 6px;
-  --tj-radius-md: 8px;
-  --tj-radius-lg: 10px;
-  --tj-radius-xl: 12px;
+  --tj-radius-compact: 5px;
+  --tj-radius-sm: 8px;
+  --tj-radius-md: 10px;
+  --tj-radius-lg: 12px;
+  --tj-radius-xl: 14px;
   --tj-radius-pill: 999px;
 
   /* =========================================================

@@ -200,6 +200,7 @@ export interface NFTItem {
   imageUrl: string;
   coverUrl?: string; // Alias for imageUrl
   audioUrl?: string;
+  audioIpfsUrl?: string;
   rarity?: string;
   edition: string;
   supply?: number;

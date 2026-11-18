@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Volume2, VolumeX, Music, Sparkles, Disc3, Headphones, Zap } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
+import { normalizePlayableAudioUrl } from '@/utils/audioSource';
 import { NFTItem, Track } from '@/types';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -43,14 +44,27 @@ export const NFTAudioPreviewPlayer: React.FC<NFTAudioPreviewPlayerProps> = ({
 
   // 1. Resolve Audio Source
   const resolvedAudioUrl = useMemo(() => {
-    if (customAudioUrl) return customAudioUrl;
-    if (nft?.audioUrl) return nft.audioUrl;
+    if (customAudioUrl) {
+      const n = normalizePlayableAudioUrl(customAudioUrl);
+      if (n) return n;
+    }
+    if (nft?.audioUrl) {
+      const n = normalizePlayableAudioUrl(nft.audioUrl);
+      if (n) return n;
+    }
+    if (nft?.audioIpfsUrl) {
+      const n = normalizePlayableAudioUrl(nft.audioIpfsUrl);
+      if (n) return n;
+    }
     
     // Check by trackId or NFT id
     const targetTrackId = trackId || nft?.trackId || nft?.id;
     if (targetTrackId) {
       const matched = allTracks.find(t => t.id === targetTrackId || t.songId === targetTrackId);
-      if (matched?.audioUrl) return matched.audioUrl;
+      if (matched?.audioUrl) {
+        const n = normalizePlayableAudioUrl(matched.audioUrl);
+        if (n) return n;
+      }
     }
     
     // Check by title
@@ -59,7 +73,10 @@ export const NFTAudioPreviewPlayer: React.FC<NFTAudioPreviewPlayerProps> = ({
       const matchedByTitle = allTracks.find(t => 
         searchTitle.includes(t.title.toLowerCase()) || t.title.toLowerCase().includes(searchTitle)
       );
-      if (matchedByTitle?.audioUrl) return matchedByTitle.audioUrl;
+      if (matchedByTitle?.audioUrl) {
+        const n = normalizePlayableAudioUrl(matchedByTitle.audioUrl);
+        if (n) return n;
+      }
     }
 
     return '';
@@ -93,8 +110,10 @@ export const NFTAudioPreviewPlayer: React.FC<NFTAudioPreviewPlayerProps> = ({
   // Sync with window-level singleton to allow only 1 preview at a time
   useEffect(() => {
     const audio = new Audio();
-    audio.src = resolvedAudioUrl;
-    audio.preload = 'metadata';
+    if (resolvedAudioUrl) {
+      audio.src = resolvedAudioUrl;
+      audio.preload = 'metadata';
+    }
     audioRef.current = audio;
 
     const handleTimeUpdate = () => {

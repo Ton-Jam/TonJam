@@ -234,7 +234,7 @@
   --input-background: var(--tj-color-input-background, #0B1F36);
   --input-placeholder: var(--tj-color-input-placeholder, #8193A8);
   --input-border: var(--tj-color-border-interactive, #245078);
-  --input-radius: var(--tj-radius-md, 8px);
+  --input-radius: var(--tj-radius-md, 10px);
   --input-focus-border: var(--tj-color-border-focus, #00B4D8);
 
   --filter-background: var(--tj-color-chip-background, #102943);
@@ -245,9 +245,9 @@
   --filter-active-border: transparent;
 
   /* Consistent subtle component radii */
-  --button-radius: var(--tj-radius-sm, 6px);
+  --button-radius: var(--tj-radius-sm, 8px);
   --button-border: transparent;
-  --card-radius: var(--tj-radius-md, 8px);
+  --card-radius: var(--tj-radius-md, 10px);
 
   /* Semantic Spacing Scale */
   --tj-space-1: var(--tj-spacing-4);
@@ -267,7 +267,7 @@
 
   /* Card dimensions */
   --card-width: 168px;
-  --card-image-radius: var(--tj-radius-sm, 6px);
+  --card-image-radius: var(--tj-radius-sm, 8px);
 
   /* Spacing */
   --card-gap: var(--tj-space-3);
@@ -286,7 +286,7 @@
 
   /* Actions */
   --card-action-height: 34px;
-  --card-action-radius: var(--tj-radius-sm, 6px);
+  --card-action-radius: var(--tj-radius-sm, 8px);
 
   /* Borders */
   --card-border-width: 1px;
@@ -308,13 +308,13 @@
   --border-header: var(--tj-border-subtle);
 
   /* Radius Tokens */
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 12px;
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
   --radius-pill: 999px;
-  --radius: 8px;
+  --radius: 10px;
 
   /* Card Tokens */
   --card-background: var(--tj-bg-surface);
@@ -493,7 +493,7 @@
   --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --radius-xs: 3px;
+  --radius-xs: 5px;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -1317,7 +1317,7 @@
   }
 
   .glass-card {
-    border-radius: var(--tj-radius-md, 8px) !important;
+    border-radius: var(--tj-radius-md, 10px) !important;
     border: 1px solid rgba(192, 192, 192, 0.18) !important;
     box-shadow: none !important;
     background: transparent !important;

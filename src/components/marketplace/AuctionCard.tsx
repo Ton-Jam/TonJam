@@ -36,23 +36,27 @@ const STATUS_BADGE: Record<
 > = {
   active: {
     label: "Active",
-    dotClass: "bg-emerald-400",
-    badgeClass: "bg-emerald-950/90 text-emerald-300 border-emerald-400/40",
+    dotClass: "bg-[var(--tj-color-state-success,#34D399)]",
+    badgeClass:
+      "bg-[var(--tj-color-state-success-bg,#103B32)] text-[var(--tj-color-state-success,#34D399)] border-[var(--tj-color-border-subtle)]",
   },
   ended: {
     label: "Ended",
-    dotClass: "bg-slate-400",
-    badgeClass: "bg-slate-900/90 text-slate-300 border-slate-500/40",
+    dotClass: "bg-[var(--tj-color-text-muted,#7F91AA)]",
+    badgeClass:
+      "bg-[var(--tj-color-surface-elevated,#111C30)] text-[var(--tj-color-text-secondary,#A8B7CC)] border-[var(--tj-color-border-subtle)]",
   },
   pending: {
     label: "Pending",
-    dotClass: "bg-amber-400",
-    badgeClass: "bg-amber-950/90 text-amber-300 border-amber-400/40",
+    dotClass: "bg-[var(--tj-color-state-warning,#FFC857)]",
+    badgeClass:
+      "bg-[var(--tj-color-state-warning-bg,#493516)] text-[var(--tj-color-state-warning,#FFC857)] border-[var(--tj-color-border-subtle)]",
   },
   cancelled: {
     label: "Cancelled",
-    dotClass: "bg-rose-400",
-    badgeClass: "bg-rose-950/90 text-rose-300 border-rose-400/40",
+    dotClass: "bg-[var(--tj-color-state-danger,#F87171)]",
+    badgeClass:
+      "bg-[var(--tj-color-state-danger-bg,#451F2A)] text-[var(--tj-color-state-danger,#F87171)] border-[var(--tj-color-border-subtle)]",
   },
 };
 
@@ -131,8 +135,8 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
         }
       }}
       className={cn(
-        "flex flex-col justify-between bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-md",
-        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-md,8px)] p-2.5",
+        "flex flex-col justify-between bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-md",
+        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-compact,5px)] p-2.5",
         "cursor-pointer transition-colors duration-150 select-none text-left",
         layout === "shelf"
           ? "w-[220px] sm:w-[248px] shrink-0 snap-start"
@@ -142,7 +146,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
     >
       <div>
         {/* Square Artwork */}
-        <div className="relative aspect-square w-full rounded-[var(--tj-radius-sm,6px)] overflow-hidden bg-[var(--tj-color-bg-secondary,#0D1628)] border border-[var(--tj-color-border-subtle)] group">
+        <div className="relative aspect-square w-full rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[var(--tj-color-bg-secondary,#0B1424)] border border-[var(--tj-color-border-subtle)] group">
           <ProgressiveImage
             src={auction.imageUrl || getPlaceholderImage(`auction-${auction.id}`)}
             fallbackSrc={getPlaceholderImage(`auction-${auction.id}`)}
@@ -153,7 +157,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
           {/* Auction Status Badge */}
           <div
             className={cn(
-              "absolute top-1.5 left-1.5 flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--tj-radius-xs,4px)] text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md",
+              "absolute top-1.5 left-1.5 flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--tj-radius-compact,5px)] text-[10px] font-semibold uppercase tracking-wider border backdrop-blur-md",
               statusMeta.badgeClass
             )}
           >
@@ -162,19 +166,19 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
           </div>
 
           {/* Bid Count */}
-          <div className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-[var(--tj-radius-xs,4px)] text-[10px] font-mono font-semibold bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[var(--tj-color-text-secondary,#C2C7CD)]">
+          <div className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-[var(--tj-radius-compact,5px)] text-[10px] font-mono font-semibold bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[var(--tj-color-text-secondary,#A8B7CC)]">
             {auction.bidsCount} {auction.bidsCount === 1 ? "bid" : "bids"}
           </div>
 
           {/* Real Countdown or Explicit End Timestamp */}
-          <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-2 px-2 py-1 rounded-[var(--tj-radius-xs,4px)] bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[10px]">
-            <div className="flex items-center gap-1 text-[var(--tj-color-text-secondary,#C2C7CD)] shrink-0">
-              <Clock className="w-3 h-3 text-[var(--tj-color-brand-primary,#00B4D8)]" />
+          <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-2 px-2 py-1 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[10px]">
+            <div className="flex items-center gap-1 text-[var(--tj-color-text-secondary,#A8B7CC)] shrink-0">
+              <Clock className="w-3 h-3 text-[var(--tj-color-brand-primary,#229ED9)]" />
               <span className="uppercase tracking-wider">
                 {auction.status === "active" && countdown ? "Ends" : "Closing"}
               </span>
             </div>
-            <span className="font-mono font-bold text-[var(--tj-color-text-primary,#FFFFFF)] truncate">
+            <span className="font-mono font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate">
               {auction.status === "active" && countdown ? countdown : formattedEndDate}
             </span>
           </div>
@@ -182,7 +186,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
 
         {/* Title & Artist */}
         <div className="mt-2.5 space-y-0.5 min-w-0">
-          <h3 className="text-xs sm:text-sm font-bold text-[var(--tj-color-text-primary,#FFFFFF)] truncate leading-tight">
+          <h3 className="text-xs sm:text-sm font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate leading-tight">
             {auction.title}
           </h3>
           <VerifiedArtistLabel
@@ -194,16 +198,16 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
         {/* Bid Metrics */}
         <div className="mt-2 pt-2 border-t border-[var(--tj-color-border-subtle)] grid grid-cols-2 gap-2 text-[11px]">
           <div className="min-w-0">
-            <span className="text-[10px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)] block">
+            <span className="text-[10px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#A8B7CC)] block">
               Highest Bid
             </span>
             <TonPriceLabel price={auction.highestBid} label="" size="sm" />
           </div>
           <div className="min-w-0 text-right">
-            <span className="text-[10px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)] block">
+            <span className="text-[10px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#A8B7CC)] block">
               Min Next Bid
             </span>
-            <span className="text-xs font-mono font-bold text-[var(--tj-color-text-primary,#FFFFFF)] truncate block">
+            <span className="text-xs font-mono font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate block">
               {auction.minimumNextBid || auction.highestBid}
             </span>
           </div>
@@ -215,14 +219,16 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
             {auction.recentBids.slice(0, 2).map((b) => (
               <div
                 key={b.id}
-                className="flex items-center justify-between text-[10px] font-mono text-[var(--tj-color-text-secondary,#C2C7CD)]"
+                className="flex items-center justify-between text-[10px] font-mono text-[var(--tj-color-text-secondary,#A8B7CC)]"
               >
                 <span className="truncate">
                   {b.bidder.length > 10
                     ? `${b.bidder.slice(0, 5)}...${b.bidder.slice(-4)}`
                     : b.bidder}
                 </span>
-                <span className="font-bold text-[var(--tj-color-brand-primary,#00B4D8)] shrink-0">{b.amount}</span>
+                <span className="font-semibold text-[var(--tj-color-brand-primary,#229ED9)] shrink-0">
+                  {b.amount}
+                </span>
               </div>
             ))}
           </div>
@@ -231,7 +237,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
 
       {/* Footer CTA */}
       <div className="mt-2.5 pt-2 border-t border-[var(--tj-color-border-subtle)] flex items-center justify-between gap-2">
-        <span className="text-[10px] text-[var(--tj-color-text-secondary,#C2C7CD)] truncate">
+        <span className="text-[10px] text-[var(--tj-color-text-secondary,#A8B7CC)] truncate">
           {auction.status === "ended"
             ? "Bidding closed"
             : auction.status === "cancelled"
@@ -244,14 +250,14 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
           type="button"
           onClick={handlePlaceBid}
           className={cn(
-            "px-2.5 py-1 rounded-[var(--tj-radius-sm,6px)] text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1 cursor-pointer border transition-colors shrink-0",
+            "min-h-[32px] px-2.5 py-1 rounded-[var(--tj-radius-compact,5px)] text-[10px] font-semibold inline-flex items-center gap-1 cursor-pointer border transition-colors shrink-0 whitespace-nowrap",
             auction.status === "active"
-              ? "bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white border-[var(--tj-color-brand-primary,#00B4D8)]"
-              : "bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-primary,#FFFFFF)] border-[var(--tj-color-border-subtle)]"
+              ? "bg-[var(--tj-color-brand-primary,#229ED9)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#F8FAFC)] border-[var(--tj-color-brand-primary,#229ED9)]"
+              : "bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-primary,#F8FAFC)] border-[var(--tj-color-border-subtle)]"
           )}
         >
           <Gavel className="w-3 h-3" />
-          <span>{auction.status === "active" ? "Place Bid" : "View"}</span>
+          <span>{auction.status === "active" ? "Place Bid" : "View Details"}</span>
         </button>
       </div>
     </div>

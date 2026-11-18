@@ -64,10 +64,11 @@ export const NFTCard: React.FC<NFTCardProps> = ({
 
   const editionText = nft.edition
     ? (nft.edition.toLowerCase().includes('of') ? nft.edition : `Edition ${nft.edition}`)
-    : (nft.supply ? `1 of ${nft.supply}` : '1 of 25');
+    : (nft.supply ? `1 of ${nft.supply}` : null);
 
   const rarityKey = (nft.rarity || 'rare').toLowerCase();
   const rarityTheme = RARITY_COLORS[rarityKey] || RARITY_COLORS.rare;
+  const collectionName = (nft as any).collectionName as string | undefined;
 
   const handleCardClick = () => {
     if (onViewNFT) {
@@ -107,9 +108,9 @@ export const NFTCard: React.FC<NFTCardProps> = ({
         }
       }}
       className={cn(
-        'group relative flex flex-col p-3 rounded-[16px] transition-all duration-200 select-none cursor-pointer',
-        'bg-[#0F1C32] hover:bg-[#132B49] active:bg-[#193657]',
-        'shadow-[0_8px_24px_rgba(0,0,0,0.35)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.45),0_0_24px_rgba(0,180,216,0.15)]',
+        'group relative flex flex-col p-2.5 rounded-[var(--tj-radius-compact,5px)] transition-colors duration-150 select-none cursor-pointer',
+        'bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] active:bg-[var(--tj-color-surface-pressed,#193657)]',
+        'border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)]',
         className
       )}
       data-testid="music-nft-card"
@@ -117,27 +118,27 @@ export const NFTCard: React.FC<NFTCardProps> = ({
       data-variant={variant}
     >
       {/* Square NFT Artwork */}
-      <div className="relative w-full aspect-square rounded-[12px] overflow-hidden mb-3">
+      <div className="relative w-full aspect-square rounded-[var(--tj-radius-compact,5px)] overflow-hidden mb-2.5 border border-[var(--tj-color-border-subtle)] bg-[var(--tj-color-bg-secondary,#0B1424)]">
         <AlbumArtwork
           src={nft.imageUrl || nft.coverUrl}
           alt={nft.title}
-          shape="rounded"
+          shape="square"
           size="standard"
           fallbackType="nft"
           showPlayOverlay={false}
-          className="w-full h-full max-w-none"
+          className="w-full h-full max-w-none transition-transform duration-300 group-hover:scale-[1.03]"
         />
 
         {/* Top Badges: Music NFT Label & Optional Rarity */}
-        <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5 pointer-events-none">
-          <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-semibold uppercase tracking-wider text-white bg-black/60 backdrop-blur-md">
+        <div className="absolute top-1.5 left-1.5 z-20 flex items-center gap-1 pointer-events-none">
+          <span className="px-1.5 py-0.5 rounded-[var(--tj-radius-compact,5px)] text-[10px] font-semibold uppercase tracking-wider text-[var(--tj-color-text-primary,#F8FAFC)] bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)]">
             Music NFT
           </span>
 
           {showRarity && nft.rarity && (
             <span
               className={cn(
-                'px-2 py-0.5 rounded-[6px] text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md',
+                'px-1.5 py-0.5 rounded-[var(--tj-radius-compact,5px)] text-[10px] font-semibold uppercase tracking-wider border border-[var(--tj-color-border-subtle)]',
                 rarityTheme.text,
                 rarityTheme.bg
               )}
@@ -154,18 +155,20 @@ export const NFTCard: React.FC<NFTCardProps> = ({
             onClick={handleFavoriteClick}
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             className={cn(
-              'absolute top-2 right-2 z-20 p-2 rounded-full bg-black/60 backdrop-blur-md transition-transform duration-150 hover:scale-110 active:scale-95',
-              isFavorite ? 'text-[#F87171]' : 'text-white hover:text-[#00B4D8]'
+              'absolute top-1.5 right-1.5 z-20 w-8 h-8 flex items-center justify-center rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] transition-colors duration-150 cursor-pointer',
+              isFavorite
+                ? 'text-[var(--tj-color-state-danger,#F87171)] border-[var(--tj-color-state-danger,#F87171)]'
+                : 'text-[var(--tj-color-text-primary,#F8FAFC)] hover:text-[var(--tj-color-brand-primary,#229ED9)] hover:border-[var(--tj-color-border-strong)]'
             )}
           >
-            <Heart className={cn('w-4 h-4', isFavorite && 'fill-current')} />
+            <Heart className={cn('w-3.5 h-3.5', isFavorite && 'fill-current')} />
           </button>
         )}
 
-        {/* Bottom Badge inside artwork: Edition Indicator */}
-        {showEdition && (
-          <div className="absolute bottom-2 left-2 z-20 pointer-events-none">
-            <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-medium text-[#C2C7CD] bg-black/70 backdrop-blur-md">
+        {/* Bottom Badge inside artwork: Edition Indicator (only when available) */}
+        {showEdition && editionText && (
+          <div className="absolute bottom-1.5 left-1.5 z-20 pointer-events-none">
+            <span className="px-1.5 py-0.5 rounded-[var(--tj-radius-compact,5px)] text-[10px] font-mono font-medium text-[var(--tj-color-text-secondary,#A8B7CC)] bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)]">
               {editionText}
             </span>
           </div>
@@ -173,87 +176,97 @@ export const NFTCard: React.FC<NFTCardProps> = ({
       </div>
 
       {/* Info Section */}
-      <div className="flex flex-col gap-1 min-w-0 flex-1">
-        <h4 className="text-sm font-semibold text-white truncate transition-colors duration-150 group-hover:text-white">
+      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+        <h4 className="text-xs sm:text-sm font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate transition-colors duration-150">
           {nft.title}
         </h4>
 
-        <div className="flex items-center gap-1.5 text-xs text-[#C2C7CD] truncate">
+        <div className="flex items-center gap-1.5 text-xs text-[var(--tj-color-text-secondary,#A8B7CC)] truncate">
           <span className="truncate">{artistName}</span>
           {isVerified && <VerifiedArtistBadge isVerified={true} size="xs" className="shrink-0" />}
         </div>
 
+        {collectionName && (
+          <span className="text-[10px] text-[var(--tj-color-text-muted,#7F91AA)] truncate">
+            {collectionName}
+          </span>
+        )}
+
         {/* Pricing & State Variant Row */}
-        <div className="flex items-center justify-between mt-2 pt-2 border-t-0">
+        <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-[var(--tj-color-border-subtle)]">
           {variant === 'sale' && (
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-medium tracking-wider text-[#8193A8]">
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] uppercase font-medium tracking-wider text-[var(--tj-color-text-muted,#7F91AA)]">
                 Price
               </span>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5 object-contain" />
-                <span className="text-sm font-bold text-white tabular-nums">
+              <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5 object-contain shrink-0" />
+                <span className="text-xs sm:text-sm font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] tabular-nums truncate">
                   {nft.price} TON
                 </span>
-                {(() => {
-                  const change = nft.floorPriceChange ?? 5.4;
-                  const isPositive = change >= 0;
-                  return (
-                    <span className={cn(
-                      "text-[10px] font-bold px-1.5 py-0.2 rounded-[4px] tabular-nums inline-flex items-center",
-                      isPositive ? "bg-[#103B32] text-[#34D399]" : "bg-[#451F2A] text-[#F87171]"
-                    )}>
-                      {isPositive ? `+${change}%` : `${change}%`}
-                    </span>
-                  );
-                })()}
+                {typeof nft.floorPriceChange === 'number' && (
+                  <span
+                    className={cn(
+                      'text-[10px] font-semibold px-1.5 py-0.5 rounded-[var(--tj-radius-compact,5px)] tabular-nums inline-flex items-center',
+                      nft.floorPriceChange >= 0
+                        ? 'bg-[var(--tj-color-state-success-bg,#103B32)] text-[var(--tj-color-state-success,#34D399)]'
+                        : 'bg-[var(--tj-color-state-danger-bg,#451F2A)] text-[var(--tj-color-state-danger,#F87171)]'
+                    )}
+                  >
+                    {nft.floorPriceChange >= 0
+                      ? `+${nft.floorPriceChange}%`
+                      : `${nft.floorPriceChange}%`}
+                  </span>
+                )}
               </div>
             </div>
           )}
 
           {variant === 'auction' && (
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-medium tracking-wider text-[#FFC857] flex items-center gap-1">
-                <Gavel className="w-3 h-3 text-[#FFC857]" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] uppercase font-medium tracking-wider text-[var(--tj-color-state-warning,#FFC857)] flex items-center gap-1">
+                <Gavel className="w-3 h-3 text-[var(--tj-color-state-warning,#FFC857)] shrink-0" />
                 Auction Active
               </span>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5 object-contain" />
-                <span className="text-sm font-bold text-white tabular-nums">
+              <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5 object-contain shrink-0" />
+                <span className="text-xs sm:text-sm font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] tabular-nums truncate">
                   {nft.startingBid || nft.price || '0.5'} TON
                 </span>
-                {(() => {
-                  const change = nft.floorPriceChange ?? 2.1;
-                  const isPositive = change >= 0;
-                  return (
-                    <span className={cn(
-                      "text-[10px] font-bold px-1.5 py-0.2 rounded-[4px] tabular-nums inline-flex items-center",
-                      isPositive ? "bg-[#103B32] text-[#34D399]" : "bg-[#451F2A] text-[#F87171]"
-                    )}>
-                      {isPositive ? `+${change}%` : `${change}%`}
-                    </span>
-                  );
-                })()}
+                {typeof nft.floorPriceChange === 'number' && (
+                  <span
+                    className={cn(
+                      'text-[10px] font-semibold px-1.5 py-0.5 rounded-[var(--tj-radius-compact,5px)] tabular-nums inline-flex items-center',
+                      nft.floorPriceChange >= 0
+                        ? 'bg-[var(--tj-color-state-success-bg,#103B32)] text-[var(--tj-color-state-success,#34D399)]'
+                        : 'bg-[var(--tj-color-state-danger-bg,#451F2A)] text-[var(--tj-color-state-danger,#F87171)]'
+                    )}
+                  >
+                    {nft.floorPriceChange >= 0
+                      ? `+${nft.floorPriceChange}%`
+                      : `${nft.floorPriceChange}%`}
+                  </span>
+                )}
               </div>
             </div>
           )}
 
           {variant === 'owned' && (
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-medium tracking-wider text-[#34D399] flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-[#34D399]" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] uppercase font-medium tracking-wider text-[var(--tj-color-state-success,#34D399)] flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-[var(--tj-color-state-success,#34D399)] shrink-0" />
                 Owned by you
               </span>
-              <span className="text-xs text-[#8193A8] mt-0.5">In Wallet</span>
+              <span className="text-xs text-[var(--tj-color-text-muted,#7F91AA)] mt-0.5">In Wallet</span>
             </div>
           )}
 
           {variant === 'sold' && (
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-medium tracking-wider text-[#64748B]">
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] uppercase font-medium tracking-wider text-[var(--tj-color-text-disabled,#64748B)]">
                 Status
               </span>
-              <span className="text-sm font-bold text-[#64748B] mt-0.5">
+              <span className="text-xs sm:text-sm font-semibold text-[var(--tj-color-text-disabled,#64748B)] mt-0.5">
                 Sold Out
               </span>
             </div>
@@ -264,11 +277,15 @@ export const NFTCard: React.FC<NFTCardProps> = ({
             type="button"
             onClick={handleActionClick}
             className={cn(
-              'px-3 py-1.5 rounded-[10px] text-xs font-semibold transition-all duration-150 flex items-center gap-1.5 shrink-0 select-none shadow-sm',
-              variant === 'sale' && 'bg-[#00B4D8] hover:bg-[#21C2E8] active:bg-[#168AC4] text-white',
-              variant === 'auction' && 'bg-[#FFC857] hover:bg-[#E5B03B] active:bg-[#C99622] text-[#07111F]',
-              variant === 'owned' && 'bg-[#103B32] hover:bg-[#175346] text-[#34D399]',
-              variant === 'sold' && 'bg-[#19273D] text-[#8193A8] hover:text-white'
+              'min-h-[32px] px-2.5 py-1 rounded-[var(--tj-radius-compact,5px)] text-xs font-semibold transition-colors duration-150 flex items-center gap-1.5 shrink-0 select-none border cursor-pointer',
+              variant === 'sale' &&
+                'bg-[var(--tj-color-brand-primary,#229ED9)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] border-[var(--tj-color-brand-primary,#229ED9)] text-white',
+              variant === 'auction' &&
+                'bg-[var(--tj-color-state-warning,#FFC857)] hover:opacity-90 border-[var(--tj-color-state-warning,#FFC857)] text-[var(--tj-text-inverse,#07111F)]',
+              variant === 'owned' &&
+                'bg-[var(--tj-color-state-success-bg,#103B32)] hover:opacity-90 border-[var(--tj-color-border-subtle)] text-[var(--tj-color-state-success,#34D399)]',
+              variant === 'sold' &&
+                'bg-[var(--tj-color-surface-elevated,#111C30)] border-[var(--tj-color-border-subtle)] text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-white'
             )}
             data-testid="nft-action-button"
           >

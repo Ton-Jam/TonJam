@@ -4,6 +4,7 @@ import { Play, Pause, BadgeCheck, Disc, Wallet, Eye, RotateCw, Share2 } from "lu
 import { useNavigate } from "react-router-dom";
 import { useAudio } from "@/contexts/AudioContext";
 import { cn, shareContent } from "@/lib/utils";
+import { normalizePlayableAudioUrl } from "@/utils/audioSource";
 import { MarqueeTitle } from "../MarqueeTitle";
 import { AuctionCountdownTimer } from "../AuctionCountdownTimer";
 import { NFT3DViewerModal } from "../NFT3DViewerModal";
@@ -68,9 +69,9 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
       return;
     }
 
-    const audioUrl = nft.audioUrl || associatedTrack?.audioUrl;
+    const audioUrl = normalizePlayableAudioUrl(nft.audioUrl || associatedTrack?.audioUrl);
     if (!audioUrl) {
-      addNotification("No audio preview available for this NFT", "error");
+      addNotification("No audio preview available for this NFT", "info");
       return;
     }
 
@@ -78,12 +79,12 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
       try {
         (window as any)._activePreviewStop();
       } catch (err) {
-        console.error("Error stopping previous preview:", err);
+        console.warn("Error stopping previous preview:", err);
       }
     }
 
     if (isPlaying) {
-      togglePlay().catch((err) => console.error("Error pausing main audio:", err));
+      togglePlay().catch((err) => console.warn("Error pausing main audio:", err));
     }
 
     const audio = new Audio(audioUrl);
@@ -115,7 +116,7 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
           stopPreview();
           return;
         }
-        console.error("Audio preview failed:", err);
+        console.warn("Audio preview failed:", err?.message || err);
         addNotification("Preview playback failed", "error");
         stopPreview();
       });

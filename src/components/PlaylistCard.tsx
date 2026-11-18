@@ -130,7 +130,7 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
           role="button"
           tabIndex={0}
         >
-          <div className="relative w-11 h-11 rounded-[3px] overflow-hidden flex-shrink-0 bg-neutral-900 border-none">
+          <div className="relative w-11 h-11 rounded-[5px] overflow-hidden flex-shrink-0 bg-neutral-900 border-none">
             {renderCover()}
             <button 
               type="button"

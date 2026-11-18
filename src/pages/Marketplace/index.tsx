@@ -29,14 +29,14 @@ import { MarketplaceNFT, MarketplaceTab } from "./types";
 import { getPlaceholderImage, cn } from "@/lib/utils";
 
 const CATEGORIES = [
-  "All",
+  "All NFTs",
   "Trending",
   "New Releases",
-  "Featured",
-  "Music",
-  "Collections",
+  "Exclusive",
+  "Limited Editions",
   "Auctions",
-  "Listed NFTs",
+  "Recently Listed",
+  "Music Collections",
 ];
 
 const MARKETPLACE_TABS: Array<{ id: MarketplaceTab; label: string }> = [
@@ -46,12 +46,12 @@ const MARKETPLACE_TABS: Array<{ id: MarketplaceTab; label: string }> = [
   { id: "my-nfts", label: "My NFTs" },
 ];
 
-const SORT_OPTIONS = [
+const BASE_SORT_OPTIONS = [
   { value: "default", label: "Featured" },
-  { value: "trending", label: "Most Popular" },
+  { value: "recent", label: "Recently Listed" },
   { value: "price_asc", label: "Price: Low to High" },
   { value: "price_desc", label: "Price: High to Low" },
-  { value: "recent", label: "Newest" },
+  { value: "trending", label: "Trending" },
 ];
 
 function mapNFTToCard(item: MarketplaceNFT): MusicNFTData {
@@ -66,17 +66,16 @@ function mapNFTToCard(item: MarketplaceNFT): MusicNFTData {
         ? item.price
         : `${item.price} TON`
       : "0 TON",
-    edition: item.edition || "1/1",
+    edition: item.edition || undefined,
     genre: item.genre || "",
-    badge:
-      item.rarity === "Legendary"
-        ? "EXCLUSIVE"
-        : item.rarity === "Rare"
-        ? "LIMITED"
-        : undefined,
     imageUrl: item.imageUrl || item.coverUrl || "",
     audioUrl: item.audioUrl || "",
-    status: item.listingType === "auction" ? "On Auction" : "Listed",
+    status:
+      item.listingType === "auction"
+        ? "On Auction"
+        : item.listingType === "fixed"
+        ? "Listed"
+        : undefined,
     listingType: item.listingType,
     auctionEndTime: item.auctionEndTime,
     owner: item.owner,
@@ -94,14 +93,14 @@ export default function MarketplacePage() {
   const {
     activeTab = "discover",
     setActiveTab,
-    activeCategory,
+    activeCategory = "All NFTs",
     setActiveCategory,
     activeGenre = "All",
     setActiveGenre,
     availableGenres = [],
-    searchTerm,
+    searchTerm = "",
     setSearchTerm,
-    sortBy,
+    sortBy = "default",
     setSortBy,
     filteredNFTs = [],
     paginatedNFTs,
@@ -110,6 +109,11 @@ export default function MarketplacePage() {
     myNFTs = [],
     allNFTs = [],
     featuredNFT,
+    trendingNFTs,
+    recentlyListedNFTs,
+    exclusiveDrops,
+    recommendedNFTs,
+    hasAuctions: hookHasAuctions,
     liveAuctions: rawLiveAuctions = [],
     trendingCollections: rawCollections = [],
     recentSales = [],
@@ -128,10 +132,11 @@ export default function MarketplacePage() {
   const [quickBuyNFT, setQuickBuyNFT] = useState<QuickBuyNFTData | null>(null);
 
   const visibleSourceNFTs = paginatedNFTs ?? filteredNFTs;
+  const isAllCategory = activeCategory === "All NFTs" || activeCategory === "All";
 
   const hasActiveFilter =
     searchTerm.trim() !== "" ||
-    activeCategory !== "All" ||
+    !isAllCategory ||
     activeGenre !== "All" ||
     sortBy !== "default";
 
@@ -143,6 +148,39 @@ export default function MarketplacePage() {
   const ownedNFTs: MusicNFTData[] = useMemo(
     () => (myNFTs || []).map(mapNFTToCard),
     [myNFTs]
+  );
+
+  const trendingShelfNFTs: MusicNFTData[] = useMemo(
+    () =>
+      ((trendingNFTs && trendingNFTs.length > 0 ? trendingNFTs : allNFTs.slice(0, 12)) || []).map(
+        mapNFTToCard
+      ),
+    [trendingNFTs, allNFTs]
+  );
+
+  const recentlyListedShelfNFTs: MusicNFTData[] = useMemo(
+    () =>
+      (
+        (recentlyListedNFTs && recentlyListedNFTs.length > 0
+          ? recentlyListedNFTs
+          : allNFTs.slice(0, 12)) || []
+      ).map(mapNFTToCard),
+    [recentlyListedNFTs, allNFTs]
+  );
+
+  const exclusiveDropsShelfNFTs: MusicNFTData[] = useMemo(
+    () => (exclusiveDrops || []).map(mapNFTToCard),
+    [exclusiveDrops]
+  );
+
+  const recommendedShelfNFTs: MusicNFTData[] = useMemo(
+    () =>
+      (
+        (recommendedNFTs && recommendedNFTs.length > 0
+          ? recommendedNFTs
+          : allNFTs.slice(0, 12)) || []
+      ).map(mapNFTToCard),
+    [recommendedNFTs, allNFTs]
   );
 
   const liveAuctions: AuctionData[] = useMemo(() => {
@@ -179,6 +217,20 @@ export default function MarketplacePage() {
       };
     });
   }, [rawCollections, collectionNFTCounts]);
+
+  const hasAuctions = Boolean(
+    hookHasAuctions ||
+      liveAuctions.length > 0 ||
+      allNFTs.some((item: MarketplaceNFT) => item.listingType === "auction")
+  );
+
+  const sortOptions = useMemo(
+    () =>
+      hasAuctions
+        ? [...BASE_SORT_OPTIONS, { value: "ending_soon", label: "Ending Soon" }]
+        : BASE_SORT_OPTIONS,
+    [hasAuctions]
+  );
 
   const handlePlayPreview = (nft: MusicNFTData) => {
     const targetId = nft.trackId || nft.id;
@@ -219,14 +271,57 @@ export default function MarketplacePage() {
   };
 
   const floorNumeric =
-    parseFloat(analyticsStats.floorPrice.replace(/[^\d.]/g, "")) || 0;
+    parseFloat(analyticsStats?.floorPrice?.replace(/[^\d.]/g, "") || "0") || 0;
   const floorUsd = (floorNumeric * (tonUsdRate ?? 7.5)).toFixed(2);
   const activeAuctionCount = liveAuctions.filter((a) => a.status === "active").length;
 
   const genrePills = ["All", ...(availableGenres || [])];
 
+  const renderNFTShelf = (
+    title: string,
+    supportingLabel: string,
+    items: MusicNFTData[],
+    onViewAll?: () => void
+  ) => {
+    if (!isLoading && items.length === 0) return null;
+
+    return (
+      <section className="pt-4 border-t border-[var(--tj-color-border-subtle)]">
+        <MarketplaceSectionHeader
+          title={title}
+          supportingLabel={supportingLabel}
+          actionText={onViewAll ? "View All" : undefined}
+          onAction={onViewAll}
+        />
+        {isLoading ? (
+          <CarouselSkeletonList type="nft" layout="shelf" count={4} />
+        ) : (
+          <div className="overflow-x-auto no-scrollbar scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-3 sm:px-0 pb-2">
+            {items.map((nft) => (
+              <MusicNFTCard
+                key={`${title}-${nft.id}`}
+                layout="shelf"
+                nft={nft}
+                isPlaying={Boolean(
+                  (currentTrack?.id === nft.trackId || currentTrack?.id === nft.id) &&
+                    isPlaying
+                )}
+                isFavourited={likedTrackIds.includes(nft.trackId || nft.id)}
+                onToggleFavourite={handleToggleFavourite}
+                onPlayPreview={handlePlayPreview}
+                onQuickBuy={(item) => setQuickBuyNFT(item)}
+                onCollect={(item) => setQuickBuyNFT(item)}
+                onViewNFT={(item) => navigate(`/nft/${item.id}`)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  };
+
   return (
-    <div className="min-h-screen overflow-x-hidden bg-transparent text-[var(--tj-color-text-primary,#FFFFFF)] pb-36 pt-1 px-0 sm:px-4 md:px-6 max-w-7xl mx-auto space-y-5">
+    <div className="min-h-screen overflow-x-hidden bg-transparent text-[var(--tj-color-text-primary,#F8FAFC)] pb-36 pt-1 px-0 sm:px-4 md:px-6 max-w-7xl mx-auto space-y-5">
       <MarketplaceHeader
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -238,58 +333,58 @@ export default function MarketplacePage() {
         aria-label="Marketplace statistics"
         className="px-3 sm:px-0 grid grid-cols-2 lg:grid-cols-4 gap-2.5"
       >
-        <div className="rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-3 flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider">
+        <div className="rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
+          <span className="text-[10px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider">
             Listed NFTs
           </span>
           <div className="flex items-baseline justify-between gap-2 mt-1">
-            <span className="text-base sm:text-lg font-black font-mono tabular-nums text-white">
+            <span className="text-base sm:text-lg font-bold font-mono tabular-nums text-[var(--tj-color-text-primary,#F8FAFC)]">
               {allNFTs.length}
             </span>
-            <span className="text-[10px] text-[var(--tj-color-brand-primary,#00B4D8)] font-medium truncate">
-              {analyticsStats.totalOwners} holders
+            <span className="text-[10px] text-[var(--tj-color-brand-primary,#229ED9)] font-medium truncate">
+              {analyticsStats?.totalOwners ?? 0} holders
             </span>
           </div>
         </div>
 
-        <div className="rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-3 flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider">
+        <div className="rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
+          <span className="text-[10px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider">
             Floor Price
           </span>
           <div className="flex items-baseline justify-between gap-2 mt-1">
-            <span className="text-base sm:text-lg font-black font-mono tabular-nums text-[var(--tj-color-brand-primary,#00B4D8)]">
-              {analyticsStats.floorPrice}
+            <span className="text-base sm:text-lg font-bold font-mono tabular-nums text-[var(--tj-color-brand-primary,#229ED9)]">
+              {analyticsStats?.floorPrice ?? "0.0 TON"}
             </span>
-            <span className="text-[10px] font-mono tabular-nums text-[var(--tj-color-text-secondary,#C2C7CD)]">
+            <span className="text-[10px] font-mono tabular-nums text-[var(--tj-color-text-secondary,#A8B7CC)]">
               ≈ ${floorUsd}
             </span>
           </div>
         </div>
 
-        <div className="rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-3 flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider">
+        <div className="rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
+          <span className="text-[10px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider">
             Active Auctions
           </span>
           <div className="flex items-baseline justify-between gap-2 mt-1">
-            <span className="text-base sm:text-lg font-black font-mono tabular-nums text-white">
+            <span className="text-base sm:text-lg font-bold font-mono tabular-nums text-[var(--tj-color-text-primary,#F8FAFC)]">
               {activeAuctionCount}
             </span>
-            <span className="text-[10px] text-amber-400 font-medium">
+            <span className="text-[10px] text-[var(--tj-color-state-warning,#FFC857)] font-medium">
               Live bids
             </span>
           </div>
         </div>
 
-        <div className="rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-3 flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider">
+        <div className="rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
+          <span className="text-[10px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider">
             Sales Volume
           </span>
           <div className="flex items-baseline justify-between gap-2 mt-1">
-            <span className="text-base sm:text-lg font-black font-mono tabular-nums text-emerald-400">
-              {analyticsStats.volumeTotal}
+            <span className="text-base sm:text-lg font-bold font-mono tabular-nums text-[var(--tj-color-state-success,#34D399)]">
+              {analyticsStats?.volumeTotal ?? "0.0 TON"}
             </span>
-            <span className="text-[10px] text-[var(--tj-color-text-secondary,#C2C7CD)] font-mono">
-              {analyticsStats.dailySalesCount} trades
+            <span className="text-[10px] text-[var(--tj-color-text-secondary,#A8B7CC)] font-mono">
+              {analyticsStats?.dailySalesCount ?? 0} trades
             </span>
           </div>
         </div>
@@ -300,7 +395,7 @@ export default function MarketplacePage() {
         aria-label="Marketplace sections"
         className="px-3 sm:px-0 border-b border-[var(--tj-color-border-subtle)]"
       >
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar scrollbar-none">
           {MARKETPLACE_TABS.map((tab) => {
             const isTabActive = activeTab === tab.id;
             const tabCount =
@@ -320,19 +415,19 @@ export default function MarketplacePage() {
                 aria-selected={isTabActive}
                 onClick={() => setActiveTab?.(tab.id)}
                 className={cn(
-                  "px-3.5 py-2.5 text-xs font-bold whitespace-nowrap transition-colors cursor-pointer bg-transparent border-0 border-b -mb-px flex items-center gap-1.5 outline-none",
+                  "px-3.5 py-2.5 text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer bg-transparent border-0 border-b -mb-px flex items-center gap-1.5 outline-none",
                   isTabActive
-                    ? "border-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                    : "border-transparent text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white"
+                    ? "border-[var(--tj-color-brand-primary,#229ED9)] text-[var(--tj-color-text-primary,#F8FAFC)]"
+                    : "border-transparent text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-[var(--tj-color-text-primary,#F8FAFC)]"
                 )}
               >
                 <span>{tab.label}</span>
                 <span
                   className={cn(
-                    "text-[10px] font-mono px-1.5 py-0.5 rounded-full",
+                    "text-[10px] font-mono px-1.5 py-0.5 rounded-[var(--tj-radius-compact,5px)]",
                     isTabActive
-                      ? "bg-[var(--tj-color-chip-active-background,#063C55)] text-[var(--tj-color-brand-primary,#00B4D8)]"
-                      : "bg-white/5 text-[var(--tj-color-text-secondary,#C2C7CD)]"
+                      ? "bg-[var(--tj-color-chip-active-background,#063C55)] text-[var(--tj-color-brand-primary,#229ED9)]"
+                      : "bg-[var(--tj-color-surface-elevated,#111C30)] text-[var(--tj-color-text-secondary,#A8B7CC)]"
                   )}
                 >
                   {tabCount}
@@ -352,6 +447,7 @@ export default function MarketplacePage() {
               title: featuredNFT.title,
               artist: featuredNFT.artist || featuredNFT.creator || "TonJam Artist",
               artistVerified: Boolean(featuredNFT.artistVerified),
+              collectionName: featuredNFT.collectionName,
               price: featuredNFT.price || "0 TON",
               edition: featuredNFT.edition,
               genre: featuredNFT.genre,
@@ -376,28 +472,31 @@ export default function MarketplacePage() {
         </div>
       )}
 
-      {/* Search Filters & Genre Pills */}
+      {/* Search Filters, Sorting & Genre Pills */}
       {(activeTab === "discover" || activeTab === "auctions") && (
-        <div className="px-3 sm:px-0 space-y-2.5">
+        <div className="px-3 sm:px-0 space-y-2">
           {activeTab === "discover" && (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div
                 aria-label="Category filters"
-                className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5"
+                className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scrollbar-none py-0.5"
               >
                 {CATEGORIES.map((cat) => (
                   <FilterPill
                     key={cat}
                     label={cat}
-                    active={activeCategory === cat}
+                    active={
+                      activeCategory === cat ||
+                      (cat === "All NFTs" && activeCategory === "All")
+                    }
                     onClick={() => setActiveCategory(cat)}
                   />
                 ))}
               </div>
 
               <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                <div className="flex items-center gap-1.5 bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-sm,6px)] px-2.5 py-1.5">
-                  <ArrowUpDown className="w-3.5 h-3.5 text-[var(--tj-color-brand-primary,#00B4D8)] shrink-0" />
+                <div className="min-h-[36px] flex items-center gap-1.5 bg-[var(--tj-color-surface-default,#0B1424)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-compact,5px)] px-2.5 py-1 transition-colors">
+                  <ArrowUpDown className="w-3.5 h-3.5 text-[var(--tj-color-brand-primary,#229ED9)] shrink-0" />
                   <label htmlFor="marketplace-sort" className="sr-only">
                     Sort NFTs
                   </label>
@@ -405,13 +504,13 @@ export default function MarketplacePage() {
                     id="marketplace-sort"
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-transparent text-xs font-semibold text-white outline-none border-0 cursor-pointer"
+                    className="bg-transparent text-xs font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] outline-none border-0 cursor-pointer"
                   >
-                    {SORT_OPTIONS.map((opt) => (
+                    {sortOptions.map((opt) => (
                       <option
                         key={opt.value}
                         value={opt.value}
-                        className="bg-[var(--tj-color-surface-default,#0D1628)] text-white"
+                        className="bg-[var(--tj-color-surface-default,#0B1424)] text-[var(--tj-color-text-primary,#F8FAFC)]"
                       >
                         {opt.label}
                       </option>
@@ -423,11 +522,11 @@ export default function MarketplacePage() {
                   <button
                     type="button"
                     onClick={handleResetFilters}
-                    className="px-2.5 py-1.5 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] text-xs font-semibold text-slate-200 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
-                    title="Reset Filters"
+                    className="min-h-[36px] px-2.5 py-1 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] text-xs font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-[var(--tj-color-text-primary,#F8FAFC)] flex items-center gap-1 cursor-pointer transition-colors"
+                    title="Clear Filters"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Reset</span>
+                    <span>Clear</span>
                   </button>
                 )}
               </div>
@@ -437,7 +536,7 @@ export default function MarketplacePage() {
           {/* Globally Inclusive Genre Filter Bar */}
           <div
             aria-label="Genre filters"
-            className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5"
+            className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scrollbar-none py-0.5"
           >
             {genrePills.map((genre) => (
               <FilterPill
@@ -467,12 +566,105 @@ export default function MarketplacePage() {
       {/* TAB 1: DISCOVER */}
       {activeTab === "discover" && !error && (
         <>
-          <section aria-labelledby="discovery-grid-heading" className="space-y-3">
+          {/* Curated Discovery Shelves when viewing unfiltered catalog */}
+          {!hasActiveFilter && (
+            <>
+              {renderNFTShelf(
+                "Trending Music NFTs",
+                "Most played & collected across TonJam",
+                trendingShelfNFTs,
+                () => setActiveCategory("Trending")
+              )}
+
+              {renderNFTShelf(
+                "Recently Listed",
+                "Fresh releases listed on TON",
+                recentlyListedShelfNFTs,
+                () => setActiveCategory("Recently Listed")
+              )}
+
+              {renderNFTShelf(
+                "Exclusive Music Drops",
+                "1/1 editions, legendary & stem-enabled releases",
+                exclusiveDropsShelfNFTs,
+                () => setActiveCategory("Exclusive")
+              )}
+
+              {!isLoading && exclusiveCollections.length > 0 && (
+                <section className="pt-4 border-t border-[var(--tj-color-border-subtle)]">
+                  <MarketplaceSectionHeader
+                    title="Popular Collections"
+                    supportingLabel="Verified music series and album editions"
+                    actionText="View All"
+                    onAction={() => setActiveTab?.("collections")}
+                  />
+                  <div className="overflow-x-auto no-scrollbar scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-3 sm:px-0 pb-2">
+                    {exclusiveCollections.slice(0, 8).map((collection) => (
+                      <CollectionCard
+                        key={collection.id}
+                        layout="shelf"
+                        collection={collection}
+                        onView={(col) => navigate(`/collections/${col.id}`)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {!isLoading && liveAuctions.length > 0 && (
+                <section className="pt-4 border-t border-[var(--tj-color-border-subtle)]">
+                  <MarketplaceSectionHeader
+                    title="Live Auctions"
+                    supportingLabel="On-chain bidding from TonJam artists"
+                    actionText="View All"
+                    onAction={() => setActiveTab?.("auctions")}
+                  />
+                  <div className="overflow-x-auto no-scrollbar scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-3 sm:px-0 pb-2">
+                    {liveAuctions.slice(0, 6).map((auction) => (
+                      <AuctionCard
+                        key={auction.id}
+                        layout="shelf"
+                        auction={auction}
+                        onPlaceBid={(auc) => navigate(`/nft/${auc.id}`)}
+                        onView={(auc) => navigate(`/nft/${auc.id}`)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {renderNFTShelf(
+                "Recommended Music NFTs",
+                "Curated from your listening taste and verified creators",
+                recommendedShelfNFTs,
+                () => setActiveCategory("Trending")
+              )}
+            </>
+          )}
+
+          {/* Full Catalog Grid or Active Search/Filter Results */}
+          <section
+            aria-labelledby="discovery-grid-heading"
+            className={cn(
+              "space-y-3",
+              !hasActiveFilter && "pt-4 border-t border-[var(--tj-color-border-subtle)]"
+            )}
+          >
             <MarketplaceSectionHeader
-              title={activeCategory === "All" ? "Discover Music NFTs" : activeCategory}
+              title={
+                hasActiveFilter
+                  ? searchTerm.trim()
+                    ? `Results for "${searchTerm.trim()}"`
+                    : isAllCategory
+                    ? "Filtered Music NFTs"
+                    : activeCategory
+                  : "All Music NFTs"
+              }
               supportingLabel={`${filteredNFTs.length} ${
                 filteredNFTs.length === 1 ? "collectible" : "collectibles"
               } available on TON`}
+              actionText={hasActiveFilter ? "Clear Filters" : undefined}
+              onAction={hasActiveFilter ? handleResetFilters : undefined}
             />
 
             {isLoading ? (
@@ -512,61 +704,16 @@ export default function MarketplacePage() {
                     <button
                       type="button"
                       onClick={loadMoreNFTs}
-                      className="inline-flex items-center gap-1.5 px-5 py-2 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] text-xs font-bold uppercase tracking-wider text-white cursor-pointer transition-colors"
+                      className="min-h-[38px] inline-flex items-center gap-1.5 px-5 py-2 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] text-xs font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] cursor-pointer transition-colors"
                     >
                       <span>Load More NFTs</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-[var(--tj-color-brand-primary,#00B4D8)]" />
+                      <ChevronDown className="w-3.5 h-3.5 text-[var(--tj-color-brand-primary,#229ED9)]" />
                     </button>
                   </div>
                 )}
               </>
             )}
           </section>
-
-          {/* Compact Collections Shelf inside Discover */}
-          {!isLoading && exclusiveCollections.length > 0 && (
-            <section className="pt-4 border-t border-[var(--tj-color-border-subtle)]">
-              <MarketplaceSectionHeader
-                title="Featured Collections"
-                supportingLabel="Verified music series and album editions"
-                actionText="View all"
-                onAction={() => setActiveTab?.("collections")}
-              />
-              <div className="overflow-x-auto scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-3 sm:px-0 pb-2">
-                {exclusiveCollections.slice(0, 8).map((collection) => (
-                  <CollectionCard
-                    key={collection.id}
-                    layout="shelf"
-                    collection={collection}
-                    onView={(col) => navigate(`/collections/${col.id}`)}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Compact Auctions Shelf inside Discover */}
-          {!isLoading && liveAuctions.length > 0 && activeCategory !== "Auctions" && (
-            <section className="pt-4 border-t border-[var(--tj-color-border-subtle)]">
-              <MarketplaceSectionHeader
-                title="Auctions"
-                supportingLabel="On-chain bidding from TonJam artists"
-                actionText="View all"
-                onAction={() => setActiveTab?.("auctions")}
-              />
-              <div className="overflow-x-auto scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-3 sm:px-0 pb-2">
-                {liveAuctions.slice(0, 6).map((auction) => (
-                  <AuctionCard
-                    key={auction.id}
-                    layout="shelf"
-                    auction={auction}
-                    onPlaceBid={(auc) => navigate(`/nft/${auc.id}`)}
-                    onView={(auc) => navigate(`/nft/${auc.id}`)}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
         </>
       )}
 
@@ -574,7 +721,7 @@ export default function MarketplacePage() {
       {activeTab === "collections" && !error && (
         <section aria-labelledby="collections-heading" className="space-y-3">
           <MarketplaceSectionHeader
-            title="Collections"
+            title="Music Collections"
             supportingLabel={`${exclusiveCollections.length} curated collections`}
           />
 
@@ -603,7 +750,7 @@ export default function MarketplacePage() {
       {activeTab === "auctions" && !error && (
         <section aria-labelledby="auctions-heading" className="space-y-3">
           <MarketplaceSectionHeader
-            title="Music NFT Auctions"
+            title="Live Auctions"
             supportingLabel="Real-time bid status and closing schedules"
           />
 
@@ -680,7 +827,7 @@ export default function MarketplacePage() {
               <div
                 key={sale.id}
                 onClick={() => sale.nftId && navigate(`/nft/${sale.nftId}`)}
-                className="p-2.5 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] transition-colors flex items-center justify-between gap-2.5 cursor-pointer"
+                className="p-2.5 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] transition-colors flex items-center justify-between gap-2.5 cursor-pointer"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <img
@@ -697,22 +844,22 @@ export default function MarketplacePage() {
                       );
                     }}
                     alt={sale.nftTitle}
-                    className="w-10 h-10 rounded-[var(--tj-radius-sm,6px)] object-cover shrink-0 bg-[var(--tj-color-bg-secondary,#0D1628)] border border-[var(--tj-color-border-subtle)]"
+                    className="w-10 h-10 rounded-[var(--tj-radius-compact,5px)] object-cover shrink-0 bg-[var(--tj-color-bg-secondary,#0B1424)] border border-[var(--tj-color-border-subtle)]"
                   />
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-white truncate">
+                    <p className="text-xs font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate">
                       {sale.nftTitle}
                     </p>
-                    <p className="text-[11px] text-[var(--tj-color-text-secondary,#C2C7CD)] truncate">
+                    <p className="text-[11px] text-[var(--tj-color-text-secondary,#A8B7CC)] truncate">
                       {sale.sellerName} &rarr; {sale.buyerName}
                     </p>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-xs font-bold font-mono text-emerald-400 block">
+                  <span className="text-xs font-semibold font-mono text-[var(--tj-color-state-success,#34D399)] block">
                     {sale.price}
                   </span>
-                  <span className="text-[10px] text-[var(--tj-color-text-secondary,#C2C7CD)] font-mono">
+                  <span className="text-[10px] text-[var(--tj-color-text-secondary,#A8B7CC)] font-mono">
                     {sale.timestamp}
                   </span>
                 </div>

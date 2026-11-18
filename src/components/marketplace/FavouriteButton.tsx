@@ -38,12 +38,12 @@ export const FavouriteButton: React.FC<FavouriteButtonProps> = ({
       aria-label={favourited ? "Remove from favourites" : "Add to favourites"}
       aria-pressed={favourited}
       className={cn(
-        "rounded-[var(--tj-radius-xs,4px)] flex items-center justify-center transition-colors cursor-pointer outline-none border border-[var(--tj-color-border-subtle)]",
+        "rounded-[var(--tj-radius-compact,5px)] flex items-center justify-center transition-colors duration-150 cursor-pointer outline-none border",
         "bg-[var(--tj-color-surface-overlay,#07182BCC)] backdrop-blur-md",
-        size === "sm" ? "w-7 h-7" : "w-8 h-8",
+        size === "sm" ? "w-8 h-8" : "w-9 h-9",
         favourited
-          ? "text-[#FF4A6B] border-[#FF4A6B]/50 hover:text-[#FF6685]"
-          : "text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white",
+          ? "text-[var(--tj-color-state-danger,#F16D78)] border-[var(--tj-color-state-danger,#F16D78)]/60 hover:opacity-90"
+          : "text-[var(--tj-color-text-secondary,#C2C7CD)] border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] hover:text-[var(--tj-color-text-primary,#FFFFFF)]",
         className
       )}
     >
@@ -55,7 +55,7 @@ export const FavouriteButton: React.FC<FavouriteButtonProps> = ({
         strokeWidth={2}
       />
       {typeof count === "number" && (
-        <span className="text-[10px] ml-1 font-semibold">{count}</span>
+        <span className="text-[10px] ml-1 font-semibold font-mono tabular-nums">{count}</span>
       )}
     </button>
   );

@@ -641,7 +641,7 @@ contract TonJamRoyaltyDistributor with Deployable {
                   </p>
                   <button
                     onClick={handleSimulateStream}
-                    className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-[3px] text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-blue-600/15"
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-blue-600/15"
                   >
                     <Play className="h-3 w-3 fill-current" />
                     Simulate Stream Event
@@ -666,7 +666,7 @@ contract TonJamRoyaltyDistributor with Deployable {
                   </p>
                   <button
                     onClick={handleSimulateResale}
-                    className="w-full py-2 bg-[#2BE08C] hover:bg-[#20c076] text-black rounded-[3px] text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-[#2BE08C]/15"
+                    className="w-full py-2 bg-[#2BE08C] hover:bg-[#20c076] text-black rounded-[5px] text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-[#2BE08C]/15"
                   >
                     <TrendingUp className="h-3 w-3" />
                     Simulate Resale Event

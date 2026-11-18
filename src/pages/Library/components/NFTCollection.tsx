@@ -77,10 +77,10 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
 
   const getRarityColor = (rarity: LibraryNFT['rarity']) => {
     switch (rarity) {
-      case 'Legendary': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
-      case 'Epic': return 'text-purple-400 bg-purple-400/10 border-purple-400/20';
-      case 'Rare': return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
-      default: return 'text-slate-400 bg-slate-400/10 border-slate-400/20';
+      case 'Legendary': return 'text-amber-400 bg-amber-400/12';
+      case 'Epic': return 'text-purple-400 bg-purple-400/12';
+      case 'Rare': return 'text-sky-400 bg-sky-400/12';
+      default: return 'text-[var(--tj-color-text-secondary,#A8B7CC)] bg-white/10';
     }
   };
 
@@ -121,13 +121,13 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
   return (
     <div className="space-y-4">
       {/* Mini NFT collection stats header */}
-      <div className="bg-gradient-to-r from-purple-950/20 to-indigo-950/20 border border-purple-500/10 rounded-[10px] p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="bg-[var(--tj-color-surface-elevated,#111C30)] border-0 rounded-[var(--tj-radius-lg,10px)] p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-1.5">
-            <Zap className="w-5 h-5 text-purple-500 animate-pulse" />
-            <h2 className="section-title">Music NFT Vault</h2>
+            <Zap className="w-5 h-5 text-purple-400" />
+            <h2 className="section-title text-[var(--tj-color-text-primary,#F8FAFC)]">Music NFT Vault</h2>
           </div>
-          <p className="text-[10px] text-muted-foreground max-w-sm">
+          <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)] max-w-sm">
             Decentralized audio artifacts secured on The Open Network (TON). Earn active royalty rewards.
           </p>
         </div>
@@ -135,15 +135,17 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
         {/* Stats box */}
         <div className="flex items-center gap-6">
           <div className="space-y-0.5">
-            <span className="text-[9px] text-muted-foreground uppercase font-mono font-bold tracking-wider">Owned NFTs</span>
-            <p className="text-base font-black text-purple-400 font-mono leading-none">{displayNfts.length} Items</p>
+            <span className="text-[10px] text-[var(--tj-color-text-muted,#7F91AA)] uppercase font-mono font-bold tracking-wider">Owned NFTs</span>
+            <p className="text-base font-black text-purple-400 font-mono leading-none">
+              {displayNfts.length} {displayNfts.length === 1 ? 'Item' : 'Items'}
+            </p>
           </div>
-          <div className="h-8 w-[1px] bg-purple-500/10" />
+          <div className="h-8 w-[1px] bg-white/10" />
           <div className="space-y-0.5">
-            <span className="text-[9px] text-muted-foreground uppercase font-mono font-bold tracking-wider">Est. Vault Value</span>
-            <p className="text-base font-black text-amber-400 font-mono leading-none flex items-center gap-1">
+            <span className="text-[10px] text-[var(--tj-color-text-muted,#7F91AA)] uppercase font-mono font-bold tracking-wider">Est. Vault Value</span>
+            <p className="text-base font-black text-amber-400 font-mono leading-none flex items-center gap-1 tabular-nums">
               <Coins className="w-4 h-4 shrink-0" />
-              <span>{displayTotalFloorValue} TON</span>
+              <span>{displayTotalFloorValue.toFixed(2)} TON</span>
             </p>
           </div>
         </div>
@@ -151,20 +153,20 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
 
       {/* Collectibles list or grid */}
       {displayNfts.length === 0 ? (
-        <div className="bg-[#111C30] rounded-2xl p-8 text-center space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center mx-auto">
+        <div className="bg-[var(--tj-color-surface-elevated,#111C30)] rounded-[var(--tj-radius-lg,10px)] p-8 text-center space-y-4 border-0">
+          <div className="w-12 h-12 rounded-[var(--tj-radius-lg,10px)] bg-purple-500/12 text-purple-400 flex items-center justify-center mx-auto">
             <Zap className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h4 className="text-sm font-bold text-white">No Music NFTs In Your Vault</h4>
-            <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
+            <h4 className="text-sm font-bold text-[var(--tj-color-text-primary,#F8FAFC)]">No Music NFTs In Your Vault</h4>
+            <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)] max-w-sm mx-auto">
               You don&apos;t own any TON music NFTs yet. Discover, collect, and trade exclusive artist drops on the TonJam NFT Marketplace.
             </p>
           </div>
           <button
             type="button"
             onClick={() => navigate('/marketplace')}
-            className="px-5 py-2.5 bg-[#00B4D8] hover:bg-[#0098EA] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-lg shadow-[#00B4D8]/25 border-none"
+            className="min-h-[40px] px-5 py-2.5 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white text-xs font-bold uppercase tracking-wider rounded-[var(--tj-radius-md,8px)] transition-colors cursor-pointer border-0"
           >
             Explore NFT Marketplace
           </button>
@@ -174,7 +176,7 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
           <motion.div
             layout
             transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
-            className={layout === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-2"}
+            className={layout === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5' : 'space-y-2'}
           >
           {displayNfts.map((nft) => {
             const isCurrentPlaying = currentTrack?.id === nft.id && isPlaying;
@@ -185,27 +187,29 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
                 layout
                 key={nft.id}
                 transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
-                whileHover={layout === 'grid' ? { y: -4 } : { x: 4 }}
+                whileHover={layout === 'grid' ? { y: -2 } : { x: 2 }}
                 className={
                   layout === 'grid'
-                    ? "bg-white/[0.02] dark:bg-white/[0.02] bg-black/[0.02] border border-black/5 dark:border-white/5 p-3 rounded-[10px] flex flex-col justify-between group relative transition-all duration-300 ease-out"
-                    : "bg-white/[0.02] dark:bg-white/[0.02] bg-black/[0.02] border border-black/5 dark:border-white/5 p-3 rounded-[10px] flex flex-col md:flex-row md:items-center justify-between gap-4 group relative text-left transition-all duration-300 ease-out"
+                    ? 'bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border-0 p-3 rounded-[var(--tj-radius-lg,10px)] flex flex-col justify-between group relative transition-colors'
+                    : 'bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border-0 p-3 rounded-[var(--tj-radius-lg,10px)] flex flex-col md:flex-row md:items-center justify-between gap-4 group relative text-left transition-colors'
                 }
               >
                 {layout === 'grid' ? (
                   <>
                     {/* Cover art image */}
-                    <motion.div 
+                    <motion.div
                       layoutId={`nft-cover-${nft.id}`}
-                      className="relative aspect-video w-full rounded-[10px] overflow-hidden mb-3.5 bg-slate-800"
+                      className="relative aspect-video w-full rounded-[var(--tj-radius-md,8px)] overflow-hidden mb-3.5 bg-[var(--tj-color-bg-secondary,#0B1424)]"
                     >
                       <img src={nft.coverUrl} alt={nft.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                      
-                      {/* Floating play button on hover */}
-                      <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${isCurrentPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+
+                      {/* Floating play button */}
+                      <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${isCurrentPlaying ? 'opacity-100' : 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100'}`}>
                         <button
+                          type="button"
                           onClick={(e) => handlePlayNFT(nft, e)}
-                          className="p-3 bg-[#0052FF] hover:bg-[#0040D9] text-white rounded-full transition-transform transform scale-90 hover:scale-100 flex items-center justify-center cursor-pointer shadow-lg"
+                          aria-label={isCurrentPlaying ? `Pause ${nft.title}` : `Play ${nft.title}`}
+                          className="p-3 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white rounded-full transition-transform hover:scale-105 flex items-center justify-center cursor-pointer border-0"
                         >
                           {isCurrentPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
                         </button>
@@ -213,28 +217,30 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
 
                       {/* Floating rarity & contract checks */}
                       <div className="absolute top-2 left-2 flex gap-1">
-                        <span className={`text-[8px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider border ${getRarityColor(nft.rarity)}`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border-0 ${getRarityColor(nft.rarity)}`}>
                           {nft.rarity}
                         </span>
-                        <span className="bg-black/60 text-emerald-400 p-1 rounded-full border border-emerald-500/10">
+                        <span className="bg-black/60 text-emerald-400 p-1 rounded-full border-0">
                           <ShieldCheck className="w-3.5 h-3.5" />
                         </span>
                       </div>
 
                       {/* Floating History / Activity button */}
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           setHistoryNft(nft);
                         }}
-                        className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-purple-400 hover:text-purple-300 p-1.5 rounded-full cursor-pointer transition-colors z-10"
+                        className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-purple-400 hover:text-purple-300 p-1.5 rounded-full cursor-pointer transition-colors z-10 border-0"
                         title="View Transaction History"
+                        aria-label={`View transaction history for ${nft.title}`}
                       >
                         <History className="w-3.5 h-3.5" />
                       </button>
 
                       {/* Token ID */}
-                      <span className="absolute bottom-2 right-2 bg-black/70 px-2 py-0.5 text-[9px] font-mono font-bold rounded-md text-slate-300">
+                      <span className="absolute bottom-2 right-2 bg-black/70 px-2 py-0.5 text-[10px] font-mono font-bold rounded-[var(--tj-radius-xs,4px)] text-slate-200">
                         {nft.tokenId}
                       </span>
                     </motion.div>
@@ -243,33 +249,35 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
                     <div className="space-y-2">
                       <div className="space-y-0.5">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[9px] text-purple-400 uppercase font-bold tracking-wider">{nft.collectionName}</span>
-                          <span className="text-[8px] text-slate-400 font-mono">
+                          <span className="text-[10px] text-purple-400 uppercase font-bold tracking-wider truncate">{nft.collectionName}</span>
+                          <span className="text-[10px] text-[var(--tj-color-text-muted,#7F91AA)] font-mono shrink-0">
                             {isOwner ? 'Owned' : `${nft.ownerAddress.substring(0, 6)}...`}
                           </span>
                         </div>
-                        <motion.h4 
+                        <motion.h4
                           layoutId={`nft-title-${nft.id}`}
-                          className="text-xs font-black text-foreground truncate"
+                          className="text-sm font-bold text-[var(--tj-color-text-primary,#F8FAFC)] truncate"
                         >
                           {nft.title}
                         </motion.h4>
-                        <p className="text-[10px] text-muted-foreground font-semibold">Artist: {nft.artist}</p>
+                        <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)] font-medium truncate">
+                          {nft.artist}
+                        </p>
                       </div>
 
                       {/* Price & Royalties specs */}
-                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-black/5 dark:border-white/5 text-[10px] font-mono">
+                      <div className="grid grid-cols-2 gap-2 pt-2 text-[11px] font-mono">
                         <div className="space-y-0.5">
-                          <span className="text-muted-foreground text-[8px] uppercase tracking-wider font-bold">Floor Price</span>
-                          <p className="font-bold text-amber-400 flex items-center gap-1">
+                          <span className="text-[var(--tj-color-text-muted,#7F91AA)] text-[10px] uppercase tracking-wider font-bold">Floor Price</span>
+                          <p className="font-bold text-amber-400 flex items-center gap-1 tabular-nums">
                             <Tag className="w-3 h-3 text-amber-500 shrink-0" />
                             <span>{nft.floorPriceTon} TON</span>
                           </p>
                         </div>
                         <div className="space-y-0.5 text-right">
-                          <span className="text-muted-foreground text-[8px] uppercase tracking-wider font-bold">Your Royalty</span>
+                          <span className="text-[var(--tj-color-text-muted,#7F91AA)] text-[10px] uppercase tracking-wider font-bold">Your Royalty</span>
                           <p className="font-bold text-indigo-400 flex items-center justify-end gap-1">
-                            <Award className="w-3 h-3 text-indigo-500 shrink-0" />
+                            <Award className="w-3 h-3 text-indigo-400 shrink-0" />
                             <span>{nft.royaltyPercent}% splits</span>
                           </p>
                         </div>
@@ -279,32 +287,35 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
                     {/* Direct action buttons */}
                     <div className="grid grid-cols-2 gap-2 mt-4">
                       <button
+                        type="button"
                         onClick={() => navigate(`/nft/${nft.id}`)}
-                        className="py-2 bg-white/5 hover:bg-white/10 text-slate-300 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                        className="min-h-[36px] py-2 bg-[var(--tj-color-chip-background,#102943)] hover:bg-white/10 text-[var(--tj-color-text-primary,#F8FAFC)] text-[11px] font-bold uppercase tracking-wider rounded-[var(--tj-radius-sm,6px)] transition-colors flex items-center justify-center gap-1 cursor-pointer border-0"
                       >
                         <span>Explore</span>
-                        <ArrowUpRight className="w-3 h-3" />
+                        <ArrowUpRight className="w-3.5 h-3.5" />
                       </button>
 
                       {isOwner ? (
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setTransferringNft(nft);
                             setDestinationAddress('');
                             setTransferStep('idle');
                           }}
-                          className="py-2 bg-[#0052FF]/10 hover:bg-[#0052FF]/20 text-[#0052FF] text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                          className="min-h-[36px] py-2 bg-[var(--tj-color-brand-primary,#00B4D8)]/15 hover:bg-[var(--tj-color-brand-primary,#00B4D8)]/25 text-[var(--tj-color-brand-primary,#00B4D8)] text-[11px] font-bold uppercase tracking-wider rounded-[var(--tj-radius-sm,6px)] transition-colors flex items-center justify-center gap-1 cursor-pointer border-0"
                         >
-                          <Send className="w-3 h-3" />
+                          <Send className="w-3.5 h-3.5" />
                           <span>Send</span>
                         </button>
                       ) : (
                         <button
+                          type="button"
                           disabled
-                          className="py-2 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold uppercase tracking-widest rounded-md flex items-center justify-center gap-1 opacity-75"
+                          className="min-h-[36px] py-2 bg-emerald-500/12 text-emerald-400 text-[11px] font-bold uppercase tracking-wider rounded-[var(--tj-radius-sm,6px)] flex items-center justify-center gap-1 opacity-75 border-0"
                         >
-                          <Check className="w-3 h-3" />
+                          <Check className="w-3.5 h-3.5" />
                           <span>Sent</span>
                         </button>
                       )}
@@ -313,41 +324,43 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
                 ) : (
                   <>
                     <div className="flex items-center gap-3 min-w-0">
-                      <motion.div 
+                      <motion.div
                         layoutId={`nft-cover-${nft.id}`}
-                        className="relative w-16 h-12 rounded-lg overflow-hidden bg-slate-800 shrink-0 group/cover"
+                        className="relative w-16 h-12 rounded-[var(--tj-radius-md,8px)] overflow-hidden bg-[var(--tj-color-bg-secondary,#0B1424)] shrink-0 group/cover"
                       >
                         <img src={nft.coverUrl} alt={nft.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                        
-                        {/* Hover play button overlay for rows */}
-                        <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${isCurrentPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+
+                        {/* Play button overlay */}
+                        <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${isCurrentPlaying ? 'opacity-100' : 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100'}`}>
                           <button
+                            type="button"
                             onClick={(e) => handlePlayNFT(nft, e)}
-                            className="p-1.5 bg-[#0052FF] text-white rounded-full flex items-center justify-center cursor-pointer"
+                            aria-label={isCurrentPlaying ? `Pause ${nft.title}` : `Play ${nft.title}`}
+                            className="p-1.5 bg-[var(--tj-color-brand-primary,#00B4D8)] text-white rounded-full flex items-center justify-center cursor-pointer border-0"
                           >
                             {isCurrentPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current ml-0.5" />}
                           </button>
                         </div>
 
                         <div className="absolute top-1 left-1">
-                          <span className={`text-[6px] font-extrabold px-1 py-0.5 rounded-full uppercase tracking-wider border ${getRarityColor(nft.rarity)}`}>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider border-0 ${getRarityColor(nft.rarity)}`}>
                             {nft.rarity}
                           </span>
                         </div>
                       </motion.div>
                       <div className="min-w-0 text-left">
-                        <span className="text-[8px] text-purple-400 uppercase font-bold tracking-wider block leading-none mb-0.5">{nft.collectionName}</span>
-                        <motion.h4 
+                        <span className="text-[10px] text-purple-400 uppercase font-bold tracking-wider block leading-none mb-1">{nft.collectionName}</span>
+                        <motion.h4
                           layoutId={`nft-title-${nft.id}`}
-                          className="text-xs font-black text-foreground truncate leading-snug"
+                          className="text-xs sm:text-sm font-bold text-[var(--tj-color-text-primary,#F8FAFC)] truncate leading-snug"
                         >
                           {nft.title}
                         </motion.h4>
-                        <p className="text-[10px] text-muted-foreground font-semibold leading-none mt-1">
-                          {nft.artist} • <span className="font-mono text-[9px]">{nft.tokenId}</span>
+                        <p className="text-[11px] text-[var(--tj-color-text-secondary,#A8B7CC)] font-medium leading-none mt-1 truncate">
+                          {nft.artist} • <span className="font-mono text-[10px]">{nft.tokenId}</span>
                         </p>
-                        <p className="text-[8px] text-slate-400 font-mono mt-1">
-                          {isOwner ? 'Status: Owned by You' : `Status: Sent to ${nft.ownerAddress.substring(0, 8)}...`}
+                        <p className="text-[10px] text-[var(--tj-color-text-muted,#7F91AA)] font-mono mt-1">
+                          {isOwner ? 'Status: Owned by You' : nft.ownerAddress ? `Owner: ${nft.ownerAddress.substring(0, 8)}...` : 'Verified Collectible'}
                         </p>
                       </div>
                     </div>
@@ -355,16 +368,16 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
                     <div className="flex items-center gap-4 md:gap-8 justify-between md:justify-end shrink-0">
                       <div className="hidden lg:grid grid-cols-2 gap-4 text-left font-mono mr-2">
                         <div className="space-y-0.5">
-                          <span className="text-muted-foreground text-[8px] uppercase tracking-wider font-bold block leading-none">Floor Price</span>
-                          <p className="font-bold text-amber-400 text-xs flex items-center gap-1 leading-none">
+                          <span className="text-[var(--tj-color-text-muted,#7F91AA)] text-[10px] uppercase tracking-wider font-bold block leading-none">Floor Price</span>
+                          <p className="font-bold text-amber-400 text-xs flex items-center gap-1 leading-none tabular-nums">
                             <Tag className="w-3 h-3 text-amber-500 shrink-0" />
                             <span>{nft.floorPriceTon} TON</span>
                           </p>
                         </div>
                         <div className="space-y-0.5 text-right">
-                          <span className="text-muted-foreground text-[8px] uppercase tracking-wider font-bold block leading-none">Your Royalty</span>
+                          <span className="text-[var(--tj-color-text-muted,#7F91AA)] text-[10px] uppercase tracking-wider font-bold block leading-none">Your Royalty</span>
                           <p className="font-bold text-indigo-400 text-xs flex items-center justify-end gap-1 leading-none">
-                            <Award className="w-3 h-3 text-indigo-500 shrink-0" />
+                            <Award className="w-3 h-3 text-indigo-400 shrink-0" />
                             <span>{nft.royaltyPercent}%</span>
                           </p>
                         </div>
@@ -372,41 +385,46 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
 
                       <div className="flex items-center gap-2">
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setHistoryNft(nft);
                           }}
-                          className="p-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 rounded-md transition-colors cursor-pointer"
+                          className="min-h-[36px] min-w-[36px] p-2 bg-purple-500/12 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 rounded-[var(--tj-radius-sm,6px)] transition-colors cursor-pointer border-0 flex items-center justify-center"
                           title="View Transaction History"
+                          aria-label={`View transaction history for ${nft.title}`}
                         >
-                          <History className="w-3.5 h-3.5" />
+                          <History className="w-4 h-4" />
                         </button>
 
                         <button
+                          type="button"
                           onClick={() => navigate(`/nft/${nft.id}`)}
-                          className="py-1.5 px-3 bg-white/5 hover:bg-white/10 text-slate-300 text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors flex items-center gap-1 cursor-pointer"
+                          className="min-h-[36px] py-1.5 px-3 bg-[var(--tj-color-chip-background,#102943)] hover:bg-white/10 text-[var(--tj-color-text-primary,#F8FAFC)] text-[11px] font-bold uppercase tracking-wider rounded-[var(--tj-radius-sm,6px)] transition-colors flex items-center gap-1 cursor-pointer border-0"
                         >
                           <span>Explore</span>
-                          <ArrowUpRight className="w-3 h-3" />
+                          <ArrowUpRight className="w-3.5 h-3.5" />
                         </button>
 
                         {isOwner ? (
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               setTransferringNft(nft);
                               setDestinationAddress('');
                               setTransferStep('idle');
                             }}
-                            className="py-1.5 px-3 bg-[#0052FF]/10 hover:bg-[#0052FF]/20 text-[#0052FF] text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors flex items-center gap-1 cursor-pointer"
+                            className="min-h-[36px] py-1.5 px-3 bg-[var(--tj-color-brand-primary,#00B4D8)]/15 hover:bg-[var(--tj-color-brand-primary,#00B4D8)]/25 text-[var(--tj-color-brand-primary,#00B4D8)] text-[11px] font-bold uppercase tracking-wider rounded-[var(--tj-radius-sm,6px)] transition-colors flex items-center gap-1 cursor-pointer border-0"
                           >
                             <Send className="w-3.5 h-3.5" />
                             <span>Send</span>
                           </button>
                         ) : (
                           <button
+                            type="button"
                             disabled
-                            className="py-1.5 px-3 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest rounded-md flex items-center gap-1 opacity-75"
+                            className="min-h-[36px] py-1.5 px-3 bg-emerald-500/12 text-emerald-400 text-[11px] font-bold uppercase tracking-wider rounded-[var(--tj-radius-sm,6px)] flex items-center gap-1 opacity-75 border-0"
                           >
                             <Check className="w-3.5 h-3.5" />
                             <span>Transferred</span>
@@ -542,7 +560,7 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
                   type="button"
                   disabled={!destinationAddress.trim()}
                   onClick={handleTransferConfirm}
-                  className="w-full py-3 bg-[#0052FF] hover:bg-[#0040D9] text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  className="w-full py-3 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white text-xs font-bold uppercase tracking-widest rounded-[var(--tj-radius-md,8px)] transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed border-0"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Broadcast Transfer</span>
@@ -661,11 +679,11 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
                   <span>On-Chain Status: Verified</span>
                 </span>
               </div>
-              <a 
-                href="https://tonscan.org" 
-                target="_blank" 
-                rel="noreferrer" 
-                className="text-[#0052FF] hover:underline flex items-center gap-1 text-[9px] uppercase font-bold"
+              <a
+                href="https://tonscan.org"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[var(--tj-color-brand-primary,#00B4D8)] hover:underline flex items-center gap-1 text-[10px] uppercase font-bold"
               >
                 <span>tonscan.org</span>
                 <ExternalLink className="w-3 h-3" />
@@ -678,8 +696,9 @@ export const NFTCollection: React.FC<NFTCollectionProps> = ({ nfts, totalFloorVa
       {/* Primary marketplace CTA button */}
       <div className="flex justify-center pt-2">
         <button
+          type="button"
           onClick={() => navigate('/marketplace')}
-          className="px-6 py-2.5 bg-[#0052FF] hover:bg-[#0040D9] text-white text-xs font-bold uppercase tracking-widest rounded-[10px] transition-all cursor-pointer flex items-center gap-2 shadow-lg"
+          className="min-h-[42px] px-6 py-2.5 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white text-xs font-bold uppercase tracking-widest rounded-[var(--tj-radius-md,8px)] transition-colors cursor-pointer flex items-center gap-2 border-0"
         >
           <span>Open NFT Marketplace</span>
           <ArrowUpRight className="w-4 h-4" />

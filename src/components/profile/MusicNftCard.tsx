@@ -7,6 +7,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
 import { TON_LOGO } from '@/constants';
 import { useNftColorPalette } from '@/hooks/useNftColorPalette';
+import { normalizePlayableAudioUrl } from '@/utils/audioSource';
 
 interface MusicNftCardProps {
   nft: NFTItem;
@@ -39,11 +40,12 @@ export const MusicNftCard: React.FC<MusicNftCardProps> = ({
 
   // Resolve audio source: attached audioUrl or match from trackId
   const audioSource = useMemo(() => {
-    if (nft.audioUrl) return nft.audioUrl;
+    const directUrl = normalizePlayableAudioUrl(nft.audioUrl);
+    if (directUrl) return directUrl;
     const matchedTrack = allTracks.find(
       (t) => t.id === nft.trackId || t.songId === nft.trackId || t.title.toLowerCase() === nft.title.toLowerCase()
     );
-    return matchedTrack?.audioUrl || '';
+    return normalizePlayableAudioUrl(matchedTrack?.audioUrl);
   }, [nft, allTracks]);
 
   // Audio setup

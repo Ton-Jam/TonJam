@@ -103,7 +103,16 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
     }
   };
 
-  const editionText = nft.edition ? `Ed. ${nft.edition}` : "1/1";
+  const editionText = nft.edition ? `Ed. ${nft.edition}` : null;
+  const statusText =
+    nft.status ||
+    (nft.listingType === "auction"
+      ? "On Auction"
+      : nft.listingType === "fixed"
+      ? "Listed"
+      : nft.listingType === "swap"
+      ? "Swap"
+      : null);
 
   return (
     <div
@@ -118,18 +127,18 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
         }
       }}
       className={cn(
-        "group relative flex flex-col justify-between bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-md",
-        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-md,8px)] p-2.5",
+        "group relative flex flex-col justify-between bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-md",
+        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-compact,5px)] p-2.5",
         "transition-colors duration-150 cursor-pointer select-none text-left",
         layout === "shelf"
-          ? "w-[154px] sm:w-[172px] shrink-0 snap-start"
+          ? "w-[160px] sm:w-[178px] shrink-0 snap-start"
           : "w-full min-w-0",
         className
       )}
     >
       <div>
         {/* Square 1:1 Artwork */}
-        <div className="relative aspect-square w-full rounded-[var(--tj-radius-sm,6px)] overflow-hidden bg-[var(--tj-color-bg-secondary,#0D1628)] border border-[var(--tj-color-border-subtle)]">
+        <div className="relative aspect-square w-full rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[var(--tj-color-bg-secondary,#0B1424)] border border-[var(--tj-color-border-subtle)]">
           <ProgressiveImage
             src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
             fallbackSrc={getPlaceholderImage(`nft-${nft.id}`)}
@@ -137,10 +146,12 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
 
-          {/* Top Left: Edition Badge */}
-          <span className="absolute top-1.5 left-1.5 z-10 px-1.5 py-0.5 rounded-[var(--tj-radius-xs,4px)] text-[9px] font-mono font-bold uppercase tracking-wider bg-[var(--tj-color-surface-overlay,#07182BCC)] text-[var(--tj-color-text-secondary,#C2C7CD)] border border-[var(--tj-color-border-subtle)] pointer-events-none">
-            {editionText}
-          </span>
+          {/* Top Left: Edition Badge (only when real edition metadata exists) */}
+          {editionText && (
+            <span className="absolute top-1.5 left-1.5 z-10 px-1.5 py-0.5 rounded-[var(--tj-radius-compact,5px)] text-[9px] font-mono font-semibold uppercase tracking-wider bg-[var(--tj-color-surface-overlay,#07182BCC)] text-[var(--tj-color-text-secondary,#A8B7CC)] border border-[var(--tj-color-border-subtle)] pointer-events-none">
+              {editionText}
+            </span>
+          )}
 
           {/* Top Right: Favorite Button */}
           <div className="absolute top-1.5 right-1.5 z-10">
@@ -148,13 +159,13 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
               initialFavourited={isFavourited}
               size="sm"
               onToggle={(next) => onToggleFavourite?.(nft, next)}
-              className="rounded-[var(--tj-radius-xs,4px)] border border-[var(--tj-color-border-subtle)]"
+              className="rounded-[var(--tj-radius-compact,5px)] border border-[var(--tj-color-border-subtle)]"
             />
           </div>
 
           {/* Bottom Left: Real Auction Countdown ONLY when applicable */}
           {isAuction && countdownLabel && (
-            <div className="absolute bottom-1.5 left-1.5 z-10 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[var(--tj-radius-xs,4px)] bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[9px] font-mono font-bold text-[var(--tj-color-brand-primary,#00B4D8)]">
+            <div className="absolute bottom-1.5 left-1.5 z-10 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[9px] font-mono font-semibold text-[var(--tj-color-brand-primary,#229ED9)]">
               <Clock className="w-2.5 h-2.5 shrink-0" />
               <span>{countdownLabel}</span>
             </div>
@@ -167,7 +178,7 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
               onClick={handlePlayClick}
               aria-label={isPlaying ? "Pause preview" : "Play preview"}
               className={cn(
-                "absolute bottom-1.5 right-1.5 z-10 w-7 h-7 rounded-[var(--tj-radius-xs,4px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white flex items-center justify-center border border-white/20 cursor-pointer transition-opacity",
+                "absolute bottom-1.5 right-1.5 z-10 w-8 h-8 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-brand-primary,#229ED9)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#F8FAFC)] flex items-center justify-center border border-[var(--tj-color-border-strong)] cursor-pointer transition-opacity",
                 isPlaying ? "opacity-100" : "opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
               )}
             >
@@ -180,29 +191,49 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
           )}
         </div>
 
-        {/* Title & Verified Artist */}
+        {/* Title, Verified Artist, Collection & Listing State */}
         <div className="mt-2 space-y-0.5 min-w-0">
-          <h3 className="text-xs font-bold text-[var(--tj-color-text-primary,#FFFFFF)] truncate leading-snug">
+          <h3 className="text-xs font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate leading-snug">
             {nft.title}
           </h3>
           <VerifiedArtistLabel
             artist={nft.artist}
             verified={Boolean(nft.artistVerified)}
           />
+          {(nft.collectionName || statusText) && (
+            <div className="flex items-center justify-between gap-1.5 pt-0.5 text-[10px] leading-tight min-w-0">
+              <span className="text-[var(--tj-color-text-muted,#7F91AA)] truncate">
+                {nft.collectionName || ""}
+              </span>
+              {statusText && (
+                <span
+                  className={cn(
+                    "font-medium shrink-0",
+                    isAuction
+                      ? "text-[var(--tj-color-state-warning,#FFC857)]"
+                      : "text-[var(--tj-color-text-secondary,#A8B7CC)]"
+                  )}
+                >
+                  {statusText}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Price & Compact View Details Action */}
-      <div className="mt-2.5 pt-2 border-t border-[var(--tj-color-border-subtle)] flex items-center justify-between gap-1.5 min-w-0">
+      <div className="mt-2 pt-2 border-t border-[var(--tj-color-border-subtle)] flex items-center justify-between gap-1.5 min-w-0">
         <TonPriceLabel price={nft.price} label="" size="sm" />
 
         <button
           type="button"
           onClick={handleActionClick}
-          className="px-2 py-1 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-brand-primary,#00B4D8)] text-[var(--tj-color-text-primary,#FFFFFF)] text-[10px] font-bold uppercase tracking-wider border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-brand-primary,#00B4D8)] cursor-pointer transition-colors shrink-0"
+          className="min-h-[30px] px-2 py-1 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-brand-primary,#229ED9)] text-[var(--tj-color-text-primary,#F8FAFC)] text-[10px] font-semibold border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-brand-primary,#229ED9)] cursor-pointer transition-colors shrink-0 whitespace-nowrap"
           title="View NFT details"
+          aria-label={`View details for ${nft.title}`}
         >
-          Details
+          View Details
         </button>
       </div>
     </div>

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Download, HardDrive, Settings, Trash2, ArrowRight, CheckCircle, Disc } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Download, HardDrive, Settings, Trash2 } from 'lucide-react';
 import { LibraryTrack, LibraryAlbum } from '../types';
 
 interface DownloadsManagerProps {
@@ -48,72 +47,86 @@ export const DownloadsManager: React.FC<DownloadsManagerProps> = ({
     };
   }, []);
 
-  const totalDeviceGb = storageEstimate.quotaGb > 0 ? storageEstimate.quotaGb : 1;
+  const hasQuota = storageEstimate.quotaGb > 0;
+  const totalDeviceGb = hasQuota ? storageEstimate.quotaGb : 1;
   const usedDeviceGb = storageEstimate.usageGb;
   const systemTonJamGb = parseFloat(totalDownloadedSize) || 0;
+  const freeGb = hasQuota ? Math.max(0, totalDeviceGb - usedDeviceGb) : 0;
 
-  const tonjamPercentage = storageEstimate.quotaGb > 0 ? (systemTonJamGb / totalDeviceGb) * 100 : 0;
-  const otherPercentage = storageEstimate.quotaGb > 0 ? (usedDeviceGb / totalDeviceGb) * 100 : 0;
+  const tonjamPercentage = hasQuota ? Math.min(100, (systemTonJamGb / totalDeviceGb) * 100) : 0;
+  const otherPercentage = hasQuota ? Math.min(100 - tonjamPercentage, (usedDeviceGb / totalDeviceGb) * 100) : 0;
 
   return (
     <div className="space-y-4">
       {/* Device Storage Status Bar */}
-      <div className="bg-white/[0.02] dark:bg-white/[0.02] bg-black/[0.02] border border-black/5 dark:border-white/5 rounded-[10px] p-4 space-y-3">
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-1.5 text-foreground">
-            <HardDrive className="w-5 h-5 text-emerald-500 shrink-0" />
+      <div className="bg-[var(--tj-color-surface-elevated,#111C30)] rounded-[var(--tj-radius-lg,10px)] p-4 space-y-3">
+        <div className="flex justify-between items-start gap-3">
+          <div className="flex items-center gap-2.5 text-[var(--tj-color-text-primary,#F8FAFC)]">
+            <HardDrive className="w-5 h-5 text-emerald-400 shrink-0" />
             <div className="space-y-0.5">
-              <h2 className="section-title">Offline Node Storage</h2>
-              <p className="text-[10px] text-muted-foreground">Cached storage footprint on this device</p>
+              <h3 className="text-sm font-semibold">Offline Storage</h3>
+              <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)]">
+                Cached audio footprint on this device
+              </p>
             </div>
           </div>
 
-          <div className="text-right space-y-0.5 font-mono">
-            <p className="text-xs font-bold text-foreground">{systemTonJamGb.toFixed(2)} GB</p>
-            <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">TonJam Footprint</p>
+          <div className="text-right space-y-0.5 font-mono shrink-0">
+            <p className="text-xs font-bold text-[var(--tj-color-text-primary,#F8FAFC)]">
+              {systemTonJamGb.toFixed(2)} GB
+            </p>
+            <p className="text-[11px] text-[var(--tj-color-text-muted,#7F91AA)] uppercase font-semibold tracking-wider">
+              TonJam Cache
+            </p>
           </div>
         </div>
 
-        {/* Triple progress bar style */}
-        <div className="space-y-1">
-          <div className="w-full h-2.5 bg-black/10 dark:bg-white/5 rounded-full flex overflow-hidden">
-            <div 
-              className="bg-emerald-500 h-full rounded-l-full" 
-              style={{ width: `${Math.max(2, tonjamPercentage)}%` }} 
-              title={`TonJam Storage: ${systemTonJamGb} GB`}
+        <div className="space-y-1.5">
+          <div className="w-full h-2.5 bg-[var(--tj-color-bg-secondary,#0B1424)] rounded-full flex overflow-hidden">
+            <div
+              className="bg-emerald-500 h-full rounded-l-full"
+              style={{ width: `${systemTonJamGb > 0 ? Math.max(2, tonjamPercentage) : 0}%` }}
+              title={`TonJam Storage: ${systemTonJamGb.toFixed(2)} GB`}
             />
-            <div 
-              className="bg-slate-500/30 h-full" 
-              style={{ width: `${otherPercentage}%` }} 
-              title={`Other Apps: ${usedDeviceGb} GB`}
+            <div
+              className="bg-slate-500/35 h-full"
+              style={{ width: `${otherPercentage}%` }}
+              title={`Other Apps: ${usedDeviceGb.toFixed(2)} GB`}
             />
           </div>
-          <div className="flex justify-between items-center text-[9px] font-mono text-muted-foreground font-bold uppercase tracking-wider">
+          <div className="flex justify-between items-center text-[11px] font-mono text-[var(--tj-color-text-secondary,#A8B7CC)] font-medium">
             <span>{systemTonJamGb.toFixed(2)} GB TonJam</span>
-            <span>{(totalDeviceGb - usedDeviceGb - systemTonJamGb).toFixed(1)} GB Free of {totalDeviceGb} GB</span>
+            <span>
+              {hasQuota
+                ? `${freeGb.toFixed(1)} GB Free of ${totalDeviceGb.toFixed(1)} GB`
+                : `${downloadedTracks.length} track${downloadedTracks.length === 1 ? '' : 's'} cached`}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Downloader configurations */}
-      <div className="bg-white/[0.02] dark:bg-white/[0.02] bg-black/[0.02] border border-black/5 dark:border-white/5 rounded-[10px] p-4 flex flex-col md:flex-row justify-between md:items-center gap-3">
+      {/* Download Quality Configuration */}
+      <div className="bg-[var(--tj-color-surface-elevated,#111C30)] rounded-[var(--tj-radius-lg,10px)] p-4 flex flex-col md:flex-row justify-between md:items-center gap-3">
         <div className="space-y-0.5">
-          <div className="flex items-center gap-1.5 text-foreground">
-            <Settings className="w-4 h-4 text-emerald-500 shrink-0" />
-            <h4 className="text-xs font-bold uppercase tracking-wide">Download Configurations</h4>
+          <div className="flex items-center gap-2 text-[var(--tj-color-text-primary,#F8FAFC)]">
+            <Settings className="w-4 h-4 text-emerald-400 shrink-0" />
+            <h4 className="text-xs font-bold uppercase tracking-wide">Download Quality</h4>
           </div>
-          <p className="text-[10px] text-muted-foreground leading-normal">Configure fidelity settings and stream quality</p>
+          <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)]">
+            Preferred fidelity for offline cached streams
+          </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {(['High', 'Lossless', 'Dolby Atmos'] as const).map((q) => (
             <button
+              type="button"
               key={q}
               onClick={() => onChangeQuality(q)}
-              className={`px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-md cursor-pointer border transition-all ${
-                downloadQuality === q 
-                  ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
-                  : 'bg-white/5 border-transparent text-muted-foreground hover:bg-white/10'
+              className={`min-h-[36px] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider rounded-[var(--tj-radius-md,8px)] cursor-pointer transition-colors border-0 ${
+                downloadQuality === q
+                  ? 'bg-emerald-500/20 text-emerald-300'
+                  : 'bg-[var(--tj-color-chip-background,#102943)] text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-[var(--tj-color-text-primary,#F8FAFC)] hover:bg-[var(--tj-color-surface-hover,#132B49)]'
               }`}
             >
               {q}
@@ -122,62 +135,78 @@ export const DownloadsManager: React.FC<DownloadsManagerProps> = ({
         </div>
       </div>
 
-      {/* Download list titles */}
+      {/* Downloaded Content */}
       <div className="space-y-3">
-        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 px-1">Downloaded Content Nodes</h4>
-        
+        <h4 className="text-[11px] font-bold uppercase tracking-widest text-emerald-400 px-1">
+          Downloaded Tracks & Albums
+        </h4>
+
         {downloadedTracks.length === 0 && downloadedAlbums.length === 0 ? (
-          <div className="text-center py-8 border border-dashed border-black/10 dark:border-white/10 rounded-[10px]">
-            <Download className="w-6 h-6 text-muted-foreground mx-auto mb-1.5 opacity-50" />
-            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">No downloaded tracks found</p>
+          <div className="text-center py-8 px-4 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-elevated,#111C30)]/60">
+            <Download className="w-6 h-6 text-[var(--tj-color-text-muted,#7F91AA)] mx-auto mb-2 opacity-70" />
+            <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)] font-semibold">
+              No downloaded tracks yet
+            </p>
           </div>
         ) : (
           <div className="space-y-1.5">
-            {/* Downloaded albums */}
             {downloadedAlbums.map((album) => (
-              <div 
+              <div
                 key={album.id}
-                className="flex items-center gap-3 p-2 bg-white/[0.01] hover:bg-white/[0.03] rounded-[10px] border border-black/5 dark:border-white/5 group"
+                className="flex items-center gap-3 p-2.5 bg-[var(--tj-color-surface-elevated,#111C30)]/60 hover:bg-[var(--tj-color-surface-hover,#132B49)] rounded-[var(--tj-radius-lg,10px)] group transition-colors"
               >
-                <div className="relative w-10 h-10 rounded-[10px] overflow-hidden shrink-0 bg-slate-800">
+                <div className="relative w-10 h-10 rounded-[var(--tj-radius-md,8px)] overflow-hidden shrink-0 bg-[var(--tj-color-bg-secondary,#0B1424)]">
                   <img src={album.coverUrl} alt={album.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-[8px] font-extrabold text-emerald-500 uppercase tracking-widest font-mono">Album Node</span>
-                  <h5 className="text-xs font-bold text-foreground truncate">{album.title}</h5>
-                  <p className="text-[9px] text-muted-foreground truncate">{album.artist} • {album.tracksCount} tracks</p>
+                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider font-mono">
+                    Album
+                  </span>
+                  <h5 className="text-xs sm:text-sm font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate">
+                    {album.title}
+                  </h5>
+                  <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)] truncate">
+                    {album.artist} • {album.tracksCount} tracks
+                  </p>
                 </div>
-                <span className="text-[9px] font-mono font-bold text-muted-foreground mr-1">
+                <span className="text-[11px] font-mono font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] mr-1 shrink-0">
                   {album.downloadSize || '54 MB'}
                 </span>
               </div>
             ))}
 
-            {/* Downloaded tracks */}
             {downloadedTracks.map((track) => (
-              <div 
+              <div
                 key={track.id}
                 onClick={() => onPlay && onPlay(track)}
-                className="flex items-center gap-3 p-2 bg-white/[0.01] hover:bg-white/[0.03] rounded-[10px] border border-black/5 dark:border-white/5 group cursor-pointer select-none transition-all"
+                className="flex items-center gap-3 p-2.5 bg-[var(--tj-color-surface-elevated,#111C30)]/60 hover:bg-[var(--tj-color-surface-hover,#132B49)] rounded-[var(--tj-radius-lg,10px)] group cursor-pointer select-none transition-colors"
               >
-                <div className="relative w-10 h-10 rounded-[10px] overflow-hidden shrink-0 bg-slate-800">
+                <div className="relative w-10 h-10 rounded-[var(--tj-radius-md,8px)] overflow-hidden shrink-0 bg-[var(--tj-color-bg-secondary,#0B1424)]">
                   <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-[8px] font-extrabold text-indigo-400 uppercase tracking-widest font-mono">Single Track</span>
-                  <h5 className="text-xs font-bold text-foreground truncate">{track.title}</h5>
-                  <p className="text-[9px] text-muted-foreground truncate">{track.artist}</p>
+                  <h5 className="text-xs sm:text-sm font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate">
+                    {track.title}
+                  </h5>
+                  <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)] truncate">
+                    {track.artist}
+                  </p>
                 </div>
-                <div className="flex items-center gap-3 font-mono text-[9px] font-bold text-muted-foreground">
-                  <span>{track.downloadQuality || downloadQuality}</span>
-                  <span>•</span>
-                  <span>{track.downloadSize || '5.2 MB'}</span>
+                <div className="flex items-center gap-2 font-mono text-[11px] font-medium text-[var(--tj-color-text-secondary,#A8B7CC)] shrink-0">
+                  <span className="hidden sm:inline">{track.downloadQuality || downloadQuality}</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span>{track.downloadSize || '5.8 MB'}</span>
                   <button
-                    onClick={() => onRemoveDownload(track.id)}
-                    className="p-1.5 rounded-md hover:bg-red-500/10 text-muted-foreground hover:text-red-500 cursor-pointer transition-colors"
-                    title="Delete Download"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveDownload(track.id);
+                    }}
+                    className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-[var(--tj-radius-md,8px)] hover:bg-rose-500/15 text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-rose-400 cursor-pointer transition-colors border-0 bg-transparent"
+                    title="Remove Download"
+                    aria-label={`Remove ${track.title} from downloads`}
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>

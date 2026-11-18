@@ -11,9 +11,9 @@ interface QuickActionsProps {
   queueCount?: number;
 }
 
-export const QuickActions: React.FC<QuickActionsProps> = ({ 
-  onSelectAction, 
-  likedCount, 
+export const QuickActions: React.FC<QuickActionsProps> = ({
+  onSelectAction,
+  likedCount,
   downloadCount,
   nftCount = 0,
   localCount = 0,
@@ -23,99 +23,100 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
     {
       id: 'liked',
       title: 'Liked Songs',
-      subtitle: `${likedCount} tracks`,
+      subtitle: `${likedCount} ${likedCount === 1 ? 'track' : 'tracks'}`,
       icon: Heart,
-      color: 'text-pink-500 bg-pink-500/10'
+      color: 'text-pink-400 bg-pink-500/12'
     },
     {
       id: 'downloads',
       title: 'Downloads',
-      subtitle: `${downloadCount} tracks`,
+      subtitle: `${downloadCount} cached offline`,
       icon: Download,
-      color: 'text-emerald-500 bg-emerald-500/10'
+      color: 'text-emerald-400 bg-emerald-500/12'
     },
     {
       id: 'local-files',
       title: 'Device & Local Music',
-      subtitle: localCount > 0 ? `${localCount} device tracks` : 'Play from local folders',
+      subtitle: localCount > 0 ? `${localCount} device ${localCount === 1 ? 'track' : 'tracks'}` : 'Scan local folders',
       icon: HardDrive,
-      color: 'text-amber-400 bg-amber-400/10'
+      color: 'text-amber-400 bg-amber-400/12'
     },
     {
       id: 'recently-played',
       title: 'Recently Played',
-      subtitle: 'Audio history',
+      subtitle: 'Recent streams',
       icon: Clock,
-      color: 'text-[#0052FF] bg-[#0052FF]/10'
+      color: 'text-[var(--tj-color-brand-primary,#00B4D8)] bg-[var(--tj-color-brand-primary,#00B4D8)]/12'
     },
     {
       id: 'my-nfts',
       title: 'My NFTs',
       subtitle: `${nftCount} owned`,
       icon: Gem,
-      color: 'text-purple-500 bg-purple-500/10'
+      color: 'text-purple-400 bg-purple-500/12'
     },
     {
       id: 'import-playlist',
       title: 'Imported Playlists',
       subtitle: 'Spotify synced',
       icon: ArrowDownToLine,
-      color: 'text-indigo-500 bg-indigo-500/10'
+      color: 'text-indigo-400 bg-indigo-500/12'
     },
     {
       id: 'queue',
       title: 'Active Queue',
-      subtitle: queueCount > 0 ? `${queueCount} tracks queued` : 'Empty queue',
+      subtitle: queueCount > 0 ? `${queueCount} ${queueCount === 1 ? 'track' : 'tracks'} queued` : 'Empty queue',
       icon: ListMusic,
-      color: 'text-amber-500 bg-amber-500/10'
+      color: 'text-amber-400 bg-amber-500/12'
     },
     {
       id: 'history',
       title: 'Timeline Log',
       subtitle: 'Full history',
       icon: History,
-      color: 'text-teal-500 bg-teal-500/10'
+      color: 'text-teal-400 bg-teal-500/12'
     },
     {
       id: 'create-playlist',
       title: 'Create Playlist',
-      subtitle: 'New node mix',
+      subtitle: 'New compilation',
       icon: Plus,
-      color: 'text-sky-500 bg-sky-500/10'
+      color: 'text-sky-400 bg-sky-500/12'
     }
   ];
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+        <h3 className="text-[11px] font-bold text-[var(--tj-color-text-muted,#7F91AA)] uppercase tracking-widest">
           Library Destinations
         </h3>
       </div>
-      <div className="flex flex-col space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
         {actions.map((action) => {
           const Icon = action.icon;
           return (
             <motion.button
               key={action.id}
               type="button"
-              whileHover={{ x: 3 }}
               whileTap={{ scale: 0.99 }}
               onClick={() => onSelectAction(action.id)}
-              className="flex items-center justify-between p-3 sm:p-3.5 rounded-[12px] bg-white/[0.03] hover:bg-white/[0.07] text-left transition-all cursor-pointer w-full group shadow-sm select-none"
+              className="flex items-center justify-between min-h-[60px] p-3 rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-left transition-colors cursor-pointer w-full group select-none border-0 shadow-none"
             >
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className={`p-2.5 rounded-[10px] ${action.color} shrink-0 transition-transform group-hover:scale-105`}>
-                  <Icon className="w-5 h-5" />
+              <div className="flex items-center gap-3 min-w-0">
+                <div className={`p-2.5 rounded-[var(--tj-radius-md,8px)] ${action.color} shrink-0 transition-transform group-hover:scale-105`}>
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-sm font-bold text-white tracking-tight leading-snug truncate group-hover:text-[#0088CC] transition-colors">
+                  <h4 className="text-sm font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] tracking-tight leading-snug truncate group-hover:text-[var(--tj-color-brand-primary,#00B4D8)] transition-colors">
                     {action.title}
                   </h4>
-                  <p className="text-xs text-slate-400 font-medium truncate mt-0.5">{action.subtitle}</p>
+                  <p className="text-xs text-[var(--tj-color-text-secondary,#A8B7CC)] font-normal truncate mt-0.5">
+                    {action.subtitle}
+                  </p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 ml-3" />
+              <ChevronRight className="w-4 h-4 text-[var(--tj-color-text-muted,#7F91AA)] group-hover:text-[var(--tj-color-text-primary,#F8FAFC)] group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
             </motion.button>
           );
         })}

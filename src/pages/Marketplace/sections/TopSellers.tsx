@@ -37,7 +37,7 @@ export const TopSellers: React.FC<TopSellersProps> = ({
             <div
               key={seller.id}
               onClick={() => onSelectSeller(seller)}
-              className="bg-[#0A0A0A] border border-white/12 rounded-[3px] p-2.5 flex items-center justify-between cursor-pointer transition-colors hover:border-white/20"
+              className="bg-[#0A0A0A] border border-white/12 rounded-[5px] p-2.5 flex items-center justify-between cursor-pointer transition-colors hover:border-white/20"
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 {/* Ranking Index */}
@@ -81,7 +81,7 @@ export const TopSellers: React.FC<TopSellersProps> = ({
                   type="button"
                   onClick={(e) => toggleFollow(seller.id, e)}
                   aria-label={isFollowing ? `Unfollow ${seller.name}` : `Follow ${seller.name}`}
-                  className={`px-3 py-1 rounded-[3px] text-[9px] font-semibold uppercase tracking-wider transition-colors duration-500 ease-in-out focus:outline-none ${
+                  className={`px-3 py-1 rounded-[5px] text-[9px] font-semibold uppercase tracking-wider transition-colors duration-500 ease-in-out focus:outline-none ${
                     isFollowing
                       ? "bg-[#0088CC] text-white"
                       : "bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"

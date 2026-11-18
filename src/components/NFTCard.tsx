@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers, History, RotateCw, Bell, Zap } from 'lucide-react';
+import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers, History, RotateCw, Bell, Zap, Heart } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { useGramPrice } from '@/contexts/GramPriceContext';
 import { TON_LOGO } from '@/constants';
 import { useAudio } from '@/contexts/AudioContext';
 import { cn, getPlaceholderImage, shareContent } from '@/lib/utils';
+import { normalizePlayableAudioUrl } from '@/utils/audioSource';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import NFTQuickViewModal from './NFTQuickViewModal';
 import NFT3DViewerModal from './NFT3DViewerModal';
@@ -69,7 +70,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
   const [tonConnectUI] = useTonConnectUI();
   const { convertPrice, localCurrencyEnabled } = useGramPrice();
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const { playTrack, currentTrack, isPlaying, togglePlay, setOptionsTrack, userProfile, setAnthem, addNotification, collections, seek, progress, artists, allTracks } = useAudio();
+  const { playTrack, currentTrack, isPlaying, togglePlay, setOptionsTrack, userProfile, setAnthem, addNotification, collections, seek, progress, artists, allTracks, likedTrackIds = [], toggleLikeTrack } = useAudio();
 
   const handleArtistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -179,6 +180,8 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
 
   const associatedTrack = allTracks?.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
+  const targetFavId = nft.trackId || nft.id;
+  const isFavourited = likedTrackIds.includes(targetFavId);
   const isOwner = Boolean(userProfile?.walletAddress && nft.owner && nft.owner === userProfile.walletAddress);
   const isAnthem = userProfile.anthemId === nft.id;
 
@@ -247,7 +250,8 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
       togglePlay().catch((err) => console.error("Error pausing main audio:", err));
     }
 
-    const audioUrl = nft.audioUrl || associatedTrack?.audioUrl || "";
+    const rawAudioUrl = nft.audioUrl || nft.audioIpfsUrl || associatedTrack?.audioUrl || "";
+    const audioUrl = normalizePlayableAudioUrl(rawAudioUrl);
     if (!audioUrl) {
       addNotification("No audio preview available for this NFT", "info");
       return;
@@ -287,7 +291,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
           stopPreview();
           return;
         }
-        console.error("Audio preview failed:", err);
+        console.warn("Audio preview failed:", err?.message || err);
         addNotification("Preview playback failed", "error");
         stopPreview();
       });
@@ -510,38 +514,38 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
     <ContextMenuContent className="bg-[#121824] border-0 text-white min-w-[200px] p-1 rounded-xl shadow-2xl">
       <ContextMenuLabel className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/50 py-2.5 px-3">NFT Options</ContextMenuLabel>
       <ContextMenuSeparator className="bg-white/10" />
-      <ContextMenuItem onClick={handlePlayClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
+      <ContextMenuItem onClick={handlePlayClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[5px]">
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         <span className="text-[10px] font-semibold uppercase tracking-wider">Play Track</span>
       </ContextMenuItem>
       {!isOwner && !isAuctionEnded && nft.listingType !== 'auction' && (
-        <ContextMenuItem onClick={(e) => { e.stopPropagation(); setIsQuickBuyOpen(true); }} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#229ED9] rounded-[3px] text-[#229ED9] font-bold">
+        <ContextMenuItem onClick={(e) => { e.stopPropagation(); setIsQuickBuyOpen(true); }} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#229ED9] rounded-[5px] text-[#229ED9] font-bold">
           <Zap className="h-4 w-4 fill-current" />
           <span className="text-[10px] font-bold uppercase tracking-wider">Quick Buy</span>
         </ContextMenuItem>
       )}
-      <ContextMenuItem onClick={handleArtistClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
+      <ContextMenuItem onClick={handleArtistClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[5px]">
         <User className="h-4 w-4" />
         <span className="text-[10px] font-semibold uppercase tracking-wider">View Artist</span>
       </ContextMenuItem>
-      <ContextMenuItem onClick={handleQuickViewClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
+      <ContextMenuItem onClick={handleQuickViewClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[5px]">
         <Eye className="h-4 w-4" />
         <span className="text-[10px] font-semibold uppercase tracking-wider">Quick View</span>
       </ContextMenuItem>
-      <ContextMenuItem onClick={() => setIs3DModalOpen(true)} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
+      <ContextMenuItem onClick={() => setIs3DModalOpen(true)} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[5px]">
         <RotateCw className="h-4 w-4" />
         <span className="text-[10px] font-semibold uppercase tracking-wider">3D Holographic Stage</span>
       </ContextMenuItem>
-      <ContextMenuItem onClick={handleHistoryClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
+      <ContextMenuItem onClick={handleHistoryClick} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[5px]">
         <History className="h-4 w-4" />
         <span className="text-[10px] font-semibold uppercase tracking-wider">Ledger History</span>
       </ContextMenuItem>
-      <ContextMenuItem onClick={() => setIsPriceAlertOpen(true)} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
+      <ContextMenuItem onClick={() => setIsPriceAlertOpen(true)} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[5px]">
         <Bell className="h-4 w-4 text-cyan-400" />
         <span className="text-[10px] font-semibold uppercase tracking-wider">Price Alert</span>
       </ContextMenuItem>
       <ContextMenuSeparator className="bg-white/10" />
-      <ContextMenuItem onClick={handleShare} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[3px]">
+      <ContextMenuItem onClick={handleShare} className="flex items-center gap-2.5 py-2 px-3 cursor-pointer focus:bg-[#0088CC] rounded-[5px]">
         <Share2 className="h-4 w-4" />
         <span className="text-[10px] font-semibold uppercase tracking-wider">Share NFT</span>
       </ContextMenuItem>
@@ -619,7 +623,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
-            className={`flex items-center gap-3 p-1.5 rounded-[3px] group bg-transparent hover:bg-white/5 transition-colors cursor-pointer w-full select-none ${className}`}
+            className={`flex items-center gap-3 p-2 rounded-[var(--tj-radius-compact,5px)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] group bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] transition-colors cursor-pointer w-full select-none ${className}`}
             onClick={handleCardClick}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -632,7 +636,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
             aria-label={`View NFT ${nft.title}`}
           >
             <div 
-              className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#121824]"
+              className="relative w-12 h-12 rounded-[var(--tj-radius-compact,5px)] overflow-hidden flex-shrink-0 bg-[var(--tj-color-bg-secondary,#0B1424)] border border-[var(--tj-color-border-subtle)]"
               onClick={(e) => { e.stopPropagation(); handlePreviewToggle(e); }}
             >
               {!isRowImageLoaded && (
@@ -657,7 +661,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
               />
               <div className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity ${isActive || isPlayingPreview ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                 {isPlayingPreview || (isActive && isPlaying) ? (
-                  <Pause className="h-4 w-4 fill-current text-[#0088CC]" />
+                  <Pause className="h-4 w-4 fill-current text-[var(--tj-color-brand-primary,#229ED9)]" />
                 ) : (
                   <Play className="h-4 w-4 text-white fill-current ml-0.5" />
                 )}
@@ -665,20 +669,25 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
             </div>
 
             <div className="flex-1 min-w-0">
-              <h4 className={`text-[11px] font-medium leading-tight truncate ${isActive ? 'text-[#0088CC] font-semibold' : 'text-[#F5F7FA]'}`}>
+              <h4 className={`text-xs font-medium leading-tight truncate ${isActive ? 'text-[var(--tj-color-brand-primary,#229ED9)] font-semibold' : 'text-[var(--tj-color-text-primary,#F8FAFC)]'}`}>
                 {nft.title}
               </h4>
               <p 
-                className="text-[9px] text-white/60 truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+                className="text-[11px] text-[var(--tj-color-text-secondary,#A8B7CC)] truncate mt-0.5 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
                 onClick={handleArtistClick}
               >
-                <span>{nft.creator}</span>
+                <span className="truncate">{nft.creator}</span>
                 <VerifiedBadge user={artist} size="sm" />
+                {collectionName && (
+                  <span className="text-[10px] text-[var(--tj-color-text-muted,#7F91AA)] truncate">
+                    · {collectionName}
+                  </span>
+                )}
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5">
-              <div className="flex items-center gap-1 text-[11px] font-medium text-white/80 font-mono">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-[11px] font-medium text-[var(--tj-color-text-primary,#F8FAFC)] font-mono">
                 <img src={TON_LOGO} className="w-3 h-3 opacity-80" alt="TON" />
                 <span>{formattedPrice} TON</span>
               </div>
@@ -691,10 +700,10 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                 disabled={!isOwner && isAuctionEnded}
                 aria-label={isOwner ? `Owned by you: ${nft.title}` : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Auction ended' : `Place bid on ${nft.title}`) : `Buy ${nft.title} for ${formattedPrice} TON`)}
                 className={cn(
-                  "cursor-pointer transition-colors rounded-full min-h-[34px] px-4 py-1 text-xs font-bold uppercase tracking-wider text-white border-none focus:outline-none focus-visible:ring-1 focus-visible:ring-[#0052FF]",
+                  "cursor-pointer transition-colors rounded-[var(--tj-radius-compact,5px)] min-h-[34px] px-3 py-1 text-xs font-semibold text-white border focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--tj-color-border-focus,#00B4D8)]",
                   isOwner 
-                    ? 'bg-white/[0.08] hover:bg-white/[0.12] text-slate-300' 
-                    : (isAuctionEnded ? 'bg-white/[0.04] text-slate-500 cursor-not-allowed' : 'bg-[#0052FF] hover:bg-[#1a66ff]')
+                    ? 'bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-secondary,#A8B7CC)] border-[var(--tj-color-border-subtle)]' 
+                    : (isAuctionEnded ? 'bg-[var(--tj-color-surface-elevated,#111C30)] text-[var(--tj-color-text-disabled,#64748B)] border-[var(--tj-color-border-subtle)] cursor-not-allowed' : 'bg-[var(--tj-color-brand-primary,#229ED9)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] border-[var(--tj-color-brand-primary,#229ED9)]')
                 )}
               >
                 {isOwner ? 'Owned' : (nft.listingType === 'auction' ? (isAuctionEnded ? 'Sold' : 'Bid') : 'Buy')}
@@ -716,13 +725,13 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
           type="nft"
           isActive={isActive}
           className={cn(
-            "snap-start border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] bg-[var(--tj-color-surface-default,#0D1628)]",
+            "snap-start border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)]",
             className
           )}
           style={{
-            ['--card-radius' as any]: 'var(--tj-radius-md, 8px)',
-            ['--card-image-radius' as any]: 'var(--tj-radius-sm, 6px)',
-            ['--card-action-radius' as any]: 'var(--tj-radius-sm, 6px)',
+            ['--card-radius' as any]: 'var(--tj-radius-compact, 5px)',
+            ['--card-image-radius' as any]: 'var(--tj-radius-compact, 5px)',
+            ['--card-action-radius' as any]: 'var(--tj-radius-compact, 5px)',
           }}
           onClick={handleCardClick}
           onKeyDown={(e) => {
@@ -737,11 +746,11 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
           artwork={
             <>
               {!isImageLoaded && (
-                <div className="absolute inset-0 bg-neutral-900 overflow-hidden flex flex-col items-center justify-center z-0 select-none">
+                <div className="absolute inset-0 bg-[var(--tj-color-bg-secondary,#0B1424)] overflow-hidden flex flex-col items-center justify-center z-0 select-none">
                   <div className="absolute inset-0 animate-shimmer pointer-events-none" />
                   <div className="flex flex-col items-center gap-1 opacity-25">
                     <img src={TON_LOGO} alt="TON" className="w-5 h-5" />
-                    <span className="text-[8px] font-mono font-medium tracking-wider text-cyan-400 uppercase">SYNC</span>
+                    <span className="text-[8px] font-mono font-medium tracking-wider text-[var(--tj-color-brand-primary,#229ED9)] uppercase">SYNC</span>
                   </div>
                 </div>
               )}
@@ -760,6 +769,26 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                 }}
               />
 
+              {/* Top Right: Favourite Toggle */}
+              {toggleLikeTrack && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleLikeTrack(targetFavId);
+                  }}
+                  aria-label={isFavourited ? `Remove ${nft.title} from favourites` : `Add ${nft.title} to favourites`}
+                  className={cn(
+                    "absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-[var(--tj-radius-compact,5px)] flex items-center justify-center border transition-colors cursor-pointer bg-[var(--tj-color-surface-overlay,#07182BCC)]",
+                    isFavourited
+                      ? "border-[var(--tj-color-state-danger,#F87171)] text-[var(--tj-color-state-danger,#F87171)]"
+                      : "border-[var(--tj-color-border-subtle)] text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-white hover:border-[var(--tj-color-border-strong)]"
+                  )}
+                >
+                  <Heart className={cn("w-3.5 h-3.5", isFavourited && "fill-current")} />
+                </button>
+              )}
+
               {/* Floating Play / Preview Action Button */}
               <div className={cn(
                 "absolute bottom-1.5 right-1.5 transition-all duration-200",
@@ -769,7 +798,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
               )}>
                 <button 
                   type="button"
-                  className="w-8 h-8 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white cursor-pointer border border-white/20"
+                  className="w-8 h-8 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-brand-primary,#229ED9)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white cursor-pointer border border-[var(--tj-color-border-strong)]"
                   onClick={handlePreviewToggle}
                   aria-label={isPlayingPreview || (isActive && isPlaying) ? `Pause preview for ${nft.title}` : `Play preview for ${nft.title}`}
                 >
@@ -784,15 +813,29 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
           }
           title={nft.title}
           subtitle={
-            <span onClick={handleArtistClick} className="hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1">
-              <span>{nft.creator}</span>
-              <VerifiedBadge user={artist} size="sm" />
-            </span>
+            <div className="space-y-0.5 min-w-0">
+              <span onClick={handleArtistClick} className="hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1 max-w-full truncate">
+                <span className="truncate">{nft.creator}</span>
+                <VerifiedBadge user={artist} size="sm" />
+              </span>
+              {collectionName && (
+                <span className="block text-[10px] text-[var(--tj-color-text-muted,#7F91AA)] truncate">
+                  {collectionName}
+                </span>
+              )}
+            </div>
           }
           meta={
-            <div className="flex items-center gap-1 text-[12px] leading-[17px] font-medium text-white/80 font-mono">
-              <img src={TON_LOGO} className="w-3 h-3 opacity-75 shrink-0" alt="TON" />
-              <span>{formattedPrice} TON</span>
+            <div className="flex items-center justify-between gap-1.5 text-[12px] leading-[17px] font-medium font-mono">
+              <div className="flex items-center gap-1 text-[var(--tj-color-text-primary,#F8FAFC)] min-w-0">
+                <img src={TON_LOGO} className="w-3 h-3 opacity-80 shrink-0" alt="TON" />
+                <span className="truncate">{formattedPrice} TON</span>
+              </div>
+              {nft.listingType && (
+                <span className="text-[9px] font-sans font-medium text-[var(--tj-color-text-secondary,#A8B7CC)] shrink-0">
+                  {isAuctionEnded ? 'Ended' : nft.listingType === 'auction' ? 'Auction' : 'Listed'}
+                </span>
+              )}
             </div>
           }
           action={
@@ -814,15 +857,15 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
               }
               style={{
                 height: 'var(--card-action-height, 34px)',
-                borderRadius: 'var(--tj-radius-sm, 6px)',
+                borderRadius: 'var(--tj-radius-compact, 5px)',
               }}
               className={cn(
-                "w-full h-[34px] py-1 px-3 rounded-[var(--tj-radius-sm,6px)] text-xs font-bold uppercase tracking-wider transition-all duration-150 flex items-center justify-center gap-1.5 text-center cursor-pointer border border-[var(--tj-color-border-subtle)] select-none",
+                "w-full h-[34px] py-1 px-3 rounded-[var(--tj-radius-compact,5px)] text-xs font-semibold transition-colors duration-150 flex items-center justify-center gap-1.5 text-center cursor-pointer border select-none",
                 isOwner
-                  ? "bg-white/[0.08] hover:bg-white/[0.12] text-slate-300"
+                  ? "bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-secondary,#A8B7CC)] border-[var(--tj-color-border-subtle)]"
                   : isAuctionEnded
-                  ? "bg-white/[0.04] text-slate-500 cursor-not-allowed"
-                  : "bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] active:scale-[0.98] text-white"
+                  ? "bg-[var(--tj-color-surface-elevated,#111C30)] text-[var(--tj-color-text-disabled,#64748B)] border-[var(--tj-color-border-subtle)] cursor-not-allowed"
+                  : "bg-[var(--tj-color-brand-primary,#229ED9)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] border-[var(--tj-color-brand-primary,#229ED9)] text-white"
               )}
             >
               {isOwner ? (

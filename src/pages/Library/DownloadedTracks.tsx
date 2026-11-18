@@ -212,7 +212,7 @@ export const DownloadedTracks: React.FC = () => {
             <button
               type="button"
               onClick={handlePlayAll}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#0052FF] hover:bg-[#0040D9] text-white text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95 transition-transform shadow-md"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95 transition-all border-0"
               title="Play All"
               aria-label="Play all"
             >
