@@ -75,7 +75,7 @@ export const CardGridSkeleton: React.FC = () => {
 
 export const PostFeedSkeleton: React.FC = () => {
   return (
-    <div className="space-y-6 max-w-xl mx-auto animate-pulse">
+    <div className="space-y-6 w-full max-w-full animate-pulse">
       {Array.from({ length: 2 }).map((_, idx) => (
         <div key={idx} className="bg-neutral-900/30 rounded-[10px] p-4 space-y-4">
           <div className="flex items-center gap-3">

@@ -45,7 +45,7 @@ const FavoriteTracks: React.FC = () => {
   };
 
   return (
-    <PageLayout containerClassName="max-w-4xl mx-auto px-4 space-y-4" topSpacing="default">
+    <PageLayout containerClassName="w-full max-w-full px-2 space-y-4" topSpacing="default">
       {/* Header with Back, Title, Subtitle, and Play Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2">
         <div className="flex items-center gap-3 min-w-0">

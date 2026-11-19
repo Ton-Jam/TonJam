@@ -22,7 +22,7 @@ export const NoResultsState: React.FC<NoResultsStateProps> = ({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className={`w-full flex flex-col items-center justify-center py-20 px-4 text-center max-w-xl mx-auto rounded-3xl border border-white/5 bg-gradient-to-b from-[#0e1b42]/40 to-transparent shadow-2xl backdrop-blur-sm ${className}`}
+      className={`w-full flex flex-col items-center justify-center py-20 px-4 text-center max-w-full rounded-3xl border border-white/5 bg-gradient-to-b from-[#0e1b42]/40 to-transparent shadow-2xl backdrop-blur-sm ${className}`}
     >
       {/* Animated Glowing Icon Orb */}
       <div className="relative mb-8 flex items-center justify-center">

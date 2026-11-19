@@ -259,7 +259,7 @@ export const UserProfile: React.FC = () => {
       />
 
       {/* 2. Main Profile Content Canvas */}
-      <div className="px-4 sm:px-8 space-y-6">
+      <div className="px-2 space-y-6">
         
         {/* Navigation Tabs Pill Bar */}
         <div className="pt-2">

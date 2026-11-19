@@ -207,8 +207,8 @@ const Wallet: React.FC = () => {
   return (
     <div className="w-full min-h-screen bg-[#080D1A] text-[#F5F7FB] pb-32 animate-in fade-in duration-500">
       {/* SCREEN HEADER */}
-      <div className="sticky top-0 z-30 bg-[#080D1A]/90 backdrop-blur-xl px-4 sm:px-6 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+      <div className="sticky top-0 z-30 bg-[#080D1A]/90 backdrop-blur-xl px-3 py-4">
+        <div className="w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -255,7 +255,7 @@ const Wallet: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 space-y-6">
+      <div className="w-full px-2 pt-4 space-y-6">
         {/* A. WALLET CONNECTION STATUS CARD */}
         <div className="rounded-2xl bg-[#111C30] p-5 sm:p-6 shadow-xl shadow-black/25 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

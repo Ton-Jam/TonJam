@@ -16,7 +16,7 @@ export const MarketplaceTransparency: React.FC<MarketplaceTransparencyProps> = (
   return (
     <div
       className={cn(
-        "rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0D1628)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-4 sm:p-5 text-left space-y-4",
+        "w-full rounded-none bg-[var(--tj-color-surface-default,#0D1628)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-4 sm:p-5 text-left space-y-4",
         className
       )}
     >

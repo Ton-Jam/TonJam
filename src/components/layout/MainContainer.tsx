@@ -11,23 +11,23 @@ export interface MainContainerProps extends React.HTMLAttributes<HTMLDivElement>
 export const MainContainer: React.FC<MainContainerProps> = ({
   children,
   className = '',
-  size = 'default',
-  noPadding = false,
+  size = 'full',
+  noPadding = true,
   ...props
 }) => {
   const sizeClasses = {
-    narrow: 'max-w-5xl',
-    default: 'max-w-7xl',
-    wide: 'max-w-[1440px]',
+    narrow: 'max-w-full',
+    default: 'max-w-full',
+    wide: 'max-w-full',
     full: 'max-w-full',
   };
 
   return (
     <div
       className={cn(
-        'w-full mx-auto overflow-x-hidden',
+        'w-full px-0 overflow-x-hidden',
         sizeClasses[size],
-        !noPadding && 'px-4 sm:px-6 md:px-8',
+        !noPadding && 'px-0',
         className
       )}
       {...props}

@@ -654,7 +654,7 @@ export default function NFTLaunchpad() {
   const allGenres = ['all', 'Phonk / Vaporwave', 'Synthwave / Cyberpunk', 'Ambient / Classical Web3', 'City Pop / Nu-Disco', 'Electronic', 'Hip-Hop'];
 
   return (
-    <div className="min-h-screen bg-[#050A24] text-white px-4 py-8 md:px-8 max-w-7xl mx-auto space-y-10 selection:bg-[#0098EA]/30">
+    <div className="min-h-screen bg-[#050A24] text-white px-2 py-6 w-full max-w-full space-y-10 selection:bg-[#0098EA]/30">
       
       {/* 1. HERO HEADER */}
       <div className="space-y-4">

@@ -266,8 +266,8 @@ export const LiveStudio: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#040812] text-white p-4 sm:p-6 pb-24">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#040812] text-white px-2 py-4 pb-24">
+      <div className="w-full max-w-full">
         {/* Top Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">

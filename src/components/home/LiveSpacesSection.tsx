@@ -52,7 +52,7 @@ export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spac
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between px-3">
         <div className="flex items-center gap-2">
           <Radio className="w-5 h-5 text-[#FF3A5C] animate-pulse" />
           <h2 className="text-section-title font-bold text-white">
@@ -72,7 +72,7 @@ export const LiveSpacesSection: React.FC<{ spaces?: LiveSpaceItem[] }> = ({ spac
         </div>
       </div>
 
-      <div className="space-y-1.5 px-4 sm:px-6 lg:px-8 w-full">
+      <div className="space-y-1.5 px-2 w-full">
         {activeSpaces.map((room) => (
           <div
             key={room.id}

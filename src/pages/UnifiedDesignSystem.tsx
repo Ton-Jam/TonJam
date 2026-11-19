@@ -278,11 +278,11 @@ export const UnifiedDesignSystem: React.FC = () => {
       </div>
 
       {/* VIEWPORT BODY */}
-      <div className="px-4 sm:px-8 pt-8">
+      <div className="px-2 pt-8">
         {/* VIEW 1: FIGMA CANVAS (SIDE-BY-SIDE 3 SCREENS) */}
         {activeView === 'canvas' && (
           <div className="w-full flex flex-col items-center gap-6 overflow-x-auto pb-12">
-            <div className="w-full max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+            <div className="w-full max-w-full flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
               <div>
                 <h2 className="text-xl font-bold text-white tracking-tight">
                   Unified Mobile Experience Canvas
@@ -392,7 +392,7 @@ export const UnifiedDesignSystem: React.FC = () => {
 
         {/* VIEW 5: SHARED COMPONENT LIBRARY & DESIGN VARIABLES */}
         {activeView === 'components' && (
-          <div className="max-w-6xl mx-auto space-y-10">
+          <div className="w-full max-w-full space-y-10">
             {/* Design System Overview */}
             <div className="space-y-2">
               <h2 className="text-2xl font-black text-white tracking-tight">

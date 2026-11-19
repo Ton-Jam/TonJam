@@ -738,7 +738,7 @@ const NFTDetail: React.FC = () => {
         }
       />
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 pt-3">
+      <div className="relative z-10 w-full max-w-full px-2 pt-3">
         {/* Hero */}
         <NFTDetailHero
           nft={effectiveNft}

@@ -21,14 +21,14 @@ export const LiveAuctionTicker: React.FC = () => {
   if (activeAuctions.length === 0) return null;
 
   return (
-    <div className="w-full bg-[#121824] py-3 rounded-2xl mb-8">
-      <div className="flex items-center justify-between px-4 md:px-8 mb-3">
+    <div className="w-full bg-[#121824] py-3 rounded-none mb-8">
+      <div className="flex items-center justify-between px-3 mb-3">
         <h3 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
             <Flame className="w-4 h-4 text-[#FF3A5C]" />
             Live Auctions Ending Soon
         </h3>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none px-4 md:px-8">
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none px-2">
         {activeAuctions.map((nft) => (
           <div 
             key={nft.id}

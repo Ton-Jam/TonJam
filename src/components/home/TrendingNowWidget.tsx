@@ -71,8 +71,8 @@ export const TrendingNowWidget: React.FC = () => {
 
   if (loading && !data) {
     return (
-      <div className="w-full px-4 sm:px-6 lg:px-8 my-4">
-        <div className="bg-[#111C30]/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl space-y-4 animate-pulse">
+      <div className="w-full px-0 my-4">
+        <div className="bg-[#111C30]/80 backdrop-blur-xl rounded-none px-3 sm:px-5 py-5 shadow-xl space-y-4 animate-pulse">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/10" />
@@ -98,12 +98,12 @@ export const TrendingNowWidget: React.FC = () => {
   }
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 my-4">
+    <div className="w-full px-0 my-4">
       <motion.div 
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-[#111C30]/90 backdrop-blur-2xl rounded-2xl p-5 sm:p-6 shadow-2xl shadow-black/40 text-left overflow-hidden relative"
+        className="bg-[#111C30]/90 backdrop-blur-2xl rounded-none px-3 sm:px-5 py-5 shadow-2xl shadow-black/40 text-left overflow-hidden relative"
       >
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#229ED9]/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#9B7CFF]/5 rounded-full blur-3xl pointer-events-none" />

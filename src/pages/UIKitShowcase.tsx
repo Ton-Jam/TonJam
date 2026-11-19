@@ -246,7 +246,7 @@ export const UIKitShowcase: React.FC = () => {
       </div>
 
       {/* Core Showcase body panel */}
-      <div className="p-6 max-w-7xl mx-auto space-y-12">
+      <div className="px-2 py-6 w-full max-w-full space-y-12">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

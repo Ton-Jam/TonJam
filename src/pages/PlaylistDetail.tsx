@@ -331,7 +331,7 @@ export const PlaylistDetail: React.FC = () => {
         }
       />
 
-      <div className="relative z-10 px-4 sm:px-6 md:px-8 max-w-6xl mx-auto pt-2">
+      <div className="relative z-10 w-full max-w-full px-2 pt-2">
         
         {/* Hero Section */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-end mb-8 pt-2">

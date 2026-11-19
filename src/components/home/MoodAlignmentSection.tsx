@@ -55,7 +55,7 @@ export const MoodAlignmentSection: React.FC = () => {
       transition={{ duration: 0.5, ease: "easeInOut" }}
       className="space-y-3.5 text-left py-2 rounded-none transition-all w-full"
     >
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between px-3">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary shrink-0 animate-pulse" />
           <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white">
@@ -70,7 +70,7 @@ export const MoodAlignmentSection: React.FC = () => {
       <div 
         ref={scrollRef}
         {...handlers}
-        className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full overscroll-x-contain select-none"
+        className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 px-2 after:content-[''] after:shrink-0 after:w-2 w-full overscroll-x-contain select-none"
         style={{ overscrollBehaviorX: 'contain' }}
       >
         {MOODS.map((mood) => {
@@ -98,7 +98,7 @@ export const MoodAlignmentSection: React.FC = () => {
       </div>
 
       {selectedMood && (
-        <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-2">
           <MoodPlaylist
             selectedMood={selectedMood}
             onClear={() => setSelectedMood(null)}

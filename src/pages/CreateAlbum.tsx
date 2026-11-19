@@ -449,7 +449,7 @@ export const CreateAlbum: React.FC = () => {
         <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600 rounded-full" />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+      <div className="relative z-10 w-full max-w-full space-y-6">
         {/* Header Navigation & Stepper */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0D1527]/90 p-5 rounded-2xl backdrop-blur-md">
           <div className="flex items-center gap-3">

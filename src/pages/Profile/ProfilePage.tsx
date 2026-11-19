@@ -298,7 +298,7 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
 
       {/* Creator Dashboard toggle if artist verified */}
       {profile.isArtistVerified && (
-        <div className="max-w-md mx-auto px-4 mb-4">
+        <div className="w-full px-2 mb-4">
           <DashboardButton 
             isDashboardActive={isCreatorDashboardMode} 
             onToggle={() => setIsCreatorDashboardMode(!isCreatorDashboardMode)} 
@@ -307,7 +307,7 @@ const ProfileScreenContent: React.FC<ProfileScreenContentProps> = ({
       )}
 
       {/* 3. CORE MUSIC LIST SECTIONS (Matching ASCII structure) */}
-      <div className="max-w-md mx-auto px-4 pt-2">
+      <div className="w-full px-2 pt-2">
         {isCreatorDashboardMode && profile.isArtistVerified ? (
           <CreatorTools profile={profile} />
         ) : (

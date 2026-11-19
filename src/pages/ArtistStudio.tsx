@@ -1377,8 +1377,8 @@ export const ArtistStudio: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 pb-28 selection:bg-[#0088CC]/30">
       {/* Studio Top Bar */}
-      <div className="bg-[#0E1420]/90 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 lg:px-8 py-4">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-[#0E1420]/90 backdrop-blur-md sticky top-0 z-30 px-3 py-4">
+        <div className="w-full max-w-full flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -1492,7 +1492,7 @@ export const ArtistStudio: React.FC = () => {
         </div>
 
         {/* Studio Workspace Switcher */}
-        <div className="max-w-7xl mx-auto mt-4 flex items-center gap-2">
+        <div className="w-full max-w-full mt-4 flex items-center gap-2">
           <button
             type="button"
             onClick={() => setStudioTab('workbench')}
@@ -1522,7 +1522,7 @@ export const ArtistStudio: React.FC = () => {
       </div>
 
       {/* Main Content Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+      <div className="w-full max-w-full px-2 pt-6 space-y-6">
         {/* Artist Profile Banner Identity Bar */}
         <div
           onDragOver={(e) => {

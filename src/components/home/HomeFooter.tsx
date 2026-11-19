@@ -6,7 +6,7 @@ export const HomeFooter: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <footer className="w-full px-4 sm:px-6 lg:px-8 pt-8 pb-6 text-center space-y-3 border-none">
+    <footer className="w-full px-3 pt-8 pb-6 text-center space-y-3 border-none">
       <div className="flex items-center justify-center gap-3">
         <button
           type="button"

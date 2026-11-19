@@ -44,7 +44,7 @@ export const FeaturedDropBanner: React.FC<FeaturedDropBannerProps> = ({
       aria-label="Featured NFT"
       onClick={onExploreDrop}
       className={cn(
-        "group relative rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)]/70 backdrop-blur-md border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] transition-colors duration-200 cursor-pointer",
+        "group relative w-full rounded-none overflow-hidden bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)]/70 backdrop-blur-md border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] transition-colors duration-200 cursor-pointer",
         className
       )}
     >

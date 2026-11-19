@@ -309,7 +309,7 @@ export const Partnerships: React.FC = () => {
         }
       />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-2 space-y-6">
+      <div className="w-full max-w-full px-2 pt-2 space-y-6">
         {/* BRAND HERO HEADER */}
         <div className="relative rounded-3xl bg-gradient-to-b from-[#111C30] via-[#0E1729] to-[#0B1220] p-6 sm:p-8 shadow-2xl space-y-4 overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-[#229ED9]/10 rounded-full blur-3xl pointer-events-none" />
@@ -407,7 +407,7 @@ export const Partnerships: React.FC = () => {
               </p>
             </div>
 
-            <div className="rounded-2xl bg-[#0B1424] p-5 max-w-lg mx-auto text-left space-y-3 font-mono text-xs">
+            <div className="rounded-2xl bg-[#0B1424] p-5 w-full text-left space-y-3 font-mono text-xs">
               <div className="flex items-center justify-between pb-2">
                 <span className="text-[#94A3B8] uppercase text-[10px]">Reference ID</span>
                 <span className="font-bold text-white">{paymentRef}</span>

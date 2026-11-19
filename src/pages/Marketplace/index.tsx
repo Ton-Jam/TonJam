@@ -296,7 +296,7 @@ export default function MarketplacePage() {
         {isLoading ? (
           <CarouselSkeletonList type="nft" layout="shelf" count={4} />
         ) : (
-          <div className="overflow-x-auto no-scrollbar scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-3 sm:px-0 pb-2">
+          <div className="overflow-x-auto no-scrollbar scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-2 pb-2">
             {items.map((nft) => (
               <MusicNFTCard
                 key={`${title}-${nft.id}`}
@@ -321,7 +321,7 @@ export default function MarketplacePage() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-transparent text-[var(--tj-color-text-primary,#F8FAFC)] pb-36 pt-1 px-0 sm:px-4 md:px-6 max-w-7xl mx-auto space-y-5">
+    <div className="min-h-screen overflow-x-hidden bg-transparent text-[var(--tj-color-text-primary,#F8FAFC)] pb-36 pt-1 px-0 w-full max-w-full space-y-5">
       <MarketplaceHeader
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -331,7 +331,7 @@ export default function MarketplacePage() {
       {/* Marketplace KPI Strip */}
       <section
         aria-label="Marketplace statistics"
-        className="px-3 sm:px-0 grid grid-cols-2 lg:grid-cols-4 gap-2.5"
+        className="px-2 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5"
       >
         <div className="rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
           <span className="text-[10px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider">
@@ -393,7 +393,7 @@ export default function MarketplacePage() {
       {/* Primary Marketplace Tabs */}
       <nav
         aria-label="Marketplace sections"
-        className="px-3 sm:px-0 border-b border-[var(--tj-color-border-subtle)]"
+        className="px-2 sm:px-3 border-b border-[var(--tj-color-border-subtle)]"
       >
         <div className="flex items-center gap-1 overflow-x-auto no-scrollbar scrollbar-none">
           {MARKETPLACE_TABS.map((tab) => {
@@ -440,7 +440,7 @@ export default function MarketplacePage() {
 
       {/* Featured NFT Banner (Discover tab only, hidden if none exist in Firebase) */}
       {activeTab === "discover" && featuredNFT && (
-        <div className="px-3 sm:px-0">
+        <div className="px-0 w-full">
           <FeaturedDropBanner
             dropInfo={{
               id: featuredNFT.id,
@@ -474,7 +474,7 @@ export default function MarketplacePage() {
 
       {/* Search Filters, Sorting & Genre Pills */}
       {(activeTab === "discover" || activeTab === "auctions") && (
-        <div className="px-3 sm:px-0 space-y-2">
+        <div className="px-2 sm:px-3 space-y-2">
           {activeTab === "discover" && (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div
@@ -598,7 +598,7 @@ export default function MarketplacePage() {
                     actionText="View All"
                     onAction={() => setActiveTab?.("collections")}
                   />
-                  <div className="overflow-x-auto no-scrollbar scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-3 sm:px-0 pb-2">
+                  <div className="overflow-x-auto no-scrollbar scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-2 pb-2">
                     {exclusiveCollections.slice(0, 8).map((collection) => (
                       <CollectionCard
                         key={collection.id}
@@ -619,7 +619,7 @@ export default function MarketplacePage() {
                     actionText="View All"
                     onAction={() => setActiveTab?.("auctions")}
                   />
-                  <div className="overflow-x-auto no-scrollbar scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-3 sm:px-0 pb-2">
+                  <div className="overflow-x-auto no-scrollbar scrollbar-none snap-x snap-mandatory flex gap-2.5 sm:gap-3 px-2 pb-2">
                     {liveAuctions.slice(0, 6).map((auction) => (
                       <AuctionCard
                         key={auction.id}
@@ -670,7 +670,7 @@ export default function MarketplacePage() {
             {isLoading ? (
               <CarouselSkeletonList type="nft" count={4} />
             ) : discoveryNFTs.length === 0 ? (
-              <div className="px-3 sm:px-0">
+              <div className="px-2">
                 <EmptyState
                   type="no_nfts"
                   searchTerm={searchTerm}
@@ -679,7 +679,7 @@ export default function MarketplacePage() {
               </div>
             ) : (
               <>
-                <div className="px-3 sm:px-0 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+                <div className="px-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
                   {discoveryNFTs.map((nft) => (
                     <MusicNFTCard
                       key={nft.id}
@@ -700,7 +700,7 @@ export default function MarketplacePage() {
                 </div>
 
                 {hasMoreNFTs && (
-                  <div className="px-3 sm:px-0 pt-2 flex justify-center">
+                  <div className="px-2 pt-2 flex justify-center">
                     <button
                       type="button"
                       onClick={loadMoreNFTs}
@@ -728,11 +728,11 @@ export default function MarketplacePage() {
           {isLoading ? (
             <CarouselSkeletonList type="collection" count={4} />
           ) : exclusiveCollections.length === 0 ? (
-            <div className="px-3 sm:px-0">
+            <div className="px-2">
               <EmptyState type="no_collections" />
             </div>
           ) : (
-            <div className="px-3 sm:px-0 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+            <div className="px-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
               {exclusiveCollections.map((collection) => (
                 <CollectionCard
                   key={collection.id}
@@ -757,11 +757,11 @@ export default function MarketplacePage() {
           {isLoading ? (
             <CarouselSkeletonList type="nft" count={4} />
           ) : liveAuctions.length === 0 ? (
-            <div className="px-3 sm:px-0">
+            <div className="px-2">
               <EmptyState type="no_auctions" />
             </div>
           ) : (
-            <div className="px-3 sm:px-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="px-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
               {liveAuctions.map((auction) => (
                 <AuctionCard
                   key={auction.id}
@@ -785,15 +785,15 @@ export default function MarketplacePage() {
           />
 
           {!isWalletConnected && ownedNFTs.length === 0 ? (
-            <div className="px-3 sm:px-0">
+            <div className="px-2">
               <EmptyState type="wallet" onConnectWallet={handleConnectWallet} />
             </div>
           ) : ownedNFTs.length === 0 ? (
-            <div className="px-3 sm:px-0">
+            <div className="px-2">
               <EmptyState type="no_nfts" searchTerm={searchTerm} />
             </div>
           ) : (
-            <div className="px-3 sm:px-0 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+            <div className="px-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
               {ownedNFTs.map((nft) => (
                 <MusicNFTCard
                   key={nft.id}
@@ -816,13 +816,12 @@ export default function MarketplacePage() {
 
       {/* Recent Trades */}
       {recentSales.length > 0 && activeTab === "discover" && (
-        <section className="px-3 sm:px-0 pt-4 border-t border-[var(--tj-color-border-subtle)] space-y-3">
+        <section className="px-2 pt-4 border-t border-[var(--tj-color-border-subtle)] space-y-3">
           <MarketplaceSectionHeader
             title="Recent Trades"
             supportingLabel="Completed collector transfers on TonJam"
-            className="px-0"
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          <div className="px-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
             {recentSales.slice(0, 6).map((sale: any) => (
               <div
                 key={sale.id}
@@ -869,7 +868,7 @@ export default function MarketplacePage() {
         </section>
       )}
 
-      <div className="px-3 sm:px-0 pt-2">
+      <div className="px-0 w-full pt-2">
         <MarketplaceTransparency
           onConnectWallet={handleConnectWallet}
           isWalletConnected={isWalletConnected}

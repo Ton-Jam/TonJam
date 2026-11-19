@@ -27,7 +27,7 @@ export default function Referrals() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-32 pt-6 px-4 sm:px-6">
+    <div className="w-full max-w-full space-y-8 pb-32 pt-6 px-2">
       
       {/* Header section */}
       <motion.div 

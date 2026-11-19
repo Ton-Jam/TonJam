@@ -19,7 +19,7 @@ export const TrendingFeedSection: React.FC = () => {
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between px-3">
         <div className="flex items-center gap-2">
           <Flame className="w-5 h-5 text-amber-400 fill-amber-400/20 animate-pulse" />
           <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
@@ -37,7 +37,7 @@ export const TrendingFeedSection: React.FC = () => {
       <div 
         ref={scrollRef}
         {...handlers}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-2 w-full snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {trendingTracks.map((track) => (

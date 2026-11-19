@@ -5,8 +5,8 @@ import { SettingsItem } from './SettingsItem';
 
 export const SettingsScreen = () => {
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] p-4 md:p-8">
-      <div className="max-w-xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-2 py-4">
+      <div className="w-full max-w-full space-y-8">
         
         {/* Header */}
         <div className="flex items-center gap-4">

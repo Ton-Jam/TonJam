@@ -113,7 +113,7 @@ export const JamSpaceMain: React.FC = () => {
         }
       />
 
-      <PageLayout containerClassName="max-w-6xl mx-auto px-3 sm:px-6 relative pt-2" topSpacing="none">
+      <PageLayout containerClassName="w-full max-w-full px-2 relative pt-2" topSpacing="none">
         {/* Sticky For You / Following Header */}
         <JamFeedHeader
           activeTab={activeTab}

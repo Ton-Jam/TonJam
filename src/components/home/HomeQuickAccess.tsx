@@ -61,7 +61,7 @@ export const HomeQuickAccess: React.FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 px-4 mb-8">
+    <div className="grid grid-cols-2 gap-3 px-2 mb-8">
       {items.map((item) => (
         <motion.button
           key={item.id}

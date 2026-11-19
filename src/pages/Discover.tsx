@@ -332,7 +332,7 @@ export const Discover: React.FC = () => {
       <PageHeader title="Discover Music" showBack={true} />
       
       {/* Search Content Input Area */}
-      <div className="pt-2 pb-3 px-4 sm:px-6 lg:px-8 space-y-4">
+      <div className="pt-2 pb-3 px-3 space-y-4 w-full">
 
         {/* Main Search Input Bar - High border radius with subtle blue border */}
         <div className="w-full relative">
@@ -536,7 +536,7 @@ export const Discover: React.FC = () => {
       </div>
 
       {/* Main Canvas Body */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 space-y-8 sm:space-y-10">
+      <div className="w-full max-w-full px-0 pt-3 sm:pt-4 space-y-8 sm:space-y-10">
 
         {/* CONDITIONAL CONTENT: Search Results VS Spotify Search Home */}
         {query.trim() !== '' ? (
@@ -546,6 +546,7 @@ export const Discover: React.FC = () => {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
+              className="px-2"
             >
               <SearchResultsSkeleton activeFilter={activeFilter} />
             </motion.div>
@@ -555,6 +556,7 @@ export const Discover: React.FC = () => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
+              className="px-2"
             >
               <SearchResults
                 query={debouncedQuery}
@@ -570,12 +572,12 @@ export const Discover: React.FC = () => {
         ) : (isLoading && allTracks.length === 0) ? (
           <FullDiscoverSkeleton />
         ) : (
-          <div className="space-y-10">
+          <div className="space-y-10 w-full">
             {/* 1. Browse All Categories */}
-            <section className="space-y-3.5">
-              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight px-4 sm:px-0">Explore All Genres</h3>
+            <section className="space-y-3.5 w-full">
+              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight px-3">Explore All Genres</h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4 -mx-4 px-3 sm:mx-0 sm:px-0">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 px-2 w-full">
                 {DISCOVER_CATEGORIES.map((category) => (
                   <motion.div
                     key={category.id}
@@ -601,8 +603,8 @@ export const Discover: React.FC = () => {
 
             {/* 3. Recommended For You ("Made For You") */}
             {recommendedTracks.length > 0 && (
-              <section className="space-y-3.5">
-                <div className="flex items-center justify-between">
+              <section className="space-y-3.5 w-full">
+                <div className="flex items-center justify-between px-3">
                   <div>
                     <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Recommended for You</h3>
                   </div>
@@ -614,7 +616,7 @@ export const Discover: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="-mx-3 flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-3 sm:mx-0 sm:px-0 scroll-smooth">
+                <div className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 px-2 scroll-smooth w-full">
                   {recommendedTracks.map((track) => (
                     <motion.div
                       key={`rec-track-${track.id}`}
@@ -649,8 +651,8 @@ export const Discover: React.FC = () => {
 
             {/* AI-Powered Discovery Feed Section */}
             {(isLoadingAi || (aiFeed && recommendedTracksWithAi.length > 0)) && (
-              <section className="space-y-3.5">
-                <div className="flex items-center justify-between">
+              <section className="space-y-3.5 w-full">
+                <div className="flex items-center justify-between px-3">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4.5 h-4.5 text-[#00B4D8]" />
                     <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">AI Discovery</h3>
@@ -666,7 +668,7 @@ export const Discover: React.FC = () => {
                 </div>
 
                 {isLoadingAi ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 px-2">
                     {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="animate-pulse bg-white/[0.03] rounded-[var(--tj-radius-md,8px)] p-4 h-24 flex gap-3.5">
                         <div className="w-16 h-16 bg-white/5 rounded-[var(--tj-radius-sm,6px)] shrink-0" />
@@ -679,7 +681,7 @@ export const Discover: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 px-2">
                     {recommendedTracksWithAi.map((track) => (
                       <motion.div
                         key={`ai-rec-${track.id}`}
@@ -722,8 +724,8 @@ export const Discover: React.FC = () => {
 
             {/* 4. Top Charts / Trending Tracks */}
             {topTrendingTracks.length > 0 && (
-              <section className="space-y-3.5">
-                <div className="flex items-center justify-between">
+              <section className="space-y-3.5 w-full">
+                <div className="flex items-center justify-between px-3">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-4.5 h-4.5 text-rose-400" />
                     <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Top Charts</h3>
@@ -736,7 +738,7 @@ export const Discover: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="space-y-1.5 sm:space-y-2">
+                <div className="space-y-1.5 sm:space-y-2 px-2">
                   {topTrendingTracks.map((track, idx) => {
                     const isLiked = likedTrackIds.includes(track.id);
                     const isCurrentPlaying = currentTrack?.id === track.id && isPlaying;
@@ -801,13 +803,13 @@ export const Discover: React.FC = () => {
             )}
 
             {/* 5. Featured Artist Spotlight */}
-            <section className="space-y-3.5">
-              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Artist Spotlight</h3>
+            <section className="space-y-3.5 w-full px-2">
+              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight px-1">Artist Spotlight</h3>
               <FeaturedArtistCard />
             </section>
 
             {/* 6. Artist Leaderboard (Top 10) */}
-            <section className="space-y-4 pt-2">
+            <section className="space-y-4 pt-2 w-full px-2">
               <ArtistLeaderboard 
                 limit={10} 
                 artists={artists} 
@@ -818,8 +820,8 @@ export const Discover: React.FC = () => {
 
             {/* 6. Featured Playlists */}
             {allUserPlaylists.length > 0 && (
-              <section className="space-y-3.5">
-                <div className="flex items-center justify-between">
+              <section className="space-y-3.5 w-full">
+                <div className="flex items-center justify-between px-3">
                   <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Featured Playlists</h3>
                   <button
                     onClick={() => navigate('/explore/playlists?title=Featured+Playlists&filter=curated')}
@@ -829,7 +831,7 @@ export const Discover: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 px-2">
                   {allUserPlaylists.slice(0, 4).map((playlist) => (
                     <motion.div
                       key={`feat-playlist-${playlist.id}`}

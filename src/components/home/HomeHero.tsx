@@ -19,7 +19,7 @@ export const HomeHero: React.FC = () => {
     >
       <div 
         id="tonjam-home-header-container"
-        className="flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 pt-2 sm:pt-4 w-full"
+        className="flex items-center justify-between gap-3 px-3 pt-2 sm:pt-4 w-full"
       >
         {/* Left: Greeting & Welcome Copy */}
         <div className="flex items-center justify-start min-w-0 flex-1">

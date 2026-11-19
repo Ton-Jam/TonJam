@@ -256,8 +256,8 @@ export const Swap: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#07091E] text-white p-3 sm:p-6 lg:p-8 font-sans pb-32">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="w-full min-h-screen bg-[#07091E] text-white px-2 py-4 font-sans pb-32">
+      <div className="w-full max-w-full space-y-6">
         
         {/* Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -692,7 +692,7 @@ const AuctionScreen: React.FC = () => {
 
       {/* Persistent Call to Action */}
       <footer className="w-full bg-card/60 backdrop-blur-md border-t border-white/5 py-12">
-        <div className="max-w-4xl mx-auto text-center px-6 space-y-6">
+        <div className="w-full text-center px-2 space-y-6">
           <div className="flex flex-col items-center gap-4">
              <img src={APP_LOGO} className="w-16 h-16" alt="TonJam" />
              <h2 className="text-3xl font-black uppercase tracking-tighter">Ready to join the next drop?</h2>

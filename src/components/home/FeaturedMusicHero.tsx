@@ -27,8 +27,8 @@ export const FeaturedMusicHero: React.FC = () => {
 
   if (!featuredTrack) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="w-full p-8 rounded-3xl bg-gradient-to-br from-[#0c1b30]/80 via-[#0a1526]/70 to-[#070e1a]/90 backdrop-blur-xl text-center shadow-xl shadow-black/30">
+      <div className="px-0 w-full">
+        <div className="w-full p-8 rounded-none bg-gradient-to-br from-[#0c1b30]/80 via-[#0a1526]/70 to-[#070e1a]/90 backdrop-blur-xl text-center shadow-xl shadow-black/30">
           <Music className="w-10 h-10 text-zinc-500 mx-auto mb-2" />
           <p className="text-sm text-zinc-400 font-medium">No featured tracks available right now</p>
         </div>
@@ -70,10 +70,10 @@ export const FeaturedMusicHero: React.FC = () => {
   };
 
   return (
-    <section className="px-4 sm:px-6 lg:px-8 w-full text-left">
+    <section className="px-0 w-full text-left">
       <div 
         onClick={handleOpenTrack}
-        className="group relative w-full overflow-hidden rounded-3xl bg-gradient-to-br from-[#0e223d]/90 via-[#0a172a]/85 to-[#060e1c]/95 backdrop-blur-xl p-5 sm:p-7 lg:p-8 cursor-pointer transition-all duration-300 shadow-2xl shadow-black/40 hover:shadow-[#0088CC]/10"
+        className="group relative w-full overflow-hidden rounded-none bg-gradient-to-br from-[#0e223d]/90 via-[#0a172a]/85 to-[#060e1c]/95 backdrop-blur-xl p-5 sm:p-7 lg:p-8 cursor-pointer transition-all duration-300 shadow-2xl shadow-black/40 hover:shadow-[#0088CC]/10"
         role="region"
         aria-label="Featured music release"
       >

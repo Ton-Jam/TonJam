@@ -301,7 +301,7 @@ const DJKrupy: React.FC = () => {
 
           {/* Input Area */}
           <div className="p-4 bg-background/50 border-t border-border/40 shrink-0 bottom-0 relative">
-            <div className="max-w-2xl mx-auto flex items-center gap-2 bg-muted/20 border border-border/40 rounded-full px-4 py-2 focus-within:border-blue-500/50 shadow-none transition-all">
+            <div className="w-full flex items-center gap-2 bg-muted/20 border border-border/40 rounded-full px-4 py-2 focus-within:border-blue-500/50 shadow-none transition-all">
               <input 
                 type="text" 
                 value={message}

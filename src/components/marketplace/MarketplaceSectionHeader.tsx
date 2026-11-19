@@ -20,7 +20,7 @@ export const MarketplaceSectionHeader: React.FC<MarketplaceSectionHeaderProps> =
   className,
 }) => {
   return (
-    <div className={cn("flex items-end justify-between gap-3 mb-2.5 px-3 sm:px-0", className)}>
+    <div className={cn("flex items-end justify-between gap-3 mb-2.5 px-3", className)}>
       <div className="space-y-0.5 min-w-0">
         <div className="flex items-center gap-2">
           <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--tj-color-text-primary,#FFFFFF)] truncate">

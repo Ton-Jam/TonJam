@@ -20,7 +20,7 @@ export const HomePlaylistsSection: React.FC = () => {
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between px-3">
         <div className="flex items-center gap-2">
           <ListMusic className="w-5 h-5 text-[#0088CC]" />
           <h2 className="text-section-title font-bold text-white">
@@ -38,7 +38,7 @@ export const HomePlaylistsSection: React.FC = () => {
       <div
         ref={scrollRef}
         {...handlers}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-2 after:content-[''] after:shrink-0 after:w-2 w-full snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ scrollBehavior: "smooth", overscrollBehaviorX: "contain", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
       >
         {displayPlaylists.map((playlist) => (
@@ -79,7 +79,7 @@ export const HomeCollectionsSection: React.FC = () => {
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between px-3">
         <div className="flex items-center gap-2">
           <Layers className="w-5 h-5 text-emerald-400" />
           <h2 className="text-section-title font-bold text-white">
@@ -97,7 +97,7 @@ export const HomeCollectionsSection: React.FC = () => {
       <div
         ref={scrollRef}
         {...handlers}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-2 after:content-[''] after:shrink-0 after:w-2 w-full snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ scrollBehavior: "smooth", overscrollBehaviorX: "contain", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
       >
         {curatedCollections.map((col) => (

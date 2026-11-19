@@ -207,7 +207,7 @@ export const ArtistProfile: React.FC = () => {
         <div className="absolute inset-0 h-64 sm:h-72 bg-gradient-to-b from-transparent via-[#07111F]/70 to-[#07111F] -z-10 pointer-events-none" />
 
         {/* Hero Content */}
-        <div className="flex flex-col items-center text-center px-4 pt-6 pb-6 max-w-xl mx-auto">
+        <div className="flex flex-col items-center text-center px-3 pt-6 pb-6 w-full">
           {/* Avatar with Glow Shadow */}
           <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-neutral-900 shadow-2xl shadow-black/80 mb-3.5 shrink-0 ring-4 ring-[#0088CC]/20">
             <LazyArtworkImage 
@@ -387,7 +387,7 @@ export const ArtistProfile: React.FC = () => {
       </div>
 
       {/* 2. POPULAR TRACKS SECTION */}
-      <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
+      <div className="w-full px-2 py-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">Popular Tracks</h2>
@@ -506,7 +506,7 @@ export const ArtistProfile: React.FC = () => {
       </div>
 
       {/* 3. RELEASES & MUSIC NFTS SECTION */}
-      <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
+      <div className="w-full px-2 py-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">Music NFTs & Releases</h2>
@@ -562,7 +562,7 @@ export const ArtistProfile: React.FC = () => {
       </div>
 
       {/* 4. ALBUMS / DISCOGRAPHY */}
-      <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
+      <div className="w-full px-2 py-4 space-y-3">
         <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">Discography & Playlists</h2>
 
         {(albums.length === 0 && playlists.length === 0) ? (
@@ -625,7 +625,7 @@ export const ArtistProfile: React.FC = () => {
       </div>
 
       {/* 5. ABOUT ARTIST SECTION */}
-      <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
+      <div className="w-full px-2 py-4 space-y-3">
         <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">About</h2>
 
         <div className="p-5 rounded-2xl bg-white/[0.04] backdrop-blur-md space-y-4">

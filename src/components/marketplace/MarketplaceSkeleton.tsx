@@ -84,8 +84,8 @@ export const CarouselSkeletonList: React.FC<CarouselSkeletonListProps> = ({
     <div
       className={cn(
         layout === "shelf"
-          ? "flex gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar px-3 sm:px-0"
-          : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5 px-3 sm:px-0",
+          ? "flex gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar px-2"
+          : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 px-2",
         className
       )}
     >

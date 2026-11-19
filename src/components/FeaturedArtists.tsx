@@ -27,7 +27,7 @@ const FeaturedArtists: React.FC = () => {
 
   return (
     <div className="space-y-3 pt-2 w-full text-left">
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between px-3">
         <h2 className="text-section-title font-bold text-white">
           Popular Artists
         </h2>
@@ -42,7 +42,7 @@ const FeaturedArtists: React.FC = () => {
       <div 
         ref={scrollRef}
         {...handlers}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-2 after:content-[''] after:shrink-0 after:w-2 w-full snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
       >
         {featuredArtists.map((artist) => (

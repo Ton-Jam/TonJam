@@ -68,7 +68,7 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between px-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
           Featured Spotlights & Launches
         </h2>
@@ -77,9 +77,9 @@ export const SponsoredPromoCarousel: React.FC<{ promos?: SponsoredPromo[] }> = (
         </span>
       </div>
 
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-0">
         <div 
-          className="relative rounded-2xl overflow-hidden bg-zinc-950 h-[175px] sm:h-[190px] lg:h-[210px] w-full"
+          className="relative rounded-none overflow-hidden bg-zinc-950 h-[175px] sm:h-[190px] lg:h-[210px] w-full"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={() => setIsPaused(true)}

@@ -149,7 +149,7 @@ const ExploreList: React.FC = () => {
   const sentinelRef = useInfiniteScroll(loadMore);
 
   return (
-    <div className="animate-in fade-in duration-500 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 text-left">
+    <div className="animate-in fade-in duration-500 w-full max-w-full px-2 py-4 sm:py-6 pb-24 text-left">
       {/* Sticky Header with Explicit Back Navigation */}
       <div className="sticky top-0 left-0 right-0 z-40 bg-black/95 backdrop-blur-md pt-2 pb-4 mb-6">
         <div className="flex items-center justify-between gap-3 sm:gap-4">

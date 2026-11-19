@@ -307,7 +307,7 @@ export const CollectionDetails: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-[#070B18] via-[#070B18]/70 to-transparent" />
         </div>
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pb-6 -mt-16 sm:-mt-20 flex flex-col md:flex-row md:items-end justify-between gap-5">
+        <div className="relative w-full max-w-full px-2 pb-6 -mt-16 sm:-mt-20 flex flex-col md:flex-row md:items-end justify-between gap-5">
           <div className="flex flex-col sm:flex-row sm:items-end gap-4">
             <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-[10px] overflow-hidden bg-slate-900 shadow-2xl shrink-0 flex items-center justify-center">
               {activeCollection.coverUrl ? (
@@ -366,14 +366,14 @@ export const CollectionDetails: React.FC = () => {
         </div>
 
         {activeCollection.description && (
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-6">
-            <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+          <div className="w-full max-w-full px-2 pb-6">
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
               {activeCollection.description}
             </p>
           </div>
         )}
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-6 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="w-full max-w-full px-2 pb-6 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
           <div className="bg-[#0B112C] p-3 rounded-[10px] shadow-lg shadow-black/20">
             <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
               Floor Price
@@ -419,7 +419,7 @@ export const CollectionDetails: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-4">
+      <div className="w-full max-w-full px-2 pt-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-black uppercase tracking-wider text-white flex items-center gap-2">

@@ -590,7 +590,7 @@ export const MintNFT: React.FC = () => {
       </div>
 
       {/* Main Container */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-6">
+      <div className="w-full max-w-full px-2 pt-6">
         
         {/* Stepper Navigation Indicator */}
         <div className="bg-[#0B112C] rounded-2xl p-4 sm:p-5 mb-8 shadow-xl shadow-black/30">
@@ -1600,7 +1600,7 @@ export const MintNFT: React.FC = () => {
           >
             {isMinting ? (
               /* Minting Progress in Execution */
-              <div className="bg-[#0B112C] rounded-2xl p-8 text-center space-y-6 shadow-2xl shadow-black/40 max-w-xl mx-auto">
+              <div className="bg-[#0B112C] rounded-2xl p-8 text-center space-y-6 shadow-2xl shadow-black/40 w-full">
                 <div className="relative w-20 h-20 mx-auto">
                   <div className="absolute inset-0 rounded-full blur-xl bg-gradient-to-r from-blue-600 to-indigo-600 opacity-50 animate-pulse" />
                   <div className="w-20 h-20 rounded-full bg-blue-500/10 flex items-center justify-center relative z-10">
@@ -1652,7 +1652,7 @@ export const MintNFT: React.FC = () => {
               </div>
             ) : mintedNFT ? (
               /* Minting Succeeded Receipt Card */
-              <div className="bg-[#0B112C] rounded-2xl p-6 sm:p-8 text-center space-y-6 shadow-2xl shadow-black/40 max-w-xl mx-auto">
+              <div className="bg-[#0B112C] rounded-2xl p-6 sm:p-8 text-center space-y-6 shadow-2xl shadow-black/40 w-full">
                 <div className="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
@@ -1743,7 +1743,7 @@ export const MintNFT: React.FC = () => {
                 </div>
               </div>
             ) : mintError ? (
-              <div className="bg-[#0B112C] rounded-2xl p-6 sm:p-8 text-center space-y-6 shadow-2xl shadow-black/40 max-w-xl mx-auto">
+              <div className="bg-[#0B112C] rounded-2xl p-6 sm:p-8 text-center space-y-6 shadow-2xl shadow-black/40 w-full">
                 <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto">
                   <AlertTriangle className="w-8 h-8" />
                 </div>

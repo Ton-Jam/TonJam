@@ -132,7 +132,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
       }`}
       aria-label="Bottom Navigation"
     >
-      <div className="max-w-lg mx-auto h-[var(--tj-nav-height,64px)] px-1 min-[360px]:px-2 pl-[max(0.25rem,env(safe-area-inset-left,0px))] pr-[max(0.25rem,env(safe-area-inset-right,0px))] flex items-center justify-around relative">
+      <div className="w-full max-w-full h-[var(--tj-nav-height,64px)] px-1 min-[360px]:px-2 pl-[max(0.25rem,env(safe-area-inset-left,0px))] pr-[max(0.25rem,env(safe-area-inset-right,0px))] flex items-center justify-around relative">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentTab === tab.id;

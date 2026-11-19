@@ -114,7 +114,7 @@ export const LocalTracks: React.FC = () => {
   };
 
   return (
-    <PageLayout containerClassName="max-w-4xl mx-auto px-4 space-y-6 pb-24" topSpacing="default">
+    <PageLayout containerClassName="w-full max-w-full px-2 space-y-6 pb-24" topSpacing="default">
       {/* Hidden file inputs for local device directory and audio files */}
       <input
         ref={folderInputRef}

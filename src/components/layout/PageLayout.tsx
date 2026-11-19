@@ -18,18 +18,18 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   className = '',
   containerClassName = '',
-  maxWidth = 'default',
+  maxWidth = 'full',
   topSpacing = 'default',
   bottomSpacing = 'player',
-  noPadding = false,
+  noPadding = true,
   animate = false,
   id,
   ...props
 }) => {
   const maxWidthClasses = {
-    narrow: 'max-w-5xl',
-    default: 'max-w-7xl',
-    wide: 'max-w-[1440px]',
+    narrow: 'max-w-full',
+    default: 'max-w-full',
+    wide: 'max-w-full',
     full: 'max-w-full',
   };
 
@@ -59,10 +59,10 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
     >
       <div
         className={cn(
-          'w-full mx-auto',
+          'w-full px-0',
           maxWidthClasses[maxWidth],
           topSpacingClasses[topSpacing],
-          !noPadding && 'px-4 sm:px-6 md:px-8',
+          !noPadding && 'px-0',
           containerClassName
         )}
       >

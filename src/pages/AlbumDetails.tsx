@@ -151,7 +151,7 @@ const AlbumDetails = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <PageHeader title="Album" showBack={true} />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-2">
+      <main className="w-full max-w-full px-2 pt-2">
         {/* Album Info */}
         <div className="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
           <motion.div 

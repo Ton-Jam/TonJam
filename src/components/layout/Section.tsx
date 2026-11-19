@@ -33,9 +33,9 @@ export const Section: React.FC<SectionProps> = ({
   }, [isInView, lazy]);
 
   return (
-    <section id={id} ref={ref} className={`my-[24px] px-4 ${className}`}>
+    <section id={id} ref={ref} className={`my-[24px] px-0 w-full ${className}`}>
       {/* Section Header */}
-      <div className="flex items-end justify-between mb-[14px]">
+      <div className="flex items-end justify-between mb-[14px] px-3">
         <div className="space-y-0.5">
           <h2 className="text-base font-black uppercase tracking-wider text-white">
             {title}

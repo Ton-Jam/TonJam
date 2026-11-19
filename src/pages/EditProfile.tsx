@@ -218,7 +218,7 @@ const EditProfile: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pb-12">
       <PageHeader title="Edit Profile" showBack={true} />
-      <div className="w-full max-w-xl mx-auto px-4 sm:px-6 pt-2 space-y-6">
+      <div className="w-full max-w-full px-2 pt-2 space-y-6">
 
         <form onSubmit={handleSave} className="space-y-6 bg-card/60 backdrop-blur-md p-4 sm:p-6 rounded-2xl border border-white/5">
           

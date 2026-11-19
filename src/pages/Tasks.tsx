@@ -132,7 +132,7 @@ const TasksPage: React.FC = () => {
       <EarnTJHeader onInfoClick={() => setShowInfoModal(true)} />
 
       {/* CONTENT WRAPPER */}
-      <div className="flex-1 w-full max-w-lg mx-auto flex flex-col gap-4 px-4 pt-2 z-10 text-left">
+      <div className="flex-1 w-full max-w-full flex flex-col gap-4 px-2 pt-2 z-10 text-left">
         {isLoading ? (
           <TaskSkeleton />
         ) : error ? (

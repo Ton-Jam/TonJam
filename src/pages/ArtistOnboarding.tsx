@@ -215,7 +215,7 @@ const ArtistOnboarding: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pb-12">
       <PageHeader title="Artist Verification" showBack={true} />
-      <div className="max-w-2xl mx-auto px-4 md:px-4 pt-2">
+      <div className="w-full max-w-full px-2 pt-2">
         <header className="mb-4 text-center">
           <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">Step {step} of 3</p>
           <div className="flex items-center justify-center gap-4 mt-2">

@@ -76,7 +76,7 @@ export const ImportedPlaylists: React.FC = () => {
   };
 
   return (
-    <PageLayout containerClassName="max-w-4xl mx-auto px-4 space-y-4" topSpacing="default">
+    <PageLayout containerClassName="w-full max-w-full px-2 space-y-4" topSpacing="default">
       {/* 1. MINIMAL HEADER */}
       <div className="flex items-center justify-between py-2">
         <div className="flex items-center gap-3 min-w-0">

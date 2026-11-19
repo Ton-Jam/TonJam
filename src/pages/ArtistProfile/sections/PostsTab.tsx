@@ -28,7 +28,7 @@ export const PostsTab: React.FC<PostsTabProps> = ({ posts, onLikePost }) => {
   };
 
   return (
-    <div className="space-y-6 max-w-xl mx-auto animate-in fade-in" id="posts-tab-root">
+    <div className="space-y-6 w-full max-w-full animate-in fade-in" id="posts-tab-root">
       
       {posts.length > 0 ? (
         <div className="space-y-4">

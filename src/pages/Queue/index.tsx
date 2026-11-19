@@ -76,7 +76,7 @@ export const QueuePage: React.FC = () => {
   }, [allTracks, queue, currentTrack]);
 
   return (
-    <PageLayout containerClassName="max-w-4xl mx-auto px-4 space-y-6" topSpacing="default">
+    <PageLayout containerClassName="w-full max-w-full px-2 space-y-6" topSpacing="default">
       {/* 1. HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2">
         <div className="flex items-center gap-3 min-w-0">

@@ -328,7 +328,7 @@ const Settings: React.FC = () => {
   return (
     <div className="w-full pb-36 sm:pb-32 md:pb-24 animate-in fade-in duration-500">
       <PageHeader title="Settings" showBack={true} />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-4 space-y-6">
+      <div className="w-full max-w-full px-2 pt-4 space-y-6">
         {/* Quick User Summary Badge */}
         {userProfile && (
           <div className="flex items-center gap-3 bg-white/[0.03] border border-white/5 p-2 rounded-2xl backdrop-blur-md self-start sm:self-auto">

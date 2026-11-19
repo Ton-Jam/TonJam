@@ -267,7 +267,7 @@ export const FanPowerTracker: React.FC<FanPowerTrackerProps> = ({ artist }) => {
 
   if (!userProfile?.uid) {
     return (
-      <div className="bg-[#1c1c1e]/40 rounded-3xl p-10 text-center max-w-xl mx-auto space-y-6">
+      <div className="bg-[#1c1c1e]/40 rounded-3xl p-10 text-center w-full max-w-full space-y-6">
         <div className="w-16 h-16 bg-blue-500/10 text-blue-400 rounded-full flex items-center justify-center mx-auto">
           <Award className="w-8 h-8" />
         </div>

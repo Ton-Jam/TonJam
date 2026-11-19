@@ -161,7 +161,7 @@ export const SecureUserNFTDashboard: React.FC = () => {
   }, [effectiveNFTs, searchQuery, filterRarity]);
 
   return (
-    <div id="secure-nft-dashboard" className="w-full max-w-7xl mx-auto space-y-8">
+    <div id="secure-nft-dashboard" className="w-full max-w-full space-y-8">
       {/* 1. Header with Profile Details & Security Badge */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-950 via-[#0B132B] to-zinc-900 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">

@@ -143,7 +143,7 @@ const LibraryPage: React.FC = () => {
     data.history.length > 0;
 
   return (
-    <PageLayout containerClassName="space-y-7" topSpacing="default">
+    <PageLayout containerClassName="w-full px-2 space-y-7" topSpacing="default">
       {/* 1. PAGE HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
         <div className="space-y-1 min-w-0">
@@ -350,7 +350,7 @@ const LibraryPage: React.FC = () => {
 
       {/* Empty state when in offline mode and no tracks are cached */}
       {data.isOfflineOnly && data.tracks.length === 0 && !data.isLoading && (
-        <div className="bg-[var(--tj-color-surface-elevated,#111C30)] rounded-[var(--tj-radius-lg,10px)] p-8 text-center space-y-4 max-w-md mx-auto border-0">
+        <div className="bg-[var(--tj-color-surface-elevated,#111C30)] rounded-[var(--tj-radius-lg,10px)] p-8 text-center space-y-4 w-full border-0">
           <div className="w-14 h-14 rounded-full bg-emerald-500/12 text-emerald-400 flex items-center justify-center mx-auto">
             <WifiOff className="w-7 h-7" />
           </div>

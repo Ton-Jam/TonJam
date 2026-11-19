@@ -61,8 +61,8 @@ export const LivestreamHub: React.FC = () => {
   const featuredStream = streams[0];
 
   return (
-    <div className="min-h-screen bg-[#040812] text-white p-4 sm:p-6 lg:p-8 pb-28">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#040812] text-white px-2 py-4 pb-28">
+      <div className="w-full max-w-full space-y-8">
         {/* Header Title & Go Live CTA */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>

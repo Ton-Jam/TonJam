@@ -84,7 +84,7 @@ export const Collections: React.FC = () => {
         <div className="w-10 shrink-0" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 space-y-6">
+      <div className="w-full max-w-full px-2 pt-4 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">

@@ -38,7 +38,7 @@ export const MarketplacePicksSection: React.FC<{ picks?: MarketplacePick[] }> = 
 
   return (
     <section className="space-y-3 text-left w-full">
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between px-3">
         <div className="flex items-center gap-2">
           <ShoppingBag className="w-4 h-4 text-primary" />
           <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white">
@@ -56,7 +56,7 @@ export const MarketplacePicksSection: React.FC<{ picks?: MarketplacePick[] }> = 
       <div 
         ref={scrollRef}
         {...handlers}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-4 sm:px-6 lg:px-8 after:content-[''] after:shrink-0 after:w-4 sm:after:w-6 lg:after:w-8 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-2 after:content-[''] after:shrink-0 after:w-2 w-full snap-x snap-mandatory overscroll-x-contain select-none"
         style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
       >
         {resolvedPicks.map((pick: any) => (

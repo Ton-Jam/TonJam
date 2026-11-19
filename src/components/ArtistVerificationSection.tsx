@@ -283,7 +283,7 @@ export const ArtistVerificationSection: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="space-y-8 w-full max-w-full">
       {/* Top Banner / Status Overview Card */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-900/90 via-[#0D1527]/90 to-zinc-950 p-6 md:p-8 backdrop-blur-xl shadow-2xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">

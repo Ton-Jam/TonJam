@@ -84,7 +84,7 @@ export const CollectionsListScreen: React.FC = () => {
         <div className="w-[44px] shrink-0" aria-hidden="true" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 space-y-6">
+      <div className="w-full max-w-full px-2 pt-4 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">

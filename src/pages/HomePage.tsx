@@ -72,10 +72,10 @@ export const HomePage: React.FC = () => {
       <HomePullToRefresh onRefresh={handleRefresh}>
         <div
           key={refreshKey}
-          className="w-full max-w-7xl mx-auto space-y-6 sm:space-y-8 pt-2"
+          className="w-full max-w-full space-y-6 sm:space-y-8 pt-2"
         >
           {/* 1. UTILITY & QUICK NAVIGATION STRIP */}
-          <div className="px-4 sm:px-6 lg:px-8 pt-1">
+          <div className="px-3 pt-1 w-full">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2 flex-wrap">
                 <button
@@ -117,8 +117,8 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* 2. HERO GREETING & ACTIVE/SPOTLIGHT PLAYER CARD */}
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="rounded-[var(--tj-radius-lg,10px)] bg-[var(--tj-color-surface-default,#0D1628)] p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden">
+          <div className="px-0 w-full">
+            <div className="rounded-none bg-[var(--tj-color-surface-default,#0D1628)] px-3 py-5 sm:px-5 sm:py-6 flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden">
               <div
                 className="absolute -top-24 -right-24 w-72 h-72 rounded-full blur-[110px] opacity-15 pointer-events-none"
                 style={{
@@ -126,7 +126,7 @@ export const HomePage: React.FC = () => {
                 }}
               />
 
-              <div className="space-y-1.5 relative z-10 text-left max-w-xl">
+              <div className="space-y-1.5 relative z-10 text-left flex-1 min-w-0">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[#38BDF8]">
                   TON Music & Collectibles
                 </span>

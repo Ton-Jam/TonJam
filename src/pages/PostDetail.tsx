@@ -223,7 +223,7 @@ const PostDetail: React.FC = () => {
       <div className="min-h-screen bg-background pb-24">
         <PageHeader title="Post" showBack={true} />
 
-        <div className="max-w-2xl mx-auto py-6 px-4">
+        <div className="w-full max-w-full py-6 px-2">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

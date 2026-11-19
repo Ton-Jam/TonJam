@@ -62,7 +62,7 @@ export const FanEngagement: React.FC = () => {
   }, [transactions, userProfile.uid, userProfile.name, userProfile.avatar]);
 
   return (
-    <div className="min-h-screen pb-28 pt-6 px-4 max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen pb-28 pt-6 px-2 w-full max-w-full space-y-6">
       {/* Header Banner */}
       <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-[#070D2A] via-[#0D1854] to-[#120B44] relative overflow-hidden shadow-2xl">
         <div className="absolute -top-10 -right-10 w-96 h-96 bg-[#0098EA]/15 rounded-full blur-3xl pointer-events-none" />

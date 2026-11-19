@@ -274,8 +274,8 @@ const ArtistVerification: React.FC = () => {
   return (
     <div className="w-full min-h-screen bg-[#080D1A] text-[#F5F7FB] pb-32 animate-in fade-in duration-500">
       {/* SCREEN HEADER */}
-      <div className="sticky top-0 z-30 bg-[#080D1A]/90 backdrop-blur-xl px-4 sm:px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <div className="sticky top-0 z-30 bg-[#080D1A]/90 backdrop-blur-xl px-3 py-4">
+        <div className="w-full max-w-full flex items-center justify-between">
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -293,7 +293,7 @@ const ArtistVerification: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-4 space-y-6">
+      <div className="w-full max-w-full px-2 pt-4 space-y-6">
         {/* TITLE & INTRO */}
         <div className="space-y-1.5">
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">

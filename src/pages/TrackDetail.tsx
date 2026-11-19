@@ -453,7 +453,7 @@ const TrackDetail: React.FC = () => {
         }
       />
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 pt-3">
+      <div className="relative z-10 w-full max-w-full px-2 pt-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           {/* Left Column: Artwork, Playback Controls, Visualizer, Mint Card */}
           <div className="lg:col-span-5 space-y-5">

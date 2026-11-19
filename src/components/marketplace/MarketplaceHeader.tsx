@@ -52,7 +52,7 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
         className
       )}
     >
-      <div className="flex items-start sm:items-center justify-between gap-2.5 px-3 sm:px-0">
+      <div className="flex items-start sm:items-center justify-between gap-2.5 px-3">
         <div className="min-w-0">
           <h1 className="text-lg sm:text-2xl font-semibold tracking-tight text-[var(--tj-color-text-primary,#FFFFFF)] leading-tight truncate">
             NFT Marketplace
@@ -100,7 +100,7 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
         </div>
       </div>
 
-      <div className="px-3 sm:px-0">
+      <div className="px-3">
         <div
           className="search-input-wrapper relative flex items-center w-full h-10 bg-[var(--tj-color-input-background,#0B1F36)] rounded-[var(--tj-radius-compact,5px)] border border-[var(--tj-color-border-subtle)] focus-within:border-[var(--tj-color-border-focus,#00B4D8)] transition-colors"
         >

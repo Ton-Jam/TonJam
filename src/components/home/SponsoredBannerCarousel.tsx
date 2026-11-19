@@ -79,12 +79,12 @@ export const SponsoredBannerCarousel: React.FC = () => {
   // Empty state when no genuine approved paid campaigns exist (no fake sponsor placeholders)
   if (!isLoading && campaigns.length === 0) {
     return (
-      <section className="px-4 sm:px-6 lg:px-8 w-full select-none">
+      <section className="px-0 w-full select-none">
         <div
           onClick={() => navigate('/partnerships')}
-          className="relative w-full h-[120px] sm:h-[135px] rounded-2xl bg-gradient-to-r from-[#0e285a]/70 via-[#11244e]/60 to-[#0e285a]/70 p-5 flex items-center justify-between cursor-pointer group shadow-lg transition-all hover:bg-white/[0.04]"
+          className="relative w-full h-[120px] sm:h-[135px] rounded-none bg-gradient-to-r from-[#0e285a]/70 via-[#11244e]/60 to-[#0e285a]/70 px-3 sm:px-5 py-4 flex items-center justify-between cursor-pointer group shadow-lg transition-all hover:bg-white/[0.04]"
         >
-          <div className="space-y-1.5 max-w-xl">
+          <div className="space-y-1.5 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="px-2 py-0.5 rounded-full bg-[#00B4D8]/15 text-[#00B4D8] text-[9px] font-black uppercase tracking-widest">
                 Partner Spotlight
@@ -126,9 +126,9 @@ export const SponsoredBannerCarousel: React.FC = () => {
   };
 
   return (
-    <section className="px-4 sm:px-6 lg:px-8 w-full select-none">
+    <section className="px-0 w-full select-none">
       <div
-        className="relative w-full h-[150px] sm:h-[165px] md:h-[175px] rounded-2xl bg-[#0e285a]/90 overflow-hidden group shadow-xl cursor-pointer"
+        className="relative w-full h-[150px] sm:h-[165px] md:h-[175px] rounded-none bg-[#0e285a]/90 overflow-hidden group shadow-xl cursor-pointer"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}

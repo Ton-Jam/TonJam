@@ -46,7 +46,7 @@ export const AboutTab: React.FC<AboutTabProps> = ({ artist }) => {
     : [];
 
   return (
-    <div className="space-y-8 animate-in fade-in max-w-5xl" id="tonjam-about-tab">
+    <div className="space-y-8 animate-in fade-in w-full max-w-full" id="tonjam-about-tab">
       
       {/* 1. ARTIST HERO BANNER & BIO PREVIEW */}
       <div className="relative min-h-[380px] sm:min-h-[420px] rounded-3xl overflow-hidden p-8 sm:p-10 flex flex-col justify-between bg-neutral-950 shadow-2xl">

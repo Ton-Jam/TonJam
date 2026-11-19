@@ -84,7 +84,7 @@ export const SideDrawerShowcase: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#080D1A] text-white font-sans pb-32 pt-6 px-4 sm:px-6 max-w-5xl mx-auto flex flex-col gap-6 text-left select-none">
+    <div className="w-full min-h-screen bg-[#080D1A] text-white font-sans pb-32 pt-6 px-2 max-w-full flex flex-col gap-6 text-left select-none">
       {/* PAGE HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">

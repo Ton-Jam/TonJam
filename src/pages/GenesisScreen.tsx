@@ -50,7 +50,7 @@ const GenesisScreen: React.FC = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-          className="text-center space-y-8 max-w-5xl relative z-10"
+          className="text-center space-y-8 w-full relative z-10"
         >
           <div className="flex items-center justify-center gap-4 mb-4">
             <div className="h-px w-10 bg-gradient-to-r from-transparent to-primary"></div>
@@ -64,7 +64,7 @@ const GenesisScreen: React.FC = () => {
             FORGE
           </h1>
 
-          <div className="max-w-2xl mx-auto space-y-6">
+          <div className="w-full space-y-6">
             <p className="text-muted-foreground text-sm md:text-lg font-medium leading-relaxed tracking-tight">
               The foundational block of TonJam. 1,000 unique audio artifacts forged on GRAM for the pioneers of decentralized music. This remains the most rare tier in existence.
             </p>
@@ -95,7 +95,7 @@ const GenesisScreen: React.FC = () => {
       </section>
 
       {/* Stats Section - Technical Design */}
-      <section className="relative z-10 w-full w-full max-w-full px-6 py-12 md:py-24">
+      <section className="relative z-10 w-full max-w-full px-2 py-12 md:py-24">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-border/50 divide-x divide-y md:divide-y-0 border-collapse bg-white/[0.01] backdrop-blur-md rounded-2xl overflow-hidden">
           {[
             { label: 'Supply.Cap', value: '1,000', sub: 'Fixed Forever' },
@@ -115,7 +115,7 @@ const GenesisScreen: React.FC = () => {
       </section>
 
       {/* Featured Genesis Grid */}
-      <section className="relative z-10 w-full w-full max-w-full px-6 py-24 space-y-12 md:space-y-16">
+      <section className="relative z-10 w-full max-w-full px-2 py-24 space-y-12 md:space-y-16">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ const GenesisScreen: React.FC = () => {
       {/* The Architects - Artist Highlight */}
       <section className="bg-white/[0.01] border-y border-border/50 py-32 overflow-hidden relative">
         <div className="absolute inset-0 bg-primary/[0.02] pointer-events-none"></div>
-        <div className="w-full w-full max-w-full px-6 space-y-20 relative z-10">
+        <div className="w-full max-w-full px-2 space-y-20 relative z-10">
           <div className="text-center space-y-4">
              <span className="text-[9px] font-black uppercase tracking-[0.5em] text-primary">Consensus.Architects</span>
              <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">Architects of Sound</h2>
@@ -182,7 +182,7 @@ const GenesisScreen: React.FC = () => {
       </section>
 
       {/* Lore / Utility Cards */}
-      <section className="w-full w-full max-w-full px-6 py-32">
+      <section className="w-full max-w-full px-2 py-32">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { 
@@ -218,7 +218,7 @@ const GenesisScreen: React.FC = () => {
       {/* Footer Call to Action */}
       <footer className="relative py-40 overflow-hidden text-center bg-black">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-blue-500/10"></div>
-        <div className="relative z-10 max-w-2xl mx-auto px-6 space-y-10">
+        <div className="relative z-10 w-full max-w-full px-2 space-y-10">
           <div className="inline-flex flex-col items-center">
             <img src={TON_LOGO} className="w-12 h-12 mb-6 grayscale hover:grayscale-0 transition-all cursor-pointer" alt="GRAM" />
             <h2 className="text-5xl font-black uppercase tracking-tighter">Secure the Alpha</h2>
