@@ -33,9 +33,9 @@ import {
   Check,
   Copy,
   Send,
-  ArrowLeft,
   ChevronRight,
 } from "lucide-react";
+import { TonJamBackArrow } from "@/components/icons/TonJamBackArrow";
 import { TJ_COIN_ICON, TON_LOGO } from "@/constants";
 import { useAudio } from "@/contexts/AudioContext";
 import { useTonPrice } from "@/contexts/TonPriceContext";
@@ -332,9 +332,9 @@ const TrackDetail: React.FC = () => {
         </p>
         <button
           onClick={() => navigate(-1)}
-          className="px-5 py-2.5 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-sm font-semibold text-white flex items-center gap-2 transition-colors border-0 cursor-pointer"
+          className="px-5 py-2.5 rounded-[var(--tj-radius-sm,6px)] bg-transparent hover:bg-white/[0.08] text-sm font-semibold text-[#FFFFFF] flex items-center gap-2 transition-colors border-0 cursor-pointer"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <TonJamBackArrow size="sm" />
           Go Back
         </button>
       </div>

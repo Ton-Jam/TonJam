@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Sliders, Sparkles, Activity, Zap, Disc, Maximize2, Minimize2, Settings2, BarChart2, Radio, Compass } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Activity } from 'lucide-react';
 import { Track } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 
@@ -55,7 +54,7 @@ const COLOR_PALETTES = {
   },
 };
 
-export const CanvasAudioAnalyzer: React.FC<CanvasAudioAnalyzerProps> = ({
+export const CanvasAudioAnalyzer: React.FC<CanvasAudioAnalyzerProps> = React.memo(({
   analyser,
   isPlaying,
   track,
@@ -70,14 +69,13 @@ export const CanvasAudioAnalyzer: React.FC<CanvasAudioAnalyzerProps> = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const lastMetricsUpdateRef = useRef<number>(0);
 
   const [mode, setMode] = useState<VisualizerMode>(initialMode);
   const [theme, setTheme] = useState<VisualizerTheme>(initialTheme);
-  const [sensitivity, setSensitivity] = useState<number>(1.2);
-  const [barCount, setBarCount] = useState<number>(48);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const sensitivity = 1.2;
+  const barCount = 48;
 
-  // Live audio metrics state
   const [metrics, setMetrics] = useState({
     bass: 0,
     mid: 0,
@@ -85,10 +83,8 @@ export const CanvasAudioAnalyzer: React.FC<CanvasAudioAnalyzerProps> = ({
     peakDb: -60,
   });
 
-  // Peaks array for smooth falling peak dots in bars mode
   const peaksRef = useRef<number[]>([]);
 
-  // Particle positions for particle visualizer mode
   const particlesRef = useRef<Array<{
     x: number;
     y: number;
@@ -171,9 +167,11 @@ export const CanvasAudioAnalyzer: React.FC<CanvasAudioAnalyzerProps> = ({
         }
       }
 
-      // Calculate band metrics
+      // Calculate band metrics (throttled to ~120ms to avoid 60fps React re-renders)
+      const now = performance.now();
       const len = dataArray.length;
-      if (len > 0) {
+      if (len > 0 && showMetrics && now - lastMetricsUpdateRef.current >= 120) {
+        lastMetricsUpdateRef.current = now;
         let bassSum = 0;
         let midSum = 0;
         let trebleSum = 0;
@@ -506,18 +504,17 @@ export const CanvasAudioAnalyzer: React.FC<CanvasAudioAnalyzerProps> = ({
       }
       observer.disconnect();
     };
-  }, [analyser, isPlaying, mode, theme, sensitivity, barCount, height, currentPalette]);
+  }, [analyser, isPlaying, mode, theme, sensitivity, barCount, height, currentPalette, showMetrics]);
 
   return (
     <div
       ref={containerRef}
-      className={`relative w-full rounded-2xl overflow-hidden bg-[#050A24] border border-[#16244F] p-3 shadow-2xl select-none ${className}`}
+      className={`relative w-full rounded-[var(--tj-radius-md,10px)] overflow-hidden bg-[#050A24] p-3 shadow-2xl select-none border-none ${className}`}
       style={{ backgroundColor: currentPalette.bg }}
     >
-      {/* Visualizer Canvas Header / Status Bar */}
       <div className="flex items-center justify-between mb-2 px-1 text-xs text-[#9AA0AE]">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 border border-white/10">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--tj-radius-compact,5px)] bg-white/5">
             <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F2F4F8]">
               {mode} Visualizer
@@ -532,18 +529,17 @@ export const CanvasAudioAnalyzer: React.FC<CanvasAudioAnalyzerProps> = ({
           )}
         </div>
 
-        {/* Action Controls Toggle */}
         {showControls && (
           <div className="flex items-center gap-1.5">
-            {/* Mode Selector Buttons */}
-            <div className="hidden sm:flex items-center bg-black/40 rounded-lg p-0.5 border border-white/10">
+            <div className="hidden sm:flex items-center bg-black/40 rounded-[var(--tj-radius-sm,8px)] p-0.5">
               {(['bars', 'radial', 'wave', 'hologram', 'particles'] as VisualizerMode[]).map((m) => (
                 <button
                   key={m}
+                  type="button"
                   onClick={() => handleModeSelect(m)}
-                  className={`px-2 py-0.5 text-[9px] font-bold uppercase rounded-md transition-all ${
+                  className={`px-2 py-0.5 text-[9px] font-bold uppercase rounded-[var(--tj-radius-compact,5px)] transition-all border-none cursor-pointer ${
                     mode === m
-                      ? 'bg-[#0098EA] text-white shadow-sm'
+                      ? 'bg-[var(--tj-color-brand-primary,#00B4D8)] text-white shadow-sm'
                       : 'text-[#9AA0AE] hover:text-white'
                   }`}
                 >
@@ -552,11 +548,11 @@ export const CanvasAudioAnalyzer: React.FC<CanvasAudioAnalyzerProps> = ({
               ))}
             </div>
 
-            {/* Theme Selector */}
             <select
+              aria-label="Visualizer color theme"
               value={theme}
               onChange={(e) => setTheme(e.target.value as VisualizerTheme)}
-              className="bg-black/60 border border-white/10 text-white text-[10px] font-bold rounded-lg px-2 py-0.5 outline-none cursor-pointer"
+              className="bg-black/60 text-white text-[10px] font-bold rounded-[var(--tj-radius-sm,8px)] px-2 py-0.5 outline-none cursor-pointer border-none"
             >
               <option value="cyber">Cyan Cyber</option>
               <option value="gold">NFT Gold</option>
@@ -567,29 +563,27 @@ export const CanvasAudioAnalyzer: React.FC<CanvasAudioAnalyzerProps> = ({
         )}
       </div>
 
-      {/* Main HTML5 Canvas */}
-      <div className="relative w-full overflow-hidden flex items-center justify-center rounded-xl bg-black/30">
+      <div className="relative w-full overflow-hidden flex items-center justify-center rounded-[var(--tj-radius-sm,8px)] bg-black/30">
         <canvas
           ref={canvasRef}
           style={{ width: '100%', height: `${height}px` }}
           className="w-full block transition-opacity duration-300"
         />
 
-        {/* Central Album Artwork Overlay for Radial Mode */}
         {mode === 'radial' && track && (
-          <div className="absolute w-20 h-20 rounded-full overflow-hidden border-2 border-white/20 shadow-2xl pointer-events-none animate-spin-slow">
+          <div className="absolute w-20 h-20 rounded-full overflow-hidden shadow-2xl pointer-events-none animate-spin-slow">
             <img
               src={track.coverUrl || getPlaceholderImage('cover')}
               alt=""
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover"
             />
           </div>
         )}
       </div>
 
-      {/* Live Audio Frequency Spectrum Metrics Bar */}
       {showMetrics && (
-        <div className="mt-3 pt-2 border-t border-white/10 grid grid-cols-4 gap-2 text-center text-[10px] font-bold text-[#9AA0AE]">
+        <div className="mt-3 pt-2 grid grid-cols-4 gap-2 text-center text-[10px] font-bold text-[#9AA0AE]">
           {/* Sub-Bass Band */}
           <div className="bg-white/5 rounded-lg p-1.5 flex flex-col items-center">
             <span className="text-[9px] uppercase tracking-wider text-amber-400">Sub-Bass</span>
@@ -641,6 +635,8 @@ export const CanvasAudioAnalyzer: React.FC<CanvasAudioAnalyzerProps> = ({
       )}
     </div>
   );
-};
+});
+
+CanvasAudioAnalyzer.displayName = "CanvasAudioAnalyzer";
 
 export default CanvasAudioAnalyzer;

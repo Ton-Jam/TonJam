@@ -181,7 +181,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                 >
                   <Icon 
                     className="w-5 h-5 shrink-0 [vector-effect:non-scaling-stroke] [shape-rendering:geometricPrecision]" 
-                    strokeWidth={isActive ? 1.75 : 1.25} 
+                    strokeWidth={isActive ? 2.75 : 2.25} 
                   />
                 </motion.div>
 

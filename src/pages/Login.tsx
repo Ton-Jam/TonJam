@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { X, Mail, Lock, User, Github, Chrome, ArrowRight, Loader2, ShieldCheck, Globe, ChevronLeft, Wallet, Camera, Check, Sparkles, RefreshCw, Twitter, MessageSquare } from 'lucide-react';
+import { X, Mail, Lock, User, Github, Chrome, ArrowRight, Loader2, ShieldCheck, Globe, Wallet, Camera, Check, Sparkles, RefreshCw, Twitter, MessageSquare } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { motion, AnimatePresence } from 'motion/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -305,9 +306,10 @@ const Login: React.FC = () => {
         variant="ghost"
         size="icon"
         onClick={() => navigate('/')}
-        className="absolute top-6 left-6 text-white/75 hover:text-white hover:bg-white/10 z-20 group rounded-[4px]"
+        aria-label="Go back"
+        className="absolute top-6 left-6 text-[#FFFFFF] hover:text-white hover:bg-white/10 z-20 group rounded-full bg-transparent"
       >
-        <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+        <TonJamBackArrow size="sm" className="group-hover:-translate-x-1 transition-transform" />
       </Button>
 
       <motion.div

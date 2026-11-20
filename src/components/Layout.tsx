@@ -465,13 +465,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {isHome && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isLoginPage && (
         <motion.header 
           className={cn(
-            "fixed top-0 left-0 right-0 z-40 h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between transition-all duration-300 ease-out border-b border-white/10 dark:border-white/10",
+            "fixed top-0 left-0 right-0 z-40 h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between transition-all duration-300 ease-out border-none backdrop-blur-xl",
             "lg:left-64",
-            isHeaderHidden ? "-translate-y-full" : "translate-y-0",
-            isScrolled
-              ? "bg-[#0A1628]/85 backdrop-blur-[18px] shadow-[0_8px_30px_rgba(0,0,0,0.45)]"
-              : "bg-[#0A1628]/55 backdrop-blur-[18px]"
+            isScrolled ? "shadow-[0_6px_24px_rgba(4,10,24,0.35)]" : "shadow-none",
+            isHeaderHidden ? "-translate-y-full" : "translate-y-0"
           )}
+          style={{
+            background: isScrolled
+              ? "rgba(11, 20, 36, 0.78)"
+              : "rgba(14, 40, 90, 0.56)",
+            backdropFilter: "blur(18px) saturate(160%)",
+            WebkitBackdropFilter: "blur(18px) saturate(160%)",
+          }}
         >
           {/* LEFT: TonJam Logo & Brand */}
           <div className="flex items-center gap-1 sm:gap-2">

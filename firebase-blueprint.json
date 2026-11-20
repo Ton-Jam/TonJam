@@ -671,6 +671,18 @@
         "lastPayoutAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       }
+    },
+    "Repost": {
+      "title": "Repost",
+      "description": "User repost of a JamSpace social post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "postId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "postId"]
     }
   },
   "firestore": {
@@ -769,6 +781,10 @@
     "/posts/{postId}": {
       "schema": "Post",
       "description": "Social feed"
+    },
+    "/reposts/{repostId}": {
+      "schema": "Repost",
+      "description": "User reposts on JamSpace posts"
     },
     "/tracks/{trackId}/likes/{likeId}": {
       "schema": "Like",

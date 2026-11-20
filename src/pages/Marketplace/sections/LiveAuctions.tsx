@@ -47,10 +47,10 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
             <div
               key={auc.id}
               onClick={() => onSelectNFT(auc.nft)}
-              className="bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-2xl overflow-hidden p-3.5 flex flex-col justify-between cursor-pointer select-none transition-all duration-200"
+              className="bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-[var(--tj-radius-sm,8px)] overflow-hidden p-3.5 flex flex-col justify-between cursor-pointer select-none transition-all duration-200"
             >
               {/* Media Section */}
-              <div className="relative aspect-square w-full rounded-xl bg-[#07111F] overflow-hidden mb-3">
+              <div className="relative aspect-square w-full rounded-[var(--tj-radius-compact,5px)] bg-[#07111F] overflow-hidden mb-3">
                 <img
                   src={artwork}
                   alt={auc.nft.title}
@@ -76,7 +76,7 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
                 </div>
 
                 {/* Countdown display */}
-                <div className="absolute bottom-2 left-2 right-2 p-2 bg-[#07111F]/85 backdrop-blur-md rounded-lg flex items-center justify-between border border-[#22374D]">
+                <div className="absolute bottom-2 left-2 right-2 p-2 bg-[#07111F]/85 backdrop-blur-md rounded-[var(--tj-radius-compact,5px)] flex items-center justify-between border border-[#22374D]">
                   <span className="text-[10px] font-medium text-[#C2C7CD] uppercase tracking-wider flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-[#00B4D8]" /> Ends In
                   </span>
@@ -112,7 +112,7 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
                     onPlaceBid(auc);
                   }}
                   aria-label={`Place bid on ${auc.nft.title}`}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#00B4D8] text-[#07111F] font-bold text-xs uppercase tracking-wider hover:bg-[#009CC0] transition-colors focus:outline-none flex items-center gap-1"
+                  className="px-3.5 py-1.5 rounded-[var(--tj-radius-sm,8px)] bg-[#00B4D8] text-[#07111F] font-bold text-xs uppercase tracking-wider hover:bg-[#009CC0] transition-colors focus:outline-none flex items-center gap-1"
                 >
                   Place Bid
                   <ArrowRight className="w-3.5 h-3.5" />

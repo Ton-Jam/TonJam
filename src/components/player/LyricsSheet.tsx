@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion } from "motion/react";
-import { Mic2, Type, Languages, X, Play } from "lucide-react";
+import { Mic2, Type, X, Play } from "lucide-react";
 import { Track } from "@/types";
 
 interface LyricsSheetProps {
@@ -12,72 +12,76 @@ interface LyricsSheetProps {
 }
 
 export interface LyricLine {
-  time: number;
+  time: number | null;
   text: string;
-  translation?: string;
 }
 
-export const LyricsSheet: React.FC<LyricsSheetProps> = ({
+function parseTrackLyrics(rawLyrics: string | undefined): LyricLine[] {
+  if (!rawLyrics || typeof rawLyrics !== "string") return [];
+  const trimmed = rawLyrics.trim();
+  if (!trimmed) return [];
+
+  const lrcRegex = /^\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]\s*(.*)$/;
+  const lines = trimmed.split(/\r?\n/);
+  const parsed: LyricLine[] = [];
+
+  for (const line of lines) {
+    const clean = line.trim();
+    if (!clean) continue;
+    const match = clean.match(lrcRegex);
+    if (match) {
+      const mins = parseInt(match[1], 10);
+      const secs = parseInt(match[2], 10);
+      const ms = match[3] ? parseInt(match[3].padEnd(3, "0"), 10) : 0;
+      const text = match[4].trim();
+      if (text) {
+        parsed.push({
+          time: mins * 60 + secs + ms / 1000,
+          text,
+        });
+      }
+    } else {
+      parsed.push({
+        time: null,
+        text: clean,
+      });
+    }
+  }
+
+  return parsed;
+}
+
+export const LyricsSheet: React.FC<LyricsSheetProps> = React.memo(({
   track,
   currentTime,
-  duration,
+  duration: _duration,
   onSeek,
-  onClose
+  onClose,
 }) => {
   const [fontSize, setFontSize] = useState<"sm" | "base" | "lg" | "xl">("lg");
-  const [showTranslation, setShowTranslation] = useState<boolean>(false);
-
   const containerRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLParagraphElement>(null);
 
-  // Generate or parse synced lyrics
-  const lyrics: LyricLine[] = useMemo(() => {
-    if (!track) return [];
-    
-    // Default dynamic demo synced lyrics
-    const baseLyrics = [
-      { time: 0, text: "🎵 [Instrumental Intro] 🎵", translation: "🎵 [Intro Instrumental] 🎵" },
-      { time: 6, text: "Step into the digital soundscape", translation: "Entra en el paisaje sonoro digital" },
-      { time: 12, text: "Feel the frequency vibrating in TON", translation: "Siente la frecuencia vibrando en TON" },
-      { time: 18, text: "Streaming decentralized, crystal lossless clear", translation: "Transmisión descentralizada, alta fidelidad" },
-      { time: 24, text: "Every note is minted on the blockchain", translation: "Cada nota está acuñada en la cadena" },
-      { time: 30, text: "🎵 [Drop & Bass Break] 🎵", translation: "🎵 [Caída y Ritmo] 🎵" },
-      { time: 42, text: "We break the boundaries of streaming web", translation: "Rompemos las fronteras del streaming" },
-      { time: 48, text: "Direct support from fan to creator", translation: "Apoyo directo de fan a creador" },
-      { time: 54, text: "Ownership is freedom, sound is art", translation: "La propiedad es libertad, el sonido es arte" },
-      { time: 62, text: "Together in the TonJam arena", translation: "Juntos en la arena TonJam" },
-      { time: 70, text: "🎵 [Instrumental Outro] 🎵", translation: "🎵 [Outro Instrumental] 🎵" }
-    ];
+  const lyrics = useMemo(() => parseTrackLyrics(track?.lyrics), [track?.lyrics]);
+  const hasTimestamps = useMemo(() => lyrics.some((l) => l.time !== null), [lyrics]);
 
-    if (duration > 0) {
-      const scale = duration / 80;
-      return baseLyrics.map((line) => ({
-        ...line,
-        time: Math.round(line.time * scale * 10) / 10
-      }));
-    }
-    return baseLyrics;
-  }, [track?.id, duration]);
-
-  // Determine active lyric line index
   const activeIndex = useMemo(() => {
-    let idx = 0;
+    if (!hasTimestamps) return -1;
+    let idx = -1;
     for (let i = 0; i < lyrics.length; i++) {
-      if (currentTime >= lyrics[i].time) {
+      const t = lyrics[i].time;
+      if (t !== null && t <= currentTime + 0.3) {
         idx = i;
-      } else {
-        break;
       }
     }
     return idx;
-  }, [currentTime, lyrics]);
+  }, [lyrics, hasTimestamps, currentTime]);
 
-  // Auto-scroll active line into center of view
   useEffect(() => {
     if (activeLineRef.current && containerRef.current) {
       activeLineRef.current.scrollIntoView({
         behavior: "smooth",
-        block: "center"
+        block: "center",
       });
     }
   }, [activeIndex]);
@@ -85,68 +89,42 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = ({
   const fontSizeClasses = {
     sm: "text-sm",
     base: "text-base",
-    lg: "text-lg font-bold",
-    xl: "text-2xl font-black"
+    lg: "text-lg",
+    xl: "text-xl",
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#050A24] text-[#F2F4F8] select-none rounded-[18px] p-4 border border-[#16244F]">
-      {/* Lyrics Header Controls */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#16244F]/60 mb-2">
+    <div className="w-full h-full flex flex-col bg-[#050A24]/95 backdrop-blur-md text-[#F2F4F8] select-none rounded-[var(--tj-radius-md,10px)] p-4 border-none">
+      {/* Header Toolbar */}
+      <div className="flex items-center justify-between pb-3 mb-2">
         <div className="flex items-center gap-2">
-          <Mic2 className="w-4 h-4 text-[#0098EA]" />
-          <span className="text-xs font-bold uppercase tracking-wider text-[#F2F4F8]">
-            Synced Lyrics
+          <Mic2 className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)]" />
+          <span className="text-xs font-bold uppercase tracking-wider text-[#9AA0AE]">
+            {hasTimestamps ? "Synced Lyrics" : "Lyrics"}
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Font Size Selector */}
-          <div className="flex items-center gap-1 bg-[#0A113A] border border-[#16244F] rounded-[10px] p-0.5">
-            <button
-              onClick={() => setFontSize("sm")}
-              className={`px-2 py-0.5 text-[10px] rounded-[6px] font-bold ${
-                fontSize === "sm" ? "bg-[#0098EA] text-white" : "text-[#9AA0AE]"
-              }`}
-            >
-              A-
-            </button>
-            <button
-              onClick={() => setFontSize("lg")}
-              className={`px-2 py-0.5 text-[10px] rounded-[6px] font-bold ${
-                fontSize === "lg" ? "bg-[#0098EA] text-white" : "text-[#9AA0AE]"
-              }`}
-            >
-              A
-            </button>
-            <button
-              onClick={() => setFontSize("xl")}
-              className={`px-2 py-0.5 text-[10px] rounded-[6px] font-bold ${
-                fontSize === "xl" ? "bg-[#0098EA] text-white" : "text-[#9AA0AE]"
-              }`}
-            >
-              A+
-            </button>
-          </div>
-
-          {/* Translation Toggle */}
+        <div className="flex items-center gap-1.5">
           <button
-            onClick={() => setShowTranslation(!showTranslation)}
-            className={`p-1.5 rounded-[10px] border transition-all text-xs flex items-center gap-1 font-semibold ${
-              showTranslation
-                ? "bg-[#0098EA] text-white border-[#0098EA]"
-                : "bg-[#0A113A] border-[#16244F] text-[#9AA0AE]"
-            }`}
-            title="Toggle Translation"
+            type="button"
+            onClick={() => {
+              const sizes: Array<"sm" | "base" | "lg" | "xl"> = ["sm", "base", "lg", "xl"];
+              const next = sizes[(sizes.indexOf(fontSize) + 1) % sizes.length];
+              setFontSize(next);
+            }}
+            className="p-1.5 rounded-[var(--tj-radius-sm,8px)] text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F] transition-colors cursor-pointer border-none bg-transparent"
+            title="Cycle font size"
+            aria-label="Cycle lyrics font size"
           >
-            <Languages className="w-3.5 h-3.5" />
-            <span className="text-[10px]">Trans</span>
+            <Type className="w-3.5 h-3.5" />
           </button>
 
           {onClose && (
             <button
+              type="button"
               onClick={onClose}
-              className="p-1.5 text-[#9AA0AE] hover:text-[#F2F4F8] rounded-[10px]"
+              aria-label="Close lyrics"
+              className="p-1.5 rounded-[var(--tj-radius-sm,8px)] text-[#9AA0AE] hover:text-[#F2F4F8] hover:bg-[#16244F] transition-colors cursor-pointer border-none bg-transparent"
             >
               <X className="w-4 h-4" />
             </button>
@@ -154,58 +132,60 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = ({
         </div>
       </div>
 
-      {/* Lyrics Scrollable Area */}
+      {/* Scrollable Lyrics Content */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto space-y-6 py-6 pr-2 scrollbar-thin scrollbar-thumb-[#16244F]"
+        className="flex-1 overflow-y-auto space-y-4 py-4 px-2 scrollbar-thin scrollbar-thumb-[#16244F] max-h-[300px]"
       >
-        {lyrics.map((line, idx) => {
-          const isActive = idx === activeIndex;
-          return (
-            <motion.div
-              key={idx}
-              ref={isActive ? activeLineRef : null}
-              onClick={() => onSeek(line.time)}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              className={`cursor-pointer transition-all duration-300 p-2.5 rounded-[12px] group ${
-                isActive
-                  ? "bg-[#0A113A] border border-[#0098EA]/40 shadow-lg shadow-[#0098EA]/10 opacity-100"
-                  : "hover:bg-[#0A113A]/50 opacity-40 hover:opacity-80"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <p
-                  className={`${fontSizeClasses[fontSize]} transition-colors ${
-                    isActive ? "text-[#F2F4F8]" : "text-[#9AA0AE]"
-                  }`}
-                >
-                  {line.text}
-                </p>
+        {lyrics.length === 0 ? (
+          <div className="text-center py-10 space-y-2">
+            <Mic2 className="w-7 h-7 text-[#9AA0AE]/50 mx-auto" />
+            <p className="text-xs font-semibold text-[#F2F4F8]">No lyrics available for this track.</p>
+            <p className="text-[11px] text-[#9AA0AE]">
+              Lyrics will appear here when provided by the artist.
+            </p>
+          </div>
+        ) : (
+          lyrics.map((line, index) => {
+            const isActive = index === activeIndex;
+            const isPast = hasTimestamps && activeIndex > index;
+            const isSeekable = line.time !== null;
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
+            return (
+              <motion.p
+                key={`${index}-${line.text.slice(0, 12)}`}
+                ref={isActive ? activeLineRef : null}
+                onClick={() => {
+                  if (line.time !== null) {
                     onSeek(line.time);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 p-1 bg-[#0098EA] text-white rounded-full text-xs transition-opacity"
-                  title="Seek to line"
-                >
-                  <Play className="w-3 h-3 fill-current" />
-                </button>
-              </div>
-
-              {showTranslation && line.translation && (
-                <p className="text-xs text-[#0098EA] mt-1 font-medium italic">
-                  {line.translation}
-                </p>
-              )}
-            </motion.div>
-          );
-        })}
+                  }
+                }}
+                animate={{
+                  scale: isActive ? 1.03 : 1,
+                  opacity: isActive ? 1 : isPast ? 0.55 : hasTimestamps ? 0.65 : 0.9,
+                }}
+                transition={{ duration: 0.2 }}
+                className={`group flex items-start gap-2 transition-colors duration-200 ${
+                  isSeekable ? "cursor-pointer hover:text-[#F2F4F8]" : ""
+                } ${fontSizeClasses[fontSize]} ${
+                  isActive
+                    ? "text-[#FFFFFF] font-extrabold drop-shadow-[0_0_8px_rgba(0,180,216,0.5)]"
+                    : "text-[#9AA0AE] font-semibold"
+                }`}
+              >
+                {isSeekable && (
+                  <Play className="w-3 h-3 mt-1.5 text-[var(--tj-color-brand-primary,#00B4D8)] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                )}
+                <span className="leading-snug">{line.text}</span>
+              </motion.p>
+            );
+          })
+        )}
       </div>
     </div>
   );
-};
+});
+
+LyricsSheet.displayName = "LyricsSheet";
 
 export default LyricsSheet;

@@ -281,9 +281,17 @@ export const Discover: React.FC = () => {
       playlists: allUserPlaylists.filter(
         (p) =>
           p.title?.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q)
+          p.description?.toLowerCase().includes(q) ||
+          p.creator?.toLowerCase().includes(q)
       ),
-      nfts: allNFTs.filter((n) => n.title?.toLowerCase().includes(q)),
+      nfts: allNFTs.filter(
+        (n) =>
+          n.title?.toLowerCase().includes(q) ||
+          n.creator?.toLowerCase().includes(q) ||
+          n.artist?.toLowerCase().includes(q) ||
+          n.nftCollection?.toLowerCase().includes(q) ||
+          n.description?.toLowerCase().includes(q)
+      ),
       users: firestoreUsers.filter(
         (u) =>
           u.name?.toLowerCase().includes(q) ||
@@ -566,6 +574,10 @@ export const Discover: React.FC = () => {
                 followedUserIds={followedUserIds}
                 onToggleFollow={toggleFollowUser}
                 onClearQuery={() => setQuery('')}
+                onResetFilter={() => setActiveFilter('all')}
+                onSelectSuggestion={handleSelectSearchTerm}
+                suggestedQueries={QUICK_VIBES.slice(0, 6)}
+                suggestedTracks={recommendedTracks.slice(0, 4)}
               />
             </motion.div>
           )

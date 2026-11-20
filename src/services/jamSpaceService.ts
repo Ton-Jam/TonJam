@@ -170,8 +170,42 @@ export const jamSpaceService = {
         hasMore
       };
     } catch (error) {
-      handleFirestoreError(error, OperationType.LIST, POSTS_COLLECTION);
-      return { posts: [], lastVisible: null, hasMore: false };
+      // Fallback: fetch without orderBy if an index/field mismatch occurs
+      try {
+        const fallbackSnap = await getDocs(query(collection(db, POSTS_COLLECTION), limit(pageSize)));
+        const posts: SocialPost[] = fallbackSnap.docs
+          .map(normalizePostDoc)
+          .filter((p) => p.moderationStatus !== 'removed' && !p.replyToPostId)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return {
+          posts,
+          lastVisible: null,
+          hasMore: false
+        };
+      } catch (fallbackErr) {
+        handleFirestoreError(fallbackErr, OperationType.LIST, POSTS_COLLECTION);
+        return { posts: [], lastVisible: null, hasMore: false };
+      }
+    }
+  },
+
+  /**
+   * Fetches all account IDs a user follows from the canonical /follows collection
+   */
+  async fetchFollowingIds(userId: string): Promise<string[]> {
+    if (!userId) return [];
+    try {
+      const q = query(
+        collection(db, FOLLOWS_COLLECTION),
+        where('followerId', '==', userId),
+        limit(200)
+      );
+      const snap = await getDocs(q);
+      return snap.docs
+        .map((d) => String(d.data()?.followingId || ''))
+        .filter(Boolean);
+    } catch {
+      return [];
     }
   },
 
@@ -604,7 +638,7 @@ export const jamSpaceService = {
   },
 
   /**
-   * Follows or unfollows a user idempotently
+   * Follows or unfollows a user idempotently (resilient if target/follower user docs do not yet exist)
    */
   async toggleFollow(follower: PostAuthor, followingId: string): Promise<{ isFollowing: boolean }> {
     if (follower.uid === followingId) {
@@ -619,12 +653,21 @@ export const jamSpaceService = {
     const followSnap = await getDoc(followRef);
     const isCurrentlyFollowing = followSnap.exists();
 
+    const [followerDoc, targetDoc] = await Promise.all([
+      getDoc(followerUserRef).catch(() => null),
+      getDoc(targetUserRef).catch(() => null)
+    ]);
+
     const batch = writeBatch(db);
 
     if (isCurrentlyFollowing) {
       batch.delete(followRef);
-      batch.update(followerUserRef, { following: increment(-1) });
-      batch.update(targetUserRef, { followers: increment(-1) });
+      if (followerDoc?.exists()) {
+        batch.update(followerUserRef, { following: increment(-1) });
+      }
+      if (targetDoc?.exists()) {
+        batch.update(targetUserRef, { followers: increment(-1) });
+      }
       await batch.commit();
       return { isFollowing: false };
     } else {
@@ -634,8 +677,12 @@ export const jamSpaceService = {
         followingId,
         createdAt: serverTimestamp()
       });
-      batch.update(followerUserRef, { following: increment(1) });
-      batch.update(targetUserRef, { followers: increment(1) });
+      if (followerDoc?.exists()) {
+        batch.update(followerUserRef, { following: increment(1) });
+      }
+      if (targetDoc?.exists()) {
+        batch.update(targetUserRef, { followers: increment(1) });
+      }
       await batch.commit();
 
       await dispatchSocialNotification({

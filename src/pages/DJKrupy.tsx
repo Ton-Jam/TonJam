@@ -3,9 +3,10 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Send, Sparkles, Music, Mic2, Loader2, RefreshCw, 
-  AlertCircle, ChevronLeft, Disc, Library, Radio,
+  AlertCircle, Disc, Library, Radio,
   Share2, Zap, FileText, Info
 } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -106,10 +107,17 @@ const DJKrupy: React.FC = () => {
       </div>
 
       {/* Improved DJ Krupy Header */}
-      <header className="px-6 h-16 border-b border-blue-500/20 flex items-center justify-between bg-background/80 backdrop-blur-2xl z-20 shrink-0">
+      <header
+        style={{
+          background: 'var(--tj-header-bg, transparent)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+        className="px-6 h-16 border-none shadow-none flex items-center justify-between bg-transparent backdrop-blur-none backdrop-filter-none z-20 shrink-0"
+      >
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full hover:bg-muted/50 h-10 w-10">
-            <ChevronLeft className="h-6 w-6 text-foreground" />
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full hover:bg-white/10 h-11 w-11 text-[#FFFFFF] bg-transparent border-none" aria-label="Go back">
+            <TonJamBackArrow size="md" />
           </Button>
           <div className="flex items-center gap-4">
             <div className="relative group">
@@ -389,7 +397,7 @@ const DJKrupy: React.FC = () => {
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 z-50 bg-background/95 backdrop-blur-3xl flex flex-col"
             >
-                <header className="px-6 py-8 flex items-center justify-between border-b border-white/5 shrink-0">
+                <header className="px-6 py-8 flex items-center justify-between bg-transparent backdrop-blur-none border-none shadow-none shrink-0">
                     <div className="flex items-center gap-6">
                         <Avatar className="h-16 w-16 border border-blue-500 shadow-2xl">
                             <AvatarImage src={currentTrack.coverUrl} />

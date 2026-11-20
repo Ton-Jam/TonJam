@@ -40,13 +40,13 @@ export const MarketplaceStatistics: React.FC<MarketplaceStatisticsProps> = ({ st
         {statItems.map((item, index) => (
           <div
             key={index}
-            className="bg-[#0A1628] border border-[#22374D] rounded-xl p-3.5 sm:p-4 flex flex-col justify-between transition-colors hover:border-[#38516B]"
+            className="bg-[#0A1628] border border-[#22374D] rounded-[var(--tj-radius-sm,8px)] p-3.5 sm:p-4 flex flex-col justify-between transition-colors hover:border-[#38516B]"
           >
             <div className="flex items-center justify-between gap-1 mb-2">
               <span className="text-[11px] font-medium text-[#8C8C8C] uppercase tracking-wider truncate">
                 {item.title}
               </span>
-              <div className="p-1.5 rounded-lg bg-[#0F1C32] border border-[#22374D]/50">
+              <div className="p-1.5 rounded-[var(--tj-radius-compact,5px)] bg-[#0F1C32] border border-[#22374D]/50">
                 {item.icon}
               </div>
             </div>

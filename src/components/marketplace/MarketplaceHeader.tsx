@@ -1,7 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, X, Wallet, Sparkles } from "lucide-react";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { useOptionalWallet } from "@/contexts/WalletContext";
+import { safeOpenTonConnectModal } from "@/lib/tonConnectGuard";
 import NotificationBell from "@/components/NotificationBell";
 import { cn } from "@/lib/utils";
 
@@ -18,27 +20,26 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
   onMintClick,
   className,
 }) => {
+  const navigate = useNavigate();
   const wallet = useOptionalWallet();
   const tonAddressFallback = useTonAddress();
   const [tonConnectUI] = useTonConnectUI();
 
   const rawAddress = wallet?.address || tonAddressFallback || "";
   const isConnected = Boolean(wallet?.isConnected || rawAddress);
-  const tonBalance = wallet?.tonBalance ?? 0;
-  const networkLabel = wallet?.isTestnet ? "Testnet" : "TON";
-
-  const shortAddress = rawAddress
-    ? `${rawAddress.slice(0, 4)}...${rawAddress.slice(-4)}`
-    : "";
 
   const handleWalletClick = () => {
+    if (isConnected) {
+      navigate("/wallet");
+      return;
+    }
     if (wallet?.connectWallet) {
       wallet.connectWallet();
       return;
     }
     if (tonConnectUI) {
       try {
-        tonConnectUI.openModal();
+        safeOpenTonConnectModal(tonConnectUI);
       } catch (err) {
         console.warn("[MarketplaceHeader] TON Connect modal error:", err);
       }
@@ -47,8 +48,13 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
 
   return (
     <header
+      style={{
+        background: "var(--tj-header-bg, transparent)",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+      }}
       className={cn(
-        "space-y-3 pt-3 pb-3.5 border-b border-[var(--tj-color-border-subtle)] bg-[var(--tj-color-bg-secondary,#0D1628)]/90 backdrop-blur-md",
+        "space-y-3 pt-3 pb-3.5 border-none shadow-none bg-transparent backdrop-blur-none backdrop-filter-none",
         className
       )}
     >
@@ -63,46 +69,28 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {onMintClick && (
-            <button
-              type="button"
-              onClick={onMintClick}
-              className="min-h-[38px] px-2.5 sm:px-3 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] text-[var(--tj-color-brand-primary,#00B4D8)] hover:text-[var(--tj-color-text-primary,#FFFFFF)] inline-flex items-center gap-1.5 text-[11px] font-semibold transition-colors cursor-pointer outline-none whitespace-nowrap"
-            >
-              <Sparkles className="w-3.5 h-3.5 shrink-0" />
-              <span className="hidden sm:inline">Mint NFT</span>
-              <span className="sm:hidden">Mint</span>
-            </button>
-          )}
-
           <button
             type="button"
             onClick={handleWalletClick}
             className={cn(
-              "min-h-[38px] px-2.5 sm:px-3 rounded-[var(--tj-radius-compact,5px)] inline-flex items-center gap-1.5 text-[11px] font-semibold transition-colors cursor-pointer border outline-none whitespace-nowrap",
+              "relative w-10 h-10 min-w-[40px] min-h-[40px] rounded-[var(--tj-radius-pill,999px)] inline-flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] transition-colors cursor-pointer border-none outline-none focus-visible:ring-2 focus-visible:ring-[var(--tj-color-border-focus,#00B4D8)] shrink-0",
               isConnected
-                ? "bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] text-[var(--tj-color-brand-primary,#00B4D8)]"
-                : "bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] border-[var(--tj-color-brand-primary,#00B4D8)] text-[var(--tj-color-text-primary,#FFFFFF)]"
+                ? "text-[var(--tj-color-brand-primary,#00B4D8)]"
+                : "text-[#FFFFFF]"
             )}
-            aria-label="TON Wallet Status"
+            aria-label={isConnected ? "TON Wallet Connected" : "Connect TON Wallet"}
+            title={isConnected ? "TON Wallet Connected" : "Connect TON Wallet"}
           >
-            <Wallet className="w-3.5 h-3.5 shrink-0" />
-            <span className="font-mono tabular-nums text-[11px] truncate max-w-[120px] sm:max-w-[140px]">
-              {isConnected
-                ? tonBalance > 0
-                  ? `${tonBalance.toFixed(1)} ${networkLabel}`
-                  : shortAddress
-                : "Connect Wallet"}
-            </span>
+            <Wallet className="w-5 h-5 shrink-0" />
           </button>
 
           <NotificationBell />
         </div>
       </div>
 
-      <div className="px-3">
+      <div className="px-3 space-y-2.5">
         <div
-          className="search-input-wrapper relative flex items-center w-full h-10 bg-[var(--tj-color-input-background,#0B1F36)] rounded-[var(--tj-radius-compact,5px)] border border-[var(--tj-color-border-subtle)] focus-within:border-[var(--tj-color-border-focus,#00B4D8)] transition-colors"
+          className="search-input-wrapper relative flex items-center w-full h-10 bg-[var(--tj-color-input-background,#0B1F36)] rounded-[var(--tj-radius-sm,8px)] border border-[var(--tj-color-border-subtle)] focus-within:border-[var(--tj-color-border-focus,#00B4D8)] transition-colors"
         >
           <Search className="ml-3 w-4 h-4 text-[var(--tj-color-text-secondary,#C2C7CD)] shrink-0 pointer-events-none" />
           <input
@@ -124,6 +112,19 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
             </button>
           )}
         </div>
+
+        {onMintClick && (
+          <div className="flex items-center">
+            <button
+              type="button"
+              onClick={onMintClick}
+              className="min-h-[36px] px-4 py-1.5 rounded-[var(--tj-radius-pill,999px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] active:bg-[var(--tj-color-brand-pressed,#009CC0)] text-[var(--tj-color-text-primary,#FFFFFF)] border-none inline-flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer outline-none whitespace-nowrap"
+            >
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
+              <span>Mint NFT</span>
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

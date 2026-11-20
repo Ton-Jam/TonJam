@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { cn } from '@/lib/utils';
 
 export type PageHeaderProps = {
@@ -18,7 +18,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   showBack = true,
   onBack,
   rightContent,
-  transparent = false,
+  transparent = true,
   sticky = true,
   className,
 }) => {
@@ -34,12 +34,15 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 
   return (
     <header
+      data-transparent={transparent ? 'true' : 'false'}
+      style={{
+        background: 'var(--tj-header-bg, transparent)',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
+      }}
       className={cn(
-        "w-full h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between z-30 transition-all select-none border-none",
-        sticky ? "sticky top-0" : "relative",
-        transparent
-          ? "bg-transparent backdrop-blur-none backdrop-filter-none"
-          : "bg-[#0e285a]/85 backdrop-blur-xl",
+        'w-full h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between z-30 transition-all select-none border-none shadow-none bg-transparent backdrop-blur-none backdrop-filter-none',
+        sticky ? 'sticky top-0' : 'relative',
         className
       )}
     >
@@ -49,10 +52,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           <button
             type="button"
             onClick={handleBack}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] -ml-2 rounded-full text-slate-200 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none shrink-0 bg-transparent"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] -ml-2 rounded-full text-[#FFFFFF] hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center cursor-pointer border-none outline-none shrink-0 bg-transparent"
             aria-label="Go back"
           >
-            <ArrowLeftIcon className="w-5 h-5" strokeWidth={2.5} />
+            <TonJamBackArrow size="md" />
           </button>
         )}
         <h1 className="text-[18px] sm:text-[20px] font-bold text-white tracking-tight truncate">

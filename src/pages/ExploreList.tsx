@@ -151,12 +151,19 @@ const ExploreList: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-500 w-full max-w-full px-2 py-4 sm:py-6 pb-24 text-left">
       {/* Sticky Header with Explicit Back Navigation */}
-      <div className="sticky top-0 left-0 right-0 z-40 bg-black/95 backdrop-blur-md pt-2 pb-4 mb-6">
+      <div
+        style={{
+          background: 'var(--tj-header-bg, transparent)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+        className="sticky top-0 left-0 right-0 z-40 bg-transparent backdrop-blur-none backdrop-filter-none border-none shadow-none pt-2 pb-4 mb-6"
+      >
         <div className="flex items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-3 sm:gap-4 flex-1">
             <BackButton 
-              className="p-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] text-white transition-all shrink-0"
-              iconClassName="h-4 w-4 text-white"
+              className="p-2.5 rounded-full bg-transparent hover:bg-white/10 text-[#FFFFFF] transition-all shrink-0"
+              iconClassName="h-5 w-5 text-[#FFFFFF]"
             />
             
             {isSearchActive ? (

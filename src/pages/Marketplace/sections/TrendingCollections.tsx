@@ -57,7 +57,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
             <button
               type="button"
               onClick={() => scroll("left")}
-              className="w-8 h-8 rounded-lg bg-[#0A1628] border border-[#22374D] text-[#C2C7CD] hover:text-white flex items-center justify-center transition-colors focus:outline-none"
+              className="w-8 h-8 rounded-[var(--tj-radius-compact,5px)] bg-[#0A1628] border border-[#22374D] text-[#C2C7CD] hover:text-white flex items-center justify-center transition-colors focus:outline-none"
               aria-label="Previous collections"
             >
               <ChevronLeft className="w-4 h-4" aria-hidden="true" />
@@ -65,7 +65,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
             <button
               type="button"
               onClick={() => scroll("right")}
-              className="w-8 h-8 rounded-lg bg-[#0A1628] border border-[#22374D] text-[#C2C7CD] hover:text-white flex items-center justify-center transition-colors focus:outline-none"
+              className="w-8 h-8 rounded-[var(--tj-radius-compact,5px)] bg-[#0A1628] border border-[#22374D] text-[#C2C7CD] hover:text-white flex items-center justify-center transition-colors focus:outline-none"
               aria-label="Next collections"
             >
               <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -83,10 +83,10 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
           <div
             key={col.id}
             onClick={() => onSelectCollection(col)}
-            className="min-w-[240px] max-w-[240px] bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-2xl overflow-hidden p-3.5 cursor-pointer select-none snap-start flex flex-col justify-between transition-all duration-200"
+            className="min-w-[240px] max-w-[240px] bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-[var(--tj-radius-sm,8px)] overflow-hidden p-3.5 cursor-pointer select-none snap-start flex flex-col justify-between transition-all duration-200"
           >
             {/* Collection Cover Image */}
-            <div className="aspect-square w-full rounded-xl overflow-hidden bg-[#07111F] relative mb-3">
+            <div className="aspect-square w-full rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[#07111F] relative mb-3">
               <img
                 src={col.imageUrl || getPlaceholderImage(col.name)}
                 alt={col.name}

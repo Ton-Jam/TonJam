@@ -26,7 +26,7 @@ export const TopBuyers: React.FC<TopBuyersProps> = ({
             <div
               key={buyer.id}
               onClick={() => onSelectBuyer(buyer)}
-              className="bg-[#0A0A0A] border border-white/12 rounded-[5px] p-2.5 flex items-center justify-between cursor-pointer transition-colors hover:border-white/20"
+              className="bg-[#0A0A0A] border border-white/12 rounded-[var(--tj-radius-sm,8px)] p-2.5 flex items-center justify-between cursor-pointer transition-colors hover:border-white/20"
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 {/* Ranking Index */}

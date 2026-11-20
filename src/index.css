@@ -325,9 +325,14 @@
   /* Header Tokens */
   --header-background: transparent;
   --header-border: transparent;
-  --header-scrolled-background: rgba(10, 22, 40, 0.85);
+  --header-scrolled-background: transparent;
   --header-scrolled-border: transparent;
-  --header-blur: 18px;
+  --header-blur: 0px;
+  --tj-header-bg: transparent;
+  --tj-header-backdrop: none;
+  --tj-icon-back-color: #FFFFFF;
+  --tj-icon-back-size: 20px;
+  --tj-icon-back-stroke: 2.25;
 
   /* Glass / Backdrop Tokens */
   --glass-background: var(--tj-bg-glass);

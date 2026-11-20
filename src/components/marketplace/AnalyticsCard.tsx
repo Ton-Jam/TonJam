@@ -24,7 +24,7 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({
       whileHover={{ y: -4, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        "flex-shrink-0 w-48 p-4 rounded-2xl bg-[#121824] transition-colors duration-300",
+        "flex-shrink-0 w-48 p-4 rounded-[var(--tj-radius-sm,8px)] bg-[#121824] transition-colors duration-300",
         className
       )}
     >

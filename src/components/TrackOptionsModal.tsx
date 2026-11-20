@@ -14,9 +14,9 @@ import {
   Flag, 
   ChevronRight, 
   X,
-  ArrowLeft,
   BadgeCheck
 } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { Track } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
@@ -277,15 +277,22 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
       {/* Ambient background glow without border lines */}
       <div className="fixed top-0 right-1/4 w-96 h-96 bg-[#00B4D8]/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
-      {/* Screen Top Header Bar - Clean and borderless */}
-      <div className="sticky top-0 z-20 bg-[#07111F]/95 backdrop-blur-xl px-4 sm:px-6 py-3.5 flex items-center justify-between border-none">
+      {/* Screen Top Header Bar - Clean, transparent and borderless */}
+      <div
+        style={{
+          background: 'var(--tj-header-bg, transparent)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+        className="sticky top-0 z-20 bg-transparent backdrop-blur-none backdrop-filter-none px-4 sm:px-6 py-3.5 flex items-center justify-between border-none shadow-none"
+      >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close track options"
-          className="flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white transition-all text-xs font-semibold cursor-pointer border-none"
+          className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-full bg-transparent hover:bg-white/10 text-[#FFFFFF] transition-all text-xs font-semibold cursor-pointer border-none"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <TonJamBackArrow size="sm" />
           <span>Back</span>
         </button>
 

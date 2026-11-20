@@ -12,7 +12,7 @@ export const NFTCardSkeleton: React.FC<SkeletonProps> = ({ className }) => {
       aria-label="Loading NFT item"
       className={cn(
         "w-full min-w-0 flex flex-col justify-between",
-        "bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-compact,5px)] p-2.5 select-none animate-pulse",
+        "bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-sm,8px)] p-2.5 select-none animate-pulse",
         className
       )}
     >
@@ -42,7 +42,7 @@ export const CollectionCardSkeleton: React.FC<SkeletonProps> = ({ className }) =
       aria-label="Loading collection item"
       className={cn(
         "w-full min-w-0 flex flex-col justify-between",
-        "bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-compact,5px)] p-2.5 select-none animate-pulse",
+        "bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-sm,8px)] p-2.5 select-none animate-pulse",
         className
       )}
     >

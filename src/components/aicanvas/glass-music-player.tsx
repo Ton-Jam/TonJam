@@ -7,7 +7,7 @@ import { SkipForward } from '@phosphor-icons/react/dist/ssr/SkipForward'
 import { Heart } from '@phosphor-icons/react/dist/ssr/Heart'
 import { Shuffle } from '@phosphor-icons/react/dist/ssr/Shuffle'
 import { Queue } from '@phosphor-icons/react/dist/ssr/Queue'
-import { ArrowLeft } from '@phosphor-icons/react/dist/ssr/ArrowLeft'
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow'
 
 const TRACKS = [
   { title: 'Midnight Drive',  artist: 'Neon Collective', color: '#FF6BF5', duration: 234 },
@@ -114,12 +114,12 @@ export default function GlassMusicPlayer() {
           {/* ── Top bar ───────────────────────────────────────────────────────── */}
           <div className="mb-6 flex w-full items-center justify-between">
             <motion.button
-              whileHover={{ scale: 1.15, color: 'rgba(255,255,255,0.8)' }}
+              whileHover={{ scale: 1.15 }}
               whileTap={{ scale: 0.85 }}
-              className="cursor-pointer"
-              style={{ color: 'rgba(255,255,255,0.35)' }}
+              className="cursor-pointer text-[#FFFFFF]"
+              aria-label="Go back"
             >
-              <ArrowLeft size={20} weight="regular" />
+              <TonJamBackArrow size="md" />
             </motion.button>
 
             <span

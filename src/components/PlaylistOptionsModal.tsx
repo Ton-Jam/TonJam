@@ -9,12 +9,12 @@ import {
   Play, 
   ListPlus, 
   Users, 
-  ArrowLeft,
   Check,
   Folder,
   Music2,
   FolderMinus
 } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { Playlist, PlaylistFolder } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { toast } from 'sonner';
@@ -214,9 +214,9 @@ const PlaylistOptionsModal: React.FC<PlaylistOptionsModalProps> = ({
                 >
                   <button 
                     onClick={() => setShowFolders(false)} 
-                    className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-white/[0.06] text-slate-300 hover:text-white transition-all text-xs font-semibold cursor-pointer border-none bg-transparent"
+                    className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-white/[0.06] text-white transition-all text-xs font-semibold cursor-pointer border-none bg-transparent"
                   >
-                    <ArrowLeft className="w-4 h-4 text-[#00B4D8]" />
+                    <TonJamBackArrow size="sm" />
                     <span>Back to Options</span>
                   </button>
 

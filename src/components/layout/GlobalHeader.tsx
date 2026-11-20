@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { Bell, Wallet, Search, ArrowLeft, MoreHorizontal, LayoutDashboard } from 'lucide-react';
+import { Bell, Wallet, Search, MoreHorizontal, LayoutDashboard } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { useNavigate } from 'react-router-dom';
 import { APP_LOGO } from '@/constants';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -66,23 +67,26 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   return (
     <motion.header
       className={`
-        w-full h-16 px-4 flex items-center justify-between z-40 transition-transform duration-300 ease-in-out
+        w-full h-16 px-4 flex items-center justify-between z-40 transition-transform duration-300 ease-in-out border-none shadow-none bg-transparent backdrop-blur-none backdrop-filter-none
         ${isSticky ? 'sticky top-0' : 'relative'}
         ${isHidden ? '-translate-y-full' : 'translate-y-0'}
       `}
       style={{
-        backgroundColor: isScrolled ? '#000000' : 'transparent',
+        background: 'var(--tj-header-bg, transparent)',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
       }}
     >
       {/* Left section: Back button or Logo + Title */}
       <div className="flex items-center gap-2">
         {onBack ? (
           <button
+            type="button"
             onClick={onBack}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 active:scale-95 transition-all text-white border-none bg-transparent cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-white/10 active:scale-95 transition-all text-[#FFFFFF] border-none bg-transparent cursor-pointer"
             aria-label="Go back"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <TonJamBackArrow size="md" />
           </button>
         ) : (
           <div className="flex items-center gap-2">

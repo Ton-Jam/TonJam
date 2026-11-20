@@ -54,11 +54,11 @@ export function formatSecondsToTimestamp(totalSeconds: number): string {
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 }
 
-export const TrackComments: React.FC<TrackCommentsProps> = ({
+export const TrackComments: React.FC<TrackCommentsProps> = React.memo(({
   track,
   onClose,
   className = "",
-  isSidebar = true
+  isSidebar: _isSidebar = true
 }) => {
   const { progress, seek, userProfile, isPlaying, togglePlay } = useAudio();
 
@@ -71,7 +71,6 @@ export const TrackComments: React.FC<TrackCommentsProps> = ({
   const [attachTimestamp, setAttachTimestamp] = useState<boolean>(true);
   const [customTimeSeconds, setCustomTimeSeconds] = useState<number>(currentPlaybackSeconds);
   const [sortMode, setSortMode] = useState<"chronological" | "newest" | "top">("chronological");
-  const [selectedTag, setSelectedTag] = useState<string>("all");
 
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -102,6 +101,11 @@ export const TrackComments: React.FC<TrackCommentsProps> = ({
     if (track) {
       try {
         localStorage.setItem(`${STORAGE_KEY_PREFIX}${track.id}`, JSON.stringify(newComments));
+        window.dispatchEvent(
+          new CustomEvent("tonjam:track-comments-updated", {
+            detail: { trackId: track.id, count: newComments.length },
+          })
+        );
       } catch (e) {
         console.error("Failed to save comments:", e);
       }
@@ -141,7 +145,7 @@ export const TrackComments: React.FC<TrackCommentsProps> = ({
       formattedTime: formatSecondsToTimestamp(timeSecs),
       createdAt: "Just now",
       likes: 0,
-      badge: "Passionate Listener"
+      badge: userProfile?.isVerifiedArtist ? "Artist" : undefined
     };
 
     const updated = [newComment, ...comments];
@@ -214,9 +218,11 @@ export const TrackComments: React.FC<TrackCommentsProps> = ({
           {/* Close Button */}
           {onClose && (
             <button
+              type="button"
               onClick={onClose}
               className="p-1.5 text-[#9AA0AE] hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
               title="Close Comments"
+              aria-label="Close Comments"
             >
               <X className="w-4 h-4" />
             </button>
@@ -348,7 +354,8 @@ export const TrackComments: React.FC<TrackCommentsProps> = ({
                     <img
                       src={comment.userAvatar}
                       alt={comment.userName}
-                      className="w-6 h-6 rounded-full object-cover border border-[#18285C]"
+                      referrerPolicy="no-referrer"
+                      className="w-6 h-6 rounded-full object-cover"
                     />
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-xs font-bold text-white">{comment.userName}</span>
@@ -462,6 +469,8 @@ export const TrackComments: React.FC<TrackCommentsProps> = ({
       </div>
     </div>
   );
-};
+});
+
+TrackComments.displayName = "TrackComments";
 
 export default TrackComments;

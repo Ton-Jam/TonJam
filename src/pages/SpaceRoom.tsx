@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import {
   Mic,
   MicOff,
@@ -24,7 +25,6 @@ import {
   Music,
   Play,
   Pause,
-  ChevronLeft,
   Pin,
   ExternalLink,
   Zap,
@@ -758,14 +758,23 @@ export const SpaceRoom: React.FC = () => {
       </div>
 
       {/* TOP ROOM BAR HEADER */}
-      <div className="sticky top-0 z-40 bg-[#0a0e2e]/80 backdrop-blur-xl border-b border-white/5 px-4 sm:px-8 py-4 flex items-center justify-between gap-4">
+      <div
+        style={{
+          background: 'var(--tj-header-bg, transparent)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+        className="sticky top-0 z-40 bg-transparent backdrop-blur-none backdrop-filter-none border-none shadow-none px-4 sm:px-8 py-4 flex items-center justify-between gap-4"
+      >
         <div className="flex items-center gap-3 min-w-0">
           <button
+            type="button"
             onClick={handleLeaveClick}
-            className="p-2 bg-white/5 hover:bg-white/10 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer shrink-0"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center bg-transparent hover:bg-white/10 rounded-full text-[#FFFFFF] transition-colors cursor-pointer shrink-0 border-none"
             title="Back to JamSpace"
+            aria-label="Back to JamSpace"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <TonJamBackArrow size="md" />
           </button>
 
           <div className="min-w-0 space-y-0.5">

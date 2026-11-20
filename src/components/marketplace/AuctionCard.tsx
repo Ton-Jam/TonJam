@@ -136,7 +136,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
       }}
       className={cn(
         "flex flex-col justify-between bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-md",
-        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-compact,5px)] p-2.5",
+        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-sm,8px)] p-2.5",
         "cursor-pointer transition-colors duration-150 select-none text-left",
         layout === "shelf"
           ? "w-[220px] sm:w-[248px] shrink-0 snap-start"

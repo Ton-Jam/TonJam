@@ -169,6 +169,14 @@
   --tj-color-chip-background: #102943;
   --tj-color-chip-active-background: #063C55;
 
+  /* Header & Back Arrow Tokens */
+  --tj-header-bg: transparent;
+  --tj-header-backdrop: none;
+  --tj-header-border: none;
+  --tj-icon-back-color: #FFFFFF;
+  --tj-icon-back-size: 20px;
+  --tj-icon-back-stroke: 2.25;
+
   /* Aliases */
   --tj-surface-pressed: var(--tj-color-surface-pressed);
   --tj-surface-overlay: var(--tj-color-surface-overlay);

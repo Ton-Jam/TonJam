@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { BadgeCheck, Globe, Calendar, Music, ShieldCheck, Settings, Sparkles, ArrowLeft, Camera, LayoutDashboard, QrCode } from 'lucide-react';
+import { BadgeCheck, Globe, Calendar, Music, ShieldCheck, Settings, Sparkles, Camera, LayoutDashboard, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { ProfileData } from '../../components/profile/ProfileTypes';
 import { ArtistVerificationBadge } from '../../components/ArtistVerificationBadge';
 import { ProfileQRCodeModal } from '../../components/profile/ProfileQRCodeModal';
@@ -40,11 +41,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         {/* Top Floating Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 p-2.5 bg-black/70 hover:bg-black active:scale-95 text-white rounded-full transition-all cursor-pointer z-10"
+          className="absolute top-4 left-4 p-2.5 bg-transparent hover:bg-white/[0.08] active:scale-95 text-[#FFFFFF] rounded-full transition-all cursor-pointer z-10"
           title="Back"
           aria-label="Go Back"
         >
-          <ArrowLeft className="w-5 h-5 text-slate-300 hover:text-white" />
+          <TonJamBackArrow size="md" />
         </button>
         
         {/* Top Floating Settings, Dashboard & Share QR Buttons */}

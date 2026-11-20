@@ -23,6 +23,7 @@ import {
   ArrowDownUp,
   Wallet as WalletIcon
 } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAudio } from '@/contexts/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
@@ -207,15 +208,24 @@ const Wallet: React.FC = () => {
   return (
     <div className="w-full min-h-screen bg-[#080D1A] text-[#F5F7FB] pb-32 animate-in fade-in duration-500">
       {/* SCREEN HEADER */}
-      <div className="sticky top-0 z-30 bg-[#080D1A]/90 backdrop-blur-xl px-3 py-4">
+      <div
+        style={{
+          background: 'var(--tj-header-bg, transparent)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+        className="sticky top-0 z-30 bg-transparent backdrop-blur-none backdrop-filter-none border-none shadow-none px-3 py-4"
+      >
         <div className="w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="text-xs font-bold text-[#94A3B8] hover:text-white transition-colors cursor-pointer bg-[#111C30] px-3.5 py-2 rounded-xl"
+              className="min-h-[44px] min-w-[44px] flex items-center gap-1.5 text-xs font-bold text-[#FFFFFF] hover:bg-white/10 transition-colors cursor-pointer bg-transparent border-none px-2.5 py-2 rounded-full"
+              aria-label="Go back"
             >
-              Back
+              <TonJamBackArrow size="sm" />
+              <span>Back</span>
             </button>
             <div>
               <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight">

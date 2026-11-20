@@ -184,7 +184,7 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
         transition={{ duration: 0.25, ease: "easeOut" }}
         onClick={handleCardClick}
         className={cn(
-          "cursor-pointer group relative flex flex-col bg-[var(--tj-color-surface-default,#0D1628)] rounded-[var(--tj-radius-md,8px)] overflow-hidden transition-all duration-300",
+          "cursor-pointer group relative flex flex-col bg-[var(--tj-color-surface-default,#0D1628)] rounded-[var(--tj-radius-sm,8px)] overflow-hidden transition-all duration-300",
           className
         )}
       >
@@ -265,7 +265,7 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
         )}
 
         {nft.edition && (
-          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold tracking-widest uppercase px-2 py-0.5 rounded z-10">
+          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-[var(--tj-radius-compact,5px)] z-10">
             {nft.edition}
           </div>
         )}
@@ -295,7 +295,7 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
         <button
           onClick={handlePreviewToggle}
           className={cn(
-            "w-full py-2 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 mb-3 select-none",
+            "w-full py-2 px-3 rounded-[var(--tj-radius-sm,8px)] text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 mb-3 select-none",
             isPlayingPreview 
               ? "bg-[#2BE08C]/20 text-[#2BE08C] hover:bg-[#2BE08C]/35" 
               : "bg-[#5B6BFF]/10 text-[#5B6BFF] hover:bg-[#5B6BFF]/20"
@@ -332,7 +332,7 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
             <button
               onClick={handlePlayClick}
               className={cn(
-                "p-1.5 rounded-lg border-0 transition-all duration-200",
+                "p-1.5 rounded-[var(--tj-radius-compact,5px)] border-0 transition-all duration-200",
                 isCurrentlyPlaying
                   ? "bg-[#2BE08C]/15 text-[#2BE08C]"
                   : "bg-white/[0.04] hover:bg-white/[0.08] text-[#9AA0AE]"
@@ -347,7 +347,7 @@ export const MarketplaceNFTCard: React.FC<MarketplaceNFTCardProps> = ({
 
             <button
               onClick={handleMintClick}
-              className="px-2.5 py-1.5 bg-[#5B6BFF] hover:bg-[#5B6BFF]/90 text-white rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1 transition-all"
+              className="px-2.5 py-1.5 bg-[#5B6BFF] hover:bg-[#5B6BFF]/90 text-white rounded-[var(--tj-radius-compact,5px)] text-[9px] font-black uppercase tracking-widest flex items-center gap-1 transition-all"
             >
               <Wallet className="w-3 h-3" />
               View

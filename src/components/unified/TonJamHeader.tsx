@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 
 interface TonJamHeaderProps {
   title: string;
@@ -17,16 +17,23 @@ export const TonJamHeader: React.FC<TonJamHeaderProps> = ({
   rightAction,
 }) => {
   return (
-    <div className="sticky top-0 z-20 w-full px-5 py-4 bg-[#091326]/90 backdrop-blur-md flex items-center justify-between gap-3 select-none">
+    <div
+      style={{
+        background: 'var(--tj-header-bg, transparent)',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
+      }}
+      className="sticky top-0 z-20 w-full px-5 py-4 bg-transparent backdrop-blur-none backdrop-filter-none border-none shadow-none flex items-center justify-between gap-3 select-none"
+    >
       <div className="flex items-center gap-3 min-w-0">
         {showBack && (
           <button
             type="button"
             onClick={onBack}
-            className="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] active:scale-95 text-slate-200 flex items-center justify-center transition-all shrink-0"
+            className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-transparent hover:bg-white/10 active:scale-95 text-[#FFFFFF] flex items-center justify-center transition-all shrink-0 border-none cursor-pointer"
             aria-label="Go back"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <TonJamBackArrow size="md" />
           </button>
         )}
         <div className="flex flex-col min-w-0">

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Sparkles, ChevronRight, ArrowLeft, Music, ShieldCheck, 
+  Sparkles, ChevronRight, Music, ShieldCheck, 
   CheckCircle2, User, Wallet, Lock, 
   AlertCircle, RefreshCw
 } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { useToast } from '@/components/layout/ToastProvider';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
@@ -93,7 +94,7 @@ export const ArtistVerificationWizard: React.FC<ArtistVerificationWizardProps> =
           >
             {/* Upper Indicator Row / Steps Progress Bar */}
             {currentStep !== 'submitted' && (
-              <div className="bg-slate-950/40 px-6 py-4 flex items-center justify-between">
+              <div className="bg-transparent backdrop-blur-none border-none shadow-none px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 bg-[#0052FF]/10 text-[#0052FF] rounded-lg">
                     <Sparkles className="w-4 h-4" />
@@ -213,9 +214,9 @@ export const ArtistVerificationWizard: React.FC<ArtistVerificationWizardProps> =
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <button
                       onClick={() => setCurrentStep('welcome')}
-                      className="py-3 bg-white/5 hover:bg-white/10 active:scale-95 transition-all text-xs font-bold uppercase tracking-widest rounded-xl cursor-pointer flex items-center justify-center gap-1.5"
+                      className="py-3 bg-white/5 hover:bg-white/10 active:scale-95 transition-all text-xs font-bold uppercase tracking-widest rounded-xl cursor-pointer flex items-center justify-center gap-1.5 text-[#FFFFFF]"
                     >
-                      <ArrowLeft className="w-4 h-4" />
+                      <TonJamBackArrow size="sm" />
                       <span>Back</span>
                     </button>
                     <button
@@ -312,9 +313,9 @@ export const ArtistVerificationWizard: React.FC<ArtistVerificationWizardProps> =
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <button
                       onClick={() => setCurrentStep('spotify')}
-                      className="py-3 bg-white/5 hover:bg-white/10 active:scale-95 transition-all text-xs font-bold uppercase tracking-widest rounded-xl cursor-pointer flex items-center justify-center gap-1.5"
+                      className="py-3 bg-white/5 hover:bg-white/10 active:scale-95 transition-all text-xs font-bold uppercase tracking-widest rounded-xl cursor-pointer flex items-center justify-center gap-1.5 text-[#FFFFFF]"
                     >
-                      <ArrowLeft className="w-4 h-4" />
+                      <TonJamBackArrow size="sm" />
                       <span>Back</span>
                     </button>
                     <button

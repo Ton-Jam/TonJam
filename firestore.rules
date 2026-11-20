@@ -47,7 +47,9 @@ service cloud.firestore {
 
     function isValidPost(data) {
       return (!data.keys().contains('userId') || (data.userId is string && data.userId.size() <= 128))
-        && (!data.keys().contains('content') || (data.content is string && data.content.size() <= 5000));
+        && (!data.keys().contains('authorId') || (data.authorId is string && data.authorId.size() <= 128))
+        && (!data.keys().contains('content') || (data.content is string && data.content.size() <= 5000))
+        && (!data.keys().contains('text') || (data.text is string && data.text.size() <= 5000));
     }
 
     function isValidProposal(data) {
@@ -196,27 +198,31 @@ service cloud.firestore {
           (!incoming().keys().contains('earnings') || incoming().earnings == 0)
         )
       );
-      allow update: if isSignedIn() && (isOwner(userId) || isAdmin()) && (
-        isAdmin() || (
-          // Non-admins CANNOT change role, isAdmin, verified flags
-          !incoming().diff(existing()).affectedKeys().hasAny([
-            'role', 
-            'isAdmin', 
-            'isVerified', 
-            'isVerifiedArtist', 
-            'verified', 
-            'creatorPerks',
-            'approvedAt',
-            'resolvedAt',
-            'reviewerId',
-            'reviewerNotes',
-            'verificationDate'
-          ]) &&
-          // Non-admins can only set verificationStatus to 'pending' or keep existing, NEVER directly to 'verified'
-          (
-            !incoming().diff(existing()).affectedKeys().hasAny(['verificationStatus']) || 
-            incoming().verificationStatus == existing().verificationStatus ||
-            (incoming().verificationStatus == 'pending' && existing().verificationStatus != 'verified')
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        incoming().diff(existing()).affectedKeys().hasOnly(['followers']) ||
+        (
+          isOwner(userId) && (
+            // Non-admins CANNOT change role, isAdmin, verified flags
+            !incoming().diff(existing()).affectedKeys().hasAny([
+              'role', 
+              'isAdmin', 
+              'isVerified', 
+              'isVerifiedArtist', 
+              'verified', 
+              'creatorPerks',
+              'approvedAt',
+              'resolvedAt',
+              'reviewerId',
+              'reviewerNotes',
+              'verificationDate'
+            ]) &&
+            // Non-admins can only set verificationStatus to 'pending' or keep existing, NEVER directly to 'verified'
+            (
+              !incoming().diff(existing()).affectedKeys().hasAny(['verificationStatus']) || 
+              incoming().verificationStatus == existing().verificationStatus ||
+              (incoming().verificationStatus == 'pending' && existing().verificationStatus != 'verified')
+            )
           )
         )
       );
@@ -296,34 +302,51 @@ service cloud.firestore {
     // 🧠 POSTS & INTERACTIONS
     match /posts/{postId} {
       allow read: if true;
-      allow create: if isSignedIn() && (
-        !incoming().keys().contains('userId') || 
-        incoming().userId == request.auth.uid || 
-        !incoming().keys().contains('authorId') || 
-        incoming().authorId == request.auth.uid || 
-        isAdmin()
+      allow create: if isSignedIn() && isValidPost(incoming()) && (
+        isAdmin() || (
+          (!incoming().keys().contains('userId') || incoming().userId == request.auth.uid) &&
+          (!incoming().keys().contains('authorId') || incoming().authorId == request.auth.uid)
+        )
       );
       allow update: if isSignedIn() && (
-        isOwner(resource.data.userId) || 
-        isOwner(resource.data.authorId) || 
+        ('userId' in resource.data && isOwner(resource.data.userId)) || 
+        ('authorId' in resource.data && isOwner(resource.data.authorId)) || 
         isAdmin() || 
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'likeCount',
+          'replyCount',
+          'repostCount',
+          'bookmarkCount',
           'likesCount', 
           'repostsCount', 
           'commentsCount', 
           'sharesCount', 
           'likes', 
           'reposts', 
-          'bookmarkCount', 
+          'comments',
           'bookmarks', 
           'updatedAt'
         ])
       );
-      allow delete: if isAdmin() || (isSignedIn() && (isOwner(resource.data.userId) || isOwner(resource.data.authorId)));
+      allow delete: if isAdmin() || (isSignedIn() && (
+        ('userId' in resource.data && isOwner(resource.data.userId)) ||
+        ('authorId' in resource.data && isOwner(resource.data.authorId))
+      ));
 
       match /likes/{likeId} {
         allow read: if true;
-        allow create, delete: if isSignedIn() && (likeId == request.auth.uid || isAdmin());
+        allow create: if isSignedIn() && (
+          likeId == request.auth.uid ||
+          likeId == (request.auth.uid + '_' + postId) ||
+          (incoming().keys().contains('userId') && incoming().userId == request.auth.uid) ||
+          isAdmin()
+        );
+        allow delete: if isSignedIn() && (
+          likeId == request.auth.uid ||
+          likeId == (request.auth.uid + '_' + postId) ||
+          ('userId' in resource.data && resource.data.userId == request.auth.uid) ||
+          isAdmin()
+        );
       }
 
       match /comments/{commentId} {
@@ -355,6 +378,19 @@ service cloud.firestore {
     match /likes/{likeId} {
       allow read: if true;
       allow create, delete: if isSignedIn();
+    }
+
+    match /reposts/{repostId} {
+      allow read: if true;
+      allow create: if isSignedIn() && (
+        isAdmin() ||
+        !incoming().keys().contains('userId') ||
+        incoming().userId == request.auth.uid
+      );
+      allow delete: if isSignedIn() && (
+        isAdmin() ||
+        ('userId' in existing() && isOwner(existing().userId))
+      );
     }
 
     match /songRequests/{id} {
@@ -805,17 +841,32 @@ service cloud.firestore {
     match /liveStreams/{streamId} {
       allow read: if true;
       allow create: if isSignedIn() && (
-        !incoming().keys().contains('artistId') || 
-        incoming().artistId == request.auth.uid || 
-        isAdmin()
+        isAdmin() || (
+          (!incoming().keys().contains('artistId') || incoming().artistId == request.auth.uid) &&
+          (!incoming().keys().contains('ownerId') || incoming().ownerId == request.auth.uid)
+        )
       );
       allow update: if isAdmin() || (
         isSignedIn() && (
-          isOwner(existing().artistId) ||
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewersCount', 'likesCount', 'status'])
+          ('artistId' in resource.data && isOwner(resource.data.artistId)) ||
+          ('ownerId' in resource.data && isOwner(resource.data.ownerId)) ||
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'viewersCount',
+            'viewerCount',
+            'listenerCount',
+            'likesCount',
+            'status',
+            'isLive',
+            'updatedAt'
+          ])
         )
       );
-      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().artistId));
+      allow delete: if isAdmin() || (
+        isSignedIn() && (
+          ('artistId' in resource.data && isOwner(resource.data.artistId)) ||
+          ('ownerId' in resource.data && isOwner(resource.data.ownerId))
+        )
+      );
 
       match /messages/{messageId} {
         allow read: if true;

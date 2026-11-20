@@ -7,8 +7,10 @@ interface CommentsSheetProps {
   onClose?: () => void;
 }
 
-export const CommentsSheet: React.FC<CommentsSheetProps> = ({ track, onClose }) => {
+export const CommentsSheet: React.FC<CommentsSheetProps> = React.memo(({ track, onClose }) => {
   return <TrackComments track={track} onClose={onClose} />;
-};
+});
+
+CommentsSheet.displayName = "CommentsSheet";
 
 export default CommentsSheet;

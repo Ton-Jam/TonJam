@@ -10,7 +10,6 @@ import {
   Globe, 
   Sparkles, 
   ExternalLink, 
-  ArrowLeft,
   ChevronRight,
   FileCheck,
   Headphones,
@@ -24,6 +23,7 @@ import { db, auth, cleanUpdateData, handleFirestoreError, OperationType } from '
 import { collection, query, where, orderBy, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudio } from '@/contexts/AudioContext';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { toast } from 'sonner';
 import { ArtistVerificationRequest } from '@/types';
 
@@ -274,15 +274,22 @@ const ArtistVerification: React.FC = () => {
   return (
     <div className="w-full min-h-screen bg-[#080D1A] text-[#F5F7FB] pb-32 animate-in fade-in duration-500">
       {/* SCREEN HEADER */}
-      <div className="sticky top-0 z-30 bg-[#080D1A]/90 backdrop-blur-xl px-3 py-4">
+      <div
+        style={{
+          background: 'var(--tj-header-bg, transparent)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+        className="sticky top-0 z-30 bg-transparent backdrop-blur-none backdrop-filter-none border-none shadow-none px-3 py-4"
+      >
         <div className="w-full max-w-full flex items-center justify-between">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-xs font-bold text-[#94A3B8] hover:text-white transition-colors cursor-pointer bg-[#111C30] px-3.5 py-2 rounded-xl"
+            className="min-h-[44px] min-w-[44px] flex items-center gap-2 text-xs font-bold text-[#FFFFFF] hover:bg-white/10 transition-colors cursor-pointer bg-transparent border-none px-3 py-2 rounded-full"
             aria-label="Go Back"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <TonJamBackArrow size="sm" />
             <span>Back</span>
           </button>
 

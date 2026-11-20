@@ -228,7 +228,7 @@ export const UIKitShowcase: React.FC = () => {
       </div>
 
       {/* Tabs navigation list */}
-      <div className="flex gap-1 overflow-x-auto p-4 bg-[#0A113A]/55 scrollbar-none sticky top-0 z-40 backdrop-blur-md">
+      <div className="flex gap-1 overflow-x-auto p-4 bg-transparent backdrop-blur-none border-none shadow-none scrollbar-none sticky top-0 z-40">
         {tabs.map((tab) => (
           <button
             key={tab.id}

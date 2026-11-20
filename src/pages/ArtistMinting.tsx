@@ -468,9 +468,9 @@ export const ArtistMinting: React.FC = () => {
 
       <div className="relative z-10 w-full max-w-full space-y-6">
         {/* Header Navigation & Step Indicator */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0D1527]/90 p-5 rounded-2xl border border-white/10 backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-transparent backdrop-blur-none border-none shadow-none px-2 py-3">
           <div className="flex items-center gap-3">
-            <BackButton className="bg-white/5 hover:bg-white/10 text-white" />
+            <BackButton />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">

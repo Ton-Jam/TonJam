@@ -1,6 +1,7 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
 import { useTonAddress, useTonWallet, useTonConnectUI, CHAIN } from '@tonconnect/ui-react';
 import { safeLocalStorage } from '@/lib/safeStorage';
+import { isTonConnectConnected, safeOpenTonConnectModal } from '@/lib/tonConnectGuard';
 import { 
   getTonBalance, 
   getJettonBalance, 
@@ -144,8 +145,11 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const connectWallet = () => {
     if (tonConnectUI) {
+      if (isTonConnectConnected(tonConnectUI) || Boolean(wallet) || Boolean(address)) {
+        return;
+      }
       try {
-        tonConnectUI.openModal();
+        safeOpenTonConnectModal(tonConnectUI);
       } catch (err) {
         console.warn("[WalletContext] Failed to open TonConnect modal:", err);
       }

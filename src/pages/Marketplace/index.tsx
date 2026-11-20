@@ -333,7 +333,7 @@ export default function MarketplacePage() {
         aria-label="Marketplace statistics"
         className="px-2 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5"
       >
-        <div className="rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
+        <div className="rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
           <span className="text-[10px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider">
             Listed NFTs
           </span>
@@ -347,7 +347,7 @@ export default function MarketplacePage() {
           </div>
         </div>
 
-        <div className="rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
+        <div className="rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
           <span className="text-[10px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider">
             Floor Price
           </span>
@@ -361,7 +361,7 @@ export default function MarketplacePage() {
           </div>
         </div>
 
-        <div className="rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
+        <div className="rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
           <span className="text-[10px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider">
             Active Auctions
           </span>
@@ -375,7 +375,7 @@ export default function MarketplacePage() {
           </div>
         </div>
 
-        <div className="rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
+        <div className="rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-2.5 sm:p-3 flex flex-col justify-between">
           <span className="text-[10px] font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] uppercase tracking-wider">
             Sales Volume
           </span>
@@ -495,7 +495,7 @@ export default function MarketplacePage() {
               </div>
 
               <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                <div className="min-h-[36px] flex items-center gap-1.5 bg-[var(--tj-color-surface-default,#0B1424)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-compact,5px)] px-2.5 py-1 transition-colors">
+                <div className="min-h-[36px] flex items-center gap-1.5 bg-[var(--tj-color-surface-default,#0B1424)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-sm,8px)] px-2.5 py-1 transition-colors">
                   <ArrowUpDown className="w-3.5 h-3.5 text-[var(--tj-color-brand-primary,#229ED9)] shrink-0" />
                   <label htmlFor="marketplace-sort" className="sr-only">
                     Sort NFTs
@@ -522,7 +522,7 @@ export default function MarketplacePage() {
                   <button
                     type="button"
                     onClick={handleResetFilters}
-                    className="min-h-[36px] px-2.5 py-1 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] text-xs font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-[var(--tj-color-text-primary,#F8FAFC)] flex items-center gap-1 cursor-pointer transition-colors"
+                    className="min-h-[36px] px-2.5 py-1 rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] text-xs font-semibold text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-[var(--tj-color-text-primary,#F8FAFC)] flex items-center gap-1 cursor-pointer transition-colors"
                     title="Clear Filters"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -704,7 +704,7 @@ export default function MarketplacePage() {
                     <button
                       type="button"
                       onClick={loadMoreNFTs}
-                      className="min-h-[38px] inline-flex items-center gap-1.5 px-5 py-2 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] text-xs font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] cursor-pointer transition-colors"
+                      className="min-h-[38px] inline-flex items-center gap-1.5 px-5 py-2 rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] text-xs font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] cursor-pointer transition-colors"
                     >
                       <span>Load More NFTs</span>
                       <ChevronDown className="w-3.5 h-3.5 text-[var(--tj-color-brand-primary,#229ED9)]" />
@@ -826,7 +826,7 @@ export default function MarketplacePage() {
               <div
                 key={sale.id}
                 onClick={() => sale.nftId && navigate(`/nft/${sale.nftId}`)}
-                className="p-2.5 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] transition-colors flex items-center justify-between gap-2.5 cursor-pointer"
+                className="p-2.5 rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] transition-colors flex items-center justify-between gap-2.5 cursor-pointer"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <img

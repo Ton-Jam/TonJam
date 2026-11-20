@@ -22,8 +22,8 @@ import {
   Clock,
   Flame,
   Zap,
-  ArrowLeft
 } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNFT } from '@/contexts/NFTContext';
 import { useWallet } from '@/contexts/WalletContext';
@@ -269,13 +269,14 @@ export const LiveStudio: React.FC = () => {
     <div className="min-h-screen bg-[#040812] text-white px-2 py-4 pb-24">
       <div className="w-full max-w-full">
         {/* Top Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 bg-transparent backdrop-blur-none border-none shadow-none">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/livestream')}
-              className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+              className="p-2.5 rounded-full bg-transparent hover:bg-white/[0.08] text-[#FFFFFF] transition-colors cursor-pointer"
+              aria-label="Go back"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <TonJamBackArrow size="sm" />
             </button>
             <div>
               <div className="flex items-center gap-2">

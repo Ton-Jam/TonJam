@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Layers, Disc } from 'lucide-react';
+import { Search, Layers, Disc } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { CollectionCard } from '@/components/marketplace/CollectionCard';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { collection, onSnapshot, query, limit } from 'firebase/firestore';
@@ -65,13 +66,21 @@ export const CollectionsListScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#070B18] text-white pb-32 overflow-x-hidden selection:bg-blue-600/30">
-      <div className="sticky top-0 z-30 bg-[#070B18]/80 backdrop-blur-md px-4 sm:px-6 py-3 flex items-center justify-between gap-3 border-none">
+      <div
+        style={{
+          background: 'var(--tj-header-bg, transparent)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+        className="sticky top-0 z-30 bg-transparent backdrop-blur-none backdrop-filter-none px-4 sm:px-6 py-3 flex items-center justify-between gap-3 border-none shadow-none"
+      >
         <button
+          type="button"
           onClick={() => navigate(-1)}
-          className="min-h-[44px] min-w-[44px] px-3 rounded-[10px] bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 text-slate-300 hover:text-white flex items-center gap-1.5 text-xs font-bold transition-all border-none cursor-pointer shrink-0"
+          className="min-h-[44px] min-w-[44px] px-3 rounded-full bg-transparent hover:bg-white/10 active:scale-95 text-[#FFFFFF] flex items-center gap-1.5 text-xs font-bold transition-all border-none cursor-pointer shrink-0"
           aria-label="Back"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <TonJamBackArrow size="sm" />
           <span>Back</span>
         </button>
 

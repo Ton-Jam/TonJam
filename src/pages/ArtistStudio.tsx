@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
   Music,
   Image as ImageIcon,
   Upload,
@@ -29,6 +28,7 @@ import {
   Crop,
 } from 'lucide-react';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import {
   collection,
   doc,
@@ -1377,16 +1377,16 @@ export const ArtistStudio: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 pb-28 selection:bg-[#0088CC]/30">
       {/* Studio Top Bar */}
-      <div className="bg-[#0E1420]/90 backdrop-blur-md sticky top-0 z-30 px-3 py-4">
+      <div className="bg-transparent backdrop-blur-none border-none shadow-none sticky top-0 z-30 px-3 py-4">
         <div className="w-full max-w-full flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="w-10 h-10 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-slate-300 hover:text-white transition-colors cursor-pointer border-0 outline-none"
+              className="w-10 h-10 rounded-full bg-transparent hover:bg-white/[0.08] flex items-center justify-center text-[#FFFFFF] transition-colors cursor-pointer border-0 outline-none"
               aria-label="Go back"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <TonJamBackArrow size="sm" />
             </button>
             <div>
               <div className="flex flex-wrap items-center gap-2">

@@ -16,9 +16,16 @@ export default function ArtistAnalytics() {
       </div>
 
       {/* Header */}
-      <div className="relative z-10 p-4 flex items-center justify-between border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0">
-        <BackButton className="p-2 text-muted-foreground hover:text-foreground transition-colors" />
-        <h1 className="text-sm font-black uppercase tracking-[0.3em] flex items-center gap-2">
+      <div
+        style={{
+          background: 'var(--tj-header-bg, transparent)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+        className="relative z-10 p-4 flex items-center justify-between border-none shadow-none bg-transparent backdrop-blur-none backdrop-filter-none sticky top-0"
+      >
+        <BackButton className="p-2 text-[#FFFFFF] hover:bg-white/10 transition-colors" />
+        <h1 className="text-sm font-black uppercase tracking-[0.3em] flex items-center gap-2 text-white">
           <Activity className="w-4 h-4 text-primary" />
           Analytics
         </h1>

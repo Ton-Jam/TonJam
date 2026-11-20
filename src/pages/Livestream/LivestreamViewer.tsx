@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, 
   Coins, 
   Share2, 
-  Heart, 
+  Heart,  
   Crown, 
   Sparkles, 
   Music, 
@@ -17,6 +16,7 @@ import {
   Volume2
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { useNFT } from '@/contexts/NFTContext';
 import { useWallet } from '@/contexts/WalletContext';
 import { 
@@ -125,12 +125,12 @@ export const LivestreamViewer: React.FC = () => {
     <div className="min-h-screen bg-[#040812] text-white px-2 py-4 pb-24">
       <div className="w-full max-w-full">
         {/* Navigation Bar */}
-        <div className="flex items-center justify-between gap-4 mb-4">
+        <div className="flex items-center justify-between gap-4 mb-4 bg-transparent backdrop-blur-none border-none shadow-none">
           <button
             onClick={() => navigate('/livestream')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-transparent hover:bg-white/[0.08] text-[#FFFFFF] text-xs font-bold transition-colors cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <TonJamBackArrow size="sm" />
             <span>All Streams</span>
           </button>
 

@@ -44,7 +44,7 @@ export const FeaturedDropBanner: React.FC<FeaturedDropBannerProps> = ({
       aria-label="Featured NFT"
       onClick={onExploreDrop}
       className={cn(
-        "group relative w-full rounded-none overflow-hidden bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)]/70 backdrop-blur-md border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] transition-colors duration-200 cursor-pointer",
+        "group relative w-full rounded-[var(--tj-radius-sm,8px)] overflow-hidden bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)]/70 backdrop-blur-md border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] transition-colors duration-200 cursor-pointer",
         className
       )}
     >
@@ -136,7 +136,7 @@ export const FeaturedDropBanner: React.FC<FeaturedDropBannerProps> = ({
                   e.stopPropagation();
                   onExploreDrop();
                 }}
-                className="min-h-[36px] inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#FFFFFF)] font-semibold text-xs transition-colors cursor-pointer border border-[var(--tj-color-brand-primary,#00B4D8)] whitespace-nowrap"
+                className="min-h-[36px] inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#FFFFFF)] font-semibold text-xs transition-colors cursor-pointer border border-[var(--tj-color-brand-primary,#00B4D8)] whitespace-nowrap"
               >
                 <span>View NFT</span>
                 <ArrowRight className="w-3.5 h-3.5" />

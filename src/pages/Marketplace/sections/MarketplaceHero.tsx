@@ -39,7 +39,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
 
   return (
     <div
-      className="relative w-full rounded-2xl bg-[#0F1C32] border border-[#22374D] p-5 sm:p-7 flex flex-col-reverse md:flex-row justify-between gap-6 items-center overflow-hidden transition-all duration-300"
+      className="relative w-full rounded-[var(--tj-radius-sm,8px)] bg-[#0F1C32] border border-[#22374D] p-5 sm:p-7 flex flex-col-reverse md:flex-row justify-between gap-6 items-center overflow-hidden transition-all duration-300"
       id="marketplace-hero"
     >
       {/* Background ambient gradient glow */}
@@ -109,7 +109,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
         <div className="flex flex-wrap items-center gap-3 pt-1">
           <Button
             onClick={handleExplore}
-            className="rounded-xl text-xs font-semibold px-5 py-2.5 h-10 flex items-center gap-2 bg-[#00B4D8] hover:bg-[#009CC0] text-[#07111F] font-bold transition-colors cursor-pointer border-none shadow-md shadow-[#00B4D8]/20"
+            className="rounded-[var(--tj-radius-sm,8px)] text-xs font-semibold px-5 py-2.5 h-10 flex items-center gap-2 bg-[#00B4D8] hover:bg-[#009CC0] text-[#07111F] font-bold transition-colors cursor-pointer border-none shadow-md shadow-[#00B4D8]/20"
           >
             Explore Drop
             <ArrowRight className="w-4 h-4" />
@@ -118,7 +118,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
           <Button
             onClick={handlePlayToggle}
             variant="ghost"
-            className="rounded-xl text-xs font-semibold px-4 py-2.5 h-10 flex items-center gap-2 bg-[#0A1628] hover:bg-[#0A1628]/80 text-[#FFFFFF] border border-[#22374D] transition-colors cursor-pointer"
+            className="rounded-[var(--tj-radius-sm,8px)] text-xs font-semibold px-4 py-2.5 h-10 flex items-center gap-2 bg-[#0A1628] hover:bg-[#0A1628]/80 text-[#FFFFFF] border border-[#22374D] transition-colors cursor-pointer"
           >
             {isThisPlaying ? (
               <>
@@ -138,7 +138,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
       {/* Hero Right Media Card */}
       <div 
         onClick={handleExplore}
-        className="w-full sm:w-64 md:w-72 aspect-square rounded-xl overflow-hidden relative group cursor-pointer bg-[#0A1628] border border-[#22374D] shrink-0"
+        className="w-full sm:w-64 md:w-72 aspect-square rounded-[var(--tj-radius-sm,8px)] overflow-hidden relative group cursor-pointer bg-[#0A1628] border border-[#22374D] shrink-0"
       >
         <img
           src={coverImage}

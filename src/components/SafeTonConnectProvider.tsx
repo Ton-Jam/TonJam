@@ -1,5 +1,6 @@
-import React, { Component, ReactNode } from 'react';
-import { TonConnectUIProvider, TonConnectUIContext } from '@tonconnect/ui-react';
+import React, { Component, ReactNode, useEffect } from 'react';
+import { TonConnectUIProvider, TonConnectUIContext, useTonConnectUI } from '@tonconnect/ui-react';
+import { installTonConnectGuards, isWalletAlreadyConnectedError } from '@/lib/tonConnectGuard';
 
 // Complete mock instance matching TonConnectUI interface to guarantee hooks never crash if SDK fails
 const fallbackTonConnectUI: any = {
@@ -23,6 +24,16 @@ const fallbackTonConnectUI: any = {
   connectionRestored: Promise.resolve(true),
   setConnectRequestParameters: () => {},
   uiOptions: {},
+};
+
+const TonConnectConnectionGuard: React.FC = () => {
+  const [tonConnectUI] = useTonConnectUI();
+
+  useEffect(() => {
+    return installTonConnectGuards(tonConnectUI);
+  }, [tonConnectUI]);
+
+  return null;
 };
 
 interface ErrorBoundaryProps {
@@ -86,6 +97,7 @@ export class SafeTonConnectProvider extends Component<SafeTonConnectProviderProp
   private handleUnhandledRejection = (event: PromiseRejectionEvent) => {
     const reason = String(event.reason?.message || event.reason || '');
     if (
+      isWalletAlreadyConnectedError(event.reason) ||
       reason.includes('tonconnect') || 
       reason.includes('TonConnect') || 
       reason.includes('manifest') ||
@@ -96,15 +108,24 @@ export class SafeTonConnectProvider extends Component<SafeTonConnectProviderProp
     }
   };
 
+  private handleWindowError = (event: ErrorEvent) => {
+    if (isWalletAlreadyConnectedError(event.error || event.message)) {
+      console.warn("[SafeTonConnectProvider] Wallet already connected; suppressed duplicate TonConnect connection error.");
+      event.preventDefault();
+    }
+  };
+
   componentDidMount() {
     if (typeof window !== 'undefined') {
       window.addEventListener('unhandledrejection', this.handleUnhandledRejection);
+      window.addEventListener('error', this.handleWindowError);
     }
   }
 
   componentWillUnmount() {
     if (typeof window !== 'undefined') {
       window.removeEventListener('unhandledrejection', this.handleUnhandledRejection);
+      window.removeEventListener('error', this.handleWindowError);
     }
   }
 
@@ -126,6 +147,7 @@ export class SafeTonConnectProvider extends Component<SafeTonConnectProviderProp
             returnStrategy: 'back',
           }}
         >
+          <TonConnectConnectionGuard />
           {this.props.children}
         </TonConnectUIProvider>
       </TonConnectErrorBoundary>

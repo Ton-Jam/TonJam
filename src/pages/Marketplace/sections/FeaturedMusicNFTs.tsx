@@ -65,10 +65,10 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
             <div
               key={nft.id}
               onClick={() => handleCardClick(nft)}
-              className="w-[160px] sm:w-[190px] shrink-0 group bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition-all duration-200 select-none overflow-hidden relative"
+              className="w-[160px] sm:w-[190px] shrink-0 group bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-[var(--tj-radius-sm,8px)] p-3 flex flex-col justify-between cursor-pointer transition-all duration-200 select-none overflow-hidden relative"
             >
               {/* Artwork Media Area */}
-              <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#07111F] mb-3">
+              <div className="relative aspect-square w-full rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[#07111F] mb-3">
                 <img
                   src={artwork}
                   alt={nft.title}

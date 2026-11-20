@@ -1,5 +1,6 @@
 import React from 'react';
-import { ArrowLeft, CheckCheck, Settings } from 'lucide-react';
+import { CheckCheck, Settings } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { useNavigate } from 'react-router-dom';
 
 interface NotificationsHeaderProps {
@@ -18,15 +19,23 @@ export const NotificationsHeader: React.FC<NotificationsHeaderProps> = ({
   const navigate = useNavigate();
 
   return (
-    <header className="w-full flex items-center justify-between px-4 py-3 bg-[#080D1A]/95 backdrop-blur-xl border-b border-white/[0.04] select-none sticky top-0 z-30">
+    <header
+      style={{
+        background: 'var(--tj-header-bg, transparent)',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
+      }}
+      className="w-full flex items-center justify-between px-4 py-3 bg-transparent backdrop-blur-none backdrop-filter-none border-none shadow-none select-none sticky top-0 z-30"
+    >
       <div className="flex items-center gap-3">
         {showBack && (
           <button
+            type="button"
             onClick={() => navigate(-1)}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#94A3B8] hover:text-[#F5F7FB] hover:bg-white/[0.06] transition-colors cursor-pointer"
+            className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center text-[#FFFFFF] hover:bg-white/10 transition-colors cursor-pointer bg-transparent border-none"
             aria-label="Go back"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <TonJamBackArrow size="sm" />
           </button>
         )}
 

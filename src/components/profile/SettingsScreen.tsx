@@ -1,5 +1,6 @@
 import React from 'react';
-import { ArrowLeft, User, Volume2, Shield, Bell, Moon, HelpCircle, LogOut } from 'lucide-react';
+import { User, Volume2, Shield, Bell, Moon, HelpCircle, LogOut } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { SettingsSection } from './SettingsSection';
 import { SettingsItem } from './SettingsItem';
 
@@ -9,8 +10,8 @@ export const SettingsScreen = () => {
       <div className="w-full max-w-full space-y-8">
         
         {/* Header */}
-        <div className="flex items-center gap-4">
-            <button className="p-2 rounded-full hover:bg-[var(--surface)]"><ArrowLeft size={20}/></button>
+        <div className="flex items-center gap-4 bg-transparent backdrop-blur-none border-none">
+            <button type="button" className="min-h-[44px] min-w-[44px] p-2 rounded-full hover:bg-white/10 bg-transparent border-none text-[#FFFFFF] flex items-center justify-center cursor-pointer" aria-label="Go back"><TonJamBackArrow size="md" /></button>
             <h1 className="text-2xl font-bold">Settings</h1>
         </div>
 

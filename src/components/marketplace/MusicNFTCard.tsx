@@ -128,7 +128,7 @@ export const MusicNFTCard: React.FC<MusicNFTCardProps> = ({
       }}
       className={cn(
         "group relative flex flex-col justify-between bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-md",
-        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-compact,5px)] p-2.5",
+        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-sm,8px)] p-2.5",
         "transition-colors duration-150 cursor-pointer select-none text-left",
         layout === "shelf"
           ? "w-[160px] sm:w-[178px] shrink-0 snap-start"

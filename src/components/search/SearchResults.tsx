@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Track, Artist, Album, Playlist, NFTItem, UserProfile } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from './EmptyState';
+import { EmptyState, SuggestedQueryOption } from './EmptyState';
 import { SearchResultsSkeleton } from './Skeletons';
 
 interface SearchResultsProps {
@@ -23,6 +23,10 @@ interface SearchResultsProps {
   followedUserIds: string[];
   onToggleFollow: (id: string) => void;
   onClearQuery?: () => void;
+  onResetFilter?: () => void;
+  onSelectSuggestion?: (query: string) => void;
+  suggestedQueries?: SuggestedQueryOption[];
+  suggestedTracks?: Track[];
   isLoading?: boolean;
 }
 
@@ -34,6 +38,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   followedUserIds,
   onToggleFollow,
   onClearQuery,
+  onResetFilter,
+  onSelectSuggestion,
+  suggestedQueries,
+  suggestedTracks,
   isLoading = false
 }) => {
   const navigate = useNavigate();
@@ -49,20 +57,44 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     </div>
   );
 
-  const hasAnyResults = 
-    results.tracks.length > 0 ||
-    results.artists.length > 0 ||
-    results.albums.length > 0 ||
-    results.playlists.length > 0 ||
-    results.nfts.length > 0 ||
-    results.users.length > 0;
+  const totalMatches =
+    results.tracks.length +
+    results.artists.length +
+    results.albums.length +
+    results.playlists.length +
+    results.nfts.length;
 
-  if (!hasAnyResults) {
+  const hasAnyResults = totalMatches > 0;
+
+  const hasVisibleResults =
+    activeFilter === 'all'
+      ? hasAnyResults
+      : activeFilter === 'tracks'
+        ? results.tracks.length > 0
+        : activeFilter === 'artists'
+          ? results.artists.length > 0
+          : activeFilter === 'albums'
+            ? results.albums.length > 0
+            : activeFilter === 'playlists'
+              ? results.playlists.length > 0
+              : activeFilter === 'nfts'
+                ? results.nfts.length > 0
+                : hasAnyResults;
+
+  if (!hasVisibleResults) {
     return (
       <EmptyState
         variant="no-results"
         query={query}
+        activeFilter={activeFilter}
+        hasOtherFilterMatches={activeFilter !== 'all' && hasAnyResults}
+        otherMatchCount={totalMatches}
+        onResetFilter={onResetFilter}
         onClearQuery={onClearQuery}
+        onSelectSuggestion={onSelectSuggestion}
+        suggestedQueries={suggestedQueries}
+        suggestedTracks={suggestedTracks}
+        onPlayTrack={onPlayTrack}
         onNavigateNFTs={() => navigate('/marketplace')}
         onNavigateArtists={onClearQuery}
       />

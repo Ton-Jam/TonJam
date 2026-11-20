@@ -101,7 +101,7 @@ export const UnifiedDesignSystem: React.FC = () => {
       {/* Device Viewport Canvas */}
       <div className="relative w-[390px] h-[960px] bg-[#091326] rounded-[44px] shadow-2xl flex flex-col overflow-hidden select-none">
         {/* Dynamic Island / Mobile Notch Area */}
-        <div className="sticky top-0 z-30 w-full h-8 bg-[#091326] flex items-center justify-between px-7 shrink-0 text-white text-[11px] font-semibold">
+        <div className="sticky top-0 z-30 w-full h-8 bg-transparent backdrop-blur-none border-none shadow-none flex items-center justify-between px-7 shrink-0 text-white text-[11px] font-semibold">
           <span>9:41</span>
           <div className="w-24 h-4 bg-black rounded-full" />
           <div className="flex items-center gap-1.5 text-[10px]">
@@ -191,7 +191,7 @@ export const UnifiedDesignSystem: React.FC = () => {
   return (
     <div className="w-full min-h-screen bg-[#080D1A] text-white font-sans pb-32 text-left select-none">
       {/* MASTER TOP CONTROL BAR */}
-      <div className="sticky top-0 z-40 w-full bg-[#091326]/95 backdrop-blur-md px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+      <div className="sticky top-0 z-40 w-full bg-transparent backdrop-blur-none border-none shadow-none px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-[#2E8CEB] flex items-center justify-center font-black text-white text-sm shadow-md">
             TJ

@@ -4,9 +4,10 @@ import {
   Music, Image as ImageIcon, Sparkles, Zap, Database, 
   Loader2, Check, Plus, Trash2, Volume2, Info, ChevronRight, Play, Pause,
   Flame, Disc, Crown, Tag, Sliders, Radio, Percent, ShieldCheck, FileAudio,
-  Code, Eye, ExternalLink, ArrowRight, ArrowLeft, Wallet, CheckCircle2, Copy,
+  Code, Eye, ExternalLink, ArrowRight, Wallet, CheckCircle2, Copy,
   Share2, RefreshCw, Upload, Lock, Layers, AlertTriangle
 } from 'lucide-react';
+import { TonJamBackArrow } from '@/components/icons/TonJamBackArrow';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNFT } from '@/contexts/NFTContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
@@ -543,14 +544,22 @@ export const MintNFT: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#070B18] text-white selection:bg-blue-600/30 pb-32">
       {/* Top Navigation & Status Bar */}
-      <div className="bg-[#090E20]/90 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 py-4 flex items-center justify-between">
+      <div
+        style={{
+          background: 'var(--tj-header-bg, transparent)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+        className="bg-transparent backdrop-blur-none backdrop-filter-none border-none shadow-none sticky top-0 z-40 px-4 sm:px-6 py-4 flex items-center justify-between"
+      >
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={() => navigate(-1)}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 transition-all flex items-center justify-center text-slate-300 hover:text-white border-none cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-transparent hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center text-[#FFFFFF] border-none cursor-pointer"
             aria-label="Go back"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <TonJamBackArrow size="md" />
           </button>
           <div>
             <div className="flex items-center gap-2">

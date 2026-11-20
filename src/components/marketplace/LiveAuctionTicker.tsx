@@ -21,7 +21,7 @@ export const LiveAuctionTicker: React.FC = () => {
   if (activeAuctions.length === 0) return null;
 
   return (
-    <div className="w-full bg-[#121824] py-3 rounded-none mb-8">
+    <div className="w-full bg-[#121824] py-3 rounded-[var(--tj-radius-sm,8px)] mb-8">
       <div className="flex items-center justify-between px-3 mb-3">
         <h3 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
             <Flame className="w-4 h-4 text-[#FF3A5C]" />
@@ -33,9 +33,9 @@ export const LiveAuctionTicker: React.FC = () => {
           <div 
             key={nft.id}
             onClick={() => navigate(`/nft/${nft.id}`)}
-            className="flex items-center gap-3 bg-[#182032] p-3 rounded-xl cursor-pointer hover:bg-[#1f2940] transition-colors min-w-[280px]"
+            className="flex items-center gap-3 bg-[#182032] p-3 rounded-[var(--tj-radius-sm,8px)] cursor-pointer hover:bg-[#1f2940] transition-colors min-w-[280px]"
           >
-            <img src={nft.imageUrl} referrerPolicy="no-referrer" alt={nft.title} className="w-12 h-12 rounded-lg object-cover" />
+            <img src={nft.imageUrl} referrerPolicy="no-referrer" alt={nft.title} className="w-12 h-12 rounded-[var(--tj-radius-compact,5px)] object-cover" />
             <div className="flex flex-col min-w-0">
                 <span className="text-[10px] font-bold text-white uppercase truncate">{nft.title}</span>
                 <AuctionCountdownTimer nft={nft} variant="mini" />

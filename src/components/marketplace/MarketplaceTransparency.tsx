@@ -16,7 +16,7 @@ export const MarketplaceTransparency: React.FC<MarketplaceTransparencyProps> = (
   return (
     <div
       className={cn(
-        "w-full rounded-none bg-[var(--tj-color-surface-default,#0D1628)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-4 sm:p-5 text-left space-y-4",
+        "w-full rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-surface-default,#0D1628)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-4 sm:p-5 text-left space-y-4",
         className
       )}
     >
@@ -56,7 +56,7 @@ export const MarketplaceTransparency: React.FC<MarketplaceTransparencyProps> = (
           <button
             type="button"
             onClick={onConnectWallet}
-            className="min-h-[38px] inline-flex items-center gap-2 px-4 py-2 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#FFFFFF)] transition-colors text-xs font-semibold shrink-0 cursor-pointer border border-[var(--tj-color-brand-primary,#00B4D8)] outline-none whitespace-nowrap"
+            className="min-h-[38px] inline-flex items-center gap-2 px-4 py-2 rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#FFFFFF)] transition-colors text-xs font-semibold shrink-0 cursor-pointer border border-[var(--tj-color-brand-primary,#00B4D8)] outline-none whitespace-nowrap"
           >
             <Wallet className="w-3.5 h-3.5" />
             <span>Connect Wallet</span>
