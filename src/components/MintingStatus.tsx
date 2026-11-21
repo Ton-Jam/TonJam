@@ -136,7 +136,7 @@ export const MintingStatus: React.FC<MintingStatusProps> = ({
   ];
 
   return (
-    <div className={`p-5 rounded-2xl bg-[#0A113A]/90 backdrop-blur-xl shadow-2xl relative overflow-hidden ${className}`}>
+    <div className={`p-5 rounded-2xl bg-[#0A113A]/90 shadow-2xl relative overflow-hidden ${className}`}>
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-0 w-72 h-72 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />

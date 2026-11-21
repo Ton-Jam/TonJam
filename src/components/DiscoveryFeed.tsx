@@ -40,10 +40,10 @@ const DiscoveryFeed: React.FC = () => {
           onClick={() => setSelectedGenre(null)}
           aria-pressed={!selectedGenre}
           className={cn(
-            "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border cursor-pointer",
+            "filter-btn filter-silver-border border-silver-2 border-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer",
             !selectedGenre 
-              ? "bg-blue-600 text-white border-[#c0c0c0]/40" 
-              : "bg-white/5 text-muted-foreground hover:bg-white/10 border-[#c0c0c0]/25"
+              ? "active bg-blue-600 text-white border-[rgba(192,192,192,0.35)]" 
+              : "bg-white/5 text-muted-foreground hover:bg-white/10 border-[rgba(192,192,192,0.22)] hover:border-[rgba(192,192,192,0.35)]"
           )}
         >
           All Trends
@@ -54,10 +54,10 @@ const DiscoveryFeed: React.FC = () => {
             onClick={() => setSelectedGenre(genre)}
             aria-pressed={selectedGenre === genre}
             className={cn(
-              "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border cursor-pointer",
+              "filter-btn filter-silver-border border-silver-2 border-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer",
               selectedGenre === genre 
-                ? "bg-blue-600 text-white border-[#c0c0c0]/40" 
-                : "bg-white/5 text-muted-foreground hover:bg-white/10 border-[#c0c0c0]/25"
+                ? "active bg-blue-600 text-white border-[rgba(192,192,192,0.35)]" 
+                : "bg-white/5 text-muted-foreground hover:bg-white/10 border-[rgba(192,192,192,0.22)] hover:border-[rgba(192,192,192,0.35)]"
             )}
           >
             {genre}

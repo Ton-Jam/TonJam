@@ -64,14 +64,15 @@ export const NotificationFilterPills: React.FC<NotificationFilterPillsProps> = (
             role="tab"
             aria-selected={isActive}
             whileTap={{ scale: 0.96 }}
-            onClick={() => onChangeFilter(pill.id)}
+            aria-pressed={isActive}
             className={`
+              filter-btn filter-pill filter-silver-border border-silver-2 border-2
               flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold
               transition-all duration-200 cursor-pointer shrink-0 whitespace-nowrap outline-none
               ${
                 isActive
-                  ? 'bg-[var(--tj-color-chip-active-background,#063C55)] text-white shadow-sm shadow-[#063C55]/25 font-bold'
-                  : 'bg-[var(--tj-color-chip-background,#102943)] text-[#94A3B8] hover:text-[#F5F7FB] hover:bg-[var(--tj-color-surface-hover,#132B49)]'
+                  ? 'active bg-[var(--tj-color-chip-active-background,#063C55)] border-[rgba(192,192,192,0.35)] text-white shadow-sm shadow-[#063C55]/25 font-bold'
+                  : 'bg-[var(--tj-color-chip-background,#102943)] border-[rgba(192,192,192,0.22)] text-[#94A3B8] hover:text-[#F5F7FB] hover:bg-[var(--tj-color-surface-hover,#132B49)] hover:border-[rgba(192,192,192,0.35)]'
               }
             `}
           >

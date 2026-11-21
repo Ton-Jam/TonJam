@@ -28,7 +28,7 @@ export const TrendingChart: React.FC = () => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-[#101A3B]/90 border border-white/10 backdrop-blur-md p-3 rounded-xl shadow-xl">
+        <div className="bg-[#101A3B]/90 border border-white/10 p-3 rounded-xl shadow-xl">
           <p className="font-bold text-white text-sm mb-1">{data.fullTitle}</p>
           <p className="text-[10px] text-slate-400 font-medium uppercase tracking-widest mb-2">{data.artist}</p>
           <div className="flex items-center gap-2">
@@ -47,7 +47,7 @@ export const TrendingChart: React.FC = () => {
   }
 
   return (
-    <div className="bg-card/50 backdrop-blur-md border border-border/50 rounded-3xl p-6 relative overflow-hidden">
+    <div className="bg-card/50 border border-border/50 rounded-3xl p-6 relative overflow-hidden">
       <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 blur-3xl rounded-full pointer-events-none" />
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">

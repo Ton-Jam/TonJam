@@ -59,7 +59,7 @@ const SonicSearchSection: React.FC = () => {
   };
 
   return (
-    <Card className="relative overflow-hidden bg-background/40 backdrop-blur-xl border-blue-500/20 rounded-[4px] shadow-2xl mb-8 group/section">
+    <Card className="relative overflow-hidden bg-background/40 border-blue-500/20 rounded-[4px] shadow-2xl mb-8 group/section">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/10 rounded-full blur-[100px] -z-10 group-hover/section:bg-blue-600/20 transition-all duration-700" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/5 rounded-full blur-[80px] -z-10 group-hover/section:bg-purple-600/10 transition-all duration-700" />

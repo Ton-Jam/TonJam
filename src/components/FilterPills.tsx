@@ -92,7 +92,7 @@ const FilterPills: React.FC<FilterPillsProps> = ({
               onClick={(e) => handlePillClick(category, e)}
               aria-pressed={isSelected}
               className={cn(
-                "pill relative z-10 overflow-hidden",
+                "pill filter-btn filter-silver-border border-silver-2 border-2 relative z-10 overflow-hidden",
                 isSelected && "active"
               )}
             >

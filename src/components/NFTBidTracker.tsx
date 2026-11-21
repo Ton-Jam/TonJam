@@ -134,7 +134,7 @@ export const NFTBidTracker: React.FC<NFTBidTrackerProps> = ({ nft, className }) 
   return (
     <div 
       className={cn(
-        "bg-white/[0.02] backdrop-blur-2xl rounded-lg p-5 relative overflow-hidden transition-all duration-300 shadow-2xl",
+        "bg-white/[0.02] rounded-lg p-5 relative overflow-hidden transition-all duration-300 shadow-2xl",
         flash && "bg-amber-500/[0.08] shadow-[0_0_30px_rgba(245,158,11,0.15)]",
         className
       )}

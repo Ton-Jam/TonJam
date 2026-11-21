@@ -116,7 +116,7 @@ export const TrackCard: React.FC<{
 
         {/* Play Count Badge on Corner */}
         {((track.streams !== undefined ? track.streams : track.playCount) || 0) > 0 && (
-          <div className="absolute top-0.5 right-0.5 bg-black/70 backdrop-blur-[2px] text-[7px] font-bold text-white px-1 py-0.2 rounded flex items-center gap-0.5 z-10 select-none">
+          <div className="absolute top-0.5 right-0.5 bg-black/70 text-[7px] font-bold text-white px-1 py-0.2 rounded flex items-center gap-0.5 z-10 select-none">
             <Headphones className="w-2 h-2 text-blue-400" />
             <span>
               {(() => {
@@ -227,7 +227,7 @@ export const CompactTrackCard: React.FC<{
 
         {/* Play Count Badge on Corner */}
         {((track.streams !== undefined ? track.streams : track.playCount) || 0) > 0 && (
-          <div className="absolute top-1.5 right-1.5 bg-black/75 backdrop-blur-[2px] text-[8px] font-bold text-white px-1.5 py-0.5 rounded flex items-center gap-0.5 z-10 select-none shadow-md">
+          <div className="absolute top-1.5 right-1.5 bg-black/75 text-[8px] font-bold text-white px-1.5 py-0.5 rounded flex items-center gap-0.5 z-10 select-none shadow-md">
             <Headphones className="w-2.5 h-2.5 text-blue-400" />
             <span>
               {(() => {
@@ -548,7 +548,7 @@ export const AlbumCard: React.FC<{
             </span>
           )}
           {album.isDolbyAtmos && (
-            <span className="bg-black/60 backdrop-blur-md text-blue-400 text-[8px] font-black px-1.5 py-0.5 rounded-[4px] tracking-wider uppercase flex items-center gap-1 shadow-md">
+            <span className="bg-black/60 text-blue-400 text-[8px] font-black px-1.5 py-0.5 rounded-[4px] tracking-wider uppercase flex items-center gap-1 shadow-md">
               <Volume2 className="w-3 h-3 fill-current" /> Dolby
             </span>
           )}

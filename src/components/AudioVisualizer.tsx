@@ -400,7 +400,7 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   }, [analyser, activeMode, isPlaying]);
 
   return (
-    <div className={`flex flex-col bg-[#121824]/90 backdrop-blur-xl rounded-2xl p-4 overflow-hidden relative group/viz ${className}`} id="audio-visualizer-card">
+    <div className={`flex flex-col bg-[#121824]/90 rounded-2xl p-4 overflow-hidden relative group/viz ${className}`} id="audio-visualizer-card">
       <div className="flex items-center justify-between mb-3 z-10">
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-[#0088CC] animate-pulse' : 'bg-slate-600'}`} />
@@ -424,7 +424,7 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
         {/* Playback instruction overlay if stream isn't playing */}
         {!isPlaying && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/25 text-center p-4 backdrop-blur-[1px] pointer-events-none select-none">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/25 text-center p-4 pointer-events-none select-none">
             <Music className="w-6 h-6 text-slate-500 mb-2" />
             <p className="text-[11px] text-slate-400 font-medium tracking-wide">
               Press play to activate the live visualizer

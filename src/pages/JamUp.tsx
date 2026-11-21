@@ -312,10 +312,10 @@ export default function JamUp() {
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
                 aria-pressed={isActive}
-                className={`relative px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer border ${
+                className={`filter-btn filter-chip filter-silver-border border-silver-2 border-2 relative px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer ${
                   isActive 
-                    ? 'text-white border-[#c0c0c0]/40' 
-                    : 'text-muted-foreground hover:text-foreground bg-muted/20 border-[#c0c0c0]/25'
+                    ? 'active text-white border-[rgba(192,192,192,0.35)]' 
+                    : 'text-muted-foreground hover:text-foreground bg-muted/20 border-[rgba(192,192,192,0.22)] hover:border-[rgba(192,192,192,0.35)]'
                 }`}
               >
                 {isActive && (

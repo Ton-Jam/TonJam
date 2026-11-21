@@ -239,10 +239,10 @@
 
   --filter-background: var(--tj-color-chip-background, #102943);
   --filter-active-background: var(--tj-color-chip-active-background, #063C55);
-  --filter-border: transparent;
+  --filter-border: 2px solid rgba(192, 192, 192, 0.22);
   --filter-radius: 999px;
   --filter-text: var(--tj-text-secondary);
-  --filter-active-border: transparent;
+  --filter-active-border: 2px solid rgba(192, 192, 192, 0.35);
 
   /* Consistent subtle component radii */
   --button-radius: var(--tj-radius-sm, 8px);
@@ -1320,11 +1320,34 @@
     border: 1px solid rgba(192, 192, 192, 0.18) !important;
     box-shadow: none !important;
     background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   .glass-card:hover {
     border-color: rgba(192, 192, 192, 0.28) !important;
     box-shadow: none !important;
+  }
+
+  /* Global Card Backdrop Removal — No backdrop-filter or blur on cards */
+  .card,
+  [data-slot="card"],
+  .glass-card,
+  .nft-card,
+  .track-card,
+  .album-card,
+  .artist-card,
+  .collection-card,
+  .event-card,
+  .playlist-card,
+  .dashboard-card,
+  .media-card,
+  .stat-card,
+  [class*="-card"],
+  [class*="card-"],
+  [id*="card"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   .glass-input {
@@ -1644,7 +1667,28 @@ button,
   scrollbar-width: none; /* Firefox */
 }
 
-/* Pill Component Design — TonJam Chip Tokens without heavy glow */
+/* =========================================================
+   SUBTLE SILVER 2PX BORDER FOR GLOBAL FILTER BUTTONS
+   ========================================================= */
+.border-silver-2,
+.filter-silver-border,
+.border-silver-2px {
+  border: 2px solid rgba(192, 192, 192, 0.22) !important;
+}
+
+.border-silver-2:hover,
+.filter-silver-border:hover,
+.border-silver-2px:hover,
+.border-silver-2.active,
+.filter-silver-border.active,
+.border-silver-2px.active,
+.border-silver-2[aria-pressed="true"],
+.filter-silver-border[aria-pressed="true"],
+.border-silver-2px[aria-pressed="true"] {
+  border-color: rgba(192, 192, 192, 0.35) !important;
+}
+
+/* Pill Component Design — TonJam Chip Tokens with subtle silver 2px border */
 .pill,
 .filter-btn,
 .filter-button,
@@ -1656,14 +1700,14 @@ button,
   flex: 0 0 auto; /* Prevents pills from shrinking */
   background: var(--tj-color-chip-background, #102943);
   color: var(--tj-color-text-secondary, #C2C7CD);
-  border: none !important;
+  border: 2px solid rgba(192, 192, 192, 0.22) !important;
   background-clip: padding-box !important;
   padding: 0.38rem 0.85rem;
   border-radius: var(--tj-radius-pill, 999px);
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
   white-space: nowrap;
   position: relative;
   overflow: hidden;
@@ -1671,15 +1715,7 @@ button,
   box-shadow: none !important;
 }
 
-.pill.border-0,
-.pill.border-none,
-.pill.\!border-none,
-.filter-btn.border-0,
-.filter-btn.border-none {
-  border: none !important;
-}
-
-/* Active State — flat TonJam accent without neon glow */
+/* Active State — flat TonJam accent with 2px silver border highlight */
 .pill.active,
 .filter-btn.active,
 .filter-button.active,
@@ -1696,13 +1732,13 @@ button,
 .tab-filter-btn[aria-pressed="true"] {
   background: var(--tj-color-brand-primary, #00B4D8) !important;
   color: var(--tj-color-text-primary, #ffffff) !important;
-  border: none !important;
+  border: 2px solid rgba(192, 192, 192, 0.35) !important;
   transform: none !important;
   z-index: 2;
   box-shadow: none !important;
 }
 
-/* Hover/Focus State for Desktop — clean subtle surface step */
+/* Hover/Focus State for Desktop — clean subtle surface step and silver border */
 @media (hover: hover) {
   .pill:hover:not(.active),
   .filter-btn:hover:not(.active),
@@ -1711,8 +1747,12 @@ button,
   .filter-pill:hover:not(.active),
   .filter-chip:hover:not(.active),
   .category-filter-btn:hover:not(.active),
-  .tab-filter-btn:hover:not(.active) {
+  .tab-filter-btn:hover:not(.active),
+  .border-silver-2:hover,
+  .filter-silver-border:hover,
+  .border-silver-2px:hover {
     background: var(--tj-color-surface-hover, #132B49);
+    border-color: rgba(192, 192, 192, 0.35) !important;
     color: var(--tj-color-text-primary, #ffffff);
     transform: none;
     box-shadow: none !important;

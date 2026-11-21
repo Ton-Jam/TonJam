@@ -23,7 +23,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       className={cn(
-        "group relative bg-card/40 backdrop-blur-xl border border-white/5 rounded-[4px] overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)]",
+        "group relative bg-card/40 border border-white/5 rounded-[4px] overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)]",
         className
       )}
     >
@@ -41,13 +41,13 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-transparent to-transparent" />
           
           {/* Date Badge */}
-          <div className="absolute top-4 left-4 bg-blue-500 text-white px-4 py-2 rounded-2xl flex flex-col items-center shadow-xl backdrop-blur-md">
+          <div className="absolute top-4 left-4 bg-blue-500 text-white px-4 py-2 rounded-2xl flex flex-col items-center shadow-xl">
             <span className="text-[10px] font-black uppercase tracking-widest">{eventDate.toLocaleDateString('en-US', { month: 'short' })}</span>
             <span className="text-xl font-black tracking-tighter leading-none">{eventDate.getDate()}</span>
           </div>
 
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-             <div className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-[10px] font-black text-white/80 uppercase tracking-widest">
+             <div className="px-3 py-1 bg-white/10 border border-white/10 rounded-full text-[10px] font-black text-white/80 uppercase tracking-widest">
               {event.status || 'Upcoming'}
             </div>
           </div>

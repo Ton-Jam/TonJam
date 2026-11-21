@@ -41,11 +41,11 @@ export const HomeGenreFilterBar: React.FC<HomeGenreFilterBarProps> = ({
             <motion.button
               key={category}
               whileTap={{ scale: 0.95 }}
-              onClick={() => handleSelect(category)}
-              className={`shrink-0 snap-start px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer outline-none border-none shadow-none ${
+              aria-pressed={isSelected}
+              className={`filter-btn filter-silver-border border-silver-2 border-2 shrink-0 snap-start px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer outline-none shadow-none ${
                 isSelected
-                  ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                  : "bg-[var(--tj-color-chip-background,#102943)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)]"
+                  ? "active bg-[var(--tj-color-brand-primary,#00B4D8)] border-[rgba(192,192,192,0.35)] text-white"
+                  : "bg-[var(--tj-color-chip-background,#102943)] border-[rgba(192,192,192,0.22)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)] hover:border-[rgba(192,192,192,0.35)]"
               }`}
             >
               {category}

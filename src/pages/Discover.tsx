@@ -506,10 +506,10 @@ export const Discover: React.FC = () => {
                   key={pill.id}
                   onClick={() => setActiveFilter(pill.id)}
                   aria-pressed={isActive}
-                  className={`border-0 !border-none shadow-none px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-colors select-none cursor-pointer ${
+                  className={`filter-btn filter-silver-border border-silver-2 border-2 shadow-none px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-colors select-none cursor-pointer ${
                     isActive
-                      ? 'bg-[var(--tj-color-brand-primary,#00B4D8)] text-white'
-                      : 'bg-[var(--tj-color-chip-background,#102943)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)]'
+                      ? 'active bg-[var(--tj-color-brand-primary,#00B4D8)] border-[rgba(192,192,192,0.35)] text-white'
+                      : 'bg-[var(--tj-color-chip-background,#102943)] border-[rgba(192,192,192,0.22)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)] hover:border-[rgba(192,192,192,0.35)]'
                   }`}
                 >
                   {pill.label}
@@ -528,10 +528,11 @@ export const Discover: React.FC = () => {
                     type="button"
                     key={vibe.query}
                     onClick={() => handleSelectSearchTerm(vibe.query)}
-                    className={`border-0 !border-none shadow-none px-3 py-1 rounded-full text-[11px] font-medium shrink-0 transition-colors select-none cursor-pointer ${
+                    aria-pressed={isSelected}
+                    className={`filter-btn filter-silver-border border-silver-2 border-2 shadow-none px-3 py-1 rounded-full text-[11px] font-medium shrink-0 transition-colors select-none cursor-pointer ${
                       isSelected
-                        ? 'bg-[var(--tj-color-chip-active-background,#063C55)] text-white'
-                        : 'bg-[var(--tj-color-chip-background,#102943)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)]'
+                        ? 'active bg-[var(--tj-color-chip-active-background,#063C55)] border-[rgba(192,192,192,0.35)] text-white'
+                        : 'bg-[var(--tj-color-chip-background,#102943)] border-[rgba(192,192,192,0.22)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)] hover:border-[rgba(192,192,192,0.35)]'
                     }`}
                   >
                     {vibe.label}

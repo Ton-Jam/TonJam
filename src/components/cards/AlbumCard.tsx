@@ -96,7 +96,7 @@ export const AlbumCard: React.FC<AlbumCardProps> = ({
             </span>
           )}
           {album.isDolbyAtmos && (
-            <span className="bg-black/60 backdrop-blur-md text-blue-400 text-[8px] font-black px-1.5 py-0.5 rounded-[4px] tracking-wider uppercase flex items-center gap-1 shadow-md">
+            <span className="bg-black/60 text-blue-400 text-[8px] font-black px-1.5 py-0.5 rounded-[4px] tracking-wider uppercase flex items-center gap-1 shadow-md">
               <Volume2 className="w-3 h-3 fill-current" /> Dolby
             </span>
           )}
@@ -106,7 +106,7 @@ export const AlbumCard: React.FC<AlbumCardProps> = ({
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
             onClick={handleLikeClick}
-            className="p-1.5 bg-black/40 backdrop-blur-md hover:bg-black/60 rounded-full transition-colors active:scale-90 text-white"
+            className="p-1.5 bg-black/40 hover:bg-black/60 rounded-full transition-colors active:scale-90 text-white"
           >
             <Heart className={`w-3.5 h-3.5 ${isLikedState ? 'text-red-500 fill-red-500' : 'text-white'}`} />
           </button>

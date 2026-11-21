@@ -94,7 +94,7 @@ export const AuctionAnalyticsSection: React.FC<AuctionAnalyticsSectionProps> = (
     if (active && payload && payload.length) {
       const data = payload[0].payload as DataPoint;
       return (
-        <div className="bg-[#050a24]/95 backdrop-blur-2xl border border-white/5 p-3 rounded-xl shadow-2xl min-w-[180px]">
+        <div className="bg-[#050a24]/95 border border-white/5 p-3 rounded-xl shadow-2xl min-w-[180px]">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{data.label} Timeframe</span>
           <div className="mt-2 space-y-2">
             <div>
@@ -113,7 +113,7 @@ export const AuctionAnalyticsSection: React.FC<AuctionAnalyticsSectionProps> = (
   };
 
   return (
-    <div className={cn("bg-card/40 backdrop-blur-xl rounded-2xl p-6 flex flex-col gap-6", className)}>
+    <div className={cn("bg-card/40 rounded-2xl p-6 flex flex-col gap-6", className)}>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">

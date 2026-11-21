@@ -41,7 +41,7 @@ const FeaturedArtistCardContent: React.FC<FeaturedArtistCardProps> = ({ artistId
     <motion.div
       whileHover={{ y: -3 }}
       onClick={() => navigate(`/artist/${artist.uid}`)}
-      className={`bg-white/[0.03] hover:bg-white/[0.06] backdrop-blur-xl rounded-2xl p-5 sm:p-6 cursor-pointer transition-all flex flex-col justify-between space-y-4 select-none ${className}`}
+      className={`bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-5 sm:p-6 cursor-pointer transition-all flex flex-col justify-between space-y-4 select-none ${className}`}
     >
       {/* Top Header: Avatar & Info */}
       <div className="flex items-center justify-between gap-3">

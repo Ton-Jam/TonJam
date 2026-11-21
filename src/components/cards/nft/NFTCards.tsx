@@ -87,7 +87,7 @@ export const NFTCard: React.FC<{
           </span>
         </div>
         <div className="absolute top-2 right-2 flex flex-col gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button onClick={(e) => { e.stopPropagation(); setLiked(!liked); onLike?.(nft); }} className="p-1.5 bg-black/40 backdrop-blur-md rounded-full text-white">
+          <button onClick={(e) => { e.stopPropagation(); setLiked(!liked); onLike?.(nft); }} className="p-1.5 bg-black/40 rounded-full text-white">
             <Heart className={`w-3.5 h-3.5 ${liked ? 'text-red-500 fill-red-500' : ''}`} />
           </button>
         </div>

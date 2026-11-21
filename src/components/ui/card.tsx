@@ -15,10 +15,12 @@ const Card = React.forwardRef<
       fontFamily: typography.fontFamily.primary,
       borderWidth: '1px',
       borderStyle: 'solid',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none',
       ...style
     }}
     className={cn(
-      "overflow-hidden transition-all",
+      "overflow-hidden transition-all backdrop-blur-none backdrop-filter-none",
       className
     )}
     {...props}

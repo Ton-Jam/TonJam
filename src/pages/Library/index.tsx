@@ -231,10 +231,10 @@ const LibraryPage: React.FC = () => {
                     setShowImporter(chip === 'Import');
                   }}
                   aria-pressed={isActive}
-                  className={`flex-shrink-0 snap-start min-h-[34px] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full cursor-pointer transition-colors border-0 ${
+                  className={`filter-btn filter-pill filter-silver-border border-silver-2 border-2 flex-shrink-0 snap-start min-h-[34px] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full cursor-pointer transition-colors ${
                     isActive
-                      ? 'bg-[var(--tj-color-brand-primary,#00B4D8)] text-white'
-                      : 'bg-[var(--tj-color-chip-background,#102943)] text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)]'
+                      ? 'active bg-[var(--tj-color-brand-primary,#00B4D8)] border-[rgba(192,192,192,0.35)] text-white'
+                      : 'bg-[var(--tj-color-chip-background,#102943)] border-[rgba(192,192,192,0.22)] text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-white hover:bg-[var(--tj-color-surface-hover,#132B49)] hover:border-[rgba(192,192,192,0.35)]'
                   }`}
                 >
                   {chip}

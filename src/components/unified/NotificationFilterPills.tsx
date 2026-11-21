@@ -27,12 +27,11 @@ export const NotificationFilterPills: React.FC<NotificationFilterPillsProps> = (
           return (
             <button
               key={f.id}
-              type="button"
-              onClick={() => onFilterChange(f.id)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-tight transition-all shrink-0 ${
+              aria-pressed={isActive}
+              className={`filter-btn filter-pill filter-silver-border border-silver-2 border-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-tight transition-all shrink-0 cursor-pointer ${
                 isActive
-                  ? 'bg-[#2E8CEB] text-white shadow-sm'
-                  : 'bg-white/[0.05] text-[#91A8C5] hover:bg-white/[0.08] hover:text-[#F5F7FB]'
+                  ? 'active bg-[#2E8CEB] border-[rgba(192,192,192,0.35)] text-white shadow-sm'
+                  : 'bg-white/[0.05] border-[rgba(192,192,192,0.22)] text-[#91A8C5] hover:bg-white/[0.08] hover:text-[#F5F7FB] hover:border-[rgba(192,192,192,0.35)]'
               }`}
             >
               <span>{f.label}</span>

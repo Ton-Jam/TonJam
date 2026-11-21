@@ -26,7 +26,7 @@ export const MarketTrendsChart = ({ className }: { className?: string }) => {
   const [activeTab, setActiveTab] = useState<'volume' | 'floor'>('volume');
 
   return (
-    <div className={cn("bg-white/5 backdrop-blur-xl rounded-[4px] p-6 flex flex-col gap-6", className)}>
+    <div className={cn("bg-white/5 rounded-[4px] p-6 flex flex-col gap-6", className)}>
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ export const MarketTrendsChart = ({ className }: { className?: string }) => {
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
-                        <div className="bg-black/95 backdrop-blur-xl border border-white/10 p-3 rounded-[4px] shadow-2xl">
+                        <div className="bg-black/95 border border-white/10 p-3 rounded-[4px] shadow-2xl">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{payload[0].payload.date}</p>
                           <div className="flex items-baseline gap-1.5">
                             <span className="text-lg font-black text-white font-mono">{payload[0].value?.toLocaleString()}</span>
@@ -133,7 +133,7 @@ export const MarketTrendsChart = ({ className }: { className?: string }) => {
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
-                        <div className="bg-black/95 backdrop-blur-xl border border-white/10 p-3 rounded-[4px] shadow-2xl">
+                        <div className="bg-black/95 border border-white/10 p-3 rounded-[4px] shadow-2xl">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{payload[0].payload.date}</p>
                           <div className="flex items-baseline gap-1.5">
                             <span className="text-lg font-black text-emerald-400 font-mono">{payload[0].value}</span>

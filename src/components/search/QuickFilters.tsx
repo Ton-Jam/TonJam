@@ -35,10 +35,10 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({
             key={filter.id}
             onClick={() => onFilterChange(filter.id)}
             aria-pressed={isActive}
-            className={`pill border-0 !border-none relative px-3.5 py-1.5 shrink-0 rounded-full text-xs font-semibold cursor-pointer transition-all duration-200 overflow-hidden outline-none ${
+            className={`pill filter-btn filter-silver-border border-silver-2 border-2 relative px-3.5 py-1.5 shrink-0 rounded-full text-xs font-semibold cursor-pointer transition-all duration-200 overflow-hidden outline-none ${
               isActive
-                ? 'active bg-[#00B4D8] text-white'
-                : 'bg-white/[0.06] text-slate-300 hover:text-white hover:bg-white/[0.12]'
+                ? 'active bg-[#00B4D8] border-[rgba(192,192,192,0.35)] text-white'
+                : 'bg-white/[0.06] border-[rgba(192,192,192,0.22)] text-slate-300 hover:text-white hover:bg-white/[0.12] hover:border-[rgba(192,192,192,0.35)]'
             }`}
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >

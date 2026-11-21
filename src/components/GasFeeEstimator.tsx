@@ -173,7 +173,7 @@ export const GasFeeEstimator: React.FC<GasFeeEstimatorProps> = ({
   // Compact variant (e.g. for modal sidebars and upload drawers)
   if (variant === 'compact') {
     return (
-      <div className={cn("p-3.5 rounded-2xl bg-neutral-900/60 backdrop-blur-md space-y-3", className)}>
+      <div className={cn("p-3.5 rounded-2xl bg-neutral-900/60 space-y-3", className)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className={cn("w-2 h-2 rounded-full animate-ping", congestionTokens.dotColor)} />
@@ -245,7 +245,7 @@ export const GasFeeEstimator: React.FC<GasFeeEstimatorProps> = ({
 
   // Full Card Variant
   return (
-    <div className={cn("p-4 sm:p-5 rounded-2xl bg-neutral-900/70 backdrop-blur-xl space-y-4 select-none", className)}>
+    <div className={cn("p-4 sm:p-5 rounded-2xl bg-neutral-900/70 space-y-4 select-none", className)}>
       {/* 1. Header with live status, latency, and refresh */}
       <div className="flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex items-center gap-2.5">
