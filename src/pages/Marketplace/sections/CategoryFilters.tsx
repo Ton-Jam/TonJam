@@ -41,7 +41,7 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
         ref={containerRef}
         role="group"
         aria-label="NFT category filters"
-        className="flex gap-2.5 overflow-x-auto py-1.5 no-scrollbar scroll-smooth w-full px-1 scrollbar-none"
+        className="flex gap-2.5 overflow-x-auto py-1.5 no-scrollbar scroll-smooth w-full px-3 sm:px-4 after:content-[''] after:shrink-0 after:w-1 scrollbar-none touch-pan-x"
       >
         {categories.map((cat) => {
           const isActive = cat === activeCategory;
@@ -52,7 +52,7 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
               onClick={() => onSelectCategory(cat)}
               aria-pressed={isActive}
               aria-label={`Filter by ${cat}`}
-              className={`category-filter-btn filter-btn filter-silver-border border-silver-2 border-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 shrink-0 select-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8] ${
+              className={`category-filter-btn filter-btn filter-silver-border border-silver-2 border px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 shrink-0 select-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8] ${
                 isActive
                   ? "active bg-[#00B4D8] border-[rgba(192,192,192,0.35)] text-[#FFFFFF] shadow-sm shadow-[#00B4D8]/25 font-bold"
                   : "bg-[#0A1628] text-[#C2C7CD] border-[rgba(192,192,192,0.22)] hover:text-[#FFFFFF] hover:bg-[#0F1C32] hover:border-[rgba(192,192,192,0.35)]"

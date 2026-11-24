@@ -46,7 +46,7 @@ export const SmartRadioPanel: React.FC<SmartRadioPanelProps> = React.memo(() => 
   };
 
   return (
-    <div className="bg-[#0A113A]/95 backdrop-blur-xl rounded-[var(--tj-radius-md,10px)] p-4 text-[#F2F4F8] shadow-2xl space-y-4 max-h-[420px] overflow-y-auto scrollbar-thin scrollbar-thumb-[#16244F] border-none">
+    <div className="bg-[#0A113A] backdrop-blur-none rounded-[var(--tj-radius-md,10px)] p-4 text-[#F2F4F8] space-y-4 border-none">
       <div className="flex items-center justify-between pb-3">
         <div className="flex items-center gap-2.5">
           <div className={`p-2 rounded-[var(--tj-radius-sm,8px)] transition-all ${isSmartRadio ? "bg-[#5B6BFF] text-white shadow-[0_0_15px_rgba(91,107,255,0.5)]" : "bg-[#16244F] text-[#9AA0AE]"}`}>

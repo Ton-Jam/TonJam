@@ -35,7 +35,7 @@ const DiscoveryFeed: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pt-0">
       {/* Genre Selector */}
-      <section className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+      <section className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 px-3 sm:px-4 after:content-[''] after:shrink-0 after:w-1 touch-pan-x">
         <button
           onClick={() => setSelectedGenre(null)}
           aria-pressed={!selectedGenre}

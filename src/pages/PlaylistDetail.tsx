@@ -12,7 +12,6 @@ import {
   Sparkles, 
   MoreHorizontal, 
   Send, 
-  Heart, 
   Plus, 
   Search,
   Music2,
@@ -20,6 +19,7 @@ import {
   Share2,
   Volume2
 } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { useAudio } from '@/contexts/AudioContext';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import PlaylistCoverGenerator from '@/components/PlaylistCoverGenerator';
@@ -530,7 +530,7 @@ export const PlaylistDetail: React.FC = () => {
                   title="Like Playlist"
                   aria-label="Like Playlist"
                 >
-                  <Heart className={`h-4 w-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
+                  <AnimatedHeart liked={isLiked} className={`h-4 w-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
                 </button>
 
                 {/* More Options Button */}
@@ -677,7 +677,7 @@ export const PlaylistDetail: React.FC = () => {
                     className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer border-none bg-transparent"
                     title={isTrackLiked ? "Unlike" : "Like"}
                   >
-                    <Heart className={cn("w-4 h-4", isTrackLiked ? "fill-rose-500 text-rose-500" : "")} />
+                    <AnimatedHeart liked={isTrackLiked} className={cn("w-4 h-4", isTrackLiked ? "fill-rose-500 text-rose-500" : "")} />
                   </button>
 
                   {id !== 'liked-songs' && (

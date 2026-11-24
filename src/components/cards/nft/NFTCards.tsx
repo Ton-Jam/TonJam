@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Sparkles, Heart, Bookmark, Eye, Layers, Clock, ArrowUpRight, 
+  Sparkles, Bookmark, Eye, Layers, Clock, ArrowUpRight, 
   TrendingUp, Award, DollarSign, Wallet, ShieldAlert, CheckCircle, Flame 
 } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { NFTPlaceholder } from '../../placeholders/NFTPlaceholder';
 import { CollectionPlaceholder } from '../../placeholders/CollectionPlaceholder';
 import { cardTokens } from '@/design';
@@ -88,7 +89,7 @@ export const NFTCard: React.FC<{
         </div>
         <div className="absolute top-2 right-2 flex flex-col gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button onClick={(e) => { e.stopPropagation(); setLiked(!liked); onLike?.(nft); }} className="p-1.5 bg-black/40 rounded-full text-white">
-            <Heart className={`w-3.5 h-3.5 ${liked ? 'text-red-500 fill-red-500' : ''}`} />
+            <AnimatedHeart liked={liked} className={`w-3.5 h-3.5 ${liked ? 'text-red-500 fill-red-500' : ''}`} />
           </button>
         </div>
       </div>

@@ -24,7 +24,6 @@ import { ArtistProfile } from '@/components/ArtistProfile';
 import { PageLayout } from '@/components/layout/PageLayout';
 
 import {
-  Heart,
   Download,
   Clock,
   Search,
@@ -42,6 +41,7 @@ import {
   Music2,
   ArrowRight
 } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { motion, AnimatePresence } from 'motion/react';
 
 const formatDuration = (seconds: number) => {
@@ -213,9 +213,9 @@ const LibraryPage: React.FC = () => {
 
       {/* 3. FILTER CHIPS & CONTROLS */}
       <div className="space-y-3 pt-1">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Scrolling Filter Chips */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none snap-x flex-1">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none snap-x -mx-2 px-2 md:mx-0 md:px-0 md:flex-1 after:content-[''] after:shrink-0 after:w-1 touch-pan-x">
             {filterChips.map((chip) => {
               const isActive = data.activeChip === chip;
               return (
@@ -537,7 +537,7 @@ const LibraryPage: React.FC = () => {
                                   track.isLiked ? 'text-pink-500' : 'text-[var(--tj-color-text-muted,#7F91AA)]'
                                 }`}
                               >
-                                <Heart className={`w-4 h-4 ${track.isLiked ? 'fill-current' : ''}`} />
+                                <AnimatedHeart liked={Boolean(track.isLiked)} className={`w-4 h-4 ${track.isLiked ? 'fill-current' : ''}`} />
                               </button>
                               <button
                                 type="button"

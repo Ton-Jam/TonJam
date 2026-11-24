@@ -16,7 +16,7 @@ export const MarketplaceTransparency: React.FC<MarketplaceTransparencyProps> = (
   return (
     <div
       className={cn(
-        "w-full rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-surface-default,#0D1628)] backdrop-blur-md border border-[var(--tj-color-border-subtle)] p-4 sm:p-5 text-left space-y-4",
+        "w-full rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[var(--tj-color-surface-default,#0B1424)] backdrop-blur-none p-4 sm:p-5 text-left space-y-4",
         className
       )}
     >
@@ -56,7 +56,7 @@ export const MarketplaceTransparency: React.FC<MarketplaceTransparencyProps> = (
           <button
             type="button"
             onClick={onConnectWallet}
-            className="min-h-[38px] inline-flex items-center gap-2 px-4 py-2 rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#FFFFFF)] transition-colors text-xs font-semibold shrink-0 cursor-pointer border border-[var(--tj-color-brand-primary,#00B4D8)] outline-none whitespace-nowrap"
+            className="min-h-[40px] inline-flex items-center gap-2 px-4 py-2 rounded-[8px] bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#FFFFFF)] transition-colors text-xs font-semibold shrink-0 cursor-pointer outline-none whitespace-nowrap"
           >
             <Wallet className="w-3.5 h-3.5" />
             <span>Connect Wallet</span>
@@ -65,8 +65,8 @@ export const MarketplaceTransparency: React.FC<MarketplaceTransparencyProps> = (
       </div>
 
       {/* Feature Pillars Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-[var(--tj-color-border-subtle)]">
-        <div className="flex items-start gap-2.5 p-3 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111F36)]/80 border border-[var(--tj-color-border-subtle)]">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+        <div className="flex items-start gap-2.5 p-3 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[var(--tj-color-surface-elevated,#111C30)]">
           <Percent className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)] shrink-0 mt-0.5" />
           <div>
             <h4 className="text-xs font-semibold text-[var(--tj-color-text-primary,#FFFFFF)]">5% Platform Fee</h4>
@@ -76,7 +76,7 @@ export const MarketplaceTransparency: React.FC<MarketplaceTransparencyProps> = (
           </div>
         </div>
 
-        <div className="flex items-start gap-2.5 p-3 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111F36)]/80 border border-[var(--tj-color-border-subtle)]">
+        <div className="flex items-start gap-2.5 p-3 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[var(--tj-color-surface-elevated,#111C30)]">
           <Zap className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)] shrink-0 mt-0.5" />
           <div>
             <h4 className="text-xs font-semibold text-[var(--tj-color-text-primary,#FFFFFF)]">Instant & Low Cost</h4>
@@ -86,7 +86,7 @@ export const MarketplaceTransparency: React.FC<MarketplaceTransparencyProps> = (
           </div>
         </div>
 
-        <div className="flex items-start gap-2.5 p-3 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111F36)]/80 border border-[var(--tj-color-border-subtle)]">
+        <div className="flex items-start gap-2.5 p-3 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[var(--tj-color-surface-elevated,#111C30)]">
           <ShieldCheck className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)] shrink-0 mt-0.5" />
           <div>
             <h4 className="text-xs font-semibold text-[var(--tj-color-text-primary,#FFFFFF)]">Immutable Royalties</h4>

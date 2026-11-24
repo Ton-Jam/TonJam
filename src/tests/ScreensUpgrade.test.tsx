@@ -242,6 +242,7 @@ vi.mock('@/components/home/TrendingNowWidget', () => ({ TrendingNowWidget: () =>
 vi.mock('@/components/home/RecommendedNFTTracksSection', () => ({ RecommendedNFTTracksSection: () => <div /> }));
 vi.mock('@/components/home/SponsoredBannerCarousel', () => ({ SponsoredBannerCarousel: () => <div /> }));
 vi.mock('@/components/home/RecommendedTracksSection', () => ({ RecommendedTracksSection: () => <div /> }));
+vi.mock('@/components/home/ArtistSpotlightSection', () => ({ ArtistSpotlightSection: () => <div /> }));
 
 const mockSetSortBy = vi.fn();
 const mockSetActiveCategory = vi.fn();
@@ -397,7 +398,7 @@ describe('Upgraded Screens Regression Suite', () => {
     const { rerender } = render(<MarketplacePage />);
 
     expect(screen.getByText('NFT Marketplace')).toBeDefined();
-    expect(screen.getByText('Discover, collect and trade music NFTs.')).toBeDefined();
+    expect(screen.getByText('Discover, collect and trade music NFTs on TON.')).toBeDefined();
     expect(screen.getByText('Featured NFT')).toBeDefined();
 
     // Marketplace tabs
@@ -413,7 +414,7 @@ describe('Upgraded Screens Regression Suite', () => {
     expect(screen.getByText('12.5 TON')).toBeDefined();
 
     fireEvent.click(screen.getByRole('button', { name: /Mint NFT/i }));
-    expect(mockNavigate).toHaveBeenCalledWith('/studio');
+    expect(mockNavigate).toHaveBeenCalledWith('/mint');
 
     const sortSelect = screen.getByLabelText(/Sort NFTs/i);
     fireEvent.change(sortSelect, { target: { value: 'price_asc' } });

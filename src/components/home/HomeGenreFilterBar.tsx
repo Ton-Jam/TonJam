@@ -32,7 +32,7 @@ export const HomeGenreFilterBar: React.FC<HomeGenreFilterBarProps> = ({
       <div
         ref={scrollRef}
         {...handlers}
-        className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-2 after:content-[''] after:shrink-0 after:w-2 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+        className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-3 sm:px-5 after:content-[''] after:shrink-0 after:w-1 w-full snap-x snap-mandatory overscroll-x-contain select-none touch-pan-x"
         style={{ scrollBehavior: "smooth", overscrollBehaviorX: "contain" }}
       >
         {CATEGORIES.map((category) => {
@@ -41,6 +41,7 @@ export const HomeGenreFilterBar: React.FC<HomeGenreFilterBarProps> = ({
             <motion.button
               key={category}
               whileTap={{ scale: 0.95 }}
+              onClick={() => handleSelect(category)}
               aria-pressed={isSelected}
               className={`filter-btn filter-silver-border border-silver-2 border-2 shrink-0 snap-start px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer outline-none shadow-none ${
                 isSelected

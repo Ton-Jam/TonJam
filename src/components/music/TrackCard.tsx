@@ -1,5 +1,6 @@
 import React from 'react';
-import { Play, Pause, Heart, MoreVertical, ListPlus, Share2, User, Copy, Check } from 'lucide-react';
+import { Play, Pause, MoreVertical, ListPlus, Share2, User, Copy, Check } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { Track } from '@/types';
 import { useAudio } from '@/contexts/AudioContext';
 import { AlbumArtwork } from './AlbumArtwork';
@@ -227,7 +228,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
                 isLiked ? 'text-[#F87171]' : 'text-[#8193A8] hover:text-white'
               )}
             >
-              <Heart className={cn('w-4 h-4', isLiked && 'fill-current')} />
+              <AnimatedHeart liked={isLiked} className={cn('w-4 h-4', isLiked && 'fill-current')} />
             </button>
           )}
 
@@ -336,7 +337,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
                 isLiked ? 'text-[#F87171]' : 'text-white hover:text-[#00B4D8]'
               )}
             >
-              <Heart className={cn('w-4 h-4', isLiked && 'fill-current')} />
+              <AnimatedHeart liked={isLiked} className={cn('w-4 h-4', isLiked && 'fill-current')} />
             </button>
           )}
 

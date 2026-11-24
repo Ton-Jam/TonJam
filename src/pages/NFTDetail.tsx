@@ -17,8 +17,8 @@ import {
   Copy,
   Coins,
   Check,
-  Heart,
 } from "lucide-react";
+import { AnimatedHeart } from "@/components/common/AnimatedHeart";
 import { QRCodeSVG } from "qrcode.react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { TON_LOGO } from "@/constants";
@@ -708,7 +708,8 @@ const NFTDetail: React.FC = () => {
                 title={isFavourited ? "Remove from Favorites" : "Add to Favorites"}
                 aria-label={isFavourited ? "Remove from Favorites" : "Add to Favorites"}
               >
-                <Heart
+                <AnimatedHeart
+                  liked={Boolean(isFavourited)}
                   className={cn(
                     "w-5 h-5",
                     isFavourited ? "fill-rose-400 text-rose-400" : ""

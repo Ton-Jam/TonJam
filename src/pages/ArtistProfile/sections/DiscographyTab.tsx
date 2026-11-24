@@ -3,9 +3,10 @@ import { Track, NFTItem, Artist } from "@/types";
 import { AlbumData } from "../types";
 import { 
   Play, Pause, Disc, Sparkles, Clock, Music2, 
-  Layers, ExternalLink, Share2, Heart, Plus, ChevronDown, ChevronUp,
+  Layers, ExternalLink, Share2, Plus, ChevronDown, ChevronUp,
   Radio, Check
 } from "lucide-react";
+import { AnimatedHeart } from "@/components/common/AnimatedHeart";
 import { toast } from "sonner";
 import { useAudio } from "@/contexts/AudioContext";
 import { motion, AnimatePresence } from "motion/react";
@@ -230,7 +231,7 @@ export const DiscographyTab: React.FC<DiscographyTabProps> = ({
                                     onClick={(e) => toggleLike(track.id, e)}
                                     className="p-1 text-neutral-400 hover:text-[#1DB954] transition-colors"
                                   >
-                                    <Heart className={`w-3.5 h-3.5 ${likedMap[track.id] ? "fill-current text-[#1DB954]" : ""}`} />
+                                    <AnimatedHeart liked={Boolean(likedMap[track.id])} className={`w-3.5 h-3.5 ${likedMap[track.id] ? "fill-current text-[#1DB954]" : ""}`} />
                                   </button>
                                 </div>
                               </div>

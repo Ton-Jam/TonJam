@@ -41,9 +41,9 @@ export const RecentlyMinted: React.FC<RecentlyMintedProps> = ({ nfts }) => {
             <div
               key={nft.id}
               onClick={() => navigate(`/nft/${nft.id}`)}
-              className="w-[220px] sm:w-[250px] shrink-0 bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-[var(--tj-radius-sm,8px)] p-3 flex items-center gap-3 cursor-pointer select-none transition-colors group"
+              className="w-[220px] sm:w-[250px] shrink-0 bg-[#0A1628] hover:bg-[#0F1C32] backdrop-blur-none rounded-[var(--tj-mkt-radius-sm,9px)] p-3 flex items-center gap-3 cursor-pointer select-none transition-colors group"
             >
-              <div className="w-14 h-14 rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[#07111F] shrink-0 border border-[#22374D]">
+              <div className="w-14 h-14 rounded-[var(--tj-mkt-radius-compact,6px)] overflow-hidden bg-[#07111F] shrink-0">
                 <img
                   src={artwork}
                   alt={nft.title}

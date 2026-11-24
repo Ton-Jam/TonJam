@@ -39,19 +39,13 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
 
   return (
     <div
-      className="relative w-full rounded-[var(--tj-radius-sm,8px)] bg-[#0F1C32] border border-[#22374D] p-5 sm:p-7 flex flex-col-reverse md:flex-row justify-between gap-6 items-center overflow-hidden transition-all duration-300"
+      className="relative w-full rounded-[var(--tj-mkt-radius-sm,9px)] bg-[#0F1C32] backdrop-blur-none p-5 sm:p-7 flex flex-col-reverse md:flex-row justify-between gap-6 items-center overflow-hidden transition-all duration-300"
       id="marketplace-hero"
     >
-      {/* Background ambient gradient glow */}
-      <div 
-        className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-[#00B4D8]/10 blur-3xl pointer-events-none"
-        aria-hidden="true" 
-      />
-
       {/* Hero Left Content */}
       <div className="flex-1 space-y-3 sm:space-y-4 z-10 text-left w-full md:max-w-[58%]">
         {/* Featured Drop Badge */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00B4D8]/15 text-[#00B4D8] border border-[#00B4D8]/30 select-none">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[#00B4D8]/15 text-[#00B4D8] select-none">
           <Sparkles className="w-3.5 h-3.5" />
           <span className="text-[11px] font-semibold uppercase tracking-wider">FEATURED DROP</span>
         </div>
@@ -85,7 +79,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
         </p>
 
         {/* Pricing & Rarity info */}
-        <div className="flex items-center gap-6 py-2.5 border-y border-[#22374D]/70 max-w-sm">
+        <div className="flex items-center gap-6 py-2.5 max-w-sm">
           <div>
             <span className="text-[10px] font-medium text-[#8C8C8C] uppercase tracking-wider block mb-0.5">
               Floor Price
@@ -109,7 +103,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
         <div className="flex flex-wrap items-center gap-3 pt-1">
           <Button
             onClick={handleExplore}
-            className="rounded-[var(--tj-radius-sm,8px)] text-xs font-semibold px-5 py-2.5 h-10 flex items-center gap-2 bg-[#00B4D8] hover:bg-[#009CC0] text-[#07111F] font-bold transition-colors cursor-pointer border-none shadow-md shadow-[#00B4D8]/20"
+            className="rounded-[var(--tj-mkt-radius-sm,9px)] text-xs font-semibold px-5 py-2.5 h-10 flex items-center gap-2 bg-[#00B4D8] hover:bg-[#009CC0] text-[#07111F] font-bold transition-colors cursor-pointer border-none shadow-md shadow-[#00B4D8]/20"
           >
             Explore Drop
             <ArrowRight className="w-4 h-4" />
@@ -118,7 +112,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
           <Button
             onClick={handlePlayToggle}
             variant="ghost"
-            className="rounded-[var(--tj-radius-sm,8px)] text-xs font-semibold px-4 py-2.5 h-10 flex items-center gap-2 bg-[#0A1628] hover:bg-[#0A1628]/80 text-[#FFFFFF] border border-[#22374D] transition-colors cursor-pointer"
+            className="rounded-[var(--tj-mkt-radius-sm,9px)] text-xs font-semibold px-4 py-2.5 h-10 flex items-center gap-2 bg-[#0A1628] hover:bg-[#0A1628]/80 text-[#FFFFFF] border-0 transition-colors cursor-pointer"
           >
             {isThisPlaying ? (
               <>
@@ -138,7 +132,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
       {/* Hero Right Media Card */}
       <div 
         onClick={handleExplore}
-        className="w-full sm:w-64 md:w-72 aspect-square rounded-[var(--tj-radius-sm,8px)] overflow-hidden relative group cursor-pointer bg-[#0A1628] border border-[#22374D] shrink-0"
+        className="w-full sm:w-64 md:w-72 aspect-square rounded-[var(--tj-mkt-radius-sm,9px)] overflow-hidden relative group cursor-pointer bg-[#0A1628] shrink-0"
       >
         <img
           src={coverImage}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { collection, doc, setDoc, deleteDoc, query, where, onSnapshot } from 'firebase/firestore';
 import { useAudio } from '@/contexts/AudioContext';
@@ -67,7 +67,7 @@ export default function LikeButton({ targetId, targetType }: LikeButtonProps) {
       className={`flex items-center gap-1.5 p-2 rounded-full transition-all ${isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
       aria-label={isLiked ? 'Unlike' : 'Like'}
     >
-      <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+      <AnimatedHeart liked={isLiked} className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
       <span className="text-xs font-bold">{likeCount}</span>
     </button>
   );

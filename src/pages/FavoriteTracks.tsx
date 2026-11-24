@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAudio } from '@/contexts/AudioContext';
 import { Heart, Play, Shuffle, Search } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -137,7 +138,7 @@ const FavoriteTracks: React.FC = () => {
                   aria-label="Unlike track"
                   title="Remove from favorites"
                 >
-                  <Heart className="w-4 h-4 fill-current" />
+                  <AnimatedHeart liked={true} className="w-4 h-4 fill-current" />
                 </button>
               }
               onRemove={() => toggleLikeTrack(track.id)}

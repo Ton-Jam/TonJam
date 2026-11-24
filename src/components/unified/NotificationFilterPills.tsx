@@ -20,8 +20,8 @@ export const NotificationFilterPills: React.FC<NotificationFilterPillsProps> = (
   unreadCount = 0,
 }) => {
   return (
-    <div className="w-full overflow-x-auto no-scrollbar py-1 select-none">
-      <div className="flex items-center gap-2 min-w-max px-1">
+    <div className="-mx-4 px-4 overflow-x-auto no-scrollbar py-1 select-none touch-pan-x">
+      <div className="flex items-center gap-2 min-w-max pr-4">
         {FILTERS.map((f) => {
           const isActive = activeFilter === f.id;
           return (

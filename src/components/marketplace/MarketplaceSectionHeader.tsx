@@ -14,13 +14,13 @@ interface MarketplaceSectionHeaderProps {
 export const MarketplaceSectionHeader: React.FC<MarketplaceSectionHeaderProps> = ({
   title,
   supportingLabel,
-  actionText = "View All",
+  actionText = "See All",
   onAction,
   badge,
   className,
 }) => {
   return (
-    <div className={cn("flex items-end justify-between gap-3 mb-2.5 px-3", className)}>
+    <div className={cn("flex items-end justify-between gap-3 mb-2.5 px-3 sm:px-4", className)}>
       <div className="space-y-0.5 min-w-0">
         <div className="flex items-center gap-2">
           <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--tj-color-text-primary,#FFFFFF)] truncate">
@@ -39,7 +39,7 @@ export const MarketplaceSectionHeader: React.FC<MarketplaceSectionHeaderProps> =
         <button
           type="button"
           onClick={onAction}
-          className="inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--tj-color-brand-primary,#00B4D8)] hover:text-[var(--tj-color-brand-hover,#21C2E8)] transition-colors shrink-0 cursor-pointer border-none bg-transparent px-1 py-1 outline-none whitespace-nowrap"
+          className="inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--tj-color-brand-primary,#00B4D8)] hover:text-[var(--tj-color-brand-hover,#21C2E8)] transition-colors shrink-0 cursor-pointer border-none bg-transparent px-1.5 py-1 rounded-[var(--tj-mkt-radius-compact,6px)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--tj-color-border-focus,#00B4D8)] whitespace-nowrap"
         >
           <span>{actionText}</span>
           <ChevronRight className="w-3.5 h-3.5" />

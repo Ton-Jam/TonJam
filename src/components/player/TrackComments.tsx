@@ -316,7 +316,7 @@ export const TrackComments: React.FC<TrackCommentsProps> = React.memo(({
       {/* Chronological Comment List */}
       <div
         ref={listRef}
-        className="flex-1 overflow-y-auto p-3.5 space-y-3 min-h-[220px] max-h-[380px] scrollbar-thin scrollbar-thumb-[#18285C] scrollbar-track-transparent"
+        className="p-3.5 space-y-3"
       >
         {sortedComments.length === 0 ? (
           <div className="text-center py-10 space-y-2">

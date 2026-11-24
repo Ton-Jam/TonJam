@@ -43,6 +43,7 @@ import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import BottomNavigation from '@/components/layout/BottomNavigation';
+import { useModal } from '@/components/layout/ModalProvider';
 import { SideDrawer } from '@/components/drawer';
 import MiniPlayer from './player/MiniPlayer';
 import PlayerScreen from './player/PlayerScreen';
@@ -165,6 +166,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isTippingModalOpen, setIsTippingModalOpen] = useState(false);
   const [isTestnetModalOpen, setIsTestnetModalOpen] = useState(false);
   const [tonBalance, setTonBalance] = useState<number | null>(null);
+  const { isModalOpen: isModalProviderOpen } = useModal();
+  const [isDomModalOpen, setIsDomModalOpen] = useState(false);
 
   useEffect(() => {
     if (userAddress) {
@@ -276,6 +279,105 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [location.pathname]);
   const [isMobileNavHidden, setIsMobileNavHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Detect any open page-level, Radix dialog/sheet, or TON Connect modals in the DOM
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const isElementHidden = (el: Element): boolean => {
+      if (!(el instanceof HTMLElement)) return false;
+      if (el.getAttribute('aria-hidden') === 'true') return true;
+      if (el.getAttribute('data-state') === 'closed') return true;
+      const cls = typeof el.className === 'string' ? el.className : '';
+      if (cls.includes('pointer-events-none') || cls.includes('hidden')) return true;
+      if (
+        el.id === 'tonjam-bottom-navigation' ||
+        el.id === 'tonjam-mini-player' ||
+        el.id === 'tonjam-dropped-down-player' ||
+        el.closest('#tonjam-bottom-navigation, #tonjam-mini-player, #tonjam-dropped-down-player, [data-sonner-toaster]')
+      ) {
+        return true;
+      }
+      if (typeof window !== 'undefined' && typeof window.getComputedStyle === 'function') {
+        const style = window.getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0' || style.pointerEvents === 'none') {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    const detectOpenDomModal = (): boolean => {
+      const explicitModalSelector = [
+        'dialog[open]',
+        '[role="dialog"]',
+        '[role="alertdialog"]',
+        '[aria-modal="true"]',
+        '[data-slot="dialog-content"]',
+        '[data-slot="alert-dialog-content"]',
+        '[data-slot="sheet-content"]',
+        'tc-modal',
+        '[data-tc-modal]',
+        '.protected-route-loading-overlay',
+      ].join(', ');
+
+      const explicitMatches = document.querySelectorAll(explicitModalSelector);
+      for (const el of explicitMatches) {
+        if (!isElementHidden(el)) {
+          return true;
+        }
+      }
+
+      // Check full-screen fixed overlays with modal-level z-index (z-50+ / z-[...]), ignoring ambient pointer-events-none glows
+      const fixedOverlays = document.querySelectorAll('.fixed.inset-0');
+      for (const el of fixedOverlays) {
+        if (isElementHidden(el)) continue;
+        const cls = el instanceof HTMLElement && typeof el.className === 'string' ? el.className : '';
+        const zMatch = cls.match(/\bz-(?:(\d+)|\[(\d+)\])/);
+        const zVal = zMatch ? Number(zMatch[1] || zMatch[2]) : 0;
+        if (zVal >= 50) {
+          return true;
+        }
+      }
+
+      return false;
+    };
+
+    const updateDomModalState = () => {
+      const open = detectOpenDomModal();
+      setIsDomModalOpen((prev) => (prev === open ? prev : open));
+    };
+
+    updateDomModalState();
+
+    const observer = new MutationObserver(() => {
+      updateDomModalState();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['open', 'data-state', 'aria-hidden', 'aria-modal', 'class', 'style'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const isAnyModalOpen =
+    isFullPlayerOpen ||
+    isAuthModalOpen ||
+    isTippingModalOpen ||
+    isTestnetModalOpen ||
+    isPostModalOpen ||
+    isCreatePlaylistModalOpen ||
+    isDiscoverFiltersOpen ||
+    isMobileSidebarOpen ||
+    Boolean(optionsTrack) ||
+    Boolean(trackToAddToPlaylist) ||
+    isModalProviderOpen ||
+    isDomModalOpen;
+
   const lastScrollYRef = useRef(0);
   const [isFabActive, setIsFabActive] = useState(true);
   const isFabActiveRef = useRef(true);
@@ -622,8 +724,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Audio Player Container */}
       <ErrorBoundary>
         <div className="relative">
-          {currentTrack && !isDJKrupy && !isPostDetail && !isTasks && (
-            <MiniPlayer isMobileNavHidden={isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin} />
+          {currentTrack && !isDJKrupy && !isPostDetail && !isTasks && !isAnyModalOpen && (
+            <MiniPlayer isMobileNavHidden={isMobileNavHidden || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin} />
           )}
           
           <AnimatePresence>
@@ -705,9 +807,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <ErrorBoundary>
         <div className="lg:hidden">
           {/* Mobile Navigation */}
-          {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
+          {!isPostDetail && !isDJKrupy && !isAnyModalOpen && (
             <BottomNavigation
-              isHidden={isMobileNavHidden || isFullPlayerOpen || Boolean(optionsTrack) || Boolean(trackToAddToPlaylist) || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin}
+              isHidden={isMobileNavHidden || location.pathname.startsWith('/track/') || location.pathname.startsWith('/nft/') || location.pathname.startsWith('/mint') || isSettings || isAdmin}
             />
           )}
         </div>

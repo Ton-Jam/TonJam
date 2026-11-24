@@ -57,6 +57,7 @@ import RoyaltyConfigModal from "@/components/RoyaltyConfigModal";
 import TrackMonetizationModal from "@/components/TrackMonetizationModal";
 import EditMetadataModal from "@/components/EditMetadataModal";
 import SponsorshipSubmissionModal from "@/components/SponsorshipSubmissionModal";
+import MintTrackNFTModal from "@/components/artist/MintTrackNFTModal";
 import { BadgeSystem } from "@/components/BadgeSystem";
 import CollectorTier from "@/components/CollectorTier";
 import { CollabRequestsManager } from "@/components/CollabRequestsManager";
@@ -260,6 +261,8 @@ export default function ArtistDashboard() {
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [isEditMetadataOpen, setIsEditMetadataOpen] = useState(false);
+  const [trackToMint, setTrackToMint] = useState<any | null>(null);
+  const [isMintTrackModalOpen, setIsMintTrackModalOpen] = useState(false);
 
   // Dynamic Upload Simulator State
   const [isUploading, setIsUploading] = useState(false);
@@ -522,7 +525,8 @@ export default function ArtistDashboard() {
   const mintNFT = (trackId: string) => {
     const track = tracks.find(t => t.id === trackId);
     if (track) {
-      navigate('/artist-minting', { state: { track } });
+      setTrackToMint(track);
+      setIsMintTrackModalOpen(true);
     }
   };
 
@@ -534,9 +538,8 @@ export default function ArtistDashboard() {
       return;
     }
 
-    toast.info(`Opening TON Connect minting studio for "${tracksToMint[0].title}"`);
-    addNotification(`Redirecting to TON Connect minting studio for "${tracksToMint[0].title}"`, "info");
-    navigate('/artist-minting', { state: { track: tracksToMint[0] } });
+    setTrackToMint(tracksToMint[0]);
+    setIsMintTrackModalOpen(true);
   };
 
   const handleBulkDelete = async () => {
@@ -2358,6 +2361,19 @@ export default function ArtistDashboard() {
           artist={artistDataForRoyalty}
         />
       )}
+
+      <MintTrackNFTModal
+        isOpen={isMintTrackModalOpen}
+        onClose={() => {
+          setIsMintTrackModalOpen(false);
+          setTrackToMint(null);
+        }}
+        preselectedTrack={trackToMint}
+        artistTracks={tracks}
+        onSuccess={() => {
+          fetchStaticData();
+        }}
+      />
 
     </div>
   );

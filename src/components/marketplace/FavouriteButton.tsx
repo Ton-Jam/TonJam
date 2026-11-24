@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Heart } from "lucide-react";
+import { AnimatedHeart } from "@/components/common/AnimatedHeart";
 import { cn } from "@/lib/utils";
 
 interface FavouriteButtonProps {
@@ -38,16 +38,17 @@ export const FavouriteButton: React.FC<FavouriteButtonProps> = ({
       aria-label={favourited ? "Remove from favourites" : "Add to favourites"}
       aria-pressed={favourited}
       className={cn(
-        "rounded-[var(--tj-radius-compact,5px)] flex items-center justify-center transition-colors duration-150 cursor-pointer outline-none border",
-        "bg-[var(--tj-color-surface-overlay,#07182BCC)] backdrop-blur-md",
+        "rounded-[var(--tj-mkt-radius-compact,6px)] flex items-center justify-center transition-colors duration-150 cursor-pointer outline-none border-0 backdrop-blur-none",
+        "bg-[#07182B]/85",
         size === "sm" ? "w-8 h-8" : "w-9 h-9",
         favourited
-          ? "text-[var(--tj-color-state-danger,#F16D78)] border-[var(--tj-color-state-danger,#F16D78)]/60 hover:opacity-90"
-          : "text-[var(--tj-color-text-secondary,#C2C7CD)] border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] hover:text-[var(--tj-color-text-primary,#FFFFFF)]",
+          ? "text-[var(--tj-color-state-danger,#F16D78)] hover:opacity-90"
+          : "text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-[var(--tj-color-text-primary,#FFFFFF)]",
         className
       )}
     >
-      <Heart
+      <AnimatedHeart
+        liked={favourited}
         className={cn(
           size === "sm" ? "w-3.5 h-3.5" : "w-4 h-4",
           favourited ? "fill-current" : ""

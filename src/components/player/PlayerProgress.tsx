@@ -10,7 +10,7 @@ interface PlayerProgressProps {
   bufferedPercentage?: number;
 }
 
-function formatTime(seconds: number): string {
+export function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
@@ -35,6 +35,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = React.memo(({
   const [localProgress, setLocalProgress] = useState(clampedPropProgress);
   const [hoverTime, setHoverTime] = useState<string | null>(null);
   const [hoverPos, setHoverPos] = useState<number>(0);
+  const [showTotalDuration, setShowTotalDuration] = useState(false);
 
   useEffect(() => {
     if (!isSeeking) {
@@ -43,6 +44,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = React.memo(({
   }, [clampedPropProgress, isSeeking]);
 
   const currentTime = (localProgress / 100) * safeDuration;
+  const remainingTime = Math.max(0, safeDuration - currentTime);
 
   const updateProgressFromEvent = useCallback((clientX: number) => {
     const rect = progressBarRef.current?.getBoundingClientRect();
@@ -107,8 +109,8 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = React.memo(({
   }, [localProgress, onSeek]);
 
   return (
-    <div className="w-full flex flex-col gap-1.5 font-sans select-none px-1">
-      {/* Interactive Progress Container */}
+    <div className="w-full flex flex-col gap-1 font-sans select-none px-0.5">
+      {/* Interactive Scrubber Track (44px+ comfortable touch height) */}
       <div
         ref={progressBarRef}
         role="slider"
@@ -117,7 +119,7 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = React.memo(({
         aria-valuemin={0}
         aria-valuemax={Math.round(safeDuration)}
         aria-valuenow={Math.round(currentTime)}
-        aria-valuetext={`${formatTime(currentTime)} of ${formatTime(safeDuration)}`}
+        aria-valuetext={`${formatTime(currentTime)} elapsed, ${formatTime(remainingTime)} remaining`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -125,12 +127,12 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = React.memo(({
         onPointerLeave={() => setHoverTime(null)}
         onKeyDown={handleKeyDown}
         style={{ touchAction: "none" }}
-        className="relative py-2.5 w-full flex flex-col justify-center cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tj-color-border-focus,#00B4D8)] rounded-[var(--tj-radius-compact,5px)]"
+        className="relative min-h-[36px] py-3 w-full flex flex-col justify-center cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#229ED9] rounded-[var(--tj-radius-compact,5px)]"
       >
         {/* Scrubbing Hover Time Tooltip */}
         {hoverTime && (
           <div
-            className="absolute -top-6 px-2 py-0.5 bg-[#07111F] text-[#FFFFFF] text-[10px] font-bold rounded-[var(--tj-radius-compact,5px)] shadow-lg pointer-events-none -translate-x-1/2 transition-opacity z-30 font-mono"
+            className="absolute -top-6 px-2 py-0.5 bg-[#0A182E] border border-[rgba(192,192,192,0.22)] text-[#FFFFFF] text-[10px] font-semibold rounded-[5px] pointer-events-none -translate-x-1/2 z-30 tabular-nums"
             style={{ left: `${hoverPos}%` }}
           >
             {hoverTime}
@@ -138,35 +140,43 @@ export const PlayerProgress: React.FC<PlayerProgressProps> = React.memo(({
         )}
 
         {/* Progress Bar Track */}
-        <div className="w-full h-1.5 group-hover:h-2 bg-[#22374D] rounded-full overflow-hidden relative transition-all duration-150">
+        <div className="w-full h-1.5 group-hover:h-2 bg-[#1A314D] rounded-full overflow-hidden relative transition-all duration-150">
           {/* Buffered Progress Layer */}
           <div
-            className="absolute left-0 top-0 bottom-0 bg-[#3B5570] rounded-full pointer-events-none transition-[width] duration-200"
+            className="absolute left-0 top-0 bottom-0 bg-[#325173] rounded-full pointer-events-none transition-[width] duration-200"
             style={{ width: `${clampedBuffered}%` }}
           />
 
-          {/* TonJam Cyan Played Progress */}
+          {/* TonJam Blue Played Progress */}
           <div
-            className="h-full bg-[var(--tj-color-brand-primary,#00B4D8)] rounded-full relative shadow-[0_0_8px_rgba(0,180,216,0.6)] transition-[width] duration-75"
+            className="h-full bg-[#229ED9] rounded-full relative transition-[width] duration-75"
             style={{ width: `${localProgress}%` }}
           />
         </div>
 
-        {/* Seek Handle Thumb */}
+        {/* Visible Scrubber Thumb */}
         <motion.div
           className="absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none -translate-x-1/2"
           style={{ left: `${localProgress}%` }}
-          animate={{ scale: isSeeking ? 1.3 : 1 }}
+          animate={{ scale: isSeeking ? 1.25 : 1 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
-          <div className="w-3.5 h-3.5 bg-white rounded-full shadow-sm group-hover:scale-125 transition-transform" />
+          <div className="w-3.5 h-3.5 bg-[#FFFFFF] rounded-full border border-[rgba(192,192,192,0.35)] group-hover:scale-115 transition-transform" />
         </motion.div>
       </div>
 
-      {/* Time Labels Row */}
-      <div className="flex justify-between items-center text-xs font-medium text-[#8C8C8C] px-0.5 tabular-nums">
-        <span>{formatTime(currentTime)}</span>
-        <span>{formatTime(safeDuration)}</span>
+      {/* Elapsed & Remaining Time Row */}
+      <div className="flex justify-between items-center text-[11px] font-medium text-[#8FA3BF] px-0.5 tabular-nums">
+        <span data-testid="player-elapsed-time">{formatTime(currentTime)}</span>
+        <button
+          type="button"
+          data-testid="player-remaining-time"
+          onClick={() => setShowTotalDuration((prev) => !prev)}
+          aria-label={showTotalDuration ? "Show remaining time" : "Show total duration"}
+          className="text-[11px] font-medium text-[#8FA3BF] hover:text-[#FFFFFF] bg-transparent border-none p-0 cursor-pointer tabular-nums"
+        >
+          {showTotalDuration ? formatTime(safeDuration) : `-${formatTime(remainingTime)}`}
+        </button>
       </div>
     </div>
   );

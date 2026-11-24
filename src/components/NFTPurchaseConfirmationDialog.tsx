@@ -109,7 +109,10 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && !isProcessing && onClose()}>
       {/* Mobile-friendly bottom sheet on narrow viewports, centered card on desktop */}
-      <AlertDialogContent className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:-translate-x-[50%] sm:-translate-y-[50%] w-full sm:max-w-md max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl bg-[#0A1628] text-[#FFFFFF] p-4 sm:p-6 shadow-2xl border border-[#22374D] z-50 select-none">
+      <AlertDialogContent
+        data-tonjam-modal="true"
+        className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:-translate-x-[50%] sm:-translate-y-[50%] w-full sm:max-w-md max-h-[90vh] overflow-y-auto rounded-t-[8px] sm:rounded-[8px] bg-[#0E1729] text-[#FFFFFF] p-4 sm:p-6 shadow-2xl border-2 border-[rgba(192,192,192,0.22)] z-50 select-none"
+      >
         
         {/* Mobile Drag Indicator */}
         <div className="w-12 h-1.5 bg-[#22374D] rounded-full mx-auto mb-3 sm:hidden" />
@@ -121,24 +124,20 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
             onClick={onClose}
             disabled={isProcessing}
             aria-label="Close dialog"
-            className="absolute right-0 top-0 p-1.5 text-[#8C8C8C] hover:text-[#FFFFFF] rounded-lg bg-[#0F1C32] border border-[#22374D] sm:hidden"
+            className="absolute right-0 top-0 p-1.5 text-[#8C8C8C] hover:text-[#FFFFFF] rounded-[8px] bg-[#142036] border-2 border-[rgba(192,192,192,0.22)] sm:hidden"
           >
             <X className="w-4 h-4" />
           </button>
 
           <div className="flex items-center justify-between pr-8 sm:pr-0">
             <div className="flex items-center gap-1.5">
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00B4D8] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00B4D8]"></span>
-              </span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#00B4D8]">
                 TON Blockchain
               </span>
             </div>
             
             {/* Live TON Rate Badge */}
-            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#0F1C32] border border-[#22374D] text-[#C2C7CD] text-[10px] font-mono">
+            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-[8px] bg-[#142036] border-2 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] text-[10px] font-mono">
               <TrendingUp className="w-3 h-3 text-[#00B4D8]" />
               <span>1 TON ≈ {formatFiat(1)}</span>
             </div>
@@ -153,7 +152,7 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
         </AlertDialogHeader>
 
         {/* NFT Asset Card */}
-        <div className="mt-3.5 p-3 bg-[#0F1C32] rounded-xl border border-[#22374D] flex items-center gap-3">
+        <div className="mt-3.5 p-3 bg-[#142036] rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] flex items-center gap-3">
           <img
             src={nftImage}
             alt={nftTitle}
@@ -161,7 +160,7 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
             onError={(e) => {
               e.currentTarget.src = getPlaceholderImage(nftTitle);
             }}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover bg-[#07111F] shrink-0 border border-[#22374D]"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-[8px] object-cover bg-[#07111F] shrink-0 border-2 border-[rgba(192,192,192,0.22)]"
           />
           <div className="flex-1 min-w-0">
             <span className="text-[9px] font-semibold uppercase tracking-wider text-[#00B4D8] block mb-0.5">
@@ -187,7 +186,7 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
         </div>
 
         {/* Breakdown of Cost */}
-        <div className="mt-3 p-3.5 bg-[#0F1C32] rounded-xl border border-[#22374D] space-y-2.5">
+        <div className="mt-3 p-3.5 bg-[#121C30] rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] space-y-2.5">
           <div className="flex justify-between items-center text-xs">
             <span className="text-[#8C8C8C]">NFT Price</span>
             <div className="text-right">
@@ -205,7 +204,7 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
           </div>
 
           <div className="flex justify-between items-center text-xs">
-            <span className="text-[#8C8C8C]">Estimated Network Fee</span>
+            <span className="text-[#8C8C8C]">Network Fee</span>
             <div className="text-right">
               <span className="font-mono text-[#C2C7CD]">~{networkFeeNum.toFixed(2)} TON</span>
               <span className="text-[10px] text-[#8C8C8C] block font-mono">≈ {formatFiat(networkFeeNum)}</span>
@@ -213,10 +212,10 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
           </div>
 
           {(userWalletAddress || recipient) && (
-            <div className="pt-2 mt-1 border-t border-[#22374D]/60 space-y-1 text-[10px] text-[#8C8C8C]">
+            <div className="pt-2 mt-1 border-t border-[rgba(192,192,192,0.16)] space-y-1 text-[10px] text-[#8C8C8C]">
               {userWalletAddress && (
                 <div className="flex justify-between items-center">
-                  <span>Paying From</span>
+                  <span>Wallet Connected</span>
                   <span className="font-mono text-[#C2C7CD]">
                     {userWalletAddress.slice(0, 6)}...{userWalletAddress.slice(-4)}
                   </span>
@@ -224,7 +223,7 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
               )}
               {recipient && (
                 <div className="flex justify-between items-center">
-                  <span>Seller Vault</span>
+                  <span>Seller Address</span>
                   <span className="font-mono text-[#C2C7CD]">
                     {recipient.slice(0, 6)}...{recipient.slice(-4)}
                   </span>
@@ -233,13 +232,13 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
             </div>
           )}
 
-          {/* Total Due Highlight */}
-          <div className="mt-3 p-3 bg-[#07111F] rounded-xl border border-[#00B4D8]/30 flex items-center justify-between">
+          {/* Total Payable Highlight */}
+          <div className="mt-3 p-3 bg-[#0B1424] rounded-[8px] border-2 border-[#00B4D8]/35 flex items-center justify-between">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#00B4D8] block">
-                Total Due
+                Total Payable
               </span>
-              <span className="text-[10px] text-[#8C8C8C]">Includes network & gas fees</span>
+              <span className="text-[10px] text-[#8C8C8C]">Includes 5% platform & network fees</span>
             </div>
             
             <div className="text-right">
@@ -262,7 +261,7 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
             type="button"
             disabled={isProcessing}
             onClick={onClose}
-            className="flex-1 h-11 rounded-xl bg-[#0F1C32] hover:bg-[#22374D] text-[#C2C7CD] hover:text-[#FFFFFF] font-medium text-xs border border-[#22374D] transition-colors cursor-pointer"
+            className="flex-1 h-11 rounded-[8px] bg-[#142036] hover:bg-[#1A2A46] text-[#C2C7CD] hover:text-[#FFFFFF] font-medium text-xs border-2 border-[rgba(192,192,192,0.22)] transition-colors cursor-pointer"
           >
             {cancelText}
           </button>
@@ -274,12 +273,12 @@ export const NFTPurchaseConfirmationDialog: React.FC<NFTPurchaseConfirmationDial
               e.preventDefault();
               onConfirm();
             }}
-            className="flex-1 h-11 rounded-xl bg-[#00B4D8] hover:bg-[#009CC0] text-[#07111F] font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shadow-[#00B4D8]/20 border-none cursor-pointer"
+            className="flex-1 h-11 rounded-[8px] bg-[#00B4D8] hover:bg-[#009CC0] text-[#07111F] font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border-none cursor-pointer"
           >
             {isProcessing ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin text-[#07111F]" />
-                <span>Processing...</span>
+                <span>Transaction Pending</span>
               </>
             ) : (
               <>

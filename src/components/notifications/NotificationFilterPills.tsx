@@ -50,7 +50,7 @@ export const NotificationFilterPills: React.FC<NotificationFilterPillsProps> = (
 }) => {
   return (
     <div
-      className={`w-full flex items-center gap-2 overflow-x-auto no-scrollbar py-2.5 px-4 select-none touch-pan-x ${className}`}
+      className={`w-full flex items-center gap-2 overflow-x-auto no-scrollbar py-2.5 px-4 after:content-[''] after:shrink-0 after:w-1 select-none touch-pan-x ${className}`}
       role="tablist"
       aria-label="Notification categories"
     >

@@ -186,14 +186,15 @@ describe('MarketplaceHeader & Full Player Production Verification', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/wallet');
   });
 
-  it('PlayerArtwork renders reduced border radius for cover frame and image', () => {
+  it('PlayerArtwork renders 16px border radius and subtle silver border for cover frame and image', () => {
     const { container } = render(
       <PlayerArtwork track={sampleTrack} isPlaying={false} />
     );
 
     const coverImg = screen.getByAltText('Real Signal');
-    expect(coverImg.className).toContain('rounded-[var(--tj-radius-sm,8px)]');
+    expect(coverImg.className).toContain('rounded-[16px]');
     expect(coverImg.className).not.toContain('rounded-[20px]');
+    expect(container.innerHTML).toContain('border-[rgba(192,192,192,0.22)]');
     expect(container.innerHTML).not.toContain('rounded-[20px]');
   });
 
@@ -226,5 +227,44 @@ describe('MarketplaceHeader & Full Player Production Verification', () => {
 
     expect(screen.getByText(/No lyrics available for this track/i)).toBeDefined();
     expect(screen.queryByText(/digital soundscape/i)).toBeNull();
+  });
+
+  it('PlayerArtwork stays fixed and non-floating without blur-3xl backdrop or heavy drop shadow', () => {
+    const { container } = render(
+      <PlayerArtwork track={sampleTrack} isPlaying={true} onDragDismiss={vi.fn()} />
+    );
+
+    expect(container.innerHTML).not.toContain('blur-3xl');
+    expect(container.innerHTML).not.toContain('shadow-[0_20px_50px_rgba(0,0,0,0.8)]');
+    expect(container.innerHTML).not.toContain('backdrop-blur-');
+  });
+
+  it('PlayerScreen keeps cover art fixed in top stage while lower region uses smooth scroll without nested scroll traps', () => {
+    const { container } = render(<PlayerScreen />);
+
+    const dialog = screen.getByRole('dialog', { name: /Full player: Real Signal/i });
+    expect(dialog.className).toContain('h-dvh');
+    expect(dialog.className).toContain('flex');
+    expect(dialog.className).toContain('flex-col');
+    expect(dialog.className).toContain('overflow-hidden');
+
+    const fixedStage = screen.getByTestId('full-player-fixed-stage');
+    const scrollRegion = screen.getByTestId('full-player-scroll-region');
+    const coverImg = screen.getByAltText('Real Signal');
+
+    expect(fixedStage.className).toContain('shrink-0');
+    expect(fixedStage.contains(coverImg)).toBe(true);
+    expect(scrollRegion.contains(coverImg)).toBe(false);
+
+    expect(scrollRegion.className).toContain('flex-1');
+    expect(scrollRegion.className).toContain('overflow-y-auto');
+    expect(scrollRegion.className).toContain('scroll-smooth');
+    expect(scrollRegion.className).toContain('overscroll-y-contain');
+    expect(scrollRegion.className).toContain('touch-pan-y');
+
+    // Open Lyrics tab and ensure no nested max-h scroll traps exist
+    fireEvent.click(screen.getByRole('button', { name: /Lyrics/i }));
+    expect(container.innerHTML).not.toContain('max-h-[480px] overflow-y-auto');
+    expect(container.innerHTML).not.toContain('max-h-[300px]');
   });
 });

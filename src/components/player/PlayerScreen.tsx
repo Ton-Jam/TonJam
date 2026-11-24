@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  Heart,
   Share2,
   Download,
   ListMusic,
@@ -9,7 +8,6 @@ import {
   Check,
   Gem,
   Award,
-  Info,
   User,
   Repeat2,
   MessageSquare,
@@ -19,14 +17,18 @@ import {
   Sliders,
   Radio,
   Activity,
+  Gauge,
 } from "lucide-react";
+import { AnimatedHeart } from "@/components/common/AnimatedHeart";
 import { useAudio } from "@/contexts/AudioContext";
+import { usePlaybackSpeed } from "@/hooks/usePlaybackSpeed";
 import { MarqueeTitle } from "@/components/MarqueeTitle";
 import TipArtistModal from "@/components/TipArtistModal";
 import { PlayerHeader } from "./PlayerHeader";
 import { PlayerArtwork } from "./PlayerArtwork";
 import { PlayerProgress } from "./PlayerProgress";
 import { PlayerControls } from "./PlayerControls";
+import { AudioOutputCard } from "./AudioOutputCard";
 import { CanvasAudioAnalyzer } from "./CanvasAudioAnalyzer";
 import { LyricsSheet } from "./LyricsSheet";
 import { QueueSheet } from "./QueueSheet";
@@ -111,17 +113,20 @@ export const PlayerScreen: React.FC = () => {
     setIsSeeking,
     setTrackToAddToPlaylist,
     isSmartRadio,
+    isHighFidelity,
     createPost,
   } = useAudio();
 
+  const { speed, changeSpeed, availableSpeeds } = usePlaybackSpeed();
   const [activeTab, setActiveTab] = useState<PlayerTab>("none");
   const [isCached, setIsCached] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [repostedTrackIds, setRepostedTrackIds] = useState<string[]>(getStoredRepostedIds);
   const [commentCount, setCommentCount] = useState<number>(0);
   const [showTipModal, setShowTipModal] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const activePanelRef = useRef<HTMLDivElement>(null);
 
-  // Sync offline cache status when current track changes
   useEffect(() => {
     let active = true;
     setIsCached(false);
@@ -141,7 +146,6 @@ export const PlayerScreen: React.FC = () => {
     };
   }, [currentTrack?.id, isTrackCached]);
 
-  // Sync live comment count for current track
   useEffect(() => {
     if (!currentTrack?.id) {
       setCommentCount(0);
@@ -161,7 +165,6 @@ export const PlayerScreen: React.FC = () => {
     };
   }, [currentTrack?.id]);
 
-  // Escape key closes full player when no modal dialog is open
   useEffect(() => {
     if (!isFullPlayerOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -176,25 +179,28 @@ export const PlayerScreen: React.FC = () => {
   const coverUrl = currentTrack?.coverUrl || getPlaceholderImage("cover");
   const coverColor = useCoverColor(coverUrl);
 
-  const trackDuration = currentTrack?.duration || 0;
+  const trackDuration = useMemo(() => {
+    if (audioElement && Number.isFinite(audioElement.duration) && audioElement.duration > 0) {
+      return audioElement.duration;
+    }
+    return currentTrack?.duration || 0;
+  }, [audioElement, currentTrack?.duration, progress]);
+
   const currentTime = (progress / 100) * trackDuration;
   const isLiked = Boolean(currentTrack && likedTrackIds.includes(currentTrack.id));
   const isReposted = Boolean(currentTrack && repostedTrackIds.includes(currentTrack.id));
   const streamsCount = currentTrack?.playCount ?? currentTrack?.streams ?? 0;
   const likesCount = currentTrack?.likes ?? 0;
+  const isHiFiActive = Boolean(currentTrack?.isHighFidelity || isHighFidelity);
 
   const bufferedPercentage = useMemo(() => {
     if (!audioElement || !audioElement.buffered || audioElement.buffered.length === 0) {
       return 0;
     }
-    const dur =
-      Number.isFinite(audioElement.duration) && audioElement.duration > 0
-        ? audioElement.duration
-        : trackDuration;
-    if (!dur || dur <= 0) return 0;
+    if (!trackDuration || trackDuration <= 0) return 0;
     try {
       const end = audioElement.buffered.end(audioElement.buffered.length - 1);
-      return Math.max(0, Math.min(100, (end / dur) * 100));
+      return Math.max(0, Math.min(100, (end / trackDuration) * 100));
     } catch {
       return 0;
     }
@@ -207,6 +213,14 @@ export const PlayerScreen: React.FC = () => {
   const handleTabToggle = useCallback((tab: PlayerTab) => {
     setActiveTab((prev) => (prev === tab ? "none" : tab));
   }, []);
+
+  useEffect(() => {
+    if (activeTab === "none") return;
+    const rafId = requestAnimationFrame(() => {
+      activePanelRef.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, [activeTab]);
 
   const handleLikeToggle = useCallback(() => {
     if (currentTrack?.id) {
@@ -279,9 +293,7 @@ export const PlayerScreen: React.FC = () => {
             track: currentTrack,
             type: "track_repost",
           });
-        } catch {
-          // Keep local repost state cleanly if offline
-        }
+        } catch {}
       }
       toast.success("Shared to JamSpace feed");
     } else {
@@ -317,10 +329,17 @@ export const PlayerScreen: React.FC = () => {
     }
   }, [currentTrack, setTrackToAddToPlaylist]);
 
+  const handleCycleSpeed = useCallback(() => {
+    const idx = availableSpeeds.findIndex((s) => s === speed);
+    const next = availableSpeeds[(idx + 1) % availableSpeeds.length] ?? 1.0;
+    changeSpeed(next);
+  }, [availableSpeeds, changeSpeed, speed]);
+
   return (
     <AnimatePresence>
       {isFullPlayerOpen && currentTrack && (
         <motion.div
+          id="tonjam-full-player-screen"
           key="tonjam-full-player"
           role="dialog"
           aria-modal="true"
@@ -328,40 +347,33 @@ export const PlayerScreen: React.FC = () => {
           initial={{ y: "100%", opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: "100%", opacity: 0 }}
-          transition={{ duration: 0.25, ease: "easeInOut" }}
-          className="fixed inset-0 z-50 bg-[#07111F] text-[#FFFFFF] font-sans overflow-y-auto overscroll-contain touch-pan-y scrollbar-thin scrollbar-thumb-[#22374D]"
+          transition={{ duration: 0.24, ease: "easeInOut" }}
+          className="fixed inset-0 z-50 h-dvh w-full bg-[#061426] text-[#FFFFFF] font-sans flex flex-col overflow-hidden"
+          style={{ height: "100dvh" }}
         >
-          {/* Ambient Background Derived from Cover Photo */}
-          <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 select-none">
-            {coverUrl && (
-              <img
-                src={coverUrl}
-                alt=""
-                aria-hidden="true"
-                referrerPolicy="no-referrer"
-                className="absolute inset-0 w-full h-full object-cover blur-3xl scale-125 opacity-25 transition-opacity duration-700"
-              />
-            )}
+          {/* Dark TON-Blue Ambient Background */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 select-none">
             <div
               className="absolute inset-0 transition-all duration-700 ease-out"
               style={{
-                background: `radial-gradient(circle at 50% 25%, ${coverColor}44 0%, ${coverColor}11 55%, transparent 100%)`,
-                opacity: 0.75,
+                background: `radial-gradient(circle at 50% 22%, ${coverColor}28 0%, rgba(14, 40, 90, 0.55) 45%, #061426 100%)`,
               }}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#07111F]/75 to-[#07111F]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#091C38]/65 via-[#061426]/90 to-[#040D1B]" />
           </div>
 
-          {/* Scrollable Core Player Body */}
-          <div className="relative z-10 min-h-full max-w-md mx-auto w-full px-3 pt-2 pb-[calc(env(safe-area-inset-bottom,20px)+28px)] flex flex-col items-center justify-start gap-3 sm:gap-4">
-            <div className="w-full bg-transparent">
-              <PlayerHeader
-                onClose={handleClose}
-                onQueueClick={() => handleTabToggle("queue")}
-                queueCount={queue.length}
-                track={currentTrack}
-              />
-            </div>
+          {/* Fixed Top Stage: Compact Header & Stationary Square Artwork */}
+          <div
+            data-testid="full-player-fixed-stage"
+            className="shrink-0 relative z-10 w-full max-w-md mx-auto px-4 pt-[max(env(safe-area-inset-top,8px),8px)] pb-1 flex flex-col items-center gap-1"
+          >
+            <PlayerHeader
+              onClose={handleClose}
+              onMoreClick={handleOpenOptions}
+              onQueueClick={() => handleTabToggle("queue")}
+              queueCount={queue.length}
+              track={currentTrack}
+            />
 
             <PlayerArtwork
               track={currentTrack}
@@ -369,55 +381,89 @@ export const PlayerScreen: React.FC = () => {
               isLiked={isLiked}
               onDoubleTapLike={handleLikeToggle}
               onLongPress={handleOpenOptions}
-              onDragDismiss={handleClose}
             />
+          </div>
 
-            {/* Track Metadata & Badges */}
-            <div className="w-full text-center space-y-1">
-              <div className="w-full px-4">
-                <MarqueeTitle
-                  text={currentTrack.title}
-                  className="text-[17px] sm:text-[19px] font-bold text-[#FFFFFF] tracking-tight"
-                  containerClassName="w-full max-w-xs mx-auto"
-                />
+          {/* Smooth Scrollable Lower Region */}
+          <div
+            ref={scrollContainerRef}
+            data-testid="full-player-scroll-region"
+            className="flex-1 min-h-0 relative z-10 w-full overflow-y-auto overflow-x-hidden scroll-smooth overscroll-y-contain touch-pan-y no-scrollbar"
+            style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}
+          >
+            <div className="max-w-md mx-auto w-full px-4 pt-1.5 pb-[calc(env(safe-area-inset-bottom,16px)+20px)] flex flex-col gap-2.5">
+              {/* Track Title, Artist Name & Like Control Row */}
+              <div className="w-full flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1 text-left">
+                  <MarqueeTitle
+                    text={currentTrack.title}
+                    className="text-[18px] sm:text-[20px] font-semibold text-[#FFFFFF] tracking-tight"
+                    containerClassName="w-full"
+                  />
+                  <div className="flex items-center gap-1.5 min-w-0 mt-0.5">
+                    <MarqueeTitle
+                      text={currentTrack.artist}
+                      className="text-[13px] sm:text-[14px] font-medium text-[#9BB0CB]"
+                      containerClassName="min-w-0 max-w-full"
+                    />
+                    {currentTrack.artistVerified && (
+                      <span
+                        title="Verified Artist"
+                        className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#229ED9]/20 border border-[#229ED9]/40 shrink-0"
+                      >
+                        <Check className="w-2.5 h-2.5 text-[#229ED9]" />
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Prominent Like / Favourite Control */}
+                <button
+                  type="button"
+                  onClick={handleLikeToggle}
+                  aria-label={isLiked ? "Remove from favourites" : "Add to favourites"}
+                  aria-pressed={isLiked}
+                  className={`shrink-0 min-h-[44px] min-w-[44px] px-3 rounded-full flex items-center justify-center gap-1.5 border transition-colors cursor-pointer ${
+                    isLiked
+                      ? "bg-[#229ED9]/20 border-[#229ED9]/60 text-[#229ED9]"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-[#FFFFFF]"
+                  }`}
+                >
+                  <AnimatedHeart
+                    liked={isLiked}
+                    className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`}
+                  />
+                  {likesCount > 0 && (
+                    <span className="text-[11px] font-semibold tabular-nums whitespace-nowrap">
+                      Like {formatCompactCount(likesCount)}
+                    </span>
+                  )}
+                </button>
               </div>
 
-              <div className="w-full px-4">
-                <MarqueeTitle
-                  text={currentTrack.artist}
-                  className="text-[13px] sm:text-[14px] font-medium text-[#C2C7CD]"
-                  containerClassName="w-full max-w-xs mx-auto"
-                />
-              </div>
+              {/* Compact Real Track Metadata Badges */}
+              {(streamsCount > 0 || currentTrack.isNFT || isHiFiActive) && (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {streamsCount > 0 && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#0B1C34] border border-[rgba(192,192,192,0.22)] rounded-full text-[10px] font-semibold text-[#F4BD50] tabular-nums">
+                      <Flame className="w-3 h-3 fill-current" />
+                      {formatCompactCount(streamsCount)} {streamsCount === 1 ? "Stream" : "Streams"}
+                    </span>
+                  )}
+                  {currentTrack.isNFT && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#0B1C34] border border-[rgba(192,192,192,0.22)] rounded-full text-[10px] font-semibold text-[#35C98A]">
+                      <Gem className="w-3 h-3" /> Music NFT
+                    </span>
+                  )}
+                  {isHiFiActive && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#0B1C34] border border-[rgba(192,192,192,0.22)] rounded-full text-[10px] font-semibold text-[#FFFFFF]">
+                      <Award className="w-3 h-3 text-[#229ED9]" /> Lossless Hi-Fi
+                    </span>
+                  )}
+                </div>
+              )}
 
-              <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
-                {streamsCount > 0 && (
-                  <span className="flex items-center gap-1 px-2.5 py-0.5 bg-[#0A1628] rounded-[var(--tj-radius-sm,8px)] text-[10px] font-bold text-[#F4BD50]">
-                    <Flame className="w-3 h-3 fill-current" />
-                    {formatCompactCount(streamsCount)} {streamsCount === 1 ? "Stream" : "Streams"}
-                  </span>
-                )}
-
-                {currentTrack.artistVerified && (
-                  <span className="flex items-center gap-1 px-2.5 py-0.5 bg-[#0A1628] rounded-[var(--tj-radius-sm,8px)] text-[10px] font-bold text-[var(--tj-color-brand-primary,#00B4D8)]">
-                    <Check className="w-3 h-3 text-[var(--tj-color-brand-primary,#00B4D8)]" /> Verified
-                  </span>
-                )}
-                {currentTrack.isNFT && (
-                  <span className="flex items-center gap-1 px-2.5 py-0.5 bg-[#0A1628] rounded-[var(--tj-radius-sm,8px)] text-[10px] font-bold text-[#35C98A]">
-                    <Gem className="w-3 h-3" /> Music NFT
-                  </span>
-                )}
-                {currentTrack.isHighFidelity && (
-                  <span className="flex items-center gap-1 px-2.5 py-0.5 bg-[#0A1628] rounded-[var(--tj-radius-sm,8px)] text-[10px] font-bold text-white">
-                    <Award className="w-3 h-3 text-white" /> Lossless Hi-Fi
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Seekable Progress Bar */}
-            <div className="w-full mt-1 mb-0.5">
+              {/* Seekable Playback Progress Bar */}
               <PlayerProgress
                 progress={progress}
                 duration={trackDuration}
@@ -426,322 +472,314 @@ export const PlayerScreen: React.FC = () => {
                 isSeeking={isSeeking}
                 setIsSeeking={setIsSeeking}
               />
-            </div>
 
-            {/* Primary Playback Controls */}
-            <PlayerControls />
+              {/* Primary Playback Controls Row */}
+              <PlayerControls showAuxiliaryBar={false} />
 
-            {/* Social Engagement Action Bar */}
-            <div className="w-full flex items-center gap-2 overflow-x-auto px-3 py-2 bg-[#0A1628] rounded-[var(--tj-radius-lg,12px)] scrollbar-none snap-x touch-pan-x">
-              <button
-                type="button"
-                onClick={() => setShowTipModal(true)}
-                className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--tj-radius-sm,8px)] bg-gradient-to-r from-amber-500/15 via-[#00B4D8]/15 to-blue-600/25 text-[#F4BD50] hover:text-white text-xs font-bold transition-all active:scale-95 cursor-pointer border-none"
-                title="Tip Artist in TON"
-              >
-                <Coins className="w-4 h-4 text-[#F4BD50] fill-[#F4BD50]/30" />
-                <span>Tip Artist</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleLikeToggle}
-                aria-pressed={isLiked}
-                className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--tj-radius-sm,8px)] text-xs font-bold transition-all cursor-pointer border-none ${
-                  isLiked
-                    ? "bg-[#00B4D8]/20 text-[var(--tj-color-brand-primary,#00B4D8)]"
-                    : "bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
-                }`}
-              >
-                <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
-                <span>{likesCount > 0 ? `Like ${formatCompactCount(likesCount)}` : isLiked ? "Liked" : "Like"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleRepostToggle}
-                aria-pressed={isReposted}
-                className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--tj-radius-sm,8px)] text-xs font-bold transition-all cursor-pointer border-none ${
-                  isReposted
-                    ? "bg-[#35C98A]/20 text-[#35C98A]"
-                    : "bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
-                }`}
-                title="JamUp Repost"
-              >
-                <Repeat2 className="w-4 h-4" />
-                <span>{isReposted ? "Reposted" : "Repost"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabToggle("comments")}
-                aria-pressed={activeTab === "comments"}
-                className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--tj-radius-sm,8px)] text-xs font-bold transition-all cursor-pointer border-none ${
-                  activeTab === "comments"
-                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                    : "bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
-                }`}
-                title="Track Comments"
-              >
-                <MessageSquare className={`w-4 h-4 ${activeTab === "comments" ? "text-white" : "text-[var(--tj-color-brand-primary,#00B4D8)]"}`} />
-                <span>{commentCount > 0 ? `Comments (${commentCount})` : "Comments"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleAddToPlaylist}
-                className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--tj-radius-sm,8px)] bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F] text-xs font-bold transition-all cursor-pointer border-none"
-                title="Add to Playlist"
-              >
-                <Plus className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)]" />
-                <span>Add to Playlist</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDownloadToggle}
-                disabled={isDownloading}
-                className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--tj-radius-sm,8px)] text-xs font-bold transition-all cursor-pointer border-none disabled:opacity-50 ${
-                  isCached
-                    ? "bg-[#35C98A]/20 text-[#35C98A]"
-                    : "bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F]"
-                }`}
-                title="Download Offline"
-              >
-                <Download className={`w-4 h-4 ${isCached ? "text-[#35C98A]" : "text-[#8C8C8C]"}`} />
-                <span>{isDownloading ? "Saving..." : isCached ? "Downloaded" : "Download"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleShare}
-                className="shrink-0 snap-start flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--tj-radius-sm,8px)] bg-[#0F1C32] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#16244F] text-xs font-bold transition-all cursor-pointer border-none"
-                title="Share Track"
-              >
-                <Share2 className="w-4 h-4 text-[var(--tj-color-brand-primary,#00B4D8)]" />
-                <span>Share</span>
-              </button>
-            </div>
-
-            {/* Secondary Features Tab Row */}
-            <div className="w-full flex items-center gap-2 overflow-x-auto py-2 px-1 text-[#8C8C8C] scrollbar-none snap-x touch-pan-x">
-              <button
-                type="button"
-                onClick={() => handleTabToggle("visualizer")}
-                aria-pressed={activeTab === "visualizer"}
-                className={`shrink-0 px-3.5 py-2 rounded-[var(--tj-radius-sm,8px)] transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border-none ${
-                  activeTab === "visualizer"
-                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                    : "bg-[#0A1628] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
-                }`}
-                title="Live Frequency Visualizer"
-              >
-                <Activity className={`w-4 h-4 ${activeTab === "visualizer" ? "text-white" : "text-[var(--tj-color-brand-primary,#00B4D8)]"}`} />
-                <span>Live Visualizer</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabToggle("equalizer")}
-                aria-pressed={activeTab === "equalizer"}
-                className={`shrink-0 px-3.5 py-2 rounded-[var(--tj-radius-sm,8px)] transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border-none ${
-                  activeTab === "equalizer"
-                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                    : "bg-[#0A1628] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
-                }`}
-                title="Equalizer & FX Settings"
-              >
-                <Sliders className={`w-4 h-4 ${activeTab === "equalizer" ? "text-white" : "text-[var(--tj-color-brand-primary,#00B4D8)]"}`} />
-                <span>Equalizer & FX</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabToggle("radio")}
-                aria-pressed={activeTab === "radio"}
-                className={`shrink-0 px-3.5 py-2 rounded-[var(--tj-radius-sm,8px)] transition-all relative flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border-none ${
-                  activeTab === "radio"
-                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                    : "bg-[#0A1628] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
-                }`}
-                title="Smart Radio Engine"
-              >
-                <Radio className={`w-4 h-4 ${activeTab === "radio" ? "text-white" : "text-[#35C98A]"}`} />
-                <span>Smart Radio</span>
-                {isSmartRadio && (
-                  <span className="w-2 h-2 rounded-full bg-[#35C98A]" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabToggle("lyrics")}
-                aria-pressed={activeTab === "lyrics"}
-                className={`shrink-0 px-3.5 py-2 rounded-[var(--tj-radius-sm,8px)] transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border-none ${
-                  activeTab === "lyrics"
-                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                    : "bg-[#0A1628] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
-                }`}
-                title="Lyrics"
-              >
-                <Mic2 className={`w-4 h-4 ${activeTab === "lyrics" ? "text-white" : "text-pink-400"}`} />
-                <span>Lyrics</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabToggle("queue")}
-                aria-pressed={activeTab === "queue"}
-                className={`shrink-0 px-3.5 py-2 rounded-[var(--tj-radius-sm,8px)] transition-all relative flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border-none ${
-                  activeTab === "queue"
-                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                    : "bg-[#0A1628] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
-                }`}
-                title="Queue"
-              >
-                <ListMusic className={`w-4 h-4 ${activeTab === "queue" ? "text-white" : "text-[var(--tj-color-brand-primary,#00B4D8)]"}`} />
-                <span>Queue</span>
-                {queue.length > 0 && (
-                  <span className="px-1.5 py-0.5 bg-[#07111F]/60 text-white text-[10px] font-bold rounded-full">
-                    {queue.length}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabToggle("audio_info")}
-                aria-pressed={activeTab === "audio_info"}
-                className={`shrink-0 px-3.5 py-2 rounded-[var(--tj-radius-sm,8px)] transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border-none ${
-                  activeTab === "audio_info"
-                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                    : "bg-[#0A1628] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
-                }`}
-                title="Audio Specs"
-              >
-                <Info className={`w-4 h-4 ${activeTab === "audio_info" ? "text-white" : "text-[var(--tj-color-brand-primary,#00B4D8)]"}`} />
-                <span>Audio Specs</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabToggle("nft")}
-                aria-pressed={activeTab === "nft"}
-                className={`shrink-0 px-3.5 py-2 rounded-[var(--tj-radius-sm,8px)] transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border-none ${
-                  activeTab === "nft"
-                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                    : "bg-[#0A1628] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
-                }`}
-                title="NFT Collectible"
-              >
-                <Gem className={`w-4 h-4 ${activeTab === "nft" ? "text-white" : "text-[#F4BD50]"}`} />
-                <span>NFT Collectible</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabToggle("artist")}
-                aria-pressed={activeTab === "artist"}
-                className={`shrink-0 px-3.5 py-2 rounded-[var(--tj-radius-sm,8px)] transition-all flex items-center gap-1.5 text-xs font-bold snap-start cursor-pointer border-none ${
-                  activeTab === "artist"
-                    ? "bg-[var(--tj-color-brand-primary,#00B4D8)] text-white"
-                    : "bg-[#0A1628] text-[#8C8C8C] hover:text-[#FFFFFF] hover:bg-[#0F1C32]"
-                }`}
-                title="Artist Info"
-              >
-                <User className={`w-4 h-4 ${activeTab === "artist" ? "text-white" : "text-[#35C98A]"}`} />
-                <span>Artist Info</span>
-              </button>
-            </div>
-
-            {/* Expanded Auxiliary Panel */}
-            <AnimatePresence>
-              {activeTab !== "none" && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="w-full my-2 max-h-[480px] overflow-y-auto rounded-[var(--tj-radius-md,10px)] scrollbar-thin scrollbar-thumb-[#16244F]"
+              {/* Figma Primary Pill Actions: High Quality, Queue, Lyrics */}
+              <div className="w-full grid grid-cols-3 gap-2 pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => handleTabToggle("audio_info")}
+                  aria-pressed={activeTab === "audio_info"}
+                  className={`min-h-[40px] px-2.5 py-2 rounded-full border flex items-center justify-center gap-1.5 text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                    activeTab === "audio_info"
+                      ? "bg-[#229ED9] border-[#229ED9] text-[#FFFFFF]"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-[#FFFFFF]"
+                  }`}
                 >
-                  {activeTab === "visualizer" && (
-                    <div className="w-full">
-                      <CanvasAudioAnalyzer
-                        analyser={analyser}
-                        isPlaying={isPlaying}
+                  <Award className={`w-3.5 h-3.5 shrink-0 ${activeTab === "audio_info" ? "text-white" : "text-[#229ED9]"}`} />
+                  <span>High Quality</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleTabToggle("queue")}
+                  aria-pressed={activeTab === "queue"}
+                  className={`min-h-[40px] px-2.5 py-2 rounded-full border flex items-center justify-center gap-1.5 text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                    activeTab === "queue"
+                      ? "bg-[#229ED9] border-[#229ED9] text-[#FFFFFF]"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-[#FFFFFF]"
+                  }`}
+                >
+                  <ListMusic className={`w-3.5 h-3.5 shrink-0 ${activeTab === "queue" ? "text-white" : "text-[#229ED9]"}`} />
+                  <span>Queue</span>
+                  {queue.length > 0 && (
+                    <span
+                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold leading-none tabular-nums ${
+                        activeTab === "queue" ? "bg-white/20 text-white" : "bg-[#152E4D] text-[#FFFFFF]"
+                      }`}
+                    >
+                      {queue.length}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleTabToggle("lyrics")}
+                  aria-pressed={activeTab === "lyrics"}
+                  className={`min-h-[40px] px-2.5 py-2 rounded-full border flex items-center justify-center gap-1.5 text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                    activeTab === "lyrics"
+                      ? "bg-[#229ED9] border-[#229ED9] text-[#FFFFFF]"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-[#FFFFFF]"
+                  }`}
+                >
+                  <Mic2 className={`w-3.5 h-3.5 shrink-0 ${activeTab === "lyrics" ? "text-white" : "text-[#229ED9]"}`} />
+                  <span>Lyrics</span>
+                </button>
+              </div>
+
+              {/* Audio Output / Device Selection Card */}
+              <AudioOutputCard />
+
+              {/* Compact Edge-to-Edge Secondary Social & Audio Utilities Strip */}
+              <div className="self-stretch -mx-4 px-4 flex items-center gap-2 overflow-x-auto py-0.5 text-[#C2C7CD] no-scrollbar snap-x touch-pan-x after:content-[''] after:shrink-0 after:w-1">
+                <button
+                  type="button"
+                  onClick={() => setShowTipModal(true)}
+                  className="shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0B1C34]/90 border border-[rgba(192,192,192,0.22)] text-[#F4BD50] hover:text-white text-[11px] font-semibold whitespace-nowrap cursor-pointer"
+                >
+                  <Coins className="w-3.5 h-3.5" />
+                  <span>Tip Artist</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleTabToggle("equalizer")}
+                  aria-pressed={activeTab === "equalizer"}
+                  className={`shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold whitespace-nowrap cursor-pointer ${
+                    activeTab === "equalizer"
+                      ? "bg-[#229ED9] border-[#229ED9] text-white"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white"
+                  }`}
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>Equalizer</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleTabToggle("visualizer")}
+                  aria-pressed={activeTab === "visualizer"}
+                  className={`shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold whitespace-nowrap cursor-pointer ${
+                    activeTab === "visualizer"
+                      ? "bg-[#229ED9] border-[#229ED9] text-white"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white"
+                  }`}
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  <span>Visualizer</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleTabToggle("radio")}
+                  aria-pressed={activeTab === "radio"}
+                  className={`shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold whitespace-nowrap cursor-pointer ${
+                    activeTab === "radio"
+                      ? "bg-[#229ED9] border-[#229ED9] text-white"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white"
+                  }`}
+                >
+                  <Radio className={`w-3.5 h-3.5 ${isSmartRadio ? "text-[#35C98A]" : ""}`} />
+                  <span>Smart Radio</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCycleSpeed}
+                  aria-label={`Playback speed ${speed}x`}
+                  className={`shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold whitespace-nowrap cursor-pointer ${
+                    speed !== 1.0
+                      ? "bg-[#229ED9] border-[#229ED9] text-white"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white"
+                  }`}
+                >
+                  <Gauge className="w-3.5 h-3.5" />
+                  <span>{speed}x</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleRepostToggle}
+                  aria-pressed={isReposted}
+                  className={`shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold whitespace-nowrap cursor-pointer ${
+                    isReposted
+                      ? "bg-[#35C98A]/20 border-[#35C98A]/50 text-[#35C98A]"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white"
+                  }`}
+                >
+                  <Repeat2 className="w-3.5 h-3.5" />
+                  <span>{isReposted ? "Reposted" : "Repost"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleTabToggle("comments")}
+                  aria-pressed={activeTab === "comments"}
+                  className={`shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold whitespace-nowrap cursor-pointer ${
+                    activeTab === "comments"
+                      ? "bg-[#229ED9] border-[#229ED9] text-white"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white"
+                  }`}
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>{commentCount > 0 ? `Comments (${commentCount})` : "Comments"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleAddToPlaylist}
+                  className="shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0B1C34]/90 border border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white text-[11px] font-semibold whitespace-nowrap cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 text-[#229ED9]" />
+                  <span>Playlist</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadToggle}
+                  disabled={isDownloading}
+                  className={`shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold whitespace-nowrap cursor-pointer disabled:opacity-50 ${
+                    isCached
+                      ? "bg-[#35C98A]/20 border-[#35C98A]/50 text-[#35C98A]"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white"
+                  }`}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{isDownloading ? "Saving..." : isCached ? "Saved" : "Download"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0B1C34]/90 border border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white text-[11px] font-semibold whitespace-nowrap cursor-pointer"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-[#229ED9]" />
+                  <span>Share</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleTabToggle("nft")}
+                  aria-pressed={activeTab === "nft"}
+                  className={`shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold whitespace-nowrap cursor-pointer ${
+                    activeTab === "nft"
+                      ? "bg-[#229ED9] border-[#229ED9] text-white"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white"
+                  }`}
+                >
+                  <Gem className="w-3.5 h-3.5 text-[#F4BD50]" />
+                  <span>NFT</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleTabToggle("artist")}
+                  aria-pressed={activeTab === "artist"}
+                  className={`shrink-0 snap-start min-h-[36px] flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold whitespace-nowrap cursor-pointer ${
+                    activeTab === "artist"
+                      ? "bg-[#229ED9] border-[#229ED9] text-white"
+                      : "bg-[#0B1C34]/90 border-[rgba(192,192,192,0.22)] text-[#C2C7CD] hover:text-white"
+                  }`}
+                >
+                  <User className="w-3.5 h-3.5 text-[#35C98A]" />
+                  <span>Artist</span>
+                </button>
+              </div>
+
+              {/* Expanded Auxiliary Panel */}
+              <AnimatePresence>
+                {activeTab !== "none" && (
+                  <motion.div
+                    ref={activePanelRef}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className="w-full my-1 rounded-[12px] overflow-hidden"
+                  >
+                    {activeTab === "visualizer" && (
+                      <div className="w-full">
+                        <CanvasAudioAnalyzer
+                          analyser={analyser}
+                          isPlaying={isPlaying}
+                          track={currentTrack}
+                          height={200}
+                          showControls={true}
+                          showMetrics={true}
+                        />
+                      </div>
+                    )}
+
+                    {activeTab === "equalizer" && (
+                      <EqualizerSettings onClose={() => setActiveTab("none")} />
+                    )}
+
+                    {activeTab === "radio" && (
+                      <SmartRadioPanel onClose={() => setActiveTab("none")} />
+                    )}
+
+                    {activeTab === "lyrics" && (
+                      <LyricsSheet
                         track={currentTrack}
-                        height={200}
-                        showControls={true}
-                        showMetrics={true}
+                        currentTime={currentTime}
+                        duration={trackDuration}
+                        onSeek={handleSeekSeconds}
+                        onClose={() => setActiveTab("none")}
                       />
-                    </div>
-                  )}
+                    )}
 
-                  {activeTab === "equalizer" && (
-                    <EqualizerSettings onClose={() => setActiveTab("none")} />
-                  )}
+                    {activeTab === "queue" && (
+                      <QueueSheet
+                        queue={queue}
+                        currentTrack={currentTrack}
+                        recentlyPlayed={recentlyPlayed}
+                        onPlayTrack={playTrack}
+                        onRemoveTrack={handleRemoveFromQueue}
+                        onMoveTrack={handleMoveInQueue}
+                        onReorderQueue={setQueue}
+                        onClearQueue={handleClearQueue}
+                        onClose={() => setActiveTab("none")}
+                      />
+                    )}
 
-                  {activeTab === "radio" && (
-                    <SmartRadioPanel onClose={() => setActiveTab("none")} />
-                  )}
+                    {activeTab === "comments" && (
+                      <CommentsSheet
+                        track={currentTrack}
+                        onClose={() => setActiveTab("none")}
+                      />
+                    )}
 
-                  {activeTab === "lyrics" && (
-                    <LyricsSheet
-                      track={currentTrack}
-                      currentTime={currentTime}
-                      duration={trackDuration}
-                      onSeek={handleSeekSeconds}
-                      onClose={() => setActiveTab("none")}
-                    />
-                  )}
+                    {activeTab === "audio_info" && (
+                      <AudioInfoCard track={currentTrack} />
+                    )}
 
-                  {activeTab === "queue" && (
-                    <QueueSheet
-                      queue={queue}
-                      currentTrack={currentTrack}
-                      recentlyPlayed={recentlyPlayed}
-                      onPlayTrack={playTrack}
-                      onRemoveTrack={handleRemoveFromQueue}
-                      onMoveTrack={handleMoveInQueue}
-                      onReorderQueue={setQueue}
-                      onClearQueue={handleClearQueue}
-                      onClose={() => setActiveTab("none")}
-                    />
-                  )}
+                    {activeTab === "nft" && (
+                      <NFTCard
+                        track={currentTrack}
+                        onClosePlayer={handleClose}
+                      />
+                    )}
 
-                  {activeTab === "comments" && (
-                    <CommentsSheet
-                      track={currentTrack}
-                      onClose={() => setActiveTab("none")}
-                    />
-                  )}
+                    {activeTab === "artist" && (
+                      <ArtistPreviewCard
+                        track={currentTrack}
+                        onClosePlayer={handleClose}
+                      />
+                    )}
 
-                  {activeTab === "audio_info" && (
-                    <AudioInfoCard track={currentTrack} />
-                  )}
-
-                  {activeTab === "nft" && (
-                    <NFTCard
-                      track={currentTrack}
-                      onClosePlayer={handleClose}
-                    />
-                  )}
-
-                  {activeTab === "artist" && (
-                    <ArtistPreviewCard
-                      track={currentTrack}
-                      onClosePlayer={handleClose}
-                    />
-                  )}
-
-                  {activeTab === "album" && (
-                    <AlbumCard
-                      track={currentTrack}
-                      onClosePlayer={handleClose}
-                    />
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    {activeTab === "album" && (
+                      <AlbumCard
+                        track={currentTrack}
+                        onClosePlayer={handleClose}
+                      />
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {showTipModal && (

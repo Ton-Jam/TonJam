@@ -1,11 +1,14 @@
 export { MusicNFTCard } from "./MusicNFTCard";
-export type { MusicNFTData } from "./MusicNFTCard";
+export type { MusicNFTData, NFTCardVariant } from "./MusicNFTCard";
 
 export { AuctionCard } from "./AuctionCard";
 export type { AuctionData } from "./AuctionCard";
 
 export { CollectionCard } from "./CollectionCard";
 export type { CollectionData } from "./CollectionCard";
+
+export { VerifiedArtistCard } from "./VerifiedArtistCard";
+export type { VerifiedArtistData } from "./VerifiedArtistCard";
 
 export { FilterPill } from "./FilterPill";
 export { VerifiedArtistLabel } from "./VerifiedArtistLabel";

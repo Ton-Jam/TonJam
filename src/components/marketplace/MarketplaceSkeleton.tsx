@@ -12,24 +12,24 @@ export const NFTCardSkeleton: React.FC<SkeletonProps> = ({ className }) => {
       aria-label="Loading NFT item"
       className={cn(
         "w-full min-w-0 flex flex-col justify-between",
-        "bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-sm,8px)] p-2.5 select-none animate-pulse",
+        "bg-[var(--tj-color-surface-default,#0B1424)] rounded-[var(--tj-mkt-radius-sm,9px)] p-2.5 sm:p-3 select-none animate-pulse",
         className
       )}
     >
       <div>
-        <div className="relative aspect-square w-full rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[var(--tj-color-surface-elevated,#111F36)]">
-          <div className="absolute top-1.5 right-1.5 w-7 h-7 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-chip-background,#102943)]" />
+        <div className="relative aspect-square w-full rounded-[var(--tj-mkt-radius-compact,6px)] overflow-hidden bg-[var(--tj-color-surface-elevated,#111C30)]">
+          <div className="absolute top-1.5 right-1.5 w-7 h-7 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[var(--tj-color-chip-background,#102943)]" />
         </div>
 
         <div className="mt-2.5 space-y-1.5">
-          <div className="h-3.5 w-3/4 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111F36)]" />
-          <div className="h-3 w-1/2 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111F36)]/80" />
+          <div className="h-3.5 w-3/4 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[var(--tj-color-surface-elevated,#111C30)]" />
+          <div className="h-3 w-1/2 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[var(--tj-color-surface-elevated,#111C30)]/80" />
         </div>
       </div>
 
-      <div className="mt-2.5 pt-2 border-t border-[var(--tj-color-border-subtle)] flex items-center justify-between gap-2">
-        <div className="h-3.5 w-14 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-chip-background,#102943)]" />
-        <div className="h-7 w-16 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-chip-background,#102943)]" />
+      <div className="mt-2.5 pt-2 flex items-center justify-between gap-2">
+        <div className="h-3.5 w-14 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[var(--tj-color-chip-background,#102943)]" />
+        <div className="h-7 w-16 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[var(--tj-color-chip-background,#102943)]" />
       </div>
     </div>
   );
@@ -42,24 +42,24 @@ export const CollectionCardSkeleton: React.FC<SkeletonProps> = ({ className }) =
       aria-label="Loading collection item"
       className={cn(
         "w-full min-w-0 flex flex-col justify-between",
-        "bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-sm,8px)] p-2.5 select-none animate-pulse",
+        "bg-[var(--tj-color-surface-default,#0B1424)] rounded-[var(--tj-mkt-radius-sm,9px)] p-2.5 sm:p-3 select-none animate-pulse",
         className
       )}
     >
       <div>
-        <div className="relative aspect-square w-full rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[var(--tj-color-surface-elevated,#111F36)]">
-          <div className="absolute bottom-1.5 right-1.5 w-12 h-4 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-chip-background,#102943)]" />
+        <div className="relative aspect-square w-full rounded-[var(--tj-mkt-radius-compact,6px)] overflow-hidden bg-[var(--tj-color-surface-elevated,#111C30)]">
+          <div className="absolute bottom-1.5 right-1.5 w-12 h-4 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[var(--tj-color-chip-background,#102943)]" />
         </div>
 
         <div className="mt-2.5 space-y-1.5">
-          <div className="h-3.5 w-2/3 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111F36)]" />
-          <div className="h-3 w-1/2 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111F36)]/80" />
+          <div className="h-3.5 w-2/3 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[var(--tj-color-surface-elevated,#111C30)]" />
+          <div className="h-3 w-1/2 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[var(--tj-color-surface-elevated,#111C30)]/80" />
         </div>
       </div>
 
-      <div className="mt-2.5 pt-2 border-t border-[var(--tj-color-border-subtle)] flex items-center justify-between">
-        <div className="h-3 w-12 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-chip-background,#102943)]" />
-        <div className="h-3 w-16 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-elevated,#111F36)]/80" />
+      <div className="mt-2.5 pt-2 flex items-center justify-between">
+        <div className="h-3 w-12 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[var(--tj-color-chip-background,#102943)]" />
+        <div className="h-3 w-16 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[var(--tj-color-surface-elevated,#111C30)]/80" />
       </div>
     </div>
   );
@@ -84,8 +84,8 @@ export const CarouselSkeletonList: React.FC<CarouselSkeletonListProps> = ({
     <div
       className={cn(
         layout === "shelf"
-          ? "flex gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar px-2"
-          : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 px-2",
+          ? "flex gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar px-3 sm:px-4"
+          : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-3 px-3 sm:px-4",
         className
       )}
     >
@@ -93,12 +93,12 @@ export const CarouselSkeletonList: React.FC<CarouselSkeletonListProps> = ({
         type === "nft" ? (
           <NFTCardSkeleton
             key={`nft-skeleton-${idx}`}
-            className={layout === "shelf" ? "w-[160px] sm:w-[180px] shrink-0" : undefined}
+            className={layout === "shelf" ? "w-[164px] sm:w-[184px] shrink-0" : undefined}
           />
         ) : (
           <CollectionCardSkeleton
             key={`col-skeleton-${idx}`}
-            className={layout === "shelf" ? "w-[175px] sm:w-[210px] shrink-0" : undefined}
+            className={layout === "shelf" ? "w-[178px] sm:w-[214px] shrink-0" : undefined}
           />
         )
       )}

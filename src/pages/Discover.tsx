@@ -497,7 +497,7 @@ export const Discover: React.FC = () => {
         {/* Refined Search Filters */}
         <div className="space-y-2 pt-0.5 pb-1 w-full">
           {/* Primary Type Filters */}
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar w-full py-0.5">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar -mx-3 px-3 py-0.5 after:content-[''] after:shrink-0 after:w-1 touch-pan-x">
             {FILTER_PILLS.map((pill) => {
               const isActive = activeFilter === pill.id;
               return (
@@ -520,7 +520,7 @@ export const Discover: React.FC = () => {
 
           {/* Quick Vibes / Tags without Emojis */}
           {!query.trim() && (
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full py-0.5">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-3 px-3 py-0.5 after:content-[''] after:shrink-0 after:w-1 touch-pan-x">
               {QUICK_VIBES.map((vibe) => {
                 const isSelected = query.toLowerCase() === vibe.query.toLowerCase();
                 return (

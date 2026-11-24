@@ -4,7 +4,7 @@ import { X, Share2, AlertOctagon, Wallet, ListPlus, Flame, Gift } from 'lucide-r
 import { ArtistProfile } from '@/components/ArtistProfile';
 import { toast } from 'sonner';
 
-import { MintNFTModal } from '@/components/modal/MintNFTModal';
+import { MintTrackNFTModal } from '@/components/artist/MintTrackNFTModal';
 
 export type ModalType = 'share' | 'report' | 'playlist' | 'wallet' | 'artistAction' | 'nftAction' | 'artistProfile' | 'mintNFT';
 
@@ -17,6 +17,7 @@ interface ModalConfig {
 interface ModalContextType {
   openModal: (type: ModalType, title: string, props?: any) => void;
   closeModal: () => void;
+  isModalOpen: boolean;
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
@@ -209,7 +210,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         );
 
       case 'mintNFT':
-        return <MintNFTModal />;
+        return null;
 
       default:
         return null;
@@ -217,11 +218,19 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <ModalContext.Provider value={{ openModal, closeModal }}>
+    <ModalContext.Provider value={{ openModal, closeModal, isModalOpen: Boolean(activeModal) }}>
       {children}
 
+      {activeModal?.type === 'mintNFT' && (
+        <MintTrackNFTModal
+          isOpen={true}
+          onClose={closeModal}
+          preselectedTrack={activeModal.props?.track}
+        />
+      )}
+
       <AnimatePresence>
-        {activeModal && (
+        {activeModal && activeModal.type !== 'mintNFT' && (
           <>
             {/* Backdrop Blur Layer */}
             <motion.div
@@ -284,6 +293,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 const FALLBACK_MODAL_CONTEXT: ModalContextType = {
   openModal: () => {},
   closeModal: () => {},
+  isModalOpen: false,
 };
 
 export const useModal = () => {

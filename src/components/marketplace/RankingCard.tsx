@@ -38,22 +38,22 @@ export const RankingCard: React.FC<RankingCardProps> = ({
     <motion.div
       whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.04)" }}
       onClick={handleInteract}
-      className="flex items-center gap-3 p-2.5 rounded-[var(--tj-radius-sm,8px)] bg-[#121824] hover:bg-[#182032] transition-all duration-300 cursor-pointer"
+      className="flex items-center gap-3 p-2.5 rounded-[var(--tj-mkt-radius-sm,9px)] bg-[#121824] hover:bg-[#182032] backdrop-blur-none transition-all duration-300 cursor-pointer"
     >
       {/* Rank Index */}
-      <span className="w-5 text-center text-xs font-black text-[#9AA0AE]">
+      <span className="w-5 text-center text-xs font-black text-[#9AA0AE] tabular-nums">
         {rank}
       </span>
 
       {/* Avatar/Artwork Shield */}
-      <div className="relative shrink-0 w-11 h-11 bg-black/40 rounded-[var(--tj-radius-compact,5px)] overflow-hidden">
+      <div className="relative shrink-0 w-11 h-11 bg-black/40 rounded-[var(--tj-mkt-radius-compact,6px)] overflow-hidden">
         <img
           src={imageUrl}
           alt={name}
           referrerPolicy="no-referrer"
           className={cn(
             "w-full h-full object-cover",
-            type === "artist" ? "rounded-full scale-100" : "rounded-[var(--tj-radius-compact,5px)]"
+            type === "artist" ? "rounded-full scale-100" : "rounded-[var(--tj-mkt-radius-compact,6px)]"
           )}
         />
         {type === "track" && onPlayTrack && (

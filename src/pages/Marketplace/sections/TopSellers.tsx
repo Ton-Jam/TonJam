@@ -37,7 +37,7 @@ export const TopSellers: React.FC<TopSellersProps> = ({
             <div
               key={seller.id}
               onClick={() => onSelectSeller(seller)}
-              className="bg-[#0A0A0A] border border-white/12 rounded-[var(--tj-radius-sm,8px)] p-2.5 flex items-center justify-between cursor-pointer transition-colors hover:border-white/20"
+              className="bg-[#0A0A0A] hover:bg-[#121824] backdrop-blur-none rounded-[var(--tj-mkt-radius-sm,9px)] p-2.5 flex items-center justify-between cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 {/* Ranking Index */}
@@ -50,11 +50,11 @@ export const TopSellers: React.FC<TopSellersProps> = ({
                   <img
                     src={seller.avatar}
                     alt={seller.name}
-                    className="w-9 h-9 rounded-full bg-[#101010] border border-white/10"
+                    className="w-9 h-9 rounded-full bg-[#101010]"
                     loading="lazy"
                   />
                   {seller.isVerified && (
-                    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#0088CC] text-white flex items-center justify-center text-[7px] font-bold border border-[#0A0A0A]">
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#0088CC] text-white flex items-center justify-center text-[7px] font-bold">
                       ✓
                     </span>
                   )}
@@ -81,7 +81,7 @@ export const TopSellers: React.FC<TopSellersProps> = ({
                   type="button"
                   onClick={(e) => toggleFollow(seller.id, e)}
                   aria-label={isFollowing ? `Unfollow ${seller.name}` : `Follow ${seller.name}`}
-                  className={`px-3 py-1 rounded-[var(--tj-radius-compact,5px)] text-[9px] font-semibold uppercase tracking-wider transition-colors duration-500 ease-in-out focus:outline-none ${
+                  className={`px-3 py-1 rounded-[var(--tj-mkt-radius-compact,6px)] text-[9px] font-semibold uppercase tracking-wider transition-colors duration-500 ease-in-out focus:outline-none ${
                     isFollowing
                       ? "bg-[#0088CC] text-white"
                       : "bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"

@@ -9,7 +9,6 @@ import {
   Zap,
   Verified,
   Share2,
-  Heart,
   MoreHorizontal,
   ShoppingCart,
   Music2,
@@ -35,6 +34,7 @@ import {
   Send,
   ChevronRight,
 } from "lucide-react";
+import { AnimatedHeart } from "@/components/common/AnimatedHeart";
 import { TonJamBackArrow } from "@/components/icons/TonJamBackArrow";
 import { TJ_COIN_ICON, TON_LOGO } from "@/constants";
 import { useAudio } from "@/contexts/AudioContext";
@@ -528,7 +528,7 @@ const TrackDetail: React.FC = () => {
                 aria-label={isLiked ? "Unlike Track" : "Like Track"}
                 title={isLiked ? "Unlike" : "Like"}
               >
-                <Heart className={cn("h-5 w-5", isLiked && "fill-current")} />
+                <AnimatedHeart liked={isLiked} className={cn("h-5 w-5", isLiked && "fill-current")} />
               </button>
 
               <button

@@ -78,10 +78,10 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = React.memo(({
   }, [lyrics, hasTimestamps, currentTime]);
 
   useEffect(() => {
-    if (activeLineRef.current && containerRef.current) {
-      activeLineRef.current.scrollIntoView({
+    if (activeIndex >= 0 && activeLineRef.current) {
+      activeLineRef.current.scrollIntoView?.({
         behavior: "smooth",
-        block: "center",
+        block: "nearest",
       });
     }
   }, [activeIndex]);
@@ -94,7 +94,7 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = React.memo(({
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#050A24]/95 backdrop-blur-md text-[#F2F4F8] select-none rounded-[var(--tj-radius-md,10px)] p-4 border-none">
+    <div className="w-full flex flex-col bg-[#050A24] backdrop-blur-none text-[#F2F4F8] select-none rounded-[var(--tj-radius-md,10px)] p-4 border-none">
       {/* Header Toolbar */}
       <div className="flex items-center justify-between pb-3 mb-2">
         <div className="flex items-center gap-2">
@@ -132,10 +132,10 @@ export const LyricsSheet: React.FC<LyricsSheetProps> = React.memo(({
         </div>
       </div>
 
-      {/* Scrollable Lyrics Content */}
+      {/* Lyrics Content */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto space-y-4 py-4 px-2 scrollbar-thin scrollbar-thumb-[#16244F] max-h-[300px]"
+        className="space-y-4 py-3 px-2"
       >
         {lyrics.length === 0 ? (
           <div className="text-center py-10 space-y-2">

@@ -10,8 +10,12 @@ import {
   GenreCategory,
   MarketplaceStats,
   AuctionStatus,
+  PriceRangeFilter,
+  EditionTypeFilter,
+  NetworkFilter,
 } from "../types";
 import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
+import { TON_NETWORK_MODE } from "@/services/tonService";
 import {
   collection,
   query,
@@ -24,25 +28,29 @@ import { useOptionalWallet } from "@/contexts/WalletContext";
 import { useAudio } from "@/contexts/AudioContext";
 
 export const DEFAULT_GENRES: string[] = [
-  "Afrobeats",
+  "Electronic",
   "Hip-Hop",
   "Pop",
   "R&B",
-  "Electronic",
-  "Amapiano",
-  "Gospel",
-  "Dancehall",
+  "Rock",
+  "Jazz",
+  "Ambient",
+  "Indie",
+  "Afrobeats",
+  "Classical",
 ];
 
 const GENRE_COLOR_CLASSES: Record<string, string> = {
-  Afrobeats: "from-amber-600 to-yellow-900",
+  Electronic: "from-cyan-600 to-blue-950",
   "Hip-Hop": "from-blue-600 to-indigo-950",
   Pop: "from-emerald-600 to-teal-950",
   "R&B": "from-rose-600 to-red-950",
-  Electronic: "from-cyan-600 to-blue-950",
-  Amapiano: "from-purple-600 to-pink-950",
-  Gospel: "from-amber-500 to-stone-900",
-  Dancehall: "from-sky-700 to-slate-900",
+  Rock: "from-slate-600 to-zinc-900",
+  Jazz: "from-indigo-600 to-slate-950",
+  Ambient: "from-teal-600 to-cyan-950",
+  Indie: "from-violet-600 to-slate-900",
+  Afrobeats: "from-amber-600 to-yellow-900",
+  Classical: "from-sky-700 to-slate-900",
 };
 
 const PAGE_STEP = 12;
@@ -82,6 +90,9 @@ export const useMarketplace = () => {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All NFTs");
   const [activeGenre, setActiveGenre] = useState("All");
+  const [priceRange, setPriceRange] = useState<PriceRangeFilter>("all");
+  const [editionType, setEditionType] = useState<EditionTypeFilter>("all");
+  const [networkFilter, setNetworkFilter] = useState<NetworkFilter>("all");
   const [sortBy, setSortBy] = useState("default");
   const [pageSize, setPageSize] = useState(PAGE_STEP);
   const [reloadNonce, setReloadNonce] = useState(0);
@@ -121,10 +132,10 @@ export const useMarketplace = () => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Reset visible pagination when category / genre / sort changes
+  // Reset visible pagination when category / genre / secondary filters / sort change
   useEffect(() => {
     setPageSize(PAGE_STEP);
-  }, [activeCategory, activeGenre, sortBy, activeTab]);
+  }, [activeCategory, activeGenre, priceRange, editionType, networkFilter, sortBy, activeTab]);
 
   // Online / Offline tracking
   useEffect(() => {
@@ -183,7 +194,12 @@ export const useMarketplace = () => {
             edition: data.edition || "1/1",
             editionNumber: Number(data.editionNumber || 1),
             totalEditions: Number(data.totalEditions || data.supply || 1),
+            remainingEditions:
+              data.remainingEditions !== undefined
+                ? Number(data.remainingEditions)
+                : Number(data.totalEditions || data.supply || 1),
             supply: Number(data.supply || data.totalEditions || 1),
+            network: String(data.network || data.chain || TON_NETWORK_MODE).toLowerCase(),
             rarity: data.rarity || "Common",
             genre: data.genre || "",
             description: data.description || "",
@@ -429,6 +445,32 @@ export const useMarketplace = () => {
       result = result.filter((t) => (t.genre || "").toLowerCase() === targetGenre);
     }
 
+    if (priceRange !== "all") {
+      result = result.filter((t) => {
+        const val = parseTonValue(t.price);
+        if (priceRange === "under_5") return val > 0 && val < 5;
+        if (priceRange === "5_to_25") return val >= 5 && val <= 25;
+        if (priceRange === "25_plus") return val > 25;
+        return true;
+      });
+    }
+
+    if (editionType !== "all") {
+      result = result.filter((t) => {
+        const total = Number(t.totalEditions || t.supply || 1);
+        if (editionType === "single") return total === 1;
+        if (editionType === "limited") return total > 1 && total <= 100;
+        if (editionType === "open") return total > 100;
+        return true;
+      });
+    }
+
+    if (networkFilter !== "all") {
+      result = result.filter(
+        (t) => (t.network || TON_NETWORK_MODE).toLowerCase() === networkFilter
+      );
+    }
+
     switch (activeCategory) {
       case "Trending":
         if (sortBy === "default") {
@@ -482,6 +524,15 @@ export const useMarketplace = () => {
       case "Auctions":
       case "Live Auctions":
         result = result.filter((t) => t.listingType === "auction");
+        break;
+      case "Buy Now":
+        result = result.filter(
+          (t) =>
+            t.listingType !== "auction" &&
+            (t.listingStatus || "").toLowerCase() !== "sold" &&
+            (t.listingStatus || "").toLowerCase() !== "unlisted" &&
+            parseTonValue(t.price) > 0
+        );
         break;
       case "Recently Listed":
       case "Listed NFTs":
@@ -546,7 +597,7 @@ export const useMarketplace = () => {
     }
 
     return result;
-  }, [allNFTs, debouncedSearch, activeCategory, activeGenre, sortBy]);
+  }, [allNFTs, debouncedSearch, activeCategory, activeGenre, priceRange, editionType, networkFilter, sortBy]);
 
   const paginatedNFTs = useMemo(() => {
     return filteredNFTs.slice(0, pageSize);
@@ -654,8 +705,34 @@ export const useMarketplace = () => {
       list = list.filter((a) => (a.nft.genre || "").toLowerCase() === targetGenre);
     }
 
+    if (priceRange !== "all") {
+      list = list.filter((a) => {
+        const val = parseTonValue(a.currentBid || a.nft.price);
+        if (priceRange === "under_5") return val > 0 && val < 5;
+        if (priceRange === "5_to_25") return val >= 5 && val <= 25;
+        if (priceRange === "25_plus") return val > 25;
+        return true;
+      });
+    }
+
+    if (editionType !== "all") {
+      list = list.filter((a) => {
+        const total = Number(a.nft.totalEditions || a.nft.supply || 1);
+        if (editionType === "single") return total === 1;
+        if (editionType === "limited") return total > 1 && total <= 100;
+        if (editionType === "open") return total > 100;
+        return true;
+      });
+    }
+
+    if (networkFilter !== "all") {
+      list = list.filter(
+        (a) => (a.nft.network || TON_NETWORK_MODE).toLowerCase() === networkFilter
+      );
+    }
+
     return list;
-  }, [allNFTs, debouncedSearch, activeGenre]);
+  }, [allNFTs, debouncedSearch, activeGenre, priceRange, editionType, networkFilter]);
 
   // Collections strictly from Firestore with honest floor/volume when available
   const trendingCollections = useMemo<NFTCollection[]>(() => {
@@ -837,6 +914,17 @@ export const useMarketplace = () => {
       .slice(0, 12);
   }, [allNFTs, audio.likedTrackIds, audio.allTracks]);
 
+  const featuredNFTs = useMemo<MarketplaceNFT[]>(() => {
+    const flagged = allNFTs.filter(
+      (t) => t.isFeatured || (t.artistVerified && parseTonValue(t.price) > 0)
+    );
+    return (flagged.length > 0 ? flagged : allNFTs).slice(0, 12);
+  }, [allNFTs]);
+
+  const newlyVerifiedArtists = useMemo<LeaderboardUser[]>(() => {
+    return verifiedArtists.slice(0, 12);
+  }, [verifiedArtists]);
+
   const hasAuctions = useMemo(
     () => liveAuctions.length > 0 || allNFTs.some((n) => n.listingType === "auction"),
     [liveAuctions, allNFTs]
@@ -847,6 +935,9 @@ export const useMarketplace = () => {
     setDebouncedSearch("");
     setActiveCategory("All NFTs");
     setActiveGenre("All");
+    setPriceRange("all");
+    setEditionType("all");
+    setNetworkFilter("all");
     setSortBy("default");
     setPageSize(PAGE_STEP);
   }, []);
@@ -862,6 +953,12 @@ export const useMarketplace = () => {
     activeGenre,
     setActiveGenre,
     availableGenres,
+    priceRange,
+    setPriceRange,
+    editionType,
+    setEditionType,
+    networkFilter,
+    setNetworkFilter,
     sortBy,
     setSortBy,
     isLoading,
@@ -881,10 +978,12 @@ export const useMarketplace = () => {
     myNFTs,
     allNFTs,
     featuredNFT,
+    featuredNFTs,
     trendingNFTs,
     recentlyListedNFTs,
     exclusiveDrops,
     recommendedNFTs,
+    newlyVerifiedArtists,
     hasAuctions,
     liveAuctions,
     trendingCollections,

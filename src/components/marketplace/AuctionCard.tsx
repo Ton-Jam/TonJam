@@ -135,18 +135,18 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
         }
       }}
       className={cn(
-        "flex flex-col justify-between bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-md",
-        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-sm,8px)] p-2.5",
-        "cursor-pointer transition-colors duration-150 select-none text-left",
+        "flex flex-col justify-between bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-none",
+        "rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] hover:border-[rgba(192,192,192,0.35)] p-2.5 sm:p-3",
+        "cursor-pointer transition-colors duration-150 select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#229ED9]",
         layout === "shelf"
-          ? "w-[220px] sm:w-[248px] shrink-0 snap-start"
+          ? "w-[224px] sm:w-[252px] shrink-0 snap-start"
           : "w-full min-w-0",
         className
       )}
     >
       <div>
         {/* Square Artwork */}
-        <div className="relative aspect-square w-full rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[var(--tj-color-bg-secondary,#0B1424)] border border-[var(--tj-color-border-subtle)] group">
+        <div className="relative aspect-square w-full rounded-[8px] overflow-hidden bg-[var(--tj-color-surface-elevated,#111C30)] group">
           <ProgressiveImage
             src={auction.imageUrl || getPlaceholderImage(`auction-${auction.id}`)}
             fallbackSrc={getPlaceholderImage(`auction-${auction.id}`)}
@@ -154,31 +154,30 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
 
-          {/* Auction Status Badge */}
+          {/* Auction Status Label */}
           <div
             className={cn(
-              "absolute top-1.5 left-1.5 flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--tj-radius-compact,5px)] text-[10px] font-semibold uppercase tracking-wider border backdrop-blur-md",
-              statusMeta.badgeClass
+              "absolute top-1.5 left-1.5 flex items-center px-2 py-0.5 rounded-[8px] text-[10px] font-semibold uppercase tracking-wider",
+              statusMeta.badgeClass.replace(/border-[^\s]+/g, "")
             )}
           >
-            <span className={cn("w-1.5 h-1.5 rounded-full", statusMeta.dotClass)} />
             <span>{statusMeta.label}</span>
           </div>
 
           {/* Bid Count */}
-          <div className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-[var(--tj-radius-compact,5px)] text-[10px] font-mono font-semibold bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[var(--tj-color-text-secondary,#A8B7CC)]">
+          <div className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-[8px] text-[10px] font-mono font-semibold tabular-nums bg-[#07182B]/85 text-[var(--tj-color-text-secondary,#A8B7CC)]">
             {auction.bidsCount} {auction.bidsCount === 1 ? "bid" : "bids"}
           </div>
 
           {/* Real Countdown or Explicit End Timestamp */}
-          <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-2 px-2 py-1 rounded-[var(--tj-radius-compact,5px)] bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[10px]">
+          <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-2 px-2 py-1 rounded-[8px] bg-[#07182B]/85 text-[10px]">
             <div className="flex items-center gap-1 text-[var(--tj-color-text-secondary,#A8B7CC)] shrink-0">
               <Clock className="w-3 h-3 text-[var(--tj-color-brand-primary,#229ED9)]" />
               <span className="uppercase tracking-wider">
                 {auction.status === "active" && countdown ? "Ends" : "Closing"}
               </span>
             </div>
-            <span className="font-mono font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate">
+            <span className="font-mono font-semibold tabular-nums text-[var(--tj-color-text-primary,#F8FAFC)] truncate">
               {auction.status === "active" && countdown ? countdown : formattedEndDate}
             </span>
           </div>
@@ -196,18 +195,18 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
         </div>
 
         {/* Bid Metrics */}
-        <div className="mt-2 pt-2 border-t border-[var(--tj-color-border-subtle)] grid grid-cols-2 gap-2 text-[11px]">
+        <div className="mt-2.5 pt-2 grid grid-cols-2 gap-2 text-[11px]">
           <div className="min-w-0">
-            <span className="text-[10px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#A8B7CC)] block">
+            <span className="text-[10px] font-medium text-[var(--tj-color-text-secondary,#A8B7CC)] block">
               Highest Bid
             </span>
             <TonPriceLabel price={auction.highestBid} label="" size="sm" />
           </div>
           <div className="min-w-0 text-right">
-            <span className="text-[10px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#A8B7CC)] block">
+            <span className="text-[10px] font-medium text-[var(--tj-color-text-secondary,#A8B7CC)] block">
               Min Next Bid
             </span>
-            <span className="text-xs font-mono font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate block">
+            <span className="text-xs font-mono font-semibold tabular-nums text-[var(--tj-color-text-primary,#F8FAFC)] truncate block">
               {auction.minimumNextBid || auction.highestBid}
             </span>
           </div>
@@ -215,11 +214,11 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
 
         {/* Recent Bid History Preview (strictly real offers if recorded) */}
         {auction.recentBids && auction.recentBids.length > 0 && (
-          <div className="mt-2 pt-2 border-t border-[var(--tj-color-border-subtle)] space-y-1">
+          <div className="mt-2 pt-2 space-y-1">
             {auction.recentBids.slice(0, 2).map((b) => (
               <div
                 key={b.id}
-                className="flex items-center justify-between text-[10px] font-mono text-[var(--tj-color-text-secondary,#A8B7CC)]"
+                className="flex items-center justify-between text-[10px] font-mono tabular-nums text-[var(--tj-color-text-secondary,#A8B7CC)]"
               >
                 <span className="truncate">
                   {b.bidder.length > 10
@@ -236,7 +235,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
       </div>
 
       {/* Footer CTA */}
-      <div className="mt-2.5 pt-2 border-t border-[var(--tj-color-border-subtle)] flex items-center justify-between gap-2">
+      <div className="mt-2.5 pt-2 flex items-center justify-between gap-2">
         <span className="text-[10px] text-[var(--tj-color-text-secondary,#A8B7CC)] truncate">
           {auction.status === "ended"
             ? "Bidding closed"
@@ -250,10 +249,10 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({
           type="button"
           onClick={handlePlaceBid}
           className={cn(
-            "min-h-[32px] px-2.5 py-1 rounded-[var(--tj-radius-compact,5px)] text-[10px] font-semibold inline-flex items-center gap-1 cursor-pointer border transition-colors shrink-0 whitespace-nowrap",
+            "min-h-[34px] px-3 py-1 rounded-[8px] text-[10px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors shrink-0 whitespace-nowrap",
             auction.status === "active"
-              ? "bg-[var(--tj-color-brand-primary,#229ED9)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#F8FAFC)] border-[var(--tj-color-brand-primary,#229ED9)]"
-              : "bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-primary,#F8FAFC)] border-[var(--tj-color-border-subtle)]"
+              ? "bg-[var(--tj-color-brand-primary,#229ED9)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#F8FAFC)]"
+              : "bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-primary,#F8FAFC)]"
           )}
         >
           <Gavel className="w-3 h-3" />

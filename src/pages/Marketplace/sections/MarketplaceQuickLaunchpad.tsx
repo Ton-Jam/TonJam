@@ -121,9 +121,9 @@ export const MarketplaceQuickLaunchpad: React.FC<MarketplaceQuickLaunchpadProps>
               onClick={act.action}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="flex flex-col items-start p-4 bg-[#0A0A0A] hover:bg-[#121212] rounded-[10px] text-left transition-colors cursor-pointer min-w-[145px] sm:min-w-[165px] shrink-0 group select-none shadow-md shadow-black/30"
+              className="flex flex-col items-start p-4 bg-[#0A0A0A] hover:bg-[#121212] backdrop-blur-none rounded-[var(--tj-mkt-radius-md,11px)] text-left transition-colors cursor-pointer min-w-[145px] sm:min-w-[165px] shrink-0 group select-none shadow-md shadow-black/30"
             >
-              <div className={`p-2 rounded-[10px] ${act.bg} ${act.color} mb-3 transition-transform group-hover:scale-105`}>
+              <div className={`p-2 rounded-[var(--tj-mkt-radius-md,11px)] ${act.bg} ${act.color} mb-3 transition-transform group-hover:scale-105`}>
                 <Icon className="w-5 h-5" />
               </div>
               <h4 className="text-sm font-bold text-white tracking-tight whitespace-nowrap">{act.label}</h4>

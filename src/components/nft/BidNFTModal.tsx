@@ -205,32 +205,37 @@ export const BidNFTModal: React.FC<BidNFTModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md w-full bg-[var(--tj-color-surface-default,#0D1628)] text-white p-6 rounded-[var(--tj-radius-lg,10px)] shadow-xl overflow-hidden sm:max-w-lg">
+      <DialogContent
+        data-tonjam-modal="true"
+        className="max-w-md w-full bg-[#0E1729] text-white p-5 sm:p-6 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] shadow-xl overflow-hidden sm:max-w-lg"
+      >
         {/* Modal Header */}
         <div className="relative flex items-center justify-between pb-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[var(--tj-radius-sm,6px)] bg-[var(--tj-color-brand-primary,#00B4D8)]/15 flex items-center justify-center text-[var(--tj-color-brand-primary,#00B4D8)]">
+            <div className="w-10 h-10 rounded-[8px] bg-[var(--tj-color-brand-primary,#00B4D8)]/15 flex items-center justify-center text-[var(--tj-color-brand-primary,#00B4D8)]">
               <Gavel className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-black uppercase tracking-wider text-white">Place Auction Bid</h2>
-              <p className="text-xs text-[var(--tj-color-text-secondary,#C2C7CD)]">Compete for on-chain music NFT ownership</p>
+              <h2 className="text-base font-black uppercase tracking-wider text-white">Place Bid</h2>
+              <p className="text-xs text-[var(--tj-color-text-secondary,#C2C7CD)]">Live on-chain auction bidding</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+            aria-label="Close bid modal"
+            className="p-2 text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[#142036] hover:bg-[#1A2A46] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* NFT Asset Summary */}
-        <div className="relative flex items-center gap-3.5 p-3 rounded-[var(--tj-radius-md,8px)] bg-white/[0.04] mt-3">
+        <div className="relative flex items-center gap-3.5 p-3 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[#142036] mt-3">
           <img
             src={nft.imageUrl || (nft as any).image || getPlaceholderImage(`nft-${nft.id}`)}
             alt={nft.title}
-            className="w-14 h-14 rounded-[var(--tj-radius-sm,6px)] object-cover bg-slate-900 shrink-0 shadow-sm"
+            className="w-14 h-14 rounded-[8px] object-cover bg-slate-900 shrink-0 shadow-sm"
           />
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-bold text-white truncate">{nft.title}</h3>

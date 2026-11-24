@@ -67,7 +67,7 @@ export const TaskCategoryFilters: React.FC<TaskCategoryFiltersProps> = ({
   completedCount,
 }) => {
   return (
-    <div className="w-full flex gap-2 overflow-x-auto no-scrollbar py-1 px-1 select-none touch-pan-x">
+    <div className="-mx-2 px-2 flex gap-2 overflow-x-auto no-scrollbar py-1 after:content-[''] after:shrink-0 after:w-1 select-none touch-pan-x">
       {CATEGORIES.map((category) => (
         <TaskCategoryPill
           key={category.id}

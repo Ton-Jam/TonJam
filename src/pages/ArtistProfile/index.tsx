@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { 
   Play, Pause, Shuffle, UserPlus, UserCheck, 
   Share2, MoreVertical, Coins, MessageSquare,
-  QrCode, Wallet, Globe, Send, Heart
+  QrCode, Wallet, Globe, Send
 } from "lucide-react";
+import { AnimatedHeart } from "@/components/common/AnimatedHeart";
 import { useAudio } from "@/contexts/AudioContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getPlaceholderImage } from "@/lib/utils";
@@ -482,7 +483,7 @@ export const ArtistProfile: React.FC = () => {
                       }`}
                       aria-label={isLiked ? "Unlike track" : "Like track"}
                     >
-                      <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
+                      <AnimatedHeart liked={isLiked} className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
                     </button>
 
                     <span className="text-xs font-mono text-zinc-400 tabular-nums">

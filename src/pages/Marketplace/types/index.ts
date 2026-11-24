@@ -4,6 +4,10 @@ export type MarketplaceTab = "discover" | "collections" | "auctions" | "my-nfts"
 
 export type AuctionStatus = "active" | "ended" | "pending" | "cancelled";
 
+export type PriceRangeFilter = "all" | "under_5" | "5_to_25" | "25_plus";
+export type EditionTypeFilter = "all" | "single" | "limited" | "open";
+export type NetworkFilter = "all" | "mainnet" | "testnet";
+
 export interface MarketplaceNFT extends NFTItem {
   collectionName?: string;
   creatorUsername?: string;
@@ -21,7 +25,9 @@ export interface MarketplaceNFT extends NFTItem {
   royalty?: number;
   editionNumber?: number;
   totalEditions?: number;
+  remainingEditions?: number;
   listingStatus?: string;
+  network?: string;
   isNFT?: boolean;
 }
 

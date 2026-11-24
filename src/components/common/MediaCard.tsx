@@ -47,13 +47,13 @@ export const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
         onClick={onClick}
         className={cn(
           "group relative cursor-pointer flex flex-col shrink-0 select-none",
-          "w-[168px] p-[10px] rounded-[12px] bg-white/[0.02] hover:bg-white/[0.05] transition-colors duration-200",
+          "w-[168px] p-[8px] rounded-[2px] bg-transparent hover:bg-white/[0.03] transition-colors duration-200",
           className
         )}
         style={{
           width: 'var(--card-width, 168px)',
-          borderRadius: 'var(--card-radius, 12px)',
-          padding: 'var(--card-padding, 10px)',
+          borderRadius: 'var(--card-radius, 2px)',
+          padding: 'var(--card-padding, 8px)',
           ...motionProps.style,
         }}
         {...motionProps}
@@ -61,11 +61,11 @@ export const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
         {/* 1:1 Aspect Ratio Artwork Container */}
         <div
           className={cn(
-            "relative aspect-square w-full rounded-[10px] overflow-hidden bg-neutral-900 flex-shrink-0",
+            "relative aspect-square w-full rounded-[2px] overflow-hidden bg-transparent flex-shrink-0",
             artworkClassName
           )}
           style={{
-            borderRadius: 'var(--card-image-radius, 10px)',
+            borderRadius: 'var(--card-image-radius, 2px)',
           }}
         >
           {artwork}

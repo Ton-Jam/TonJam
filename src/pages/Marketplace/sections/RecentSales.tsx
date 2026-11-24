@@ -25,14 +25,14 @@ export const RecentSales: React.FC<RecentSalesProps> = ({
           <div
             key={sale.id}
             onClick={() => onSelectNFT(sale.nftId)}
-            className="bg-[#0A0A0A] border border-white/12 rounded-[5px] p-2.5 flex items-center justify-between gap-3 cursor-pointer transition-colors hover:border-white/20"
+            className="bg-[#0A0A0A] hover:bg-[#121824] backdrop-blur-none rounded-[var(--tj-mkt-radius-compact,6px)] p-2.5 flex items-center justify-between gap-3 cursor-pointer transition-colors"
           >
             {/* Left Section: Artwork + NFT Name */}
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <img
                 src={sale.nftCoverUrl}
                 alt={sale.nftTitle}
-                className="w-9 h-9 rounded-[5px] object-cover bg-[#101010] border border-white/10 flex-shrink-0"
+                className="w-9 h-9 rounded-[var(--tj-mkt-radius-compact,6px)] object-cover bg-[#101010] flex-shrink-0"
                 loading="lazy"
               />
               <div className="min-w-0">
@@ -60,7 +60,7 @@ export const RecentSales: React.FC<RecentSalesProps> = ({
                 </span>
               </div>
               
-              <div className="w-6 h-6 rounded-[5px] bg-white/5 border border-white/10 text-white/50 hover:text-white flex items-center justify-center transition-colors shadow-none">
+              <div className="w-6 h-6 rounded-[var(--tj-mkt-radius-compact,6px)] bg-white/5 text-white/50 hover:text-white flex items-center justify-center transition-colors shadow-none">
                 <ExternalLink className="w-3 h-3" />
               </div>
             </div>

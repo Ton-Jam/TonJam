@@ -99,33 +99,52 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
     TONJAM_MARKETPLACE_ADDRESS && validateTonAddress(TONJAM_MARKETPLACE_ADDRESS, TON_NETWORK_MODE)
   );
 
+  const isSold =
+    String((nft as any).listingStatus || "").toLowerCase() === "sold" ||
+    String((nft as any).status || "").toLowerCase() === "sold";
+
   const canBuyVerified =
     !isOwner &&
     !isAuction &&
+    !isSold &&
     numericTon > 0 &&
     ((hasValidContract && hasMarketplaceContract) || hasValidSeller);
 
   const canBidVerified =
     !isOwner &&
+    !isSold &&
     isAuction &&
     !isAuctionEnded &&
     (hasValidContract || hasMarketplaceContract);
 
-  const primaryActionUnavailable = !isOwner && (isAuction ? !isAuctionEnded && !canBidVerified : !canBuyVerified);
+  const primaryActionUnavailable =
+    !isOwner && (isSold || (isAuction ? !isAuctionEnded && !canBidVerified : !canBuyVerified));
 
-  const unavailableReason = isAuction
+  const unavailableReason = isSold
+    ? "This NFT edition has already been sold."
+    : isAuction
     ? "Auction contract is not verified for bidding on this release."
     : numericTon <= 0
     ? "This NFT is not currently listed with a price."
     : "Seller wallet or marketplace contract address is unverified for on-chain settlement.";
 
+  const priceHeading = isSold
+    ? "Last Sale Price"
+    : isAuction
+    ? isAuctionEnded
+      ? "Winning Bid"
+      : "Current Leading Bid"
+    : numericTon > 0
+    ? "Buy Now Price"
+    : "Not Currently Listed";
+
   return (
-    <div className="bg-[var(--tj-color-surface-default,#0D1628)] border-0 rounded-[var(--tj-radius-md,8px)] p-4 sm:p-6 relative overflow-hidden transition-colors text-left">
+    <div className="bg-[var(--tj-color-surface-default,#0D1628)] border-2 border-[rgba(192,192,192,0.22)] rounded-[8px] p-4 sm:p-6 relative overflow-hidden transition-colors text-left">
       {/* Main Pricing Header & Sparkline */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 relative z-10">
         <div className="space-y-2">
           <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)] block">
-            {isAuction ? "Current Leading Bid" : "Current Listing Price"}
+            {priceHeading}
           </span>
 
           <div className="flex items-baseline gap-2">
@@ -157,20 +176,20 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
           <PriceSparkline basePrice={numericTon} history={nft.history} />
 
           {isAuction && (
-            <div className="bg-[var(--tj-color-surface-elevated,#111F36)] border-0 p-3 rounded-[var(--tj-radius-sm,6px)] flex items-center justify-between gap-4 text-xs">
-              <div className="flex flex-col items-start">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)]">
-                  Highest Bid
-                </span>
-                <span className="text-sm font-black font-mono tabular-nums text-white">
-                  {highestOfferPrice > 0 ? `${highestOfferPrice} TON` : `${formattedTon} TON`}
-                </span>
+              <div className="bg-[var(--tj-color-surface-elevated,#111F36)] border-2 border-[rgba(192,192,192,0.22)] p-3 rounded-[8px] flex items-center justify-between gap-4 text-xs">
+                <div className="flex flex-col items-start">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--tj-color-text-secondary,#C2C7CD)]">
+                    Highest Bid
+                  </span>
+                  <span className="text-sm font-black font-mono tabular-nums text-white">
+                    {highestOfferPrice > 0 ? `${highestOfferPrice} TON` : `${formattedTon} TON`}
+                  </span>
+                </div>
+                <AuctionCountdownTimer nft={nft} variant="compact" className="items-end" />
               </div>
-              <AuctionCountdownTimer nft={nft} variant="compact" className="items-end" />
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
 
       {/* Main Actions Bar */}
       <div className="mt-5 flex flex-wrap items-center gap-2 relative z-10">
@@ -179,21 +198,21 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
             <button
               type="button"
               onClick={nft.listingType ? onManage : onSell}
-              className="flex-1 min-w-[140px] py-3 px-4 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-0 outline-none"
+              className="flex-1 min-w-[140px] py-3 px-4 bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white rounded-[8px] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-0 outline-none"
             >
               {nft.listingType ? "Manage Listing" : "List For Sale"}
             </button>
             <button
               type="button"
               onClick={onManage}
-              className="py-3 px-3.5 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-0 outline-none"
+              className="py-3 px-3.5 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer outline-none"
             >
               Settings
             </button>
             <button
               type="button"
               onClick={onSend}
-              className="py-3 px-3.5 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer border-0 outline-none"
+              className="py-3 px-3.5 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] font-bold text-xs uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer outline-none"
             >
               <Send className="h-3.5 w-3.5" /> Send
             </button>
@@ -201,7 +220,7 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
               <button
                 type="button"
                 onClick={onCancelListing}
-                className="py-3 px-3.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-0 outline-none"
+                className="py-3 px-3.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 rounded-[8px] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-0 outline-none"
               >
                 Cancel Listing
               </button>
@@ -214,7 +233,7 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
               onClick={onAction}
               disabled={isPlacingBid || (isAuction && isAuctionEnded) || primaryActionUnavailable}
               title={primaryActionUnavailable ? unavailableReason : undefined}
-              className={`flex-[2] min-w-[160px] py-3 px-5 rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 border-0 outline-none transition-colors ${
+              className={`flex-[2] min-w-[160px] py-3 px-5 rounded-[8px] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 border-0 outline-none transition-colors ${
                 (isAuction && isAuctionEnded) || primaryActionUnavailable
                   ? "bg-[var(--tj-color-surface-elevated,#111F36)] text-slate-400 cursor-not-allowed"
                   : "bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-white cursor-pointer"
@@ -225,11 +244,15 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Processing...</span>
                 </>
+              ) : isSold ? (
+                "Sold"
               ) : isAuction && isAuctionEnded ? (
                 "Auction Ended"
               ) : primaryActionUnavailable ? (
                 isAuction ? (
                   "Bidding Unavailable"
+                ) : numericTon <= 0 ? (
+                  "Not Listed"
                 ) : (
                   "Buy Unavailable"
                 )
@@ -239,7 +262,7 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
                 </>
               ) : (
                 <>
-                  <Zap className="h-4 w-4" /> Buy NFT
+                  <Zap className="h-4 w-4" /> Buy Now
                 </>
               )}
             </button>
@@ -247,7 +270,7 @@ export const NFTPriceCard: React.FC<NFTPriceCardProps> = ({
             <button
               type="button"
               onClick={onOffer}
-              className="flex-1 min-w-[125px] py-3 px-4 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[var(--tj-radius-sm,6px)] font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer border-0 outline-none"
+              className="flex-1 min-w-[125px] py-3 px-4 bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-white rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer outline-none"
             >
               <Handshake className="h-4 w-4 text-[var(--tj-color-brand-primary,#00B4D8)]" /> Make Offer
             </button>

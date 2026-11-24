@@ -1,5 +1,6 @@
 import React from 'react';
 import { Play, Pause, MoreVertical, Heart, Music, Download, Check } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { motion } from 'motion/react';
 import { LibraryTrack } from '../types';
 import { useAudio } from '@/contexts/AudioContext';
@@ -126,7 +127,7 @@ export const LikedSongs: React.FC<LikedSongsProps> = ({
                       title="Remove from Liked Songs"
                       aria-label={`Remove ${track.title} from Liked Songs`}
                     >
-                      <Heart className="w-4 h-4 fill-current" />
+                      <AnimatedHeart liked={true} className="w-4 h-4 fill-current" />
                     </button>
                   )}
 

@@ -304,7 +304,7 @@ export default function JamUp() {
 
       {/* Filter Chips */}
       <div className="px-4 mb-8">
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 after:content-[''] after:shrink-0 after:w-1 touch-pan-x">
           {FILTERS.map((filter) => {
             const isActive = activeFilter === filter.id;
             return (

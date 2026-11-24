@@ -5,6 +5,7 @@ import {
   Volume2, Disc3, Music, Download, Users, Lock, Globe, ListMusic, 
   TrendingUp, Clock, History, Shuffle, SkipBack, SkipForward, Repeat 
 } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { TrackPlaceholder } from '../../placeholders/TrackPlaceholder';
 import { AlbumPlaceholder } from '../../placeholders/AlbumPlaceholder';
 import { PlaylistPlaceholder } from '../../placeholders/PlaylistPlaceholder';
@@ -168,7 +169,7 @@ export const TrackCard: React.FC<{
         <span className="text-[11px] text-[#9AA0AE] font-mono">{track.duration}</span>
         <div className="flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
           <button onClick={() => { setLiked(!liked); onLike?.(track); }} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
-            <Heart className={`w-4 h-4 ${liked ? 'text-red-500 fill-red-500' : 'text-white/60 hover:text-white'}`} />
+            <AnimatedHeart liked={liked} className={`w-4 h-4 ${liked ? 'text-red-500 fill-red-500' : 'text-white/60 hover:text-white'}`} />
           </button>
           <button onClick={() => onMore?.(track)} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
             <MoreVertical className="w-4 h-4 text-white/60" />
@@ -325,7 +326,7 @@ export const NowPlayingCard: React.FC<{
           </p>
         </div>
         <button onClick={() => setLiked(!liked)} className="p-1.5 hover:bg-white/10 rounded-full transition-colors shrink-0">
-          <Heart className={`w-6 h-6 transition-colors ${liked ? 'text-red-500 fill-red-500' : 'text-white/60'}`} />
+          <AnimatedHeart liked={liked} className={`w-6 h-6 transition-colors ${liked ? 'text-red-500 fill-red-500' : 'text-white/60'}`} />
         </button>
       </div>
 

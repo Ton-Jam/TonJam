@@ -16,7 +16,7 @@ export const CategoryChips: React.FC<CategoryChipsProps> = ({
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-xs font-extrabold uppercase tracking-widest text-zinc-400">Filter Channels</h3>
       </div>
-      <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-none snap-x -mx-4 px-4 after:content-[''] after:shrink-0 after:w-1 touch-pan-x">
         {categories.map((cat) => {
           const isActive = cat === activeCategory;
           return (

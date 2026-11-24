@@ -86,7 +86,7 @@ export const EqualizerSettings: React.FC<EqualizerSettingsProps> = React.memo(()
   };
 
   return (
-    <div className="w-full bg-[#080D2D]/95 backdrop-blur-xl rounded-[var(--tj-radius-md,10px)] p-4 space-y-4 shadow-2xl text-[#F2F4F8] border-none">
+    <div className="w-full bg-[#080D2D] backdrop-blur-none rounded-[var(--tj-radius-md,10px)] p-4 space-y-4 text-[#F2F4F8] border-none">
       <div className="flex items-center justify-between pb-2">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-[var(--tj-radius-sm,8px)] bg-[var(--tj-color-brand-primary,#00B4D8)]/20 text-[var(--tj-color-brand-primary,#00B4D8)]">

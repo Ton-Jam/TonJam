@@ -25,7 +25,7 @@ export const DiscoverGenres: React.FC<DiscoverGenresProps> = ({
           <div
             key={gen.id}
             onClick={() => onSelectGenre(gen)}
-            className="relative h-20 rounded-[5px] bg-[#0A0A0A] border border-white/12 p-3 flex flex-col justify-between overflow-hidden cursor-pointer select-none transition-colors hover:border-white/20 shadow-none"
+            className="relative h-20 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[#0A0A0A] hover:bg-[#121824] backdrop-blur-none p-3 flex flex-col justify-between overflow-hidden cursor-pointer select-none transition-colors shadow-none"
           >
             {/* Ambient Background Disc Graphic */}
             <div className="absolute right-[-8px] bottom-[-8px] w-14 h-14 opacity-10 pointer-events-none">

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Play, Pause, Heart, Sparkles, CheckCircle2, Flame } from "lucide-react";
+import { Play, Pause, Sparkles, CheckCircle2, Flame } from "lucide-react";
+import { AnimatedHeart } from "@/components/common/AnimatedHeart";
 import { NFTItem } from "@/types";
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
@@ -65,10 +66,10 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
             <div
               key={nft.id}
               onClick={() => handleCardClick(nft)}
-              className="w-[160px] sm:w-[190px] shrink-0 group bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-[var(--tj-radius-sm,8px)] p-3 flex flex-col justify-between cursor-pointer transition-all duration-200 select-none overflow-hidden relative"
+              className="w-[160px] sm:w-[190px] shrink-0 group bg-[#0A1628] hover:bg-[#0F1C32] backdrop-blur-none rounded-[var(--tj-mkt-radius-sm,9px)] p-3 flex flex-col justify-between cursor-pointer transition-all duration-200 select-none overflow-hidden relative"
             >
               {/* Artwork Media Area */}
-              <div className="relative aspect-square w-full rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[#07111F] mb-3">
+              <div className="relative aspect-square w-full rounded-[var(--tj-mkt-radius-compact,6px)] overflow-hidden bg-[#07111F] mb-3">
                 <img
                   src={artwork}
                   alt={nft.title}
@@ -83,7 +84,7 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
                 {/* Edition or Category Badge */}
                 {nft.edition && (
                   <div className="absolute top-2 left-2 z-10">
-                    <span className="text-[10px] font-semibold bg-[#07111F]/80 backdrop-blur-sm text-[#00B4D8] border border-[#22374D] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    <span className="text-[10px] font-semibold bg-[#07111F]/90 backdrop-blur-none text-[#00B4D8] px-2 py-0.5 rounded-[var(--tj-mkt-radius-compact,6px)] uppercase tracking-wider">
                       {nft.edition}
                     </span>
                   </div>
@@ -94,9 +95,12 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
                   type="button"
                   onClick={(e) => toggleFavorite(nft.id, e)}
                   aria-label={isFav ? `Remove ${nft.title} from favorites` : `Add ${nft.title} to favorites`}
-                  className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-[#07111F]/70 backdrop-blur-sm border border-[#22374D] text-[#FFFFFF] hover:text-[#00B4D8] flex items-center justify-center transition-colors focus:outline-none cursor-pointer"
+                  className="absolute top-2 right-2 z-10 w-7 h-7 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[#07111F]/85 backdrop-blur-none text-[#FFFFFF] hover:text-[#00B4D8] flex items-center justify-center transition-colors focus:outline-none cursor-pointer"
                 >
-                  <Heart className={`w-3.5 h-3.5 ${isFav ? "fill-[#00B4D8] text-[#00B4D8]" : "text-[#FFFFFF]"}`} />
+                  <AnimatedHeart
+                    liked={isFav}
+                    className={`w-3.5 h-3.5 ${isFav ? "fill-[#00B4D8] text-[#00B4D8]" : "text-[#FFFFFF]"}`}
+                  />
                 </button>
 
                 {/* Play Button Overlay */}
@@ -138,7 +142,7 @@ export const FeaturedMusicNFTs: React.FC<FeaturedMusicNFTsProps> = ({
                 </div>
 
                 {/* Price Line */}
-                <div className="pt-2 mt-2 border-t border-[#22374D]/60 flex items-center justify-between">
+                <div className="pt-2 mt-2 flex items-center justify-between">
                   <span className="text-[10px] text-[#8C8C8C] uppercase tracking-wider">
                     Price
                   </span>

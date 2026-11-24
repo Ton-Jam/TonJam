@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, Eye, Gavel, Sparkles, CheckCircle2, ShoppingBag } from 'lucide-react';
+import { Eye, Gavel, Sparkles, CheckCircle2, ShoppingBag } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { NFTItem } from '@/types';
 import { AlbumArtwork } from './AlbumArtwork';
 import VerifiedArtistBadge, { checkIsArtistVerified } from '@/components/common/VerifiedArtistBadge';
@@ -161,7 +162,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({
                 : 'text-[var(--tj-color-text-primary,#F8FAFC)] hover:text-[var(--tj-color-brand-primary,#229ED9)] hover:border-[var(--tj-color-border-strong)]'
             )}
           >
-            <Heart className={cn('w-3.5 h-3.5', isFavorite && 'fill-current')} />
+            <AnimatedHeart liked={Boolean(isFavorite)} className={cn('w-3.5 h-3.5', isFavorite && 'fill-current')} />
           </button>
         )}
 

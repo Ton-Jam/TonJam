@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Play, Pause, Heart, BarChart2, Share2, Search, SlidersHorizontal } from 'lucide-react';
+import { Play, Pause, BarChart2, Share2, Search, SlidersHorizontal } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { useAudio } from '@/contexts/AudioContext';
 import { Track } from '@/types';
 
@@ -18,7 +19,7 @@ const formatDuration = (dur?: number | string) => {
 export const TracksTab: React.FC<TracksTabProps> = ({ onPlayTrack, tracks }) => {
   const [activePlayingId, setActivePlayingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const { allTracks, userProfile } = useAudio();
+  const { allTracks, userProfile, likedTrackIds = [], toggleLikeTrack } = useAudio();
 
   const sourceTracks = tracks !== undefined
     ? tracks
@@ -105,8 +106,18 @@ export const TracksTab: React.FC<TracksTabProps> = ({ onPlayTrack, tracks }) => 
                   <span className="text-xs font-mono text-slate-400">{formatDuration(track.duration)}</span>
                   
                   <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                    <button className="p-1.5 hover:bg-white/5 rounded-full transition-colors cursor-pointer text-slate-400 hover:text-red-400">
-                      <Heart className="w-4 h-4" />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLikeTrack?.(track.id);
+                      }}
+                      aria-label={likedTrackIds.includes(track.id) ? 'Unlike track' : 'Like track'}
+                      className={`p-1.5 hover:bg-white/5 rounded-full transition-colors cursor-pointer ${
+                        likedTrackIds.includes(track.id) ? 'text-red-400' : 'text-slate-400 hover:text-red-400'
+                      }`}
+                    >
+                      <AnimatedHeart liked={likedTrackIds.includes(track.id)} className={`w-4 h-4 ${likedTrackIds.includes(track.id) ? 'fill-current' : ''}`} />
                     </button>
                     <button className="p-1.5 hover:bg-white/5 rounded-full transition-colors cursor-pointer text-slate-400 hover:text-white">
                       <Share2 className="w-4 h-4" />

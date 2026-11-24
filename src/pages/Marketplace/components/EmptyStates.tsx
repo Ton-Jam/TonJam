@@ -29,8 +29,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   switch (type) {
     case "error":
       return (
-        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-state-danger,#F16D78)]/40 rounded-[var(--tj-radius-sm,8px)] min-h-[220px]">
-          <div className="p-3 bg-[var(--tj-color-state-danger-bg,#451F2A)] rounded-[var(--tj-radius-compact,5px)] text-[var(--tj-color-state-danger,#F16D78)] mb-3 border border-[var(--tj-color-state-danger,#F16D78)]/30">
+        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0B1424)] rounded-[var(--tj-mkt-radius-sm,9px)] min-h-[220px]">
+          <div className="p-3 bg-[var(--tj-color-state-danger-bg,#451F2A)] rounded-[var(--tj-mkt-radius-compact,6px)] text-[var(--tj-color-state-danger,#F16D78)] mb-3">
             <AlertTriangle className="w-5 h-5" />
           </div>
           <h3 className="text-sm font-semibold text-[var(--tj-color-text-primary,#FFFFFF)] mb-1">
@@ -42,7 +42,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           {onRetry && (
             <Button
               onClick={onRetry}
-              className="bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#FFFFFF)] font-semibold rounded-[var(--tj-radius-sm,8px)] text-xs px-4 py-2 border border-[var(--tj-color-brand-primary,#00B4D8)] cursor-pointer"
+              className="bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#FFFFFF)] font-semibold rounded-[var(--tj-mkt-radius-sm,9px)] text-xs px-4 py-2 cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Retry
             </Button>
@@ -52,8 +52,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
     case "wallet":
       return (
-        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-sm,8px)] min-h-[240px]">
-          <div className="p-3 bg-[var(--tj-color-chip-active-background,#063C55)] rounded-[var(--tj-radius-compact,5px)] text-[var(--tj-color-brand-primary,#00B4D8)] mb-3 border border-[var(--tj-color-border-interactive,#245078)]">
+        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0B1424)] rounded-[var(--tj-mkt-radius-sm,9px)] min-h-[240px]">
+          <div className="p-3 bg-[var(--tj-color-chip-active-background,#063C55)] rounded-[var(--tj-mkt-radius-compact,6px)] text-[var(--tj-color-brand-primary,#00B4D8)] mb-3">
             <Wallet className="w-5 h-5" />
           </div>
           <h3 className="text-sm font-semibold text-[var(--tj-color-text-primary,#FFFFFF)] mb-1">
@@ -65,7 +65,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           {onConnectWallet && (
             <Button
               onClick={onConnectWallet}
-              className="bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#FFFFFF)] font-semibold rounded-[var(--tj-radius-sm,8px)] text-xs px-4 py-2 border border-[var(--tj-color-brand-primary,#00B4D8)] cursor-pointer"
+              className="bg-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-brand-hover,#21C2E8)] text-[var(--tj-color-text-primary,#FFFFFF)] font-semibold rounded-[var(--tj-mkt-radius-sm,9px)] text-xs px-4 py-2 cursor-pointer"
             >
               Connect TON Wallet
             </Button>
@@ -75,8 +75,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
     case "offline":
       return (
-        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-sm,8px)] min-h-[240px]">
-          <div className="p-3 bg-[var(--tj-color-state-danger-bg,#451F2A)] rounded-[var(--tj-radius-compact,5px)] text-[var(--tj-color-state-danger,#F16D78)] mb-3 border border-[var(--tj-color-state-danger,#F16D78)]/30">
+        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0B1424)] rounded-[var(--tj-mkt-radius-sm,9px)] min-h-[240px]">
+          <div className="p-3 bg-[var(--tj-color-state-danger-bg,#451F2A)] rounded-[var(--tj-mkt-radius-compact,6px)] text-[var(--tj-color-state-danger,#F16D78)] mb-3">
             <WifiOff className="w-5 h-5" />
           </div>
           <h3 className="text-sm font-semibold text-[var(--tj-color-text-primary,#FFFFFF)] mb-1">Connection Lost</h3>
@@ -86,7 +86,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           {onRetry && (
             <Button
               onClick={onRetry}
-              className="bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border border-[var(--tj-color-border-subtle)] text-[var(--tj-color-text-primary,#FFFFFF)] font-semibold rounded-[var(--tj-radius-sm,8px)] text-xs px-4 py-2 flex items-center gap-2 cursor-pointer"
+              className="bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-primary,#FFFFFF)] font-semibold rounded-[var(--tj-mkt-radius-sm,9px)] text-xs px-4 py-2 flex items-center gap-2 cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5 text-[var(--tj-color-brand-primary,#00B4D8)]" /> Try Reconnecting
             </Button>
@@ -96,8 +96,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
     case "no_auctions":
       return (
-        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-sm,8px)] min-h-[200px]">
-          <div className="p-3 bg-[var(--tj-color-state-warning-bg,#493516)] rounded-[var(--tj-radius-compact,5px)] text-[var(--tj-color-state-warning,#F4BD50)] mb-3 border border-[var(--tj-color-state-warning,#F4BD50)]/30">
+        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0B1424)] rounded-[var(--tj-mkt-radius-sm,9px)] min-h-[200px]">
+          <div className="p-3 bg-[var(--tj-color-state-warning-bg,#493516)] rounded-[var(--tj-mkt-radius-compact,6px)] text-[var(--tj-color-state-warning,#F4BD50)] mb-3">
             <HelpCircle className="w-5 h-5" />
           </div>
           <h3 className="text-sm font-semibold text-[var(--tj-color-text-primary,#FFFFFF)] mb-1">No Auctions Available</h3>
@@ -109,8 +109,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
     case "no_collections":
       return (
-        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-sm,8px)] min-h-[200px]">
-          <div className="p-3 bg-[var(--tj-color-surface-elevated,#111F36)] rounded-[var(--tj-radius-compact,5px)] text-[var(--tj-color-text-secondary,#C2C7CD)] mb-3 border border-[var(--tj-color-border-subtle)]">
+        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0B1424)] rounded-[var(--tj-mkt-radius-sm,9px)] min-h-[200px]">
+          <div className="p-3 bg-[var(--tj-color-surface-elevated,#111C30)] rounded-[var(--tj-mkt-radius-compact,6px)] text-[var(--tj-color-text-secondary,#C2C7CD)] mb-3">
             <Inbox className="w-5 h-5" />
           </div>
           <h3 className="text-sm font-semibold text-[var(--tj-color-text-primary,#FFFFFF)] mb-1">No Collections Found</h3>
@@ -123,8 +123,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     case "no_nfts":
     default:
       return (
-        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0D1628)] border border-[var(--tj-color-border-subtle)] rounded-[var(--tj-radius-sm,8px)] min-h-[220px]">
-          <div className="p-3 bg-[var(--tj-color-surface-elevated,#111F36)] rounded-[var(--tj-radius-compact,5px)] text-[var(--tj-color-brand-primary,#00B4D8)] mb-3 border border-[var(--tj-color-border-subtle)]">
+        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 bg-[var(--tj-color-surface-default,#0B1424)] rounded-[var(--tj-mkt-radius-sm,9px)] min-h-[220px]">
+          <div className="p-3 bg-[var(--tj-color-surface-elevated,#111C30)] rounded-[var(--tj-mkt-radius-compact,6px)] text-[var(--tj-color-brand-primary,#00B4D8)] mb-3">
             <Search className="w-5 h-5" />
           </div>
           <h3 className="text-sm font-semibold text-[var(--tj-color-text-primary,#FFFFFF)] mb-1">No NFTs Found</h3>
@@ -141,8 +141,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           {onRetry && (
             <Button
               onClick={onRetry}
-              variant="outline"
-              className="border border-[var(--tj-color-border-subtle)] bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-primary,#FFFFFF)] font-semibold rounded-[var(--tj-radius-sm,8px)] text-xs px-4 py-2 flex items-center gap-1.5 cursor-pointer"
+              variant="ghost"
+              className="bg-[var(--tj-color-surface-elevated,#111C30)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-primary,#FFFFFF)] font-semibold rounded-[var(--tj-mkt-radius-sm,9px)] text-xs px-4 py-2 flex items-center gap-1.5 cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5 text-[var(--tj-color-brand-primary,#00B4D8)]" />
               Reset Filters

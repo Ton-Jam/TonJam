@@ -27,7 +27,7 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({
   onFilterChange
 }) => {
   return (
-    <div className="w-full overflow-x-auto pb-1 select-none no-scrollbar flex gap-2">
+    <div className="w-full overflow-x-auto pb-1 select-none no-scrollbar flex gap-2 px-3 sm:px-4 after:content-[''] after:shrink-0 after:w-1 touch-pan-x">
       {FILTERS.map((filter) => {
         const isActive = activeFilter === filter.id;
         return (

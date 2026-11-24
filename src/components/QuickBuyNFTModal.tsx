@@ -5,23 +5,30 @@ import {
   X,
   CheckCircle2,
   Wallet,
-  ExternalLink,
   Volume2,
   VolumeX,
   ShieldCheck,
   AlertCircle,
   Loader2,
   Headphones,
-  Sparkles,
+  RotateCcw,
 } from 'lucide-react';
 import { useTonConnectUI } from '@tonconnect/ui-react';
-import { buyNFT } from '@/services/tonService';
+import { buyNFT, monitorTransaction } from '@/services/tonService';
 import { useAudio } from '@/contexts/AudioContext';
 import { useTonPrice } from '@/contexts/TonPriceContext';
 import { useGramPrice } from '@/contexts/GramPriceContext';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+
+export type WalletTransactionState =
+  | 'connect_wallet'
+  | 'wallet_connected'
+  | 'confirm_purchase'
+  | 'pending'
+  | 'success'
+  | 'failed';
 
 export interface QuickBuyNFTData {
   id: string;
@@ -45,6 +52,15 @@ export interface QuickBuyNFTModalProps {
   onSuccess?: (nft: QuickBuyNFTData) => void;
 }
 
+const TX_STATE_LABELS: Record<WalletTransactionState, string> = {
+  connect_wallet: 'Connect Wallet',
+  wallet_connected: 'Wallet Connected',
+  confirm_purchase: 'Confirm Purchase',
+  pending: 'Transaction Pending',
+  success: 'Transaction Successful',
+  failed: 'Transaction Failed',
+};
+
 export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
   isOpen,
   onClose,
@@ -57,17 +73,28 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
   const { price: tonUsdPrice } = useTonPrice();
   const { fiatCurrency } = useGramPrice();
 
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const isWalletConnected = Boolean(tonConnectUI && tonConnectUI.connected);
+  const userWalletAddress = tonConnectUI?.account?.address || '';
+
+  const [txState, setTxState] = useState<WalletTransactionState>(() =>
+    isWalletConnected ? 'confirm_purchase' : 'connect_wallet'
+  );
+  const [pendingStageText, setPendingStageText] = useState(
+    'Awaiting wallet confirmation...'
+  );
+  const [confirmedTxHash, setConfirmedTxHash] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
 
+  const isProcessing = txState === 'pending';
+
   // Reset modal state when opened/closed or NFT changes
   useEffect(() => {
     if (isOpen) {
-      setIsProcessing(false);
-      setIsSuccess(false);
+      setTxState(isWalletConnected ? 'confirm_purchase' : 'connect_wallet');
+      setPendingStageText('Awaiting wallet confirmation...');
+      setConfirmedTxHash('');
       setErrorMessage(null);
       setIsPlayingAudio(false);
     } else {
@@ -78,6 +105,19 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
       setIsPlayingAudio(false);
     }
   }, [isOpen, nft?.id]);
+
+  // Keep wallet connection state synchronized while modal is open before purchase starts
+  useEffect(() => {
+    if (!isOpen) return;
+    if (txState === 'connect_wallet' && isWalletConnected) {
+      setTxState('wallet_connected');
+    } else if (
+      (txState === 'wallet_connected' || txState === 'confirm_purchase') &&
+      !isWalletConnected
+    ) {
+      setTxState('connect_wallet');
+    }
+  }, [isOpen, isWalletConnected, txState]);
 
   // Audio preview playback toggle
   const toggleAudioPreview = (e: React.MouseEvent) => {
@@ -97,7 +137,6 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
     }
   };
 
-  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
       if (audioElement) {
@@ -106,7 +145,7 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
     };
   }, [audioElement]);
 
-  // Price calculations
+  // Purchase breakdown calculations
   const numericPrice = useMemo(() => {
     if (!nft?.price) return 0;
     if (typeof nft.price === 'number') return nft.price;
@@ -115,10 +154,10 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
     return isNaN(parsed) ? 0 : parsed;
   }, [nft?.price]);
 
-  const networkFee = 0.05; // Standard TON gas fee estimate
-  const totalPrice = numericPrice + networkFee;
+  const platformFee = useMemo(() => Number((numericPrice * 0.05).toFixed(4)), [numericPrice]);
+  const networkFee = 0.05;
+  const totalPayable = numericPrice + platformFee + networkFee;
 
-  // Fiat rate calculation
   const fiatRates: Record<string, { rate: number; symbol: string }> = useMemo(
     () => ({
       USD: { rate: 1.0, symbol: '$' },
@@ -141,9 +180,6 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
     })}`;
   };
 
-  const isWalletConnected = Boolean(tonConnectUI && tonConnectUI.connected);
-  const userWalletAddress = tonConnectUI?.account?.address || '';
-
   const displayWalletAddress = useMemo(() => {
     if (!userWalletAddress) return '';
     return `${userWalletAddress.slice(0, 4)}...${userWalletAddress.slice(-4)}`;
@@ -163,29 +199,33 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
     if (!nft) return;
 
     if (!isWalletConnected) {
-      toast.warning("Please connect your TON wallet to purchase this NFT.");
+      setTxState('connect_wallet');
+      toast.warning('Please connect your TON wallet to purchase this NFT.');
       handleConnectWallet();
       return;
     }
 
     if (!nft.owner) {
-      toast.error("Seller wallet address is unavailable for this NFT.");
+      setTxState('failed');
+      setErrorMessage('Seller wallet address is unavailable for this NFT.');
+      toast.error('Seller wallet address is unavailable for this NFT.');
       return;
     }
 
     const toastId = toast.loading(`Authorizing purchase of "${nft.title}"...`, {
-      description: "Please confirm the transaction in your TON wallet..."
+      description: 'Please confirm the transaction in your TON wallet...',
     });
 
     try {
-      setIsProcessing(true);
+      setTxState('pending');
+      setPendingStageText('Awaiting TON wallet signature...');
       setErrorMessage(null);
       addNotification(`Authorizing purchase of ${nft.title}...`, 'info');
 
       const ownerTarget = nft.owner;
       const formattedPriceStr = `${numericPrice} TON`;
 
-      await buyNFT(
+      const txHash = await buyNFT(
         tonConnectUI,
         ownerTarget,
         formattedPriceStr,
@@ -193,10 +233,27 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
         nft.royaltySplits || []
       );
 
-      setIsSuccess(true);
+      setConfirmedTxHash(txHash || '');
+      setPendingStageText('Confirming transaction on TON network...');
+
+      const confirmed = await monitorTransaction(txHash, (status) => {
+        if (status === 'pending') {
+          setPendingStageText('Broadcasting transaction to TON...');
+        } else if (status === 'confirming') {
+          setPendingStageText('Waiting for on-chain confirmation...');
+        } else if (status === 'failed') {
+          setPendingStageText('Transaction verification failed.');
+        }
+      });
+
+      if (!confirmed) {
+        throw new Error('Transaction could not be confirmed on the TON blockchain.');
+      }
+
+      setTxState('success');
       toast.success(`Successfully collected "${nft.title}"!`, {
         id: toastId,
-        description: `Acquired for ${formattedPriceStr}. Added to your collection.`
+        description: `Confirmed on TON for ${formattedPriceStr}. Added to your library.`,
       });
       addNotification(`Successfully collected ${nft.title}!`, 'success');
       if (onSuccess) {
@@ -204,12 +261,12 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
       }
     } catch (err: any) {
       console.error('Quick Buy transaction error:', err);
-      const msg = err?.message || 'Transaction was canceled or could not be completed on TON.';
+      const msg =
+        err?.message || 'Transaction was canceled or could not be completed on TON.';
       setErrorMessage(msg);
+      setTxState('failed');
       toast.error(`Purchase failed: ${msg}`, { id: toastId });
       addNotification('Purchase failed or canceled', 'error');
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -231,7 +288,7 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
         price: `${numericPrice} TON`,
       } as any);
     } else {
-      addNotification("No audio stream attached to this NFT.", "info");
+      addNotification('No audio stream attached to this NFT.', 'info');
     }
     onClose();
   };
@@ -246,12 +303,12 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
   return (
     <AnimatePresence>
       <div
+        data-tonjam-modal="true"
         className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
         role="dialog"
         aria-modal="true"
         aria-labelledby="quick-buy-title"
       >
-        {/* Soft backdrop blur with zero border lines */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -260,50 +317,125 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
           className="fixed inset-0 bg-[#080D1A]/80 backdrop-blur-md"
         />
 
-        {/* Compact Centered Modal Window */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 12 }}
+          data-tonjam-modal="true"
+          data-tx-state={txState}
+          initial={{ opacity: 0, scale: 0.96, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 12 }}
+          exit={{ opacity: 0, scale: 0.96, y: 12 }}
           transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-          className="relative w-full max-w-[400px] bg-[#0E1729] rounded-2xl shadow-2xl shadow-black/80 p-5 text-white z-10 overflow-hidden select-none border-none"
+          className="relative w-full max-w-[404px] bg-[#0E1729] rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] p-4 sm:p-5 text-white z-10 overflow-hidden select-none"
         >
-          {/* Subtle Ambient Radial Glows */}
-          <div className="absolute -top-16 -right-16 w-36 h-36 bg-[#229ED9]/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 w-36 h-36 bg-[#9B7CFF]/15 rounded-full blur-3xl pointer-events-none" />
-
-          {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
             disabled={isProcessing}
-            aria-label="Close Quick Buy dialog"
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] active:scale-95 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer border-none z-20 disabled:opacity-40"
+            aria-label="Close purchase dialog"
+            className="absolute top-3.5 right-3.5 w-8 h-8 rounded-[8px] bg-[#142036] hover:bg-[#1A2A46] text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer border-2 border-[rgba(192,192,192,0.22)] z-20 disabled:opacity-40"
           >
             <X className="w-4 h-4" />
           </button>
 
-          {!isSuccess ? (
-            <div className="space-y-4">
-              {/* Header Title with Zap Icon */}
-              <div className="flex items-center gap-2 pr-8">
-                <div className="w-8 h-8 rounded-xl bg-[#229ED9]/15 flex items-center justify-center text-[#229ED9] shrink-0">
-                  <Zap className="w-4 h-4 fill-current" />
+          {/* Header & Transaction State Indicator */}
+          <div className="flex items-start gap-2.5 pr-10 mb-3.5">
+            <div className="w-8 h-8 rounded-[8px] bg-[#229ED9]/15 flex items-center justify-center text-[#229ED9] shrink-0">
+              <Zap className="w-4 h-4 fill-current" />
+            </div>
+            <div className="min-w-0">
+              <h3 id="quick-buy-title" className="text-sm sm:text-base font-bold text-[#F8FAFC] leading-tight">
+                {TX_STATE_LABELS[txState]}
+              </h3>
+              <span className="text-[11px] text-[#A8B7CC] font-medium block mt-0.5">
+                TON Music NFT Checkout
+              </span>
+            </div>
+          </div>
+
+          {txState === 'success' ? (
+            <div className="text-center py-3 space-y-4">
+              <div className="w-14 h-14 rounded-[8px] bg-[#34D399]/15 border-2 border-[#34D399]/40 mx-auto flex items-center justify-center text-[#34D399]">
+                <CheckCircle2 className="w-7 h-7" />
+              </div>
+
+              <div className="space-y-1">
+                <h4 className="text-base font-bold text-white">Transaction Successful</h4>
+                <p className="text-xs text-[#A8B7CC]">
+                  <span className="text-white font-semibold">{nft.title}</span> is now owned in your TonJam library.
+                </p>
+                {confirmedTxHash && (
+                  <p className="text-[10px] font-mono text-[#7F91AA] truncate pt-1">
+                    Tx: {confirmedTxHash.slice(0, 14)}...{confirmedTxHash.slice(-8)}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleListenNow}
+                  className="w-full min-h-[40px] py-2 px-4 rounded-[8px] bg-[#229ED9] hover:bg-[#168AC4] text-white text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Headphones className="w-4 h-4" />
+                  <span>Play Track Now</span>
+                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleGoToLibrary}
+                    className="flex-1 min-h-[38px] py-2 px-3 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[#142036] hover:bg-[#1A2A46] text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    View in Library
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex-1 min-h-[38px] py-2 px-3 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[#142036] hover:bg-[#1A2A46] text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    Done
+                  </button>
                 </div>
+              </div>
+            </div>
+          ) : txState === 'failed' ? (
+            <div className="py-3 space-y-4">
+              <div className="p-3.5 rounded-[8px] border-2 border-red-500/40 bg-red-500/10 flex items-start gap-2.5 text-xs text-red-200">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 <div>
-                  <h3 id="quick-buy-title" className="text-base font-bold text-[#F8FAFC] leading-none">
-                    Quick Buy
-                  </h3>
-                  <span className="text-[11px] text-[#A8B7CC] font-medium mt-0.5 block">
-                    Confirm instant purchase on TON
-                  </span>
+                  <p className="font-bold text-red-300">Transaction Failed</p>
+                  <p className="mt-1 leading-relaxed">
+                    {errorMessage || 'Unable to verify the transaction on the TON network.'}
+                  </p>
                 </div>
               </div>
 
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 min-h-[40px] py-2 px-4 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[#142036] hover:bg-[#1A2A46] text-slate-200 text-xs font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setErrorMessage(null);
+                    setTxState(isWalletConnected ? 'confirm_purchase' : 'connect_wallet');
+                  }}
+                  className="flex-1 min-h-[40px] py-2 px-4 rounded-[8px] bg-[#229ED9] hover:bg-[#168AC4] text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Try Again</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3.5">
               {/* Compact NFT Card Preview */}
-              <div className="flex items-center gap-3.5 p-3 rounded-xl bg-[#142036] shadow-inner relative overflow-hidden">
-                {/* Artwork Thumbnail */}
-                <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-[#080D1A] shrink-0 shadow-md">
+              <div className="flex items-center gap-3 p-2.5 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[#142036] relative overflow-hidden">
+                <div className="relative w-14 h-14 rounded-[8px] overflow-hidden bg-[#080D1A] shrink-0">
                   <img
                     src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
                     alt={nft.title}
@@ -329,15 +461,13 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
                   )}
                 </div>
 
-                {/* Title & Metadata */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[9px] font-bold uppercase tracking-wider text-[#229ED9]">
                       {nft.badge || nft.edition || 'Music NFT'}
                     </span>
                     {isPlayingAudio && (
-                      <span className="flex items-center gap-1 text-[9px] text-[#34D399] font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
+                      <span className="text-[9px] text-[#34D399] font-medium">
                         Previewing
                       </span>
                     )}
@@ -356,45 +486,68 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
                 </div>
               </div>
 
-              {/* Cost Breakdown */}
-              <div className="p-3.5 rounded-xl bg-[#121C30] space-y-2 text-xs">
+              {/* Purchase Breakdown */}
+              <div className="p-3 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[#121C30] space-y-2 text-xs">
                 <div className="flex items-center justify-between text-[#A8B7CC]">
-                  <span>Item Price</span>
+                  <span>NFT Price</span>
                   <div className="text-right">
-                    <span className="font-bold text-[#F8FAFC] font-mono">{numericPrice.toFixed(2)} TON</span>
-                    <span className="text-[10px] text-[#7F91AA] block font-mono">≈ {formatFiat(numericPrice)}</span>
+                    <span className="font-bold text-[#F8FAFC] font-mono tabular-nums">
+                      {numericPrice.toFixed(2)} TON
+                    </span>
+                    <span className="text-[10px] text-[#7F91AA] block font-mono tabular-nums">
+                      ≈ {formatFiat(numericPrice)}
+                    </span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between text-[#A8B7CC]">
-                  <span>Network Gas Fee</span>
+                  <span>Platform Fee (5%)</span>
                   <div className="text-right">
-                    <span className="font-mono text-[#F8FAFC]">~{networkFee.toFixed(2)} TON</span>
-                    <span className="text-[10px] text-[#7F91AA] block font-mono">≈ {formatFiat(networkFee)}</span>
+                    <span className="font-mono tabular-nums text-[#F8FAFC]">
+                      +{platformFee.toFixed(2)} TON
+                    </span>
+                    <span className="text-[10px] text-[#7F91AA] block font-mono tabular-nums">
+                      ≈ {formatFiat(platformFee)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-[#A8B7CC]">
+                  <span>Network Fee</span>
+                  <div className="text-right">
+                    <span className="font-mono tabular-nums text-[#F8FAFC]">
+                      ~{networkFee.toFixed(2)} TON
+                    </span>
+                    <span className="text-[10px] text-[#7F91AA] block font-mono tabular-nums">
+                      ≈ {formatFiat(networkFee)}
+                    </span>
                   </div>
                 </div>
 
                 <div className="pt-2 flex items-center justify-between text-sm font-bold text-white">
-                  <span>Total Due</span>
+                  <span>Total Payable</span>
                   <div className="text-right">
-                    <span className="text-[#229ED9] font-mono text-base">{totalPrice.toFixed(2)} TON</span>
-                    <span className="text-[11px] text-[#A8B7CC] block font-mono font-normal">≈ {formatFiat(totalPrice)}</span>
+                    <span className="text-[#229ED9] font-mono tabular-nums text-base">
+                      {totalPayable.toFixed(2)} TON
+                    </span>
+                    <span className="text-[11px] text-[#A8B7CC] block font-mono tabular-nums font-normal">
+                      ≈ {formatFiat(totalPayable)}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Wallet Status Row */}
-              <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#10192C] text-xs">
+              {/* Wallet Connection State Row */}
+              <div className="flex items-center justify-between px-3 py-2.5 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[#10192C] text-xs">
                 <div className="flex items-center gap-2 text-[#A8B7CC]">
                   <Wallet className="w-4 h-4 text-[#229ED9]" />
-                  <span>Wallet:</span>
+                  <span>{isWalletConnected ? 'Wallet Connected' : 'Connect Wallet'}</span>
                 </div>
 
                 {isWalletConnected ? (
-                  <div className="flex items-center gap-1.5 font-mono text-[#34D399] font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
-                    <span>{displayWalletAddress}</span>
-                  </div>
+                  <span className="font-mono text-[#34D399] font-medium">
+                    {displayWalletAddress}
+                  </span>
                 ) : (
                   <button
                     type="button"
@@ -406,97 +559,49 @@ export const QuickBuyNFTModal: React.FC<QuickBuyNFTModalProps> = ({
                 )}
               </div>
 
-              {/* Error banner if purchase failed */}
-              {errorMessage && (
-                <div className="p-2.5 rounded-xl bg-red-500/10 text-red-300 text-xs flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <span className="leading-snug">{errorMessage}</span>
+              {txState === 'pending' && (
+                <div className="p-2.5 rounded-[8px] border-2 border-[#229ED9]/40 bg-[#229ED9]/10 text-[#F8FAFC] text-xs flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 text-[#229ED9] animate-spin shrink-0" />
+                  <span>{pendingStageText}</span>
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2.5 pt-1">
+              <div className="flex items-center gap-2 pt-0.5">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={isProcessing}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] active:scale-95 text-slate-300 text-xs font-semibold transition-all cursor-pointer border-none disabled:opacity-40"
+                  className="flex-1 min-h-[40px] py-2 px-3 rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] bg-[#142036] hover:bg-[#1A2A46] text-slate-300 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-40"
                 >
                   Cancel
                 </button>
 
                 <button
                   type="button"
-                  onClick={handleConfirmPurchase}
+                  onClick={isWalletConnected ? handleConfirmPurchase : handleConnectWallet}
                   disabled={isProcessing}
-                  className="flex-[1.6] py-2.5 px-4 rounded-xl bg-[#229ED9] hover:bg-[#168AC4] active:scale-95 text-white text-xs font-bold transition-all shadow-md shadow-[#229ED9]/25 flex items-center justify-center gap-1.5 cursor-pointer border-none disabled:opacity-50"
+                  className={cn(
+                    'flex-[1.6] min-h-[40px] py-2 px-4 rounded-[8px] bg-[#229ED9] hover:bg-[#168AC4] text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50'
+                  )}
                 >
                   {isProcessing ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Confirming on TON...</span>
+                      <span>Transaction Pending</span>
                     </>
                   ) : !isWalletConnected ? (
                     <>
                       <Wallet className="w-4 h-4" />
-                      <span>Connect & Buy</span>
+                      <span>Connect Wallet</span>
                     </>
                   ) : (
                     <>
                       <Zap className="w-4 h-4 fill-current" />
-                      <span>Confirm & Buy Now</span>
+                      <span>Confirm Purchase</span>
                     </>
                   )}
                 </button>
-              </div>
-            </div>
-          ) : (
-            /* Celebration Success State */
-            <div className="text-center py-4 space-y-4">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 20 }}
-                className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#34D399] to-[#229ED9] mx-auto flex items-center justify-center text-white shadow-lg shadow-[#34D399]/25"
-              >
-                <CheckCircle2 className="w-8 h-8" />
-              </motion.div>
-
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold text-white">Purchase Confirmed!</h3>
-                <p className="text-xs text-[#A8B7CC]">
-                  <span className="text-white font-semibold">{nft.title}</span> is now stored in your TonJam library.
-                </p>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="space-y-2 pt-2">
-                <button
-                  type="button"
-                  onClick={handleListenNow}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#229ED9] hover:bg-[#168AC4] active:scale-95 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer border-none shadow-md shadow-[#229ED9]/25"
-                >
-                  <Headphones className="w-4 h-4" />
-                  <span>Play Track Now</span>
-                </button>
-
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleGoToLibrary}
-                    className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] active:scale-95 text-slate-200 text-xs font-semibold transition-all cursor-pointer border-none"
-                  >
-                    View in Library
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] active:scale-95 text-slate-200 text-xs font-semibold transition-all cursor-pointer border-none"
-                  >
-                    Done
-                  </button>
-                </div>
               </div>
             </div>
           )}

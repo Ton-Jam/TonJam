@@ -61,11 +61,12 @@
     align-items: center;
     justify-content: center;
     gap: 1.25rem;
+    transform: translateY(-1.5rem);
   }
 
   .protected-route-loading-overlay .spinning-logo {
-    width: 100px;
-    height: 100px;
+    width: 102px;
+    height: 102px;
     object-fit: contain;
     animation: tonjam-logo-spin 3s linear infinite;
     filter: drop-shadow(0 0 20px rgba(0, 180, 216, 0.35));
@@ -73,7 +74,7 @@
 
   .protected-route-loading-overlay .pulsing-title {
     font-family: var(--font-family-sans, 'Poppins', sans-serif);
-    font-size: 1.875rem;
+    font-size: 29px;
     font-weight: 700;
     color: #ffffff;
     letter-spacing: 0.1em;
@@ -640,10 +641,10 @@
     box-shadow: none !important;
   }
 
-  /* Search containers: subtle, consistent TonJam borders */
+  /* Search containers: subtle 2px silver TonJam borders */
   .search-input-wrapper,
   [data-slot="input-group"] {
-    border: 1px solid var(--tj-border-subtle);
+    border: 2px solid rgba(192, 192, 192, 0.22);
     border-radius: var(--input-radius);
     background-color: var(--input-background);
     transition: border-color 150ms ease;
@@ -1648,12 +1649,17 @@ button,
   display: flex;
   gap: 0.75rem;
   overflow-x: auto;
-  padding: 0 0.5rem;
+  padding: 0 0.75rem;
 
   /* Smooth scrolling experience on mobile */
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
+}
+
+.filter-scroll::after {
+  content: "";
+  flex: 0 0 0.25rem;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -1760,10 +1766,10 @@ button,
 }
 
 /* Global Modals and Toasts Black Background Override */
-[data-slot="dialog-content"],
-[data-slot="alert-dialog-content"],
-[role="dialog"],
-[role="alertdialog"],
+[data-slot="dialog-content"]:not([data-tonjam-modal="true"]),
+[data-slot="alert-dialog-content"]:not([data-tonjam-modal="true"]),
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]),
+[role="alertdialog"]:not([data-tonjam-modal="true"]),
 .cn-toast,
 [data-sonner-toast],
 .toast {
@@ -1774,40 +1780,40 @@ button,
 }
 
 /* Ensure inner container panels in modals match the black theme */
-[role="dialog"] .bg-zinc-950,
-[role="dialog"].bg-zinc-950,
-[role="dialog"] .bg-neutral-900,
-[role="dialog"].bg-neutral-900,
-[role="dialog"] .bg-black,
-[role="dialog"].bg-black,
-[role="dialog"] .bg-zinc-900,
-[role="dialog"].bg-zinc-900,
-[role="dialog"] .bg-zinc-800,
-[role="dialog"].bg-zinc-800,
-[role="dialog"] .bg-\[\#0a0a0a\],
-[role="dialog"].bg-\[\#0a0a0a\],
-[role="dialog"] .bg-\[\#0b0f14\],
-[role="dialog"].bg-\[\#0b0f14\],
-[role="dialog"] .bg-\[\#0A0A0B\],
-[role="dialog"].bg-\[\#0A0A0B\],
-[role="dialog"] .bg-card,
-[role="dialog"].bg-card,
-[role="dialog"] .bg-background,
-[role="dialog"].bg-background,
-[role="alertdialog"] .bg-zinc-950,
-[role="alertdialog"].bg-zinc-950,
-[role="alertdialog"] .bg-neutral-900,
-[role="alertdialog"].bg-neutral-900,
-[role="alertdialog"] .bg-black,
-[role="alertdialog"].bg-black,
-[role="alertdialog"] .bg-zinc-900,
-[role="alertdialog"].bg-zinc-900,
-[role="alertdialog"] .bg-zinc-800,
-[role="alertdialog"].bg-zinc-800,
-[role="alertdialog"] .bg-card,
-[role="alertdialog"].bg-card,
-[role="alertdialog"] .bg-background,
-[role="alertdialog"].bg-background {
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]) .bg-zinc-950,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]).bg-zinc-950,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]) .bg-neutral-900,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]).bg-neutral-900,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]) .bg-black,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]).bg-black,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]) .bg-zinc-900,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]).bg-zinc-900,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]) .bg-zinc-800,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]).bg-zinc-800,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]) .bg-\[\#0a0a0a\],
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]).bg-\[\#0a0a0a\],
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]) .bg-\[\#0b0f14\],
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]).bg-\[\#0b0f14\],
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]) .bg-\[\#0A0A0B\],
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]).bg-\[\#0A0A0B\],
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]) .bg-card,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]).bg-card,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]) .bg-background,
+[role="dialog"]:not(#tonjam-full-player-screen):not([data-tonjam-modal="true"]).bg-background,
+[role="alertdialog"]:not([data-tonjam-modal="true"]) .bg-zinc-950,
+[role="alertdialog"]:not([data-tonjam-modal="true"]).bg-zinc-950,
+[role="alertdialog"]:not([data-tonjam-modal="true"]) .bg-neutral-900,
+[role="alertdialog"]:not([data-tonjam-modal="true"]).bg-neutral-900,
+[role="alertdialog"]:not([data-tonjam-modal="true"]) .bg-black,
+[role="alertdialog"]:not([data-tonjam-modal="true"]).bg-black,
+[role="alertdialog"]:not([data-tonjam-modal="true"]) .bg-zinc-900,
+[role="alertdialog"]:not([data-tonjam-modal="true"]).bg-zinc-900,
+[role="alertdialog"]:not([data-tonjam-modal="true"]) .bg-zinc-800,
+[role="alertdialog"]:not([data-tonjam-modal="true"]).bg-zinc-800,
+[role="alertdialog"]:not([data-tonjam-modal="true"]) .bg-card,
+[role="alertdialog"]:not([data-tonjam-modal="true"]).bg-card,
+[role="alertdialog"]:not([data-tonjam-modal="true"]) .bg-background,
+[role="alertdialog"]:not([data-tonjam-modal="true"]).bg-background {
   background-color: #000000 !important;
   background: #000000 !important;
   border-color: transparent !important;

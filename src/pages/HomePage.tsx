@@ -28,6 +28,7 @@ import { TrendingNowWidget } from "@/components/home/TrendingNowWidget";
 import { RecommendedNFTTracksSection } from "@/components/home/RecommendedNFTTracksSection";
 import { SponsoredBannerCarousel } from "@/components/home/SponsoredBannerCarousel";
 import { RecommendedTracksSection } from "@/components/home/RecommendedTracksSection";
+import { ArtistSpotlightSection } from "@/components/home/ArtistSpotlightSection";
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -229,6 +230,11 @@ export const HomePage: React.FC = () => {
             activeCategory={activeCategory}
             onSelectCategory={setActiveCategory}
           />
+
+          {/* 3B. ARTIST SPOTLIGHT CAROUSEL */}
+          {(activeCategory === "All" ||
+            activeCategory === "Artists" ||
+            activeCategory === "Music") && <ArtistSpotlightSection />}
 
           {/* 4. RECOMMENDED NFT TRACKS */}
           {(activeCategory === "All" || activeCategory === "NFTs") && (

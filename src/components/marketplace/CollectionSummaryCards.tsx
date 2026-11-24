@@ -146,7 +146,7 @@ export const CollectionSummaryCards: React.FC<CollectionSummaryCardsProps> = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.06, ease: 'easeOut' }}
-              className="bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border-0 p-3.5 rounded-[var(--tj-radius-md,8px)] flex items-center justify-between transition-colors duration-200 cursor-default"
+              className="bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-none border-0 p-3.5 rounded-[var(--tj-mkt-radius-sm,9px)] flex items-center justify-between transition-colors duration-200 cursor-default"
             >
               <div className="space-y-1 min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
@@ -160,7 +160,7 @@ export const CollectionSummaryCards: React.FC<CollectionSummaryCardsProps> = ({
                 </p>
               </div>
 
-              <div className={`${card.bgColor} p-2.5 rounded-[var(--tj-radius-sm,6px)] border-0 shrink-0`}>
+              <div className={`${card.bgColor} p-2.5 rounded-[7px] border-0 shrink-0`}>
                 <Icon className={`w-4 h-4 ${card.iconColor}`} />
               </div>
             </motion.div>

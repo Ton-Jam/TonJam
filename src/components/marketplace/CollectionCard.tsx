@@ -62,17 +62,17 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
         }
       }}
       className={cn(
-        "flex flex-col justify-between bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-md",
-        "border border-[var(--tj-color-border-subtle)] hover:border-[var(--tj-color-border-strong)] rounded-[var(--tj-radius-sm,8px)] p-2.5",
-        "cursor-pointer transition-colors duration-150 select-none text-left",
+        "flex flex-col justify-between bg-[var(--tj-color-surface-default,#0B1424)] hover:bg-[var(--tj-color-surface-hover,#132B49)] backdrop-blur-none",
+        "rounded-[8px] border-2 border-[rgba(192,192,192,0.22)] hover:border-[rgba(192,192,192,0.35)] p-2.5 sm:p-3",
+        "cursor-pointer transition-colors duration-150 select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#229ED9]",
         layout === "shelf"
-          ? "w-[175px] sm:w-[210px] shrink-0 snap-start"
+          ? "w-[178px] sm:w-[214px] shrink-0 snap-start"
           : "w-full min-w-0",
         className
       )}
     >
       <div>
-        <div className="relative aspect-square w-full rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[var(--tj-color-bg-secondary,#0B1424)] border border-[var(--tj-color-border-subtle)] group">
+        <div className="relative aspect-square w-full rounded-[8px] overflow-hidden bg-[var(--tj-color-surface-elevated,#111C30)] group">
           <ProgressiveImage
             src={collection.imageUrl || getPlaceholderImage(`col-${collection.id}`)}
             fallbackSrc={getPlaceholderImage(`col-${collection.id}`)}
@@ -80,12 +80,12 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
 
-          <div className="absolute top-1.5 left-1.5 flex items-center gap-1 px-1.5 py-0.5 rounded-[var(--tj-radius-compact,5px)] text-[9px] font-semibold tracking-wider uppercase bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[var(--tj-color-brand-primary,#229ED9)]">
+          <div className="absolute top-1.5 left-1.5 flex items-center gap-1 px-1.5 py-0.5 rounded-[8px] text-[9px] font-semibold tracking-wider uppercase bg-[#07182B]/85 text-[var(--tj-color-brand-primary,#229ED9)]">
             <Disc3 className="w-3 h-3" />
             <span>Collection</span>
           </div>
 
-          <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-[var(--tj-radius-compact,5px)] text-[10px] font-mono font-semibold bg-[var(--tj-color-surface-overlay,#07182BCC)] border border-[var(--tj-color-border-subtle)] text-[var(--tj-color-text-primary,#F8FAFC)]">
+          <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-[8px] text-[10px] font-mono font-semibold tabular-nums bg-[#07182B]/85 text-[var(--tj-color-text-primary,#F8FAFC)]">
             {totalNFTsCount} {totalNFTsCount === 1 ? "NFT" : "NFTs"}
           </div>
         </div>
@@ -99,25 +99,25 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
       </div>
 
       {/* Metrics & Action — hide floor/volume when unavailable */}
-      <div className="mt-2.5 pt-2 border-t border-[var(--tj-color-border-subtle)] space-y-2">
+      <div className="mt-2.5 pt-2 space-y-2">
         {(showFloor || showVolume) && (
           <div className="flex items-center justify-between gap-2 text-[11px]">
             {showFloor && (
               <div className="min-w-0">
-                <span className="text-[9px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#A8B7CC)] block">
+                <span className="text-[10px] font-medium text-[var(--tj-color-text-secondary,#A8B7CC)] block">
                   Floor Price
                 </span>
-                <span className="font-mono font-semibold text-[var(--tj-color-brand-primary,#229ED9)] truncate block">
+                <span className="font-mono font-semibold tabular-nums text-[var(--tj-color-brand-primary,#229ED9)] truncate block">
                   {collection.floorPrice}
                 </span>
               </div>
             )}
             {showVolume && (
               <div className="min-w-0 text-right ml-auto">
-                <span className="text-[9px] uppercase tracking-wider text-[var(--tj-color-text-secondary,#A8B7CC)] block">
+                <span className="text-[10px] font-medium text-[var(--tj-color-text-secondary,#A8B7CC)] block">
                   Total Volume
                 </span>
-                <span className="font-mono font-semibold text-[var(--tj-color-text-primary,#F8FAFC)] truncate block">
+                <span className="font-mono font-semibold tabular-nums text-[var(--tj-color-text-primary,#F8FAFC)] truncate block">
                   {collection.volume}
                 </span>
               </div>
@@ -126,7 +126,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
         )}
 
         <div className="flex items-center justify-between text-[11px]">
-          <span className="font-mono text-[var(--tj-color-text-secondary,#A8B7CC)]">
+          <span className="font-mono tabular-nums text-[var(--tj-color-text-secondary,#A8B7CC)]">
             {totalNFTsCount} {totalNFTsCount === 1 ? "item" : "items"}
           </span>
           <span className="font-semibold text-[var(--tj-color-brand-primary,#229ED9)] hover:text-[var(--tj-color-text-primary,#F8FAFC)] transition-colors text-[11px]">

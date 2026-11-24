@@ -17,6 +17,7 @@ import {
   Flame,
   ArrowRight
 } from "lucide-react";
+import { AnimatedHeart } from "@/components/common/AnimatedHeart";
 import { Track } from "@/types";
 import { getPlaceholderImage } from "@/lib/utils";
 import { toast } from "sonner";
@@ -337,7 +338,7 @@ export const QueueSheet: React.FC<QueueSheetProps> = React.memo(({
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto space-y-3 py-3 pr-1 scrollbar-thin scrollbar-thumb-[#16244F]">
+      <div className="space-y-3 py-3 pr-1">
         {activeTab === "queue" ? (
           <>
             {currentTrack && (
@@ -502,7 +503,7 @@ export const QueueSheet: React.FC<QueueSheetProps> = React.memo(({
                         title="Remove from favorites"
                         aria-label={`Remove ${track.title} from favorites`}
                       >
-                        <Heart className="w-3.5 h-3.5 fill-current" />
+                        <AnimatedHeart liked={true} className="w-3.5 h-3.5 fill-current" />
                       </button>
                     </div>
                   </div>

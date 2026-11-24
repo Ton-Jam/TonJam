@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Track } from "@/types";
-import { Play, Pause, Heart, Download, Share2, Plus, MoreHorizontal, ArrowUpDown, AlertCircle, Gem } from "lucide-react";
+import { Play, Pause, Download, Share2, Plus, MoreHorizontal, ArrowUpDown, AlertCircle, Gem } from "lucide-react";
+import { AnimatedHeart } from "@/components/common/AnimatedHeart";
 import { toast } from "sonner";
 import { useAudio } from "@/contexts/AudioContext";
 import { getPlaceholderImage } from "@/lib/utils";
@@ -146,7 +147,7 @@ export const MusicTab: React.FC<MusicTabProps> = ({
                     }`}
                     title={isLiked ? "Remove from Liked Songs" : "Save to Liked Songs"}
                   >
-                    <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
+                    <AnimatedHeart liked={Boolean(isLiked)} className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
                   </button>
 
                   <span className="text-xs text-neutral-400 font-mono w-10 text-right">

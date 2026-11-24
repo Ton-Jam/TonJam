@@ -144,36 +144,32 @@ describe('Marketplace Radius & Library Audit Verification', () => {
     vi.clearAllMocks();
   });
 
-  it('applies +2px global radius tokens and enforces 1px borders across Marketplace', () => {
+  it('applies global radius tokens and 2px silver Marketplace borders', () => {
     const tokensCss = fs.readFileSync(path.resolve('src/styles/tonjam-tokens.css'), 'utf-8');
     expect(tokensCss).toContain('--tj-radius-compact: 5px;');
     expect(tokensCss).toContain('--tj-radius-sm: 8px;');
     expect(tokensCss).toContain('--tj-radius-md: 10px;');
+    expect(tokensCss).toContain('--tj-mkt-card-radius: 8px;');
 
     const indexCss = fs.readFileSync(path.resolve('src/index.css'), 'utf-8');
     expect(indexCss).toContain('--radius-sm: 8px;');
     expect(indexCss).toContain('--radius: 10px;');
 
-    const filesToCheck = [
+    const silverBorderFiles = [
       'src/components/marketplace/MarketplaceHeader.tsx',
       'src/components/marketplace/FeaturedDropBanner.tsx',
       'src/components/marketplace/MusicNFTCard.tsx',
       'src/components/marketplace/AuctionCard.tsx',
       'src/components/marketplace/CollectionCard.tsx',
-      'src/components/marketplace/FavouriteButton.tsx',
       'src/components/marketplace/FilterPill.tsx',
-      'src/components/marketplace/MarketplaceSkeleton.tsx',
       'src/components/marketplace/MarketplaceTransparency.tsx',
-      'src/pages/Marketplace/components/EmptyStates.tsx',
       'src/pages/Marketplace/index.tsx',
-      'src/components/music/NFTCard.tsx',
-      'src/components/NFTCard.tsx',
     ];
 
-    for (const file of filesToCheck) {
+    for (const file of silverBorderFiles) {
       const content = fs.readFileSync(path.resolve(file), 'utf-8');
       expect(content).not.toMatch(/--tj-radius-compact,\s*[23]px/);
-      expect(content).not.toMatch(/\bborder(?:-[trbl])?-2\b/);
+      expect(content).toMatch(/\bborder-2\b/);
     }
   });
 

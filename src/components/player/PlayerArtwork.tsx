@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Heart, Disc3, Sparkles } from "lucide-react";
+import { Heart, Sparkles } from "lucide-react";
 import { Track } from "@/types";
 import { getPlaceholderImage } from "@/lib/utils";
+import { equalizerBarVariants } from "@/motion/playerAnimation";
 
 interface PlayerArtworkProps {
   track: Track | null;
@@ -13,13 +14,15 @@ interface PlayerArtworkProps {
   onDragDismiss?: () => void;
 }
 
+const WAVEFORM_DURATIONS = [1.1, 0.85, 1.3, 0.95, 1.15];
+
 export const PlayerArtwork: React.FC<PlayerArtworkProps> = React.memo(({
   track,
-  isPlaying: _isPlaying,
+  isPlaying,
   isLiked: _isLiked = false,
   onDoubleTapLike,
   onLongPress,
-  onDragDismiss,
+  onDragDismiss: _onDragDismiss,
 }) => {
   const [showHeartBurst, setShowHeartBurst] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -71,68 +74,61 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = React.memo(({
   }, [onDoubleTapLike]);
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-center my-1 sm:my-2 select-none">
-      {/* Blurred background image behind the artwork */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none rounded-[var(--tj-radius-md,10px)] opacity-30 filter blur-3xl scale-125">
-        <img
-          src={coverUrl}
-          alt=""
-          aria-hidden="true"
-          referrerPolicy="no-referrer"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-[#07111F]/75" />
-      </div>
-
-      {/* Main Artwork Frame */}
-      <motion.div
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0.1, bottom: 0.8 }}
-        onDragEnd={(_, info) => {
-          if (info.offset.y > 120 && onDragDismiss) {
-            onDragDismiss();
-          }
-        }}
+    <div className="relative w-full shrink-0 flex flex-col items-center justify-center my-0.5 sm:my-1 select-none">
+      {/* Stationary Square Artwork Frame (~16px corner radius + subtle silver border) */}
+      <div
         onPointerDown={handlePointerDown}
         onPointerUp={clearLongPress}
         onPointerCancel={clearLongPress}
         onPointerLeave={clearLongPress}
         onClick={handleClick}
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.99 }}
-        animate={{ scale: isZoomed ? 1.08 : 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="relative w-[78vw] max-w-[280px] sm:max-w-[320px] aspect-square rounded-[var(--tj-radius-sm,8px)] overflow-hidden border-none shadow-[0_20px_50px_rgba(0,0,0,0.8)] bg-[var(--tj-color-player-background,#061426)] group cursor-pointer"
+        className="relative w-[min(68vw,33dvh,284px)] sm:w-[min(36dvh,304px)] aspect-square rounded-[16px] overflow-hidden border border-[rgba(192,192,192,0.22)] bg-[#0A182E] group cursor-pointer"
       >
-        <div className="w-full h-full relative flex items-center justify-center">
-          <img
-            src={coverUrl}
-            alt={track?.title || "Track Artwork"}
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover rounded-[var(--tj-radius-sm,8px)]"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
-            }}
-          />
+        <img
+          src={coverUrl}
+          alt={track?.title || "Track Artwork"}
+          loading="eager"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          className={`w-full h-full object-cover rounded-[16px] transition-transform duration-200 ${
+            isZoomed ? "scale-105" : "scale-100"
+          }`}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = getPlaceholderImage("cover");
+          }}
+        />
 
-          <div className="absolute w-12 h-12 rounded-full bg-[#07111F]/50 backdrop-blur-sm flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-            <Disc3 className="w-6 h-6 text-[#FFFFFF]" />
+        {/* Subtle Live Waveform Indicator when actively playing */}
+        {isPlaying && (
+          <div
+            aria-hidden="true"
+            data-testid="artwork-live-waveform"
+            className="absolute bottom-2.5 left-2.5 px-2 py-1.5 rounded-full bg-[#061426]/80 border border-[rgba(192,192,192,0.22)] flex items-end gap-[3px] h-6 pointer-events-none"
+          >
+            {WAVEFORM_DURATIONS.map((dur, idx) => (
+              <motion.span
+                key={idx}
+                custom={dur}
+                variants={equalizerBarVariants}
+                animate="animate"
+                className="w-[2.5px] h-1.5 rounded-full bg-[#229ED9] origin-bottom"
+              />
+            ))}
           </div>
-        </div>
+        )}
 
         <AnimatePresence>
           {showHeartBurst && (
             <motion.div
               initial={{ scale: 0, opacity: 0, rotate: -20 }}
-              animate={{ scale: 1.3, opacity: 1, rotate: 0 }}
+              animate={{ scale: 1.25, opacity: 1, rotate: 0 }}
               exit={{ scale: 0.4, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-xs z-30"
+              className="absolute inset-0 flex items-center justify-center bg-black/50 z-30"
             >
               <div className="relative flex items-center justify-center">
-                <Heart className="w-20 h-20 text-[var(--tj-color-brand-primary,#00B4D8)] fill-[var(--tj-color-brand-primary,#00B4D8)] filter drop-shadow-[0_0_15px_rgba(0,180,216,0.8)]" />
-                <Sparkles className="w-8 h-8 text-white absolute -top-2 -right-2 animate-spin" />
+                <Heart className="w-16 h-16 text-[#229ED9] fill-[#229ED9]" />
+                <Sparkles className="w-7 h-7 text-white absolute -top-2 -right-2 animate-spin" />
               </div>
             </motion.div>
           )}
@@ -145,11 +141,11 @@ export const PlayerArtwork: React.FC<PlayerArtworkProps> = React.memo(({
             setIsZoomed((prev) => !prev);
           }}
           aria-label={isZoomed ? "Reset artwork zoom" : "Zoom artwork"}
-          className="absolute bottom-2.5 right-2.5 px-2 py-1 bg-[#0A1628]/80 backdrop-blur-md rounded-[var(--tj-radius-sm,8px)] text-[10px] font-bold text-[#FFFFFF] opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity border-none cursor-pointer"
+          className="absolute bottom-2.5 right-2.5 px-2.5 py-1 bg-[#061426]/85 rounded-full border border-[rgba(192,192,192,0.22)] text-[10px] font-semibold text-[#FFFFFF] opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity cursor-pointer"
         >
           {isZoomed ? "Reset" : "Zoom"}
         </button>
-      </motion.div>
+      </div>
     </div>
   );
 });

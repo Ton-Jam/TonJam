@@ -57,7 +57,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
             <button
               type="button"
               onClick={() => scroll("left")}
-              className="w-8 h-8 rounded-[var(--tj-radius-compact,5px)] bg-[#0A1628] border border-[#22374D] text-[#C2C7CD] hover:text-white flex items-center justify-center transition-colors focus:outline-none"
+              className="w-8 h-8 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[#0A1628] text-[#C2C7CD] hover:text-white flex items-center justify-center transition-colors focus:outline-none"
               aria-label="Previous collections"
             >
               <ChevronLeft className="w-4 h-4" aria-hidden="true" />
@@ -65,7 +65,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
             <button
               type="button"
               onClick={() => scroll("right")}
-              className="w-8 h-8 rounded-[var(--tj-radius-compact,5px)] bg-[#0A1628] border border-[#22374D] text-[#C2C7CD] hover:text-white flex items-center justify-center transition-colors focus:outline-none"
+              className="w-8 h-8 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[#0A1628] text-[#C2C7CD] hover:text-white flex items-center justify-center transition-colors focus:outline-none"
               aria-label="Next collections"
             >
               <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -83,10 +83,10 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
           <div
             key={col.id}
             onClick={() => onSelectCollection(col)}
-            className="min-w-[240px] max-w-[240px] bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-[var(--tj-radius-sm,8px)] overflow-hidden p-3.5 cursor-pointer select-none snap-start flex flex-col justify-between transition-all duration-200"
+            className="min-w-[240px] max-w-[240px] bg-[#0A1628] hover:bg-[#0F1C32] backdrop-blur-none rounded-[var(--tj-mkt-radius-sm,9px)] overflow-hidden p-3.5 cursor-pointer select-none snap-start flex flex-col justify-between transition-all duration-200"
           >
             {/* Collection Cover Image */}
-            <div className="aspect-square w-full rounded-[var(--tj-radius-compact,5px)] overflow-hidden bg-[#07111F] relative mb-3">
+            <div className="aspect-square w-full rounded-[var(--tj-mkt-radius-compact,6px)] overflow-hidden bg-[#07111F] relative mb-3">
               <img
                 src={col.imageUrl || getPlaceholderImage(col.name)}
                 alt={col.name}
@@ -98,7 +98,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
                 loading="lazy"
               />
               {col.itemCount !== undefined && (
-                <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-[#07111F]/80 backdrop-blur-md text-[9px] font-mono font-semibold text-[#FFFFFF] uppercase tracking-wider border border-[#22374D]">
+                <div className="absolute top-2 right-2 px-2 py-0.5 rounded-[var(--tj-mkt-radius-compact,6px)] bg-[#07111F]/90 backdrop-blur-none text-[9px] font-mono font-semibold tabular-nums text-[#FFFFFF] uppercase tracking-wider">
                   {col.itemCount} Items
                 </div>
               )}
@@ -122,7 +122,7 @@ export const TrendingCollections: React.FC<TrendingCollectionsProps> = ({
             </div>
 
             {/* Price / Volume Metrics */}
-            <div className="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-[#22374D]/60">
+            <div className="grid grid-cols-2 gap-2 mt-3 pt-2.5">
               <div>
                 <span className="text-[9px] font-medium text-[#8C8C8C] uppercase tracking-wider block">Floor Price</span>
                 <span className="text-xs font-bold text-[#00B4D8] font-mono">{convertPrice(col.floorPrice || "1.5 TON")}</span>

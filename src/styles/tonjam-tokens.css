@@ -109,6 +109,14 @@
   --tj-radius-xl: 14px;
   --tj-radius-pill: 999px;
 
+  /* Marketplace +1px Radius Tokens */
+  --tj-mkt-radius-compact: 6px;
+  --tj-mkt-radius-sm: 9px;
+  --tj-mkt-radius-md: 11px;
+  --tj-mkt-radius-lg: 13px;
+  --tj-mkt-radius-xl: 15px;
+  --tj-mkt-card-radius: 8px;
+
   /* =========================================================
      TYPOGRAPHY TOKENS
      ========================================================= */

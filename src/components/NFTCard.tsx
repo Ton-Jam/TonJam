@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers, History, RotateCw, Bell, Zap, Heart } from 'lucide-react';
+import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers, History, RotateCw, Bell, Zap } from 'lucide-react';
+import { AnimatedHeart } from '@/components/common/AnimatedHeart';
 import { NFTItem } from '@/types';
 import { useGramPrice } from '@/contexts/GramPriceContext';
 import { TON_LOGO } from '@/constants';
@@ -785,7 +786,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
                       : "border-[var(--tj-color-border-subtle)] text-[var(--tj-color-text-secondary,#A8B7CC)] hover:text-white hover:border-[var(--tj-color-border-strong)]"
                   )}
                 >
-                  <Heart className={cn("w-3.5 h-3.5", isFavourited && "fill-current")} />
+                  <AnimatedHeart liked={Boolean(isFavourited)} className={cn("w-3.5 h-3.5", isFavourited && "fill-current")} />
                 </button>
               )}
 
@@ -972,12 +973,12 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAc
         isOpen={isConfirmPurchaseOpen}
         onClose={() => setIsConfirmPurchaseOpen(false)}
         onConfirm={executeDirectPurchase}
-        title="Confirm NFT Purchase"
-        description="Verify transaction parameters and dual currency cost before broadcasting payment to the TON blockchain relay."
-        confirmText="Confirm & Purchase"
+        title="Confirm Purchase"
+        description="Verify NFT price, 5% platform fee, and network fee before signing in your TON wallet."
+        confirmText="Confirm Purchase"
         nft={nft}
         networkFee="0.05"
-        platformFeePercentage={0}
+        platformFeePercentage={0.05}
         userWalletAddress={userProfile.walletAddress}
         recipientAddress={nft.owner}
         isProcessing={isPurchasing}

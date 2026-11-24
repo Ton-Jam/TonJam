@@ -155,13 +155,42 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
 
   const tonScanTarget = nft.contractAddress || nft.owner || "";
 
+  const isSold =
+    String((nft as any).listingStatus || "").toLowerCase() === "sold" ||
+    String((nft as any).status || "").toLowerCase() === "sold";
+  const isAuctionFlag = Boolean(nft.listingType === "auction");
+  const isAuctionEnded = Boolean(
+    isAuctionFlag &&
+      nft.auctionEndTime &&
+      new Date(nft.auctionEndTime).getTime() <= Date.now()
+  );
+  const numericPrice = parseFloat(String(nft.price || "0").replace(/[^\d.]/g, "")) || 0;
+  const isBuyNowListed = !isSold && !isAuctionFlag && (nft.listingType === "fixed" || numericPrice > 0);
+
+  const listingStatusLabel = isSold
+    ? "Sold"
+    : isAuctionFlag
+    ? isAuctionEnded
+      ? "Auction Ended"
+      : "Live Auction"
+    : isBuyNowListed
+    ? "Buy Now Listing"
+    : "Unlisted";
+
+  const remainingEditions = (nft as any).remainingEditions;
+  const sellerDisplay = isSold || (!isBuyNowListed && !isAuctionFlag)
+    ? "Not Listed"
+    : isOwner
+    ? "You (Seller)"
+    : matchedOwner?.name || formatShortAddress(nft.owner || nft.creatorId || nft.creator);
+
   return (
     <div className="space-y-5">
       {/* Top Two-Column Showcase */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-7 items-start">
         {/* Left Column: Square Artwork & Audio Specs */}
         <div className="lg:col-span-5 space-y-3">
-          <div className="rounded-[var(--tj-radius-md,8px)] overflow-hidden bg-[var(--tj-color-surface-default,#0D1628)] border-0">
+          <div className="rounded-[8px] overflow-hidden bg-[var(--tj-color-surface-default,#0D1628)] border-2 border-[rgba(192,192,192,0.22)]">
             <Interactive3DViewer
               imageUrl={displayArtwork}
               title={nft.title}
@@ -201,7 +230,7 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="bg-[var(--tj-color-surface-default,#0D1628)] border-0 p-3 rounded-[var(--tj-radius-sm,6px)]"
+                className="bg-[var(--tj-color-surface-default,#0D1628)] border-2 border-[rgba(192,192,192,0.22)] p-3 rounded-[8px]"
               >
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-[10px] font-bold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider">
@@ -217,10 +246,10 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Creator/Owner, Title, Collection, TonScan, Audio Preview */}
+        {/* Right Column: Creator/Owner/Seller, Title, Collection, TonScan, Audio Preview */}
         <div className="lg:col-span-7 flex flex-col space-y-4 text-left">
-          {/* Creator & Current Owner Row (borderless split surfaces) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-[var(--tj-radius-md,8px)] bg-[var(--tj-color-surface-default,#0D1628)] border-0">
+          {/* Creator, Owner & Seller Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-[8px] bg-[var(--tj-color-surface-default,#0D1628)] border-2 border-[rgba(192,192,192,0.22)]">
             <div
               onClick={handleCreatorClick}
               className="flex items-center gap-3 cursor-pointer group min-w-0"
@@ -298,7 +327,7 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
                   type="button"
                   onClick={handleCopyOwner}
                   aria-label="Copy owner address"
-                  className="p-2 rounded-[var(--tj-radius-xs,4px)] bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white border-0 cursor-pointer shrink-0 transition-colors"
+                  className="p-2 rounded-[8px] bg-[var(--tj-color-surface-elevated,#111F36)] hover:bg-[var(--tj-color-surface-hover,#132B49)] text-[var(--tj-color-text-secondary,#C2C7CD)] hover:text-white border-0 cursor-pointer shrink-0 transition-colors"
                   title="Copy Owner Address"
                 >
                   {copiedOwner ? (
@@ -309,10 +338,39 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
                 </button>
               )}
             </div>
+
+            <div className="flex items-center gap-3 min-w-0 sm:pl-3">
+              <div className="relative w-10 h-10 rounded-[8px] overflow-hidden bg-[var(--tj-color-surface-elevated,#111F36)] flex items-center justify-center shrink-0">
+                <User className="h-4 w-4 text-[var(--tj-color-brand-primary,#00B4D8)]" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-bold text-[var(--tj-color-text-secondary,#C2C7CD)] uppercase tracking-wider">
+                  Seller
+                </span>
+                <span className="text-xs font-bold text-slate-200 truncate font-mono">
+                  {sellerDisplay}
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* Collection, Network & TonScan Metadata Row */}
+          {/* Listing Status, Collection, Network & TonScan Metadata Row */}
           <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span
+              className={cn(
+                "px-2.5 py-1.5 rounded-[8px] border-2 text-[11px] font-bold uppercase tracking-wider",
+                isSold
+                  ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                  : isAuctionFlag && !isAuctionEnded
+                  ? "bg-amber-500/15 border-amber-500/40 text-amber-300"
+                  : isBuyNowListed
+                  ? "bg-[#00B4D8]/15 border-[#00B4D8]/40 text-[#00B4D8]"
+                  : "bg-[var(--tj-color-surface-default,#0D1628)] border-[rgba(192,192,192,0.22)] text-[var(--tj-color-text-secondary,#C2C7CD)]"
+              )}
+            >
+              {listingStatusLabel}
+            </span>
+
             <button
               type="button"
               onClick={() =>
@@ -321,7 +379,7 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
                   : undefined
               }
               className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[var(--tj-radius-xs,4px)] bg-[var(--tj-color-surface-default,#0D1628)] border-0 text-[11px] font-semibold transition-colors",
+                "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[8px] bg-[var(--tj-color-surface-default,#0D1628)] border-2 border-[rgba(192,192,192,0.22)] text-[11px] font-semibold transition-colors",
                 matchedCollection
                   ? "text-[var(--tj-color-brand-primary,#00B4D8)] hover:bg-[var(--tj-color-surface-hover,#132B49)] hover:text-white cursor-pointer"
                   : "text-[var(--tj-color-text-secondary,#C2C7CD)] cursor-default"
@@ -335,7 +393,7 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
               </span>
             </button>
 
-            <span className="px-2.5 py-1.5 rounded-[var(--tj-radius-xs,4px)] bg-[var(--tj-color-surface-default,#0D1628)] border-0 text-[11px] font-mono text-[var(--tj-color-text-secondary,#C2C7CD)]">
+            <span className="px-2.5 py-1.5 rounded-[8px] bg-[var(--tj-color-surface-default,#0D1628)] border-2 border-[rgba(192,192,192,0.22)] text-[11px] font-mono text-[var(--tj-color-text-secondary,#C2C7CD)]">
               {networkLabel}
             </span>
 
@@ -344,7 +402,7 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
                 href={getTonScanUrl(tonScanTarget, false, activeNetwork)}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--tj-color-brand-primary,#00B4D8)] hover:text-white transition-colors bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border-0 px-2.5 py-1.5 rounded-[var(--tj-radius-xs,4px)]"
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--tj-color-brand-primary,#00B4D8)] hover:text-white transition-colors bg-[var(--tj-color-surface-default,#0D1628)] hover:bg-[var(--tj-color-surface-hover,#132B49)] border-2 border-[rgba(192,192,192,0.22)] px-2.5 py-1.5 rounded-[8px]"
               >
                 <span>View on TonScan</span>
                 <ExternalLink className="h-3 w-3" />
@@ -363,6 +421,7 @@ export const NFTDetailHero: React.FC<NFTDetailHeroProps> = ({
               <span>·</span>
               <span className="text-[var(--tj-color-brand-primary,#00B4D8)] font-semibold">
                 Edition #{editionNumber} of {totalEditions}
+                {typeof remainingEditions === "number" ? ` (${remainingEditions} left)` : ""}
               </span>
               {nft.views !== undefined && (
                 <>

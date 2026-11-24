@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
@@ -6,60 +6,80 @@ import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 import ArtistCard from '@/components/ArtistCard';
 import { cardTokens } from '@/design';
 import { useSmartRecommendations } from '@/hooks/useSmartRecommendations';
+import VerticalSectionListModal from '@/components/common/VerticalSectionListModal';
 
 const FeaturedArtists: React.FC = () => {
   const { artists } = useAudio();
   const { recommendedArtists } = useSmartRecommendations();
   const navigate = useNavigate();
   const { scrollRef, handlers } = useHorizontalDragScroll<HTMLDivElement>();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Use recommended artists ranked by discovery engine, fallback to follower count
-  const featuredArtists = useMemo(() => {
+  const allAvailableArtists = useMemo(() => {
     if (recommendedArtists && recommendedArtists.length > 0) {
-      return recommendedArtists.slice(0, 8);
+      return recommendedArtists;
     }
-    return [...(artists || [])]
-      .sort((a, b) => (b.followers || 0) - (a.followers || 0))
-      .slice(0, 8);
+    return [...(artists || [])].sort((a, b) => (b.followers || 0) - (a.followers || 0));
   }, [recommendedArtists, artists]);
+
+  const featuredArtists = useMemo(() => {
+    return allAvailableArtists.slice(0, 8);
+  }, [allAvailableArtists]);
 
   if (!featuredArtists || featuredArtists.length === 0) return null;
 
   return (
-    <div className="space-y-3 pt-2 w-full text-left">
-      <div className="flex items-center justify-between px-3">
-        <h2 className="text-section-title font-bold text-white">
-          Popular Artists
-        </h2>
-        <button
-          onClick={() => navigate('/artists')}
-          className="text-xs font-semibold text-[#0088CC] flex items-center gap-1 outline-none cursor-pointer border-0 bg-transparent hover:text-white transition-colors"
+    <>
+      <div className="space-y-3 pt-2 w-full text-left">
+        <div className="flex items-center justify-between px-3">
+          <h2 className="text-section-title font-bold text-white">
+            Popular Artists
+          </h2>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="text-xs font-semibold text-[#0088CC] flex items-center gap-1 outline-none cursor-pointer border-0 bg-transparent hover:text-white transition-colors"
+          >
+            See All <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div 
+          ref={scrollRef}
+          {...handlers}
+          className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-2 after:content-[''] after:shrink-0 after:w-2 w-full snap-x snap-mandatory overscroll-x-contain select-none"
+          style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
-          See All <ChevronRight className="w-3.5 h-3.5" />
-        </button>
+          {featuredArtists.map((artist) => (
+            <div
+              key={artist.uid}
+              style={{ width: cardTokens.artist.width, scrollSnapAlign: 'start' }}
+              className="w-[130px] shrink-0 snap-start"
+            >
+              <ArtistCard
+                artist={artist}
+                variant="default"
+                className="w-full"
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div 
-        ref={scrollRef}
-        {...handlers}
-        className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-2 after:content-[''] after:shrink-0 after:w-2 w-full snap-x snap-mandatory overscroll-x-contain select-none"
-        style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
-      >
-        {featuredArtists.map((artist) => (
-          <div
-            key={artist.uid}
-            style={{ width: cardTokens.artist.width, scrollSnapAlign: 'start' }}
-            className="w-[130px] shrink-0 snap-start"
-          >
-            <ArtistCard
-              artist={artist}
-              variant="default"
-              className="w-full"
-            />
-          </div>
-        ))}
-      </div>
-    </div>
+      <VerticalSectionListModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Popular Artists"
+        subtitle="Verified music creators and top listeners on TON"
+        items={allAvailableArtists}
+        renderItem={(artist) => (
+          <ArtistCard
+            artist={artist}
+            variant="default"
+            className="w-[130px]"
+          />
+        )}
+      />
+    </>
   );
 };
 

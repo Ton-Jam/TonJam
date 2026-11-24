@@ -47,10 +47,10 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
             <div
               key={auc.id}
               onClick={() => onSelectNFT(auc.nft)}
-              className="bg-[#0A1628] hover:bg-[#0F1C32] border border-[#22374D] hover:border-[#38516B] rounded-[var(--tj-radius-sm,8px)] overflow-hidden p-3.5 flex flex-col justify-between cursor-pointer select-none transition-all duration-200"
+              className="bg-[#0A1628] hover:bg-[#0F1C32] backdrop-blur-none rounded-[var(--tj-mkt-radius-sm,9px)] overflow-hidden p-3.5 flex flex-col justify-between cursor-pointer select-none transition-all duration-200"
             >
               {/* Media Section */}
-              <div className="relative aspect-square w-full rounded-[var(--tj-radius-compact,5px)] bg-[#07111F] overflow-hidden mb-3">
+              <div className="relative aspect-square w-full rounded-[var(--tj-mkt-radius-compact,6px)] bg-[#07111F] overflow-hidden mb-3">
                 <img
                   src={artwork}
                   alt={auc.nft.title}
@@ -64,19 +64,18 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
                 
                 {/* Visual Overlays */}
                 <div className="absolute top-2 left-2 flex gap-1.5 items-center">
-                  <span className="flex items-center gap-1 text-[9px] font-bold bg-[#00B4D8] text-[#07111F] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 bg-[#07111F] rounded-full" />
+                  <span className="flex items-center gap-1 text-[9px] font-bold bg-[#00B4D8] text-[#07111F] px-2 py-0.5 rounded-[var(--tj-mkt-radius-compact,6px)] uppercase tracking-wider">
                     Live
                   </span>
                   {auc.bidsCount !== undefined && (
-                    <span className="text-[9px] font-medium bg-[#07111F]/80 backdrop-blur-sm text-[#FFFFFF] px-2 py-0.5 rounded-full border border-[#22374D] uppercase tracking-wider">
+                    <span className="text-[9px] font-medium tabular-nums bg-[#07111F]/90 backdrop-blur-none text-[#FFFFFF] px-2 py-0.5 rounded-[var(--tj-mkt-radius-compact,6px)] uppercase tracking-wider">
                       {auc.bidsCount} Bids
                     </span>
                   )}
                 </div>
 
                 {/* Countdown display */}
-                <div className="absolute bottom-2 left-2 right-2 p-2 bg-[#07111F]/85 backdrop-blur-md rounded-[var(--tj-radius-compact,5px)] flex items-center justify-between border border-[#22374D]">
+                <div className="absolute bottom-2 left-2 right-2 p-2 bg-[#07111F]/90 backdrop-blur-none rounded-[var(--tj-mkt-radius-compact,6px)] flex items-center justify-between">
                   <span className="text-[10px] font-medium text-[#C2C7CD] uppercase tracking-wider flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-[#00B4D8]" /> Ends In
                   </span>
@@ -95,7 +94,7 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
               </div>
 
               {/* Auction Bidding Metrics */}
-              <div className="mt-3 pt-2.5 border-t border-[#22374D]/60 flex items-center justify-between gap-2">
+              <div className="mt-3 pt-2.5 flex items-center justify-between gap-2">
                 <div>
                   <span className="text-[10px] text-[#8C8C8C] uppercase tracking-wider block">
                     Current Bid
@@ -112,7 +111,7 @@ export const LiveAuctions: React.FC<LiveAuctionsProps> = ({
                     onPlaceBid(auc);
                   }}
                   aria-label={`Place bid on ${auc.nft.title}`}
-                  className="px-3.5 py-1.5 rounded-[var(--tj-radius-sm,8px)] bg-[#00B4D8] text-[#07111F] font-bold text-xs uppercase tracking-wider hover:bg-[#009CC0] transition-colors focus:outline-none flex items-center gap-1"
+                  className="px-3.5 py-1.5 rounded-[var(--tj-mkt-radius-sm,9px)] bg-[#00B4D8] text-[#07111F] font-bold text-xs uppercase tracking-wider hover:bg-[#009CC0] transition-colors focus:outline-none flex items-center gap-1"
                 >
                   Place Bid
                   <ArrowRight className="w-3.5 h-3.5" />

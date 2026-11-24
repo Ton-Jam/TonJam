@@ -139,7 +139,7 @@ export const ArtistCard: React.FC<ArtistCardProps> = ({
       whileTap={{ scale: 0.98 }}
       onClick={handleCardClick}
       className={cn(
-        "group flex flex-col items-center text-center p-3 sm:p-3.5 rounded-2xl bg-[#111C30] hover:bg-[#17243A] cursor-pointer transition-all duration-200 select-none shadow-lg shadow-black/25 w-[130px] sm:w-[140px] shrink-0",
+        "group flex flex-col items-center text-center p-3 sm:p-3.5 rounded-[2px] bg-transparent hover:bg-white/[0.03] cursor-pointer transition-all duration-200 select-none w-[130px] sm:w-[140px] shrink-0",
         className
       )}
     >
